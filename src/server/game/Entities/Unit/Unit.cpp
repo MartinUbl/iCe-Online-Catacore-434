@@ -13343,34 +13343,6 @@ uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32
     if (!caster || !pVictim)
         return damage;
 
-    // By spell family
-    switch (spellProto->SpellFamilyName)
-    {
-        case SPELLFAMILY_HUNTER:
-        {
-            if (Pet::IsPetBasicAttackSpell(spellProto->Id))
-            {
-                // Wild hunt
-                if (AuraEffect * aurEff = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
-                {
-                    uint32 cost = CalculatePowerCost(spellProto, caster, GetSpellSchoolMask(spellProto));
-
-                    // When your pet is at or above 50 Focus
-                    if (cost + caster->GetPower(POWER_FOCUS) >= 50)
-                    {
-                        // Rank 1 -> + 50 % of original cost
-                        // Rank 2 -> + 100 % of original cost
-                        int32 additionalFocusTaken = aurEff->GetAmount() == 60 ? (cost / 2) : cost;
-                        caster->ModifyPower(POWER_FOCUS, -additionalFocusTaken);
-                        // Your pet's Basic Attacks will deal 60/120% more damage, 
-                        damage += damage * aurEff->GetAmount() / 100;
-                    }
-                }
-            }
-        }
-        break;
-    }
-
     // Some special cases after damage recount
     switch (spellProto->Id)
     {
