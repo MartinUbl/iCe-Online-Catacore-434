@@ -1712,8 +1712,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         m_damage /= count;                    // divide to all targets
     }
 
-    // If you want some special handling after ALL damage calculation, use
-    // Unit::AfterAllSpellDamageComputation !
+    /*
+        If you want some special handling after ALL damage calculation (crit,absorbs,resil,etc. ...)
+        -> use Unit::AfterAllSpellDamageComputation !
+    */
 }
 
 void Spell::EffectDummy(SpellEffIndex effIndex)

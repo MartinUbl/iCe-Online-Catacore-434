@@ -7491,7 +7491,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             {
                 if(procSpell->Id == 35395) // Crusader Strike
                 {
-                    CastCustomSpell(99002, SPELLVALUE_BASE_POINT0,damage * 0.075, pVictim, true); // Flames of the Faithful
+                    CastCustomSpell(99092, SPELLVALUE_BASE_POINT0,damage * 0.075, pVictim, true); // Flames of the Faithful
                     break;
                 }
                 else return (false);
