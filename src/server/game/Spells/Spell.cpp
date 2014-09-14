@@ -7053,7 +7053,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_CHARGE_DEST:
             {
                 /* allow quest-based jumps */
-                if (m_spellInfo->Id == 4336)
+                if (m_spellInfo->Id == 4336 || m_spellInfo->Id == 101987)
                     break;
 
                 /* do these checks only on players */
