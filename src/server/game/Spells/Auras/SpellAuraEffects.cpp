@@ -2050,6 +2050,21 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
                 damage = target->SpellDamageBonusTaken(caster, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
 
+                bool countRemainingPeriodicDamage = false;
+                uint8 effectId = EFFECT_0;
+
+                switch (m_spellProto->Id)
+                {
+                    case 99002: //Fiery Claws
+                    case 99173: //Burning Wounds
+                    case 99092: //Flames of the Faithful
+                        countRemainingPeriodicDamage = true;
+                        break;
+                }
+
+                if (countRemainingPeriodicDamage)
+                    damage += target->GetRemainingPeriodicAmount(caster->GetGUID(), m_spellProto->Id, SPELL_AURA_PERIODIC_DAMAGE,effectId);
+
                 // Calculate armor mitigation
                 if (Unit::IsDamageReducedByArmor(GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), m_effIndex))
                 {
