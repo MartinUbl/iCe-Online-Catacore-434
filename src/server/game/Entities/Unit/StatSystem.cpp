@@ -1541,7 +1541,7 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
         maxdamage = maxdamage * 1.25f;
     }
 
-    // Implementation of Beast Mastery hunter mastery proficiency
+    // Implementation of Beast Mastery hunter mastery proficiency for white damage
     if (IsHunterPet() && m_owner && m_owner->ToPlayer())
     {
         Player* pOwner = m_owner->ToPlayer();

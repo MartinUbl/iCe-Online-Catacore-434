@@ -12741,6 +12741,41 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
                 }
         break;
         case SPELLFAMILY_HUNTER:
+        {
+            // Implementation of Beast Mastery hunter mastery proficiency for spell damage
+            if (Unit * owner  = GetOwner())
+            {
+                if (owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (owner->ToPlayer()->GetActiveTalentBranchSpec() == SPEC_HUNTER_BEASTMASTERY)
+                        DoneTotalMod *= 1.0f + (owner->ToPlayer()->GetMasteryPoints() * 1.67f / 100.0f);
+                }
+            }
+
+            if (Pet::IsPetBasicAttackSpell(spellProto->Id))
+            {
+                // Spiked Collar 
+                if (AuraEffect * aurEff = GetDummyAuraEffect(SPELLFAMILY_HUNTER,2934,EFFECT_0))
+                    DoneTotalMod *= float(aurEff->GetAmount() + 100.f) / 100.f;
+
+                // Wild hunt
+                if (AuraEffect * aurEff = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
+                {
+                    uint32 cost = CalculatePowerCost(spellProto, this, GetSpellSchoolMask(spellProto));
+
+                    // When your pet is at or above 50 Focus
+                    if (cost + GetPower(POWER_FOCUS) >= 50)
+                    {
+                        // Rank 1 -> + 50 % of original cost
+                        // Rank 2 -> + 100 % of original cost
+                        int32 additionalFocusTaken = aurEff->GetAmount() == 60 ? (cost / 2) : cost;
+                        const_cast<Unit*>(this)->ModifyPower(POWER_FOCUS, -additionalFocusTaken);
+                        // Your pet's Basic Attacks will deal 60/120% more damage, 
+                        DoneTotalMod *= float(aurEff->GetAmount() + 100.f) / 100.f;
+                    }
+                }
+            }
+        }
         break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Merciless Combat
