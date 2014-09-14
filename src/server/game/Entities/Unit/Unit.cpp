@@ -21668,7 +21668,10 @@ uint32 Unit::GetRemainingPeriodicAmount(uint64 casterGUID, uint32 spellId, AuraT
             continue;
         int32 ticksRemaining = std::max<int32>((*i)->GetTotalTicks() - int32((*i)->GetTickNumber()), 0);
         uint32 damage = (*i)->GetAmount();
-        switch (auraType)
+
+        uint32 auraTypeId = uint32(auraType);
+
+        switch (auraTypeId)
         {
             case SPELL_AURA_PERIODIC_HEAL:
             case SPELL_AURA_OBS_MOD_HEALTH:
