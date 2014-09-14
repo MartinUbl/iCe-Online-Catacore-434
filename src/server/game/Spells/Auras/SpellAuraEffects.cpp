@@ -788,6 +788,11 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             {
                 amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.546f) / 10;
             }
+            // Serpent Sting
+            else if (GetId() == 1978 || GetId() == 88453 || GetId() == 88466)
+            {
+                amount += (caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4f) / 5;
+            }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:
             {
