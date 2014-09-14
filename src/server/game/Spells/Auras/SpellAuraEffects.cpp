@@ -762,14 +762,9 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                     if (GetBase()->GetUnitOwner()->HasAuraState(AURA_STATE_HEALTH_ABOVE_75_PERCENT, m_spellProto, caster))
                         amount += int32(amount * SpellMgr::CalculateSpellEffectAmount(m_spellProto, 2, caster) / 100.0f);
             }
-            // Explosive Shot (Explosive Shit sounds also nice :-P)
-            else if (GetId() == 53301)
             // Frostfire Bolt DoT from Glyph of Frostfire
             else if (GetId() == 44614)
             {
-                float rmin = caster->GetWeaponDamageRange(RANGED_ATTACK,MINDAMAGE);
-                float rmax = caster->GetWeaponDamageRange(RANGED_ATTACK,MAXDAMAGE);
-                amount += 1.2f*((rmin+rmax)/2)+caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.232f;
                 if (!GetBase() || !GetBase()->GetUnitOwner())
                     break;
                 int32 baseDamage = SpellMgr::CalculateSpellEffectAmount(m_spellProto, EFFECT_1, caster, &m_baseAmount, NULL);
@@ -782,6 +777,11 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             else if (GetId() == 33745)
             {
                 amount += caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.00369f;
+            }
+            // Explosive Shot
+            else if (GetId() == 53301)
+            {
+                amount += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.273f;
             }
             // Explosive Trap
             else if (GetId() == 13812)
