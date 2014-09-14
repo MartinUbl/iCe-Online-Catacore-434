@@ -933,7 +933,20 @@ void Spell::prepareDataForTriggerSystem(AuraEffect const * /*triggeredByAura*/)
 
     // Hunter trap spells - activation proc for Lock and Load, Entrapment and Misdirection
     if (IsTrapActivationSpell(m_spellInfo))
+    {
+        if (m_originalCaster)
+        {
+            // Lock and Load hack fix !!! -> very ugly solution
+            if (AuraEffect * aurEff = m_originalCaster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_HUNTER, 3579, EFFECT_0))
+            if (roll_chance_i(aurEff->GetAmount()) && (m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_FROST))
+                if (!m_originalCaster->HasAura(67544))
+                {
+                    m_originalCaster->CastSpell(m_originalCaster, 56453 , true); // buff
+                    m_originalCaster->CastSpell(m_originalCaster, 67544 , true); // iCD
+                }
+        }
         m_procAttacker |= PROC_FLAG_DONE_TRAP_ACTIVATION;
+    }
 
     /*
         Effects which are result of aura proc from triggered spell cannot proc
