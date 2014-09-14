@@ -5462,17 +5462,8 @@ void Spell::SendResurrectRequest(Player* target)
     data << uint8(0);
 
     data << uint8(m_caster->GetTypeId() == TYPEID_PLAYER ? 0 : 1);
-	data << uint32(spellId);
+    data << uint32(spellId);
     target->GetSession()->SendPacket(&data);
-
-    // Increase ressurection data after using combat res
-    if (InstanceScript * pInstance = target->GetInstanceScript())
-    {
-        if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
-        if (SpellEntry const* spell = sSpellStore.LookupEntry(spellId))
-            if (spell->AttributesEx8 & SPELL_ATTR8_BATTLE_RESURRECTION)
-                pInstance->AddRessurectionData();
-    }
 }
 
 void Spell::TakeCastItem()
@@ -7345,6 +7336,15 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (Player* plrCaster = m_caster->ToPlayer())
             if (!plrCaster->GetComboPoints())
                 return SPELL_FAILED_NO_COMBO_POINTS;
+
+    // Increase ressurection data after using combat res
+    if (InstanceScript * pInstance = target->GetInstanceScript())
+    {
+        if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
+        if (SpellEntry const* spell = sSpellStore.LookupEntry(m_spellInfo->Id))
+            if (spell->AttributesEx8 & SPELL_ATTR8_BATTLE_RESURRECTION)
+                pInstance->AddRessurectionData();
+    }
 
     // all ok
     return SPELL_CAST_OK;
