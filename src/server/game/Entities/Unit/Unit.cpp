@@ -9581,7 +9581,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             else if (procFlags & PROC_FLAG_DONE_TRAP_ACTIVATION) // Only Lock and Load talent
             {
                 // This flag with combination with PROC_FLAG_DONE_PERIODIC doesnt work, have no idea why ...
-                // This part is hacked in Spell::AfterCast
+                // This part is hacked in Spell::prepareDataForTriggerSystem
                 /*if (roll_chance_i(triggerAmount) && (procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
                     CastSpell(this, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
                 else return false;*/
