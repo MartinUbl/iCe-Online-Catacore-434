@@ -3108,13 +3108,6 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
         }
         case SPELLFAMILY_HUNTER:
         {
-            // Explosive Shot
-            if (GetSpellProto()->SpellFamilyFlags[1] & 0x80000000)
-            {
-                if (caster)
-                    caster->CastCustomSpell(53352, SPELLVALUE_BASE_POINT0, m_amount, target, true, NULL, this);
-                break;
-            }
             switch (GetSpellProto()->Id)
             {
                 // Feeding Frenzy Rank 1
