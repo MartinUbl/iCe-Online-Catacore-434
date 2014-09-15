@@ -2046,6 +2046,8 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
 
         if (pl)
         {
+            uint32 rap = pl->GetTotalAttackPowerValue(RANGED_ATTACK);
+
             // Pet abilities, probably hack, but who knows
             switch (spellEntry->Id)
             {
@@ -2053,23 +2055,26 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
                 case 16827: // Claw
                 case 49966: // Smack
                 {
-                    uint32 rap = pl->GetTotalAttackPowerValue(RANGED_ATTACK);
                     value += rap*0.4f*0.2f;
                     break;
                 }
                 case 53508: // Wolverine Bite
                 {
-                    uint32 rap = pl->GetTotalAttackPowerValue(RANGED_ATTACK);
                     value += rap*0.4f*0.1f;
                     break;
                 }
                 case 90361: // Spirit Mend
                 {
-                    uint32 rap = pl->GetTotalAttackPowerValue(RANGED_ATTACK);
                     if (effIndex == EFFECT_0)
                         value += rap*0.35f*0.5f;
                     else if (effIndex == EFFECT_1)
                         value += rap*0.35f*0.335f;
+                    break;
+                }
+                case 95714: // Burrow Attack
+                case 95725: // Froststorm Breath
+                {
+                    value += rap*0.4f*0.288f;
                     break;
                 }
             }
