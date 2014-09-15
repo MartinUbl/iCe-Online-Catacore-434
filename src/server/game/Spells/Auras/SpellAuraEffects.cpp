@@ -765,13 +765,13 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             // Frostfire Bolt DoT from Glyph of Frostfire
             else if (GetId() == 44614)
             {
-                if (!GetBase() || !GetBase()->GetUnitOwner())
-                    break;
-                int32 baseDamage = SpellMgr::CalculateSpellEffectAmount(m_spellProto, EFFECT_1, caster, &m_baseAmount, NULL);
-                uint32 directDamage = caster->SpellDamageBonus(GetBase()->GetUnitOwner(), m_spellProto, EFFECT_1, baseDamage, SPELL_DIRECT_DAMAGE);
-                // Your Frostfire Bolt now deals 3% additional damage over 12 sec
-                amount += directDamage * 0.03 / GetTotalTicks();
-                amount *= GetBase()->GetStackAmount();
+                // Glyph of Frostfire
+                if (AuraEffect * aurEff = caster->GetAuraEffect(61205, EFFECT_2))
+                {
+                    // Your Frostfire Bolt now deals 3% additional damage over 12 sec
+                    amount += aurEff->GetScriptedAmount() / GetTotalTicks();
+                    amount *= GetBase()->GetStackAmount();
+                }
             }
             // Lacerate
             else if (GetId() == 33745)

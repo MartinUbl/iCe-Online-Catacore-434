@@ -13353,6 +13353,13 @@ uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32
                 aurEff->SetScriptedAmount(damage);
             break;
         }
+        case 44614:
+        {
+            // Glyph of Frostfire (remember damage which direct damage of Frostfire Bolt done)
+            if (AuraEffect * aurEff = caster->GetAuraEffect(61205, EFFECT_2))
+                aurEff->SetScriptedAmount(damage * aurEff->GetAmount() / 100);
+            break;
+        }
         // Blood Boil
         case 48721:
         {
