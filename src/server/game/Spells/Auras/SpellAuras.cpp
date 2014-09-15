@@ -2777,7 +2777,7 @@ void Aura::HandleAuraSpecificPeriodics(AuraApplication const* aurApp, Unit* cast
                             // Improved Serpent Sting 
                             if (AuraEffect * aESerpent = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER,536,EFFECT_0))
                             {
-                                int32 bp0 = aurEff->GetDamage() * aurEff->GetTotalTicks();
+                                int32 bp0 = aurEff->GetDamage() * 5;
                                 bp0 = bp0 * aESerpent->GetAmount() / 100;
 
                                 if (bp0)
