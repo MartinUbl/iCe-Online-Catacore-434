@@ -7342,14 +7342,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_NO_COMBO_POINTS;
 
     // Increase ressurection data after using combat res
-    if (target)
-    {
-        if (InstanceScript * pInstance = target->GetInstanceScript())
-            if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
-                if (SpellEntry const* spell = sSpellStore.LookupEntry(m_spellInfo->Id))
-                    if (spell->AttributesEx8 & SPELL_ATTR8_BATTLE_RESURRECTION)
-                        pInstance->AddRessurectionData();
-    }
+    if (InstanceScript * pInstance = m_caster->GetInstanceScript())
+        if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
+            if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_BATTLE_RESURRECTION)
+                pInstance->AddRessurectionData();
 
     // all ok
     return SPELL_CAST_OK;
