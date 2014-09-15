@@ -4554,6 +4554,12 @@ void Spell::_handle_finish_phase()
 
 void Spell::HandeAfterCast()
 {
+    // Increase ressurection data after using combat res
+    if (InstanceScript * pInstance = m_caster->GetInstanceScript())
+        if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
+            if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_BATTLE_RESURRECTION)
+                pInstance->AddRessurectionData();
+
     switch (m_spellInfo->Id)
     {
         // Blood Boil
@@ -7340,12 +7346,6 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (Player* plrCaster = m_caster->ToPlayer())
             if (!plrCaster->GetComboPoints())
                 return SPELL_FAILED_NO_COMBO_POINTS;
-
-    // Increase ressurection data after using combat res
-    if (InstanceScript * pInstance = m_caster->GetInstanceScript())
-        if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
-            if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_BATTLE_RESURRECTION)
-                pInstance->AddRessurectionData();
 
     // all ok
     return SPELL_CAST_OK;
