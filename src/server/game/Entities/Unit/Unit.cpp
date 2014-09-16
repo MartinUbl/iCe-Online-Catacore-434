@@ -13574,7 +13574,7 @@ uint32 Unit::SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damag
             break;
         case SPELL_DAMAGE_CLASS_RANGED:
             // 100% for ranged spell with SPELL_SCHOOL_MASK_NORMAL
-            if (GetSpellSchoolMask(spellProto) & SPELL_SCHOOL_MASK_NORMAL)
+            if ((GetSpellSchoolMask(spellProto) & SPELL_SCHOOL_MASK_NORMAL) || spellProto->Id == 53301)
                 crit_bonus = damage;
             else
             // 50% for ranged spells with magic like spell school -> hunter's traps, DoTs (black arrow, serpent sting ...)
