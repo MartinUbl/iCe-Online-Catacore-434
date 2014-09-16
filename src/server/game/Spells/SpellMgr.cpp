@@ -4717,6 +4717,22 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[0] = 0;
             spellInfo->Effect[1] = 0;
             break;
+        // Echo of Sylvanas
+        case 100865: // Wracking Pain
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            count++;
+            break;
+        case 101567: // Blighted Arrows
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_SRC;
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_50_YARDS;
+            break;
+        case 101401: // Blighted Arrows
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_SRC;
+            break;
+        case 101398: // Teleport
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            break;
 /********************------- END_TIME 5 MAN DUNGEON END -------********************/
 
         // Heart of the Crusader
