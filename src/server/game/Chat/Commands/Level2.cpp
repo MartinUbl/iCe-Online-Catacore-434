@@ -1337,6 +1337,7 @@ bool ChatHandler::HandleNpcDeleteCommand(const char* args)
     }
 
     // Delete the creature
+    unit->RemoveAllAuras();
     unit->CombatStop();
     unit->DeleteFromDB();
     unit->AddObjectToRemoveList();
