@@ -21307,22 +21307,21 @@ void Unit::ChangeSeat(int8 seatId, bool next, bool byAura)
 
 void Unit::ExitVehicle()
 {
-    if (!m_vehicle)
+    if (!m_vehicle || !this)
         return;
 
     Unit *vehicleBase = m_vehicle->GetBase();
+    if(!vehicleBase)
+        return;
     const AuraEffectList &modAuras = vehicleBase->GetAuraEffectsByType(SPELL_AURA_CONTROL_VEHICLE);
     for (AuraEffectList::const_iterator itr = modAuras.begin(); itr != modAuras.end(); ++itr)
     {
-        if ((*itr)->GetBase()->GetOwner() == this)
+        if ((*itr) && (*itr)->GetBase() && (*itr)->GetBase()->GetOwner() == this)
         {
             vehicleBase->RemoveAura((*itr)->GetBase());
             break; // there should be no case that a vehicle has two auras for one owner
         }
     }
-
-    if (!m_vehicle)
-        return;
 
     //sLog->outError("exit vehicle");
 
@@ -21332,10 +21331,16 @@ void Unit::ExitVehicle()
     Vehicle *vehicle = m_vehicle;
     m_vehicle = NULL;
 
+    if(!vehicle)
+        return;
+    vehicleBase = vehicle->GetBase();
+    if(!vehicleBase)
+        return;
+
     SetControlled(false, UNIT_STATE_ROOT);
 
     Position pos;
-    vehicle->GetBase()->GetPosition(&pos);
+    vehicleBase->GetPosition(&pos);
 
     //Send leave vehicle, not correct
     if (GetTypeId() == TYPEID_PLAYER)
@@ -21350,11 +21355,11 @@ void Unit::ExitVehicle()
     init.SetTransportExit();
     init.Launch();
 
-    if (vehicle->GetBase()->GetTypeId() == TYPEID_UNIT)
+    if (vehicleBase->GetTypeId() == TYPEID_UNIT)
         sScriptMgr->OnRemovePassenger(vehicle, this);
 
-    if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION))
-        if (((Minion*)vehicle->GetBase())->GetOwner() == this)
+    if (vehicleBase->HasUnitTypeMask(UNIT_MASK_MINION))
+        if (((Minion*)vehicleBase)->GetOwner() == this)
             vehicle->Dismiss();
 }
 
