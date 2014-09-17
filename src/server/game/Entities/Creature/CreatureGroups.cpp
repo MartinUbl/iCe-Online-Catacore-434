@@ -138,7 +138,7 @@ void CreatureGroupManager::LoadCreatureFormations()
     while (result->NextRow());
 
     sLog->outString();
-    sLog->outString(">> Loaded " UI64FMTD " creatures in formations", count);
+    sLog->outString(">> Loaded %u creatures in formations", count);
     sLog->outString();
 }
 
