@@ -19697,21 +19697,25 @@ void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
         difficulty=FLEXIBLE_RAID_DIFFICULTY;
     }
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
-    UnbindInstance(itr, difficulty, unload);
+    if(itr != m_boundInstances[difficulty].end())
+        UnbindInstance(itr, difficulty, unload);
 }
 
 void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficulty, bool unload)
 {
-    const MapEntry* map = sMapStore.LookupEntry(itr->second.save->GetMapId());
-    if(map && map->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(itr->second.save->GetMapId()))
+    if(itr->second.save)
     {
-        difficulty=FLEXIBLE_RAID_DIFFICULTY;
-    }
-    if (itr != m_boundInstances[difficulty].end())
-    {
-        if (!unload) CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%u' AND instance = '%u'", GetGUIDLow(), itr->second.save->GetInstanceId());
-        itr->second.save->RemovePlayer(this);               // save can become invalid
-        m_boundInstances[difficulty].erase(itr++);
+        const MapEntry* map = sMapStore.LookupEntry(itr->second.save->GetMapId());
+        if(map && map->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(itr->second.save->GetMapId()))
+        {
+            difficulty=FLEXIBLE_RAID_DIFFICULTY;
+        }
+        if (itr != m_boundInstances[difficulty].end())
+        {
+            if (!unload) CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%u' AND instance = '%u'", GetGUIDLow(), itr->second.save->GetInstanceId());
+            itr->second.save->RemovePlayer(this);               // save can become invalid
+            m_boundInstances[difficulty].erase(itr++);
+        }
     }
 }
 
