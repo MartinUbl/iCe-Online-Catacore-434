@@ -75,8 +75,6 @@ void CreatureGroupManager::RemoveCreatureFromGroup(CreatureGroup *group, Creatur
 
 void CreatureGroupManager::LoadCreatureFormations()
 {
-    uint32 oldMSTime = getMSTime();
-
     for (CreatureGroupInfoType::iterator itr = CreatureGroupMap.begin(); itr != CreatureGroupMap.end(); ++itr) // for reload case
         delete itr->second;
     CreatureGroupMap.clear();
@@ -86,7 +84,7 @@ void CreatureGroupManager::LoadCreatureFormations()
 
     if (!result)
     {
-        sLog->outErrorDb("server.loading", ">>  Loaded 0 creatures in formations. DB table `creature_formations` is empty!");
+        sLog->outErrorDb("The table creature_formations is empty or corrupted");
         return;
     }
 
@@ -121,14 +119,14 @@ void CreatureGroupManager::LoadCreatureFormations()
         {
             if (!sObjectMgr->GetCreatureData(group_member->leaderGUID))
             {
-                sLog->outErrorDb("sql.sql", "creature_formations table leader guid %u incorrect (not exist)", group_member->leaderGUID);
+                sLog->outErrorDb("creature_formations table leader guid %u incorrect (not exist)", group_member->leaderGUID);
                 delete group_member;
                 continue;
             }
 
             if (!sObjectMgr->GetCreatureData(memberGUID))
             {
-                sLog->outErrorDb("sql.sql", "creature_formations table member guid %u incorrect (not exist)", memberGUID);
+                sLog->outErrorDb("creature_formations table member guid %u incorrect (not exist)", memberGUID);
                 delete group_member;
                 continue;
             }
