@@ -3830,6 +3830,9 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
 
 void Unit::_UnapplyAura(AuraApplication * aurApp, AuraRemoveMode removeMode)
 {
+    if (!IsInWorld())
+        return;
+
     // aura can be removed from unit only if it's applied on it, shouldn't happen
     if (aurApp->GetBase()->GetApplicationOfTarget(GetGUID()) != aurApp)
         return;
