@@ -146,7 +146,191 @@ public:
     }
 };
 
+// Image of Nozdormu
+static const uint32 Bosses[4] = {54123, 54445, 54431, 54544}; // Sylvanas, Jaina, Baine, Tyrande (in this order)
+
+enum ScriptTexts
+{
+    // Neutral
+    SAY_NEUTRAL          = -1999926, // 25959 - You must give peace to this lands if you are to face Murozond
+
+    // Sylvanas Encounter
+    SAY_SYLVANAS_1       = -1999927, // 25958 - This is where she stood, heroes, and this is where she fell. The time-lost echo of Sylvanas Windrunner will reverberate through the rotting limbs of the Dragonshrine for all eternity.
+
+    // Baine Encounter
+    SAY_BAINE_1          = -1999928, // 25956 - The undying flames are all that remain of this sacred place. I sense much anger here... a seething rage, barely held in check. Be on your guard.
+    YELL_BAINE_1         =    25911, // 25911 - You! Are you the ones responsible for what has happened here...?
+
+    // Tyrande Encounter
+    SAY_TYRANDE_1        = -1999929, // 25955 - There is an unnatural darkness to this place, a perpetual midnight. Take caution, heroes, and do not stray from the light.
+    TYRANDE_INTRO_1      = -1999936, // 25977 - There is nothing left for you here, nothing but death and sorrow.
+    TYRANDE_INTRO_2      = -1999937, // 25978 - The darkness surrounds you, the light of Elune is your only salvation.
+    TYRANDE_INTRO_3      = -1999938, // 25979 - The moonlight can bring rest to your weary souls in this forgotten place.
+    TYRANDE_INTRO_4      = -1999939, // 25980 - Give yourselves to the night, Elune will guide you from this mortal prison.
+    TYRANDE_INTRO_5      = -1999940, // 25981 - You have chosen a path of darkness. Mother moon, guide my hand; allow me to bring rest to these misbegotten souls.
+
+    // Jaina Encounter
+    SAY_JAINA_1          = -1999930, // 25957 - This is all that is left of the Blue Dragonshrine. A great battle shattered the timeways leading out of this forsaken place. You must reconstruct the fragments strewn across the ground and defeat the trapped spirit to proceed.
+    JAINA_INTRO          = -1999941, // 25920 - I don't know who you are, but I'll defend this shrine with my life. Leave, now, before we come to blows.
+
+    // Murozond encounter
+    YELL_MUROZOND_1      =    25934, // 25934 - The "End Time," I once called this place, this strand. I had not seen, by then; I did not know. You hope to... what? Stop me, here? Change the fate I worked so tirelessly to weave?
+    YELL_MUROZOND_2      =    25935, // 25935 - You crawl unwitting, like a blind, writhing worm, towards endless madness and despair. I have witnessed the true End Time. This? This is a blessing you simply cannot comprehend.
+    SAY_NOZDORMU_START   = -1999931, // 25943 - Mortals! I cannot follow you any further - accept my blessing and use the Hourglass of Time to defeat Murozond!
+    SAY_NOZDORMU_END_1   = -1999932, // 25944 - At last it has come to pass. The moment of my demise. The loop is closed. My future self will cause no more harm.
+    SAY_NOZDORMU_END_2   = -1999933, // 25945 - Still, in time, I will... fall to madness. And you, heroes... will vanquish me. The cycle will repeat. So it goes.
+    SAY_NOZDORMU_END_3   = -1999934, // 25946 - What matters is that Azeroth did not fall; that we survived to fight another day.
+    SAY_NOZDORMU_END_4   = -1999935, // 25947 - All that matters... is this moment.
+};
+
+class npc_image_of_nozdormu : public CreatureScript
+{
+public:
+    npc_image_of_nozdormu() : CreatureScript("npc_image_of_nozdormu") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_image_of_nozdormuAI (pCreature);
+    }
+
+    struct npc_image_of_nozdormuAI : public ScriptedAI
+    {
+        npc_image_of_nozdormuAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Check_Timer;
+        uint32 Say_Neutral_Check;
+        uint32 Say_Next;
+        bool Sylvanas_Say;
+        bool Jaina_Say;
+        bool Tyrande_Say;
+        bool Baine_Say;
+        bool Image_Of_Nozdormu_Say;
+
+        void Reset()
+        {
+            me->CastSpell(me, 102602, true); // Visual aura
+
+            Check_Timer = 10000;
+            Say_Neutral_Check = 10000;
+
+            Sylvanas_Say = false;
+            Jaina_Say = false;
+            Tyrande_Say = false;
+            Baine_Say = false;
+            Image_Of_Nozdormu_Say = false;
+        }
+
+        void EnterCombat(Unit * /*who*/) { }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (Check_Timer <= diff)
+            {
+                float distance;
+                int count;
+                count = 0;
+                Map::PlayerList const &playerList = me->GetMap()->GetPlayers();
+                if (!playerList.isEmpty())
+                    for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                        if (Player* pPlayer = i->getSource())
+                        {
+                            distance = me->GetExactDist2d(pPlayer);
+                            if (distance<50)
+                                count = count+1;
+                        }
+
+                if (count >= 4) // Say only when at least 4 memebrs of the group are near Image of Nozdormu, so most of them can enjoy this speech :D
+                {
+                    Creature * boss = NULL;
+                    Creature * new_boss = NULL;
+                    for (int i = 0; i<4; i++)
+                    {
+                        new_boss = me->FindNearestCreature(Bosses[i], 250.0f, true);
+                        if (new_boss)
+                            boss = new_boss;
+                    }
+                    
+                    if (boss)
+                    {
+                        int entry = boss->GetEntry();
+                        switch(entry)
+                        {
+                            // Sylvanas
+                            case(54123):
+                                {
+                                    if (Sylvanas_Say == false)
+                                    {
+                                        DoScriptText(SAY_SYLVANAS_1,me);
+                                        me->SendPlaySound(25958, true);
+                                        Sylvanas_Say = true;
+                                        Say_Next = 17000;
+                                        Image_Of_Nozdormu_Say = true;
+                                    }
+                                }
+                                break;
+                            // Jaina
+                            case(54445):
+                                {
+                                    if (Jaina_Say == false)
+                                    {
+                                        DoScriptText(SAY_JAINA_1,me);
+                                        me->SendPlaySound(25957, true);
+                                        Jaina_Say = true;
+                                        Say_Next = 19000;
+                                        Image_Of_Nozdormu_Say = true;
+                                    }
+                                }
+                                break;
+                            // Baine
+                            case(54431):
+                                {
+                                    if (Baine_Say == false)
+                                    {
+                                        DoScriptText(SAY_BAINE_1,me);
+                                        me->SendPlaySound(25956, true);
+                                        Baine_Say = true;
+                                        Say_Next = 17000;
+                                        Image_Of_Nozdormu_Say = true;
+                                    }
+                                }
+                                break;
+                            // Tyrande
+                            case(54544):
+                                {
+                                    if (Tyrande_Say == false)
+                                    {
+                                        DoScriptText(SAY_TYRANDE_1,me);
+                                        me->SendPlaySound(25955, true);
+                                        Tyrande_Say = true;
+                                        Say_Next = 14000;
+                                        Image_Of_Nozdormu_Say = true;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    Check_Timer = 10000;
+                } else Check_Timer -= diff;
+
+                if (Image_Of_Nozdormu_Say == true)
+                {
+                    if (Say_Next <= diff)
+                    {
+                        DoScriptText(SAY_NEUTRAL,me);
+                        me->SendPlaySound(25959, true);
+                        Image_Of_Nozdormu_Say = false;
+                    }
+                    else Say_Next -= diff;
+                }
+            }
+
+    };
+};
+
 void AddSC_instance_end_time()
 {
     new go_time_transit_device();
+
+    new npc_image_of_nozdormu();
 }
