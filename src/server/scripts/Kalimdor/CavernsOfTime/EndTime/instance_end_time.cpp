@@ -195,11 +195,13 @@ public:
         uint32 Check_Timer;
         uint32 Say_Neutral_Check;
         uint32 Say_Next;
+        uint32 Baine_Welcome_Yell_Timer;
         bool Sylvanas_Say;
         bool Jaina_Say;
         bool Tyrande_Say;
         bool Baine_Say;
         bool Image_Of_Nozdormu_Say;
+        bool Baine_Welcome_Yell;
 
         void Reset()
         {
@@ -213,6 +215,7 @@ public:
             Tyrande_Say = false;
             Baine_Say = false;
             Image_Of_Nozdormu_Say = false;
+            Baine_Welcome_Yell = false;
         }
 
         void EnterCombat(Unit * /*who*/) { }
@@ -286,6 +289,8 @@ public:
                                         Baine_Say = true;
                                         Say_Next = 17000;
                                         Image_Of_Nozdormu_Say = true;
+                                        Baine_Welcome_Yell_Timer = 32000;
+                                        Baine_Welcome_Yell = true;
                                     }
                                 }
                                 break;
@@ -317,6 +322,21 @@ public:
                         Image_Of_Nozdormu_Say = false;
                     }
                     else Say_Next -= diff;
+                }
+
+                if (Baine_Welcome_Yell == true)
+                {
+                    if (Baine_Welcome_Yell_Timer <= diff)
+                    {
+                        Creature * baine = me->FindNearestCreature(54431, 300.0f, true);
+                        if (baine)
+                        {
+                            baine->MonsterYell("You! Are you the ones responsible for what has happened here...?", LANG_UNIVERSAL, 0);
+                            baine->SendPlaySound(25911, false);
+                        }
+                        Baine_Welcome_Yell = false;
+                    }
+                    else Baine_Welcome_Yell_Timer -= diff;
                 }
             }
 
