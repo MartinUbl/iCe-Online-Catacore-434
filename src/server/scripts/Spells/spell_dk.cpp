@@ -234,29 +234,6 @@ class spell_dk_scourge_strike : public SpellScriptLoader
                 return true;
             }
 
-            void GetGlyphScourgeStrikeAuraEffects(Unit const * caster, Unit const * target, Unit::AuraEffectList & auras)
-            {
-                Unit::AuraEffectList const & aurasA = target->GetAuraEffectsByType(SPELL_AURA_DUMMY);
-                for (Unit::AuraEffectList::const_iterator itr = aurasA.begin(); itr != aurasA.end(); ++itr)
-                {
-                    if (((*itr)->GetCasterGUID() != caster->GetGUID()) || ((*itr)->GetEffIndex() != EFFECT_0))
-                        continue;
-
-                    SpellEntry const * spellProto = (*itr)->GetSpellProto();
-                    if ((spellProto->SpellIconID == 23) && (SpellFamilyNames(spellProto->SpellFamilyName) == SPELLFAMILY_GENERIC))
-                        auras.push_back(*itr);
-                }
-            }
-
-            AuraEffect * GetGlyphScourgeStrikeAuraEffect(uint32 diseaseId, Unit::AuraEffectList const & auras)
-            {
-                for (Unit::AuraEffectList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-                    if (int32(diseaseId) == ((*itr)->GetAmount() >> 4))
-                        return (*itr);
-
-                return NULL;
-            }
-
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit* caster = GetCaster();
@@ -267,11 +244,13 @@ class spell_dk_scourge_strike : public SpellScriptLoader
             void HandleAfterHit()
             {
                 Unit* caster = GetCaster();
-                if (Unit* unitTarget = GetHitUnit())
-                {
-                    int32 bp = GetFinalDamage() * m_multip;
-                    caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
-                }
+                Unit* unitTarget = GetHitUnit();
+                if (!caster || !unitTarget || caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                int32 bp = GetFinalDamage() * m_multip;
+                bp = bp * (1.0f + caster->ToPlayer()->GetMasteryPoints()*0.025f);
+                caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
             }
 
             void Register()
