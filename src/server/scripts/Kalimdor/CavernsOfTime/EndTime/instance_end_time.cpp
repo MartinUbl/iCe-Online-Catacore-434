@@ -485,6 +485,258 @@ public:
     };
 };
 
+///////////////////////////
+// Obsidian Dragonshrine //
+///////////////////////////
+enum CreaturesObsidian
+{
+    TIME_TWISTED_SEER             = 54553,
+    TIME_TWISTED_BREAKER          = 54552,
+    TIME_TWISTED_DRAKE            = 54543,
+
+    RUPTURED_GROUND_NPC           = 54566,
+    CALL_FLAMES_NPC               = 54585,
+};
+
+enum ObsidianDragonshrineSpells
+{
+    SEAR_FLESH                    = 102158,
+    CALL_FLAMES                   = 102156,
+    UNDYING_FLAME                 = 105238,
+
+    BREAK_ARMOR                   = 102132,
+    RUPTURE_GROUND                = 102124,
+    RUPTURED_GROUND               = 102128,
+
+    ENRAGE                        = 102134,
+    FLAME_BREATH                  = 102135,
+};
+
+// Time-Twisted Seer
+class npc_time_twisted_seer : public CreatureScript
+{
+public:
+    npc_time_twisted_seer() : CreatureScript("npc_time_twisted_seer") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_time_twisted_seerAI (pCreature);
+    }
+
+    struct npc_time_twisted_seerAI : public ScriptedAI
+    {
+        npc_time_twisted_seerAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Sear_Flesh;
+        uint32 Call_Flames;
+
+        void Reset() 
+        {
+            Sear_Flesh = 8000;
+            Call_Flames = 15000;
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Sear_Flesh <= diff)
+            {
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true);
+                    if (target)
+                        me->CastSpell(target, SEAR_FLESH, false);
+                Sear_Flesh = 10000;
+            }
+            else Sear_Flesh -= diff;
+
+            if (Call_Flames <= diff)
+            {
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+                me->CastSpell(me, CALL_FLAMES, false);
+                Call_Flames = 15000;
+            }
+            else Call_Flames -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+
+    };
+};
+
+// Time-Twisted Breaker
+class npc_time_twisted_breaker : public CreatureScript
+{
+public:
+    npc_time_twisted_breaker() : CreatureScript("npc_time_twisted_breaker") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_time_twisted_breakerAI (pCreature);
+    }
+
+    struct npc_time_twisted_breakerAI : public ScriptedAI
+    {
+        npc_time_twisted_breakerAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Break_Armor;
+        uint32 Rupture_Ground;
+
+        void Reset() 
+        {
+            Break_Armor = 5000;
+            Rupture_Ground = 10000;
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Break_Armor <= diff)
+            {
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+                me->CastSpell(me, BREAK_ARMOR, false);
+                Break_Armor = 15000;
+            }
+            else Break_Armor -= diff;
+
+            if (Rupture_Ground <= diff)
+            {
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+                me->CastSpell(me, RUPTURE_GROUND, false);
+                Rupture_Ground = 20000;
+            }
+            else Rupture_Ground -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+
+    };
+};
+
+// Time-Twisted Drake
+class npc_time_twisted_drake : public CreatureScript
+{
+public:
+    npc_time_twisted_drake() : CreatureScript("npc_time_twisted_drake") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_time_twisted_drakeAI (pCreature);
+    }
+
+    struct npc_time_twisted_drakeAI : public ScriptedAI
+    {
+        npc_time_twisted_drakeAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Flame_Breath;
+        uint32 Enrage;
+
+        void Reset() 
+        {
+            Flame_Breath = 10000;
+            Enrage = 15000;
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Enrage <= diff)
+            {
+                me->CastSpell(me, ENRAGE, false);
+                Enrage = 30000;
+            }
+            else Enrage -= diff;
+
+            if (Flame_Breath <= diff)
+            {
+                me->CastSpell(me, FLAME_BREATH, false);
+                Flame_Breath = 14000;
+            }
+            else Flame_Breath -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+
+    };
+};
+
+// Ruptured Ground
+class npc_ruptured_ground : public CreatureScript
+{
+public:
+    npc_ruptured_ground() : CreatureScript("npc_ruptured_ground") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ruptured_groundAI (pCreature);
+    }
+
+    struct npc_ruptured_groundAI : public ScriptedAI
+    {
+        npc_ruptured_groundAI(Creature *c) : ScriptedAI(c) {}
+
+        void Reset() 
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->CastSpell(me, RUPTURED_GROUND, false);
+        }
+
+    };
+};
+
+// Call Flames
+class npc_call_flames : public CreatureScript
+{
+public:
+    npc_call_flames() : CreatureScript("npc_call_flames") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_call_flamesAI (pCreature);
+    }
+
+    struct npc_call_flamesAI : public ScriptedAI
+    {
+        npc_call_flamesAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Undying_Flame;
+        int count;
+
+        void Reset() 
+        {
+            Undying_Flame = 500;
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_PASSIVE);
+            count = 0;
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (Undying_Flame <= diff)
+            {
+                me->CastSpell(me, UNDYING_FLAME, false);
+                count = count + 1;
+
+                if (count == 4)
+                    me->Kill(me); 
+                Undying_Flame = 1000;
+            } 
+            else Undying_Flame -= diff;
+        }
+    };
+};
+
 void AddSC_instance_end_time()
 {
     new go_time_transit_device();
@@ -493,4 +745,9 @@ void AddSC_instance_end_time()
 
     new npc_infinite_suppressor();
     new npc_infinite_warden();
+    new npc_time_twisted_seer();
+    new npc_time_twisted_breaker();
+    new npc_time_twisted_drake();
+    new npc_ruptured_ground();
+    new npc_call_flames();
 }
