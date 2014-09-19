@@ -173,14 +173,9 @@ enum ScriptTexts
     SAY_JAINA_1          = -1999930, // 25957 - This is all that is left of the Blue Dragonshrine. A great battle shattered the timeways leading out of this forsaken place. You must reconstruct the fragments strewn across the ground and defeat the trapped spirit to proceed.
     JAINA_INTRO          = -1999941, // 25920 - I don't know who you are, but I'll defend this shrine with my life. Leave, now, before we come to blows.
 
-    // Murozond encounter
+    // Murozond Encounter
     YELL_MUROZOND_1      =    25934, // 25934 - The "End Time," I once called this place, this strand. I had not seen, by then; I did not know. You hope to... what? Stop me, here? Change the fate I worked so tirelessly to weave?
     YELL_MUROZOND_2      =    25935, // 25935 - You crawl unwitting, like a blind, writhing worm, towards endless madness and despair. I have witnessed the true End Time. This? This is a blessing you simply cannot comprehend.
-    SAY_NOZDORMU_START   = -1999931, // 25943 - Mortals! I cannot follow you any further - accept my blessing and use the Hourglass of Time to defeat Murozond!
-    SAY_NOZDORMU_END_1   = -1999932, // 25944 - At last it has come to pass. The moment of my demise. The loop is closed. My future self will cause no more harm.
-    SAY_NOZDORMU_END_2   = -1999933, // 25945 - Still, in time, I will... fall to madness. And you, heroes... will vanquish me. The cycle will repeat. So it goes.
-    SAY_NOZDORMU_END_3   = -1999934, // 25946 - What matters is that Azeroth did not fall; that we survived to fight another day.
-    SAY_NOZDORMU_END_4   = -1999935, // 25947 - All that matters... is this moment.
 };
 
 class npc_image_of_nozdormu : public CreatureScript

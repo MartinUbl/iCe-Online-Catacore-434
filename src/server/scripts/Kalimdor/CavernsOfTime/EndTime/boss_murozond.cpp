@@ -32,10 +32,20 @@ Autor: Lazik
 enum NPC
 {
     MUROZOND           = 54432,
-    NOZDORMU           = 54751,
+    NOZDORMU_INTRO     = 54476,
+    NOZDORMU_OUTRO     = 54751,
 };
 
-//define boss id`s to her name and her spells
+enum ScriptTexts
+{
+    // Murozond encounter
+    SAY_NOZDORMU_START   = -1999931, // 25943 - Mortals! I cannot follow you any further - accept my blessing and use the Hourglass of Time to defeat Murozond!
+    SAY_NOZDORMU_END_1   = -1999932, // 25944 - At last it has come to pass. The moment of my demise. The loop is closed. My future self will cause no more harm.
+    SAY_NOZDORMU_END_2   = -1999933, // 25945 - Still, in time, I will... fall to madness. And you, heroes... will vanquish me. The cycle will repeat. So it goes.
+    SAY_NOZDORMU_END_3   = -1999934, // 25946 - What matters is that Azeroth did not fall; that we survived to fight another day.
+    SAY_NOZDORMU_END_4   = -1999935, // 25947 - All that matters... is this moment.
+};
+
 enum Spells 
 {
     TAIL_LASH              = 108589, // Dmg Spell
@@ -81,11 +91,12 @@ public:
         uint32 Distortion_Bomb_Timer;
         uint32 Kill_Timer;
         uint32 Phase;
-        uint32 Check_Timer;
         uint32 Rewind_Time_Check;
         uint32 RemoveDynamicObjects_Timer;
+        uint32 Nozdormu_Say_Timer;
         bool Kill_Say;
         bool Ready_To_Die;
+        bool Nozdormu_Say;
 
         void Reset() 
         {
@@ -98,12 +109,13 @@ public:
             Temporal_Blast_Timer = 12000;
             Flame_Breath_Timer = 15000;
             Distortion_Bomb_Timer = 5000;
-            Check_Timer = 1000;
             Rewind_Time_Check = 500;
+            Nozdormu_Say_Timer = 3000;
             Kill_Timer = NEVER;
             RemoveDynamicObjects_Timer = NEVER;
             Kill_Say = false;
             Ready_To_Die = false;
+            Nozdormu_Say = false;
             Phase = 0;
 
             // Remove Hourglass bar
@@ -178,9 +190,6 @@ public:
 
         void JustDied(Unit * /*who*/)
         {
-            // Summon Chest with loot
-            me->SummonGameObject(209547, 4189.15f, -447.247f, 121.01f, 2.80922f, 0.0f, 0.0f, 0.986223f, 0.165424f, 86400);
-
             // Remove Hourglass bar
             Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
                 for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
@@ -189,12 +198,36 @@ public:
                         if (player->HasAura(HOURS_COUNTDOWN_VISUAL))
                             player->RemoveAura(HOURS_COUNTDOWN_VISUAL);
                     }
+
+            // Summon Chest with loot
+            Map::PlayerList const &playerList = me->GetMap()->GetPlayers();
+                if (!playerList.isEmpty())
+                    for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                        if (Player* pPlayer = i->getSource())
+                            pPlayer->SummonGameObject(209547, 4189.15f, -447.247f, 121.01f, 2.80922f, 0.0f, 0.0f, 0.986223f, 0.165424f, 86400);
+                            return;
         }
 
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
+
+            // Nozdormu Say Intro
+            if (Nozdormu_Say == false)
+            {
+                if (Nozdormu_Say_Timer <= diff)
+                {
+                    Creature * nozdormu_intro = me->FindNearestCreature(NOZDORMU_INTRO, 200.0, true);
+                    if (nozdormu_intro)
+                    {
+                        DoScriptText(SAY_NOZDORMU_START,me);
+                        me->SendPlaySound(25943, true);
+                    }
+                    Nozdormu_Say = true;
+                } 
+                else Nozdormu_Say_Timer -= diff;
+            }
 
             // Tail Lash
             if (Tail_Lash_Timer <= diff)
@@ -352,11 +385,10 @@ public:
             } else Distortion_Bomb_Timer -= diff;
 
             // Prepare for death, Say, Lie down and Fade
-            if (Check_Timer <= diff)
+            if (me->GetHealth()<=250000)
             {
-                if (me->GetHealth()<=100000 && Kill_Say == false)
+                if (Kill_Say == false)
                 {
-                    Phase = 6;
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                     me->SetReactState(REACT_PASSIVE);
                     me->SetStandState(UNIT_STAND_STATE_SLEEP);
@@ -375,8 +407,7 @@ public:
                     me->MonsterYell("You know not what you have done. Aman'Thul... What I... have... seen...", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(25928, false);
                 }
-                Check_Timer = 1000;
-            } else Check_Timer -= diff;
+            }
 
             // Remove all DynObjects because of Rewind Time spell
             if (RemoveDynamicObjects_Timer <= diff)
@@ -387,13 +418,28 @@ public:
             else RemoveDynamicObjects_Timer -= diff;
 
             // Death
-            if (Kill_Timer <= diff && Ready_To_Die == true)
+            if (Kill_Timer <= diff)
             {
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->RemoveAllDynObjects();
-                me->SetVisible(false);
-                me->Kill(me, false);
-                Ready_To_Die = false;
+                if (Ready_To_Die == true)
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->RemoveAllDynObjects();
+
+                    Unit * player = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true);
+                    if (player)
+                        player->Kill(me, false);
+
+                    me->SetVisible(false);
+                    Ready_To_Die = false;
+
+                    // Hide Nozdormu Intro
+                    Creature * nozdormu_intro = me->FindNearestCreature(NOZDORMU_INTRO, 100.0, true);
+                    if (nozdormu_intro)
+                        nozdormu_intro->SetVisible(false);
+
+                    // Spawn Nozdormu Outro
+                    me->SummonCreature(NOZDORMU_OUTRO, 4133.0f, -423.77f, 122.75, 0.00f);
+                }
             }
             else Kill_Timer -= diff;
 
@@ -403,9 +449,88 @@ public:
     };
 };
 
+class npc_nozdormu_outro : public CreatureScript
+{
+public:
+    npc_nozdormu_outro() : CreatureScript("npc_nozdormu_outro") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_nozdormu_outroAI (pCreature);
+    }
+
+    struct npc_nozdormu_outroAI : public ScriptedAI
+    {
+        npc_nozdormu_outroAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Say_Timer;
+        int Say;
+        bool Say_Last;
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->CastSpell(me, 102602, true); // Visual aura
+            Say = 0;
+            Say_Timer = 8000;
+            Say_Last = false;
+        }
+
+        void EnterCombat(Unit * /*who*/) { }
+        void UpdateAI(const uint32 diff) 
+        {
+            if (Say_Last == false)
+            {
+                if (Say_Timer <= diff)
+                {
+                    switch (Say)
+                    {
+                        case 0:
+                            {
+                                DoScriptText(SAY_NOZDORMU_END_1,me);
+                                me->SendPlaySound(25944, true);
+                                Say = Say + 1;
+                                Say_Timer = 16000;
+                                break;
+                            }
+                        case 1:
+                            {
+                                DoScriptText(SAY_NOZDORMU_END_2,me);
+                                me->SendPlaySound(25945, true);
+                                Say = Say + 1;
+                                Say_Timer = 18000;
+                                break;
+                            }
+                        case 2:
+                            {
+                                DoScriptText(SAY_NOZDORMU_END_3,me);
+                                me->SendPlaySound(25946, true);
+                                Say = Say + 1;
+                                Say_Timer = 12000;
+                                break;
+                            }
+                        case 3:
+                            {
+                                DoScriptText(SAY_NOZDORMU_END_4,me);
+                                me->SendPlaySound(25947, true);
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                Say = 0;
+                                Say_Last = true;
+                                break;
+                            }
+                    }
+                }
+                else Say_Timer -= diff;
+            }
+        }
+
+    };
+};
+
 void AddSC_boss_murozond()
     {
         new boss_murozond();
+        new npc_nozdormu_outro();
     }
 
 //////////////////////////////////////////////////////////////////////////////////////
