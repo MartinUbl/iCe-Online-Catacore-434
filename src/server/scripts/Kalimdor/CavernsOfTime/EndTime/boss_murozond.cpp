@@ -203,6 +203,7 @@ public:
                         if (player->HasAura(HOURS_COUNTDOWN_VISUAL))
                             player->RemoveAura(HOURS_COUNTDOWN_VISUAL);
                         player->CombatStop();
+                        player->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(6117), true); // Heroic: End Time
                     }
 
             // Summon Chest with loot
