@@ -433,7 +433,7 @@ public:
                     Ready_To_Die = false;
 
                     // Hide Nozdormu Intro
-                    Creature * nozdormu_intro = me->FindNearestCreature(NOZDORMU_INTRO, 100.0, true);
+                    Creature * nozdormu_intro = me->FindNearestCreature(NOZDORMU_INTRO, 250.0, true);
                     if (nozdormu_intro)
                         nozdormu_intro->SetVisible(false);
 
