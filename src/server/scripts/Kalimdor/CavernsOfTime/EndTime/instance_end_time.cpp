@@ -323,9 +323,174 @@ public:
     };
 };
 
+//////////////////////////////////////////////////////////////
+////////////////        TRASH AI            //////////////////
+//////////////////////////////////////////////////////////////
+
+/////////////////////////
+// Bronze Dragonshrine //
+/////////////////////////
+enum Creatures
+{
+    INFINITE_SUPPRESSOR           = 54920,
+    INFINITE_WARDEN               = 54923,
+    MUROZOND_BOSS                 = 54432,
+};
+enum BronzeDragonshrineSpells
+{
+    ARCANE_WAVE                   = 102601,
+    TEMPORAL_VORTEX               = 102600,
+
+    VOID_SHIELD                   = 102599,
+    VOID_STRIKE                   = 102598,
+};
+
+// Infinite Suppressor
+class npc_infinite_suppressor : public CreatureScript
+{
+public:
+    npc_infinite_suppressor() : CreatureScript("npc_infinite_suppressor") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_infinite_suppressorAI (pCreature);
+    }
+
+    struct npc_infinite_suppressorAI : public ScriptedAI
+    {
+        npc_infinite_suppressorAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Arcane_Wave;
+        uint32 Temporal_Vortex;
+
+        void Reset()
+        {
+            Arcane_Wave = 2000;
+            Temporal_Vortex = 15000+urand(0,10000);
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+            if (Arcane_Wave <= diff)
+            {
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true);
+                if (target)
+                    me->CastSpell(target, ARCANE_WAVE, false);
+                Arcane_Wave = 4000;
+            }
+            else Arcane_Wave -= diff;
+
+            if (Temporal_Vortex <= diff)
+            {
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true);
+                if (target)
+                    me->CastSpell(target, TEMPORAL_VORTEX, false);
+                Temporal_Vortex = 15000;
+            }
+            else Temporal_Vortex -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+
+    };
+};
+
+// Infinite Warden
+class npc_infinite_warden : public CreatureScript
+{
+public:
+    npc_infinite_warden() : CreatureScript("npc_infinite_warden") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_infinite_wardenAI (pCreature);
+    }
+
+    struct npc_infinite_wardenAI : public ScriptedAI
+    {
+        npc_infinite_wardenAI(Creature *c) : ScriptedAI(c) { }
+
+        uint32 Void_Shield;
+        uint32 Void_Strike;
+
+        void Reset()
+        {
+            me->RemoveAura(VOID_SHIELD);
+
+            Void_Shield = 5000;
+            Void_Strike = 10000+urand(0,7000);
+        }
+
+        void JustDied(Unit * /*who*/)
+        {
+            int count;
+            count = 0;
+            std::list<Creature*> Infinite_Wardens;
+            GetCreatureListWithEntryInGrid(Infinite_Wardens, me, INFINITE_WARDEN, 250.0f);
+            for (std::list<Creature*>::const_iterator itr = Infinite_Wardens.begin(); itr != Infinite_Wardens.end(); ++itr)
+                if ((*itr) && (*itr)->IsAlive())
+                    count = count + 1;
+
+            if (count == 2)
+            {
+                Creature * murozond_boss = me->FindNearestCreature(MUROZOND_BOSS, 250.0, true);
+                if (murozond_boss)
+                {
+                    murozond_boss->MonsterYell("The \"End Time\", I once called this place, this strand. I had not seen, by then; I did not know. You hope to... what? Stop me, here? Change the fate I worked so tirelessly to weave?", LANG_UNIVERSAL, 0);
+                    murozond_boss->SendPlaySound(25934, false);
+                }
+            }
+
+            if (count == 0)
+            {
+                Creature * murozond_boss = me->FindNearestCreature(MUROZOND_BOSS, 250.0, true);
+                if (murozond_boss)
+                {
+                    murozond_boss->MonsterYell("You crawl unwitting, like a blind, writhing worm, towards endless madness and despair. I have witnessed the true End Time. This? This is a blessing you simply cannot comprehend.", LANG_UNIVERSAL, 0);
+                    murozond_boss->SendPlaySound(25935, false);
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim()) 
+                return;
+
+            if (Void_Shield <= diff)
+            {
+                me->CastSpell(me, VOID_SHIELD, true);
+                Void_Shield = 16000;
+            }
+            else Void_Shield -= diff;
+
+            if (Void_Strike <= diff)
+            {
+                Unit * target = me->GetVictim();
+                if (target)
+                    me->CastSpell(target, VOID_STRIKE, false);
+                Void_Strike = 10000+urand(0,3000);
+            }
+            else Void_Strike -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+
+    };
+};
+
 void AddSC_instance_end_time()
 {
     new go_time_transit_device();
 
     new npc_image_of_nozdormu();
+
+    new npc_infinite_suppressor();
+    new npc_infinite_warden();
 }
