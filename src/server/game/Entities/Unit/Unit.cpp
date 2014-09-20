@@ -2898,14 +2898,6 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode() && this != pVictim)
         return SPELL_MISS_EVADE;
 
-    // Check for immune
-    if (pVictim->IsImmunedToSpell(spell))
-    {
-        if (spell->Id == 44572 && pVictim->ToCreature()) // Deep freeze
-            CastSpell(pVictim, 71757, true);
-        return SPELL_MISS_IMMUNE;
-    }
-
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
     if (IsPositiveSpell(spell->Id)

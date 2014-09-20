@@ -4572,6 +4572,16 @@ void Spell::HandeAfterCast()
                 if (pAura->ModStackAmount(-1))
                     m_caster->RemoveAurasDueToSpell(44544);
             break;
+        // Deep freeze
+        case 44572:
+        {
+            if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                break;
+            // Deals damage to targets that are permanently immune to stuns
+            if (unitTarget->ToCreature()->GetCreatureInfo()->MechanicImmuneMask & (1 << (MECHANIC_STUN - 1)))
+                m_caster->CastSpell(unitTarget, 71757, true);
+            break;
+        }
         // Shadowburn
         case 17877:
         {
