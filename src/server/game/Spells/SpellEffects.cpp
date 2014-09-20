@@ -4395,6 +4395,19 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             }
 
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
+
+            //Riptide
+            AuraEffect * aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0, 0x10, m_originalCasterGUID);
+
+            // Chain Heal
+            if (aurEff && m_spellInfo->Id == 1064)
+            {
+                // Your next Chain Heal cast on that primary target will consume the healing over time effect and increase the amount of the Chain Heal by 25%
+                addhealth = int32(addhealth * 1.25f);
+                // consume aura
+                if (!caster->HasAura(99195)) // Shaman T12 Restoration 4P Bonus
+                    unitTarget->RemoveAura(aurEff->GetBase());
+            }
         }
         // Atonement
         else if (m_spellInfo->Id == 81751 || m_spellInfo->Id == 94472)
@@ -4479,18 +4492,6 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 addhealth *= (1.05f + GoNbonus);
             else if (caster->HasAura(87305)) // If player has only Gift of Nature
                 addhealth *= 1.25f;
-        }
-        // Riptide - increase healing done by Chain Heal
-        else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[0] & 0x100)
-        {
-            addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
-            if (AuraEffect * aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0, 0x10, m_originalCasterGUID))
-            {
-                addhealth = int32(addhealth * 1.25f);
-                // consume aura
-                if (!caster->HasAura(99195)) // Shaman T12 Restoration 4P Bonus
-                    unitTarget->RemoveAura(aurEff->GetBase());
-            }
         }
         // Death Pact - return pct of max health to caster
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
