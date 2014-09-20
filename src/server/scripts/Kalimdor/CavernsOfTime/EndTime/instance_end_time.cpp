@@ -757,6 +757,146 @@ public:
     };
 };
 
+///////////////////////////
+//   Ruby Dragonshrine   //
+///////////////////////////
+enum CreaturesRuby
+{
+    TIME_TWISTED_SCOURGE_BEAST    = 54507,
+    TIME_TWISTED_GEIST            = 54511,
+};
+
+enum RubyDragonshrineSpells
+{
+    PUTRID_SPIT                   = 102063,
+    FACE_KICK                     = 101888,
+    WAIL_OF_THE_DEAD              = 101891,
+
+    FLESH_RIP                     = 102066,
+    CADAVER_TOSS                  = 109952,
+    CANNIBALIZE                   = 109944,
+};
+
+// Time-Twisted Scourge Beast
+class npc_time_twisted_scourge_beast : public CreatureScript
+{
+public:
+    npc_time_twisted_scourge_beast() : CreatureScript("npc_time_twisted_scourge_beast") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_time_twisted_scourge_beastAI (pCreature);
+    }
+
+    struct npc_time_twisted_scourge_beastAI : public ScriptedAI
+    {
+        npc_time_twisted_scourge_beastAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Putrid_Spit;
+        uint32 Face_Kick;
+        uint32 Wail_Of_The_Dead;
+
+        void Reset() 
+        {
+            Putrid_Spit = 7000+urand(0,5000);
+            Face_Kick = 8000;
+            Wail_Of_The_Dead = 12000;
+        }
+
+        void JustDied(Unit * /*who*/)
+        {
+            std::list<Creature*> Time_Twisted_Geists;
+            GetCreatureListWithEntryInGrid(Time_Twisted_Geists, me, TIME_TWISTED_GEIST, 10.0f);
+            for (std::list<Creature*>::const_iterator itr = Time_Twisted_Geists.begin(); itr != Time_Twisted_Geists.end(); ++itr)
+                if (*itr)
+                   (*itr)->CastSpell((*itr), CANNIBALIZE, true);
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Putrid_Spit <= diff)
+            {
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true);
+                if (target)
+                    me->CastSpell(target, PUTRID_SPIT, true);
+                Putrid_Spit = 7000+urand(0,5000);
+            }
+            else Putrid_Spit -= diff;
+
+            if (Face_Kick <= diff)
+            {
+                me->CastSpell(me, FACE_KICK, true);
+                Face_Kick = 10000+urand(0,5000);
+            }
+            else Face_Kick -= diff;
+
+            if (Wail_Of_The_Dead <= diff)
+            {
+                me->CastSpell(me, WAIL_OF_THE_DEAD, true);
+                Wail_Of_The_Dead = 45000;
+            }
+            else Wail_Of_The_Dead -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+// Time-Twisted Geist
+class npc_time_twisted_geist : public CreatureScript
+{
+public:
+    npc_time_twisted_geist() : CreatureScript("npc_time_twisted_geist") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_time_twisted_geistAI (pCreature);
+    }
+
+    struct npc_time_twisted_geistAI : public ScriptedAI
+    {
+        npc_time_twisted_geistAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Flesh_Rip;
+        uint32 Cadaver_Toss;
+
+        void Reset() 
+        {
+            Flesh_Rip = 10000+urand(0,10000);
+            Cadaver_Toss = 0+urand(0,20000);
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Flesh_Rip <= diff)
+            {
+                Unit * target = me->GetVictim();
+                if (target)
+                    me->CastSpell(target, FLESH_RIP, false);
+                Flesh_Rip = 20000;
+            }
+            else Flesh_Rip -= diff;
+
+            if (Cadaver_Toss <= diff)
+            {
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true);
+                if (target)
+                    me->CastSpell(target, CADAVER_TOSS, true);
+                Cadaver_Toss = 20000;
+            }
+            else Cadaver_Toss -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_instance_end_time()
 {
     new go_time_transit_device();
@@ -770,4 +910,6 @@ void AddSC_instance_end_time()
     new npc_time_twisted_drake();
     new npc_ruptured_ground();
     new npc_call_flames();
+    new npc_time_twisted_scourge_beast();
+    new npc_time_twisted_geist();
 }
