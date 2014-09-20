@@ -4677,11 +4677,6 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] &= ~SPELL_ATTR0_CU_NEGATIVE_EFF1;
             count++;
             break;
-        case 74522: // Skinning (Grandmaster)
-            // Because of bug in DBC, we need to set basepoints manually
-            spellInfo->EffectBasePoints[1] = 7;
-            count++;
-            break;
         case 86303: // Reactive barrier (rank 1)
         case 86304: // Reactvie barrier (rank 2)
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_SCHOOL_ABSORB;
