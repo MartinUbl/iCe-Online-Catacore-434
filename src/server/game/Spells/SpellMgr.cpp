@@ -4700,7 +4700,10 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_CONE_LINE;
             count++;
             break;
+        /* PLAYERS SPELLS*/
         case 2812:                              // Holy Wrath
+        case 30213:                             // Legion Strike 
+        /* CREATURES SPELLS*/
         case 69055: case 70814:                 // Bone Slice
         case 24340: case 26558: case 28884:     // Meteor
         case 36837: case 38903: case 41276:     // Meteor
