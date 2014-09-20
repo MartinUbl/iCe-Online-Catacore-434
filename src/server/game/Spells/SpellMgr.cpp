@@ -4474,6 +4474,15 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_SRC_CASTER;
             spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_AREA_ENEMY_SRC;
             break;
+        case 105420: // Color Combination
+        case 105435:
+        case 105436:
+        case 105437:
+        case 105439:
+        case 105440:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_SRC;
+            break;
 /*************************        DRAGON SOUL END        *****************************/
 
         case 88691: //Marked for Death Tracking
