@@ -12999,7 +12999,7 @@ bool Unit::IsSpellCrit(Unit* victim, SpellEntry const* spellProto, SpellSchoolMa
 float Unit::GetUnitSpellCriticalChance(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType) const
 {
     // Mobs can't crit with spells.
-    if (IS_CREATURE_GUID(GetGUID()) && !(GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER))
+    if (GetTypeId() == TYPEID_UNIT && !(GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER))
         return 0.0f;
 
     // not critting spell
