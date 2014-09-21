@@ -14895,7 +14895,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
         AddPctN(DoneTotalMod, GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DAMAGE_MECHANIC, spellProto->Mechanic));
 
     // done scripted mod (take it from owner)
-    Unit * owner = GetOwner() ? GetOwner() : this;
+    //Unit * owner = GetOwner() ? GetOwner() : this;
 
     // Custom scripted damage
     if (spellProto)
