@@ -1940,25 +1940,25 @@ bool Position::IsPositionValid() const
     return Trinity::IsValidMapCoord(m_positionX,m_positionY,m_positionZ,m_orientation);
 }
 
-void WorldObject::MonsterSay(const char* text, uint32 language, uint64 TargetGuid, float customRadius)
+void WorldObject::MonsterSay(const char* text, uint32 language, uint64 TargetGuid)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildMonsterChat(&data,CHAT_MSG_MONSTER_SAY,text,language,GetName(),TargetGuid);
-    SendMessageToSetInRange(&data,customRadius == 0.0f ? sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY) : customRadius,true);
+    SendMessageToSetInRange(&data,sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY),true);
 }
 
-void WorldObject::MonsterYell(const char* text, uint32 language, uint64 TargetGuid, float customRadius)
+void WorldObject::MonsterYell(const char* text, uint32 language, uint64 TargetGuid)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildMonsterChat(&data,CHAT_MSG_MONSTER_YELL,text,language,GetName(),TargetGuid);
-    SendMessageToSetInRange(&data,customRadius == 0.0f ? sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL) : customRadius,true);
+    SendMessageToSetInRange(&data,sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL),true);
 }
 
-void WorldObject::MonsterTextEmote(const char* text, uint64 TargetGuid, bool IsBossEmote, float customRadius)
+void WorldObject::MonsterTextEmote(const char* text, uint64 TargetGuid, bool IsBossEmote)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildMonsterChat(&data,IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE,text,LANG_UNIVERSAL,GetName(),TargetGuid);
-    SendMessageToSetInRange(&data,customRadius == 0.0f ? sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE) : customRadius,true);
+    SendMessageToSetInRange(&data,sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE),true);
 }
 
 void WorldObject::MonsterWhisper(const char* text, uint64 receiver, bool IsBossWhisper)
