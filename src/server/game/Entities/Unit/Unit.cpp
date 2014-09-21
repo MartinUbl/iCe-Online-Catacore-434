@@ -14930,12 +14930,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
             }
             case SPELLFAMILY_DEATHKNIGHT:
             {
-                // Glacier Rot
-                if (spellProto->SpellFamilyFlags[0] & 0x2 || spellProto->SpellFamilyFlags[1] & 0x6)
-                    if (AuraEffect * aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 196, 0))
-                        if (victim->GetDiseasesByCaster(owner->GetGUID()) > 0)
-                            DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
-
                 // Merciless Combat for melee spells
                 if (victim->HealthBelowPct(35))
                 {
