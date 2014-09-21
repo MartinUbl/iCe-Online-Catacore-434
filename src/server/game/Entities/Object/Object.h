@@ -796,9 +796,9 @@ class WorldObject : public Object, public WorldLocation
         virtual void SendMessageToSetInRange(WorldPacket *data, float dist, bool self);
         virtual void SendMessageToSet(WorldPacket *data, Player const* skipped_rcvr);
 
-        void MonsterSay(const char* text, uint32 language, uint64 TargetGuid);
-        void MonsterYell(const char* text, uint32 language, uint64 TargetGuid);
-        void MonsterTextEmote(const char* text, uint64 TargetGuid, bool IsBossEmote = false);
+        void MonsterSay(const char* text, uint32 language, uint64 TargetGuid, float customRadius = 0.0f);
+        void MonsterYell(const char* text, uint32 language, uint64 TargetGuid, float customRadius = 0.0f);
+        void MonsterTextEmote(const char* text, uint64 TargetGuid, bool IsBossEmote = false, float customRadius = 0.0f);
         void MonsterWhisper(const char* text, uint64 receiver, bool IsBossWhisper = false);
         void MonsterSay(int32 textId, uint32 language, uint64 TargetGuid);
         void MonsterYell(int32 textId, uint32 language, uint64 TargetGuid);
