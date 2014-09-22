@@ -38,7 +38,7 @@ enum Quests
 };
 
 // Spells
-enum NPC
+enum Teleport_End_Time
 {
     SPELL_ENTRANCE        = 102564,
     SPELL_SYLVANAS        = 102579,
@@ -163,11 +163,6 @@ enum ScriptTexts
 
     // Tyrande Encounter
     SAY_TYRANDE_1        = -1999929, // 25955 - There is an unnatural darkness to this place, a perpetual midnight. Take caution, heroes, and do not stray from the light.
-    TYRANDE_INTRO_1      = -1999936, // 25977 - There is nothing left for you here, nothing but death and sorrow.
-    TYRANDE_INTRO_2      = -1999937, // 25978 - The darkness surrounds you, the light of Elune is your only salvation.
-    TYRANDE_INTRO_3      = -1999938, // 25979 - The moonlight can bring rest to your weary souls in this forgotten place.
-    TYRANDE_INTRO_4      = -1999939, // 25980 - Give yourselves to the night, Elune will guide you from this mortal prison.
-    TYRANDE_INTRO_5      = -1999940, // 25981 - You have chosen a path of darkness. Mother moon, guide my hand; allow me to bring rest to these misbegotten souls.
 
     // Jaina Encounter
     SAY_JAINA_1          = -1999930, // 25957 - This is all that is left of the Blue Dragonshrine. A great battle shattered the timeways leading out of this forsaken place. You must reconstruct the fragments strewn across the ground and defeat the trapped spirit to proceed.
@@ -897,6 +892,95 @@ public:
     };
 };
 
+//////////////////////////
+// Emerald Dragonshrine //
+//////////////////////////
+enum CreaturesEmerald
+{
+    TIME_TWISTED_HUNTRESS         = 54701,
+    TIME_TWISTED_NIGHT_SABER      = 54688,
+    TIME_TWISTED_NIGHT_SABER2     = 54699,
+    TIME_TWISTED_NIGHT_SABER3     = 54700,
+    TIME_TWISTED_SENTINEL         = 54512,
+};
+
+enum EmeraldDragonshrineSpells
+{
+    IN_SHADOW_TRASH               = 101841,
+    MOONLIT_TRASH                 = 101842,
+    MOONLIGHT_TRASH               = 102479,
+};
+
+// Pools of Moonlight
+static const uint32 Pools[5] = {119503, 119504, 119505, 119506, 119507};
+
+// All npcs in Emerald Dragonshrine
+class npc_time_twisted_emerald_trash : public CreatureScript
+{
+public:
+    npc_time_twisted_emerald_trash() : CreatureScript("npc_time_twisted_emerald_trash") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_time_twisted_emerald_trashAI (pCreature);
+    }
+
+    struct npc_time_twisted_emerald_trashAI : public ScriptedAI
+    {
+        npc_time_twisted_emerald_trashAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Check_Timer;
+
+        void Reset() 
+        {
+            me->CastSpell(me, IN_SHADOW_TRASH, true);
+            Check_Timer = 1000;
+        }
+
+        void JustDied(Unit * /*who*/)
+        { 
+            std::list<Creature*> pools_of_moonlight;
+            for (uint32 i = 0; i < 5; i++)
+            {
+                me->GetCreatureListWithEntryInGrid(pools_of_moonlight, Pools[i], 30.0f);
+            }
+
+            for (std::list<Creature*>::iterator itr = pools_of_moonlight.begin(); itr != pools_of_moonlight.end(); ++itr)
+            {
+                if (*itr)
+                    (*itr)->AI()->DoAction(0);
+            }
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasAura(IN_SHADOW_TRASH))
+            {
+                if (Check_Timer <= diff)
+                {
+                    Creature * pool_of_moonlight = NULL;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        pool_of_moonlight = me->FindNearestCreature(Pools[i], 5.0f, true);
+                        if (pool_of_moonlight && pool_of_moonlight->HasAura(MOONLIGHT_TRASH))
+                        {
+                            me->RemoveAura(IN_SHADOW_TRASH);
+                            me->AddAura(MOONLIT_TRASH, me);
+                        }
+                    }
+                    Check_Timer = 3000;
+                }
+                else Check_Timer -= diff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_instance_end_time()
 {
     new go_time_transit_device();
@@ -912,4 +996,5 @@ void AddSC_instance_end_time()
     new npc_call_flames();
     new npc_time_twisted_scourge_beast();
     new npc_time_twisted_geist();
+    new npc_time_twisted_emerald_trash();
 }

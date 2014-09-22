@@ -27,7 +27,8 @@ Complete: 100%
 #include "ScriptPCH.h"
 #include "Spell.h"
 #include "UnitAI.h"
-#include "MapManager.h" 
+#include "MapManager.h"
+#include "endtime.h"
 
 // NPCs
 enum NPC
@@ -42,7 +43,10 @@ enum NPC
 // Spells
 enum Spells 
 {
-    DARK_MOONLIGHT              = 102414, // Aura slowing casting speed
+    DARK_MOONLIGHT              = 102414, // Aura slowing casting speed (purple)
+    MOONLIGHT                   = 102479, // Moonlight aura (white)
+    IN_SHADOW                   = 101841, // Shadow aura, dmg taken -90%
+    MOONLIT                     = 101946, // Triggers spellwhich removes In Shadow aura
     MOONBOLT                    = 102193, // Dmg Spell
     STARDUST                    = 102173, // Dmg Spell
     LUNAR_GUIDANCE              = 102472, // Buff
@@ -58,6 +62,15 @@ enum Spells
 
     PIERCING_GAZE_OF_ELUNE      = 102182, // Aura
     PIERCING_GAZE_EFFECT        = 102183, // Effect
+};
+
+enum PoolsOfMoonlight
+{
+    POOL_OF_MOONLIGHT_1         = 119503,
+    POOL_OF_MOONLIGHT_2         = 119504,
+    POOL_OF_MOONLIGHT_3         = 119505,
+    POOL_OF_MOONLIGHT_4         = 119506,
+    POOL_OF_MOONLIGHT_5         = 119507,
 };
 
 // Echo of Tyrande
@@ -84,6 +97,7 @@ public:
         uint32 Moonlance_Timer;
         uint32 Summon_Eyes_Timer;
         uint32 Summon_Moonlance_Timer;
+        uint32 Attackable_Timer;
         bool First_Lunar_Guidance;
         bool Second_Lunar_Guidance;
         bool Tears_Of_Elune;
@@ -96,9 +110,14 @@ public:
 
         void Reset() 
         {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_PASSIVE);
             me->SetStandState(UNIT_STAND_STATE_KNEEL);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->CastSpell(me, IN_SHADOW, true);
 
+            Attackable_Timer = 10000;
             Eyes_Of_The_Goddess_Timer = 30000;
             Check_Timer = 1000;
             Moonbolt_Timer = 1500;
@@ -124,7 +143,7 @@ public:
         {
             me->SetStandState(UNIT_STAND_STATE_STAND);
 
-            me->MonsterYell("Let the peaceful light of Elune soothe your souls in this dark time.", LANG_UNIVERSAL, 0);
+            me->MonsterSay("Let the peaceful light of Elune soothe your souls in this dark time.", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
             me->SendPlaySound(25972, true);
 
             me->SetInCombatWithZone();
@@ -141,8 +160,24 @@ public:
 
         void JustDied(Unit * /*who*/)
         {
-            me->MonsterYell("I can...see the light of the moon...so clearly now. It is...beautiful...", LANG_UNIVERSAL, 0);
+            me->MonsterSay("I can...see the light of the moon...so clearly now. It is...beautiful...", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
             me->SendPlaySound(25976, true);
+
+            // Switch purple aura to white aura
+            Creature * purple_aura_holder = me->FindNearestCreature(PURPLE_AURA_HOLDER, 150.0f, true);
+            if (purple_aura_holder)
+            {
+                purple_aura_holder->RemoveAllAuras();
+                purple_aura_holder->CastSpell(purple_aura_holder, MOONLIGHT, true);
+                purple_aura_holder->SetFloatValue(OBJECT_FIELD_SCALE_X, 2.0f);
+            }
+
+            // Despawn Eyes of Goddess
+            std::list<Creature*> eyes_of_elune;
+            GetCreatureListWithEntryInGrid(eyes_of_elune, me, EYE_OF_ELUNE, 100.0f);
+            for (std::list<Creature*>::const_iterator itr = eyes_of_elune.begin(); itr != eyes_of_elune.end(); ++itr)
+                if (*itr)
+                    (*itr)->ForcedDespawn();
         }
 
         void SummonEyesOfTheGoddess()
@@ -171,6 +206,22 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+            {
+                if (Attackable_Timer <= diff)
+                {
+                    Unit * pool_of_moonlight_5 = me->FindNearestCreature(POOL_OF_MOONLIGHT_5, 100.0f, true);
+                    if (!pool_of_moonlight_5)
+                    {
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        me->RemoveAura(IN_SHADOW);
+                    }
+                }
+                else Attackable_Timer -= 10000;
+            }
+
             if (!UpdateVictim())
             return;
 
@@ -600,11 +651,262 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
-            me->CastSpell(me, DARK_MOONLIGHT, false);
         }
 
         void EnterCombat(Unit * /*who*/) { }
         void UpdateAI(const uint32 diff) { }
+    };
+};
+
+enum TyrandeSay
+{
+    TYRANDE_INTRO_1      = -1999936, // 25977 - There is nothing left for you here, nothing but death and sorrow.
+    TYRANDE_INTRO_2      = -1999937, // 25978 - The darkness surrounds you, the light of Elune is your only salvation.
+    TYRANDE_INTRO_3      = -1999938, // 25979 - The moonlight can bring rest to your weary souls in this forgotten place.
+    TYRANDE_INTRO_4      = -1999939, // 25980 - Give yourselves to the night, Elune will guide you from this mortal prison.
+    TYRANDE_INTRO_5      = -1999940, // 25981 - You have chosen a path of darkness. Mother moon, guide my hand; allow me to bring rest to these misbegotten souls.
+};
+
+// Pool of Moonlight
+class npc_pool_of_moonlight : public CreatureScript
+{
+public:
+    npc_pool_of_moonlight() : CreatureScript("npc_pool_of_moonlight") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_pool_of_moonlightAI (pCreature);
+    }
+
+    struct npc_pool_of_moonlightAI : public ScriptedAI
+    {
+        npc_pool_of_moonlightAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Check_Timer;
+        uint32 Check_Size;
+        uint32 Entry;
+        uint32 count;
+        uint32 Say_Another_Pool;
+        float size;
+        bool Say;
+        bool Say_Next;
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_PASSIVE);
+
+            count = 0;
+            Check_Timer = 3000;
+            Check_Size = 2000;
+            Say = false;
+            Say_Next = false;
+        }
+
+        void EnterCombat(Unit * /*who*/) { }
+
+        void CountDeadUnits()
+        {
+            count++;
+        }
+
+        void DoAction(const int32 /*param*/)
+        {
+            CountDeadUnits();
+        }
+
+        void SayNextPoolAppears()
+        {
+            Say_Another_Pool = 5000;
+            Say_Next = true;
+        }
+
+        void SayAndShine()
+        {
+            me->CastSpell(me, MOONLIGHT, true);
+
+            Entry = me->GetEntry();
+            switch(Entry)
+            {
+                case 119504:
+                    me->MonsterTextEmote("A pool of moonlight appears to the west!", LANG_UNIVERSAL, true, 150.0f);
+                    break;
+                case 119505:
+                    me->MonsterTextEmote("A pool of moonlight appears to the south!", LANG_UNIVERSAL, true, 150.0f);
+                    break;
+                case 119506:
+                    me->MonsterTextEmote("A pool of moonlight appears to the east!", LANG_UNIVERSAL, true, 150.0f);
+                    break;
+                case 119507:
+                    me->MonsterTextEmote("A pool of moonlight appears to the north!", LANG_UNIVERSAL, true, 150.0f);
+                    break;
+            }
+        }
+
+        void JustDied(Unit * /*Who*/)
+        {
+            Entry = me->GetEntry();
+            Unit * tyrande = me->FindNearestCreature(ECHO_OF_TYRANDE, 150.0f, true);
+
+            switch(Entry)
+            {
+                case 119503:
+                    {
+                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_2, 150.0f, true);
+                        if (moonlight_pool)
+                        {
+                            if (npc_pool_of_moonlight::npc_pool_of_moonlightAI* pAI = (npc_pool_of_moonlight::npc_pool_of_moonlightAI*)(moonlight_pool->GetAI()))
+                                pAI->SayNextPoolAppears();
+                        }
+
+                        me->MonsterTextEmote("The Moonlight fades into the Darkness", 0, true);
+                        if (tyrande)
+                        {
+                            tyrande->MonsterSay("The darkness surrounds you, the light of Elune is your only salvation.", LANG_UNIVERSAL, tyrande->GetGUID(), 150);
+                            tyrande->SendPlaySound(25978, true);
+                        }
+                    }
+                    break;
+                case 119504:
+                    {
+                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_3, 150.0f, true);
+                        if (moonlight_pool)
+                        {
+                            if (npc_pool_of_moonlight::npc_pool_of_moonlightAI* pAI = (npc_pool_of_moonlight::npc_pool_of_moonlightAI*)(moonlight_pool->GetAI()))
+                                pAI->SayNextPoolAppears();
+                        }
+
+                        me->MonsterTextEmote("The Moonlight fades into the Darkness", 0, true);
+                        if (tyrande)
+                        {
+                            tyrande->MonsterSay("The moonlight can bring rest to your weary souls in this forgotten place.", LANG_UNIVERSAL, tyrande->GetGUID(), 150);
+                            tyrande->SendPlaySound(25979, true);
+                        }
+                    }
+                    break;
+                case 119505:
+                    {
+                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_4, 150.0f, true);
+                        if (moonlight_pool)
+                        {
+                            if (npc_pool_of_moonlight::npc_pool_of_moonlightAI* pAI = (npc_pool_of_moonlight::npc_pool_of_moonlightAI*)(moonlight_pool->GetAI()))
+                                pAI->SayNextPoolAppears();
+                        }
+
+                        me->MonsterTextEmote("The Moonlight fades into the Darkness", 0, true);
+                        if (tyrande)
+                        {
+                            tyrande->MonsterSay("Give yourselves to the night, Elune will guide you from this mortal prison.", LANG_UNIVERSAL, tyrande->GetGUID(), 150);
+                            tyrande->SendPlaySound(25980, true);
+                        }
+                    }
+                    break;
+                case 119506:
+                    {
+                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_5, 150.0f, true);
+                        if (moonlight_pool)
+                        {
+                            if (npc_pool_of_moonlight::npc_pool_of_moonlightAI* pAI = (npc_pool_of_moonlight::npc_pool_of_moonlightAI*)(moonlight_pool->GetAI()))
+                                pAI->SayNextPoolAppears();
+                        }
+
+                        me->MonsterTextEmote("The Moonlight fades into the Darkness", 0, true);
+                        if (tyrande)
+                        {
+                            tyrande->MonsterSay("You have chosen a path of darkness. Mother moon, guide my hand; allow me to bring rest to these misbegotten souls.", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
+                            me->SendPlaySound(25981, true); // Too far away from Tyrande so play sound from trigger point
+                        }
+                    }
+                    break;
+                case 119507:
+                    {
+                        me->MonsterTextEmote("A pool of dark moonlight appears nearby!", 0, true);
+                        if (tyrande)
+                        {
+                            tyrande->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            tyrande->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            tyrande->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+                            tyrande->RemoveAura(IN_SHADOW);
+
+                            Creature * purple_aura_holder = me->FindNearestCreature(PURPLE_AURA_HOLDER, 150.0f, true);
+                            if (purple_aura_holder)
+                                purple_aura_holder->CastSpell(purple_aura_holder, DARK_MOONLIGHT, false);
+                        }
+                    }
+                    break;
+            }
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (Say == false)
+            {
+                if ((me->GetEntry() == POOL_OF_MOONLIGHT_1) && me->IsAlive())
+                {
+                    if (Check_Timer <= diff)
+                    {
+                        float distance;
+                        int count;
+                        count = 0;
+                        Map::PlayerList const &playerList = me->GetMap()->GetPlayers();
+                        if (!playerList.isEmpty())
+                            for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                                if (Player* pPlayer = i->getSource())
+                                {
+                                    distance = me->GetExactDist2d(pPlayer);
+                                    if (distance<30)
+                                        count = count+1;
+                                }
+
+                        if (count >= 1)
+                        {
+                            Unit * tyrande = me->FindNearestCreature(ECHO_OF_TYRANDE, 150.0f, true);
+                            if (tyrande)
+                            {
+                                me->AddAura(MOONLIGHT, me);
+                                me->MonsterTextEmote("A pool of moonlight appears!", 0, true);
+
+                                tyrande->MonsterSay("There is nothing left for you here, nothing but death and sorrow.", LANG_UNIVERSAL, tyrande->GetGUID(), 150.0f);
+                                tyrande->SendPlaySound(25977, true);
+                                Say = true;
+                            }
+                        }
+                        Check_Timer = 3000;
+                    }
+                    else Check_Timer -= diff;
+                }
+            }
+
+            if (Check_Size <= diff)
+            {
+                // Set Size
+                if (count <= 7)
+                {
+                    size = 2-(count*0.20);
+                    me->SetFloatValue(OBJECT_FIELD_SCALE_X, size);
+                    if (count >= 7)
+                    {
+                        me->DespawnOrUnsummon(0);
+                        me->AI()->JustDied(me);
+                    }
+                }
+
+                Check_Size = 2000;
+            }
+            else Check_Size -= diff;
+
+            if (Say_Next == true)
+            {
+                if (Say_Another_Pool <= diff)
+                {
+                    SayAndShine();
+                    Say_Next = false;
+                }
+                else Say_Another_Pool -= diff;
+            }
+        }
+
     };
 };
 
@@ -615,6 +917,7 @@ void AddSC_boss_echo_of_tyrande()
         new moonlance();
         new moonlance_add();
         new purple_aura_holder();
+        new npc_pool_of_moonlight();
     }
 
 //////////////////////////////////////////////////////////////////////////////////////
