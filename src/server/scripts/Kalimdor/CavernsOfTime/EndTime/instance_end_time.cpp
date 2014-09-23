@@ -981,6 +981,331 @@ public:
     };
 };
 
+//////////////////////////
+//  Azure Dragonshrine  //
+//////////////////////////
+enum CreaturesAzure
+{
+    TIME_TWISTED_PRIEST           = 54690,
+    TIME_TWISTED_RIFLEMAN         = 54693,
+    TIME_TWISTED_FOOTMAN          = 54687,
+    TIME_TWISTED_SORCERRER        = 54691,
+    FOUNTAIN_OF_LIGHT             = 54795,
+};
+
+enum AzureDragonshrineSpells
+{
+    POWER_WORD_SHEILD             = 102409,
+    FOINTAIN_OF_LIGHT             = 102405,
+
+    SHOOT                         = 102410,
+    MULTI_SHOT                    = 102411,
+
+    SHIELD_BASH                   = 101817,
+    SHIELD_WALL                   = 101811,
+    THUNDERCLAP                   = 101820,
+
+    ARCANE_BLAST                  = 101816,
+    BLINK                         = 87925,
+
+    LIGHT_RAIN                    = 102406,
+};
+
+// Time-Twisted Priest
+class npc_time_twisted_priest : public CreatureScript
+{
+public:
+    npc_time_twisted_priest() : CreatureScript("npc_time_twisted_priest") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_time_twisted_priestAI (pCreature);
+    }
+
+    struct npc_time_twisted_priestAI : public ScriptedAI
+    {
+        npc_time_twisted_priestAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Fountain_Of_Light;
+        uint32 Power_Word_Shield;
+        int Power_Word_Shield_Target;
+
+        void Reset() 
+        {
+            Fountain_Of_Light = 7000+urand(0,5000);
+            Power_Word_Shield = 5000+urand(0,7000);
+            Power_Word_Shield_Target = 0;
+        }
+
+        void JustDied(Unit * /*who*/) { }
+
+        void EnterCombat(Unit * /*who*/)
+        {
+            me->CastSpell(me, POWER_WORD_SHEILD, true);
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Fountain_Of_Light <= diff)
+            {
+                me->CastSpell(me, FOINTAIN_OF_LIGHT, true);
+                Fountain_Of_Light = 60000;
+            }
+            else Fountain_Of_Light -= diff;
+
+            // Cast Power World Shield on random target around Priest
+            if (Power_Word_Shield <= diff)
+            {
+                Unit * target1 = me->FindNearestCreature(TIME_TWISTED_FOOTMAN, 15.0f, true);
+                Unit * target2 = me->FindNearestCreature(TIME_TWISTED_RIFLEMAN, 15.0f, true);
+                Unit * target3 = me->FindNearestCreature(TIME_TWISTED_SORCERRER, 15.0f, true);
+                Unit * target4 = me->FindNearestCreature(FOUNTAIN_OF_LIGHT, 15.0f, true);
+
+                Power_Word_Shield_Target = urand(0,3);
+
+                switch(Power_Word_Shield_Target)
+                {
+                    case 0:
+                        if (target1)
+                            target1->CastSpell(target1, POWER_WORD_SHEILD, true);
+                        else 
+                            me->CastSpell(me, POWER_WORD_SHEILD, true);
+                        break;
+                    case 1:
+                        if (target2)
+                            target2->CastSpell(target2, POWER_WORD_SHEILD, true);
+                        else
+                            me->CastSpell(me, POWER_WORD_SHEILD, true);
+                        break;
+                    case 2:
+                        if (target3)
+                            target3->CastSpell(target3, POWER_WORD_SHEILD, true);
+                        else
+                            me->CastSpell(me, POWER_WORD_SHEILD, true);
+                        break;
+                    case 3:
+                        if (target4)
+                            target4->CastSpell(target4, POWER_WORD_SHEILD, true);
+                        else
+                            me->CastSpell(me, POWER_WORD_SHEILD, true);
+                        break;
+                    case 4:
+                        me->CastSpell(me, POWER_WORD_SHEILD, true);
+                        break;
+                }
+
+                Power_Word_Shield = 3000+urand(0,5000);
+            }
+            else Power_Word_Shield -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+// Time-Twisted Rifleman
+class npc_time_twisted_rifleman : public CreatureScript
+{
+public:
+    npc_time_twisted_rifleman() : CreatureScript("npc_time_twisted_rifleman") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_time_twisted_riflemanAI (pCreature);
+    }
+
+    struct npc_time_twisted_riflemanAI : public ScriptedAI
+    {
+        npc_time_twisted_riflemanAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Shoot;
+        uint32 Multi_Shot;
+
+        void Reset() 
+        {
+            Shoot = 5000;
+            Multi_Shot = 10000;
+        }
+
+        void JustDied(Unit * /*who*/) { }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Shoot <= diff)
+            {
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true);
+                if (target)
+                    me->CastSpell(target, SHOOT, true);
+                Shoot = 3000+urand(0, 5000);
+            }
+            else Shoot -= diff;
+
+            if (Multi_Shot <= diff)
+            {
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true);
+                if (target)
+                    me->CastSpell(me, MULTI_SHOT, true);
+                Multi_Shot = 10000+urand(0,5000);
+            }
+            else Multi_Shot -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+// Time-Twisted Footman
+class npc_time_twisted_footman : public CreatureScript
+{
+public:
+    npc_time_twisted_footman() : CreatureScript("npc_time_twisted_footman") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_time_twisted_footmanAI (pCreature);
+    }
+
+    struct npc_time_twisted_footmanAI : public ScriptedAI
+    {
+        npc_time_twisted_footmanAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Thunderclap;
+        uint32 Shield_Wall;
+        uint32 Shield_Bash;
+
+        void Reset() 
+        {
+            Thunderclap = 7000+urand(0, 5000);
+            Shield_Wall = 5000;
+            Shield_Bash = 10000;
+        }
+
+        void JustDied(Unit * /*who*/) { }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Thunderclap <= diff)
+            {
+                me->CastSpell(me, THUNDERCLAP, true);
+                Thunderclap = 15000+urand(0, 3000);
+            }
+            else Thunderclap -= diff;
+
+            if (Shield_Wall <= diff)
+            {
+                me->CastSpell(me, SHIELD_WALL, true);
+                Shield_Wall = 10000+urand(0, 2000);
+            }
+            else Shield_Wall -= diff;
+
+            if (Shield_Bash <= diff)
+            {
+                Unit * target = me->GetVictim();
+                if (target)
+                    me->CastSpell(target, SHIELD_BASH, true);
+                Shield_Bash = 10000;
+            }
+            else Shield_Bash -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+// Time-Twisted Sorceress
+class npc_time_twisted_sorceress : public CreatureScript
+{
+public:
+    npc_time_twisted_sorceress() : CreatureScript("npc_time_twisted_sorceress") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_time_twisted_sorceressAI (pCreature);
+    }
+
+    struct npc_time_twisted_sorceressAI : public ScriptedAI
+    {
+        npc_time_twisted_sorceressAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Arcane_Blast;
+        uint32 Blink;
+
+        void Reset() 
+        {
+            Arcane_Blast = 2500;
+            Blink = 7000+urand(0, 3000);
+        }
+
+        void JustDied(Unit * /*who*/) { }
+        void EnterCombat(Unit * /*who*/)
+        {
+            Unit * target = me->GetVictim();
+            me->CastSpell(target, ARCANE_BLAST, false);
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Arcane_Blast <= diff)
+            {
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true);
+                if (target)
+                    me->CastSpell(target, ARCANE_BLAST, false);
+                Arcane_Blast = 2500;
+            }
+            else Arcane_Blast -= diff;
+
+            if (Blink <= diff)
+            {
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+                me->CastSpell(me, BLINK, false);
+                Arcane_Blast = 1000;
+                Blink = 10000+urand(0, 5000);
+            }
+            else Blink -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+// Fountain of Light
+class npc_fountain_of_light : public CreatureScript
+{
+public:
+    npc_fountain_of_light() : CreatureScript("npc_fountain_of_light") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_fountain_of_lightAI (pCreature);
+    }
+
+    struct npc_fountain_of_lightAI : public ScriptedAI
+    {
+        npc_fountain_of_lightAI(Creature *c) : ScriptedAI(c) {}
+
+        void Reset() 
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->CastSpell(me, LIGHT_RAIN, true);
+        }
+
+    };
+};
+
 void AddSC_instance_end_time()
 {
     new go_time_transit_device();
@@ -997,4 +1322,9 @@ void AddSC_instance_end_time()
     new npc_time_twisted_scourge_beast();
     new npc_time_twisted_geist();
     new npc_time_twisted_emerald_trash();
+    new npc_time_twisted_priest();
+    new npc_time_twisted_rifleman();
+    new npc_time_twisted_footman();
+    new npc_time_twisted_sorceress();
+    new npc_fountain_of_light();
 }
