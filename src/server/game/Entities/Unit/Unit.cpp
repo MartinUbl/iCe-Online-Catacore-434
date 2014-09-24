@@ -1916,6 +1916,75 @@ uint32 Unit::CalcSpellResistance(Unit* victim, SpellSchoolMask schoolMask, Spell
     return resistance * 10;
 }
 
+uint32 Unit::GetAbsorbedDamageFromSpell(Unit* pVictim, SpellEntry const* spellInfo) const
+{
+    if (!pVictim || !pVictim->IsAlive() || !spellInfo)
+        return 0;
+
+    SpellSchoolMask schoolMask = GetSpellSchoolMask(spellInfo);
+
+    uint32 totalDamageAbsorbed = 0;
+
+    AuraEffectList const & AbsIgnoreAurasB = GetAuraEffectsByType(SPELL_AURA_MOD_TARGET_ABILITY_ABSORB_SCHOOL);
+    for (AuraEffectList::const_iterator itr = AbsIgnoreAurasB.begin(); itr != AbsIgnoreAurasB.end(); ++itr)
+    {
+        if (!((*itr)->GetMiscValue() & schoolMask))
+            continue;
+        // Quick check - > only one spell (58284 Chaos Bolt Passive)
+        if (((*itr)->GetAmount() > 0) && (*itr)->IsAffectedOnSpell(spellInfo))
+            return 0;
+    }
+
+    // We're going to call functions which can modify content of the list during iteration over it's elements
+    // Let's copy the list so we can prevent iterator invalidation
+    AuraEffectList vSchoolAbsorbCopy(pVictim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB));
+    vSchoolAbsorbCopy.sort(Trinity::AbsorbAuraOrderPred());
+
+    // absorb without mana cost
+    for (AuraEffectList::iterator itr = vSchoolAbsorbCopy.begin(); itr != vSchoolAbsorbCopy.end(); ++itr)
+    {
+        AuraEffect * absorbAurEff = (*itr);
+        // Check if aura was removed during iteration - we don't need to work on such auras
+        AuraApplication * aurApp = absorbAurEff->GetBase()->GetApplicationOfTarget(pVictim->GetGUID());
+        if (!aurApp)
+            continue;
+        if (!(absorbAurEff->GetMiscValue() & schoolMask))
+            continue;
+
+        // get amount which can be still absorbed by the aura
+        int32 currentAbsorb = absorbAurEff->GetAmount();
+        // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
+        if (currentAbsorb < 0)
+            currentAbsorb = 0;
+
+        totalDamageAbsorbed += currentAbsorb;
+    }
+
+    // absorb by mana cost
+    AuraEffectList vManaShieldCopy(pVictim->GetAuraEffectsByType(SPELL_AURA_MANA_SHIELD));
+    for (AuraEffectList::const_iterator itr = vManaShieldCopy.begin(); itr != vManaShieldCopy.end(); ++itr)
+    {
+        AuraEffect * absorbAurEff = (*itr);
+        // Check if aura was removed during iteration - we don't need to work on such auras
+        AuraApplication * aurApp = absorbAurEff->GetBase()->GetApplicationOfTarget(pVictim->GetGUID());
+        if (!aurApp)
+            continue;
+        // check damage school mask
+        if (!(absorbAurEff->GetMiscValue() & schoolMask))
+            continue;
+
+        // get amount which can be still absorbed by the aura
+        int32 currentAbsorb = absorbAurEff->GetAmount();
+        // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
+        if (currentAbsorb < 0)
+            currentAbsorb = 0;
+
+        totalDamageAbsorbed += currentAbsorb;
+    }
+
+    return totalDamageAbsorbed;
+}
+
 void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, SpellEntry const *spellInfo)
 {
     if (!pVictim || !pVictim->IsAlive() || !damage)
