@@ -378,9 +378,23 @@ class Map : public GridRefManager<NGridType>
 
         uint32 GetInstanceId() const { return i_InstanceId; }
         uint8 GetSpawnMode() const { return (i_spawnMode); }
-        void setSpawnMode(uint8 spawnM){i_spawnMode=spawnM;}
+        void setSpawnMode(uint8 spawnM){ i_spawnMode = spawnM;}
         virtual bool CanEnter(Player* /*player*/) { return true; }
         const char* GetMapName() const;
+        bool isHeroicRaid()
+        {
+            if(i_spawnMode == RAID_DIFFICULTY_10MAN_HEROIC || i_spawnMode == RAID_DIFFICULTY_25MAN_HEROIC) 
+                return true;
+            else
+                return false;
+        }
+        bool is10Man()
+        {
+            if(i_spawnMode == RAID_DIFFICULTY_10MAN_HEROIC || i_spawnMode == RAID_DIFFICULTY_10MAN_NORMAL) 
+                return true;
+            else
+                return false;
+        }
 
         // have meaning only for instanced map (that have set real difficulty)
         Difficulty GetDifficulty() const { return Difficulty(GetSpawnMode()); }

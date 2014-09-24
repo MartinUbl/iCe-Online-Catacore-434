@@ -2310,45 +2310,45 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, boo
 {
     if (!save || isBGGroup() || isBFGroup())
         return NULL;
-    Difficulty diff=RAID_DIFFICULTY_10MAN_NORMAL;
+    Difficulty diff = RAID_DIFFICULTY_10MAN_NORMAL;
     const MapEntry* map = sMapStore.LookupEntry(save->GetMapId());
     if(map && map->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(save->GetMapId()))
-        diff= FLEXIBLE_RAID_DIFFICULTY;
+        diff = FLEXIBLE_RAID_DIFFICULTY;
     else
-        diff=save->GetDifficulty();
+        diff = save->GetDifficulty();
     InstanceGroupBind& bind = m_boundInstances[diff][save->GetMapId()];
     if (!load && (!bind.save || permanent != bind.perm || save != bind.save))
         CharacterDatabase.PExecute("REPLACE INTO group_instance (guid, instance, permanent) VALUES (%u, %u, %u)", GUID_LOPART(GetGUID()), save->GetInstanceId(), permanent);
 
-    if (bind.save != save)
+    if(bind.save != save)
     {
-        if (bind.save)
+        if(bind.save)
             bind.save->RemoveGroup(this);
         save->AddGroup(this);
     }
 
     bind.save = save;
     bind.perm = permanent;
-    if (!load)
+    if(!load)
         sLog->outDebug("Group::BindToInstance: %d is now bound to map %d, instance %d, difficulty %d", GUID_LOPART(GetGUID()), save->GetMapId(), save->GetInstanceId(), save->GetDifficulty());
     return &bind;
 }
 
 InstanceGroupBind* Group::BindToInstanceRaid(uint32 instanceId, uint32 mapId)
 {
-    InstanceGroupBind* newBind=NULL;
+    InstanceGroupBind* newBind = NULL;
     uint32 leadGuid;
-    uint32 leadId=0;
+    uint32 leadId = 0;
     std::string data;
     
     if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, RAID_DIFFICULTY_10MAN_NORMAL, 0, true, false))
     {
-        newBind=BindToInstance(save, true, false);
-        leadGuid=GetLeaderGUID();
+        newBind = BindToInstance(save, true, false);
+        leadGuid = GetLeaderGUID();
         if(leadGuid)
         {
             if(GetLeader() && GetLeader()->GetBoundInstance(mapId, FLEXIBLE_RAID_DIFFICULTY))
-                leadId=GetLeader()->GetBoundInstance(mapId, FLEXIBLE_RAID_DIFFICULTY)->save->GetInstanceId();
+                leadId = GetLeader()->GetBoundInstance(mapId, FLEXIBLE_RAID_DIFFICULTY)->save->GetInstanceId();
             else
             {
                  QueryResult result = CharacterDatabase.PQuery("SELECT instance,data FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%d' AND map='%d'", leadGuid,mapId);
@@ -2377,7 +2377,7 @@ InstanceGroupBind* Group::BindToInstanceRaid(uint32 instanceId, uint32 mapId)
                     }
                     while (result->NextRow());
                 }
-                Map* map=sMapMgr->FindMap(mapId,instanceId);
+                Map* map = sMapMgr->FindMap(mapId,instanceId);
                 if(!data.empty() && map && map->ToInstanceMap() && map->ToInstanceMap()->GetInstanceScript())//set data to new group map
                 {
                     map->ToInstanceMap()->GetInstanceScript()->Load(data.c_str());
@@ -2393,12 +2393,12 @@ void Group::UnbindInstance(uint32 mapid, uint8 difficulty, bool unload)
     const MapEntry* map = sMapStore.LookupEntry(mapid);
     if(map && map->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(mapid))
     {
-        difficulty=FLEXIBLE_RAID_DIFFICULTY;
+        difficulty = FLEXIBLE_RAID_DIFFICULTY;
     }
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
     if (itr != m_boundInstances[difficulty].end())
     {
-        if (!unload)
+        if(!unload)
             CharacterDatabase.PExecute("DELETE FROM group_instance WHERE guid=%u AND instance=%u", GUID_LOPART(GetGUID()), itr->second.save->GetInstanceId());
         itr->second.save->RemoveGroup(this);                // save can become invalid
         m_boundInstances[difficulty].erase(itr);

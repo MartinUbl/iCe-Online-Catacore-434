@@ -139,9 +139,9 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
         Group *group = player->GetGroup();
         InstanceGroupBind *groupBind = NULL;
         InstancePlayerBind *pBind;
-        bool raid=false;
+        bool raid = false;
         if(sInstanceSaveMgr->isFlexibleEnabled(mapId) && IsRaid()) //merge only if killed bosses are set
-            raid=true;
+            raid = true;
         if(group)
             groupBind = group->GetBoundInstance(this);
         if(raid)
@@ -153,27 +153,27 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                     NewInstanceId = sMapMgr->GenerateInstanceId();
                     map = CreateInstance(NewInstanceId, NULL, FLEXIBLE_RAID_DIFFICULTY);
                     if(map)//save created succesfully
-                        groupBind=group->BindToInstanceRaid(NewInstanceId, mapId);
+                        groupBind = group->BindToInstanceRaid(NewInstanceId, mapId);
                 }
 
             }
-            pBind= player->GetBoundInstance(GetId(), FLEXIBLE_RAID_DIFFICULTY);
+            pBind = player->GetBoundInstance(GetId(), FLEXIBLE_RAID_DIFFICULTY);
             if(pBind)
             {
                 if(groupBind && (pBind->save->GetInstanceId() != groupBind->save->GetInstanceId() || pBind->save->GetDifficulty() != groupBind->save->GetDifficulty()))//Player enters another instance ID then before or another raid difficulty => need to show binding query, when teleported
-                    player->showInstanceBindQuery=true;
+                    player->showInstanceBindQuery = true;
             }
 
             player->_LoadBoundInstance(mapId);//load player alone bound, not bound of the last leader(its not up because of prevent disappearing ID from server somehow)
-            pBind= player->GetBoundInstance(GetId(), FLEXIBLE_RAID_DIFFICULTY);
+            pBind = player->GetBoundInstance(GetId(), FLEXIBLE_RAID_DIFFICULTY);
 
             if(!pBind)
             {
                 NewInstanceId = sMapMgr->GenerateInstanceId();
                 /*Player enters raid for the first time, so we need create his unique ID, which will be updated with leaders*/
                 map = CreateInstance(NewInstanceId, NULL, FLEXIBLE_RAID_DIFFICULTY);
-                pBind= player->BindToInstanceRaid(NewInstanceId, mapId);
-                player->showInstanceBindQuery=true;
+                pBind = player->BindToInstanceRaid(NewInstanceId, mapId);
+                player->showInstanceBindQuery = true;
                 std::ostringstream ssPrint;
                 ssPrint << "Creating save for player: "<< player->GetGUIDLow() << " map id: " << mapId  << " instance id: " << NewInstanceId << " difficulty: " ;//log
                 if(groupBind)
@@ -184,7 +184,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
             }
         }
         else
-            pBind= player->GetBoundInstance(GetId(), player->GetDifficulty(IsRaid()));
+            pBind = player->GetBoundInstance(GetId(), player->GetDifficulty(IsRaid()));
 
         InstanceSave *pSave = pBind ? pBind->save : NULL;
 
@@ -244,13 +244,22 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                 else
                     map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
             }
-            if (raid && map->ToInstanceMap()->GetInstanceScript() && !map->ToInstanceMap()->GetInstanceScript()->CorrectDiff(player))
+            if(map && raid)
             {
-                if(GetMapDifficultyData(map->GetId(),Difficulty(map->ToInstanceMap()->GetInstanceScript()->getPlayerDifficulty(player))))
-                    map->ToInstanceMap()->GetInstanceScript()->repairDifficulty(player);
+                InstanceMap* inst = map->ToInstanceMap();
+                if(inst)
+                {
+                    InstanceScript* scr = inst->GetInstanceScript();
+                    if(scr)
+                    {
+                        if(!scr->CorrectDiff(player))
+                            if(GetMapDifficultyData(map->GetId(), Difficulty(scr->getPlayerDifficulty(player))))
+                                scr->repairDifficulty(player);
+                        if((player->getRaidDiffProgr(mapId) == KILLED_HC_N_MERGED) && (inst->isHeroicRaid())) //player somehow got into HC even if he couldnt
+                            inst->setSpawnMode(RAID_DIFFICULTY_10MAN_NORMAL); //swap to normal
+                    }
+                }
             }
-            if (raid && map->ToInstanceMap()->GetInstanceScript() && (player->getRaidDiffProgr(mapId) == KILLED_HC_N_MERGED) && (map->ToInstanceMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || map->ToInstanceMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC))//player somehow got into HC even if he couldnt
-                 map->ToInstanceMap()->setSpawnMode(RAID_DIFFICULTY_10MAN_NORMAL);//swap to normal
         }
         else
         {
@@ -262,10 +271,21 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
             if(raid)
             {
                 map = CreateInstance(NewInstanceId, NULL, FLEXIBLE_RAID_DIFFICULTY);
-                if(map->ToInstanceMap()->GetInstanceScript() && GetMapDifficultyData(map->GetId(),Difficulty(map->ToInstanceMap()->GetInstanceScript()->getPlayerDifficulty(player))))
-                     map->ToInstanceMap()->GetInstanceScript()->repairDifficulty(player);
-                if (map->ToInstanceMap()->GetInstanceScript() && (player->getRaidDiffProgr(mapId) == KILLED_HC_N_MERGED) && (map->ToInstanceMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || map->ToInstanceMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC))//player somehow got into HC even if he couldnt
-                    map->ToInstanceMap()->setSpawnMode(RAID_DIFFICULTY_10MAN_NORMAL);//swap to normal
+                if(map)
+                {
+                    InstanceMap* inst = map->ToInstanceMap();
+                    if(inst)
+                    {
+                        InstanceScript* scr = inst->GetInstanceScript();
+                        if(scr)
+                        {
+                            if(GetMapDifficultyData(map->GetId(), Difficulty(scr->getPlayerDifficulty(player))))
+                                scr->repairDifficulty(player);
+                            if((player->getRaidDiffProgr(mapId) == KILLED_HC_N_MERGED) && (inst->isHeroicRaid())) //player somehow got into HC even if he couldnt
+                                inst->setSpawnMode(RAID_DIFFICULTY_10MAN_NORMAL); //swap to normal
+                        }
+                    }
+                }
             }
             else
                 map = CreateInstance(NewInstanceId, NULL, diff);

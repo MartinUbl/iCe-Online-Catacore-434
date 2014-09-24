@@ -2253,23 +2253,25 @@ void WorldSession::HandleOpeningCinematic(WorldPacket& /*recvData*/)
 void WorldSession::HandleInstanceLockResponse(WorldPacket &recv_data)
 {
     sLog->outDebug("CMSG_INSTANCE_LOCK_WARNING_RESPONSE");
-    Player* player=GetPlayer();
-    Map* map=player->GetMap();
+    Player* player = GetPlayer();
+    Map* map = player->GetMap();
+    if(!map || !player)
+        return;
     uint8 respond;
-    recv_data>>respond;
-    if(respond == 0)//Leave instance button
+    recv_data >> respond;
+    if(respond == 0) //Leave instance button
     {
         player->RepopAtGraveyard();
     }
-    else//Accept
+    else //Accept
     {
         //if heroic, bind immediatelly
-        if(player && map && (map->GetSpawnMode() == RAID_DIFFICULTY_10MAN_HEROIC || map->GetSpawnMode() == RAID_DIFFICULTY_25MAN_HEROIC) && map->ToInstanceMap())
+        if(player && map && (map->isHeroicRaid()) && map->ToInstanceMap())
         {
             map->ToInstanceMap()->copyDeadUnitsFromLeader(player, player->GetMapId(), map->GetInstanceId(),0);
-            map->ToInstanceMap()->removePlayerSaveTimer(player->GetGUIDLow());//remove automatic save timer (because just saved)
-            uint32 mapId=map->GetId();
-            uint32 instanceId=player->getRaidId(mapId);
+            map->ToInstanceMap()->removePlayerSaveTimer(player->GetGUIDLow()); //remove automatic save timer (because just saved)
+            uint32 mapId = map->GetId();
+            uint32 instanceId = player->getRaidId(mapId);
             if(player->getRaidDiffProgr(mapId) < KILLED_HC && instanceId)
                 CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", KILLED_HC, player->GetGUIDLow(), instanceId);
         }

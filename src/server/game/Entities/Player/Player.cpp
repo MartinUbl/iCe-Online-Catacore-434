@@ -19694,7 +19694,7 @@ void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
     const MapEntry* map = sMapStore.LookupEntry(mapid);
     if(map && map->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(mapid))
     {
-        difficulty=FLEXIBLE_RAID_DIFFICULTY;
+        difficulty = FLEXIBLE_RAID_DIFFICULTY;
     }
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
     if(itr != m_boundInstances[difficulty].end())
@@ -19708,7 +19708,7 @@ void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficu
         const MapEntry* map = sMapStore.LookupEntry(itr->second.save->GetMapId());
         if(map && map->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(itr->second.save->GetMapId()))
         {
-            difficulty=FLEXIBLE_RAID_DIFFICULTY;
+            difficulty = FLEXIBLE_RAID_DIFFICULTY;
         }
         if (itr != m_boundInstances[difficulty].end())
         {
@@ -19726,39 +19726,39 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
         Difficulty diff ;
         const MapEntry* mapP = sMapStore.LookupEntry(save->GetMapId());
         if(mapP && mapP->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(save->GetMapId()))
-            diff=FLEXIBLE_RAID_DIFFICULTY;
+            diff = FLEXIBLE_RAID_DIFFICULTY;
         else
-            diff=save->GetDifficulty();
+            diff = save->GetDifficulty();
 
         InstancePlayerBind& bind = m_boundInstances[diff][save->GetMapId()];
-        if (bind.save)
+        if(bind.save)
         {
             // update the save when the group kills a boss
-            if (permanent != bind.perm || save != bind.save)
+            if(permanent != bind.perm || save != bind.save)
                 if (!load)
                     CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u', permanent = '%u' WHERE guid = '%u' AND instance = '%u'", save->GetInstanceId(), permanent, GetGUIDLow(), bind.save->GetInstanceId());
         }
         else
-            if (!load)
+            if(!load)
                 CharacterDatabase.PExecute("INSERT INTO character_instance (guid, instance, permanent) VALUES ('%u', '%u', '%u')", GetGUIDLow(), save->GetInstanceId(), permanent);
 
-        if (bind.save != save)
+        if(bind.save != save)
         {
-            if (bind.save)
+            if(bind.save)
                 bind.save->RemovePlayer(this);
             save->AddPlayer(this);
         }
 
-        if (permanent)
+        if(permanent)
             save->SetCanReset(false);
 
         bind.save = save;
         bind.perm = permanent;
-        if (!load)
+        if(!load)
             sLog->outDebug("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d", GetName(), GetGUIDLow(), save->GetMapId(), save->GetInstanceId(), save->GetDifficulty());
         sScriptMgr->OnPlayerBindToInstance(this, save->GetDifficulty(), save->GetMapId(), permanent);
 
-        uint32 instanceId=getRaidId(save->GetMapId());
+        uint32 instanceId = getRaidId(save->GetMapId());
         if(mapP->IsRaid() && instanceId)
              CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", getRaidDiffProgr(save->GetMapId()), GetGUIDLow(), instanceId);
         return &bind;
@@ -19769,7 +19769,7 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
 
 InstancePlayerBind* Player::BindToInstanceRaid(uint32 instanceId, uint32 mapId)
 {
-    if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, RAID_DIFFICULTY_10MAN_NORMAL, 0, true, false))
+    if(InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, RAID_DIFFICULTY_10MAN_NORMAL, 0, true, false))
     {
         setRaidId(mapId,instanceId);
         return BindToInstance(save, true, false);

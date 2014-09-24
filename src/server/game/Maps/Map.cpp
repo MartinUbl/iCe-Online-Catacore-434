@@ -2538,10 +2538,10 @@ bool InstanceMap::Add(Player *player)
                             bossescompleted |= 1 << (count-1-i);
                 }
                 WorldPacket data(SMSG_INSTANCE_LOCK_WARNING_QUERY, 4+4+1+1, true);
-                uint8 diff=1;
-                if(GetSpawnMode()== RAID_DIFFICULTY_10MAN_HEROIC || GetSpawnMode()== RAID_DIFFICULTY_25MAN_HEROIC) 
+                uint8 diff = 1;
+                if(isHeroicRaid()) 
                 {
-                    diff=0;
+                    diff = 0;
                     setPlayerSaveTimer(player->GetGUIDLow(), 60000);//set timer for autobind
                 }
                 data << uint32(60000);               // time
