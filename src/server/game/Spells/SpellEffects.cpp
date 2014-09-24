@@ -7138,6 +7138,17 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             m_damage += (m_damage * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 25) / 100;
             break;
     }
+
+    // Mostly meteor like spells (divided damage to targets)
+    if (m_customAttr & SPELL_ATTR0_CU_SHARE_DAMAGE)
+    {
+        uint32 count = 0;
+        for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+            if (ihit->effectMask & (1<<effIndex))
+                ++count;
+
+        m_damage /= count;                    // divide to all targets
+    }
 }
 
 void Spell::EffectThreat(SpellEffIndex /*effIndex*/)
