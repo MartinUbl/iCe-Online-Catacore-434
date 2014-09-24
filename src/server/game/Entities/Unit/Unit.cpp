@@ -9554,6 +9554,23 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 ToPlayer()->SetCombatReadinessTimer(10 * IN_MILLISECONDS);
             break;
         }
+        case 12298: // Shield Specialization 
+        case 12724:
+        case 12725:
+        {
+            if (procEx & PROC_EX_REFLECT)
+            {
+                uint32 auraId = auraSpellInfo->Id;
+
+                if (auraId == 12298)
+                    ModifyPower(POWER_RAGE,20);
+                else
+                    ModifyPower(POWER_RAGE,(auraId == 12724) ? 40 : 60);
+
+                return false;
+            }
+        }
+        break;
         // Lock and Load
         case 56342:
         case 56343:
