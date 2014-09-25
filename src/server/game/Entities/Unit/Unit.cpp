@@ -12486,6 +12486,9 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
         case 12654: // Ignite
         case 83077: // Improved Serpent Sting
             return pdamage;
+        case 44614: // Frostfire Bolt
+            if (damagetype == DOT)
+                return pdamage;
     }
 
     // For totems get damage bonus from owner
@@ -12629,6 +12632,9 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
         case 12654: // Ignite
         case 83077: // Improved Serpent Sting
             return 1.0f;
+        case 44614: // Frostfire Bolt
+            if (damagetype == DOT)
+                return 1.0f;
     }
 
     // For totems pct done mods are calculated when its calculation is run on the player in SpellDamageBonusDone.
