@@ -18,10 +18,280 @@
 #include "ScriptPCH.h"
 #include "endtime.h"
 
+enum EndTimeWorldStates
+{
+    WORLD_STATE_FRAGMENTS                  = 6046,
+    WORLD_STATE_FRAGMENTS_COUNT            = 6025,
+};
+
+
+class instance_end_time: public InstanceMapScript
+{
+public:
+    instance_end_time() : InstanceMapScript("instance_end_time", 938) { }
+
+    struct instance_end_time_InstanceMapScript : public InstanceScript
+    {
+        instance_end_time_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();}
+
+        //InstanceScript* instance;
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 currEnc[MAX_ENCOUNTER];
+
+        uint32 crystals_clicked;
+        uint32 trash_murozond;
+        uint32 trash_baine;
+
+        uint64 echo_of_sylvanasGuid;
+        uint64 echo_of_jainaGuid;
+        uint64 echo_of_baineGuid;
+        uint64 echo_of_tyrandeGuid;
+        uint64 murozondGuid;
+        uint32 Check_Timer;
+        bool Jaina_Welcome_Say;
+
+        std::string saveData;
+
+        void Initialize()
+        {
+            echo_of_sylvanasGuid = 0;
+            echo_of_jainaGuid = 0;
+            echo_of_baineGuid = 0;
+            echo_of_tyrandeGuid = 0;
+            murozondGuid = 0;
+
+            Check_Timer = 15000;
+
+            crystals_clicked = 0;
+            trash_murozond = 0;
+            trash_baine = 0;
+            Jaina_Welcome_Say = false;
+
+            memset(m_auiEncounter, 0, sizeof(uint32) * MAX_ENCOUNTER);
+            GetCorrUiEncounter();
+        }
+
+        std::string GetSaveData()
+        {
+            OUT_SAVE_INST_DATA;
+
+            std::ostringstream saveStream;
+            saveStream << m_auiEncounter[0];
+            for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                saveStream << " " << m_auiEncounter[i];
+
+            saveStream << " " << crystals_clicked;
+            saveStream << " " << trash_murozond;
+            saveStream << " " << trash_baine;
+
+            OUT_SAVE_INST_DATA_COMPLETE;
+            return saveStream.str();
+        }
+
+        void Load(const char* chrIn)
+        {
+            if (!chrIn)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(chrIn);
+
+            std::istringstream loadStream(chrIn);
+            for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+                loadStream >> m_auiEncounter[i];
+
+            loadStream >> crystals_clicked;
+            loadStream >> trash_murozond;
+            loadStream >> trash_baine;
+
+            for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            {
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                    m_auiEncounter[i] = NOT_STARTED;
+            }
+
+            GetCorrUiEncounter();
+            OUT_LOAD_INST_DATA_COMPLETE;
+        }
+
+        void OnCreatureCreate(Creature* pCreature, bool add)
+        {
+            if (!add)
+                return;
+
+            switch (pCreature->GetEntry())
+            {
+                case 54123:
+                    echo_of_sylvanasGuid = pCreature->GetGUID();
+                    break;
+                case 54445:
+                    echo_of_jainaGuid = pCreature->GetGUID();
+                    break;
+                case 54431:
+                    echo_of_baineGuid = pCreature->GetGUID();
+                    break;
+                case 54544:
+                    echo_of_tyrandeGuid = pCreature->GetGUID();
+                    break;
+                case 54432:
+                    murozondGuid = pCreature->GetGUID();
+                    break;
+            }
+        }
+
+        void OnGameObjectCreate(GameObject* go, bool add) { }
+
+        uint64 GetData64(uint32 type)
+        {
+            switch (type)
+            {
+                case TYPE_ECHO_OF_SYLVANAS:
+                    return echo_of_sylvanasGuid;
+                case TYPE_ECHO_OF_JAINA:
+                    return echo_of_jainaGuid;
+                case TYPE_ECHO_OF_BAINE:
+                    return echo_of_baineGuid;
+                case TYPE_ECHO_OF_TYRANDE:
+                    return echo_of_tyrandeGuid;
+                case TYPE_MUROZOND:
+                    return murozondGuid;
+            }
+                return 0;
+        }
+
+        void SetData64(uint32 identifier, uint64 data) { }
+
+        void Update(uint32 diff) 
+        {
+            if (!instance->HavePlayers())
+                return;
+
+            if (Check_Timer <= diff)
+            {
+                if (Jaina_Welcome_Say == false)
+                {
+                    if (crystals_clicked >= 16)
+                    {
+                        DoUpdateWorldState(WORLD_STATE_FRAGMENTS, 0);
+
+                        Creature * echo_of_jaina = this->instance->GetCreature(this->GetData64(TYPE_ECHO_OF_JAINA));
+                        if (echo_of_jaina)
+                        {
+                            echo_of_jaina->SetVisible(true);
+                            echo_of_jaina->setFaction(16);
+                            echo_of_jaina->MonsterSay("I don't know who you are, but I'll defend this shrine with my life. Leave, now, before we come to blows.", LANG_UNIVERSAL, echo_of_jaina->GetGUID(), 150.0f);
+                            echo_of_jaina->SendPlaySound(25920, true);
+                            Jaina_Welcome_Say = true;
+                        }
+                    }
+                }
+
+                if (trash_murozond == 1)
+                {
+                    Creature * boss_murozond = this->instance->GetCreature(this->GetData64(TYPE_MUROZOND));
+                    if (boss_murozond && boss_murozond->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                    {
+                        boss_murozond->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
+                        boss_murozond->SetReactState(REACT_AGGRESSIVE);
+                    }
+                }
+
+                if (trash_baine == 1)
+                {
+                    Creature * echo_of_baine = this->instance->GetCreature(this->GetData64(TYPE_ECHO_OF_BAINE));
+                    if (echo_of_baine && echo_of_baine->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                    {
+                        echo_of_baine->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
+                        echo_of_baine->SetReactState(REACT_AGGRESSIVE);
+                    }
+                }
+
+                Check_Timer = 15000;
+            }
+            else Check_Timer -= diff;
+        }
+
+        uint32 GetData(uint32 DataId) 
+        {
+            if (DataId < MAX_ENCOUNTER)
+                return m_auiEncounter[DataId];
+
+            if (DataId == DATA_CRYSTALS)
+                return crystals_clicked;
+
+            if (DataId == DATA_TRASH_MUROZOND)
+                return trash_murozond;
+
+            if (DataId == DATA_TRASH_BAINE)
+                return trash_baine;
+
+            return 0;
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            if (type < MAX_ENCOUNTER)
+                m_auiEncounter[type] = data;
+
+            if (type == DATA_CRYSTALS)
+            {
+                crystals_clicked += data;
+                DoUpdateWorldState(WORLD_STATE_FRAGMENTS_COUNT, crystals_clicked);
+                SaveToDB();
+            }
+
+            if (type == DATA_TRASH_MUROZOND)
+            {
+                trash_murozond = data;
+                SaveToDB();
+            }
+
+            if (type == DATA_TRASH_BAINE)
+            {
+                trash_baine = data;
+                SaveToDB();
+            }
+
+            if (data == DONE)
+            {
+                std::ostringstream saveStream;
+                saveStream << m_auiEncounter[0];
+                for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                    saveStream << " " << m_auiEncounter[i];
+
+                GetCorrUiEncounter();
+                SaveToDB();
+                OUT_SAVE_INST_DATA_COMPLETE;
+            }
+        }
+
+        virtual uint32* GetCorrUiEncounter()
+        {
+            currEnc[0]=m_auiEncounter[TYPE_FIRST_ECHO]; // First Echo
+            currEnc[1]=m_auiEncounter[TYPE_SECOND_ECHO]; // Second Echo
+            currEnc[2]=m_auiEncounter[TYPE_MUROZOND]; // Murozond
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
+
+            return NULL;
+        }
+    };
+
+    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
+    {
+        return new instance_end_time_InstanceMapScript(pMap);
+    }
+};
+
+////////////////////////////////
+///// Other Instance Stuff /////
+////////////////////////////////
+
 // Time Transit Device
 #define ENTRANCE           "Teleport to Entrance"                // Entrance
 #define SYLVANAS           "Teleport to Ruby Dragonshrine"       // Sylvanas
-#define TYRANDE            "Teleport to Emerald Dragonsshrine"   // Tyrande
+#define TYRANDE            "Teleport to Emerald Dragonshrine"    // Tyrande
 #define JAINA              "Teleport to Azure Dragonshrine"      // Jaina
 #define BAINE              "Teleport to Obsidian Dragonshrine"   // Baine
 #define MUROZOND           "Teleport to Bronze Dragonshrine"     // Murozond
@@ -185,8 +455,12 @@ public:
 
     struct npc_image_of_nozdormuAI : public ScriptedAI
     {
-        npc_image_of_nozdormuAI(Creature *c) : ScriptedAI(c) {}
+        npc_image_of_nozdormuAI(Creature *creature) : ScriptedAI(creature) 
+        {
+            instance = creature->GetInstanceScript();
+        }
 
+        InstanceScript* instance;
         uint32 Check_Timer;
         uint32 Say_Neutral_Check;
         uint32 Say_Next;
@@ -450,7 +724,7 @@ public:
             GetCreatureListWithEntryInGrid(Infinite_Wardens, me, INFINITE_WARDEN, 250.0f);
             for (std::list<Creature*>::const_iterator itr = Infinite_Wardens.begin(); itr != Infinite_Wardens.end(); ++itr)
                 if ((*itr) && (*itr)->IsAlive())
-                    count = count + 1;
+                    count += 1;
 
             if (count == 2)
             {
@@ -469,6 +743,9 @@ public:
                 {
                     murozond_boss->MonsterYell("You crawl unwitting, like a blind, writhing worm, towards endless madness and despair. I have witnessed the true End Time. This? This is a blessing you simply cannot comprehend.", LANG_UNIVERSAL, 0);
                     murozond_boss->SendPlaySound(25935, false);
+
+                    if (InstanceScript *pInstance = me->GetInstanceScript())
+                        pInstance->SetData(DATA_TRASH_MUROZOND, 1);
                 }
             }
         }
@@ -657,6 +934,23 @@ public:
         {
             Flame_Breath = 10000;
             Enrage = 15000;
+        }
+
+        void JustDied(Unit * /*who*/)
+        {
+            int count;
+            count = 0;
+            std::list<Creature*> Time_twisted_drakes;
+            GetCreatureListWithEntryInGrid(Time_twisted_drakes, me, TIME_TWISTED_DRAKE, 150.0f);
+            for (std::list<Creature*>::const_iterator itr = Time_twisted_drakes.begin(); itr != Time_twisted_drakes.end(); ++itr)
+                if ((*itr) && (*itr)->IsAlive())
+                    count += 1;
+
+            if (count == 0)
+            {
+                if (InstanceScript *pInstance = me->GetInstanceScript())
+                    pInstance->SetData(DATA_TRASH_BAINE, 1);
+            }
         }
 
         void UpdateAI(const uint32 diff) 
@@ -1306,9 +1600,30 @@ public:
     };
 };
 
+// Fragments of Jaina`s staff
+class go_fragments_of_jainas_staff : public GameObjectScript
+{
+public:
+    go_fragments_of_jainas_staff() : GameObjectScript("go_fragments_of_jainas_staff") { }
+
+    bool OnGossipHello(Player* pPlayer, GameObject* pGo)
+    {
+        if (InstanceScript *pInstance = pGo->GetInstanceScript())
+        {
+            pInstance->SetData(DATA_CRYSTALS, 1);
+            pInstance->DoUpdateWorldState(WORLD_STATE_FRAGMENTS, 1);
+        }
+        pGo->Delete();
+        return true;
+    }
+};
+
 void AddSC_instance_end_time()
 {
+    new instance_end_time();
+
     new go_time_transit_device();
+    new go_fragments_of_jainas_staff();
 
     new npc_image_of_nozdormu();
 

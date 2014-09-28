@@ -27,6 +27,7 @@ Autor: Lazik
 #include "Spell.h"
 #include "UnitAI.h"
 #include "MapManager.h"
+#include "endtime.h"
 
 enum NPC
 {
@@ -90,8 +91,12 @@ public:
 
     struct boss_echo_of_baineAI : public ScriptedAI
     {
-        boss_echo_of_baineAI(Creature *c) : ScriptedAI(c) {}
+        boss_echo_of_baineAI(Creature *creature) : ScriptedAI(creature) 
+        {
+            instance = creature->GetInstanceScript();
+        }
 
+        InstanceScript* instance;
         uint32 Totem_Timer;
         uint32 Pulverize_Timer;
         uint32 Pulverize_Destroy_Timer;
@@ -100,6 +105,15 @@ public:
 
         void Reset() 
         {
+            if (instance)
+            {
+                if(instance->GetData(TYPE_ECHO_OF_BAINE)!=DONE)
+                    instance->SetData(TYPE_ECHO_OF_BAINE, NOT_STARTED);
+            }
+
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_PASSIVE);
+
             Totem_Timer             = 15000;
             Pulverize_Timer         = 30000;
             Pulverize_Destroy_Timer = 32000;
@@ -131,6 +145,11 @@ public:
 
         void EnterCombat(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_ECHO_OF_BAINE, IN_PROGRESS);
+            }
+
             me->MonsterYell("What dark horrors have you wrought in this place? By my ancestors' honor, I shall take you to task!", LANG_UNIVERSAL, 0);
             me->SendPlaySound(25909, true);
 
@@ -160,6 +179,11 @@ public:
 
         void JustDied(Unit* /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_ECHO_OF_BAINE, DONE);
+            }
+
             me->MonsterYell("Where... is this place? What... have I done? Forgive me, my father...", LANG_UNIVERSAL, 0);
             me->SendPlaySound(25910, true);
 

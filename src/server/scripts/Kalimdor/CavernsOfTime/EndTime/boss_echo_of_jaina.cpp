@@ -27,6 +27,7 @@ Autor: Lazik
 #include "Spell.h"
 #include "UnitAI.h"
 #include "MapManager.h" 
+#include "endtime.h"
 
 enum NPC
 {
@@ -80,8 +81,15 @@ public:
 
     struct boss_echo_of_jainaAI : public ScriptedAI
     {
-        boss_echo_of_jainaAI(Creature *c) : ScriptedAI(c) {}
+        boss_echo_of_jainaAI(Creature *creature) : ScriptedAI(creature) 
+        {
+            instance = creature->GetInstanceScript();
 
+            me->SetVisible(false);
+            me->setFaction(34);
+        }
+
+        InstanceScript* instance;
         int Phase;
         int Pyroblast_Counter;
         int Flarecore_Counter;
@@ -97,6 +105,12 @@ public:
 
         void Reset() 
         {
+            if (instance)
+            {
+                if(instance->GetData(TYPE_ECHO_OF_JAINA)!=DONE)
+                    instance->SetData(TYPE_ECHO_OF_JAINA, NOT_STARTED);
+            }
+
             Unit * blue_aura_holder = me->FindNearestCreature(BLUE_AURA_HOLDER, 500.0f, true);
             if (blue_aura_holder)
                 blue_aura_holder->CastSpell(blue_aura_holder, VISUAL_BLUE_AURA, false);
@@ -114,6 +128,11 @@ public:
 
         void EnterCombat(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_ECHO_OF_JAINA, IN_PROGRESS);
+            }
+
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
 
             Unit * blue_aura_holder = me->FindNearestCreature(BLUE_AURA_HOLDER, 100.0f, true);
@@ -158,6 +177,11 @@ public:
 
         void JustDied(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_ECHO_OF_JAINA, DONE);
+            }
+
             me->MonsterYell("I understand, now. Farewell, and good luck.", LANG_UNIVERSAL, 0);
             me->SendPlaySound(25919, true);
         }

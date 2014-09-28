@@ -86,8 +86,12 @@ public:
 
     struct boss_echo_of_tyrandeAI : public ScriptedAI
     {
-        boss_echo_of_tyrandeAI(Creature *c) : ScriptedAI(c) {}
+        boss_echo_of_tyrandeAI(Creature *creature) : ScriptedAI(creature) 
+        {
+            instance = creature->GetInstanceScript();
+        }
 
+        InstanceScript* instance;
         uint32 Check_Timer;
         uint32 Eyes_Of_The_Goddess_Timer;
         uint32 Phase;
@@ -110,6 +114,12 @@ public:
 
         void Reset() 
         {
+            if (instance)
+            {
+                if(instance->GetData(TYPE_ECHO_OF_TYRANDE)!=DONE)
+                    instance->SetData(TYPE_ECHO_OF_TYRANDE, NOT_STARTED);
+            }
+
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
@@ -141,6 +151,11 @@ public:
 
         void EnterCombat(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_ECHO_OF_TYRANDE, IN_PROGRESS);
+            }
+
             me->SetStandState(UNIT_STAND_STATE_STAND);
 
             me->MonsterSay("Let the peaceful light of Elune soothe your souls in this dark time.", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
@@ -160,6 +175,11 @@ public:
 
         void JustDied(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_ECHO_OF_TYRANDE, DONE);
+            }
+
             me->MonsterSay("I can...see the light of the moon...so clearly now. It is...beautiful...", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
             me->SendPlaySound(25976, true);
 

@@ -26,6 +26,7 @@ Autor: Lazik
 #include "ScriptPCH.h"
 #include "Spell.h"
 #include "UnitAI.h"
+#include "endtime.h"
 
 #define NEVER (0xffffffff) // Used as "delayed" timer
 
@@ -82,8 +83,12 @@ public:
 
     struct boss_murozondAI : public ScriptedAI
     {
-        boss_murozondAI(Creature *c) : ScriptedAI(c) { }
+        boss_murozondAI(Creature *creature) : ScriptedAI(creature) 
+        {
+            instance = creature->GetInstanceScript();
+        }
 
+        InstanceScript* instance;
         uint32 Random_Kill_Text;
         uint32 Tail_Lash_Timer;
         uint32 Temporal_Blast_Timer;
@@ -94,13 +99,18 @@ public:
         uint32 Rewind_Time_Check;
         uint32 RemoveDynamicObjects_Timer;
         uint32 Nozdormu_Say_Timer;
-        uint32 Check_For_Trash;
         bool Kill_Say;
         bool Ready_To_Die;
         bool Nozdormu_Say;
 
         void Reset() 
         {
+            if (instance)
+            {
+                if(instance->GetData(TYPE_MUROZOND)!=DONE)
+                    instance->SetData(TYPE_MUROZOND, NOT_STARTED);
+            }
+
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetStandState(UNIT_STAND_STATE_STAND);
@@ -115,7 +125,6 @@ public:
             Distortion_Bomb_Timer = 5000;
             Rewind_Time_Check = 500;
             Nozdormu_Say_Timer = 3000;
-            Check_For_Trash = 10000;
             Kill_Timer = NEVER;
             RemoveDynamicObjects_Timer = NEVER;
             Kill_Say = false;
@@ -142,6 +151,11 @@ public:
 
         void EnterCombat(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_MUROZOND, IN_PROGRESS);
+            }
+
             uint32 Position;
             Position = 0;
 
@@ -195,6 +209,11 @@ public:
 
         void JustDied(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_MUROZOND, DONE);
+            }
+
             // Remove Hourglass bar
             Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
                 for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
@@ -217,30 +236,6 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            // Check for Wardens, if all dead set Attackable and Selectable, just in case if server crash
-            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && (Kill_Say == false))
-            {
-                if (Check_For_Trash)
-                {
-                    int count;
-                    count = 0;
-                    std::list<Creature*> Infinite_Wardens;
-                    GetCreatureListWithEntryInGrid(Infinite_Wardens, me, 54923, 250.0f);
-                    for (std::list<Creature*>::const_iterator itr = Infinite_Wardens.begin(); itr != Infinite_Wardens.end(); ++itr)
-                        if ((*itr) && (*itr)->IsAlive())
-                            count = count + 1;
-
-                    if (count == 0)
-                    {
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        me->SetReactState(REACT_AGGRESSIVE);
-                    }
-                    Check_For_Trash = 10000;
-                }
-                else Check_For_Trash -= diff;
-            }
-
             if (!UpdateVictim())
                 return;
 

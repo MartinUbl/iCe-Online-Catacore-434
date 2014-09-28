@@ -26,7 +26,8 @@ Autor: Lazik
 #include "ScriptPCH.h"
 #include "Spell.h"
 #include "UnitAI.h"
-#include "MapManager.h" 
+#include "MapManager.h"
+#include "endtime.h"
 
 // NPCs
 enum NPC
@@ -90,11 +91,13 @@ public:
 
     struct boss_echo_of_sylvanasAI : public ScriptedAI
     {
-        boss_echo_of_sylvanasAI(Creature *c) : ScriptedAI(c) 
+        boss_echo_of_sylvanasAI(Creature *creature) : ScriptedAI(creature) 
         {
+            instance = creature->GetInstanceScript();
             me->CastSpell(me, CALLING_OF_THE_HIGHBORNE_AURA, true);
         }
 
+        InstanceScript* instance;
         // Timers
         uint32 Port_Timer;
         uint32 Summon_Purple_Mist_Timer;
@@ -130,6 +133,12 @@ public:
 
         void Reset()
         {
+            if (instance)
+            {
+                if(instance->GetData(TYPE_ECHO_OF_SYLVANAS)!=DONE)
+                    instance->SetData(TYPE_ECHO_OF_SYLVANAS, NOT_STARTED);
+            }
+
             me->MonsterYell("And so ends your story.", LANG_UNIVERSAL, 0);
             me->SendPlaySound(25968, true);
 
@@ -170,6 +179,11 @@ public:
 
         void EnterCombat(Unit * /*who*/) 
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_ECHO_OF_SYLVANAS, IN_PROGRESS);
+            }
+
             me->MonsterYell("Another band of Deathwing's converts? I'll be sure your death is especially painful.", LANG_UNIVERSAL, 0);
             me->SendPlaySound(25966, true);
 
@@ -186,6 +200,11 @@ public:
 
         void JustDied(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_ECHO_OF_SYLVANAS, DONE);
+            }
+
             me->MonsterYell("This... isn't how it's supposed to... end.", LANG_UNIVERSAL, 0);
             me->SendPlaySound(25967, true);
 
