@@ -10624,6 +10624,12 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
             else
                 summon->SetDisplayId(1126);
         }
+        else if (summon->GetEntry() == 26125 || summon->GetEntry() == 24207) // DK: Risen Ghoul, Army of the Dead Ghoul
+        {
+            summon->setPowerType(POWER_ENERGY);
+            summon->SetMaxPower(POWER_ENERGY, 100);
+            summon->SetPower(POWER_ENERGY, 100);
+        }
 
         summon->AI()->EnterEvadeMode();
 
