@@ -3739,11 +3739,17 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 }
             }
 
-            CallScriptAfterUnitTargetSelectHandlers(unitList, SpellEffIndex(i));
+            /*CallScriptAfterUnitTargetSelectHandlers(unitList, SpellEffIndex(i));
 
             for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
-                AddUnitTarget(*itr, i);
+                AddUnitTarget(*itr, i);*/
         }
+
+        // Call this script hook, even if no targets in list -> we can force push custom units in SpellScripts
+        CallScriptAfterUnitTargetSelectHandlers(unitList, SpellEffIndex(i));
+
+        for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+            AddUnitTarget(*itr, i);
 
         if (!gobjectList.empty())
         {
