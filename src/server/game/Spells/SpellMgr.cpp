@@ -5103,6 +5103,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_APPLY_AURA;
             spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY; 
             break;
+        case 51698: // Honor Among Thieves (Rank 1) -> bad dbc data
+            spellInfo->SpellFamilyName = SPELLFAMILY_ROGUE; 
+            break;
         case 62758: // Wild Hunt (Rank 1) 
         case 62762: // Wild Hunt (Rank 2) -> again fail DBC data
             spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_APPLY_AURA;
