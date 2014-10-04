@@ -6608,6 +6608,14 @@ SpellCastResult Spell::CheckCast(bool strict)
                     break;
             }
         }
+        else if (mapEntry->IsBattleground())
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 698: // Ritual of Summoning
+                    return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+            }
+        }
 
     // zone check
     if (m_caster->GetTypeId() == TYPEID_UNIT || !m_caster->ToPlayer()->IsGameMaster())
