@@ -3075,8 +3075,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Kidney Shot
             if (spellproto->SpellFamilyFlags[0] & 0x200000)
                 return DIMINISHING_CONTROL_STUN;
-            // Crippling poison - Limit to 10 seconds in PvP
-            if (spellproto->SpellIconID == 163)
+            // Crippling poison + Wound Poison - Limit to 10 seconds in PvP
+            if (spellproto->SpellIconID == 163 || spellproto->SpellIconID == 1496)
                 return DIMINISHING_LIMITONLY;
             break;
         }
@@ -3177,7 +3177,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         case SPELLFAMILY_HUNTER:
         {
             // Hunter's mark or Widow Venom
-            if ((spellproto->SpellFamilyFlags[0] & 0x400) && spellproto->SpellIconID == 538)
+            if (((spellproto->SpellFamilyFlags[0] & 0x400) && spellproto->SpellIconID == 538) || spellproto->Id == 82654)
                 return DIMINISHING_LIMITONLY;
             // Scatter Shot
             if ((spellproto->SpellFamilyFlags[0] & 0x40000) && spellproto->SpellIconID == 132)
@@ -3228,27 +3228,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
 
 int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry const* spellproto)
 {
-    // Explicit duration before diminishing group check
-    if (spellproto->SpellIconID == 1496)
-        return 10 * IN_MILLISECONDS;
-
-    switch (spellproto->Id)
-    {
-        // Wing Clip
-        case 2974:
-            return 8 * IN_MILLISECONDS;
-        // Curse of Elements ( Max 2 minutes in PvP )
-        case 1490:
-            return 120 * IN_MILLISECONDS;
-        // Chilblains
-        case 50434:
-        case 50435:
-            return 8 * IN_MILLISECONDS;
-        // Widow Venom
-        case 82654:
-            return 10 * IN_MILLISECONDS;
-    }
-
     if (!IsDiminishingReturnsGroupDurationLimited(group))
         return 0;
 
@@ -3257,12 +3236,15 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
     {
         case SPELLFAMILY_HUNTER:
         {
+            // Wing Clip
+            if (spellproto->Id == 2974)
+                return 8 * IN_MILLISECONDS;
             // Wyvern Sting
             if (spellproto->SpellFamilyFlags[1] & 0x1000)
                 return 6 * IN_MILLISECONDS;
             // Hunter's Mark
             if (spellproto->SpellFamilyFlags[0] & 0x400)
-                return 30 * IN_MILLISECONDS;
+                return 120 * IN_MILLISECONDS;
             break;
         }
         case SPELLFAMILY_PALADIN:
@@ -3274,6 +3256,9 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
+            // Chilblains
+            if (spellproto->Id == 50434 || spellproto->Id == 50435)
+                return 8 * IN_MILLISECONDS;
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -3285,6 +3270,9 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
         }
         case SPELLFAMILY_WARLOCK:
         {
+            // Curse of Elements ( Max 2 minutes in PvP )
+            if (spellproto->Id == 1490)
+                return 120 * IN_MILLISECONDS;
             break;
         }
         default:
