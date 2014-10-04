@@ -769,7 +769,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 if (AuraEffect * aurEff = caster->GetAuraEffect(61205, EFFECT_2))
                 {
                     // Your Frostfire Bolt now deals 3% additional damage over 12 sec
-                    amount += aurEff->GetScriptedAmount() / GetTotalTicks();
+                    amount = aurEff->GetScriptedAmount() / GetTotalTicks();
                     amount *= GetBase()->GetStackAmount();
                 }
             }
