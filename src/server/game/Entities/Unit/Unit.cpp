@@ -7535,14 +7535,9 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 if (procSpell)
                 {
                     uint32 id = procSpell->Id;
-
-                    // Divine Storm, proc only we have proc victim
-                    if (id == 53385 && (!pVictim || pVictim == this))
-                        return false;
-
-                    // Judgement, Exorcism, Templar's Verdict,
+                    // Judgement, Exorcism, Templar's Verdict, Divine Storm,
                     // Inquisition, Holy Wrath, Hammer of Wrath
-                    if (id == 20271 || id == 879 || id == 85256 ||
+                    if (id == 20271 || id == 879 || id == 85256 || id == 53385 ||
                         id == 84963 || id == 2812 || id == 24275)
                     {
                         target = this;
