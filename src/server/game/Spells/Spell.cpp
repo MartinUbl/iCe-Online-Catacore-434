@@ -6601,6 +6601,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // Special cases for spells which cannot be casted in arenas
     if (MapEntry const* mapEntry = sMapStore.LookupEntry(m_caster->GetMapId()))
+    {
         if (mapEntry->IsBattleArena())
         {
             switch (m_spellInfo->Id)
@@ -6622,6 +6623,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_NOT_IN_BATTLEGROUND;
             }
         }
+    }
 
     // zone check
     if (m_caster->GetTypeId() == TYPEID_UNIT || !m_caster->ToPlayer()->IsGameMaster())
