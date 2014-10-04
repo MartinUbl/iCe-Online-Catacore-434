@@ -4666,15 +4666,16 @@ void Unit::RemoveArenaAuras(bool onLeave, bool isArena)
     {
         AuraApplication const * aurApp = iter->second;
         Aura const * aura = aurApp->GetBase();
+        const SpellEntry * spellProto = aura->GetSpellProto();
 
         // Do not removed these auras !!!
-        if ((aura->GetSpellProto()->AttributesEx4 & SPELL_ATTR4_UNK21) // don't remove stances, shadowform, pally/hunter auras
-            || aura->IsPassive() 
-            || (aura->GetSpellProto()->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
+        if (spellProto->AttributesEx4 & SPELL_ATTR4_UNK21 // don't remove stances, shadowform, pally/hunter auras
+            || (spellProto->AttributesEx4 & SPELL_ATTR4_USABLE_IN_ARENA)
+            || aura->IsPassive()
+            || (isArena == false && spellProto->SpellFamilyName == SPELLFAMILY_POTION) // remove potion auras only if entering/leaving arena
             || (aurApp->IsPositive() && onLeave)
-            || aura->GetSpellProto()->AppliesAuraType(SPELL_AURA_MOD_SHAPESHIFT) // shapeshifts are removed later, after adding to battleground (due to falling under map for unknown reason)
-            || (aura->GetSpellProto()->Attributes & SPELL_ATTR0_CANT_CANCEL) // mostly guild tabards
-            || (isArena == false && aura->GetSpellProto()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT)) // do not remove flasks if in BG
+            || spellProto->AppliesAuraType(SPELL_AURA_MOD_SHAPESHIFT) // shapeshifts are removed later, after adding to battleground (due to falling under map for unknown reason)
+            || (spellProto->Attributes & SPELL_ATTR0_CANT_CANCEL)) // mostly guild tabards
             ++iter;
         else
             RemoveAura(iter);
