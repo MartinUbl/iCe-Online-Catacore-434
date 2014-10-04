@@ -13113,6 +13113,9 @@ float Unit::GetUnitSpellCriticalChance(Unit *pVictim, SpellEntry const *spellPro
                 case 33778: // Lifebloom Final Bloom
                 case 64844: // Divine Hymn
                 case 85222: // Light of Dawn
+                case 94286: // Protector of the Innocent r1
+                case 94288: // Protector of the Innocent r2
+                case 94289: // Protector of the Innocent r3
                     break;
                 default:
                     return 0.0f;
