@@ -881,11 +881,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         else if (m_owner->getClass() == CLASS_DEATH_KNIGHT) // Ghoul
         {
             // It's there also to avoid showing error
-
-            // Ghouls are not pets. Following moved to Spell::SummonGuardian
-            //setPowerType(POWER_ENERGY);
-            //SetMaxPower(POWER_ENERGY, 100);
-            //SetPower(POWER_ENERGY, 100);
+            // Not all ghouls are guardians :)
+            setPowerType(POWER_ENERGY);
+            SetMaxPower(POWER_ENERGY, 100);
+            SetPower(POWER_ENERGY, 100);
         }
         else if (m_owner->getClass() == CLASS_MAGE && GetEntry() == 510) // Water elemental
         {
