@@ -3192,7 +3192,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             if ((spellproto->SpellFamilyFlags[1] & 0x00001000) && spellproto->SpellIconID == 1721)
                 return DIMINISHING_DISORIENT;
             // Bad Manner (Monkey)
-            if (spellproto->SpellFamilyFlags[1] & 0x10000000)
+            if (spellproto->Id == 90337)
                 return DIMINISHING_CONTROL_STUN;
             break;
         }
