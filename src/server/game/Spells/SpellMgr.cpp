@@ -3075,7 +3075,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Kidney Shot
             if (spellproto->SpellFamilyFlags[0] & 0x200000)
                 return DIMINISHING_CONTROL_STUN;
-            // Crippling poison + Wound Poison - Limit to 8 seconds in PvP
+            // Crippling poison + Wound Poison
             if (spellproto->SpellIconID == 163 || spellproto->SpellIconID == 1496)
                 return DIMINISHING_LIMITONLY;
             break;
@@ -3261,6 +3261,13 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
         {
             break;
         }
+        case SPELLFAMILY_ROGUE:
+        {
+            // Crippling poison + Wound Poison - Limit to 10 seconds in PvP
+            if (spellproto->SpellIconID == 163 || spellproto->SpellIconID == 1496)
+                return 10 * IN_MILLISECONDS;
+            break;
+        }
         case SPELLFAMILY_DRUID:
         {
             // Faerie Fire - limit to 40 seconds in PvP (3.1)
@@ -3273,6 +3280,9 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
             // Curse of Elements ( Max 2 minutes in PvP )
             if (spellproto->Id == 1490)
                 return 120 * IN_MILLISECONDS;
+            // Curse of Exhaustion + Curse of Tongues
+            if (spellproto->Id == 18223 || spellproto->Id == 1714)
+                return 12 * IN_MILLISECONDS;
             break;
         }
         default:
