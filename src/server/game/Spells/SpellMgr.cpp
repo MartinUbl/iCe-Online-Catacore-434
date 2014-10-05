@@ -3075,7 +3075,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Kidney Shot
             if (spellproto->SpellFamilyFlags[0] & 0x200000)
                 return DIMINISHING_CONTROL_STUN;
-            // Crippling poison + Wound Poison - Limit to 10 seconds in PvP
+            // Crippling poison + Wound Poison - Limit to 8 seconds in PvP
             if (spellproto->SpellIconID == 163 || spellproto->SpellIconID == 1496)
                 return DIMINISHING_LIMITONLY;
             break;
@@ -3085,11 +3085,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Death Coil
             if (spellproto->SpellFamilyFlags[0] & 0x80000)
                 return DIMINISHING_DEATHCOIL;
-            // Curses/etc
-            if (spellproto->SpellFamilyFlags[0] & 0x80000000)
-                return DIMINISHING_LIMITONLY;
-            // Curse of Exhaustion
-            if (spellproto->Id == 18223)
+            // Curses generaly + exhaustion + elements
+            if ((spellproto->SpellFamilyFlags[0] & 0x80000000) || spellproto->Id == 18223 || spellproto->Id == 1490)
                 return DIMINISHING_LIMITONLY;
             // Howl of Terror
             if (spellproto->SpellFamilyFlags[1] & 0x8)
@@ -3159,6 +3156,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
+            // Chilblains
+            if (spellproto->Id == 50434 || spellproto->Id == 50435)
+                return DIMINISHING_LIMITONLY;
             // Hungering Cold
             if ((spellproto->SpellFamilyFlags[1] & 0x00009000) && spellproto->SpellIconID == 2797)
                 return DIMINISHING_DISORIENT;
@@ -3176,8 +3176,11 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         }
         case SPELLFAMILY_HUNTER:
         {
-            // Hunter's mark or Widow Venom
-            if (((spellproto->SpellFamilyFlags[0] & 0x400) && spellproto->SpellIconID == 538) || spellproto->Id == 82654)
+            // Wing Clip or Widow Venom
+            if (spellproto->SpellIconID == 517 || spellproto->Id == 82654)
+                return DIMINISHING_LIMITONLY;
+            // Hunter's mark 
+            if (((spellproto->SpellFamilyFlags[0] & 0x400) && spellproto->SpellIconID == 538))
                 return DIMINISHING_LIMITONLY;
             // Scatter Shot
             if ((spellproto->SpellFamilyFlags[0] & 0x40000) && spellproto->SpellIconID == 132)
@@ -3236,15 +3239,15 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
     {
         case SPELLFAMILY_HUNTER:
         {
-            // Wing Clip
-            if (spellproto->Id == 2974)
-                return 8 * IN_MILLISECONDS;
+            // Widow Venom
+            if (spellproto->Id == 82654)
+                return 10 * IN_MILLISECONDS;
             // Wyvern Sting
             if (spellproto->SpellFamilyFlags[1] & 0x1000)
                 return 6 * IN_MILLISECONDS;
             // Hunter's Mark
             if (spellproto->SpellFamilyFlags[0] & 0x400)
-                return 120 * IN_MILLISECONDS;
+                return 30 * IN_MILLISECONDS;
             break;
         }
         case SPELLFAMILY_PALADIN:
@@ -3256,9 +3259,6 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            // Chilblains
-            if (spellproto->Id == 50434 || spellproto->Id == 50435)
-                return 8 * IN_MILLISECONDS;
             break;
         }
         case SPELLFAMILY_DRUID:

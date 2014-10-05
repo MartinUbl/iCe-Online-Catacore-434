@@ -2921,7 +2921,7 @@ enum DiminishingGroup
     DIMINISHING_BANISH,
     DIMINISHING_TAUNT,
     DIMINISHING_DISORIENT_SPECIAL,                          // Dragon's Breath and Scatter Shot
-    DIMINISHING_LIMITONLY                                   // Don't Diminish, but limit duration to 10s
+    DIMINISHING_LIMITONLY                                   // Don't Diminish, but limit duration to 8s
 };
 
 enum SummonCategory
