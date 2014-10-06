@@ -11835,6 +11835,7 @@ void Player::SetNewResearchProject(uint8 slot, bool completed)
             ResearchProjectEntry const* newProject = sResearchProjectStore.LookupEntry(newProjectId);
             if (newProject)
                 LearnSpell(newProject->craftSpell, false);
+            _SaveArchaeologyData();
         }
     }
 }
@@ -19357,6 +19358,7 @@ void Player::_LoadArchaeologyData()
     // Load all projects with all needed datas
     if (proj_result)
     {
+        m_researchProjects.clear();
         uint8 proj_pos = 0;
         do
         {
@@ -19379,7 +19381,7 @@ void Player::_LoadArchaeologyData()
         } while (proj_result->NextRow());
 
         // At the end, we must have 9 projects, if not, generate all new
-        if (proj_pos < 8)
+        if (proj_pos != 9)
         {
             // Set all projects as inactive
             for (std::list<ResearchProjectsElem>::iterator itr = m_researchProjects.begin(); itr != m_researchProjects.end(); ++itr)
@@ -19387,6 +19389,7 @@ void Player::_LoadArchaeologyData()
             // And generate new
             for (uint8 i = 0; i < 9; i++)
                 SetNewResearchProject(i);
+            _SaveArchaeologyData(); //Save new correct data
         }
     }
     else
