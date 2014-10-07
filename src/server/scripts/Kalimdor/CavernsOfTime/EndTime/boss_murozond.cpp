@@ -345,13 +345,12 @@ public:
                                     player->ResurrectPlayer(100.0f);
 
                                 // Find correct player`s data
-                                uint32 Position;
-                                Position = 0;
-                                for (Position; Position<5; Position++)
+                                uint32 position = 0;
+                                for (; position < 5; position++)
                                 {
-                                    if (player->GetGUID() == Coordinates[Position].guid)
+                                    if (player->GetGUID() == Coordinates[position].guid)
                                         // Move player to "start encounter" position
-                                        player->GetMotionMaster()->MovePoint(Coordinates[Position].guid, Coordinates[Position].x, Coordinates[Position].y, Coordinates[Position].z);
+                                        player->GetMotionMaster()->MovePoint(Coordinates[position].guid, Coordinates[position].x, Coordinates[position].y, Coordinates[position].z);
                                 }
 
                                 // Remove all debuffs
