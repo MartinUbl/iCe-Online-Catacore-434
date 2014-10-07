@@ -23,18 +23,18 @@ enum Encounters
     TYPE_FIRST_ECHO        = 0,
     TYPE_SECOND_ECHO       = 1,
     TYPE_MUROZOND          = 2,
-    MAX_ENCOUNTER          = 3,
+    MAX_ENCOUNTER          = 5,
     // Bosses
-    TYPE_ECHO_OF_SYLVANAS  = 4,
-    TYPE_ECHO_OF_JAINA     = 5,
-    TYPE_ECHO_OF_BAINE     = 6,
-    TYPE_ECHO_OF_TYRANDE   = 7,
+    TYPE_ECHO_OF_SYLVANAS  = 6,
+    TYPE_ECHO_OF_JAINA     = 7,
+    TYPE_ECHO_OF_BAINE     = 8,
+    TYPE_ECHO_OF_TYRANDE   = 9,
 };
 
 enum AdditionalEvents
 {
-    DATA_CRYSTALS          = 8,
-    DATA_TRASH_MUROZOND    = 9,
-    DATA_TRASH_BAINE       = 10,
+    DATA_CRYSTALS          = 10,
+    DATA_TRASH_MUROZOND    = 11,
+    DATA_TRASH_BAINE       = 12,
 };
 #endif

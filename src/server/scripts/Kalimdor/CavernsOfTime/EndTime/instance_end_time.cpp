@@ -191,10 +191,14 @@ public:
                 if (trash_murozond == 1)
                 {
                     Creature * boss_murozond = this->instance->GetCreature(this->GetData64(TYPE_MUROZOND));
-                    if (boss_murozond && boss_murozond->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                    if (boss_murozond && boss_murozond->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) 
+                        && boss_murozond->IsAlive())
                     {
                         boss_murozond->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
                         boss_murozond->SetReactState(REACT_AGGRESSIVE);
+                        boss_murozond->GetMotionMaster()->MovePoint(0, 4170.6196f, -428.5562f, 144.295914f);
+                        boss_murozond->SendMovementFlagUpdate();
+                        boss_murozond->SetVisible(true);
                     }
                 }
 
@@ -269,9 +273,9 @@ public:
 
         virtual uint32* GetCorrUiEncounter()
         {
-            currEnc[0]=m_auiEncounter[TYPE_FIRST_ECHO]; // First Echo
-            currEnc[1]=m_auiEncounter[TYPE_SECOND_ECHO]; // Second Echo
-            currEnc[2]=m_auiEncounter[TYPE_MUROZOND]; // Murozond
+            currEnc[2]=m_auiEncounter[TYPE_FIRST_ECHO]; // First Echo
+            currEnc[3]=m_auiEncounter[TYPE_SECOND_ECHO]; // Second Echo
+            currEnc[0]=m_auiEncounter[TYPE_MUROZOND]; // Murozond   
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
 
             return NULL;
@@ -731,8 +735,11 @@ public:
                 Creature * murozond_boss = me->FindNearestCreature(MUROZOND_BOSS, 250.0, true);
                 if (murozond_boss)
                 {
+                    murozond_boss->SetVisible(true);
+                    murozond_boss->GetMotionMaster()->MovePoint(0, 4170.6196f, -428.5562f, 144.295914f);
+                    murozond_boss->SendMovementFlagUpdate();
                     murozond_boss->MonsterYell("The \"End Time\", I once called this place, this strand. I had not seen, by then; I did not know. You hope to... what? Stop me, here? Change the fate I worked so tirelessly to weave?", LANG_UNIVERSAL, 0);
-                    murozond_boss->SendPlaySound(25934, false);
+                    me->SendPlaySound(25934, false);
                 }
             }
 
@@ -741,6 +748,8 @@ public:
                 Creature * murozond_boss = me->FindNearestCreature(MUROZOND_BOSS, 250.0, true);
                 if (murozond_boss)
                 {
+                    murozond_boss->GetMotionMaster()->MovePoint(0, 4170.6196f, -428.5562f, 144.295914f);
+                    murozond_boss->SendMovementFlagUpdate();
                     murozond_boss->MonsterYell("You crawl unwitting, like a blind, writhing worm, towards endless madness and despair. I have witnessed the true End Time. This? This is a blessing you simply cannot comprehend.", LANG_UNIVERSAL, 0);
                     murozond_boss->SendPlaySound(25935, false);
 
@@ -1618,6 +1627,84 @@ public:
     }
 };
 
+// Alurmi
+class npc_alurmi : public CreatureScript
+{
+public:
+    npc_alurmi() : CreatureScript("npc_alurmi") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_alurmiAI (pCreature);
+    }
+
+    struct npc_alurmiAI : public ScriptedAI
+    {
+        npc_alurmiAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Check_Timer;
+        uint32 Change_Timer;
+        bool Change;
+        bool Fly;
+
+        void Reset() 
+        {
+            me->RemoveAura(109297);
+            me->SetVisible(false);
+            Check_Timer = 10000;
+            Change_Timer = 4000;
+            Change = false;
+            Fly = false;
+            me->SetSpeed(MOVE_FLIGHT, 0.3f);
+            me->SetSpeed(MOVE_RUN, 0.3f);
+            me->SetSpeed(MOVE_WALK, 0.3f);
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            if (Fly == false)
+            {
+                if (Check_Timer <= diff)
+                {
+                    float distance;
+                    int count;
+                    count = 0;
+                    Map::PlayerList const &playerList = me->GetMap()->GetPlayers();
+                    if (!playerList.isEmpty())
+                        for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                            if (Player* pPlayer = i->getSource())
+                            {
+                                distance = me->GetExactDist2d(pPlayer);
+                                if (distance<30)
+                                    count = count+1;
+                            }
+
+                    if (count >= 1)
+                    {
+                        me->SetVisible(true);
+                        me->GetMotionMaster()->MovePoint(0, 3703.3f, -363.1712f, 113.942657f);
+                        Change_Timer = 3500;
+                        Change = true;
+                        Fly = true;
+                    }
+
+                    Check_Timer = 10000;
+                } else Check_Timer -= diff;
+            }
+
+            if (Change == true)
+            {
+                if (Change_Timer <= diff)
+                {
+                    me->CastSpell(me, 109297, true);
+                    Change = false;
+                }
+                else Change_Timer -= diff;
+            }
+        }
+    };
+};
+
 void AddSC_instance_end_time()
 {
     new instance_end_time();
@@ -1642,4 +1729,5 @@ void AddSC_instance_end_time()
     new npc_time_twisted_footman();
     new npc_time_twisted_sorceress();
     new npc_fountain_of_light();
+    new npc_alurmi();
 }

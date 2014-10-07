@@ -687,7 +687,7 @@ void InstanceSaveManager::loadRaidEncounter()
     setBossNumber(643, 4);//TotT
     setBossNumber(36, 6);//DM
     setBossNumber(568, 6);//ZA
-    setBossNumber(938, 3); // End Time
+    setBossNumber(938, 5); // End Time
 
     if (!result)
     {
@@ -1133,8 +1133,8 @@ void InstanceSaveManager::loadRaidEncounter()
             }
             case 938: // End Time
                 {
-                bossNum=3;
-                uint32 dataEnc[3];
+                bossNum=5;
+                uint32 dataEnc[5];
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -1144,10 +1144,10 @@ void InstanceSaveManager::loadRaidEncounter()
                         loadStream >> dataEnc[0]; // First Echo ??
                         break;
                     case 1:
-                        loadStream >> dataEnc[1]; // Second Echo ??
+                        loadStream >> dataEnc[2]; // Second Echo ??
                         break;
                     case 2:
-                        loadStream >> dataEnc[2]; // Murozond ??
+                        loadStream >> dataEnc[1]; // Murozond ??
                         break;
                     }
                 }

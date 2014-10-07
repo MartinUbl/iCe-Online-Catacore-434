@@ -912,7 +912,7 @@ public:
                     }
                 }
 
-                Check_Size = 2000;
+                Check_Size = 500;
             }
             else Check_Size -= diff;
 

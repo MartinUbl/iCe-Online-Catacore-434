@@ -86,6 +86,10 @@ public:
         boss_murozondAI(Creature *creature) : ScriptedAI(creature) 
         {
             instance = creature->GetInstanceScript();
+            me->GetMotionMaster()->MoveJump(4215.0f, -428.6582f, 150.0f, 100.0f, 100.0f);
+
+            me->SetFlying(true);
+            me->SetVisible(false);
         }
 
         InstanceScript* instance;
@@ -115,9 +119,6 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetStandState(UNIT_STAND_STATE_STAND);
             me->SetReactState(REACT_PASSIVE);
-
-            me->SetFlying(true);
-            me->SetVisible(true);
 
             Tail_Lash_Timer = 3000;
             Temporal_Blast_Timer = 12000;
@@ -149,6 +150,12 @@ public:
                 Hourglass->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
         }
 
+        void JustReachedHome()
+        {
+            me->SetVisible(true);
+            me->SetFlying(false);
+        }
+
         void EnterCombat(Unit * /*who*/)
         {
             if (instance)
@@ -161,9 +168,10 @@ public:
 
             me->MonsterYell("So be it.", LANG_UNIVERSAL, 0);
             me->SendPlaySound(25927, true);
-            
+
             me->CastSpell(me, TEMPORAL_SNAPSHOT, false);
             me->SetFlying(false);
+            me->GetMotionMaster()->MoveJump(4170.6196f, -428.5562f, 119.296f, 10.0f, 10.0f);
 
             // Enable interract with Hourglass 
             if (GameObject* Hourglass = me->FindNearestGameObject(209249, 500.0f))
@@ -247,7 +255,7 @@ public:
                     Creature * nozdormu_intro = me->FindNearestCreature(NOZDORMU_INTRO, 200.0, true);
                     if (nozdormu_intro)
                     {
-                        DoScriptText(SAY_NOZDORMU_START,me);
+                        nozdormu_intro->MonsterSay("Mortals! I cannot follow you any further - accept my blessing and use the Hourglass of Time to defeat Murozond!", LANG_UNIVERSAL, nozdormu_intro->GetGUID(), 150.0f);
                         me->SendPlaySound(25943, true);
                     }
                     Nozdormu_Say = true;
@@ -513,31 +521,31 @@ public:
                     {
                         case 0:
                             {
-                                DoScriptText(SAY_NOZDORMU_END_1,me);
+                                me->MonsterSay("At last it has come to pass. The moment of my demise. The loop is closed. My future self will cause no more harm.", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
                                 me->SendPlaySound(25944, true);
-                                Say = Say + 1;
+                                Say += 1;
                                 Say_Timer = 16000;
                                 break;
                             }
                         case 1:
                             {
-                                DoScriptText(SAY_NOZDORMU_END_2,me);
+                                me->MonsterSay("Still, in time, I will... fall to madness. And you, heroes... will vanquish me. The cycle will repeat. So it goes.", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
                                 me->SendPlaySound(25945, true);
-                                Say = Say + 1;
+                                Say += 1;
                                 Say_Timer = 18000;
                                 break;
                             }
                         case 2:
                             {
-                                DoScriptText(SAY_NOZDORMU_END_3,me);
+                                me->MonsterSay("What matters is that Azeroth did not fall; that we survived to fight another day.", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
                                 me->SendPlaySound(25946, true);
-                                Say = Say + 1;
+                                Say += 1;
                                 Say_Timer = 12000;
                                 break;
                             }
                         case 3:
                             {
-                                DoScriptText(SAY_NOZDORMU_END_4,me);
+                                me->MonsterSay("All that matters... is this moment.", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
                                 me->SendPlaySound(25947, true);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                                 Say = 0;
