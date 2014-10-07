@@ -42,6 +42,7 @@ class ObjectGridRespawnMover
 
         template<class T> void Visit(GridRefManager<T> &) {}
         void Visit(CreatureMapType &m);
+        void Visit(GameObjectMapType &m);
 };
 
 void
@@ -79,6 +80,20 @@ ObjectGridRespawnMover::Visit(CreatureMapType &m)
     }
 }
 
+void ObjectGridRespawnMover::Visit(GameObjectMapType &m)
+{
+    // gameobject in unloading grid can have respawn point in another grid
+    // if it will be unloaded then it will not respawn in original grid until unload/load original grid
+    // move to respawn point to prevent this case. For player view in respawn grid this will be normal respawn.
+    for (GameObjectMapType::iterator iter = m.begin(); iter != m.end();)
+    {
+        GameObject* go = iter->getSource();
+        ++iter;
+
+        go->GetMap()->GameObjectRespawnRelocation(go, true);
+    }
+}
+
 // for loading world object at grid loading (Corpses)
 class ObjectWorldLoader
 {
@@ -110,6 +125,13 @@ template<> void AddUnitState(Creature *obj, CellPair const& cell_pair)
     obj->SetCurrentCell(cell);
     if (obj->IsSpiritService())
         obj->setDeathState(DEAD);
+}
+
+template<> void AddUnitState(GameObject *obj, CellPair const& cell_pair)
+{
+    Cell cell(cell_pair);
+
+    obj->SetCurrentCell(cell);
 }
 
 template <class T>

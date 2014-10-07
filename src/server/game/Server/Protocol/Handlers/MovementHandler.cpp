@@ -330,29 +330,21 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
             if (!plMover->GetTransport())
             {
                 // elevators also cause the client to send MOVEMENTFLAG_ONTRANSPORT - just dismount if the guid can be found in the transport list
-                for (MapManager::TransportSet::const_iterator iter = sMapMgr->m_Transports.begin(); iter != sMapMgr->m_Transports.end(); ++iter)
+                if (Transport* transport = plMover->GetMap()->GetTransport(movementInfo.t_guid))
                 {
-                    if ((*iter)->GetGUID() == movementInfo.t_guid)
-                    {
-                        plMover->m_transport = *iter;
-                        (*iter)->AddPassenger(plMover);
-                        break;
-                    }
+                    plMover->m_transport = transport;
+                    transport->AddPassenger(plMover);
                 }
             }
             else if (plMover->GetTransport()->GetGUID() != movementInfo.t_guid)
             {
                 bool foundNewTransport = false;
                 plMover->m_transport->RemovePassenger(plMover);
-                for (MapManager::TransportSet::const_iterator iter = sMapMgr->m_Transports.begin(); iter != sMapMgr->m_Transports.end(); ++iter)
+                if (Transport* transport = plMover->GetMap()->GetTransport(movementInfo.t_guid))
                 {
-                    if ((*iter)->GetGUID() == movementInfo.t_guid)
-                    {
-                        foundNewTransport = true;
-                        plMover->m_transport = *iter;
-                        (*iter)->AddPassenger(plMover);
-                        break;
-                    }
+                    foundNewTransport = true;
+                    plMover->m_transport = transport;
+                    transport->AddPassenger(plMover);
                 }
 
                 if (!foundNewTransport)
@@ -662,10 +654,6 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
 
     mi->guid = guid;
     mi->t_guid = tguid;
-
-    if (hasTransportData && mi->pos.m_positionX != mi->t_pos.m_positionX)
-        if (GetPlayer()->GetTransport())
-            GetPlayer()->GetTransport()->UpdatePosition(mi);
 
     //! Anti-cheat checks. Please keep them in seperate if() blocks to maintain a clear overview.
     //! Might be subject to latency, so just remove improper flags.

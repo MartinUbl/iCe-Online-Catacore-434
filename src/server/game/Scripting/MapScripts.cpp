@@ -324,6 +324,7 @@ void Map::ScriptsProcess()
                 case HIGHGUID_PLAYER:
                     source = HashMapHolder<Player>::Find(step.sourceGUID);
                     break;
+                case HIGHGUID_TRANSPORT:
                 case HIGHGUID_GAMEOBJECT:
                     source = HashMapHolder<GameObject>::Find(step.sourceGUID);
                     break;
@@ -331,15 +332,11 @@ void Map::ScriptsProcess()
                     source = HashMapHolder<Corpse>::Find(step.sourceGUID);
                     break;
                 case HIGHGUID_MO_TRANSPORT:
-                    for (MapManager::TransportSet::iterator iter = sMapMgr->m_Transports.begin(); iter != sMapMgr->m_Transports.end(); ++iter)
-                    {
-                        if ((*iter)->GetGUID() == step.sourceGUID)
-                        {
-                            source = reinterpret_cast<Object*>(*iter);
-                            break;
-                        }
-                    }
+                {
+                    GameObject* go = HashMapHolder<GameObject>::Find(step.sourceGUID);
+                    source = go ? go->ToTransport() : NULL;
                     break;
+                }
                 default:
                     sLog->outError("*_script source with unsupported high guid value %u",GUID_HIPART(step.sourceGUID));
                     break;
@@ -366,12 +363,19 @@ void Map::ScriptsProcess()
                 case HIGHGUID_PLAYER:                       // empty GUID case also
                     target = HashMapHolder<Player>::Find(step.targetGUID);
                     break;
+                case HIGHGUID_TRANSPORT:
                 case HIGHGUID_GAMEOBJECT:
                     target = HashMapHolder<GameObject>::Find(step.targetGUID);
                     break;
                 case HIGHGUID_CORPSE:
                     target = HashMapHolder<Corpse>::Find(step.targetGUID);
                     break;
+                case HIGHGUID_MO_TRANSPORT:
+                {
+                    GameObject* go = HashMapHolder<GameObject>::Find(step.targetGUID);
+                    target = go ? go->ToTransport() : NULL;
+                    break;
+                }
                 default:
                     sLog->outError("*_script source with unsupported high guid value %u",GUID_HIPART(step.targetGUID));
                     break;

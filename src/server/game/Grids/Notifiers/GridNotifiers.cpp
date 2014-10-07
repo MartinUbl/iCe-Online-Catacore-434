@@ -40,16 +40,26 @@ VisibleNotifier::SendToSelf()
     // at this moment i_clientGUIDs have guids that not iterate at grid level checks
     // but exist one case when this possible and object not out of range: transports
     if (Transport* transport = i_player.GetTransport())
-        for (Player *passenger : transport->GetPassengers())
+        for (std::set<WorldObject*>::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
         {
-            if (vis_guids.find(passenger->GetGUID()) != vis_guids.end())
+            if (vis_guids.find((*itr)->GetGUID()) != vis_guids.end())
             {
-                vis_guids.erase(passenger->GetGUID());
+                vis_guids.erase((*itr)->GetGUID());
 
-                i_player.UpdateVisibilityOf(passenger, i_data, i_visibleNow);
-
-                if (!passenger->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-                    passenger->UpdateVisibilityOf(&i_player);
+                switch ((*itr)->GetTypeId())
+                {
+                case TYPEID_GAMEOBJECT:
+                    i_player.UpdateVisibilityOf((*itr)->ToGameObject(), i_data, i_visibleNow);
+                    break;
+                case TYPEID_PLAYER:
+                    i_player.UpdateVisibilityOf((*itr)->ToPlayer(), i_data, i_visibleNow);
+                    if (!(*itr)->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+                        (*itr)->ToPlayer()->UpdateVisibilityOf(&i_player);
+                    break;
+                case TYPEID_UNIT:
+                    i_player.UpdateVisibilityOf((*itr)->ToCreature(), i_data, i_visibleNow);
+                    break;
+                }
             }
         }
 
@@ -369,5 +379,6 @@ bool CarrionFeederObjectCheck::operator()(Corpse* u)
     return false;
 }
 
+template void ObjectUpdater::Visit<Creature>(CreatureMapType&);
 template void ObjectUpdater::Visit<GameObject>(GameObjectMapType &);
 template void ObjectUpdater::Visit<DynamicObject>(DynamicObjectMapType &);

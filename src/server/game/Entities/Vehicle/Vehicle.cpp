@@ -455,8 +455,28 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
         {
             float px, py, pz, po;
             passenger->m_movementInfo.t_pos.GetPosition(px, py, pz, po);
-            CalculatePassengerPosition(px, py, pz, po);
+            CalculatePassengerPosition(px, py, pz, &po);
 
+            passenger->SetPosition(px, py, pz, po);
+        }
+    }
+}
+
+void Vehicle::RelocatePassengers()
+{
+    Map *map = me->GetMap();
+    ASSERT(map != NULL);
+
+    // not sure that absolute position calculation is correct, it must depend on vehicle pitch angle
+    for (SeatMap::const_iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
+    {
+        if (Unit *passenger = itr->second.passenger)
+        {
+            ASSERT(passenger->IsInWorld());
+
+            float px, py, pz, po;
+            passenger->m_movementInfo.t_pos.GetPosition(px, py, pz, po);
+            CalculatePassengerPosition(px, py, pz, &po);
             passenger->SetPosition(px, py, pz, po);
         }
     }
@@ -505,18 +525,18 @@ uint16 Vehicle::GetExtraMovementFlagsForBase() const
     return movementMask;
 }
 
-void Vehicle::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
+void Vehicle::CalculatePassengerPosition(float& x, float& y, float& z, float* o) const
 {
-    float inx = x, iny = y, inz = z, ino = o;
-    o = MapManager::NormalizeOrientation(GetBase()->GetOrientation() + ino);
+    float inx = x, iny = y, inz = z, ino = *o;
+    *o = MapManager::NormalizeOrientation(GetBase()->GetOrientation() + ino);
     x = GetBase()->GetPositionX() + inx * std::cos(GetBase()->GetOrientation()) - iny * std::sin(GetBase()->GetOrientation());
     y = GetBase()->GetPositionY() + iny * std::cos(GetBase()->GetOrientation()) + inx * std::sin(GetBase()->GetOrientation());
     z = GetBase()->GetPositionZ() + inz;
 }
 
-void Vehicle::CalculatePassengerOffset(float& x, float& y, float& z, float& o)
+void Vehicle::CalculatePassengerOffset(float& x, float& y, float& z, float* o) const
 {
-    o -= MapManager::NormalizeOrientation(GetBase()->GetOrientation());
+    *o -= MapManager::NormalizeOrientation(GetBase()->GetOrientation());
     z -= GetBase()->GetPositionZ();
     y -= GetBase()->GetPositionY();    // y = searchedY * std::cos(o) + searchedX * std::sin(o)
     x -= GetBase()->GetPositionX();    // x = searchedX * std::cos(o) + searchedY * std::sin(o + pi)

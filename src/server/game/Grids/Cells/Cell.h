@@ -72,6 +72,7 @@ struct Cell
     Cell() { data.All = 0; }
     Cell(const Cell &cell) { data.All = cell.data.All; }
     explicit Cell(CellPair const& p);
+    explicit Cell(float x, float y);
 
     void operator|=(Cell &cell)
     {

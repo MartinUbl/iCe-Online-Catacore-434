@@ -208,9 +208,6 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
                 case GAMEOBJECT_TYPE_FLAGDROP:
                     updateType = UPDATETYPE_CREATE_OBJECT2;
                     break;
-                case GAMEOBJECT_TYPE_TRANSPORT:
-                    flags |= UPDATEFLAG_HAS_GO_TRANSPORT_TIME;
-                    break;
                 default:
                     break;
             }
@@ -310,7 +307,6 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     bool hasTransportTime3 = false;
     uint32 transportTime2 = 0;
     uint32 transportTime3 = 0;
-    uint32 goTransportTime = getMSTime(); // we don't know what belongs to this field, getMSTime is therefore wrong
 
     // Bit content
     data->WriteBit(0);
@@ -576,13 +572,13 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     if (flags & UPDATEFLAG_HAS_STATIONARY_POSITION)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
-        *data << float(self->GetOrientation());
-        *data << float(self->GetPositionX());
-        *data << float(self->GetPositionY());
+        *data << float(self->GetStationaryO());
+        *data << float(self->GetStationaryX());
+        *data << float(self->GetStationaryY());
         if (const Unit* unit = this->ToUnit())
             *data << float(unit->GetPositionZMinusOffset());
         else
-            *data << float(self->GetPositionZ());
+            *data << float(self->GetStationaryZ());
     }
 
     if (flags & UPDATEFLAG_HAS_ATTACKING_TARGET)
@@ -609,7 +605,18 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     //}
 
     if (flags & UPDATEFLAG_HAS_GO_TRANSPORT_TIME)
-        *data << uint32(goTransportTime);
+    {
+        GameObject const* go = ToGameObject();
+        /** @TODO Use IsTransport() to also handle type 11 (TRANSPORT)
+        Currently grid objects are not updated if there are no nearby players,
+        this causes clients to receive different PathProgress
+        resulting in players seeing the object in a different position
+        */
+        if (go && go->ToTransport())
+            *data << uint32(go->GetGOValue()->Transport.PathProgress);
+        else
+            *data << uint32(getMSTime());
+    }
 }
 
 void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* updateMask, Player* target) const
@@ -837,37 +844,39 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                 // send in current format (float as float, uint32 as uint32)
                 if (index == GAMEOBJECT_DYNAMIC)
                 {
+                    uint16 dynFlags = 0;
+                    int16 pathProgress = -1;
                     if (IsActivateToQuest)
                     {
                         switch (ToGameObject()->GetGoType())
                         {
                             case GAMEOBJECT_TYPE_CHEST:
                                 if (target->IsGameMaster())
-                                    *data << uint16(GO_DYNFLAG_LO_ACTIVATE);
+                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE;
                                 else
-                                    *data << uint16(GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
+                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE;
                                 break;
                             case GAMEOBJECT_TYPE_GENERIC:
-                                if (target->IsGameMaster())
-                                    *data << uint16(0);
-                                else
-                                    *data << uint16(GO_DYNFLAG_LO_SPARKLE);
+                                if (!target->IsGameMaster())
+                                    dynFlags |= GO_DYNFLAG_LO_SPARKLE;
                                 break;
                             case GAMEOBJECT_TYPE_GOOBER:
                                 if (target->IsGameMaster())
-                                    *data << uint16(GO_DYNFLAG_LO_ACTIVATE);
+                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE;
                                 else
-                                    *data << uint16(GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
+                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE;
+                                break;
+                            case GAMEOBJECT_TYPE_MO_TRANSPORT:
+                                pathProgress = int16(float(((GameObject*)this)->GetGOValue()->Transport.PathProgress) / float(GetUInt32Value(GAMEOBJECT_LEVEL)) * 65535.0f);
                                 break;
                             default:
-                                *data << uint16(0); // unknown, not happen.
+                                // unknown and other
                                 break;
                         }
                     }
-                    else
-                        *data << uint16(0);         // disable quest object
 
-                    *data << uint16(-1);
+                    *data << uint16(dynFlags);
+                    *data << int16(pathProgress);
                 }
                 else if (index == GAMEOBJECT_FLAGS)
                 {
@@ -2281,8 +2290,14 @@ TempSummon *Map::SummonCreature(uint32 entry, const Position &pos, SummonPropert
     return summon;
 }
 
-void WorldObject::SetZoneScript()
+void WorldObject::SetZoneScript(ZoneScript* src)
 {
+    if (src)
+    {
+        m_zoneScript = src;
+        return;
+    }
+
     if (Map *map = FindMap())
     {
         if (map->IsDungeon())
@@ -3023,6 +3038,7 @@ uint64 WorldObject::GetTransGUID() const
         return GetTransport()->GetGUID();
     return 0;
 }
+
 void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
 {
     // TODO: Allow transports to be part of dynamic vmap tree

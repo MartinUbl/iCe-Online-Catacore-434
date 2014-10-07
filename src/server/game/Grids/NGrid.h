@@ -180,14 +180,14 @@ class NGrid
             return getGridType(x, y).RemoveGridObject(obj);
         }
 
-    private:
-
         GridType& getGridType(const uint32& x, const uint32& y)
         {
             ASSERT(x < N);
             ASSERT(y < N);
             return i_cells[x][y];
         }
+
+    private:
 
         uint32 i_gridId;
         GridInfo i_GridInfo;

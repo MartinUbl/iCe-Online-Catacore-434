@@ -149,10 +149,10 @@ class TransportBase
 {
     public:
         /// This method transforms supplied transport offsets into global coordinates
-        virtual void CalculatePassengerPosition(float& x, float& y, float& z, float& o) = 0;
+        virtual void CalculatePassengerPosition(float& x, float& y, float& z, float* o) const = 0;
 
         /// This method transforms supplied global coordinates into local offsets
-        virtual void CalculatePassengerOffset(float& x, float& y, float& z, float& o) = 0;
+        virtual void CalculatePassengerOffset(float& x, float& y, float& z, float* o) const = 0;
 };
 
 class Vehicle : public TransportBase
@@ -171,10 +171,10 @@ class Vehicle : public TransportBase
         Unit *GetBase() const { return me; }
 
         /// This method transforms supplied transport offsets into global coordinates
-        void CalculatePassengerPosition(float& x, float& y, float& z, float& o);
+        void CalculatePassengerPosition(float& x, float& y, float& z, float* o) const;
 
         /// This method transforms supplied global coordinates into local offsets
-        void CalculatePassengerOffset(float& x, float& y, float& z, float& o);
+        void CalculatePassengerOffset(float& x, float& y, float& z, float* o) const;
 
         VehicleEntry const *GetVehicleInfo() const { return m_vehicleInfo; }
 
@@ -184,6 +184,7 @@ class Vehicle : public TransportBase
         bool AddPassenger(Unit *passenger, int8 seatId = -1, bool byAura = false);
         void RemovePassenger(Unit *passenger);
         void RelocatePassengers(float x, float y, float z, float ang);
+        void RelocatePassengers();
         void RemoveAllPassengers();
         void Dismiss();
         void TeleportVehicle(float x, float y, float z, float ang);

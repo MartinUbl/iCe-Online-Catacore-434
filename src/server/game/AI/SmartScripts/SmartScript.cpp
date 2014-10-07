@@ -37,6 +37,7 @@
 #include "SmartScript.h"
 #include "SmartAI.h"
 #include "Group.h"
+#include "MoveSplineInit.h"
 
 SmartScript::SmartScript()
 {
@@ -1235,7 +1236,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             ObjectList* targets = GetTargets(e, unit);
             if (e.GetTargetType() == SMART_TARGET_SELF)
-               me->SetFacingTo(me->GetHomePosition().GetOrientation());
+                me->SetFacingTo((me->GetTransport() ? me->GetTransportHomePosition() : me->GetHomePosition()).GetOrientation());
             else if (e.GetTargetType() == SMART_TARGET_POSITION)
                 me->SetFacingTo(e.target.o);
             else if (targets && !targets->empty())

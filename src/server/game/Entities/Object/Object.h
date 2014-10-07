@@ -644,6 +644,38 @@ class GridObject
         GridReference<T> m_gridRef;
 };
 
+enum MapObjectCellMoveState
+{
+    MAP_OBJECT_CELL_MOVE_NONE, //not in move list
+    MAP_OBJECT_CELL_MOVE_ACTIVE, //in move list
+    MAP_OBJECT_CELL_MOVE_INACTIVE, //in move list but should not move
+};
+
+class MapObject
+{
+    friend class Map; //map for moving creatures
+    friend class ObjectGridLoader; //grid loader for loading creatures
+
+public:
+    Cell const& GetCurrentCell() const { return _currentCell; }
+    void SetCurrentCell(Cell const& cell) { _currentCell = cell; }
+
+    void SetNewCellPosition(float x, float y, float z, float o)
+    {
+        _moveState = MAP_OBJECT_CELL_MOVE_ACTIVE;
+        _newPosition.Relocate(x, y, z, o);
+    }
+
+protected:
+    MapObject() : _moveState(MAP_OBJECT_CELL_MOVE_NONE) {}
+
+private:
+    Cell _currentCell;
+
+    MapObjectCellMoveState _moveState;
+    Position _newPosition;
+};
+
 class WorldObject : public Object, public WorldLocation
 {
     protected:
@@ -834,7 +866,7 @@ class WorldObject : public Object, public WorldLocation
         //this function should be removed in nearest time...
         Map const* GetBaseMap() const;
 
-        void SetZoneScript();
+        void SetZoneScript(ZoneScript* src = NULL);
         ZoneScript * GetZoneScript() const { return m_zoneScript; }
 
         TempSummon* SummonCreature(uint32 id, const Position &pos, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0, uint32 vehId = 0) const;
@@ -889,14 +921,19 @@ class WorldObject : public Object, public WorldLocation
 
         // Transports
         Transport *GetTransport() const { return m_transport; }
-        virtual float GetTransOffsetX() const { return 0; }
-        virtual float GetTransOffsetY() const { return 0; }
-        virtual float GetTransOffsetZ() const { return 0; }
-        virtual float GetTransOffsetO() const { return 0; }
-        virtual uint32 GetTransTime()   const { return 0; }
-        virtual int8 GetTransSeat()     const { return -1; }
+        float GetTransOffsetX() const { return m_movementInfo.t_pos.GetPositionX(); }
+        float GetTransOffsetY() const { return m_movementInfo.t_pos.GetPositionY(); }
+        float GetTransOffsetZ() const { return m_movementInfo.t_pos.GetPositionZ(); }
+        float GetTransOffsetO() const { return m_movementInfo.t_pos.GetOrientation(); }
+        uint32 GetTransTime()   const { return m_movementInfo.t_time; }
+        int8 GetTransSeat()     const { return m_movementInfo.t_seat; }
         virtual uint64 GetTransGUID()   const;
         void SetTransport(Transport *t) { m_transport = t; }
+
+        virtual float GetStationaryX() const { return GetPositionX(); }
+        virtual float GetStationaryY() const { return GetPositionY(); }
+        virtual float GetStationaryZ() const { return GetPositionZ(); }
+        virtual float GetStationaryO() const { return GetOrientation(); }
 
         MovementInfo m_movementInfo;
     protected:

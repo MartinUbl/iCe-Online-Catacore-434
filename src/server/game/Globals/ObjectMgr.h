@@ -1156,6 +1156,11 @@ class ObjectMgr
             return mMapObjectGuids[MAKE_PAIR32(mapid,spawnMode)][cell_id];
         }
 
+        CellObjectGuidsMap const& GetMapObjectGuids(uint16 mapid, uint8 spawnMode)
+        {
+            return mMapObjectGuids[MAKE_PAIR32(mapid, spawnMode)];
+        }
+
         CreatureData const* GetCreatureData(uint32 guid) const
         {
             CreatureDataMap::const_iterator itr = mCreatureDataMap.find(guid);

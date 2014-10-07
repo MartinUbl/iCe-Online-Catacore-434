@@ -1057,11 +1057,22 @@ bool ChatHandler::HandleNpcAddCommand(const char* args)
     float o = chr->GetOrientation();
     Map *map = chr->GetMap();
 
-    if (chr->GetTransport())
+    if (Transport* trans = chr->GetTransport())
     {
-        uint32 tguid = chr->GetTransport()->AddNPCPassenger(0, id, chr->GetTransOffsetX(), chr->GetTransOffsetY(), chr->GetTransOffsetZ(), chr->GetTransOffsetO());
-        if (tguid > 0)
-            WorldDatabase.PQuery("INSERT INTO creature_transport (guid, npc_entry, transport_entry,  TransOffsetX, TransOffsetY, TransOffsetZ, TransOffsetO) values (%u, %u, %f, %f, %f, %f, %u)", tguid, id, chr->GetTransport()->GetEntry(), chr->GetTransOffsetX(), chr->GetTransOffsetY(), chr->GetTransOffsetZ(), chr->GetTransOffsetO());
+        uint32 guid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
+        CreatureData& data = sObjectMgr->NewOrExistCreatureData(guid);
+        data.id = id;
+        data.phaseMask = chr->GetPhaseMaskForSpawn();
+        data.posX = chr->GetTransOffsetX();
+        data.posY = chr->GetTransOffsetY();
+        data.posZ = chr->GetTransOffsetZ();
+        data.orientation = chr->GetTransOffsetO();
+
+        Creature* creature = trans->CreateNPCPassenger(guid, &data);
+
+        creature->SaveToDB(trans->GetGOInfo()->moTransport.mapID, 1 << map->GetSpawnMode(), chr->GetPhaseMaskForSpawn());
+
+        sObjectMgr->AddCreatureToGrid(guid, &data);
 
         return true;
     }

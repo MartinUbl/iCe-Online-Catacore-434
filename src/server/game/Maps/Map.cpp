@@ -228,7 +228,8 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Map* _par
 i_mapEntry (sMapStore.LookupEntry(id)), i_spawnMode(SpawnMode), i_InstanceId(InstanceId),
 m_unloadTimer(0), m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE),
 m_VisibilityNotifyPeriod(DEFAULT_VISIBILITY_NOTIFY_PERIOD),
-m_activeNonPlayersIter(m_activeNonPlayers.end()), i_gridExpiry(expiry), i_scriptLock(false)
+m_activeNonPlayersIter(m_activeNonPlayers.end()), _transportsUpdateIter(_transports.end()),
+i_gridExpiry(expiry), i_scriptLock(false)
 {
     m_parentMap = (_parent ? _parent : this);
     for (unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
@@ -275,6 +276,17 @@ void Map::AddToGrid(Creature* obj, NGridType *grid, Cell const& cell)
     obj->SetCurrentCell(cell);
 }
 
+template<>
+void Map::AddToGrid(GameObject* obj, NGridType* grid, Cell const& cell)
+{
+    if (obj->m_isWorldObject)
+        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(obj);
+    else
+        (*grid)(cell.CellX(), cell.CellY()).AddGridObject(obj);
+
+    obj->SetCurrentCell(cell);
+}
+
 template<class T>
 void Map::RemoveFromGrid(T* obj, NGridType *grid, Cell const& cell)
 {
@@ -285,7 +297,12 @@ void Map::RemoveFromGrid(T* obj, NGridType *grid, Cell const& cell)
 }
 
 template<class T>
-void Map::SwitchGridContainers(T* obj, bool on)
+void Map::SwitchGridContainers(T* /*obj*/, bool /*on*/)
+{
+}
+
+template<>
+void Map::SwitchGridContainers(Creature* obj, bool on)
 {
     CellPair p = Trinity::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     if (p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
@@ -306,8 +323,8 @@ void Map::SwitchGridContainers(T* obj, bool on)
 
     if (on)
     {
-        grid.RemoveGridObject<T>(obj);
-        grid.AddWorldObject<T>(obj);
+        grid.RemoveGridObject<Creature>(obj);
+        grid.AddWorldObject<Creature>(obj);
         /*if (!grid.RemoveGridObject<T>(obj, obj->GetGUID())
             || !grid.AddWorldObject<T>(obj, obj->GetGUID()))
         {
@@ -316,8 +333,8 @@ void Map::SwitchGridContainers(T* obj, bool on)
     }
     else
     {
-        grid.RemoveWorldObject<T>(obj);
-        grid.AddGridObject<T>(obj);
+        grid.RemoveWorldObject<Creature>(obj);
+        grid.AddGridObject<Creature>(obj);
         /*if (!grid.RemoveWorldObject<T>(obj, obj->GetGUID())
             || !grid.AddGridObject<T>(obj, obj->GetGUID()))
         {
@@ -325,6 +342,40 @@ void Map::SwitchGridContainers(T* obj, bool on)
         }*/
     }
     obj->m_isWorldObject = on;
+}
+
+template<>
+void Map::SwitchGridContainers(GameObject* obj, bool on)
+{
+    CellPair p = Trinity::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    if (p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
+    {
+        sLog->outError("Map::SwitchGridContainers: Object " UI64FMTD " has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        return;
+    }
+
+    Cell cell(p);
+    if (!IsGridLoaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)))
+        return;
+
+    sLog->outDebug("Switch object " UI64FMTD " from grid[%u, %u] %u", obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y, on);
+    NGridType *ngrid = getNGrid(cell.GridX(), cell.GridY());
+    ASSERT(ngrid != NULL);
+
+    GridType &grid = ngrid->getGridType(cell.CellX(), cell.CellY());
+
+    RemoveFromGrid<GameObject>(obj, ngrid, cell); //This step is not really necessary but we want to do ASSERT in remove/add
+
+    if (on)
+    {
+        grid.AddWorldObject(obj);
+        AddWorldObject(obj);
+    }
+    else
+    {
+        grid.AddGridObject(obj);
+        RemoveWorldObject(obj);
+    }
 }
 
 template void Map::SwitchGridContainers(Creature *, bool);
@@ -458,6 +509,66 @@ bool Map::Add(Player *player)
     return true;
 }
 
+template<>
+void Map::Add(Transport* obj)
+{
+    //TODO: Needs clean up. An object should not be added to map twice.
+    if (obj->IsInWorld())
+        return;
+
+    CellPair cellCoord = Trinity::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    if (cellCoord.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || cellCoord.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
+    {
+        sLog->outError("Map::Add: Object " UI64FMTD " has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), cellCoord.x_coord, cellCoord.y_coord);
+        return; //Should delete object
+    }
+
+    obj->AddToWorld();
+    _transports.insert(obj);
+}
+
+template<>
+void Map::Add(GameObject *obj)
+{
+    CellPair p = Trinity::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    if (p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
+    {
+        sLog->outError("Map::Add: Object " UI64FMTD " has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        return;
+    }
+
+    Cell cell(p);
+    if (obj->IsInWorld()) // need some clean up later
+    {
+        obj->UpdateObjectVisibility(true);
+        return;
+    }
+
+    if (obj->isActiveObject())
+        EnsureGridLoadedAtEnter(cell);
+    else
+        EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
+
+    NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
+    ASSERT(grid != NULL);
+
+    AddToGrid(obj, grid, cell);
+    //obj->SetMap(this);
+    obj->AddToWorld();
+
+    if (obj->GetTypeId() == TYPEID_GAMEOBJECT)
+        obj->_moveState = MAP_OBJECT_CELL_MOVE_NONE;
+
+    if (obj->isActiveObject())
+        AddToActive(obj);
+
+    sLog->outStaticDebug("Object %u enters grid[%u,%u]", GUID_LOPART(obj->GetGUID()), cell.GridX(), cell.GridY());
+
+    //something, such as vehicle, needs to be update immediately
+    //also, trigger needs to cast spell, if not update, cannot see visual
+    obj->UpdateObjectVisibility(true);
+}
+
 template<class T>
 void
 Map::Add(T *obj)
@@ -484,7 +595,7 @@ Map::Add(T *obj)
     NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
     ASSERT(grid != NULL);
 
-    AddToGrid(obj,grid,cell);
+    AddToGrid(obj, grid, cell);
     //obj->SetMap(this);
     obj->AddToWorld();
 
@@ -616,6 +727,17 @@ void Map::Update(const uint32 &t_diff)
         }
     }
 
+    for (_transportsUpdateIter = _transports.begin(); _transportsUpdateIter != _transports.end();)
+    {
+        WorldObject* obj = *_transportsUpdateIter;
+        ++_transportsUpdateIter;
+
+        if (!obj->IsInWorld())
+            continue;
+
+        obj->Update(t_diff);
+    }
+
     ///- Process necessary scripts
     if (!m_scriptSchedule.empty())
     {
@@ -625,6 +747,7 @@ void Map::Update(const uint32 &t_diff)
     }
 
     MoveAllCreaturesInMoveList();
+    MoveAllGameObjectsInMoveList();
 
     if (!m_mapRefManager.isEmpty() || !m_activeNonPlayers.empty())
         ProcessRelocationNotifies(t_diff);
@@ -751,6 +874,34 @@ void Map::Remove(Player *player, bool remove)
     sScriptMgr->OnPlayerLeaveMap(this, player);
 }
 
+template<>
+void Map::Remove(Transport* obj, bool remove)
+{
+    obj->RemoveFromWorld();
+
+    if (_transportsUpdateIter != _transports.end())
+    {
+        TransportsContainer::iterator itr = _transports.find(obj);
+        if (itr == _transports.end())
+            return;
+        if (itr == _transportsUpdateIter)
+            ++_transportsUpdateIter;
+        _transports.erase(itr);
+    }
+    else
+        _transports.erase(obj);
+
+    obj->ResetMap();
+
+    if (remove)
+    {
+        // if option set then object already saved at this moment
+        if (!sWorld->getBoolConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
+            obj->SaveRespawnTime();
+        DeleteFromWorld(obj);
+    }
+}
+
 template<class T>
 void
 Map::Remove(T *obj, bool remove)
@@ -850,12 +1001,63 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
     ASSERT(CheckGridIntegrity(creature,true));
 }
 
+void Map::GameObjectRelocation(GameObject* go, float x, float y, float z, float orientation, bool respawnRelocationOnFail)
+{
+    Cell integrity_check(go->GetPositionX(), go->GetPositionY());
+    Cell old_cell = go->GetCurrentCell();
+
+    ASSERT(integrity_check == old_cell);
+    Cell new_cell(x, y);
+
+    if (!respawnRelocationOnFail && !getNGrid(new_cell.GridX(), new_cell.GridY()))
+        return;
+
+    // delay creature move for grid/cell to grid/cell moves
+    if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
+    {
+#ifdef TRINITY_DEBUG
+        TC_LOG_DEBUG(LOG_FILTER_MAPS, "GameObject (GUID: %u Entry: %u) added to moving list from grid[%u, %u]cell[%u, %u] to grid[%u, %u]cell[%u, %u].", go->GetGUIDLow(), go->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
+#endif
+        AddGameObjectToMoveList(go, x, y, z, orientation);
+        // in diffcell/diffgrid case notifiers called at finishing move go in Map::MoveAllGameObjectsInMoveList
+    }
+    else
+    {
+        go->Relocate(x, y, z, orientation);
+        go->UpdateObjectVisibility(false);
+        RemoveGameObjectFromMoveList(go);
+    }
+
+    old_cell = go->GetCurrentCell();
+    integrity_check = Cell(go->GetPositionX(), go->GetPositionY());
+    ASSERT(integrity_check == old_cell);
+}
+
 void Map::AddCreatureToMoveList(Creature *c, float x, float y, float z, float ang)
 {
     if (!c)
         return;
 
     i_creaturesToMove[c] = CreatureMover(x, y, z, ang);
+}
+
+void Map::AddGameObjectToMoveList(GameObject* go, float x, float y, float z, float ang)
+{
+    if (!go)
+        return;
+
+    if (go->_moveState == MAP_OBJECT_CELL_MOVE_NONE)
+        i_gameObjectsToMove.push_back(go);
+    go->SetNewCellPosition(x, y, z, ang);
+}
+
+void Map::RemoveGameObjectFromMoveList(GameObject* go)
+{
+    if (!go)
+        return;
+
+    if (go->_moveState == MAP_OBJECT_CELL_MOVE_ACTIVE)
+        go->_moveState = MAP_OBJECT_CELL_MOVE_INACTIVE;
 }
 
 void Map::MoveAllCreaturesInMoveList()
@@ -900,6 +1102,45 @@ void Map::MoveAllCreaturesInMoveList()
             }
         }
     }
+}
+
+void Map::MoveAllGameObjectsInMoveList()
+{
+    for (std::vector<GameObject*>::iterator itr = i_gameObjectsToMove.begin(); itr != i_gameObjectsToMove.end(); ++itr)
+    {
+        GameObject* go = *itr;
+        if (go->FindMap() != this) //transport is teleported to another map
+            continue;
+
+        if (go->_moveState != MAP_OBJECT_CELL_MOVE_ACTIVE)
+        {
+            go->_moveState = MAP_OBJECT_CELL_MOVE_NONE;
+            continue;
+        }
+
+        go->_moveState = MAP_OBJECT_CELL_MOVE_NONE;
+        if (!go->IsInWorld())
+            continue;
+
+        // do move or do move to respawn or remove creature if previous all fail
+        if (GameObjectCellRelocation(go, Cell(go->_newPosition.m_positionX, go->_newPosition.m_positionY)))
+        {
+            // update pos
+            go->Relocate(go->_newPosition);
+            go->UpdateObjectVisibility(false);
+        }
+        else
+        {
+            // if GameObject can't be move in new cell/grid (not loaded) move it to repawn cell/grid
+            // GameObject coordinates will be updated and notifiers send
+            if (!GameObjectRespawnRelocation(go, false))
+            {
+                // ... or unload (if respawn grid also not loaded)
+                AddObjectToRemoveList(go);
+            }
+        }
+    }
+    i_gameObjectsToMove.clear();
 }
 
 bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
@@ -972,6 +1213,46 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
     return false;
 }
 
+bool Map::GameObjectCellRelocation(GameObject* go, Cell new_cell)
+{
+    Cell const& old_cell = go->GetCurrentCell();
+    if (!old_cell.DiffGrid(new_cell))                       // in same grid
+    {
+        // if in same cell then none do
+        if (old_cell.DiffCell(new_cell))
+        {
+            RemoveFromGrid(go,getNGrid(old_cell.GridX(), old_cell.GridY()), old_cell);
+            AddToGrid(go,getNGrid(new_cell.GridX(), new_cell.GridY()),new_cell);
+        }
+
+        return true;
+    }
+
+    // in diff. grids but active GameObject
+    if (go->isActiveObject())
+    {
+        EnsureGridLoadedAtEnter(new_cell);
+
+        RemoveFromGrid(go, getNGrid(old_cell.GridX(), old_cell.GridY()), old_cell);
+        AddToGrid(go, getNGrid(new_cell.GridX(), new_cell.GridY()), new_cell);
+
+        return true;
+    }
+
+    // in diff. loaded grid normal GameObject
+    if (IsGridLoaded(GridPair(new_cell.GridX(), new_cell.GridY())))
+    {
+        RemoveFromGrid(go, getNGrid(old_cell.GridX(), old_cell.GridY()), old_cell);
+        EnsureGridCreated(GridPair(new_cell.GridX(), new_cell.GridY()));
+        AddToGrid(go, getNGrid(new_cell.GridX(), new_cell.GridY()), new_cell);
+
+        return true;
+    }
+
+    // fail to move: normal GameObject attempt move to unloaded grid
+    return false;
+}
+
 bool Map::CreatureRespawnRelocation(Creature *c)
 {
     float resp_x, resp_y, resp_z, resp_o;
@@ -1001,6 +1282,27 @@ bool Map::CreatureRespawnRelocation(Creature *c)
         return false;
 }
 
+bool Map::GameObjectRespawnRelocation(GameObject* go, bool diffGridOnly)
+{
+    float resp_x, resp_y, resp_z, resp_o;
+    go->GetRespawnPosition(resp_x, resp_y, resp_z, &resp_o);
+    Cell resp_cell(resp_x, resp_y);
+
+    //GameObject will be unloaded with grid
+    if (diffGridOnly && !go->GetCurrentCell().DiffGrid(resp_cell))
+        return true;
+
+    // teleport it to respawn point (like normal respawn if player see)
+    if (GameObjectCellRelocation(go, resp_cell))
+    {
+        go->Relocate(resp_x, resp_y, resp_z, resp_o);
+        go->UpdateObjectVisibility(false);
+        return true;
+    }
+
+    return false;
+}
+
 bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool unloadAll)
 {
     NGridType *grid = getNGrid(x, y);
@@ -1026,12 +1328,14 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool unloadAll)
             // Finish creature moves, remove and delete all creatures with delayed remove before moving to respawn grids
             // Must know real mob position before move
             MoveAllCreaturesInMoveList();
+            MoveAllGameObjectsInMoveList();
 
             // move creatures to respawn grids if this is diff.grid or to remove list
             unloader.MoveToRespawnN();
 
             // Finish creature moves, remove and delete all creatures with delayed remove before unload
             MoveAllCreaturesInMoveList();
+            MoveAllGameObjectsInMoveList();
         }
 
         ObjectGridCleaner cleaner(*grid);
@@ -1092,6 +1396,7 @@ void Map::UnloadAll()
 {
     // clear all delayed moves, useless anyway do this moves before map unload.
     i_creaturesToMove.clear();
+    i_gameObjectsToMove.clear();
 
     for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end();)
     {
@@ -2120,7 +2425,7 @@ void Map::SendInitSelf(Player * player)
     // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
     if (Transport* transport = player->GetTransport())
     {
-        for (Transport::PlayerSet::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
+        for (std::set<WorldObject*>::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
         {
             if (player != (*itr) && player->HaveAtClient(*itr))
             {
@@ -2136,25 +2441,11 @@ void Map::SendInitSelf(Player * player)
 
 void Map::SendInitTransports(Player * player)
 {
-    // Hack to send out transports
-    MapManager::TransportMap& tmap = sMapMgr->m_TransportsByMap;
-
-    // no transports at map
-    if (tmap.find(player->GetMapId()) == tmap.end())
-        return;
-
     UpdateData transData(player->GetMapId());
 
-    MapManager::TransportSet& tset = tmap[player->GetMapId()];
-
-    for (MapManager::TransportSet::const_iterator i = tset.begin(); i != tset.end(); ++i)
-    {
-        // send data for current transport in other place
-        if ((*i) != player->GetTransport() && (*i)->GetMapId() == GetId())
-        {
+    for (TransportsContainer::const_iterator i = _transports.begin(); i != _transports.end(); ++i)
+        if (*i != player->GetTransport())
             (*i)->BuildCreateUpdateBlockForPlayer(&transData, player);
-        }
-    }
 
     WorldPacket packet;
     transData.BuildPacket(&packet);
@@ -2163,20 +2454,10 @@ void Map::SendInitTransports(Player * player)
 
 void Map::SendRemoveTransports(Player * player)
 {
-    // Hack to send out transports
-    MapManager::TransportMap& tmap = sMapMgr->m_TransportsByMap;
-
-    // no transports at map
-    if (tmap.find(player->GetMapId()) == tmap.end())
-        return;
-
     UpdateData transData(player->GetMapId());
 
-    MapManager::TransportSet& tset = tmap[player->GetMapId()];
-
-    // except used transport
-    for (MapManager::TransportSet::const_iterator i = tset.begin(); i != tset.end(); ++i)
-        if ((*i) != player->GetTransport() && (*i)->GetMapId() != GetId())
+    for (TransportsContainer::const_iterator i = _transports.begin(); i != _transports.end(); ++i)
+        if (*i != player->GetTransport())
             (*i)->BuildOutOfRangeUpdateBlock(&transData);
 
     WorldPacket packet;
@@ -2245,15 +2526,8 @@ void Map::RemoveAllObjectsInRemoveList()
         bool on = itr->second;
         i_objectsToSwitch.erase(itr);
 
-        switch(obj->GetTypeId())
-        {
-            case TYPEID_UNIT:
-                if (!obj->ToCreature()->IsPet())
-                    SwitchGridContainers(obj->ToCreature(), on);
-                break;
-            default:
-                break;
-        }
+        if (obj->GetTypeId() == TYPEID_UNIT || obj->GetTypeId() == TYPEID_GAMEOBJECT && !obj->m_isWorldObject)
+            SwitchGridContainers(obj, on);
     }
 
     //sLog->outDebug("Object remover 1 check.");
@@ -2351,6 +2625,13 @@ bool Map::ActiveObjectsNearGrid(uint32 x, uint32 y) const
     return false;
 }
 
+template<class T>
+void Map::AddToActive(T* obj)
+{
+    AddToActiveHelper(obj);
+}
+
+template <>
 void Map::AddToActive(Creature* c)
 {
     AddToActiveHelper(c);
@@ -2372,6 +2653,13 @@ void Map::AddToActive(Creature* c)
     }
 }
 
+template<class T>
+void Map::RemoveFromActive(T* obj)
+{
+    RemoveFromActiveHelper(obj);
+}
+
+template <>
 void Map::RemoveFromActive(Creature* c)
 {
     RemoveFromActiveHelper(c);
@@ -2402,6 +2690,9 @@ template void Map::Remove(Corpse *,bool);
 template void Map::Remove(Creature *,bool);
 template void Map::Remove(GameObject *, bool);
 template void Map::Remove(DynamicObject *, bool);
+
+template void Map::AddToActive(DynamicObject*);
+template void Map::RemoveFromActive(DynamicObject*);
 
 /* ******* Dungeon Instance Maps ******* */
 
@@ -3057,6 +3348,15 @@ GameObject*
 Map::GetGameObject(uint64 guid)
 {
     return ObjectAccessor::GetObjectInMap(guid, this, (GameObject*)NULL);
+}
+
+Transport* Map::GetTransport(uint64 guid)
+{
+    if (GUID_HIPART(guid) != HIGHGUID_MO_TRANSPORT)
+        return NULL;
+
+    GameObject* go = GetGameObject(guid);
+    return go ? go->ToTransport() : NULL;
 }
 
 DynamicObject*

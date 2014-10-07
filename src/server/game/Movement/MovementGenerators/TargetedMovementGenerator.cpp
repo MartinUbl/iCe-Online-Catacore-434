@@ -262,7 +262,7 @@ bool TargetedMovementGeneratorMedium<T,D>::DoUpdate(T* owner, uint32 time_diff)
         float ori = 0.0f;
         if (owner->movespline->onTransport)
             if (TransportBase* transport = owner->GetDirectTransport())
-                transport->CalculatePassengerPosition(dest.x, dest.y, dest.z, ori);
+                transport->CalculatePassengerPosition(dest.x, dest.y, dest.z, &ori);
 
         // First check distance
         if ((owner->GetTypeId() == TYPEID_UNIT && owner->ToCreature()->CanFly()) || fabs(i_target->GetPositionZ() - owner->GetPositionZ()) > 0.5f)

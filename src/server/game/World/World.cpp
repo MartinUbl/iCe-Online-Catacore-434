@@ -69,6 +69,7 @@
 #include "Language.h"
 #include "CreatureGroups.h"
 #include "Transport.h"
+#include "TransportMgr.h"
 
 #include "ScriptMgr.h"
 #include "AddonMgr.h"
@@ -1404,6 +1405,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Game Object Templates...");     // must be after LoadPageTexts
     sObjectMgr->LoadGameobjectInfo();
 
+    sLog->outString("Loading Transport Templates...");
+    sTransportMgr->LoadTransportTemplates();
+
     //sLog->outString("Loading Spell Rank Data...");
     //sSpellMgr->LoadSpellRanks();
 
@@ -1851,10 +1855,7 @@ void World::SetInitialWorldSettings()
     sBattlefieldMgr.InitBattlefield();
 
     sLog->outString("Loading Transports...");
-    sMapMgr->LoadTransports();
-
-    sLog->outString("Loading Transport NPCs...");
-    sMapMgr->LoadTransportNPCs();
+    sTransportMgr->SpawnContinentTransports();
 
     sLog->outString("Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate");

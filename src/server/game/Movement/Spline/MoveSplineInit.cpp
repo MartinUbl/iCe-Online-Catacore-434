@@ -210,7 +210,7 @@ namespace Movement
         {
             float unused = 0.0f;
             if (TransportBase* transport = _owner->GetDirectTransport())
-                transport->CalculatePassengerOffset(input.x, input.y, input.z, unused);
+                transport->CalculatePassengerOffset(input.x, input.y, input.z, &unused);
         }
 
         return input;

@@ -74,22 +74,6 @@ void BattlegroundIC::HandlePlayerResurrect(Player* player)
 		player->CastSpell(player,SPELL_OIL_REFINERY,true);
 }
 
-void BattlegroundIC::SendTransportInit(Player* player)
-{
-	if (!gunshipAlliance || !gunshipHorde)
-		return;
-
-	UpdateData transData(player->GetMapId());
-
-	gunshipAlliance->BuildCreateUpdateBlockForPlayer(&transData, player);
-	gunshipHorde->BuildCreateUpdateBlockForPlayer(&transData, player);
-
-	WorldPacket packet;
-
-	transData.BuildPacket(&packet);
-	player->GetSession()->SendPacket(&packet);
-}
-
 void BattlegroundIC::DoAction(uint32 action, uint64 var)
 {
 	if (action != ACTION_TELEPORT_PLAYER_TO_TRANSPORT)
@@ -311,8 +295,6 @@ void BattlegroundIC::AddPlayer(Player *plr)
 
 	if (nodePoint[NODE_TYPE_REFINERY].nodeState == (plr->GetTeamId() == TEAM_ALLIANCE ? NODE_STATE_CONTROLLED_A : NODE_STATE_CONTROLLED_H))
 		plr->CastSpell(plr,SPELL_OIL_REFINERY,true);
-
-	SendTransportInit(plr);
 }
 
 void BattlegroundIC::RemovePlayer(Player* plr, uint64 /*guid*/)
@@ -401,8 +383,8 @@ bool BattlegroundIC::SetupBattleground()
 		return false;
 	}
 
-	gunshipHorde = CreateTransport(GO_HORDE_GUNSHIP,TRANSPORT_PERIOD_TIME);
-	gunshipAlliance = CreateTransport(GO_ALLIANCE_GUNSHIP,TRANSPORT_PERIOD_TIME);
+    gunshipHorde = sTransportMgr->CreateTransport(GO_HORDE_GUNSHIP, 0, GetBgMap());
+    gunshipAlliance = sTransportMgr->CreateTransport(GO_ALLIANCE_GUNSHIP, 0, GetBgMap());
 
 	if (!gunshipAlliance || !gunshipHorde)
 	{
@@ -414,7 +396,7 @@ bool BattlegroundIC::SetupBattleground()
 	for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end();itr++)
 	{
 		if (Player* player = sObjectMgr->GetPlayer(itr->first))
-			SendTransportInit(player);
+            GetBgMap()->SendInitTransports(player);
 	}
 
 	// setting correct factions for Keep Cannons
@@ -626,8 +608,8 @@ void BattlegroundIC::HandleContestedNodes(ICNodePoint* nodePoint)
 {
 	if (nodePoint->nodeType == NODE_TYPE_HANGAR)
 	{
-		if (gunshipAlliance && gunshipHorde)
-			(nodePoint->faction == TEAM_ALLIANCE ? gunshipHorde : gunshipAlliance)->BuildStopMovePacket(GetBgMap());
+        if (gunshipAlliance && gunshipHorde)
+            (nodePoint->faction == TEAM_ALLIANCE ? gunshipHorde : gunshipAlliance)->EnableMovement(false);
 
 		for (uint8 u = BG_IC_GO_HANGAR_TELEPORTER_1; u < BG_IC_GO_HANGAR_TELEPORTER_3; u++)
 			DelObject(u);
@@ -663,8 +645,8 @@ void BattlegroundIC::HandleCapturedNodes(ICNodePoint* nodePoint, bool recapture)
 
 		//sLog->outError("BG_IC_GO_HANGAR_BANNER CAPTURED Faction: %u", nodePoint->faction);
 
-		(nodePoint->faction == TEAM_ALLIANCE ? gunshipAlliance : gunshipHorde)->BuildStartMovePacket(GetBgMap());
-		(nodePoint->faction == TEAM_ALLIANCE ? gunshipHorde : gunshipAlliance)->BuildStopMovePacket(GetBgMap());
+        (nodePoint->faction == TEAM_ALLIANCE ? gunshipAlliance : gunshipHorde)->EnableMovement(true);
+        (nodePoint->faction == TEAM_ALLIANCE ? gunshipHorde : gunshipAlliance)->EnableMovement(false);
 		// we should spawn teleporters
 		break;
 	case BG_IC_GO_QUARRY_BANNER:
@@ -900,50 +882,4 @@ WorldSafeLocsEntry const* BattlegroundIC::GetClosestGraveYard(Player* player)
 		good_entry = sWorldSafeLocsStore.LookupEntry(BG_IC_GraveyardIds[teamIndex+MAX_NODE_TYPES]);
 
 	return good_entry;
-}
-
-Transport* BattlegroundIC::CreateTransport(uint32 goEntry,uint32 period)
-{
-	Transport* t = new Transport(period,0);
-
-	const GameObjectInfo* goinfo = sObjectMgr->GetGameObjectInfo(goEntry);
-
-	if (!goinfo)
-	{
-		sLog->outErrorDb("Transport ID: %u will not be loaded, gameobject_template missing", goEntry);
-		delete t;
-		return NULL;
-	}
-
-	std::set<uint32> mapsUsed;
-
-	if (!t->GenerateWaypoints(goinfo->moTransport.taxiPathId, mapsUsed))
-		// skip transports with empty waypoints list
-	{
-		sLog->outErrorDb("Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO data0 field.",goinfo->moTransport.taxiPathId);
-		delete t;
-		return NULL;
-	}
-
-	uint32 mapid = t->m_WayPoints[0].mapid;
-
-	float x = t->m_WayPoints[0].x;
-	float y = t->m_WayPoints[0].y;
-	float z =  t->m_WayPoints[0].z;
-	float o = 1;
-
-	// creates the Gameobject
-	if (!t->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_MO_TRANSPORT),goEntry, mapid, x, y, z, o, 100, 0))
-	{
-		delete t;
-		return NULL;
-	}
-
-	//If we someday decide to use the grid to track transports, here:
-	t->SetMap(GetBgMap());
-
-	for (uint8 i = 0; i < 5; i++)
-		t->AddNPCPassenger(0,(goEntry == GO_HORDE_GUNSHIP ? NPC_HORDE_GUNSHIP_CANNON : NPC_ALLIANCE_GUNSHIP_CANNON), (goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetPositionX() : allianceGunshipPassengers[i].GetPositionX()) , (goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetPositionY() : allianceGunshipPassengers[i].GetPositionY()),(goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetPositionZ() : allianceGunshipPassengers[i].GetPositionZ()), (goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetOrientation() : allianceGunshipPassengers[i].GetOrientation()));
-
-	return t;
 }
