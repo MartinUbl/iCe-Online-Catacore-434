@@ -4474,6 +4474,14 @@ void SpellMgr::LoadSpellCustomAttr()
 
 /*************************  END OF RAGNAROS FIRELANDS *****************************/
 
+/*************************  WELL_OF_ETERNITY  *****************************/
+
+        case 107900: // Demonic Warding 
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
+            break;
+
+/*************************  END OF WELL_OF_ETERNITY *****************************/
+
 /*************************         DRAGON SOUL        *****************************/
 
         case 104512: // Earthen Vortex ( unwanted summon effect)

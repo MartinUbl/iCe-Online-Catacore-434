@@ -18,305 +18,298 @@
 #include "ScriptPCH.h"
 #include "well_of_eternity.h"
 
-#define MAX_ENCOUNTER      (3)
+#define INST_WOE_SCRIPT instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript
 
-const Position legionDemonSpawnPositions[2] =
+#define CRYSTAL_ACTIVE (0)
+#define CRYSTAL_INACTIVE (1)
+
+void INST_WOE_SCRIPT::Initialize()
 {
-    // These are correct !!! , but i will use temporary points -> at stairs
-    //{3442.0f,-5067.8f, 213.6f, 2.12f},     //LEFT
-    //{3448.4f,-5065.2f, 213.6f, 2.12f},     //RIGHT
+    perotharnGUID = 0;
+    queenGUID = 0;
+    mannorothGUID = 0;
+    varothenGUID = 0;
 
-    {3373.7f,-4957.7f, 181.1f, 2.12f},     //LEFT
-    {3379.2f,-4954.7f, 181.1f, 2.12f},     //RIGHT
-};
+    legionTimer = 2000;
+    waveCounter = WAVE_ONE;
 
-const Position midPositions[2] =
+    crystalsRemaining = MAX_CRYSTALS;
+
+    memset(m_auiEncounter, 0, sizeof(uint32)* MAX_ENCOUNTER);
+    memset(crystals, CRYSTAL_ACTIVE, sizeof(uint32)* MAX_CRYSTALS);
+    connectors.clear();
+    guardians.clear();
+    crystalGUIDS.clear();
+
+    GetCorrUiEncounter();
+}
+
+std::string INST_WOE_SCRIPT::GetSaveData()
 {
-    {3334.4f,-4896.5f, 181.1f, 2.12f},     //LEFT
-    {3341.1f,-4892.4f, 181.1f, 2.12f},     //RIGHT
-};
+    OUT_SAVE_INST_DATA;
 
-const Position midPositions2[2] =
+    std::ostringstream saveStream;
+    saveStream << m_auiEncounter[0];
+    for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+        saveStream << " " << m_auiEncounter[i];
+
+    OUT_SAVE_INST_DATA_COMPLETE;
+    return saveStream.str();
+}
+
+void INST_WOE_SCRIPT::Load(const char* chrIn)
 {
-    {3329.98f,-4892.0f, 181.1f, 2.12f},     //LEFT
-    {3337.96f,-4886.74f, 181.1f, 2.12f},    //RIGHT
-};
-
-const Position frontEndPositions[2] =
-{
-    {3286.0f,-4821.0f, 181.5f, 2.12f},     //LEFT
-    {3290.0f,-4818.0f, 181.5f, 2.12f},     //RIGHT
-};
-
-class instance_well_of_eternity : public InstanceMapScript
-{
-public:
-    instance_well_of_eternity() : InstanceMapScript("instance_well_of_eternity", 939) { }
-
-    struct instance_well_of_eternity_InstanceMapScript : public InstanceScript
+    if (!chrIn)
     {
-        instance_well_of_eternity_InstanceMapScript(Map *pMap) : InstanceScript(pMap) { Initialize(); }
-
-        // Timers
-        uint32 legionTimer;
-        DemonWave waveCounter;
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        uint32 currEnc[MAX_ENCOUNTER];
-
-        // Creature GUIDS
-        uint64 perotharnGUID;
-        uint64 queenGUID;
-        uint64 mannorothGUID;
-        uint64 varothenGUID;
-
-        // Go GUIDS
-
-        std::string saveData;
-
-        void Initialize()
-        {
-            perotharnGUID = 0;
-            queenGUID = 0;
-            mannorothGUID = 0;
-            varothenGUID = 0;
-
-            legionTimer = 2000;
-            waveCounter = WAVE_ONE;
-
-            memset(m_auiEncounter, 0, sizeof(uint32)* MAX_ENCOUNTER);
-            GetCorrUiEncounter();
-        }
-
-        void InitDemonSpeed(Creature * pDemon)
-        {
-            pDemon->SetWalk(true);
-            pDemon->SetSpeed(MOVE_WALK, 1.28571f, true);
-        }
-
-        void Update(uint32 diff)
-        {
-            if (!instance->HavePlayers())
-                return;
-            
-            if (legionTimer <= diff)
-            {
-                if (Creature * pPerotharn = this->instance->GetCreature(GetData64(DATA_PEROTHARN)))
-                {
-                    if (pPerotharn->isDead())
-                        return;
-
-                    Creature * pDemon = NULL;
-
-                    switch (waveCounter)
-                    {
-                        case WAVE_ONE:
-                            pDemon = pPerotharn->SummonCreature(LEGION_DEMON_ENTRY, legionDemonSpawnPositions[DIRECTION_LEFT]);
-                            if (pDemon)
-                            {
-                                InitDemonSpeed(pDemon);
-                                pDemon->AI()->SetData(DEMON_DATA_DIRECTION, DIRECTION_LEFT);
-                                pDemon->AI()->SetData(DEMON_DATA_WAVE, waveCounter);
-                                pDemon->GetMotionMaster()->MovePoint(WP_MID, midPositions[DIRECTION_LEFT]);
-                            }
-
-                            pDemon = pPerotharn->SummonCreature(LEGION_DEMON_ENTRY, legionDemonSpawnPositions[DIRECTION_RIGHT]);
-                            if (pDemon)
-                            {
-                                InitDemonSpeed(pDemon);
-                                pDemon->AI()->SetData(DEMON_DATA_DIRECTION, DIRECTION_RIGHT);
-                                pDemon->AI()->SetData(DEMON_DATA_WAVE, waveCounter);
-                                pDemon->GetMotionMaster()->MovePoint(WP_MID, midPositions[DIRECTION_RIGHT]);
-                            }
-                            waveCounter = WAVE_TWO;
-                            break;
-                        case WAVE_TWO:
-                            pDemon = pPerotharn->SummonCreature(LEGION_DEMON_ENTRY, legionDemonSpawnPositions[DIRECTION_LEFT]);
-                            if (pDemon)
-                            {
-                                InitDemonSpeed(pDemon);
-                                pDemon->AI()->SetData(DEMON_DATA_DIRECTION, DIRECTION_LEFT);
-                                pDemon->AI()->SetData(DEMON_DATA_WAVE, waveCounter);
-                                pDemon->GetMotionMaster()->MovePoint(WP_MID, midPositions2[DIRECTION_LEFT]);
-                            }
-
-                            pDemon = pPerotharn->SummonCreature(LEGION_DEMON_ENTRY, legionDemonSpawnPositions[DIRECTION_RIGHT]);
-                            if (pDemon)
-                            {
-                                InitDemonSpeed(pDemon);
-                                pDemon->AI()->SetData(DEMON_DATA_DIRECTION, DIRECTION_RIGHT);
-                                pDemon->AI()->SetData(DEMON_DATA_WAVE, waveCounter);
-                                pDemon->GetMotionMaster()->MovePoint(WP_MID, midPositions2[DIRECTION_RIGHT]);
-                            }
-                            waveCounter = WAVE_THREE;
-                            break;
-                        case WAVE_THREE:
-                            pDemon = pPerotharn->SummonCreature(LEGION_DEMON_ENTRY, legionDemonSpawnPositions[DIRECTION_LEFT]);
-                            if (pDemon)
-                            {
-                                InitDemonSpeed(pDemon);
-                                pDemon->AI()->SetData(DEMON_DATA_DIRECTION, DIRECTION_STRAIGHT);
-                                pDemon->AI()->SetData(DEMON_DATA_WAVE, waveCounter);
-                                pDemon->GetMotionMaster()->MovePoint(WP_END, frontEndPositions[DIRECTION_LEFT]);
-                            }
-
-                            pDemon = pPerotharn->SummonCreature(LEGION_DEMON_ENTRY, legionDemonSpawnPositions[DIRECTION_RIGHT]);
-                            if (pDemon)
-                            {
-                                InitDemonSpeed(pDemon);
-                                pDemon->AI()->SetData(DEMON_DATA_DIRECTION, DIRECTION_STRAIGHT);
-                                pDemon->AI()->SetData(DEMON_DATA_WAVE, waveCounter);
-                                pDemon->GetMotionMaster()->MovePoint(WP_END, frontEndPositions[DIRECTION_RIGHT]);
-                            }
-                            waveCounter = WAVE_ONE;
-                            break;
-                    }
-                }
-                legionTimer = 1500;
-            }
-            else legionTimer -= diff;
-        }
-
-        std::string GetSaveData()
-        {
-            OUT_SAVE_INST_DATA;
-
-            std::ostringstream saveStream;
-            saveStream << m_auiEncounter[0];
-            for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
-                saveStream << " " << m_auiEncounter[i];
-
-            OUT_SAVE_INST_DATA_COMPLETE;
-            return saveStream.str();
-        }
-
-        void Load(const char* chrIn)
-        {
-            if (!chrIn)
-            {
-                OUT_LOAD_INST_DATA_FAIL;
-                return;
-            }
-
-            OUT_LOAD_INST_DATA(chrIn);
-
-            std::istringstream loadStream(chrIn);
-            for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
-                loadStream >> m_auiEncounter[i];
-
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-            {
-                if (m_auiEncounter[i] == IN_PROGRESS)
-                    m_auiEncounter[i] = NOT_STARTED;
-            }
-
-            GetCorrUiEncounter();
-            OUT_LOAD_INST_DATA_COMPLETE;
-        }
-
-        void OnCreatureCreate(Creature* pCreature, bool add)
-        {
-            if (!add)
-                return;
-
-            switch (pCreature->GetEntry())
-            {
-                case PEROTHARN_ENTRY:
-                    perotharnGUID = pCreature->GetGUID();
-                    break;
-                case QUEEN_AZSHARA_ENTRY:
-                    queenGUID = pCreature->GetGUID();
-                    break;
-                case MANNOROTH_ENTRY:
-                    mannorothGUID = pCreature->GetGUID();
-                    break;
-                case VAROTHEN_ENTRY:
-                    varothenGUID = pCreature->GetGUID();
-                    break;
-            }
-        }
-
-        void OnGameObjectCreate(GameObject* go, bool add)
-        {
-            if (add == false)
-                return;
-
-           /* switch (go->GetEntry())
-            {
-                default:
-                    break;
-            }*/
-        }
-
-        uint32 GetData(uint32 DataId)
-        {
-            if (DataId < MAX_ENCOUNTER)
-                return m_auiEncounter[DataId];
-
-            return 0;
-        }
-
-        void SetData(uint32 type, uint32 data)
-        {
-            if (type < MAX_ENCOUNTER)
-                m_auiEncounter[type] = data;
-
-            if (data == DONE)
-            {
-                std::ostringstream saveStream;
-                saveStream << m_auiEncounter[0];
-                for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
-                    saveStream << " " << m_auiEncounter[i];
-
-                GetCorrUiEncounter();
-                SaveToDB();
-                OUT_SAVE_INST_DATA_COMPLETE;
-            }
-        }
-
-        uint64 GetData64(uint32 type)
-        {
-            switch (type)
-            {
-                case DATA_PEROTHARN:
-                    return perotharnGUID;
-                case DATA_QUEEN_AZSHARA:
-                    return queenGUID;
-                case DATA_CAPTAIN_VAROTHEN:
-                    return varothenGUID;
-                case DATA_MANNOROTH:
-                    return mannorothGUID;
-            }
-            return 0;
-        }
-
-
-        void SetData64(uint32 identifier, uint64 data)
-        {
-            /*switch (identifier)
-            {
-                default:
-                    break;
-            }*/
-        }
-
-        virtual uint32* GetCorrUiEncounter()
-        {
-            currEnc[0] = m_auiEncounter[DATA_PEROTHARN];
-            currEnc[1] = m_auiEncounter[DATA_QUEEN_AZSHARA];
-            currEnc[2] = m_auiEncounter[DATA_MANNOROTH];
-            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(), currEnc, MAX_ENCOUNTER);
-
-            return NULL;
-        }
-
-    };
-
-    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
-    {
-        return new instance_well_of_eternity_InstanceMapScript(pMap);
+        OUT_LOAD_INST_DATA_FAIL;
+        return;
     }
-};
+
+    OUT_LOAD_INST_DATA(chrIn);
+
+    std::istringstream loadStream(chrIn);
+    for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+        loadStream >> m_auiEncounter[i];
+
+    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    {
+        if (m_auiEncounter[i] == IN_PROGRESS)
+            m_auiEncounter[i] = NOT_STARTED;
+    }
+
+    GetCorrUiEncounter();
+    OUT_LOAD_INST_DATA_COMPLETE;
+}
+
+void INST_WOE_SCRIPT::OnCreatureCreate(Creature* pCreature, bool add)
+{
+    if (!add)
+        return;
+
+    switch (pCreature->GetEntry())
+    {
+        case PEROTHARN_ENTRY:
+            perotharnGUID = pCreature->GetGUID();
+            break;
+        case QUEEN_AZSHARA_ENTRY:
+            queenGUID = pCreature->GetGUID();
+            break;
+        case MANNOROTH_ENTRY:
+            mannorothGUID = pCreature->GetGUID();
+            break;
+        case VAROTHEN_ENTRY:
+            varothenGUID = pCreature->GetGUID();
+            break;
+        case PORTAL_CONNECTOR_1_ENTRY:
+        case PORTAL_CONNECTOR_2_ENTRY:
+        case PORTAL_CONNECTOR_3_ENTRY:
+        {
+            CONNECTOR_INFO ci (pCreature->GetGUID(), pCreature->GetEntry());
+            connectors.push_back(ci);
+            break;
+        }
+        case GUARDIAN_DEMON_ENTRY:
+            guardians.push_back(pCreature->GetGUID());
+            break;
+    }
+}
+
+void INST_WOE_SCRIPT::OnGameObjectCreate(GameObject* go, bool add)
+{
+    if (add == false)
+        return;
+
+    switch (go->GetEntry())
+    {
+        case PORTAL_ENERGY_FOCUS_ENTRY:
+            crystalGUIDS.push_back(go->GetGUID());
+            break;
+    }
+}
+
+uint32 INST_WOE_SCRIPT::GetData(uint32 DataId)
+{
+    if (DataId < MAX_ENCOUNTER)
+        return m_auiEncounter[DataId];
+
+    return 0;
+}
+
+void INST_WOE_SCRIPT::SetData(uint32 type, uint32 data)
+{
+    if (type < MAX_ENCOUNTER)
+        m_auiEncounter[type] = data;
+
+    if (data == DONE)
+    {
+        std::ostringstream saveStream;
+        saveStream << m_auiEncounter[0];
+        for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+            saveStream << " " << m_auiEncounter[i];
+
+        GetCorrUiEncounter();
+        SaveToDB();
+        OUT_SAVE_INST_DATA_COMPLETE;
+    }
+}
+
+uint64 INST_WOE_SCRIPT::GetData64(uint32 type)
+{
+    switch (type)
+    {
+        case DATA_PEROTHARN:
+            return perotharnGUID;
+        case DATA_QUEEN_AZSHARA:
+            return queenGUID;
+        case DATA_CAPTAIN_VAROTHEN:
+            return varothenGUID;
+        case DATA_MANNOROTH:
+            return mannorothGUID;
+    }
+    return 0;
+}
+
+void INST_WOE_SCRIPT::TurnOffConnectors(uint32 connEntry, Creature * source)
+{
+    crystalsRemaining--;
+
+    for (std::list<CONNECTOR_INFO>::iterator it = connectors.begin(); it != connectors.end(); it++)
+    {
+        CONNECTOR_INFO conInfo = *it;
+
+        if (conInfo.entry == connEntry)
+        if (Creature * pConnector = ObjectAccessor::GetCreature(*source, conInfo.guid))
+        {
+            pConnector->InterruptNonMeleeSpells(false);
+            pConnector->CastSpell(pConnector,SPELL_CONNECTOR_DEAD,true);
+        }
+    }
+}
+
+void INST_WOE_SCRIPT::CrystalDestroyed(uint32 crystalXCoord)
+{
+    switch (crystalXCoord)
+    {
+        case FIRST_CRYSTAL_X_COORD:
+            crystals[0] = CRYSTAL_INACTIVE;
+            break;
+        case SECOND_CRYSTAL_X_COORD:
+            crystals[1] = CRYSTAL_INACTIVE;
+            break;
+        case THIRD_CRYSTAL_X_COORD:
+        {
+            // last crystal destroyed -> some kind of timer ?
+            crystals[2] = CRYSTAL_INACTIVE;
+            break;
+        }
+    }
+}
+
+bool INST_WOE_SCRIPT::IsPortalClosing(DemonDirection dir)
+{
+    if (crystals[uint32(dir)] == CRYSTAL_INACTIVE)
+        return true;
+    return false;
+}
+
+Creature * INST_WOE_SCRIPT::GetGuardianByDirection(uint32 wave, Creature * source)
+{
+    for (std::list<uint64>::iterator it = guardians.begin(); it != guardians.end(); it++)
+    {
+        if (Creature * pGuardian = ObjectAccessor::GetCreature(*source, *it))
+        {
+            if (pGuardian->AI()->GetData(DATA_GET_GUARDIAN_WAVE) == wave)
+                return pGuardian;
+        }
+    }
+    return NULL;
+}
+
+void INST_WOE_SCRIPT::SetData64(uint32 identifier, uint64 data)
+{
+}
+
+void INST_WOE_SCRIPT::SummonAndInitDemon(Creature * summoner,Position summonPos, DemonDirection dir, DemonWave wave, Position movePos, WayPointStep wpID)
+{
+    Creature * pDemon = NULL;
+
+    // Dont summon other demons if demon portal is closing -> cause crystals were destroyed
+    if (crystals[dir] == CRYSTAL_INACTIVE)
+        return;
+
+    pDemon = summoner->SummonCreature(LEGION_PORTAL_DEMON, summonPos);
+
+    if (pDemon)
+    {
+        pDemon->AI()->SetData(DEMON_DATA_DIRECTION, dir);
+        pDemon->AI()->SetData(DEMON_DATA_WAVE, wave);
+        pDemon->GetMotionMaster()->MovePoint(wpID, movePos);
+    }
+}
+
+void INST_WOE_SCRIPT::Update(uint32 diff)
+{
+    if (!instance->HavePlayers())
+        return;
+
+    if (legionTimer <= diff)
+    {
+        if (Creature * pPerotharn = this->instance->GetCreature(perotharnGUID))
+        {
+            if (pPerotharn->isDead() || crystalsRemaining == 0)
+                return; //  be carefull
+
+            switch (waveCounter)
+            {
+                case WAVE_ONE: // Going to mid position (LEFT/RIGHT)
+                {
+                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_LEFT],
+                                       DIRECTION_LEFT, waveCounter, midPositions[DIRECTION_LEFT], WP_MID);
+
+                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_RIGHT],
+                                       DIRECTION_RIGHT, waveCounter, midPositions[DIRECTION_RIGHT], WP_MID);
+
+                    waveCounter = WAVE_TWO;
+                    break;
+                }
+                case WAVE_TWO: // Going to farther mid position (LEFT/RIGHT)
+                {
+                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_LEFT],
+                                       DIRECTION_LEFT, waveCounter, midPositions2[DIRECTION_LEFT], WP_MID);
+
+                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_RIGHT],
+                                       DIRECTION_RIGHT, waveCounter, midPositions2[DIRECTION_RIGHT], WP_MID);
+
+                    waveCounter = WAVE_THREE;
+                    break;
+                }
+                case WAVE_THREE: // Going straight till end (END)
+                {
+                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_LEFT],
+                                       DIRECTION_STRAIGHT, waveCounter, frontEndPositions[DIRECTION_LEFT], WP_END);
+
+                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_RIGHT],
+                                       DIRECTION_STRAIGHT, waveCounter, frontEndPositions[DIRECTION_RIGHT], WP_END);
+
+                    waveCounter = WAVE_ONE;
+                    break;
+                }
+            }
+        }
+        legionTimer = 1500;
+    }
+    else legionTimer -= diff;
+}
+
+uint32* INST_WOE_SCRIPT::GetCorrUiEncounter()
+{
+    currEnc[0] = m_auiEncounter[DATA_PEROTHARN];
+    currEnc[1] = m_auiEncounter[DATA_QUEEN_AZSHARA];
+    currEnc[2] = m_auiEncounter[DATA_MANNOROTH];
+    sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(), currEnc, MAX_ENCOUNTER);
+
+    return NULL;
+}
 
 void AddSC_instance_well_of_eternity()
 {

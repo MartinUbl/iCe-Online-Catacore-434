@@ -130,7 +130,7 @@ enum Phase
     PHASE_TWO,
 };
 
-enum Actions
+enum PerotharnActions
 {
     ACTION_NONE,
     ACTION_ESSENCE_START,
@@ -170,10 +170,35 @@ public:
     {
         boss_perotharnAI(Creature* creature) : ScriptedAI(creature), Summons(creature)
         {
-            instance = creature->GetInstanceScript();
+            felGuardGUID = 0;
+            pInstance = creature->GetInstanceScript();
+
+            me->SummonGameObject(FIREWALL_INVIS_ENTRY, 3226.0f, -4981.0f, 194.2f, 3.86f, 0, 0, 0, 0, 0);
+            SummonIntroCreatures();
+
+            introTimer = 30000;
+            introStep = 0;
         }
 
-        InstanceScript* instance;
+        void SummonIntroCreatures()
+        {
+            if (Creature * felgurad = me->SummonCreature(LEGION_DEMON_ENTRY, 3182.65f, -4939.93f, START_Z_COORD, 5.4f))
+                felGuardGUID = felgurad->GetGUID();
+
+            me->SummonCreature(CORRUPTED_ARCANIST_ENTRY, 3200.54f, -4945.15f, START_Z_COORD, 2.02f);
+
+            me->SummonCreature(DREADLORD_DEFFENDER_ENTRY, 3206.92f, -4948.82f, START_Z_COORD, 2.38f);
+            me->SummonCreature(DREADLORD_DEFFENDER_ENTRY, 3198.35f, -4952.23f, START_Z_COORD, 1.93f);
+
+            if (Creature * pGuard = me->SummonCreature(GUARDIAN_DEMON_ENTRY, 3332.8f, -4918.25f, COURTYARD_Z, 1.16f))
+                pGuard->AI()->SetData(DATA_SET_GUARDIAN_WAVE, WAVE_ONE);
+            if (Creature * pGuard = me->SummonCreature(GUARDIAN_DEMON_ENTRY, 3367.87f, -4891.7f, COURTYARD_Z, 3.0f))
+                pGuard->AI()->SetData(DATA_SET_GUARDIAN_WAVE, WAVE_TWO);
+            if (Creature * pGuard = me->SummonCreature(GUARDIAN_DEMON_ENTRY, 3263.63f, -4868.42f, COURTYARD_Z, 5.7f))
+                pGuard->AI()->SetData(DATA_SET_GUARDIAN_WAVE, WAVE_THREE);
+        }
+
+        InstanceScript* pInstance;
         SummonList Summons;
         Phase phase;
 
@@ -181,9 +206,14 @@ public:
         uint32 felFlamesTimer;
         uint32 felDecayTimer;
 
+        uint64 felGuardGUID;
+        uint32 introTimer;
+        uint32 introStep;
+
         uint32 essenceTimer;
         uint8 essenceStep;
 
+        bool canMoveToNextPoint;
         bool essenceUsed;
         bool frenzyUsed;
 
@@ -194,6 +224,11 @@ public:
 
         void Reset()
         {
+            canMoveToNextPoint = false;
+
+            if (pInstance)
+                pInstance->SetData(DATA_PEROTHARN, NOT_STARTED);
+
             felFlamesTimer = 5000;
             felDecayTimer = 8000;
 
@@ -201,10 +236,13 @@ public:
             Summons.DespawnAll();
         }
 
-        void PlayQuote(Quotes q)
+        void PlayQuote(Quotes q, bool say = false)
         {
             DoPlaySoundToSet(me, q.soundId);
-            me->MonsterYell(q.text, LANG_UNIVERSAL, 0);
+            if (say)
+                me->MonsterSay(q.text, LANG_UNIVERSAL, 0, 150.0f);
+            else
+                me->MonsterYell(q.text, LANG_UNIVERSAL, 0);
         }
 
         void DoAction(const int32 action)
@@ -220,11 +258,15 @@ public:
         {
             PlayQuote(aggroQuotes[0]);
             DoAction(ACTION_ILLIADAN_AGGRO);
+            if (pInstance)
+                pInstance->SetData(DATA_PEROTHARN, IN_PROGRESS);
         }
 
         void EnterEvadeMode()
         {
             ScriptedAI::EnterEvadeMode();
+            if (pInstance)
+                pInstance->SetData(DATA_PEROTHARN, NOT_STARTED);
         }
 
         void KilledUnit(Unit* victim)
@@ -239,10 +281,71 @@ public:
         {
             Summons.DespawnAll();
             PlayQuote(onDeathQuotes[urand(0,2)]);
+
+            if (pInstance)
+                pInstance->SetData(DATA_PEROTHARN, DONE);
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (id == 0)
+            {
+                canMoveToNextPoint = true;
+            }
+            else if (id == 1)
+            {
+                me->SetHomePosition(COURTYARD_X, COURTYARD_Y, COURTYARD_Z, 2.35f);
+                me->setFaction(35);
+                me->SetVisible(false);
+            }
         }
 
         void UpdateAI(const uint32 diff)
         {
+            if (canMoveToNextPoint)
+            {
+                canMoveToNextPoint = false;
+                me->GetMotionMaster()->MovePoint(1, COURTYARD_X, COURTYARD_Y, COURTYARD_Z, true);
+            }
+
+            if (introStep < 5 && introTimer <= diff)
+            {
+                if (introStep < 3)
+                    PlayQuote(introQuotes[introStep],true);
+                else
+                {
+                    if (introStep == 4)
+                    {
+                        introStep++;
+                        if (Creature * pLegionDemon = ObjectAccessor::GetCreature(*me, felGuardGUID))
+                            pLegionDemon->GetMotionMaster()->MovePoint(1, 3197.25f, -4942.93f, START_Z_COORD, true);
+                        return;
+                    }
+
+                    me->GetMotionMaster()->MovePoint(0, ESCAPE_X, ESCAPE_Y, ESCAPE_Z, true);
+
+                    if (Creature * pArcanist = me->FindNearestCreature(CORRUPTED_ARCANIST_ENTRY,50.0f,true))
+                        pArcanist->GetMotionMaster()->MovePoint(0, ESCAPE_X, ESCAPE_Y, ESCAPE_Z, true);
+
+                    std::list<Creature*> creatures;
+                    me->GetCreatureListWithEntryInGrid(creatures, DREADLORD_DEFFENDER_ENTRY, 50.0f);
+                    for (std::list<Creature*>::iterator itr = creatures.begin(); itr != creatures.end(); ++itr)
+                        (*itr)->GetMotionMaster()->MovePoint(0, ESCAPE_X, ESCAPE_Y, ESCAPE_Z, true);
+                }
+
+                introTimer = 5000;
+                introStep++;
+
+                if (introStep == 3)
+                    introTimer = 2000;
+                else if (introStep == 4)
+                    introTimer = 3000;
+            }
+            else introTimer -= diff;
+
             if (!UpdateVictim())
                 return;
 
