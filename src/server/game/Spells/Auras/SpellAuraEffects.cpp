@@ -2410,12 +2410,13 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             }
             else
             {
-                if (m_spellProto->Id == 8936) // Regrowth
+                // Disabled temporary
+                /*if (m_spellProto->Id == 8936) // Regrowth
                 {
                     if (caster->HasAura(54743)) // Glyph of Regrowth
                     if (target && target->GetHealthPct() <= 50 && GetBase())
                         GetBase()->RefreshDuration();
-                }
+                }*/
 
                 // Rejuvenation and Lifebloom
                 if (m_spellProto->Id == 774 || m_spellProto->Id == 33763)
