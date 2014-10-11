@@ -753,11 +753,10 @@ void ArenaTeam::FinishGame(int32 teamRatingMod)
     {
         m_stats.rating += teamRatingMod;
         for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        {
             if (Player* member = ObjectAccessor::FindPlayer(itr->playerGuid))
-            {
                 member->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_TEAM_RATING, m_stats.rating, m_Type);
-                member->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_TEAM_RATING, m_stats.rating, m_Type);
-            }
+        }
     }
 
     m_stats.games_week += 1;

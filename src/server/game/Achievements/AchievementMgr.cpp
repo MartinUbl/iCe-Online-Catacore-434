@@ -1554,11 +1554,11 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_TEAM_RATING:
-            case ACHIEVEMENT_CRITERIA_TYPE_REACH_TEAM_RATING:
+            case ACHIEVEMENT_CRITERIA_TYPE_REACH_PERSONAL_RATING:
             {
                 uint32 reqTeamType = type == ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_TEAM_RATING ?
                     achievementCriteria->highest_team_rating.teamtype :
-                    achievementCriteria->reach_team_rating.teamtype;
+                    achievementCriteria->reach_personal_rating.teamtype;
 
                 if (miscvalue1)
                 {
@@ -1570,13 +1570,28 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 else    // login case
                 {
                     for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
+                    {
                         if (uint32 arena_team_id = GetPlayer()->GetArenaTeamId(arena_slot))
+                        {
                             if (ArenaTeam * at = sObjectMgr->GetArenaTeamById(arena_team_id))
-                                if (at->GetType() == reqTeamType)
+                            {
+                                if (at->GetType() != reqTeamType)
+                                    continue;
+
+                                uint32 criteriaValue = 0;
+                                if (type == ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_TEAM_RATING)
+                                    criteriaValue = at->GetStats().rating;
+                                else
                                 {
-                                    SetCriteriaProgress(achievementCriteria, at->GetStats().rating, PROGRESS_HIGHEST);
-                                    break;
+                                    if (ArenaTeamMember *member = at->GetMember(GetPlayer()->GetGUID()))
+                                        criteriaValue = member->personal_rating;
                                 }
+
+                                SetCriteriaProgress(achievementCriteria, criteriaValue, PROGRESS_HIGHEST);
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 break;
@@ -1770,8 +1785,8 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
             return progress->counter >= achievementCriteria->own_item.itemCount;
         case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA:
             return progress->counter >= achievementCriteria->win_rated_arena.count;
-        case ACHIEVEMENT_CRITERIA_TYPE_REACH_TEAM_RATING:
-            return progress->counter >= achievementCriteria->reach_team_rating.teamrating;
+        case ACHIEVEMENT_CRITERIA_TYPE_REACH_PERSONAL_RATING:
+            return progress->counter >= achievementCriteria->reach_personal_rating.personalrating;
         case ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILL_LEVEL:
             return progress->counter >= (achievementCriteria->learn_skill_level.skillLevel * 75);
         case ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM:

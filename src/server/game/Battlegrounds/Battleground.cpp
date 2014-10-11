@@ -888,10 +888,13 @@ void Battleground::EndBattleground(uint32 winner)
         // per player calculation
         if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
         {
+            ArenaTeamMember* member = NULL;
+            uint32 arenaType = winner_arena_team->GetType();
+
             if (team == winner)
             {
                 // update achievement BEFORE personal rating update
-                ArenaTeamMember* member = winner_arena_team->GetMember(plr->GetGUID());
+                member = winner_arena_team->GetMember(plr->GetGUID());
                 if (member)
                 {
                     plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, member->personal_rating);
@@ -930,7 +933,7 @@ void Battleground::EndBattleground(uint32 winner)
             }
             else if (winner != WINNER_NONE)     // player lost
             {
-                if (ArenaTeamMember *member = loser_arena_team->GetMember(plr->GetGUID()))
+                if (member = loser_arena_team->GetMember(plr->GetGUID()))
                     member->SetMatchmakerRating(loser_matchmaker_rating + loser_change);
 
                 loser_arena_team->MemberLost(plr, winner_matchmaker_rating);
@@ -938,6 +941,9 @@ void Battleground::EndBattleground(uint32 winner)
                 // Arena lost => reset the win_rated_arena having the "no_lose" condition
                 plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, ACHIEVEMENT_CRITERIA_CONDITION_NO_LOSE);
             }
+
+            if (member)
+                plr->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_PERSONAL_RATING, member->personal_rating, arenaType);
         }
 
         if (plr->getLevel() >= 85)
