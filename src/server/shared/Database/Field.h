@@ -156,7 +156,7 @@ class Field
             #endif
             if (data.raw)
                 return *reinterpret_cast<uint64*>(data.value);
-            return static_cast<uint64>(atol((char*)data.value));
+            return static_cast<uint64>(atoll((char*)data.value));
         }
 
         int64 GetInt64() const
@@ -173,7 +173,7 @@ class Field
             #endif
             if (data.raw)
                 return *reinterpret_cast<int64*>(data.value);
-            return static_cast<int64>(atol((char*)data.value));
+            return static_cast<int64>(atoll((char*)data.value));
         }
 
         float GetFloat() const
