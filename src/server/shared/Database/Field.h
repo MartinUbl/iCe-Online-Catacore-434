@@ -156,7 +156,7 @@ class Field
             #endif
             if (data.raw)
                 return *reinterpret_cast<uint64*>(data.value);
-            return static_cast<uint64>(atoll((char*)data.value));
+            return static_cast<uint64>(strtoull((char*)data.value, NULL, 0));
         }
 
         int64 GetInt64() const

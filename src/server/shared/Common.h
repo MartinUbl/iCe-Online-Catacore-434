@@ -121,6 +121,7 @@
 #define I64FMT "%016I64X"
 #define snprintf _snprintf
 #define atoll _atoi64
+#define strtoull _strtoui64
 #define vsnprintf _vsnprintf
 #define finite(X) _finite(X)
 
