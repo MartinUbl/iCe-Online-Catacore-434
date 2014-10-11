@@ -95,7 +95,7 @@ enum ArenaTeamTypes
 
 struct ArenaTeamMember
 {
-    uint64 guid;
+    uint64 playerGuid;
     std::string name;
     uint8 Class;
     uint32 games_week;
@@ -171,7 +171,7 @@ class ArenaTeam
         ArenaTeamMember* GetMember(const uint64& guid)
         {
             for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-                if (itr->guid == guid)
+                if (itr->playerGuid == guid)
                     return &(*itr);
 
             return NULL;
