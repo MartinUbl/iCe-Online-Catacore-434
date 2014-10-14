@@ -65,7 +65,7 @@ enum GuidMapGranularity
     PLAYER_GRANULARITY         = 100000,
     CREATURE_GRANULARITY       = 150000,
     GAMEOBJECT_GRANULARITY     = 100000,  // persistent should not exceed 85000
-    PET_RUNTIME_GRANULARITY    = 250000,  // very dynamic, should be greater
+    PET_GRANULARITY            = 250000,  // very dynamic, should be greater
     VEHICLE_GRANULARITY        = 20000,   // should be very low, generated only runtime
     ITEM_GRANULARITY           = 2500000, // probably the greatest storage
     DYNAMIC_OBJECT_GRANULARITY = 35000,
@@ -78,7 +78,6 @@ enum GuidMapGranularity
     EQUIPMENT_SET_GRANULARITY  = 20000,
     GUILD_GRANULARITY          = 2000,
     MAIL_GRANULARITY           = 100000,
-    PET_PERSISTENT_GRANULARITY = 250000,
 };
 
 ScriptMapMap sQuestEndScripts;
@@ -301,7 +300,7 @@ ObjectMgr::ObjectMgr()
     m_charGuidMap.Init(PLAYER_GRANULARITY);
     m_creatureGuidMap.Init(CREATURE_GRANULARITY);
     m_goGuidMap.Init(GAMEOBJECT_GRANULARITY);
-    m_petGuidMap.Init(PET_RUNTIME_GRANULARITY);
+    m_petNumberGuidMap.Init(PET_GRANULARITY);
     m_vehicleGuidMap.Init(VEHICLE_GRANULARITY);
     m_itemGuidMap.Init(ITEM_GRANULARITY);
     m_doGuidMap.Init(DYNAMIC_OBJECT_GRANULARITY);
@@ -314,7 +313,6 @@ ObjectMgr::ObjectMgr()
     m_equipmentSetGuidMap.Init(EQUIPMENT_SET_GRANULARITY);
     m_guildGuidMap.Init(GUILD_GRANULARITY);
     m_mailGuidMap.Init(MAIL_GRANULARITY);
-    m_petNumberGuidMap.Init(PET_PERSISTENT_GRANULARITY);
 
     m_spellCritDebug = false;
     m_addonDebug = false;
@@ -6635,9 +6633,6 @@ void ObjectMgr::SetHighestGuids()
     {
         do
         {
-            // these are set hand-in-hand
-            // persistent pet numbers will be always not consistent due to generating temporary pet guids between the persistent ones
-            m_petGuidMap.SetBit((*result)[0].GetUInt32());
             m_petNumberGuidMap.SetBit((*result)[0].GetUInt32());
         } while (result->NextRow());
     }
@@ -6824,13 +6819,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         case HIGHGUID_UNIT:
             return GenerateLowGuidForUnit(false);
         case HIGHGUID_PET:
-            id = m_petGuidMap.UseEmpty();
-            if (id >= 0x00600000)
-            {
-                sLog->outError("Pet guid overflow!! Can't continue, shutting down server. ");
-                ASSERT("Pet guid overflow!" && false);
-            }
-            return id;
+            return GeneratePetNumber();
         case HIGHGUID_VEHICLE:
             id = m_vehicleGuidMap.UseEmpty();
             if (id >= 0x00FFFFFF)

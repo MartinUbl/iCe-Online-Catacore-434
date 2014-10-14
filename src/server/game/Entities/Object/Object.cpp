@@ -2366,7 +2366,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
 
     Map *map = GetMap();
     uint32 pet_number = sObjectMgr->GeneratePetNumber();
-    if (!pet->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_PET), map, GetPhaseMask(), entry, pet_number))
+    if (!pet->Create(pet_number, map, GetPhaseMask(), entry))
     {
         sLog->outError("no such creature entry %u", entry);
         delete pet;

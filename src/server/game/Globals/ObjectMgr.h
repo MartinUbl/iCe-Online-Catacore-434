@@ -1429,7 +1429,7 @@ class ObjectMgr
         GuidMap m_charGuidMap;
         GuidMap m_creatureGuidMap;
         GuidMap m_goGuidMap;
-        GuidMap m_petGuidMap;
+        GuidMap m_petNumberGuidMap;
         GuidMap m_vehicleGuidMap;
         GuidMap m_itemGuidMap;
         GuidMap m_doGuidMap;
@@ -1443,7 +1443,6 @@ class ObjectMgr
         GuidMap m_equipmentSetGuidMap;
         GuidMap m_guildGuidMap;
         GuidMap m_mailGuidMap;
-        GuidMap m_petNumberGuidMap;
 
         QuestMap            mQuestTemplates;
 

@@ -212,8 +212,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     }
 
     Map *map = owner->GetMap();
-    uint32 guid = sObjectMgr->GenerateLowGuid(HIGHGUID_PET);
-    if (!Create(guid, map, owner->GetPhaseMask(), petentry, pet_number))
+    if (!Create(pet_number, map, owner->GetPhaseMask(), petentry))
     {
         m_loading = false;
         return false;
@@ -834,9 +833,8 @@ bool Pet::CreateBaseAtCreatureInfo(CreatureInfo const* cinfo, Unit * owner)
 bool Pet::CreateBaseAtTamed(CreatureInfo const * cinfo, Map * map, uint32 phaseMask)
 {
     sLog->outDebug("Pet::CreateBaseForTamed");
-    uint32 guid=sObjectMgr->GenerateLowGuid(HIGHGUID_PET);
     uint32 pet_number = sObjectMgr->GeneratePetNumber();
-    if (!Create(guid, map, phaseMask, cinfo->Entry, pet_number))
+    if (!Create(pet_number, map, phaseMask, cinfo->Entry))
         return false;
 
     SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
@@ -2000,15 +1998,15 @@ bool Pet::IsPermanentPetFor(Player* owner)
     }
 }
 
-bool Pet::Create(uint32 guidlow, Map *map, uint32 phaseMask, uint32 Entry, uint32 pet_number)
+bool Pet::Create(uint32 pet_number, Map *map, uint32 phaseMask, uint32 Entry)
 {
     ASSERT(map);
     SetMap(map);
 
     SetPhaseMask(phaseMask,false);
-    Object::_Create(guidlow, pet_number, HIGHGUID_PET);
+    Object::_Create(pet_number, pet_number, HIGHGUID_PET);
 
-    m_DBTableGuid = guidlow;
+    m_DBTableGuid = pet_number;
     m_originalEntry = Entry;
 
     if (!InitEntry(Entry))
