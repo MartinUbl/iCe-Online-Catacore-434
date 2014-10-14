@@ -274,33 +274,7 @@ Aura * Aura::TryCreate(SpellEntry const* spellproto, uint8 tryEffMask, WorldObje
 
 Aura * Aura::TryCreate(SpellEntry const* spellproto, WorldObject * owner, Unit * caster, int32 *baseAmount, int32 *scriptedAmount, Item * castItem, uint64 casterGUID)
 {
-    ASSERT(spellproto);
-    ASSERT(owner);
-    ASSERT(caster || casterGUID);
-    uint8 effMask = 0;
-    switch(owner->GetTypeId())
-    {
-        case TYPEID_UNIT:
-        case TYPEID_PLAYER:
-            for (uint8 i = 0; i< MAX_SPELL_EFFECTS; ++i)
-            {
-                if (IsUnitOwnedAuraEffect(spellproto->Effect[i]))
-                    effMask |= 1 << i;
-            }
-            break;
-        case TYPEID_DYNAMICOBJECT:
-            for (uint8 i = 0; i< MAX_SPELL_EFFECTS; ++i)
-            {
-                if (spellproto->Effect[i] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
-                    effMask |= 1 << i;
-            }
-            break;
-        default:
-            break;
-    }
-    if (effMask)
-        return Create(spellproto,effMask,owner,caster,baseAmount,scriptedAmount,castItem,casterGUID);
-    return NULL;
+    return TryCreate(spellproto, MAX_EFFECT_MASK, owner, caster, baseAmount, scriptedAmount, castItem, casterGUID);
 }
 
 Aura * Aura::Create(SpellEntry const* spellproto, uint8 effMask, WorldObject * owner, Unit * caster, int32 *baseAmount, int32 *scriptedAmount, Item * castItem, uint64 casterGUID)
