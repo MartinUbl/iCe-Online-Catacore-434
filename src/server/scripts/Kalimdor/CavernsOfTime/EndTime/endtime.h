@@ -20,15 +20,16 @@
 
 enum Encounters
 {
-    TYPE_FIRST_ECHO        = 0,
-    TYPE_SECOND_ECHO       = 1,
-    TYPE_MUROZOND          = 2,
-    MAX_ENCOUNTER          = 5,
     // Bosses
-    TYPE_ECHO_OF_SYLVANAS  = 6,
-    TYPE_ECHO_OF_JAINA     = 7,
-    TYPE_ECHO_OF_BAINE     = 8,
-    TYPE_ECHO_OF_TYRANDE   = 9,
+    TYPE_ECHO_OF_SYLVANAS  = 0,
+    TYPE_ECHO_OF_JAINA     = 1,
+    TYPE_MUROZOND          = 2,
+    TYPE_ECHO_OF_BAINE     = 3,
+    TYPE_ECHO_OF_TYRANDE   = 4, 
+    MAX_ENCOUNTER          = 5,
+
+    TYPE_FIRST_ECHO        = 6,
+    TYPE_SECOND_ECHO       = 7,
 };
 
 enum AdditionalEvents

@@ -19812,6 +19812,25 @@ void Player::SendRaidInfo()
                 uint32 instanceId = save->GetInstanceId();
                 std::map<uint32,uint32> uiEnc = sInstanceSaveMgr->getInstanceSaveData(instanceId);
                 int coun = sInstanceSaveMgr->getBossNumber(mapId);
+
+                if(!uiEnc.empty() && mapId == 938) //End time ugly hack (needed because of showing only echoes instead of bosses)
+                {
+                    std::map<uint32,uint32> uiEncCpy = uiEnc;
+                    for(int i = 1; i < coun; i++) //Do not reset Murozond
+                    {
+                        uiEnc[i] = NOT_STARTED;
+                    }
+                    for(int i = 1; i < coun; i++)
+                    {
+                        if(uiEncCpy[i] == DONE) //Some boss killed
+                        {
+                            if(uiEnc[2] != DONE) //assign it to the first or second echo 
+                                uiEnc[2] = uiEncCpy[i]; //First echo
+                            else if(uiEnc[3] != DONE)
+                                uiEnc[3] = uiEncCpy[i]; //Second echo
+                        }
+                    } 
+                }
                 
                 if (!uiEnc.empty() && coun && coun > 0)
                 {

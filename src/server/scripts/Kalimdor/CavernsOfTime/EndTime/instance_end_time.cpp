@@ -273,10 +273,13 @@ public:
 
         virtual uint32* GetCorrUiEncounter()
         {
-            currEnc[2]=m_auiEncounter[TYPE_FIRST_ECHO]; // First Echo
-            currEnc[3]=m_auiEncounter[TYPE_SECOND_ECHO]; // Second Echo
-            currEnc[0]=m_auiEncounter[TYPE_MUROZOND]; // Murozond   
-            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
+            currEnc[0] = m_auiEncounter[TYPE_MUROZOND]; // Murozond  
+            currEnc[1] = m_auiEncounter[TYPE_ECHO_OF_SYLVANAS]; // Sylvanas
+            currEnc[2] = m_auiEncounter[TYPE_ECHO_OF_JAINA]; // Jaina 
+            currEnc[3] = m_auiEncounter[TYPE_ECHO_OF_BAINE]; // Baine
+            currEnc[4] = m_auiEncounter[TYPE_ECHO_OF_TYRANDE]; // Tyrande
+
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(), currEnc, MAX_ENCOUNTER);
 
             return NULL;
         }

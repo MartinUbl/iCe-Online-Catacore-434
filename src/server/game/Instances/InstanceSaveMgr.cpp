@@ -1132,7 +1132,7 @@ void InstanceSaveManager::loadRaidEncounter()
                 break;
             }
             case 938: // End Time
-                {
+            {
                 bossNum=5;
                 uint32 dataEnc[5];
                 std::istringstream loadStream(data);
@@ -1141,19 +1141,25 @@ void InstanceSaveManager::loadRaidEncounter()
                     switch(i)
                     {
                     case 0:
-                        loadStream >> dataEnc[0]; // First Echo ??
+                        loadStream >> dataEnc[0]; // Murozond
                         break;
                     case 1:
-                        loadStream >> dataEnc[2]; // Second Echo ??
+                        loadStream >> dataEnc[1]; // Sylvanas
                         break;
                     case 2:
-                        loadStream >> dataEnc[1]; // Murozond ??
+                        loadStream >> dataEnc[2]; // Jaina
+                        break;
+                    case 3:
+                        loadStream >> dataEnc[3]; // Baine
+                        break;
+                    case 4:
+                        loadStream >> dataEnc[4]; // Tyrande
                         break;
                     }
                 }
                 setInstanceSaveData(instanceId,dataEnc,bossNum);
                 break;
-                }
+            }
 
             default://raids for which Raid info does not work yet
             {
