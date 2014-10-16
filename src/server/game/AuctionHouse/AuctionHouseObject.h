@@ -47,6 +47,8 @@ public:
 private:
     typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
     AuctionEntryMap AuctionsMap;
+
+    void FinishAuctionOnTime(uint32 auctionId);
 };
 
 

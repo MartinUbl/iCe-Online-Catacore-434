@@ -49,9 +49,6 @@ bool AuctionHouseObject::RemoveAuction(AuctionEntry *auction, uint32 /*itemEntry
 void AuctionHouseObject::Update()
 {
     time_t curTime = sWorld->GetGameTime();
-    ///- Handle expired auctions
-
-    // If storage is empty, no need to update. next == NULL in this case.
     if (AuctionsMap.empty())
         return;
 
@@ -62,40 +59,43 @@ void AuctionHouseObject::Update()
 
     do
     {
-        // from auctionhousehandler.cpp, creates auction pointer & player pointer
-        AuctionEntry* auction = GetAuction(result->Fetch()->GetUInt32());
-
-        if (!auction)
-            continue;
-
-        SQLTransaction trans = CharacterDatabase.BeginTransaction();
-
-        ///- Either cancel the auction if there was no bidder
-        if (auction->bidder == 0)
-        {
-            sAuctionMgr->SendAuctionExpiredMail(auction, trans);
-            sScriptMgr->OnAuctionExpire(this, auction);
-        }
-        ///- Or perform the transaction
-        else
-        {
-            //we should send an "item sold" message if the seller is online
-            //we send the item to the winner
-            //we send the money to the seller
-            sAuctionMgr->SendAuctionSuccessfulMail(auction, trans);
-            sAuctionMgr->SendAuctionWonMail(auction, trans);
-            sScriptMgr->OnAuctionSuccessful(this, auction);
-        }
-
-        uint32 itemEntry = auction->itemEntry;
-
-        ///- In any case clear the auction
-        auction->DeleteFromDB(trans);
-        CharacterDatabase.CommitTransaction(trans);
-
-        RemoveAuction(auction, itemEntry);
-        sAuctionMgr->RemoveAItem(auction->item_guidlow);
+        FinishAuctionOnTime(result->Fetch()->GetUInt32());
     } while (result->NextRow());
+}
+
+void AuctionHouseObject::FinishAuctionOnTime(uint32 auctionId)
+{
+    AuctionEntry* auction = GetAuction(auctionId);
+    if (!auction)
+        return;
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+    ///- Either cancel the auction if there was no bidder
+    if (auction->bidder == 0)
+    {
+        sAuctionMgr->SendAuctionExpiredMail(auction, trans);
+        sScriptMgr->OnAuctionExpire(this, auction);
+    }
+    ///- Or perform the transaction
+    else
+    {
+        //we should send an "item sold" message if the seller is online
+        //we send the item to the winner
+        //we send the money to the seller
+        sAuctionMgr->SendAuctionSuccessfulMail(auction, trans);
+        sAuctionMgr->SendAuctionWonMail(auction, trans);
+        sScriptMgr->OnAuctionSuccessful(this, auction);
+    }
+
+    uint32 itemEntry = auction->itemEntry;
+
+    ///- In any case clear the auction
+    auction->DeleteFromDB(trans);
+    CharacterDatabase.CommitTransaction(trans);
+
+    RemoveAuction(auction, itemEntry);
+    sAuctionMgr->RemoveAItem(auction->item_guidlow);
 }
 
 void AuctionHouseObject::BuildListBidderItems(WorldPacket& data, Player* player, uint32& count, uint32& totalcount)
