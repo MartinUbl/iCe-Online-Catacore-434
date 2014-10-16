@@ -8,7 +8,6 @@
 
 AuctionHouseObject::AuctionHouseObject()
 {
-    next = AuctionsMap.begin();
 }
 
 AuctionHouseObject::~AuctionHouseObject()
@@ -20,16 +19,6 @@ AuctionHouseObject::~AuctionHouseObject()
 uint32 AuctionHouseObject::Getcount() const
 {
     return AuctionsMap.size();
-}
-
-AuctionHouseObject::AuctionEntryMap::iterator AuctionHouseObject::GetAuctionsBegin()
-{
-    return AuctionsMap.begin();
-}
-
-AuctionHouseObject::AuctionEntryMap::iterator AuctionHouseObject::GetAuctionsEnd()
-{
-    return AuctionsMap.end();
 }
 
 AuctionEntry* AuctionHouseObject::GetAuction(uint32 id) const

@@ -31,9 +31,6 @@ public:
 
     uint32 Getcount() const;
 
-    AuctionEntryMap::iterator GetAuctionsBegin();
-    AuctionEntryMap::iterator GetAuctionsEnd();
-
     AuctionEntry* GetAuction(uint32 id) const;
 
     void AddAuction(AuctionEntry *auction);
@@ -51,9 +48,6 @@ public:
 
 private:
     AuctionEntryMap AuctionsMap;
-
-    // storage for "next" auction item for next Update()
-    AuctionEntryMap::const_iterator next;
 };
 
 
