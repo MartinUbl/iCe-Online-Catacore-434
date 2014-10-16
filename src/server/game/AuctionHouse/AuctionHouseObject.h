@@ -49,6 +49,10 @@ private:
     AuctionEntryMap AuctionsMap;
 
     void FinishAuctionOnTime(uint32 auctionId);
+    bool ItemMatchesSearchCriteria(AuctionEntry const *Aentry,
+        Player const *player, std::wstring const& wsearchedname,
+        uint8 levelmin, uint8 levelmax, uint8 usable,
+        uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality) const;
 };
 
 

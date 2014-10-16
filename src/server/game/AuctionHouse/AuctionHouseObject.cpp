@@ -133,93 +133,11 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
     uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
     uint32& count, uint32& totalcount, AuctionSortingCriterion /*sortingCriterion*/, AuctionSortingDirection /*sortingDirection*/)
 {
-    int loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
-    int locdbc_idx = player->GetSession()->GetSessionDbcLocale();
-
     for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
     {
         AuctionEntry *Aentry = itr->second;
-        Item *item = sAuctionMgr->GetAItem(Aentry->item_guidlow);
-        if (!item)
+        if (!ItemMatchesSearchCriteria(Aentry, player, wsearchedname, levelmin, levelmax, usable, inventoryType, itemClass, itemSubClass, quality))
             continue;
-
-        ItemPrototype const *proto = item->GetProto();
-
-        if (itemClass != 0xffffffff && proto->Class != itemClass)
-            continue;
-
-        if (itemSubClass != 0xffffffff && proto->SubClass != itemSubClass)
-            continue;
-
-        if (inventoryType != 0xffffffff && proto->InventoryType != inventoryType)
-        {
-            // let's join chests with robes, as it should be
-            if (inventoryType != INVTYPE_CHEST || proto->InventoryType != INVTYPE_ROBE)
-                continue;
-        }
-
-        if (quality != 0xffffffff && proto->Quality != quality)
-            continue;
-
-        if (levelmin != 0x00 && (proto->RequiredLevel < levelmin || (levelmax != 0x00 && proto->RequiredLevel > levelmax)))
-            continue;
-
-        if (usable != 0x00 && player->CanUseItem(item) != EQUIP_ERR_OK)
-            continue;
-
-        // Allow search by suffix (ie: of the Monkey) or partial name (ie: Monkey)
-        // No need to do any of this if no search term was entered
-        if (!wsearchedname.empty())
-        {
-            std::string name = proto->Name1;
-            if (name.empty())
-                continue;
-
-            // local name
-            if (loc_idx >= 0)
-                if (ItemLocale const *il = sObjectMgr->GetItemLocale(proto->ItemId))
-                    sObjectMgr->GetLocaleString(il->Name, loc_idx, name);
-
-            // DO NOT use GetItemEnchantMod(proto->RandomProperty) as it may return a result
-            //  that matches the search but it may not equal item->GetItemRandomPropertyId()
-            //  used in BuildAuctionInfo() which then causes wrong items to be listed
-            int32 propRefID = item->GetItemRandomPropertyId();
-
-            if (propRefID)
-            {
-                // Append the suffix to the name (ie: of the Monkey) if one exists
-                // These are found in ItemRandomProperties.dbc, not ItemRandomSuffix.dbc
-                //  even though the DBC names seem misleading
-                const ItemRandomPropertiesEntry *itemRandProp = sItemRandomPropertiesStore.LookupEntry(propRefID);
-
-                if (itemRandProp)
-                {
-                    DBCString temp = itemRandProp->nameSuffix;
-                    //char* temp = itemRandProp->nameSuffix;
-
-                    // dbc local name
-                    if (temp)
-                    {
-                        if (locdbc_idx >= 0)
-                        {
-                            // Append the suffix (ie: of the Monkey) to the name using localization
-                            name += " ";
-                            name += temp;
-                        }
-                        else
-                        {
-                            // Invalid localization? Append the suffix using default enUS
-                            name += " ";
-                            name += temp;
-                        }
-                    }
-                }
-            }
-
-            // Perform the search (with or without suffix)
-            if (!Utf8FitTo(name, wsearchedname))
-                continue;
-        }
 
         // Add the item if no search term or if entered search term was found
         if (count < 50 && totalcount >= listfrom)
@@ -229,4 +147,94 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
         }
         ++totalcount;
     }
+}
+
+bool AuctionHouseObject::ItemMatchesSearchCriteria(AuctionEntry const *Aentry, Player const *player, std::wstring const& wsearchedname,
+    uint8 levelmin, uint8 levelmax, uint8 usable, uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality) const
+{
+    Item *item = sAuctionMgr->GetAItem(Aentry->item_guidlow);
+    if (!item)
+        return false;
+
+    ItemPrototype const *proto = item->GetProto();
+
+    if (itemClass != 0xffffffff && proto->Class != itemClass)
+        return false;
+
+    if (itemSubClass != 0xffffffff && proto->SubClass != itemSubClass)
+        return false;
+
+    if (inventoryType != 0xffffffff && proto->InventoryType != inventoryType)
+    {
+        // let's join chests with robes, as it should be
+        if (inventoryType != INVTYPE_CHEST || proto->InventoryType != INVTYPE_ROBE)
+            return false;
+    }
+
+    if (quality != 0xffffffff && proto->Quality != quality)
+        return false;
+
+    if (levelmin != 0x00 && (proto->RequiredLevel < levelmin || (levelmax != 0x00 && proto->RequiredLevel > levelmax)))
+        return false;
+
+    if (usable != 0x00 && player->CanUseItem(item) != EQUIP_ERR_OK)
+        return false;
+
+    // Allow search by suffix (ie: of the Monkey) or partial name (ie: Monkey)
+    // No need to do any of this if no search term was entered
+    if (!wsearchedname.empty())
+    {
+        std::string name = proto->Name1;
+        if (name.empty())
+            return false;
+
+        // local name
+        int loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
+        if (loc_idx >= 0)
+            if (ItemLocale const *il = sObjectMgr->GetItemLocale(proto->ItemId))
+                sObjectMgr->GetLocaleString(il->Name, loc_idx, name);
+
+        // DO NOT use GetItemEnchantMod(proto->RandomProperty) as it may return a result
+        //  that matches the search but it may not equal item->GetItemRandomPropertyId()
+        //  used in BuildAuctionInfo() which then causes wrong items to be listed
+        int32 propRefID = item->GetItemRandomPropertyId();
+
+        if (propRefID)
+        {
+            // Append the suffix to the name (ie: of the Monkey) if one exists
+            // These are found in ItemRandomProperties.dbc, not ItemRandomSuffix.dbc
+            //  even though the DBC names seem misleading
+            const ItemRandomPropertiesEntry *itemRandProp = sItemRandomPropertiesStore.LookupEntry(propRefID);
+
+            if (itemRandProp)
+            {
+                DBCString temp = itemRandProp->nameSuffix;
+                //char* temp = itemRandProp->nameSuffix;
+
+                // dbc local name
+                if (temp)
+                {
+                    int locdbc_idx = player->GetSession()->GetSessionDbcLocale();
+                    if (locdbc_idx >= 0)
+                    {
+                        // Append the suffix (ie: of the Monkey) to the name using localization
+                        name += " ";
+                        name += temp;
+                    }
+                    else
+                    {
+                        // Invalid localization? Append the suffix using default enUS
+                        name += " ";
+                        name += temp;
+                    }
+                }
+            }
+        }
+
+        // Perform the search (with or without suffix)
+        if (!Utf8FitTo(name, wsearchedname))
+            return false;
+    }
+
+    return true;
 }
