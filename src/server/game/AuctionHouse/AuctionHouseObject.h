@@ -27,8 +27,6 @@ public:
     AuctionHouseObject();
     ~AuctionHouseObject();
 
-    typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
-
     uint32 Getcount() const;
 
     AuctionEntry* GetAuction(uint32 id) const;
@@ -47,6 +45,7 @@ public:
         uint32& count, uint32& totalcount, AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection);
 
 private:
+    typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
     AuctionEntryMap AuctionsMap;
 };
 
