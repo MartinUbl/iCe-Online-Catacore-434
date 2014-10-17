@@ -19,6 +19,28 @@ enum AuctionSortingDirection
 };
 
 
+struct AuctionSearch
+{
+    Player* const m_player;
+    std::wstring const& m_wsearchedname;
+    uint32 m_listfrom;
+    uint8 m_levelmin;
+    uint8 m_levelmax;
+    uint8 m_usable;
+    uint32 m_inventoryType;
+    uint32 m_itemClass;
+    uint32 m_itemSubClass;
+    uint32 m_quality;
+    AuctionSortingCriterion m_sortingCriterion;
+    AuctionSortingDirection m_sortingDirection;
+
+    AuctionSearch(Player* const player, std::wstring const& wsearchedname, uint32 listfrom, uint8 levelmin, uint8 levelmax, uint8 usable,
+        uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
+        AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection);
+};
+
+
+
 //this class is used as auctionhouse instance
 class AuctionHouseObject
 {
@@ -52,13 +74,10 @@ private:
     std::multimap<uint32 /*level*/, const AuctionEntry*> AuctionsMapByLevel;
     std::multimap<time_t, const AuctionEntry*> AuctionsMapByTimeLeft;
     std::multimap<std::string, const AuctionEntry*> AuctionsMapBySeller;
-    std::multimap<uint64 /*bit*/, const AuctionEntry*> AuctionsMapByCurrentBid;
+    std::multimap<uint64 /*bid*/, const AuctionEntry*> AuctionsMapByCurrentBid;
 
     void FinishAuctionOnTime(uint32 auctionId);
-    bool ItemMatchesSearchCriteria(AuctionEntry const *Aentry,
-        Player const *player, std::wstring const& wsearchedname,
-        uint8 levelmin, uint8 levelmax, uint8 usable,
-        uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality) const;
+    bool ItemMatchesSearchCriteria(AuctionEntry const *Aentry, AuctionSearch const& search) const;
 
     template <class TKey, class TContainer>
     void RemoveFromAuctionMap(TContainer &container, const TKey &key, const AuctionEntry *auction);

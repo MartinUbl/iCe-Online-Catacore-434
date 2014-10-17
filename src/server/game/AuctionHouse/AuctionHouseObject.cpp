@@ -6,6 +6,15 @@
 
 
 
+AuctionSearch::AuctionSearch(Player* const player, std::wstring const& wsearchedname, uint32 listfrom, uint8 levelmin, uint8 levelmax, uint8 usable, uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality, AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection) : m_player(player), m_wsearchedname(wsearchedname), m_listfrom(listfrom), m_levelmin(levelmin), m_levelmax(levelmax), m_usable(usable),
+m_inventoryType(inventoryType), m_itemClass(itemClass), m_itemSubClass(itemSubClass), m_quality(quality),
+m_sortingCriterion(sortingCriterion), m_sortingDirection(sortingDirection)
+{
+}
+
+
+
+
 AuctionHouseObject::AuctionHouseObject()
 {
 }
@@ -171,12 +180,15 @@ void AuctionHouseObject::BuildListOwnerItems(WorldPacket& data, Player* player, 
 void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player,
     std::wstring const& wsearchedname, uint32 listfrom, uint8 levelmin, uint8 levelmax, uint8 usable,
     uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
-    uint32& count, uint32& totalcount, AuctionSortingCriterion /*sortingCriterion*/, AuctionSortingDirection /*sortingDirection*/)
+    uint32& count, uint32& totalcount, AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection)
 {
+    AuctionSearch search(player, wsearchedname, listfrom, levelmin, levelmax, usable, inventoryType, itemClass, itemSubClass, quality,
+        sortingCriterion, sortingDirection);
+
     for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
     {
         AuctionEntry *Aentry = itr->second;
-        if (!ItemMatchesSearchCriteria(Aentry, player, wsearchedname, levelmin, levelmax, usable, inventoryType, itemClass, itemSubClass, quality))
+        if (!ItemMatchesSearchCriteria(Aentry, search))
             continue;
 
         // Add the item if no search term or if entered search term was found
@@ -189,8 +201,7 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
     }
 }
 
-bool AuctionHouseObject::ItemMatchesSearchCriteria(AuctionEntry const *Aentry, Player const *player, std::wstring const& wsearchedname,
-    uint8 levelmin, uint8 levelmax, uint8 usable, uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality) const
+bool AuctionHouseObject::ItemMatchesSearchCriteria(AuctionEntry const *Aentry, AuctionSearch const& search) const
 {
     Item *item = sAuctionMgr->GetAItem(Aentry->item_guidlow);
     if (!item)
@@ -198,38 +209,38 @@ bool AuctionHouseObject::ItemMatchesSearchCriteria(AuctionEntry const *Aentry, P
 
     ItemPrototype const *proto = item->GetProto();
 
-    if (itemClass != 0xffffffff && proto->Class != itemClass)
+    if (search.m_itemClass != 0xffffffff && proto->Class != search.m_itemClass)
         return false;
 
-    if (itemSubClass != 0xffffffff && proto->SubClass != itemSubClass)
+    if (search.m_itemSubClass != 0xffffffff && proto->SubClass != search.m_itemSubClass)
         return false;
 
-    if (inventoryType != 0xffffffff && proto->InventoryType != inventoryType)
+    if (search.m_inventoryType != 0xffffffff && proto->InventoryType != search.m_inventoryType)
     {
         // let's join chests with robes, as it should be
-        if (inventoryType != INVTYPE_CHEST || proto->InventoryType != INVTYPE_ROBE)
+        if (search.m_inventoryType != INVTYPE_CHEST || proto->InventoryType != INVTYPE_ROBE)
             return false;
     }
 
-    if (quality != 0xffffffff && proto->Quality != quality)
+    if (search.m_quality != 0xffffffff && proto->Quality != search.m_quality)
         return false;
 
-    if (levelmin != 0x00 && (proto->RequiredLevel < levelmin || (levelmax != 0x00 && proto->RequiredLevel > levelmax)))
+    if (search.m_levelmin != 0x00 && (proto->RequiredLevel < search.m_levelmin || (search.m_levelmax != 0x00 && proto->RequiredLevel > search.m_levelmax)))
         return false;
 
-    if (usable != 0x00 && player->CanUseItem(item) != EQUIP_ERR_OK)
+    if (search.m_usable != 0x00 && search.m_player->CanUseItem(item) != EQUIP_ERR_OK)
         return false;
 
     // Allow search by suffix (ie: of the Monkey) or partial name (ie: Monkey)
     // No need to do any of this if no search term was entered
-    if (!wsearchedname.empty())
+    if (!search.m_wsearchedname.empty())
     {
         std::string name = proto->Name1;
         if (name.empty())
             return false;
 
         // local name
-        int loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
+        int loc_idx = search.m_player->GetSession()->GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
             if (ItemLocale const *il = sObjectMgr->GetItemLocale(proto->ItemId))
                 sObjectMgr->GetLocaleString(il->Name, loc_idx, name);
@@ -254,7 +265,7 @@ bool AuctionHouseObject::ItemMatchesSearchCriteria(AuctionEntry const *Aentry, P
                 // dbc local name
                 if (temp)
                 {
-                    int locdbc_idx = player->GetSession()->GetSessionDbcLocale();
+                    int locdbc_idx = search.m_player->GetSession()->GetSessionDbcLocale();
                     if (locdbc_idx >= 0)
                     {
                         // Append the suffix (ie: of the Monkey) to the name using localization
@@ -272,7 +283,7 @@ bool AuctionHouseObject::ItemMatchesSearchCriteria(AuctionEntry const *Aentry, P
         }
 
         // Perform the search (with or without suffix)
-        if (!Utf8FitTo(name, wsearchedname))
+        if (!Utf8FitTo(name, search.m_wsearchedname))
             return false;
     }
 
