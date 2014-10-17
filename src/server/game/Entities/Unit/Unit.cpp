@@ -12486,6 +12486,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
         case 83853: // Combustion
         case 12654: // Ignite
         case 83077: // Improved Serpent Sting
+        case 63468: // Piercing Shots
             return pdamage;
         case 44614: // Frostfire Bolt
             if (damagetype == DOT)
@@ -12632,6 +12633,7 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
         case 83853: // Combustion
         case 12654: // Ignite
         case 83077: // Improved Serpent Sting
+        case 63468: // Piercing Shots
             return 1.0f;
         case 44614: // Frostfire Bolt
             if (damagetype == DOT)
