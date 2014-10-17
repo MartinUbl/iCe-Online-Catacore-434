@@ -14,8 +14,8 @@ enum AuctionSortingCriterion
 
 enum AuctionSortingDirection
 {
-    SORT_ASC = 1,
-    SORT_DESC = 0,
+    SORT_ASC = 0,
+    SORT_DESC = 1,
 };
 
 

@@ -186,6 +186,12 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
     uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
     uint32& count, uint32& totalcount, AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection)
 {
+    if (sortingCriterion == SC_RARITY)
+    {
+        // from unknown reason client sends opposite sorting direction for Rarity column than it internally sorts items inside a page
+        sortingDirection = (sortingDirection == SORT_ASC) ? SORT_DESC : SORT_ASC;
+    }
+
     AuctionSearch search(player, wsearchedname, listfrom, levelmin, levelmax, usable, inventoryType, itemClass, itemSubClass, quality,
         sortingCriterion, sortingDirection, count, totalcount);
 
