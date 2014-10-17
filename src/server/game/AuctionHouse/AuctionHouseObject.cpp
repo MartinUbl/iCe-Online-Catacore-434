@@ -49,7 +49,7 @@ void AuctionHouseObject::AddAuction(AuctionEntry *auction)
     AuctionsMapByLevel.insert(std::make_pair(auction->GetRequiredLevel(), auction));
     AuctionsMapByTimeLeft.insert(std::make_pair(auction->GetExpireTime(), auction));
     AuctionsMapBySeller.insert(std::make_pair(auction->GetOwnerName(), auction));
-    AuctionsMapByCurrentBid.insert(std::make_pair(auction->GetCurrentBid(), auction));
+    AuctionsMapByCurrentBid.insert(std::make_pair(auction->startbid, auction));
 
     sScriptMgr->OnAuctionAdd(this, auction);
 }
