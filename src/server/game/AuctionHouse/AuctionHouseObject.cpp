@@ -6,9 +6,13 @@
 
 
 
-AuctionSearch::AuctionSearch(Player* const player, std::wstring const& wsearchedname, uint32 listfrom, uint8 levelmin, uint8 levelmax, uint8 usable, uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality, AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection) : m_player(player), m_wsearchedname(wsearchedname), m_listfrom(listfrom), m_levelmin(levelmin), m_levelmax(levelmax), m_usable(usable),
-m_inventoryType(inventoryType), m_itemClass(itemClass), m_itemSubClass(itemSubClass), m_quality(quality),
-m_sortingCriterion(sortingCriterion), m_sortingDirection(sortingDirection)
+AuctionSearch::AuctionSearch(Player* const player, std::wstring const& wsearchedname, uint32 listfrom, uint8 levelmin, uint8 levelmax, uint8 usable,
+    uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality, AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection,
+    uint32& count, uint32& totalcount)
+    : m_player(player), m_wsearchedname(wsearchedname), m_listfrom(listfrom), m_levelmin(levelmin), m_levelmax(levelmax), m_usable(usable),
+    m_inventoryType(inventoryType), m_itemClass(itemClass), m_itemSubClass(itemSubClass), m_quality(quality),
+    m_sortingCriterion(sortingCriterion), m_sortingDirection(sortingDirection),
+    m_count(count), m_totalcount(totalcount)
 {
 }
 
@@ -183,21 +187,14 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
     uint32& count, uint32& totalcount, AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection)
 {
     AuctionSearch search(player, wsearchedname, listfrom, levelmin, levelmax, usable, inventoryType, itemClass, itemSubClass, quality,
-        sortingCriterion, sortingDirection);
+        sortingCriterion, sortingDirection, count, totalcount);
 
-    for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
+    AuctionList auctionsList = GetAuctionsBySearchCriteria(search);
+
+    for (AuctionList::const_iterator itr = auctionsList.begin(); itr != auctionsList.end(); ++itr)
     {
-        AuctionEntry *Aentry = itr->second;
-        if (!ItemMatchesSearchCriteria(Aentry, search))
-            continue;
-
-        // Add the item if no search term or if entered search term was found
-        if (count < 50 && totalcount >= listfrom)
-        {
-            ++count;
-            Aentry->BuildAuctionInfo(data);
-        }
-        ++totalcount;
+        const AuctionEntry *Aentry = *itr;
+        Aentry->BuildAuctionInfo(data);
     }
 }
 
@@ -288,4 +285,54 @@ bool AuctionHouseObject::ItemMatchesSearchCriteria(AuctionEntry const *Aentry, A
     }
 
     return true;
+}
+
+AuctionHouseObject::AuctionList AuctionHouseObject::GetAuctionsBySearchCriteria(const AuctionSearch &search) const
+{
+    switch (search.m_sortingCriterion)
+    {
+    case SC_RARITY:
+        return GetAuctionsBySearchCriteria(AuctionsMapByRarity, search);
+    case SC_LEVEL:
+        return GetAuctionsBySearchCriteria(AuctionsMapByLevel, search);
+    case SC_TIME_LEFT:
+        return GetAuctionsBySearchCriteria(AuctionsMapByTimeLeft, search);
+    case SC_SELLER:
+        return GetAuctionsBySearchCriteria(AuctionsMapBySeller, search);
+    case SC_CURRENT_BID:
+        return GetAuctionsBySearchCriteria(AuctionsMapByCurrentBid, search);
+    default:
+        return GetAuctionsBySearchCriteria(AuctionsMap, search);
+    }
+}
+
+template <class TContainer>
+AuctionHouseObject::AuctionList AuctionHouseObject::GetAuctionsBySearchCriteria(TContainer &container, const AuctionSearch &search) const
+{
+    if (search.m_sortingDirection == SORT_ASC)
+        return GetAuctionsBySearchCriteria(container.begin(), container.end(), search);
+    else
+        return GetAuctionsBySearchCriteria(container.rbegin(), container.rend(), search);
+}
+
+template <class TIterator>
+AuctionHouseObject::AuctionList AuctionHouseObject::GetAuctionsBySearchCriteria(const TIterator &begin, const TIterator &end, const AuctionSearch &search) const
+{
+    AuctionList result;
+
+    for (TIterator itr = begin; itr != end; itr++)
+    {
+        const AuctionEntry *entry = itr->second;
+        if (!ItemMatchesSearchCriteria(entry, search))
+            continue;
+
+        if (search.m_count < 50 && search.m_totalcount >= search.m_listfrom)
+        {
+            ++search.m_count;
+            result.push_back(entry);
+        }
+        ++search.m_totalcount;
+    }
+
+    return result;
 }

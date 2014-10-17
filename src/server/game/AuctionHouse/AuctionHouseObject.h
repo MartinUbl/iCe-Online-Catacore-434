@@ -33,10 +33,12 @@ struct AuctionSearch
     uint32 m_quality;
     AuctionSortingCriterion m_sortingCriterion;
     AuctionSortingDirection m_sortingDirection;
+    uint32& m_count;
+    uint32& m_totalcount;
 
     AuctionSearch(Player* const player, std::wstring const& wsearchedname, uint32 listfrom, uint8 levelmin, uint8 levelmax, uint8 usable,
         uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
-        AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection);
+        AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection, uint32& count, uint32& totalcount);
 };
 
 
@@ -69,6 +71,7 @@ public:
 private:
     typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
     AuctionEntryMap AuctionsMap;
+    typedef std::list<const AuctionEntry*> AuctionList;
 
     std::multimap<ItemQualities, const AuctionEntry*> AuctionsMapByRarity;
     std::multimap<uint32 /*level*/, const AuctionEntry*> AuctionsMapByLevel;
@@ -81,6 +84,14 @@ private:
 
     template <class TKey, class TContainer>
     void RemoveFromAuctionMap(TContainer &container, const TKey &key, const AuctionEntry *auction);
+
+    AuctionList GetAuctionsBySearchCriteria(const AuctionSearch &search) const;
+
+    template <class TContainer>
+    AuctionList GetAuctionsBySearchCriteria(TContainer &container, const AuctionSearch &search) const;
+
+    template <class TIterator>
+    AuctionList GetAuctionsBySearchCriteria(const TIterator &begin, const TIterator &end, const AuctionSearch &search) const;
 };
 
 
