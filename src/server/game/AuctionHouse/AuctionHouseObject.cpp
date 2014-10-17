@@ -342,3 +342,9 @@ AuctionHouseObject::AuctionList AuctionHouseObject::GetAuctionsBySearchCriteria(
 
     return result;
 }
+
+void AuctionHouseObject::UpdateBidSorting(const AuctionEntry *auction, uint64 oldBid, uint64 newBid)
+{
+    RemoveFromAuctionMap(AuctionsMapByCurrentBid, oldBid, auction);
+    AuctionsMapByCurrentBid.insert(std::make_pair(newBid, auction));
+}

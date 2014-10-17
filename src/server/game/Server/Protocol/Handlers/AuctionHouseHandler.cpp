@@ -443,6 +443,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket & recv_data)
         else
             pl->ModifyMoney(-int32(price));
 
+        auctionHouse->UpdateBidSorting(auction, std::max(auction->bid, auction->startbid), price);
         auction->bidder = pl->GetGUIDLow();
         auction->bid = price;
         GetPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_BID, price);
@@ -462,6 +463,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket & recv_data)
             if (auction->bidder)                          //buyout for bidded auction ..
                 sAuctionMgr->SendAuctionOutbiddedMail(auction, auction->buyout, GetPlayer(), trans);
         }
+        auctionHouse->UpdateBidSorting(auction, std::max(auction->bid, auction->startbid), auction->buyout);
         auction->bidder = pl->GetGUIDLow();
         auction->bid = auction->buyout;
         GetPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_BID, auction->buyout);

@@ -68,6 +68,8 @@ public:
         uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
         uint32& count, uint32& totalcount, AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection);
 
+    void UpdateBidSorting(const AuctionEntry *auction, uint64 oldBid, uint64 newBid);
+
 private:
     typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
     AuctionEntryMap AuctionsMap;
