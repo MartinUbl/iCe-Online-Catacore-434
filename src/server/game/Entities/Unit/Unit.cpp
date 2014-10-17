@@ -3090,7 +3090,7 @@ float Unit::GetUnitParryChance() const
     }
     else if (GetTypeId() == TYPEID_UNIT)
     {
-        if (GetCreatureType() == CREATURE_TYPE_HUMANOID)
+        if (GetCreatureType() == CREATURE_TYPE_HUMANOID || (GetTypeId() == TYPEID_UNIT && ToCreature()->isWorldBoss()))
         {
             chance = 5.0f;
             chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
