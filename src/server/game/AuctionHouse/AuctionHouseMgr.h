@@ -81,6 +81,12 @@ struct AuctionEntry
     void DeleteFromDB(SQLTransaction& trans) const;
     void SaveToDB(SQLTransaction& trans) const;
     bool LoadFromDB(Field* fields);
+
+    ItemQualities GetItemQuality() const;
+    uint32 GetRequiredLevel() const;
+    time_t GetExpireTime() const;
+    std::string GetOwnerName() const;
+    uint64 GetCurrentBid() const;
 };
 
 class AuctionHouseMgr

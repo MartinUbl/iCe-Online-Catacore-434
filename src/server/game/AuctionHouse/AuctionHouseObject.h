@@ -48,11 +48,20 @@ private:
     typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
     AuctionEntryMap AuctionsMap;
 
+    std::multimap<ItemQualities, const AuctionEntry*> AuctionsMapByRarity;
+    std::multimap<uint32 /*level*/, const AuctionEntry*> AuctionsMapByLevel;
+    std::multimap<time_t, const AuctionEntry*> AuctionsMapByTimeLeft;
+    std::multimap<std::string, const AuctionEntry*> AuctionsMapBySeller;
+    std::multimap<uint64 /*bit*/, const AuctionEntry*> AuctionsMapByCurrentBid;
+
     void FinishAuctionOnTime(uint32 auctionId);
     bool ItemMatchesSearchCriteria(AuctionEntry const *Aentry,
         Player const *player, std::wstring const& wsearchedname,
         uint8 levelmin, uint8 levelmax, uint8 usable,
         uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality) const;
+
+    template <class TKey, class TContainer>
+    void RemoveFromAuctionMap(TContainer &container, const TKey &key, const AuctionEntry *auction);
 };
 
 

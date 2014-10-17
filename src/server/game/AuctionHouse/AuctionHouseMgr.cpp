@@ -625,3 +625,36 @@ bool AuctionEntry::LoadFromDB(Field* fields)
     }
     return true;
 }
+
+ItemQualities AuctionEntry::GetItemQuality() const
+{
+    ItemPrototype const *proto = sObjectMgr->GetItemPrototype(itemEntry);
+    if (!proto)
+        return ITEM_QUALITY_NORMAL;
+    return (ItemQualities)proto->Quality;
+}
+
+uint32 AuctionEntry::GetRequiredLevel() const
+{
+    ItemPrototype const *proto = sObjectMgr->GetItemPrototype(itemEntry);
+    if (!proto)
+        return 0;
+    return proto->RequiredLevel;
+}
+
+time_t AuctionEntry::GetExpireTime() const
+{
+    return expire_time;
+}
+
+std::string AuctionEntry::GetOwnerName() const
+{
+    std::string ownerName;
+    sObjectMgr->GetPlayerNameByGUID(owner, ownerName);
+    return ownerName;
+}
+
+uint64 AuctionEntry::GetCurrentBid() const
+{
+    return bid;
+}

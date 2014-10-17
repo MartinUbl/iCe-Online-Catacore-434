@@ -32,18 +32,58 @@ void AuctionHouseObject::AddAuction(AuctionEntry *auction)
     ASSERT(auction);
 
     AuctionsMap[auction->Id] = auction;
+    AuctionsMapByRarity.insert(std::make_pair(auction->GetItemQuality(), auction));
+    AuctionsMapByLevel.insert(std::make_pair(auction->GetRequiredLevel(), auction));
+    AuctionsMapByTimeLeft.insert(std::make_pair(auction->GetExpireTime(), auction));
+    AuctionsMapBySeller.insert(std::make_pair(auction->GetOwnerName(), auction));
+    AuctionsMapByCurrentBid.insert(std::make_pair(auction->GetCurrentBid(), auction));
+
     sScriptMgr->OnAuctionAdd(this, auction);
 }
 
 bool AuctionHouseObject::RemoveAuction(AuctionEntry *auction, uint32 /*itemEntry*/)
 {
     bool wasInMap = AuctionsMap.erase(auction->Id) ? true : false;
+    if (wasInMap)
+    {
+        RemoveFromAuctionMap(AuctionsMapByRarity, auction->GetItemQuality(), auction);
+        RemoveFromAuctionMap(AuctionsMapByLevel, auction->GetRequiredLevel(), auction);
+        RemoveFromAuctionMap(AuctionsMapByTimeLeft, auction->GetExpireTime(), auction);
+        RemoveFromAuctionMap(AuctionsMapBySeller, auction->GetOwnerName(), auction);
+        RemoveFromAuctionMap(AuctionsMapByCurrentBid, auction->GetCurrentBid(), auction);
+    }
 
     sScriptMgr->OnAuctionRemove(this, auction);
 
     // we need to delete the entry, it is not referenced any more
     delete auction;
     return wasInMap;
+}
+
+template <class TKey, class TContainer>
+void AuctionHouseObject::RemoveFromAuctionMap(TContainer &container, const TKey &key, const AuctionEntry *auction)
+{
+    typedef std::multimap<TKey, const AuctionEntry *>::iterator iterator;
+    std::pair<iterator, iterator> mapIterRange = container.equal_range(key);
+
+    for (iterator itr = mapIterRange.first; itr != mapIterRange.second; itr++)
+    {
+        if (auction == itr->second)
+        {
+            container.erase(itr);
+            return;
+        }
+    }
+
+    // auction not found by key - perform full search
+    for (iterator itr = container.begin(); itr != container.end(); itr++)
+    {
+        if (auction == itr->second)
+        {
+            container.erase(itr);
+            return;
+        }
+    }
 }
 
 void AuctionHouseObject::Update()
