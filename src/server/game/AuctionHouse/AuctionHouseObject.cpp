@@ -76,7 +76,7 @@ bool AuctionHouseObject::RemoveAuction(AuctionEntry *auction, uint32 /*itemEntry
 template <class TKey, class TContainer>
 void AuctionHouseObject::RemoveFromAuctionMap(TContainer &container, const TKey &key, const AuctionEntry *auction)
 {
-    typedef std::multimap<TKey, const AuctionEntry *>::iterator iterator;
+    typedef typename std::multimap<TKey, const AuctionEntry *>::iterator iterator;
     std::pair<iterator, iterator> mapIterRange = container.equal_range(key);
 
     for (iterator itr = mapIterRange.first; itr != mapIterRange.second; itr++)
