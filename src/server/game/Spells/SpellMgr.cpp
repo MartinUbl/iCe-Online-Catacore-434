@@ -5540,6 +5540,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectBonusCoefficient[0] = 0;   // no spell power bonus
             count++;
             break;
+        case 7001:  // Lightwell Renew
+            spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
+            count++;
+            break;
 
 /***************** SINESTRA ***************************************/
         case 92958:// Twilight Pulse
