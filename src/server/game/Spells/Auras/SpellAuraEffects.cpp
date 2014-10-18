@@ -2492,6 +2492,13 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 else if (caster->HasAura(18704))
                     damage = damage * 1.2f;
             }
+            // Lightwell Renew (priest)
+            else if (m_spellProto->Id == 7001)
+            {
+                // apply bonus from Spiritual Healing (Lightwell Renew is missing in its SpellClassMask, tooltip already multiplies the value by 15% (probably this) and modifying the class mask makes the tooltip to display even more healing
+                if (AuraEffect *healing = caster->GetAuraEffect(87336, EFFECT_1))
+                    AddPctN(damage, healing->GetAmount());
+            }
 
             bool crit = false;
 
