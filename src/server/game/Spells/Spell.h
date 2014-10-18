@@ -522,7 +522,7 @@ class Spell
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target);
 
-        void HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i);
+        void HandleEffects(Unit *pUnitTarget, Item *pItemTarget, GameObject *pGOTarget, uint32 effectIndex);
         void HandleThreatSpells(uint32 spellId);
 
         const SpellEntry * const m_spellInfo;
@@ -756,7 +756,7 @@ class Spell
 
         uint32 m_customAttr;
         bool m_skipCheck;
-        uint32 m_effectMask;
+        uint32 m_handledEffectMask;     // mask for effects which were already handled
         uint8 m_auraScaleMask;
         PathGenerator m_preGeneratedPath;
 

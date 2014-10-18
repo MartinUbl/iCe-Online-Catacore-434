@@ -444,7 +444,7 @@ m_caster(Caster), m_spellValue(new SpellValue(m_spellInfo)), m_preGeneratedPath(
     m_delayAtDamageCount = 0;
 
     m_applyMultiplierMask = 0;
-    m_effectMask = 0;
+    m_handledEffectMask = 0;
     m_auraScaleMask = 0;
 
     // Get data for type of attack
@@ -4297,7 +4297,7 @@ void Spell::cast(bool skipCheck)
             case SPELL_EFFECT_LEAP_BACK:
             case SPELL_EFFECT_ACTIVATE_RUNE:
                 HandleEffects(NULL,NULL,NULL,i);
-                m_effectMask |= (1<<i);
+                m_handledEffectMask |= (1<<i);
                 break;
         }
     }
@@ -4490,7 +4490,7 @@ void Spell::_handle_immediate_phase()
 
     if (!m_originalCaster)
         return;
-    uint8 oldEffMask = m_effectMask;
+    uint8 oldEffMask = m_handledEffectMask;
     // process ground
     for (uint32 j = 0; j < MAX_SPELL_EFFECTS; ++j)
     {
@@ -4502,15 +4502,15 @@ void Spell::_handle_immediate_phase()
             if (!m_targets.HasDst()) // FIXME: this will ignore dest set in effect
                 m_targets.setDst(*m_caster);
             HandleEffects(m_originalCaster, NULL, NULL, j);
-            m_effectMask |= (1<<j);
+            m_handledEffectMask |= (1<<j);
         }
         else if (EffectTargetType[m_spellInfo->Effect[j]] == SPELL_REQUIRE_NONE)
         {
             HandleEffects(m_originalCaster, NULL, NULL, j);
-            m_effectMask |= (1<<j);
+            m_handledEffectMask |= (1<<j);
         }
     }
-    if (oldEffMask != m_effectMask && m_UniqueTargetInfo.empty())
+    if (oldEffMask != m_handledEffectMask && m_UniqueTargetInfo.empty())
     {
         uint32 procAttacker = m_procAttacker;
         if (!procAttacker)
@@ -4518,7 +4518,7 @@ void Spell::_handle_immediate_phase()
             bool positive = true;
             for (uint8 i = 0; i< MAX_SPELL_EFFECTS; ++i)
                 // If at least one effect negative spell is negative hit
-                if (m_effectMask & (1<<i) && !IsPositiveEffect(m_spellInfo->Id, i))
+                if (m_handledEffectMask & (1<<i) && !IsPositiveEffect(m_spellInfo->Id, i))
                 {
                     positive = false;
                     break;
@@ -5934,27 +5934,27 @@ void Spell::HandleThreatSpells(uint32 spellId)
     }
 }
 
-void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i)
+void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 effectIndex)
 {
     //effect has been handled, skip it
-    if (m_effectMask & (1<<i))
+    if (m_handledEffectMask & (1<<effectIndex))
         return;
 
     unitTarget = pUnitTarget;
     itemTarget = pItemTarget;
     gameObjTarget = pGOTarget;
 
-    uint8 eff = m_spellInfo->Effect[i];
+    uint8 eff = m_spellInfo->Effect[effectIndex];
 
     // we do not need DamageMultiplier here.
     // we will also supply at least unit target, because of spell scaling and buff scaling by target, not caster
-    damage = CalculateDamage(i, pUnitTarget);
+    damage = CalculateDamage(effectIndex, pUnitTarget);
 
-    bool preventDefault = CallScriptEffectHandlers((SpellEffIndex)i);
+    bool preventDefault = CallScriptEffectHandlers((SpellEffIndex)effectIndex);
 
     if (!preventDefault && eff < TOTAL_SPELL_EFFECTS)
     {
-        (this->*SpellEffects[eff])((SpellEffIndex)i);
+        (this->*SpellEffects[eff])((SpellEffIndex)effectIndex);
     }
 }
 
