@@ -73,9 +73,6 @@ BattlegroundMgr::BattlegroundMgr() : m_AutoDistributionTimeChecker(0), m_ArenaTe
     m_ratedBgWeek = RATED_BATTLEGROUND_WEEK_NONE;
     m_ratedBgNextWeek = 0;
     m_ratedBgWeekCheckTimer = 0;
-
-    m_ArenaGenerator.Seed(urand(0, 0xffffffff));
-    m_RandomBGGenerator.Seed(urand(0, 0xffffffff));
 }
 
 BattlegroundMgr::~BattlegroundMgr()
@@ -1026,7 +1023,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
             };
 
             uint32 bgCount = sizeof(avail_RBGs)/sizeof(BattlegroundTypeId);
-            bgTypeId = avail_RBGs[m_ArenaGenerator.Generate(bgCount)];
+            bgTypeId = avail_RBGs[m_ArenaGenerator.randInt(bgCount - 1)];
         }
 
         bg_template = GetBattlegroundTemplate(bgTypeId);
@@ -1126,56 +1123,75 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
 
 BattlegroundTypeId BattlegroundMgr::SelectRandomBattleground(uint32 minBracketLevel)
 {
-    BattlegroundTypeId bgTypeId = BATTLEGROUND_TYPE_NONE;
+    std::vector<BattlegroundTypeId> bgs;
+    bgs.push_back(BATTLEGROUND_WS);
+    bgs.push_back(BATTLEGROUND_AB);
+    bgs.push_back(BATTLEGROUND_EY);
 
     // Twin Peaks and Battle for Gilneas exists only for level 85 (PvpDifficulty.dbc)
-    // We must select different list of BGs in our custom system
     if (minBracketLevel == 85)
     {
-        BattlegroundTypeId avail_RBGs[] = {
-            BATTLEGROUND_WS,
-            BATTLEGROUND_AB,
-            BATTLEGROUND_EY,
-            BATTLEGROUND_TP,
-            BATTLEGROUND_BG,
-            BATTLEGROUND_TYPE_NONE,
-        };
+        bgs.push_back(BATTLEGROUND_TP);
+        bgs.push_back(BATTLEGROUND_BG);
 
         time_t secs = time(NULL);
         tm* date = localtime(&secs);
 
         // Allow Alterac Valley only from 16:00 to 22:00 every day
         if (date && date->tm_hour >= 16 && date->tm_hour <= 22)
+            bgs.push_back(BATTLEGROUND_AV);
+    }
+
+    return SelectRandomBattleground(bgs);
+}
+
+BattlegroundTypeId BattlegroundMgr::SelectRandomBattleground(std::vector<BattlegroundTypeId> &availBGs)
+{
+    uint32 bgsPlayersSum = 0;
+    std::vector<size_t> bgsPlayersSize(availBGs.size());
+
+    for (size_t i = 0; i < availBGs.size(); i++)
+    {
+        Battleground *bg = GetBattlegroundTemplate(availBGs[i]);
+        if (!bg)
         {
-            for (uint8 i = 0; i < (sizeof(avail_RBGs) / sizeof(BattlegroundTypeId)); i++)
-            {
-                if (avail_RBGs[i] == BATTLEGROUND_TYPE_NONE)
-                {
-                    avail_RBGs[i] = BATTLEGROUND_AV;
-                    break;
-                }
-            }
+            availBGs.erase(availBGs.begin() + i);
+            i--;
+            continue;
         }
 
-        uint32 bgCount = sizeof(avail_RBGs) / sizeof(BattlegroundTypeId);
+        uint32 players = bg->GetMaxPlayers() / 2;
+        if (players == 0)
+            players = 10;
 
-        do {
-            bgTypeId = avail_RBGs[m_RandomBGGenerator.Generate(bgCount)];
-        } while (bgTypeId == BATTLEGROUND_TYPE_NONE);
+        bgsPlayersSize[i] = players;
+        bgsPlayersSum += players;
     }
-    else
+
+    if (availBGs.empty())
+        return BATTLEGROUND_TYPE_NONE;
+
+    // probabilities are inversely proportional to count of players
+    // this makes players evenly distributed amongst all types of battlegrounds
+    std::vector<double> probabilities(availBGs.size());
+    double probabilitiesSum = 0;
+    for (size_t i = 0; i < probabilities.size(); i++)
     {
-        BattlegroundTypeId avail_RBGs[] = {
-            BATTLEGROUND_WS,
-            BATTLEGROUND_AB,
-            BATTLEGROUND_EY,
-        };
+        probabilities[i] = 1.0 / bgsPlayersSize[i];
+        probabilitiesSum += probabilities[i];
+    }
+    for (size_t i = 0; i < probabilities.size(); i++)
+        probabilities[i] /= probabilitiesSum;
 
-        uint32 bgCount = sizeof(avail_RBGs) / sizeof(BattlegroundTypeId);
-        bgTypeId = avail_RBGs[m_RandomBGGenerator.Generate(bgCount)];
+    double roll = m_RandomBGGenerator.randExc();
+    for (size_t i = 0; i < probabilities.size() - 1; i++)
+    {
+        if (roll < probabilities[i])
+            return availBGs[i];
+        roll -= probabilities[i];
     }
 
-    return bgTypeId;
+    return availBGs.back();
 }
 
 // used to create the BG templates
