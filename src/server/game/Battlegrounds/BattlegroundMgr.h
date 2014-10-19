@@ -125,7 +125,10 @@ class BattlegroundMgr
         static BattlegroundTypeId WeekendHolidayIdToBGType(HolidayIds holiday);
         static bool IsBGWeekend(BattlegroundTypeId bgTypeId);
         void DoCompleteAchievement(uint32 achievement, Player * player = NULL);
-    private:
+private:
+        BattlegroundTypeId SelectRandomBattleground(uint32 minBracketLevel);
+
+private:
 
         typedef std::map<BattlegroundTypeId, uint8> BattlegroundSelectionWeightMap; // TypeId and its selectionWeight
         /* Battlegrounds */

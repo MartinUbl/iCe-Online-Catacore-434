@@ -1013,52 +1013,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
         // We must differ arenas, because of they are using the same function to create instance
         if (!bg_template->isArena())
         {
-            // Twin Peaks and Battle for Gilneas exists only for level 85 (PvpDifficulty.dbc)
-            // We must select different list of BGs in our custom system
-            if (bracketEntry->minLevel == 85)
-            {
-                BattlegroundTypeId avail_RBGs[] = {
-                    BATTLEGROUND_WS,
-                    BATTLEGROUND_AB,
-                    BATTLEGROUND_EY,
-                    BATTLEGROUND_TP,
-                    BATTLEGROUND_BG,
-                    BATTLEGROUND_TYPE_NONE,
-                };
-
-                time_t secs = time(NULL);
-                tm* date = localtime(&secs);
-
-                // Allow Alterac Valley only from 16:00 to 22:00 every day
-                if (date && date->tm_hour >= 16 && date->tm_hour <= 22)
-                {
-                    for (uint8 i = 0; i < (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId)); i++)
-                    {
-                        if (avail_RBGs[i] == BATTLEGROUND_TYPE_NONE)
-                        {
-                            avail_RBGs[i] = BATTLEGROUND_AV;
-                            break;
-                        }
-                    }
-                }
-
-                uint32 bgCount = sizeof(avail_RBGs)/sizeof(BattlegroundTypeId);
-
-                do {
-                    bgTypeId = avail_RBGs[m_RandomBGGenerator.Generate(bgCount)];
-                } while (bgTypeId == BATTLEGROUND_TYPE_NONE);
-            }
-            else
-            {
-                BattlegroundTypeId avail_RBGs[] = {
-                    BATTLEGROUND_WS,
-                    BATTLEGROUND_AB,
-                    BATTLEGROUND_EY,
-                };
-
-                uint32 bgCount = sizeof(avail_RBGs)/sizeof(BattlegroundTypeId);
-                bgTypeId = avail_RBGs[m_RandomBGGenerator.Generate(bgCount)];
-            }
+            bgTypeId = SelectRandomBattleground(bracketEntry->minLevel);
         }
         else
         {
@@ -1167,6 +1122,60 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
     bg->SetGUID(MAKE_NEW_GUID(bg->GetTypeID(false), 0, HIGHGUID_BATTLEGROUND));
 
     return bg;
+}
+
+BattlegroundTypeId BattlegroundMgr::SelectRandomBattleground(uint32 minBracketLevel)
+{
+    BattlegroundTypeId bgTypeId = BATTLEGROUND_TYPE_NONE;
+
+    // Twin Peaks and Battle for Gilneas exists only for level 85 (PvpDifficulty.dbc)
+    // We must select different list of BGs in our custom system
+    if (minBracketLevel == 85)
+    {
+        BattlegroundTypeId avail_RBGs[] = {
+            BATTLEGROUND_WS,
+            BATTLEGROUND_AB,
+            BATTLEGROUND_EY,
+            BATTLEGROUND_TP,
+            BATTLEGROUND_BG,
+            BATTLEGROUND_TYPE_NONE,
+        };
+
+        time_t secs = time(NULL);
+        tm* date = localtime(&secs);
+
+        // Allow Alterac Valley only from 16:00 to 22:00 every day
+        if (date && date->tm_hour >= 16 && date->tm_hour <= 22)
+        {
+            for (uint8 i = 0; i < (sizeof(avail_RBGs) / sizeof(BattlegroundTypeId)); i++)
+            {
+                if (avail_RBGs[i] == BATTLEGROUND_TYPE_NONE)
+                {
+                    avail_RBGs[i] = BATTLEGROUND_AV;
+                    break;
+                }
+            }
+        }
+
+        uint32 bgCount = sizeof(avail_RBGs) / sizeof(BattlegroundTypeId);
+
+        do {
+            bgTypeId = avail_RBGs[m_RandomBGGenerator.Generate(bgCount)];
+        } while (bgTypeId == BATTLEGROUND_TYPE_NONE);
+    }
+    else
+    {
+        BattlegroundTypeId avail_RBGs[] = {
+            BATTLEGROUND_WS,
+            BATTLEGROUND_AB,
+            BATTLEGROUND_EY,
+        };
+
+        uint32 bgCount = sizeof(avail_RBGs) / sizeof(BattlegroundTypeId);
+        bgTypeId = avail_RBGs[m_RandomBGGenerator.Generate(bgCount)];
+    }
+
+    return bgTypeId;
 }
 
 // used to create the BG templates
