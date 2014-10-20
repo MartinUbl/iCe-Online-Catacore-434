@@ -411,10 +411,10 @@ public:
                 pPlayer->CastSpell(pPlayer,SPELL_JAINA,false);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 4:
-                pPlayer->CastSpell(pPlayer,SPELL_BAINE,false);
+                pPlayer->CastSpell(pPlayer,SPELL_TYRANDE,false);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 5:
-                pPlayer->CastSpell(pPlayer,SPELL_TYRANDE,false);
+                pPlayer->CastSpell(pPlayer,SPELL_BAINE,false);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 6:
                 pPlayer->CastSpell(pPlayer,SPELL_MUROZOND,false);
