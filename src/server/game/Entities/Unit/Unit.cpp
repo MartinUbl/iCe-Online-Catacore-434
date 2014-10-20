@@ -2961,14 +2961,14 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
 //   Parry
 // For spells
 //   Resist
-SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool CanReflect)
+SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool CanReflect, uint32 effectMask)
 {
     // Return evade for units in evade mode
     if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode() && this != pVictim)
         return SPELL_MISS_EVADE;
 
     // Check for immune
-    if (pVictim->IsImmunedToSpell(spell))
+    if (pVictim->IsImmunedToSpell(spell, effectMask))
         return SPELL_MISS_IMMUNE;
 
     // All positive spells can`t miss
@@ -14407,7 +14407,7 @@ bool Unit::IsImmunedToDamage(SpellEntry const* spellInfo)
     return false;
 }
 
-bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo)
+bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, uint32 effectMask)
 {
     if (!spellInfo)
         return false;
@@ -14454,10 +14454,21 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo)
     {
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
-            if ((itr->type & GetSpellSchoolMask(spellInfo))
-                && !(IsPositiveSpell(itr->spellId) && IsPositiveSpell(spellInfo->Id))
-                && !CanSpellPierceImmuneAura(spellInfo, sSpellStore.LookupEntry(itr->spellId)))
-                return true;
+        {
+            const SpellImmune &immune = *itr;
+            const SpellEntry *immuneAura = sSpellStore.LookupEntry(immune.spellId);
+            if (!immuneAura)
+                continue;
+
+            if ((immune.type & GetSpellSchoolMask(spellInfo))
+                && !CanSpellPierceImmuneAura(spellInfo, immuneAura))
+            {
+                bool positiveImmuneAura = IsPositiveSpell(immuneAura->Id);
+                for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
+                    if ((effectMask & (1 << i)) && (!IsPositiveEffect(spellInfo->Id, i) || !positiveImmuneAura))
+                        return true;
+            }
+        }
     }
 
     return false;

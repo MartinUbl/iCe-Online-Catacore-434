@@ -466,7 +466,7 @@ class Creature : public Unit, public GridObject<Creature>
         bool isCanInteractWithBattleMaster(Player* player, bool msg) const;
         bool isCanTrainingAndResetTalentsOf(Player* pPlayer) const;
         bool CanCreatureAttack(Unit const *pVictim, bool force = true) const;
-        bool IsImmunedToSpell(SpellEntry const* spellInfo);
+        bool IsImmunedToSpell(SpellEntry const* spellInfo, uint32 effectMask = MAX_EFFECT_MASK);
                                                             // redefine Unit::IsImmunedToSpell
         bool IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) const;
                                                             // redefine Unit::IsImmunedToSpellEffect

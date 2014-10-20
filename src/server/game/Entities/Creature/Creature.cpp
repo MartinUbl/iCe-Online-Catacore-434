@@ -1732,7 +1732,7 @@ void Creature::DespawnOrUnsummon(uint32 msTimeToDespawn)
         ForcedDespawn(msTimeToDespawn);
 }
 
-bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo)
+bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo, uint32 effectMask)
 {
     if (!spellInfo)
         return false;
@@ -1740,7 +1740,7 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo)
     if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
         return true;
 
-    return Unit::IsImmunedToSpell(spellInfo);
+    return Unit::IsImmunedToSpell(spellInfo, effectMask);
 }
 
 bool Creature::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) const
