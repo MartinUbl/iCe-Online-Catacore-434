@@ -7053,10 +7053,12 @@ void AuraEffect::HandleAuraModIncreaseEnergyPercent(AuraApplication const *aurAp
     if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
 
-    Unit *target = aurApp->GetTarget();
+    Powers powerType = (Powers)GetMiscValue();
 
-    Powers powerType = target->getPowerType();
-    if (int32(powerType) != GetMiscValue())
+    Unit *target = aurApp->GetTarget();
+    uint32 powerIndex = target->GetPowerIndex(powerType);
+
+    if (powerIndex == MAX_POWERS)
         return;
 
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + powerType);
