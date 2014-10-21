@@ -139,7 +139,7 @@ public:
                     instance->SetData(TYPE_ECHO_OF_SYLVANAS, NOT_STARTED);
             }
 
-            me->MonsterYell("And so ends your story.", LANG_UNIVERSAL, 0);
+            me->MonsterYell("And so ends your story.", LANG_UNIVERSAL, 0, 50.0f);
             me->SendPlaySound(25968, true);
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
