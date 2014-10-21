@@ -41,6 +41,7 @@ public:
         uint32 crystals_clicked;
         uint32 trash_murozond;
         uint32 trash_baine;
+        uint32 trash_tyrande;
 
         uint64 echo_of_sylvanasGuid;
         uint64 echo_of_jainaGuid;
@@ -65,6 +66,7 @@ public:
             crystals_clicked = 0;
             trash_murozond = 0;
             trash_baine = 0;
+            trash_tyrande = 0;
             Jaina_Welcome_Say = false;
 
             memset(m_auiEncounter, 0, sizeof(uint32) * MAX_ENCOUNTER);
@@ -83,6 +85,7 @@ public:
             saveStream << " " << crystals_clicked;
             saveStream << " " << trash_murozond;
             saveStream << " " << trash_baine;
+            saveStream << " " << trash_tyrande;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -105,6 +108,7 @@ public:
             loadStream >> crystals_clicked;
             loadStream >> trash_murozond;
             loadStream >> trash_baine;
+            loadStream >> trash_tyrande;
 
             for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
@@ -212,6 +216,17 @@ public:
                     }
                 }
 
+                if (trash_tyrande >= 5)
+                {
+                    Creature * echo_of_tyrande = this->instance->GetCreature(this->GetData64(TYPE_ECHO_OF_TYRANDE));
+                    if (echo_of_tyrande && echo_of_tyrande->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                    {
+                        echo_of_tyrande->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
+                        echo_of_tyrande->SetReactState(REACT_AGGRESSIVE);
+                        echo_of_tyrande->RemoveAura(101841); // In Shadow Aura
+                    }
+                }
+
                 Check_Timer = 15000;
             }
             else Check_Timer -= diff;
@@ -230,6 +245,9 @@ public:
 
             if (DataId == DATA_TRASH_BAINE)
                 return trash_baine;
+
+            if (DataId == DATA_TRASH_TYRANDE)
+                return trash_tyrande;
 
             return 0;
         }
@@ -255,6 +273,12 @@ public:
             if (type == DATA_TRASH_BAINE)
             {
                 trash_baine = data;
+                SaveToDB();
+            }
+
+            if (type == DATA_TRASH_TYRANDE)
+            {
+                trash_tyrande += data;
                 SaveToDB();
             }
 

@@ -218,30 +218,15 @@ public:
 
         void SummonMoonlance()
         {
-            float angle = me->GetOrientation();
-            float distance = 1.0f;
+            float angle = me->GetOrientation()+(urand(0,360)/100);
+            angle = MapManager::NormalizeOrientation(angle);
+            float distance = 5.0f;
 
             me->SummonCreature(MOONLANCE_MAIN_ADD,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,me->GetPositionZ(),angle,TEMPSUMMON_TIMED_DESPAWN, 30000);
         }
 
         void UpdateAI(const uint32 diff)
         {
-            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-            {
-                if (Attackable_Timer <= diff)
-                {
-                    Unit * pool_of_moonlight_5 = me->FindNearestCreature(POOL_OF_MOONLIGHT_5, 100.0f, true);
-                    if (!pool_of_moonlight_5)
-                    {
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        me->SetReactState(REACT_AGGRESSIVE);
-                        me->RemoveAura(IN_SHADOW);
-                    }
-                }
-                else Attackable_Timer -= 10000;
-            }
-
             if (!UpdateVictim())
             return;
 
@@ -700,8 +685,12 @@ public:
 
     struct npc_pool_of_moonlightAI : public ScriptedAI
     {
-        npc_pool_of_moonlightAI(Creature *c) : ScriptedAI(c) {}
+        npc_pool_of_moonlightAI(Creature *creature) : ScriptedAI(creature) 
+        {
+            instance = creature->GetInstanceScript();
+        }
 
+        InstanceScript* instance;
         uint32 Check_Timer;
         uint32 Check_Size;
         uint32 Entry;
@@ -766,6 +755,9 @@ public:
 
         void JustDied(Unit * /*Who*/)
         {
+            if (InstanceScript *pInstance = me->GetInstanceScript())
+                    pInstance->SetData(DATA_TRASH_TYRANDE, 1);
+
             Entry = me->GetEntry();
             Unit * tyrande = me->FindNearestCreature(ECHO_OF_TYRANDE, 150.0f, true);
 
@@ -862,7 +854,7 @@ public:
         {
             if (Say == false)
             {
-                if ((me->GetEntry() == POOL_OF_MOONLIGHT_1) && me->IsAlive())
+                if ((me->GetEntry() == POOL_OF_MOONLIGHT_1) && me->IsAlive() && (instance->GetData64(TYPE_ECHO_OF_TYRANDE) == 0))
                 {
                     if (Check_Timer <= diff)
                     {

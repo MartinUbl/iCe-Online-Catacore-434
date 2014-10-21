@@ -37,5 +37,6 @@ enum AdditionalEvents
     DATA_CRYSTALS          = 10,
     DATA_TRASH_MUROZOND    = 11,
     DATA_TRASH_BAINE       = 12,
+    DATA_TRASH_TYRANDE     = 13,
 };
 #endif
