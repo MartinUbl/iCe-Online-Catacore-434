@@ -1167,7 +1167,7 @@ public:
         void Reset() 
         {
             Flesh_Rip = 10000+urand(0,10000);
-            Cadaver_Toss = 0+urand(0,20000);
+            Cadaver_Toss = 5000+urand(0,35000);
         }
 
         void UpdateAI(const uint32 diff) 
@@ -1189,7 +1189,7 @@ public:
                 Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true);
                 if (target)
                     me->CastSpell(target, CADAVER_TOSS, true);
-                Cadaver_Toss = 20000;
+                Cadaver_Toss = 30000;
             }
             else Cadaver_Toss -= diff;
 
