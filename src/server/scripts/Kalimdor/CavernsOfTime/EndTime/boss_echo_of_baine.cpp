@@ -273,7 +273,10 @@ public:
 
                 // Switch weapons when he has a Molten Axe buff
                 if (me->HasAura(MOLTEN_AXE))
+                {
                     SetEquipmentSlots(false, AXE_FLAME_EFFECT, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE); // Switch weapon to flame one
+                    me->SetSheath(SHEATH_STATE_MELEE);
+                }
                 else SetEquipmentSlots(true);
 
             } else Molten_Axe_Check -= diff;
@@ -328,7 +331,7 @@ public:
                         if (player->HasAura(TOTEM_BUFF))
                             me->Kill(me, false);
                     }
-                Check_Timer = 1000;
+                Check_Timer = 500;
             } else Check_Timer -= diff;
                 
         }
