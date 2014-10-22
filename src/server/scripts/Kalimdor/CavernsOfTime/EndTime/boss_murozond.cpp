@@ -396,22 +396,22 @@ public:
                     switch(Phase) 
                     {
                         case 0:
-                            Distortion_Bomb_Timer = 5000;
+                            Distortion_Bomb_Timer = 8000;
                             break;
                         case 1:
-                            Distortion_Bomb_Timer = 4000;
+                            Distortion_Bomb_Timer = 6000;
                             break;
                         case 2:
-                            Distortion_Bomb_Timer = 3000;
+                            Distortion_Bomb_Timer = 4000;
                             break;
                         case 3:
-                            Distortion_Bomb_Timer = 2000;
+                            Distortion_Bomb_Timer = 3000;
                             break;
                         case 4:
-                            Distortion_Bomb_Timer = 1000;
+                            Distortion_Bomb_Timer = 2000;
                             break;
                         case 5:
-                            Distortion_Bomb_Timer = 500;
+                            Distortion_Bomb_Timer = 1000;
                             break;
                     }
                 }

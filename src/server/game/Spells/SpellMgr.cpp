@@ -4727,6 +4727,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[0] = 0;
             spellInfo->Effect[1] = 0;
             break;
+        case 101984: // Distortion Bomb
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_6_YARDS;
+            break;
         // Echo of Sylvanas
         case 100865: // Wracking Pain
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
