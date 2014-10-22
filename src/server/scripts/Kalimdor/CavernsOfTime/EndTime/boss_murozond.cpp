@@ -185,16 +185,17 @@ public:
             Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
                 for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                     if (Player* player = i->getSource())
-                    {
-                        player->CastSpell(player, HOURS_COUNTDOWN_VISUAL, true);
-                        player->SetMaxPower(POWER_SCRIPTED, 5);
+                        if (!player->IsGameMaster())
+                        {
+                            player->CastSpell(player, HOURS_COUNTDOWN_VISUAL, true);
+                            player->SetMaxPower(POWER_SCRIPTED, 5);
 
-                        Coordinates[Position].guid = player->GetGUID();
-                        Coordinates[Position].x = player->GetPositionX();
-                        Coordinates[Position].y = player->GetPositionY();
-                        Coordinates[Position].z = player->GetPositionZ();
-                        Position++; // Save data for next player to next Coordinates[Position]
-                    }
+                            Coordinates[Position].guid = player->GetGUID();
+                            Coordinates[Position].x = player->GetPositionX();
+                            Coordinates[Position].y = player->GetPositionY();
+                            Coordinates[Position].z = player->GetPositionZ();
+                            Position++; // Save data for next player to next Coordinates[Position]
+                        }
         }
 
         void KilledUnit(Unit* /*victim*/)
@@ -339,11 +340,10 @@ public:
                     Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
                     for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                         if (Player* player = i->getSource())
-                            if (player->IsInWorld() && player->IsAlive() && !player->IsGameMaster())
+                            if (player->IsInWorld() && player && !player->IsGameMaster())
                             {
                                 // Resurrect dead players
-                                if (!player->IsAlive())
-                                    player->ResurrectPlayer(100.0f);
+                                player->ResurrectPlayer(100.0f);
 
                                 // Find correct player`s data
                                 uint32 position = 0;
@@ -397,22 +397,22 @@ public:
                     switch(Phase) 
                     {
                         case 0:
-                            Distortion_Bomb_Timer = 8000;
+                            Distortion_Bomb_Timer = 9000;
                             break;
                         case 1:
-                            Distortion_Bomb_Timer = 6000;
+                            Distortion_Bomb_Timer = 7500;
                             break;
                         case 2:
-                            Distortion_Bomb_Timer = 4000;
+                            Distortion_Bomb_Timer = 6000;
                             break;
                         case 3:
-                            Distortion_Bomb_Timer = 3000;
+                            Distortion_Bomb_Timer = 4500;
                             break;
                         case 4:
-                            Distortion_Bomb_Timer = 2000;
+                            Distortion_Bomb_Timer = 3000;
                             break;
                         case 5:
-                            Distortion_Bomb_Timer = 1000;
+                            Distortion_Bomb_Timer = 1500;
                             break;
                     }
                 }
