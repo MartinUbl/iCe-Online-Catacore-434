@@ -4713,6 +4713,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 101614: // Throw Totem
             spellInfo->Effect[2] = 0;
             break;
+        case 107837:
+            spellInfo->EffectAmplitude[0] = 10000;
+            break;
         // Murozond
         case 102364: // Blessing of the Bronze Dragonflight
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;

@@ -421,6 +421,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         if (mover->HasAuraType(SPELL_AURA_MOD_NEXT_SPELL))
         {
             mover->RemoveAurasByType(SPELL_AURA_MOD_NEXT_SPELL);
+            mover->RemoveAura(107837); // Remove also Throw Totem aura (Echo of Baine encounter)
             IgnoreDontKnowSpell = true;
         }
 
