@@ -88,6 +88,9 @@ public:
             instance = creature->GetInstanceScript();
             me->GetMotionMaster()->MoveJump(4215.0f, -428.6582f, 150.0f, 100.0f, 100.0f);
 
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
             me->SetFlying(true);
             me->SetVisible(false);
         }
@@ -115,10 +118,8 @@ public:
                     instance->SetData(TYPE_MUROZOND, NOT_STARTED);
             }
 
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetStandState(UNIT_STAND_STATE_STAND);
-            me->SetReactState(REACT_PASSIVE);
+            me->SetReactState(REACT_AGGRESSIVE);
 
             Tail_Lash_Timer = 3000;
             Temporal_Blast_Timer = 12000;
@@ -439,6 +440,9 @@ public:
 
                     me->MonsterYell("You know not what you have done. Aman'Thul... What I... have... seen...", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(25928, false);
+
+                    if (InstanceScript *pInstance = me->GetInstanceScript())
+                        pInstance->SetData(DATA_TRASH_MUROZOND, 2);
                 }
             }
 
