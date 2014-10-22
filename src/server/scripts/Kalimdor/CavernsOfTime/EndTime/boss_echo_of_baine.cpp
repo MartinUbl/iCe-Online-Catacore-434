@@ -114,9 +114,9 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
 
-            Totem_Timer             = 15000;
+            Totem_Timer             = 10000;
             Pulverize_Timer         = 30000;
-            Pulverize_Destroy_Timer = 32000;
+            Pulverize_Destroy_Timer = 40000;
             Molten_Axe_Check        = 1000;
 
             me->CastSpell(me, MOLTEN_AXE_BUFF, false);   // Visual buff on Baine
@@ -217,7 +217,7 @@ public:
                 return;
 
             // Pulverize 
-            if (Pulverize_Timer <= diff)
+            if (Pulverize_Timer <= diff && !me->HasAura(TOTEM2))
             {
                 me->MonsterYell("My wrath knows no bounds!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(25916, true);
@@ -228,6 +228,7 @@ public:
                     me->CastSpell(target, PULVERIZE, false); // Dunno if needed but just for sure
                     me->CastSpell(target, PULVERIZE_JUMP, false); // Jump on random target
                 }
+                Pulverize_Destroy_Timer = 2000;
                 Pulverize_Timer = 40000;
             }
             else Pulverize_Timer -= diff;
@@ -236,7 +237,7 @@ public:
             if (Pulverize_Destroy_Timer <= diff)
             {
                 me->CastSpell(me, PULVERIZE_DMG, false); // Destroy platform
-                Pulverize_Destroy_Timer = 40000;
+                Pulverize_Destroy_Timer = 50000;
             }
             else Pulverize_Destroy_Timer -= diff;
 
@@ -250,7 +251,7 @@ public:
                 if (target)
                     me->CastSpell(target, THROW_TOTEM, false);
 
-                Totem_Timer = 30000;
+                Totem_Timer = 25000;
             }
             else Totem_Timer -= diff;
 
