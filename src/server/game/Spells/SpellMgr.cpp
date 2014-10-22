@@ -4682,6 +4682,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 102414: // Dark Moonlight
         case 102173: // Stardust
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_DST;
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+            count++;
             break;
         case 102149: // Moonlance Effect - Exclude because of DR purpose
             spellInfo->excludeTargetAuraSpell=102149;
