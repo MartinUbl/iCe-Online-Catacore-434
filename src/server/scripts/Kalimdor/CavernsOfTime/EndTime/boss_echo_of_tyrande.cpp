@@ -854,7 +854,7 @@ public:
         {
             if (Say == false)
             {
-                if ((me->GetEntry() == POOL_OF_MOONLIGHT_1) && me->IsAlive() && (instance->GetData64(TYPE_ECHO_OF_TYRANDE) == 0))
+                if ((me->GetEntry() == POOL_OF_MOONLIGHT_1) && me->IsAlive())
                 {
                     if (Check_Timer <= diff)
                     {
