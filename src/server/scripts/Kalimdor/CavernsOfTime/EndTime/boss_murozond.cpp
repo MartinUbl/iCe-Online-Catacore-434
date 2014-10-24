@@ -240,8 +240,10 @@ public:
                 if (!playerList.isEmpty())
                     for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
                         if (Player* pPlayer = i->getSource())
+                        {
                             pPlayer->SummonGameObject(209547, 4189.15f, -447.247f, 121.01f, 2.80922f, 0.0f, 0.0f, 0.986223f, 0.165424f, 86400);
                             return;
+                        }
         }
 
         void UpdateAI(const uint32 diff)
