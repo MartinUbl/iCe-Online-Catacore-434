@@ -14284,7 +14284,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellEntry const* spellProto, 
     }
 
     // Implementation of Deep Healing mastery proficiency
-    if (const Player *player = ToPlayer())
+    if (const Player *player = caster->ToPlayer())
     {
         if (spellProto->SpellFamilyName == SPELLFAMILY_SHAMAN &&
             player->GetActiveTalentBranchSpec() == SPEC_SHAMAN_RESTORATION)
