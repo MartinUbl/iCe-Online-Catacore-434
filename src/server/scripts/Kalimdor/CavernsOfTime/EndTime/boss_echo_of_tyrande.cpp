@@ -124,7 +124,9 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
             me->SetStandState(UNIT_STAND_STATE_KNEEL);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->GetMotionMaster()->MovePoint(0, 2828.93f, 52.8149f, 2.33101f); // Move her on Z position a little bit, so she doesn`t fall through texture
+            me->SendMovementFlagUpdate();
             me->CastSpell(me, IN_SHADOW, true);
 
             Attackable_Timer = 10000;
@@ -147,8 +149,6 @@ public:
             Say_Moonlance = false;
         }
 
-        void InEvadeMode() {}
-
         void EnterCombat(Unit * /*who*/)
         {
             if (instance)
@@ -156,6 +156,7 @@ public:
                 instance->SetData(TYPE_ECHO_OF_TYRANDE, IN_PROGRESS);
             }
 
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetStandState(UNIT_STAND_STATE_STAND);
 
             me->MonsterSay("Let the peaceful light of Elune soothe your souls in this dark time.", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
