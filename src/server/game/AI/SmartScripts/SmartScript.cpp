@@ -2681,7 +2681,7 @@ void SmartScript::OnUpdate(uint32 const diff)
             mLastTextID = 0;
             mTextTimer = 0;
             mUseTextTimer = false;
-            uint32 tempEntry = talker?talker->GetEntry():0;
+            uint32 tempEntry = talker && talker->IsInWorld() ? talker->GetEntry() : 0;
             talker = NULL;
             ProcessEventsFor(SMART_EVENT_TEXT_OVER, NULL, temp, tempEntry);
         } else mTextTimer -= diff;
