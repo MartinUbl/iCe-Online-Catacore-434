@@ -713,17 +713,6 @@ public:
             Say_Next = false;
         }
 
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MovePoint(0, 2828.93f, 52.8149f, 2.33101f);
-            me->SendMovementFlagUpdate();
-
-            me->GetMotionMaster()->MovePoint(0, 2828.93f, -428.5562f, 144.295914f);
-            me->SendMovementFlagUpdate();
-
-            ScriptedAI::EnterEvadeMode();
-        }
-
         void EnterCombat(Unit * /*who*/) { }
 
         void CountDeadUnits()
