@@ -285,7 +285,8 @@ public:
                     if (trash_tyrande <= 10)
                     {
                         Size = 2-(trash_tyrande*0.14);
-                        pool_of_moonlight_1->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
+                        if (pool_of_moonlight_1)
+                            pool_of_moonlight_1->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
                     }
 
                     if (trash_tyrande > 10)
@@ -303,7 +304,8 @@ public:
                         if (trash_tyrande <= 20)
                         {
                             Size = 2-((trash_tyrande-10)*0.14);
-                            pool_of_moonlight_2->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
+                            if (pool_of_moonlight_2)
+                                pool_of_moonlight_2->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
                         }
                     }
 
@@ -315,14 +317,15 @@ public:
                         }
                         else
                         {
-                            if (!pool_of_moonlight_3->HasAura(102479))
-                            pool_of_moonlight_3->CastSpell(pool_of_moonlight_3, 102479, true);
+                            if (pool_of_moonlight_3 && !pool_of_moonlight_3->HasAura(102479))
+                                pool_of_moonlight_3->CastSpell(pool_of_moonlight_3, 102479, true);
                         }
 
                         if (trash_tyrande <= 30)
                         {
                             Size = 2-((trash_tyrande-20)*0.14);
-                            pool_of_moonlight_3->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
+                            if (pool_of_moonlight_3)
+                                pool_of_moonlight_3->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
                         }
                     }
 
@@ -334,14 +337,15 @@ public:
                         }
                         else 
                         {
-                            if (!pool_of_moonlight_4->HasAura(102479))
+                            if (pool_of_moonlight_4 && !pool_of_moonlight_4->HasAura(102479))
                                 pool_of_moonlight_4->CastSpell(pool_of_moonlight_4, 102479, true);
                         }
 
                         if (trash_tyrande <= 40)
                         {
                             Size = 2-((trash_tyrande-30)*0.14);
-                            pool_of_moonlight_4->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
+                            if (pool_of_moonlight_4)
+                                pool_of_moonlight_4->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
                         }
                     }
 
@@ -353,14 +357,15 @@ public:
                         }
                         else 
                         {
-                            if (!pool_of_moonlight_5->HasAura(102479))
+                            if (pool_of_moonlight_5 && !pool_of_moonlight_5->HasAura(102479))
                                 pool_of_moonlight_5->CastSpell(pool_of_moonlight_5, 102479, true);
                         }
 
                         if (trash_tyrande <= 50)
                         {
                             Size = 2-((trash_tyrande-40)*0.14);
-                            pool_of_moonlight_5->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
+                            if (pool_of_moonlight_5)
+                                pool_of_moonlight_5->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
                         }
                     }
 
