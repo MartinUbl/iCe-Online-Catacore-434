@@ -296,7 +296,7 @@ public:
                         }
                         else 
                         {
-                            if (!pool_of_moonlight_2->HasAura(102479))
+                            if (pool_of_moonlight_2 && !pool_of_moonlight_2->HasAura(102479))
                                 pool_of_moonlight_2->CastSpell(pool_of_moonlight_2, 102479, true);
                         }
 
