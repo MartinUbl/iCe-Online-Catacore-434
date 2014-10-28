@@ -734,8 +734,6 @@ public:
 
         void SayAndShine()
         {
-            me->CastSpell(me, MOONLIGHT, true);
-
             Entry = me->GetEntry();
             switch(Entry)
             {
@@ -756,17 +754,14 @@ public:
 
         void JustDied(Unit * /*Who*/)
         {
-            if (InstanceScript *pInstance = me->GetInstanceScript())
-                    pInstance->SetData(DATA_TRASH_TYRANDE, 1);
-
             Entry = me->GetEntry();
-            Unit * tyrande = me->FindNearestCreature(ECHO_OF_TYRANDE, 150.0f, true);
+            Unit * tyrande = me->FindNearestCreature(ECHO_OF_TYRANDE, 300.0f, true);
 
             switch(Entry)
             {
                 case 119503:
                     {
-                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_2, 150.0f, true);
+                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_2, 200.0f, true);
                         if (moonlight_pool)
                         {
                             if (npc_pool_of_moonlight::npc_pool_of_moonlightAI* pAI = (npc_pool_of_moonlight::npc_pool_of_moonlightAI*)(moonlight_pool->GetAI()))
@@ -783,7 +778,7 @@ public:
                     break;
                 case 119504:
                     {
-                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_3, 150.0f, true);
+                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_3, 200.0f, true);
                         if (moonlight_pool)
                         {
                             if (npc_pool_of_moonlight::npc_pool_of_moonlightAI* pAI = (npc_pool_of_moonlight::npc_pool_of_moonlightAI*)(moonlight_pool->GetAI()))
@@ -800,7 +795,7 @@ public:
                     break;
                 case 119505:
                     {
-                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_4, 150.0f, true);
+                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_4, 200.0f, true);
                         if (moonlight_pool)
                         {
                             if (npc_pool_of_moonlight::npc_pool_of_moonlightAI* pAI = (npc_pool_of_moonlight::npc_pool_of_moonlightAI*)(moonlight_pool->GetAI()))
@@ -817,7 +812,7 @@ public:
                     break;
                 case 119506:
                     {
-                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_5, 150.0f, true);
+                        Creature * moonlight_pool = me->FindNearestCreature(POOL_OF_MOONLIGHT_5, 200.0f, true);
                         if (moonlight_pool)
                         {
                             if (npc_pool_of_moonlight::npc_pool_of_moonlightAI* pAI = (npc_pool_of_moonlight::npc_pool_of_moonlightAI*)(moonlight_pool->GetAI()))
@@ -890,24 +885,6 @@ public:
                     else Check_Timer -= diff;
                 }
             }
-
-            if (Check_Size <= diff)
-            {
-                // Set Size
-                if (count <= 7)
-                {
-                    size = 2-(count*0.20);
-                    me->SetFloatValue(OBJECT_FIELD_SCALE_X, size);
-                    if (count >= 7)
-                    {
-                        me->DespawnOrUnsummon(0);
-                        me->AI()->JustDied(me);
-                    }
-                }
-
-                Check_Size = 500;
-            }
-            else Check_Size -= diff;
 
             if (Say_Next == true)
             {

@@ -48,8 +48,17 @@ public:
         uint64 echo_of_baineGuid;
         uint64 echo_of_tyrandeGuid;
         uint64 murozondGuid;
+
+        uint64 pool_of_moonlight_1_guid;
+        uint64 pool_of_moonlight_2_guid;
+        uint64 pool_of_moonlight_3_guid;
+        uint64 pool_of_moonlight_4_guid;
+        uint64 pool_of_moonlight_5_guid;
+
         uint32 Check_Timer;
+        uint32 Pool_Check_Timer;
         bool Jaina_Welcome_Say;
+        float Size;
 
         std::string saveData;
 
@@ -61,7 +70,14 @@ public:
             echo_of_tyrandeGuid = 0;
             murozondGuid = 0;
 
+            pool_of_moonlight_1_guid = 0;
+            pool_of_moonlight_2_guid = 0;
+            pool_of_moonlight_3_guid = 0;
+            pool_of_moonlight_4_guid = 0;
+            pool_of_moonlight_5_guid = 0;
+
             Check_Timer = 15000;
+            Pool_Check_Timer = 1000;
 
             crystals_clicked = 0;
             trash_murozond = 0;
@@ -142,6 +158,21 @@ public:
                 case 54432:
                     murozondGuid = pCreature->GetGUID();
                     break;
+                case 119503:
+                    pool_of_moonlight_1_guid = pCreature->GetGUID();
+                    break;
+                case 119504:
+                    pool_of_moonlight_2_guid = pCreature->GetGUID();
+                    break;
+                case 119505:
+                    pool_of_moonlight_3_guid = pCreature->GetGUID();
+                    break;
+                case 119506:
+                    pool_of_moonlight_4_guid = pCreature->GetGUID();
+                    break;
+                case 119507:
+                    pool_of_moonlight_5_guid = pCreature->GetGUID();
+                    break;
             }
         }
 
@@ -161,6 +192,16 @@ public:
                     return echo_of_tyrandeGuid;
                 case TYPE_MUROZOND:
                     return murozondGuid;
+                case TYPE_POOL_OF_MOONLIGHT_1:
+                    return pool_of_moonlight_1_guid;
+                case TYPE_POOL_OF_MOONLIGHT_2:
+                    return pool_of_moonlight_2_guid;
+                case TYPE_POOL_OF_MOONLIGHT_3:
+                    return pool_of_moonlight_3_guid;
+                case TYPE_POOL_OF_MOONLIGHT_4:
+                    return pool_of_moonlight_4_guid;
+                case TYPE_POOL_OF_MOONLIGHT_5:
+                    return pool_of_moonlight_5_guid;
             }
                 return 0;
         }
@@ -216,7 +257,7 @@ public:
                     }
                 }
 
-                if (trash_tyrande >= 5)
+                if (trash_tyrande >= 50)
                 {
                     Creature * echo_of_tyrande = this->instance->GetCreature(this->GetData64(TYPE_ECHO_OF_TYRANDE));
                     if (echo_of_tyrande && echo_of_tyrande->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
@@ -230,6 +271,111 @@ public:
                 Check_Timer = 15000;
             }
             else Check_Timer -= diff;
+
+            if (trash_tyrande > 0)
+            {
+                if (Pool_Check_Timer <= diff)
+                {
+                    Creature * pool_of_moonlight_1 = this->instance->GetCreature(this->GetData64(TYPE_POOL_OF_MOONLIGHT_1));
+                    Creature * pool_of_moonlight_2 = this->instance->GetCreature(this->GetData64(TYPE_POOL_OF_MOONLIGHT_2));
+                    Creature * pool_of_moonlight_3 = this->instance->GetCreature(this->GetData64(TYPE_POOL_OF_MOONLIGHT_3));
+                    Creature * pool_of_moonlight_4 = this->instance->GetCreature(this->GetData64(TYPE_POOL_OF_MOONLIGHT_4));
+                    Creature * pool_of_moonlight_5 = this->instance->GetCreature(this->GetData64(TYPE_POOL_OF_MOONLIGHT_5));
+
+                    if (trash_tyrande <= 10)
+                    {
+                        Size = 2-(trash_tyrande*0.14);
+                        pool_of_moonlight_1->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
+                    }
+
+                    if (trash_tyrande > 10)
+                    {
+                        if (pool_of_moonlight_1 && pool_of_moonlight_1->IsAlive())
+                        {
+                            pool_of_moonlight_1->Kill(pool_of_moonlight_1);
+                        }
+                        else 
+                        {
+                            if (!pool_of_moonlight_2->HasAura(102479))
+                                pool_of_moonlight_2->CastSpell(pool_of_moonlight_2, 102479, true);
+                        }
+
+                        if (trash_tyrande <= 20)
+                        {
+                            Size = 2-((trash_tyrande-10)*0.14);
+                            pool_of_moonlight_2->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
+                        }
+                    }
+
+                    if (trash_tyrande > 20)
+                    {
+                        if (pool_of_moonlight_2 && pool_of_moonlight_2->IsAlive())
+                        {
+                            pool_of_moonlight_2->Kill(pool_of_moonlight_2);
+                        }
+                        else
+                        {
+                            if (!pool_of_moonlight_3->HasAura(102479))
+                            pool_of_moonlight_3->CastSpell(pool_of_moonlight_3, 102479, true);
+                        }
+
+                        if (trash_tyrande <= 30)
+                        {
+                            Size = 2-((trash_tyrande-20)*0.14);
+                            pool_of_moonlight_3->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
+                        }
+                    }
+
+                    if (trash_tyrande > 30)
+                    {
+                        if (pool_of_moonlight_3 && pool_of_moonlight_3->IsAlive())
+                        {
+                            pool_of_moonlight_3->Kill(pool_of_moonlight_3);
+                        }
+                        else 
+                        {
+                            if (!pool_of_moonlight_4->HasAura(102479))
+                                pool_of_moonlight_4->CastSpell(pool_of_moonlight_4, 102479, true);
+                        }
+
+                        if (trash_tyrande <= 40)
+                        {
+                            Size = 2-((trash_tyrande-30)*0.14);
+                            pool_of_moonlight_4->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
+                        }
+                    }
+
+                    if (trash_tyrande > 40)
+                    {
+                        if (pool_of_moonlight_4 && pool_of_moonlight_4->IsAlive())
+                        {
+                            pool_of_moonlight_4->Kill(pool_of_moonlight_4);
+                        }
+                        else 
+                        {
+                            if (!pool_of_moonlight_5->HasAura(102479))
+                                pool_of_moonlight_5->CastSpell(pool_of_moonlight_5, 102479, true);
+                        }
+
+                        if (trash_tyrande <= 50)
+                        {
+                            Size = 2-((trash_tyrande-40)*0.14);
+                            pool_of_moonlight_5->SetFloatValue(OBJECT_FIELD_SCALE_X, Size);
+                        }
+                    }
+
+                    if (trash_tyrande > 50)
+                    {
+                        if (pool_of_moonlight_5 && pool_of_moonlight_5->IsAlive())
+                        {
+                            pool_of_moonlight_5->Kill(pool_of_moonlight_5);
+                        }
+                    }
+
+                    Pool_Check_Timer = 1000;
+                }
+                else Pool_Check_Timer -= diff;
+            }
         }
 
         uint32 GetData(uint32 DataId) 
@@ -1257,8 +1403,12 @@ public:
 
     struct npc_time_twisted_emerald_trashAI : public ScriptedAI
     {
-        npc_time_twisted_emerald_trashAI(Creature *c) : ScriptedAI(c) {}
+        npc_time_twisted_emerald_trashAI(Creature *creature) : ScriptedAI(creature) 
+        {
+            instance = creature->GetInstanceScript();
+        }
 
+        InstanceScript* instance;
         uint32 Check_Timer;
 
         void Reset() 
@@ -1269,17 +1419,8 @@ public:
 
         void JustDied(Unit * /*who*/)
         { 
-            std::list<Creature*> pools_of_moonlight;
-            for (uint32 i = 0; i < 5; i++)
-            {
-                me->GetCreatureListWithEntryInGrid(pools_of_moonlight, Pools[i], 30.0f);
-            }
-
-            for (std::list<Creature*>::iterator itr = pools_of_moonlight.begin(); itr != pools_of_moonlight.end(); ++itr)
-            {
-                if (*itr)
-                    (*itr)->AI()->DoAction(0);
-            }
+            if (InstanceScript *pInstance = me->GetInstanceScript())
+                        pInstance->SetData(DATA_TRASH_TYRANDE, 1);
         }
 
         void UpdateAI(const uint32 diff) 
