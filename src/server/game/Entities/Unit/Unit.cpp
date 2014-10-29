@@ -521,7 +521,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     if (damagetype != NODAMAGE)
     {
         // Improved Polymorph - needs to be handled before Polymorph removal
-        if (ToPlayer() && (HasAura(11210) || HasAura(12592)) && pVictim->HasAura(118) && !HasAura(87515))
+        if (GetTypeId() == TYPEID_PLAYER && (HasAura(11210) || HasAura(12592)) && pVictim->HasAura(118) && !HasAura(87515))
         {
             CastSpell(this, 87515, true); // Cooldown marker
             if (HasAura(11210))
