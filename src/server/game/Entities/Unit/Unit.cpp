@@ -4588,6 +4588,8 @@ void Unit::RemovePlayerAurasWithSameAuraTypeDueToStack(AuraType aurType, AuraEff
             continue;
         if ((*iter)->GetCasterGUID() == casterGUID && (*iter)->GetId() == exceptSpellId)
             continue;
+        if ((*iter)->GetSpellProto()->AttributesEx7 & SPELL_ATTR7_CONSOLIDATED_RAID_BUFF) // Frost Armor ...
+            continue;
 
         if (aurType == SPELL_AURA_MOD_MELEE_RANGED_HASTE_2 && (*iter)->GetId() == 55095) // Dont drop Frost Fever
             continue;
