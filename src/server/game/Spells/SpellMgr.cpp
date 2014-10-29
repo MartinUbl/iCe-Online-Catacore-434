@@ -3263,8 +3263,11 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
         }
         case SPELLFAMILY_ROGUE:
         {
-            // Crippling poison + Wound Poison - Limit to 10 seconds in PvP
-            if (spellproto->SpellIconID == 163 || spellproto->SpellIconID == 1496)
+            // Crippling poison
+            if (spellproto->SpellIconID == 163)
+                return 8 * IN_MILLISECONDS;
+            // Wound Poison
+            if (spellproto->SpellIconID == 1496)
                 return 10 * IN_MILLISECONDS;
             break;
         }
