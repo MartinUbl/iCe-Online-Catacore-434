@@ -1353,7 +1353,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage *damageInfo, bool durabilityLoss)
         ToPlayer() && ToPlayer()->HasMastery() &&
         ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_HUNTER_MARKSMANSHIP)
     {
-        if (roll_chance_f(ToPlayer()->GetMasteryPoints()*1.8f))
+        if (roll_chance_f(ToPlayer()->GetMasteryPoints()*2.1f))
         {
             CastSpell(pVictim, 76663, true);
         }
