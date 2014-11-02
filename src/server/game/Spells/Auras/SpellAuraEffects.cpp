@@ -4356,6 +4356,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
         case FORM_SHADOW_DANCE:
         case FORM_TREE:
         case FORM_SPIRITOFREDEMPTION:
+        case FORM_ZOMBIE:
             break;
         default:
             sLog->outError("Auras: Unknown Shapeshift Type: %u", GetMiscValue());
