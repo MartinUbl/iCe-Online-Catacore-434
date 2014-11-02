@@ -19358,7 +19358,11 @@ void Player::_LoadArchaeologyData()
     // Load all projects with all needed datas
     if (proj_result)
     {
-        m_researchProjects.clear();
+        m_researchProjects.clear(); //Initialize to default values
+        for(int i=0; i<8; i++)
+            SetUInt16Value(PLAYER_FIELD_RESEARCHING_1+i, 0, 0); 
+        SetUInt16Value(PLAYER_FIELD_RESEARCHING_1, 1, 0); 
+
         uint8 proj_pos = 0;
         do
         {
@@ -19386,6 +19390,7 @@ void Player::_LoadArchaeologyData()
             // Set all projects as inactive
             for (std::list<ResearchProjectsElem>::iterator itr = m_researchProjects.begin(); itr != m_researchProjects.end(); ++itr)
                 itr->active = 0;
+            _SaveArchaeologyData();
             // And generate new
             for (uint8 i = 0; i < 9; i++)
                 SetNewResearchProject(i);
@@ -19400,6 +19405,7 @@ void Player::_LoadArchaeologyData()
         // If we haven't got any project, generate some
         for (uint8 i = 0; i < 9; i++)
             SetNewResearchProject(i);
+        _SaveArchaeologyData(); //Save new correct data
     }
 
     // If we don't have archaeology, do not assign site ids
