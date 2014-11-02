@@ -88,6 +88,7 @@
 #include <queue>
 #include <sstream>
 #include <algorithm>
+#include <memory>
 
 #include "Threading/LockedQueue.h"
 #include "Threading/Threading.h"
