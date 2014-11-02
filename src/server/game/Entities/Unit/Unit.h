@@ -777,6 +777,7 @@ enum UnitTypeMask
     UNIT_MASK_HUNTER_PET            = 0x00000080,
     UNIT_MASK_CONTROLABLE_GUARDIAN  = 0x00000100,
     UNIT_MASK_ACCESSORY             = 0x00000200,
+    UNIT_MASK_WARLOCK_PET           = 0x00000400,
 };
 namespace Movement{
     class MoveSpline;
@@ -1249,6 +1250,7 @@ class Unit : public WorldObject
         bool IsGuardian() const { return m_unitTypeMask & UNIT_MASK_GUARDIAN; }
         bool IsPet() const      { return m_unitTypeMask & UNIT_MASK_PET; }
         bool IsHunterPet() const{ return m_unitTypeMask & UNIT_MASK_HUNTER_PET; }
+        bool IsWarlockPet() const{ return m_unitTypeMask & UNIT_MASK_WARLOCK_PET; }
         bool IsMushroom() const { return (GetEntry() == 47649); }
         bool IsTotem() const    
         {

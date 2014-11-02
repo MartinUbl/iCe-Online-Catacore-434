@@ -380,7 +380,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     }
 
     //set last used pet number (for use in BG's)
-    if (owner->GetTypeId() == TYPEID_PLAYER && isControlled() && !isTemporarySummoned() && (getPetType() == SUMMON_PET || getPetType() == HUNTER_PET))
+    if (owner->GetTypeId() == TYPEID_PLAYER && isControlled() && !isTemporarySummoned() && (getPetType() == SUMMON_PET || getPetType() == HUNTER_PET || IsWarlockPet()))
         owner->ToPlayer()->SetLastPetNumber(pet_number);
 
     m_loading = false;
@@ -875,6 +875,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         {
             petType = HUNTER_PET;
             m_unitTypeMask |= UNIT_MASK_HUNTER_PET;
+        }
+        else if (m_owner->getClass() == CLASS_WARLOCK)
+        {
+            m_unitTypeMask |= UNIT_MASK_WARLOCK_PET;
         }
         else if (m_owner->getClass() == CLASS_DEATH_KNIGHT) // Ghoul
         {

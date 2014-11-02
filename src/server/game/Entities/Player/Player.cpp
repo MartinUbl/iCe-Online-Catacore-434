@@ -21478,7 +21478,7 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent)
     // only if current pet in slot
     pet->SavePetToDB(mode);
 
-    if(pet->getPetType() != HUNTER_PET)
+    if(pet->getPetType() != HUNTER_PET && !pet->IsWarlockPet())
         SetMinion(pet, false, PET_SLOT_UNK_SLOT);
     else
         SetMinion(pet, false, PET_SLOT_ACTUAL_PET_SLOT);

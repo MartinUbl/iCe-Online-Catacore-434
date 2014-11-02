@@ -197,16 +197,6 @@ public:
 
                         NewPet->SetFullHealth();
                         NewPet->SetPower(NewPet->getPowerType(),NewPet->GetMaxPower(NewPet->getPowerType()));
-
-                        switch (NewPet->GetEntry())
-                        {
-                            case NPC_DOOMGUARD:
-                            case NPC_INFERNAL:
-                                NewPet->SetEntry(NPC_IMP);
-                                break;
-                            default:
-                                break;
-                        }
                     }
                     else
                         delete NewPet;

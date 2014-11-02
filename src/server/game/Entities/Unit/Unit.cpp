@@ -11568,19 +11568,19 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
             
             if(slot == PET_SLOT_UNK_SLOT)
             {
-                if(minion->IsPet() && minion->ToPet()->getPetType() == HUNTER_PET)
+                if(minion->IsPet() && (minion->ToPet()->getPetType() == HUNTER_PET || minion->ToPet()->IsWarlockPet()))
                     assert(false);
                 slot = PET_SLOT_OTHER_PET;
             }
             
             if(GetTypeId() == TYPEID_PLAYER)
             {
-                if(!minion->IsHunterPet()) //If its not a Hunter Pet, well lets not try to use it for hunters then.
+                if(minion->IsHunterPet() && (slot >= PET_SLOT_HUNTER_FIRST && slot <= PET_SLOT_HUNTER_LAST)) // Always save thoose spots where hunter is correct
                 {
                     ToPlayer()->m_currentPetSlot = slot;
-                    // ToPlayer()->setPetSlotUsed(slot, true);
-                }
-                if(slot >= PET_SLOT_HUNTER_FIRST && slot <= PET_SLOT_HUNTER_LAST) // Always save thoose spots where hunter is correct
+                    ToPlayer()->setPetSlotUsed(slot, true);
+                }         
+                else //If its not a Hunter Pet or warlock, well lets not try to use it for hunters and locks then.
                 {
                     ToPlayer()->m_currentPetSlot = slot;
                     ToPlayer()->setPetSlotUsed(slot, true);

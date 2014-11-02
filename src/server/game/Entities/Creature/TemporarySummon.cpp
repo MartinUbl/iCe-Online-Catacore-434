@@ -239,7 +239,7 @@ void TempSummon::UnSummon(uint32 msTime)
         return;
     }
 
-    if (IsHunterPet())
+    if (IsHunterPet() || IsWarlockPet())
     {
         ((Pet*)this)->Remove(PET_SLOT_ACTUAL_PET_SLOT);
         ASSERT(!IsInWorld());
