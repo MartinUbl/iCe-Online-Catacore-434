@@ -3923,7 +3923,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const
             {
                 case FORM_CAT:
                     // Fandral's Flamescythe effect
-                    if (target->IsInCombat() && (target->ToPlayer()->HasItemOrGemWithIdEquipped(69897, 1) || target->ToPlayer()->HasItemOrGemWithIdEquipped(69897, 1)))
+                    if (target->IsInCombat() && (target->ToPlayer()->HasItemOrGemWithIdEquipped(69897, 1) || target->ToPlayer()->HasItemOrGemWithIdEquipped(71466, 1)))
                     {
                         target->CastSpell(target, 99244, true);
                         target->SetDisplayId(38150);
