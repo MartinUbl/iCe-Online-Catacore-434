@@ -1922,7 +1922,7 @@ void BattlegroundMgr::SetupWargame(Group* first, Group* second, BattlegroundType
     /*GroupQueueInfo* ginfo1 = bgQueue.AddGroup(initiator, first, bgTypeId, bracketEntry, arenaType, false, true, 0, 0, 0);
     GroupQueueInfo* ginfo2 = bgQueue.AddGroup(receiver, second, bgTypeId, bracketEntry, arenaType, false, true, 0, 0, 0);*/
 
-    WargameQueueInfo* wginfo = bgQueue.AddWargameGroups(first, second, bgTypeId, arenaType);
+    WargameQueueInfoPtr wginfo = bgQueue.AddWargameGroups(first, second, bgTypeId, arenaType);
 
     uint32 queueSlot;
     Player *member;

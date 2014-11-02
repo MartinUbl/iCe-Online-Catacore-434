@@ -33,11 +33,18 @@ typedef std::list<Battleground*> BGFreeSlotQueueType;
 
 #define COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME 10
 
-struct GroupQueueInfo;                                      // type predefinition
+struct GroupQueueInfo;
+struct WargameQueueInfo;
+typedef std::shared_ptr<GroupQueueInfo> GroupQueueInfoPtr;
+typedef std::shared_ptr<WargameQueueInfo> WargameQueueInfoPtr;
+
 struct PlayerQueueInfo                                      // stores information for players in queue
 {
+    ~PlayerQueueInfo();
     uint32  LastOnlineTime;                                 // for tracking and removing offline players from queue after 5 minutes
-    GroupQueueInfo * GroupInfo;                             // pointer to the associated groupqueueinfo
+    std::weak_ptr<GroupQueueInfo> GroupInfo;
+
+    GroupQueueInfoPtr GetGroupQueueInfo() const;
 };
 
 struct GroupQueueInfo                                       // stores information about the group in queue (also used when joined as solo!)
@@ -92,20 +99,20 @@ class BattlegroundQueue
         bool CheckPremadeMatch(BattlegroundBracketId bracket_id, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam);
         bool CheckNormalMatch(Battleground* bg_template, BattlegroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers);
         bool CheckSkirmishForSameFaction(BattlegroundBracketId bracket_id, uint32 minPlayersPerTeam);
-        GroupQueueInfo * AddGroup(Player* leader, Group* group, BattlegroundTypeId bgTypeId, PvPDifficultyEntry const*  bracketEntry, uint8 ArenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 MatchmakerRating, uint32 ArenaTeamId = 0);
-        WargameQueueInfo* AddWargameGroups(Group* first, Group* second, BattlegroundTypeId bgTypeId, uint8 arenaType);
+        GroupQueueInfoPtr AddGroup(Player* leader, Group* group, BattlegroundTypeId bgTypeId, PvPDifficultyEntry const*  bracketEntry, uint8 ArenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 MatchmakerRating, uint32 ArenaTeamId = 0);
+        WargameQueueInfoPtr AddWargameGroups(Group* first, Group* second, BattlegroundTypeId bgTypeId, uint8 arenaType);
         void RemovePlayer(const uint64& guid, bool decreaseInvitedCount);
         bool IsPlayerInvited(const uint64& pl_guid, const uint32 bgInstanceGuid, const uint32 removeTime);
-        bool GetPlayerGroupInfoData(const uint64& guid, GroupQueueInfo** ginfo);
-        void PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* ginfo, BattlegroundBracketId bracket_id);
-        uint32 GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattlegroundBracketId bracket_id) const;
+        GroupQueueInfoPtr GetPlayerGroupInfoData(const uint64& guid);
+        void PlayerInvitedToBGUpdateAverageWaitTime(const GroupQueueInfoPtr &ginfo, BattlegroundBracketId bracket_id);
+        uint32 GetAverageQueueWaitTime(const GroupQueueInfoPtr &ginfo, BattlegroundBracketId bracket_id) const;
 
         typedef std::map<uint64, PlayerQueueInfo> QueuedPlayersMap;
         QueuedPlayersMap m_QueuedPlayers;
 
         //we need constant add to begin and constant remove / add from the end, therefore deque suits our problem well
-        typedef std::list<GroupQueueInfo*> GroupsQueueType;
-        typedef std::list<WargameQueueInfo*> WargameQueueType;
+        typedef std::list<GroupQueueInfoPtr> GroupsQueueType;
+        typedef std::list<WargameQueueInfoPtr> WargameQueueType;
 
         /*
         This two dimensional array is used to store All queued groups
@@ -124,7 +131,7 @@ class BattlegroundQueue
         {
         public:
             void Init();
-            bool AddGroup(GroupQueueInfo *ginfo, uint32 desiredCount);
+            bool AddGroup(const GroupQueueInfoPtr &ginfo, uint32 desiredCount);
             bool KickGroup(uint32 size);
             uint32 GetPlayerCount() const {return PlayerCount;}
         public:
@@ -140,7 +147,7 @@ class BattlegroundQueue
 
     private:
 
-        bool InviteGroupToBG(GroupQueueInfo * ginfo, Battleground * bg, uint32 side, bool isWargame = false);
+        bool InviteGroupToBG(const GroupQueueInfoPtr &ginfo, Battleground * bg, uint32 side, bool isWargame = false);
         uint32 m_WaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME];
         uint32 m_WaitTimeLastPlayer[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
         uint32 m_SumOfWaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
