@@ -24029,7 +24029,7 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             if (target->GetTypeId() == TYPEID_UNIT)
                 BeforeVisibilityDestroy<Creature>(target->ToCreature(),this);
 
-            target->DestroyForPlayer(this);
+            target->HideForPlayer(this);
             m_clientGUIDs.erase(target->GetGUID());
 
             #ifdef TRINITY_DEBUG
