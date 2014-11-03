@@ -431,7 +431,6 @@ class WorldSession
 
         void HandleZoneUpdateOpcode(WorldPacket& recvPacket);
         void HandleViolenceLevel(WorldPacket& recvPacket);
-        void HandleSetTargetOpcode(WorldPacket& recvPacket);
         void HandleSetSelectionOpcode(WorldPacket& recvPacket);
         void HandleStandStateChangeOpcode(WorldPacket& recvPacket);
         void HandleEmoteOpcode(WorldPacket& recvPacket);
