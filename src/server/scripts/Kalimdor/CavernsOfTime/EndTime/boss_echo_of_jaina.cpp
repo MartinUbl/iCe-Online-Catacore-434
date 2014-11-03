@@ -86,7 +86,7 @@ public:
             instance = creature->GetInstanceScript();
 
             me->SetVisible(false);
-            me->setFaction(34);
+            me->setFaction(35);
         }
 
         InstanceScript* instance;
