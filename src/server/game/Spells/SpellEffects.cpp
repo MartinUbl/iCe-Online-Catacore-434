@@ -8279,7 +8279,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                 uint32 ChosenSpell = 0;
 
-                if (pPet->GetEntry() == 416)        // Imp
+                if (pPet->GetEntry() == 416 || pPet->GetEntry() == 11859 || pPet->GetEntry() == 89)        // Imp
                     ChosenSpell = 79459;
                 else if (pPet->GetEntry() == 1860)  // Voidwalker
                     ChosenSpell = 79464;

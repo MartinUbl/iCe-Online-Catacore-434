@@ -1192,6 +1192,8 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 #define ENTRY_SUCCUBUS          1863
 #define ENTRY_FELHUNTER         417
 #define ENTRY_FELGUARD          17252
+#define ENTRY_DOOMGUARD         11859
+#define ENTRY_INFERNAL          89
 #define ENTRY_WATER_ELEMENTAL   510
 #define ENTRY_TREANT            1964
 #define ENTRY_FIRE_ELEMENTAL    15438
@@ -1364,7 +1366,9 @@ void Guardian::UpdateMaxHealth()
     float multiplicator;
     switch(GetEntry())
     {
-        case ENTRY_IMP:         multiplicator = 8.4f;   break;
+        case ENTRY_IMP:
+        case ENTRY_DOOMGUARD:
+        case ENTRY_INFERNAL:    multiplicator = 8.4f;   break;
         case ENTRY_VOIDWALKER:  multiplicator = 11.0f;  break;
         case ENTRY_SUCCUBUS:    multiplicator = 9.1f;   break;
         case ENTRY_FELHUNTER:   multiplicator = 9.5f;   break;
@@ -1391,7 +1395,9 @@ void Guardian::UpdateMaxPower(Powers power)
 
     switch(GetEntry())
     {
-        case ENTRY_IMP:         multiplicator = 4.95f;  break;
+        case ENTRY_IMP:
+        case ENTRY_DOOMGUARD:
+        case ENTRY_INFERNAL:    multiplicator = 4.95f;  break;
         case ENTRY_VOIDWALKER:
         case ENTRY_SUCCUBUS:
         case ENTRY_FELHUNTER:
@@ -1417,7 +1423,7 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     UnitMods unitMod_pos = UNIT_MOD_ATTACK_POWER_POS;
     UnitMods unitMod_neg = UNIT_MOD_ATTACK_POWER_NEG;
 
-    if (GetEntry() == ENTRY_IMP)                                   // imp's attack power
+    if (GetEntry() == ENTRY_IMP || GetEntry() == ENTRY_DOOMGUARD || GetEntry() == ENTRY_INFERNAL)                                   // imp's attack power
         val = GetStat(STAT_STRENGTH) - 10.0f;
     else
         val = 2 * GetStat(STAT_STRENGTH) - 20.0f;

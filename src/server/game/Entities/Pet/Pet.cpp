@@ -2042,6 +2042,8 @@ void Pet::LearnPetPassives()
         case 1863:  // Succubus
         case 417:   // Felhunter
         case 17252: // Felguard
+        case 11859: // Doomguard
+        case 89:    // Infernal
             CastSpell(this, 32233, true);
             break;
         case 19668: // Shadowfiend
