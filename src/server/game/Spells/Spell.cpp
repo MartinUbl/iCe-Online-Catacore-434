@@ -4601,6 +4601,23 @@ void Spell::HandeAfterCast()
             }
             break;
         }
+        // Druids finishing moves
+        case 1079:
+        case 22568:
+        case 22570:
+        case 52610:
+        {
+            // Druid T12 Feral 4P Bonus
+            if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->HasAura(99009))
+            {
+                if (roll_chance_i(m_caster->ToPlayer()->GetComboPoints() * 20)) // 20 % chance per combo point
+                {
+                    if (Aura * berserk = m_caster->GetAura(50334)) // Berserk
+                        berserk->SetDuration(berserk->GetDuration() + 2000);
+                }
+            }
+            break;
+        }
     }
 }
 
