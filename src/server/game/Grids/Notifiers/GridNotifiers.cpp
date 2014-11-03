@@ -40,27 +40,27 @@ VisibleNotifier::SendToSelf()
     // at this moment i_clientGUIDs have guids that not iterate at grid level checks
     // but exist one case when this possible and object not out of range: transports
     if (Transport* transport = i_player.GetTransport())
-        for (Transport::PlayerSet::const_iterator itr = transport->GetPassengers().begin();itr != transport->GetPassengers().end();++itr)
+        for (Player *passenger : transport->GetPassengers())
         {
-            if (vis_guids.find((*itr)->GetGUID()) != vis_guids.end())
+            if (vis_guids.find(passenger->GetGUID()) != vis_guids.end())
             {
-                vis_guids.erase((*itr)->GetGUID());
+                vis_guids.erase(passenger->GetGUID());
 
-                i_player.UpdateVisibilityOf((*itr), i_data, i_visibleNow);
+                i_player.UpdateVisibilityOf(passenger, i_data, i_visibleNow);
 
-                if (!(*itr)->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-                    (*itr)->UpdateVisibilityOf(&i_player);
+                if (!passenger->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+                    passenger->UpdateVisibilityOf(&i_player);
             }
         }
 
-    for (Player::ClientGUIDs::const_iterator it = vis_guids.begin();it != vis_guids.end(); ++it)
+    for (uint64 vis_guid : vis_guids)
     {
-        i_player.m_clientGUIDs.erase(*it);
-        i_data.AddOutOfRangeGUID(*it);
+        i_player.m_clientGUIDs.erase(vis_guid);
+        i_data.AddOutOfRangeGUID(vis_guid);
 
-        if (IS_PLAYER_GUID(*it))
+        if (IS_PLAYER_GUID(vis_guid))
         {
-            Player* plr = ObjectAccessor::FindPlayer(*it);
+            Player* plr = ObjectAccessor::FindPlayer(vis_guid);
             if (plr && plr->IsInWorld() && !plr->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
                 plr->UpdateVisibilityOf(&i_player);
         }
