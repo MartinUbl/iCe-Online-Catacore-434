@@ -22230,7 +22230,7 @@ void Player::HandleStealthedUnitsDetection()
         {
             if (hasAtClient)
             {
-                (*i)->DestroyForPlayer(this);
+                (*i)->HideForPlayer(this);
                 m_clientGUIDs.erase((*i)->GetGUID());
             }
         }

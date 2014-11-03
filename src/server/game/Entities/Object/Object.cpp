@@ -293,6 +293,15 @@ void Object::DestroyForPlayer(Player *target, bool anim) const
     target->GetSession()->SendPacket(&data);
 }
 
+void Object::HideForPlayer(Player *target) const
+{
+    UpdateData data(target->GetMapId());
+    data.AddOutOfRangeGUID(GetGUID());
+    WorldPacket packet;
+    data.BuildPacket(&packet);
+    target->GetSession()->SendPacket(&packet);
+}
+
 void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
 {
     uint32 unkLoopCounter = 0;

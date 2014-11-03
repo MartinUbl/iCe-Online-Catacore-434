@@ -15825,15 +15825,35 @@ void Unit::SetVisibility(UnitVisibility x)
     m_Visibility = x;
 
     if (m_Visibility == VISIBILITY_GROUP_STEALTH)
-    {
-        if (GetEntry() == 47649 && GetOwner()) // TODO: Remove this ugly hack !
-            DestroyForNearbyPlayers(GetOwner()->GetGUID());
-        else
-            DestroyForNearbyPlayers();
-    }
-
+        HideFromNonDetectingTargets();
 
     UpdateObjectVisibility();
+}
+
+void Unit::HideFromNonDetectingTargets()
+{
+    using namespace Trinity;
+
+    std::list<Player*> targets;
+    auto visDistance = GetMap()->GetVisibilityDistance();
+    AnyPlayerInObjectRangeCheck check(this, visDistance);
+    PlayerListSearcher<AnyPlayerInObjectRangeCheck> searcher(this, targets, check);
+    VisitNearbyWorldObject(visDistance, searcher);
+
+    for (Player *player : targets)
+    {
+        if (player == this || !player->HaveAtClient(this))
+            continue;
+
+        if (GetCharmer() == player)
+            continue;
+
+        if (player->canSeeOrDetect(this, true))
+            continue;
+
+        HideForPlayer(player);
+        player->m_clientGUIDs.erase(GetGUID());
+    }
 }
 
 bool Unit::SetWalk(bool enable)

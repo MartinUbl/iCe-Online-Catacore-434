@@ -1888,6 +1888,7 @@ class Unit : public WorldObject
         bool canDetectStealthOf(Unit const* u, float distance) const;
         void SetPhaseMask(uint32 newPhaseMask, bool update);// overwrite WorldObject::SetPhaseMask
         void UpdateObjectVisibility(bool forced = true);
+        void HideFromNonDetectingTargets();
 
         // virtual functions for all world objects types
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
