@@ -11574,17 +11574,17 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
             }
             
             if(GetTypeId() == TYPEID_PLAYER)
-            {
-                if(minion->IsHunterPet() && (slot >= PET_SLOT_HUNTER_FIRST && slot <= PET_SLOT_HUNTER_LAST)) // Always save thoose spots where hunter is correct
+            {   //Check removed because of pet disappearence
+                /*if(minion->IsHunterPet() && (slot >= PET_SLOT_HUNTER_FIRST && slot <= PET_SLOT_HUNTER_LAST)) // Always save thoose spots where hunter is correct
                 {
                     ToPlayer()->m_currentPetSlot = slot;
                     ToPlayer()->setPetSlotUsed(slot, true);
                 }         
                 else //If its not a Hunter Pet or warlock, well lets not try to use it for hunters and locks then.
-                {
+                {*/
                     ToPlayer()->m_currentPetSlot = slot;
                     ToPlayer()->setPetSlotUsed(slot, true);
-                }
+                //}
             }
         }
 
