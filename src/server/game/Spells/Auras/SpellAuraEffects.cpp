@@ -5807,7 +5807,8 @@ void AuraEffect::HandleModPossessPet(AuraApplication const *aurApp, uint8 mode, 
         {
             if(pet->IsHunterPet() || pet->IsWarlockPet())
                 pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
-            pet->Remove(PET_SLOT_OTHER_PET, true);
+            else
+                pet->Remove(PET_SLOT_OTHER_PET, true);
         }
         else
         {
