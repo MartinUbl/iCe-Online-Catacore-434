@@ -55,9 +55,9 @@ static Wave RiftWaves[]=
 {
     {RIFT_BOSS, 0},
     {C_DEJA, 0},
-    {RIFT_BOSS, 120000},
-    {C_TEMPO, 140000},
-    {RIFT_BOSS, 120000},
+    {RIFT_BOSS, 45000},
+    {C_TEMPO, 60000},
+    {RIFT_BOSS, 45000},
     {C_AEONUS, 0}
 };
 
