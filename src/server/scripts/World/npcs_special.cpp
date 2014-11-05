@@ -4664,6 +4664,139 @@ public:
     };
 };
 
+class npc_pet_repairer : public CreatureScript
+{
+public:
+    npc_pet_repairer() : CreatureScript("npc_pet_repairer") { }
+    struct petDataS
+    {
+        uint32 entry;
+        uint32 slot;
+        std::string petName;
+    };
+    petDataS petData;
+    std::vector<petDataS> specialSlotPets;
+    std::vector<petDataS> normalSlotPets;
+    std::vector<petDataS> recoverablePets;
+
+    bool OnGossipHello(Player* plr, Creature* c)
+    {
+        plr->PlayerTalkClass->ClearMenus();
+
+        if(plr->getClass() != CLASS_HUNTER)
+        {
+            plr->SEND_GOSSIP_MENU(80000, c->GetGUID()); //Player is not hunter
+            return false;
+        }
+
+        if(plr->GetPet())
+        {
+            plr->SEND_GOSSIP_MENU(80003, c->GetGUID()); //Pets must be dismissed
+            return false;
+        }
+
+        FillPets(plr);
+        recoverablePets = specialSlotPets;
+        
+        for(unsigned int i=0; i < recoverablePets.size(); i++)
+        {
+             plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, recoverablePets[i].petName, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+i);
+        }
+       
+        plr->SEND_GOSSIP_MENU(80001, c->GetGUID()); //Pridat do npc_text hlasku nad vyber
+        return true;
+    }
+
+    bool OnGossipSelect(Player* plr, Creature* c, uint32 sender, uint32 action)
+    {
+        plr->PlayerTalkClass->ClearMenus();
+
+        if(plr->getClass() != CLASS_HUNTER)
+        {
+            plr->SEND_GOSSIP_MENU(80000, c->GetGUID()); //Player is not hunter
+            return false;
+        }
+
+        if(plr->GetPet())
+        {
+            plr->SEND_GOSSIP_MENU(80003, c->GetGUID()); //Pets must be dismissed
+            return false;
+        }
+
+        int pos = action - GOSSIP_ACTION_INFO_DEF;
+        petDataS recoveryPet = recoverablePets[pos];
+
+        /*Check, if pet still exists on the same position*/
+        FillPets(plr);
+        recoverablePets = specialSlotPets;
+
+        if(recoveryPet.entry != recoverablePets[pos].entry)
+            return false;
+
+        int newSlot = 999;
+        bool found = true;
+        for(int slot = PET_SLOT_STABLE_LAST; slot >= PET_SLOT_HUNTER_FIRST; slot--) //Find new slot in stable to fill pet in
+        {
+            for(unsigned int i=0; i < normalSlotPets.size(); i++) 
+            {
+                if(normalSlotPets[i].slot == (uint32)slot)
+                    found = false;
+            }
+            if(found == true)
+            {
+                newSlot = slot;
+                break;
+            }
+            else
+                found = true;
+        }
+
+        if(newSlot == 999)
+        {
+            plr->SEND_GOSSIP_MENU(80002, c->GetGUID()); //Stable and pet slots are full
+            return false;
+        }
+
+        CharacterDatabase.PExecute("UPDATE character_pet SET slot = '%d' WHERE entry = '%d' AND name = '%s' AND slot = 100", newSlot, recoveryPet.entry, recoveryPet.petName.c_str());
+        plr->SEND_GOSSIP_MENU(80004, c->GetGUID()); //Pet should be succesfully transfered into other slot
+
+
+        return true;
+    }
+
+    void FillPets(Player* plr)
+    {
+        specialSlotPets.clear();
+        normalSlotPets.clear();
+
+        QueryResult result = CharacterDatabase.PQuery("SELECT entry, slot, name FROM character_pet WHERE owner = '%d' AND PetType = 1", plr->GetGUIDLow());
+        if (result)
+        {
+            do
+            {
+                Field* fields = result->Fetch();
+
+                petData.entry = fields[0].GetUInt32();
+                petData.slot = fields[1].GetUInt32();
+                petData.petName = fields[2].GetString();
+
+                if(petData.slot == 100)
+                    specialSlotPets.push_back(petData);
+                else
+                    normalSlotPets.push_back(petData);
+            }
+            while (result->NextRow());
+        }
+
+    }
+    //INSERT INTO `creature_template` (`entry`, `modelid1`, `name`, `minlevel`, `maxlevel`, `faction_A`, `faction_H`, `npcflag`, `type_flags`, `ScriptName`) VALUES ('999999', '33716', 'Hunter pet repairer', '85', '85', '35', '35', '3', '104', 'npc_pet_repairer');
+    //INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES ('80000', 'You must be hunter to use this NPC');
+    //INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES ('80001', 'Select pet to recover:');
+    //INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES ('80002', 'You don\'t have any free pet slots!!!');
+    //INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES ('80003', 'Please dismiss your pet first.');
+    //INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES ('80004', 'Pet was succesfuly recovered.');
+};
+
 
 void AddSC_npcs_special()
 {
@@ -4721,4 +4854,5 @@ void AddSC_npcs_special()
     new npc_burning_treant;
     new npc_fiery_imp;
     new npc_raid_marker;
+    new npc_pet_repairer;
 }
