@@ -7396,7 +7396,7 @@ bool ChatHandler::HandleFreezeCommand(const char *args)
         {
             if (Pet *pet = player->GetPet())
             {
-                pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
+                pet->Remove(PET_SLOT_ACTUAL_PET_SLOT);
             }
         }
 

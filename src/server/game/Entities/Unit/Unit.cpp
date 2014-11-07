@@ -11570,7 +11570,7 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
             {
                 if(minion->IsPet() && (minion->ToPet()->getPetType() == HUNTER_PET || minion->ToPet()->IsWarlockPet()))
                 {
-                    slot = PET_SLOT_ACTUAL_PET_SLOT;
+                    //slot = PET_SLOT_ACTUAL_PET_SLOT;
                     assert(false);
                 }
                 else

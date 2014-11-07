@@ -5806,7 +5806,7 @@ void AuraEffect::HandleModPossessPet(AuraApplication const *aurApp, uint8 mode, 
         if (!pet->IsWithinDistInMap(caster, pet->GetMap()->GetVisibilityDistance()))
         {
             if(pet->IsHunterPet() || pet->IsWarlockPet())
-                pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
+                pet->Remove(PET_SLOT_ACTUAL_PET_SLOT, true);
             else
                 pet->Remove(PET_SLOT_OTHER_PET, true);
         }
