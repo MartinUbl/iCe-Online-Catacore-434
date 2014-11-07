@@ -3997,11 +3997,11 @@ void Player::LearnSpell(uint32 spell_id, bool dependent)
     }
 
     // After learning Archaeology, we need to load datas such as new sites, projects and so on..
-    if (spell_id == 78670 || spell_id == 88961 || spell_id == 89718 || spell_id == 89719 || spell_id == 89720 ||
+    /*if (spell_id == 78670 || spell_id == 88961 || spell_id == 89718 || spell_id == 89719 || spell_id == 89720 ||
         spell_id == 89721 || spell_id == 89722)
     {
         _LoadArchaeologyData();
-    }
+    }*/
 
     // learn all disabled higher ranks and required spells (recursive)
     if (disabled)
