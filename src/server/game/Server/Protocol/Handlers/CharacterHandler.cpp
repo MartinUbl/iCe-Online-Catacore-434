@@ -1111,14 +1111,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     pCurrChar->ContinueTaxiFlight();
 
-    // reset for all pets before pet loading
-    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS))
-        Pet::resetTalentsForAllPetsOf(pCurrChar);
-
-    // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)
-    pCurrChar->LoadPet();
-    pCurrChar->GetSession()->SendStablePet(0);
-
     // Set FFA PvP for non GM in non-rest mode
     if (sWorld->IsFFAPvPRealm() && !pCurrChar->IsGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_RESTING))
         pCurrChar->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
@@ -1145,6 +1137,14 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         pCurrChar->m_currentPetSlot = PET_SLOT_DELETED;
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_RESET_PET_SLOT);
     }
+
+    // reset for all pets before pet loading
+    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS))
+        Pet::resetTalentsForAllPetsOf(pCurrChar);
+
+    // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)
+    pCurrChar->LoadPet();
+    pCurrChar->GetSession()->SendStablePet(0);
 
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_TALENTS))
     {

@@ -21454,6 +21454,9 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent)
     if (!pet)
         pet = GetPet();
 
+    if (!pet || pet->GetOwnerGUID() != GetGUID())
+        return;
+
     if (pet)
     {
         sLog->outDebug("RemovePet %u, %u, %u", pet->GetEntry(), mode, returnreagent);
@@ -21464,9 +21467,6 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent)
 
     if(mode == PET_SLOT_ACTUAL_PET_SLOT)
         mode = m_currentPetSlot;
-
-    if (!pet || pet->GetOwnerGUID() != GetGUID())
-        return;
 
     //if(mode >= PET_SLOT_HUNTER_FIRST && mode <= PET_SLOT_HUNTER_LAST && pet->getPetType() != HUNTER_PET)
     //    assert(false); //debug code.
