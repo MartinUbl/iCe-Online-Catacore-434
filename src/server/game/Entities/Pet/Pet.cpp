@@ -536,7 +536,7 @@ void Pet::Update(uint32 diff)
     {
         case CORPSE:
         {
-            if (getPetType() != HUNTER_PET && m_corpseRemoveTime <= time(NULL))
+            if ((getPetType() != HUNTER_PET && m_corpseRemoveTime <= time(NULL)) || IsWarlockPet())
             {
                 Remove(PET_SLOT_ACTUAL_PET_SLOT);               //hunters' pets never get removed because of death, NEVER!
                 return;
