@@ -867,6 +867,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     PetType petType = MAX_PET_TYPE;
     if (IsPet() && m_owner->GetTypeId() == TYPEID_PLAYER)
     {
+        if (m_owner->getClass() == CLASS_WARLOCK)
+        {
+            m_unitTypeMask |= UNIT_MASK_WARLOCK_PET;
+        }
         if ((m_owner->getClass() == CLASS_WARLOCK)
             || (m_owner->getClass() == CLASS_SHAMAN)        // Fire Elemental
             || (m_owner->getClass() == CLASS_PRIEST))        // Shadowfiend
@@ -875,10 +879,6 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         {
             petType = HUNTER_PET;
             m_unitTypeMask |= UNIT_MASK_HUNTER_PET;
-        }
-        else if (m_owner->getClass() == CLASS_WARLOCK)
-        {
-            m_unitTypeMask |= UNIT_MASK_WARLOCK_PET;
         }
         else if (m_owner->getClass() == CLASS_DEATH_KNIGHT) // Ghoul
         {
