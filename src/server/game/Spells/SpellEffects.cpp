@@ -6545,7 +6545,7 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
         }
 
         if (owner->GetTypeId() == TYPEID_PLAYER)
-            owner->ToPlayer()->RemovePet(OldSummon,PET_SLOT_ACTUAL_PET_SLOT,false);
+            owner->ToPlayer()->RemovePet(OldSummon, PET_SLOT_ACTUAL_PET_SLOT);
         else
             return;
     }

@@ -127,7 +127,7 @@ class Pet : public Guardian
         bool LoadPetFromDB(Player* owner,uint32 petentry = 0,uint32 petnumber = 0, bool current = false, PetSlot slotID = PET_SLOT_UNK_SLOT);
         bool isBeingLoaded() const { return m_loading;}
         void SavePetToDB(PetSlot mode);
-        void Remove(PetSlot mode, bool returnreagent = false);
+        void Remove(PetSlot mode);
         static void DeleteFromDB(uint32 guidlow);
         
         static bool IsPetBasicAttackSpell(uint32 spellId)

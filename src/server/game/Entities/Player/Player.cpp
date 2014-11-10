@@ -1685,7 +1685,7 @@ void Player::Update(uint32 p_time)
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && !pet->IsPossessed())
     //if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && (GetCharmGUID() && (pet->GetGUID() != GetCharmGUID())))
-        RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT, true);
+        RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
 
     //we should execute delayed teleports only for alive(!) players
     //because we don't want player's ghost teleported from graveyard
@@ -1716,7 +1716,7 @@ void Player::setDeathState(DeathState s)
         RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 
         //FIXME: is pet dismissed at dying or releasing spirit? if second, add setDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
-        RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT, true);
+        RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT);
 
         // save value before aura remove in Unit::setDeathState
         ressSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
@@ -4631,7 +4631,7 @@ bool Player::ResetTalents(bool no_cost)
     }
 
     //FIXME: remove pet before or after unlearn spells? for now after unlearn to allow removing of talent related, pet affecting auras
-    RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT, true);
+    RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT);
     m_currentPetSlot = PET_SLOT_DELETED;
     /* when prev line will dropped use next line
     if (Pet* pet = GetPet())
@@ -21449,7 +21449,7 @@ Pet* Player::GetPet() const
     return NULL;
 }
 
-void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent)
+void Player::RemovePet(Pet* pet, PetSlot mode)
 {
     if (!pet)
         pet = GetPet();
@@ -21459,7 +21459,7 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent)
 
     if (pet)
     {
-        sLog->outDebug("RemovePet %u, %u, %u", pet->GetEntry(), mode, returnreagent);
+        sLog->outDebug("RemovePet %u, %u", pet->GetEntry(), mode);
 
         if (pet->m_removed)
             return;
@@ -23991,7 +23991,7 @@ template<>
 inline void BeforeVisibilityDestroy<Creature>(Creature* t, Player* p)
 {
     if (p->GetPetGUID() == t->GetGUID() && t->ToCreature()->IsPet())
-        ((Pet*)t)->Remove(PET_SLOT_ACTUAL_PET_SLOT, true);
+        ((Pet*)t)->Remove(PET_SLOT_ACTUAL_PET_SLOT);
 }
 
 void Player::UpdateVisibilityOf(WorldObject* target)

@@ -550,7 +550,7 @@ void Pet::Update(uint32 diff)
             if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && !IsPossessed()) || (isControlled() && !owner->GetPetGUID()))
             //if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGUID() && (owner->GetCharmGUID() != GetGUID()))) || (isControlled() && !owner->GetPetGUID()))
             {
-                Remove(PET_SLOT_ACTUAL_PET_SLOT, true);
+                Remove(PET_SLOT_ACTUAL_PET_SLOT);
                 return;
             }
 
@@ -726,9 +726,9 @@ bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
     return true;
 }
 
-void Pet::Remove(PetSlot mode, bool returnreagent)
+void Pet::Remove(PetSlot mode)
 {
-    m_owner->RemovePet(this,mode,returnreagent);
+    m_owner->RemovePet(this, mode);
 }
 
 void Pet::GivePetXP(uint32 xp)

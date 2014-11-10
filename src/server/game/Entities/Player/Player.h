@@ -1299,7 +1299,7 @@ class Player : public Unit, public GridObject<Player>
 
         Pet* GetPet() const;
         Pet* SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, uint32 despwtime, PetSlot slotID = PET_SLOT_UNK_SLOT);
-        void RemovePet(Pet* pet, PetSlot mode, bool returnreagent = false);
+        void RemovePet(Pet* pet, PetSlot mode);
         uint32 GetPhaseMaskForSpawn() const;                // used for proper set phase for DB at GM-mode creature/GO spawn
 
         void Say(const std::string& text, const uint32 language);

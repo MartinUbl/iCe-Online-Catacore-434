@@ -288,7 +288,7 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint32 spellid
                                     case 1863:
                                     case 417:
                                     case 17252:
-                                        GetPlayer()->RemovePet((Pet*)pet, PET_SLOT_DELETED, false);
+                                        GetPlayer()->RemovePet((Pet*)pet, PET_SLOT_DELETED);
                                         break;
                                     default:
                                         break;
