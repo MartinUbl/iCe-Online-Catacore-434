@@ -78,8 +78,12 @@ int APISocket::open(const char* host, const char* port)
 
 void APISocket::destroy()
 {
+#ifdef _WIN32
     if (m_fd != INVALID_SOCKET)
         closesocket(m_fd);
+#else
+    close(m_fd);
+#endif
 }
 
 int APISocket::send(const char* line)
