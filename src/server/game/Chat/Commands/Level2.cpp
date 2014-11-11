@@ -1792,8 +1792,16 @@ bool ChatHandler::HandleNpcTameCommand(const char* /*args*/)
         return false;
     }
 
+    auto slot = player->getSlotForNewPet();
+    if (slot == PET_SLOT_FULL_LIST)
+    {
+        PSendSysMessage("You don't have free slot for a new pet.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
     // Everything looks OK, create new pet
-    Pet* pet = player->CreateTamedPetFrom (creatureTarget);
+    Pet* pet = player->CreateTamedPetFrom (creatureTarget, slot);
     if (!pet)
     {
         PSendSysMessage (LANG_CREATURE_NON_TAMEABLE,cInfo->Entry);
@@ -1822,9 +1830,9 @@ bool ChatHandler::HandleNpcTameCommand(const char* /*args*/)
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
 
     // caster have pet now
-    player->SetMinion(pet, true, PET_SLOT_UNK_SLOT);
+    player->SetMinion(pet, true);
 
-    pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
+    pet->SavePetToDB();
     player->PetSpellInitialize();
 
     return true;
@@ -4064,11 +4072,17 @@ bool ChatHandler::HandleCreatePetCommand(const char* /*args*/)
         return false;
     }
 
+    auto slot = player->getSlotForNewPet();
+    if (slot == PET_SLOT_FULL_LIST)
+    {
+        PSendSysMessage("You don't have free slot for a new pet.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
     // Everything looks OK, create new pet
     Pet* pet = new Pet(player, HUNTER_PET);
-
-    if (!pet)
-      return false;
+    pet->SetSlot(slot);
 
     if (!pet->CreateBaseAtCreature(creatureTarget))
     {
@@ -4105,8 +4119,8 @@ bool ChatHandler::HandleCreatePetCommand(const char* /*args*/)
     // visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL,creatureTarget->getLevel());
 
-    player->SetMinion(pet, true, PET_SLOT_UNK_SLOT);
-    pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
+    player->SetMinion(pet, true);
+    pet->SavePetToDB();
     player->PetSpellInitialize();
 
     return true;

@@ -3241,6 +3241,12 @@ enum PetSlot
 };
 #define MAX_PET_STABLES         PET_SLOT_STABLE_LAST
 
+enum class PetRemoveMode
+{
+    REMOVE_AND_SAVE,
+    REMOVE_AND_DELETE,
+};
+
 enum TradeStatus
 {
     TRADE_STATUS_OPEN_WINDOW = 0,

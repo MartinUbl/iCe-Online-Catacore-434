@@ -108,9 +108,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 {
     m_loading = true;
 
-    if(slotID == PET_SLOT_ACTUAL_PET_SLOT)
-        slotID = owner->m_currentPetSlot;
-
     uint32 ownerid = owner->GetGUIDLow();
 
     QueryResult result;
@@ -146,7 +143,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     Field *fields = result->Fetch();
 
-    // update for case of current pet "slot = 0"
     petentry = fields[1].GetUInt32();
     if (!petentry)
     {
@@ -289,6 +285,8 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     SetReactState(ReactStates(fields[6].GetUInt8()));
     SetCanModifyStats(true);
 
+    SetSlot((PetSlot)fields[7].GetUInt32());
+
     if (getPetType() == SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
     {
         if (IsPetGhoul())
@@ -329,7 +327,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         }
     }
 
-    owner->SetMinion(this, true, slotID == PET_SLOT_UNK_SLOT ? PET_SLOT_OTHER_PET : slotID);
+    owner->SetMinion(this, true);
     map->Add(this->ToCreature());
 
     m_resetTalentsCost = fields[15].GetUInt32();
@@ -388,7 +386,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     return true;
 }
 
-void Pet::SavePetToDB(PetSlot mode)
+void Pet::SavePetToDB()
 {
     if (!GetEntry())
         return;
@@ -405,91 +403,58 @@ void Pet::SavePetToDB(PetSlot mode)
     if (!pOwner)
         return;
 
-    if(mode == PET_SLOT_ACTUAL_PET_SLOT)
-        mode = pOwner->m_currentPetSlot;
-    //if(mode >= PET_SLOT_HUNTER_FIRST && mode <= PET_SLOT_HUNTER_LAST && getPetType() != HUNTER_PET)
-    //    assert(false);
-    //if(mode == PET_SLOT_OTHER_PET && getPetType() == HUNTER_PET)
-    //    assert(false);
-    
-    // not save pet as current if another pet temporary unsummoned
-    if (mode == pOwner->m_currentPetSlot && pOwner->GetTemporaryUnsummonedPetNumber() &&
-        pOwner->GetTemporaryUnsummonedPetNumber() != m_charmInfo->GetPetNumber())
-    {
-        // pet will lost anyway at restore temporary unsummoned
-        if (getPetType() == HUNTER_PET)
-            return;
-    }
-
     uint32 curhealth = GetHealth();
     uint32 curmana = GetPower(POWER_MANA);
 
-    // current/stable/not_in_slot
-    if (mode >= PET_SLOT_HUNTER_FIRST)
+    uint32 owner = GUID_LOPART(GetOwnerGUID());
+    std::string name = m_name;
+    CharacterDatabase.escape_string(name);
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+    // save pet
+    std::ostringstream ss;
+    ss  << "REPLACE INTO character_pet (id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, curhappiness, abdata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType) "
+        << "VALUES ("
+        << m_charmInfo->GetPetNumber() << ", "
+        << GetEntry() << ", "
+        << owner << ", "
+        << GetNativeDisplayId() << ", "
+        << uint32(getLevel()) << ", "
+        << GetUInt32Value(UNIT_FIELD_PETEXPERIENCE) << ", "
+        << uint32(GetReactState()) << ", "
+        << uint32(GetSlot()) << ", '"
+        << name.c_str() << "', "
+        << uint32(HasByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED) ? 0 : 1) << ", "
+        << curhealth << ", "
+        << curmana << ", "
+        << "0, '";
+
+    for (uint32 i = ACTION_BAR_INDEX_START; i < ACTION_BAR_INDEX_END; ++i)
     {
-        uint32 owner = GUID_LOPART(GetOwnerGUID());
-        std::string name = m_name;
-        CharacterDatabase.escape_string(name);
+        ss << uint32(m_charmInfo->GetActionBarEntry(i)->GetType()) << " "
+            << uint32(m_charmInfo->GetActionBarEntry(i)->GetAction()) << " ";
+    };
 
-        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    ss  << "', "
+        << time(NULL) << ", "
+        << uint32(m_resetTalentsCost) << ", "
+        << uint64(m_resetTalentsTime) << ", "
+        << GetUInt32Value(UNIT_CREATED_BY_SPELL) << ", "
+        << uint32(getPetType()) << ")";
 
-        // save pet
-        std::ostringstream ss;
-        ss  << "REPLACE INTO character_pet (id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, curhappiness, abdata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType) "
-            << "VALUES ("
-            << m_charmInfo->GetPetNumber() << ", "
-            << GetEntry() << ", "
-            << owner << ", "
-            << GetNativeDisplayId() << ", "
-            << uint32(getLevel()) << ", "
-            << GetUInt32Value(UNIT_FIELD_PETEXPERIENCE) << ", "
-            << uint32(GetReactState()) << ", "
-            << uint32(mode) << ", '"
-            << name.c_str() << "', "
-            << uint32(HasByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED) ? 0 : 1) << ", "
-            << curhealth << ", "
-            << curmana << ", "
-            << "0, '";
+    trans->Append(ss.str().c_str());
 
-        for (uint32 i = ACTION_BAR_INDEX_START; i < ACTION_BAR_INDEX_END; ++i)
-        {
-            ss << uint32(m_charmInfo->GetActionBarEntry(i)->GetType()) << " "
-               << uint32(m_charmInfo->GetActionBarEntry(i)->GetAction()) << " ";
-        };
+    // save auras before possibly removing them
+    _SaveAuras(trans);
 
-        ss  << "', "
-            << time(NULL) << ", "
-            << uint32(m_resetTalentsCost) << ", "
-            << uint64(m_resetTalentsTime) << ", "
-            << GetUInt32Value(UNIT_CREATED_BY_SPELL) << ", "
-            << uint32(getPetType()) << ")";
+    if (IsInStable())
+        RemoveAllAuras();
 
-        trans->Append(ss.str().c_str());
+    _SaveSpells(trans);
+    _SaveSpellCooldowns(trans);
 
-        // save auras before possibly removing them
-        _SaveAuras(trans);
-
-        // stable and not in slot saves
-        if (mode > PET_SLOT_HUNTER_LAST && getPetType() == HUNTER_PET)
-            RemoveAllAuras();
-
-        _SaveSpells(trans);
-        _SaveSpellCooldowns(trans);
-
-        CharacterDatabase.CommitTransaction(trans);
-    }
-    // delete
-    else
-    {
-        // warlocks pets doesn't get deleted
-        if (pOwner->getClass() != CLASS_WARLOCK)
-        {
-            if(pOwner->m_currentPetSlot >= PET_SLOT_HUNTER_FIRST && pOwner->m_currentPetSlot <= PET_SLOT_HUNTER_LAST)
-                pOwner->setPetSlotUsed(pOwner->m_currentPetSlot, false);
-            RemoveAllAuras();
-            DeleteFromDB(m_charmInfo->GetPetNumber());
-        }
-    }
+    CharacterDatabase.CommitTransaction(trans);
 }
 
 void Pet::DeleteFromDB(uint32 guidlow)
@@ -536,9 +501,9 @@ void Pet::Update(uint32 diff)
     {
         case CORPSE:
         {
-            if ((getPetType() != HUNTER_PET || m_corpseRemoveTime <= time(NULL)))
+            if (!IsHunterPet() && m_corpseRemoveTime <= time(NULL))
             {
-                Remove(PET_SLOT_ACTUAL_PET_SLOT);               //hunters' pets never get removed because of death, NEVER!
+                Remove();               //hunters' pets never get removed because of death, NEVER!
                 return;
             }
             break;
@@ -550,7 +515,7 @@ void Pet::Update(uint32 diff)
             if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && !IsPossessed()) || (isControlled() && !owner->GetPetGUID()))
             //if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGUID() && (owner->GetCharmGUID() != GetGUID()))) || (isControlled() && !owner->GetPetGUID()))
             {
-                Remove(PET_SLOT_ACTUAL_PET_SLOT);
+                Remove();
                 return;
             }
 
@@ -559,7 +524,7 @@ void Pet::Update(uint32 diff)
                 if (owner->GetPetGUID() != GetGUID())
                 {
                     sLog->outError("Pet %u is not pet of owner %s, removed", GetEntry(), m_owner->GetName());
-                    Remove(PET_SLOT_ACTUAL_PET_SLOT);
+                    Remove();
                     return;
                 }
             }
@@ -570,7 +535,7 @@ void Pet::Update(uint32 diff)
                     m_duration -= diff;
                 else
                 {
-                    Remove(PET_SLOT_ACTUAL_PET_SLOT);
+                    Remove();
                     return;
                 }
             }
@@ -726,7 +691,7 @@ bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
     return true;
 }
 
-void Pet::Remove(PetSlot mode)
+void Pet::Remove(PetRemoveMode mode)
 {
     m_owner->RemovePet(this, mode);
 }
@@ -2175,4 +2140,23 @@ PetTalentType Pet::GetTalentType()
         return PET_TALENT_TYPE_NOT_HUNTER_PET;
     
     return (PetTalentType)pet_family->petTalentType;
+}
+
+bool Pet::IsInStable() const
+{
+    if (!IsHunterPet())
+        return false;
+
+    auto slot = GetSlot();
+    return slot >= PET_SLOT_STABLE_FIRST && slot <= PET_SLOT_STABLE_LAST;
+}
+
+void Pet::SetSlot(PetSlot slot)
+{
+    m_slot = slot;
+}
+
+PetSlot Pet::GetSlot() const
+{
+    return m_slot;
 }

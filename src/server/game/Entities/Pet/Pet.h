@@ -104,6 +104,7 @@ typedef std::vector<uint32> AutoSpellList;
 
 class Player;
 
+// Pet owned by a player
 class Pet : public Guardian
 {
     public:
@@ -126,8 +127,8 @@ class Pet : public Guardian
         bool CreateBaseAtTamed(CreatureInfo const * cinfo, Map * map, uint32 phaseMask);
         bool LoadPetFromDB(Player* owner,uint32 petentry = 0,uint32 petnumber = 0, bool current = false, PetSlot slotID = PET_SLOT_UNK_SLOT);
         bool isBeingLoaded() const { return m_loading;}
-        void SavePetToDB(PetSlot mode);
-        void Remove(PetSlot mode);
+        void SavePetToDB();
+        void Remove(PetRemoveMode mode = PetRemoveMode::REMOVE_AND_SAVE);
         static void DeleteFromDB(uint32 guidlow);
         
         static bool IsPetBasicAttackSpell(uint32 spellId)
@@ -220,6 +221,12 @@ class Pet : public Guardian
         Player *GetOwner() { return m_owner; }
     
         PetTalentType GetTalentType();
+
+        bool IsInStable() const;
+
+        void SetSlot(PetSlot slot);
+        PetSlot GetSlot() const override;
+
     protected:
         Player *m_owner;
         uint32  m_happinessTimer;
@@ -227,6 +234,7 @@ class Pet : public Guardian
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         uint64  m_auraRaidUpdateMask;
         bool    m_loading;
+        PetSlot m_slot = PET_SLOT_UNK_SLOT;
 
         DeclinedName *m_declinedname;
 

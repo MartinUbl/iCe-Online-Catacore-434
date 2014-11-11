@@ -11535,7 +11535,7 @@ Unit* Unit::GetCharm() const
     return NULL;
 }
 
-void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
+void Unit::SetMinion(Minion *minion, bool apply)
 {
     sLog->outDebug("SetMinion %u for %u, apply %u", minion->GetEntry(), GetEntry(), apply);
     
@@ -11566,7 +11566,7 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
                 {
                     // remove existing minion pet
                     if (oldPet->IsPet())
-                        ((Pet*)oldPet)->Remove(PET_SLOT_ACTUAL_PET_SLOT);
+                        ((Pet*)oldPet)->Remove();
                     else
                         oldPet->UnSummon();
                     SetPetGUID(minion->GetGUID());
@@ -11579,24 +11579,15 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
                 SetMinionGUID(0);
             }
             
-            if(slot == PET_SLOT_UNK_SLOT)
+            if (GetTypeId() == TYPEID_PLAYER)
             {
-                if(minion->IsPet() && (minion->ToPet()->getPetType() == HUNTER_PET || minion->ToPet()->IsWarlockPet()))
-                    assert(false);
-                slot = PET_SLOT_OTHER_PET;
-            }
-            
-            if(GetTypeId() == TYPEID_PLAYER)
-            {  
-                if(!minion->IsHunterPet()) //If its not a Hunter Pet, well lets not try to use it for hunters then.
+                Player *player = ToPlayer();
+                player->m_currentPetSlot = minion->GetSlot();
+
+                if (Pet *pet = minion->ToPet())
                 {
-                    ToPlayer()->m_currentPetSlot = slot;
-                    //ToPlayer()->setPetSlotUsed(slot, true);
-                }         
-                if(slot >= PET_SLOT_HUNTER_FIRST && slot <= PET_SLOT_HUNTER_LAST) // Always save thoose spots where hunter is correct
-                {
-                    ToPlayer()->m_currentPetSlot = slot;
-                    ToPlayer()->setPetSlotUsed(slot, true);
+                    if (pet->IsHunterPet() && !pet->IsInStable())
+                        player->setPetSlotUsed(pet->GetSlot(), true);
                 }
             }
         }
@@ -19082,12 +19073,13 @@ void Unit::RemovePetAura(PetAura const* petSpell)
         pet->RemoveAurasDueToSpell(petSpell->GetAura(pet->GetEntry()));
 }
 
-Pet* Unit::CreateTamedPetFrom(Creature* creatureTarget,uint32 spell_id)
+Pet* Unit::CreateTamedPetFrom(Creature* creatureTarget, PetSlot slot, uint32 spell_id)
 {
     if (GetTypeId() != TYPEID_PLAYER)
         return NULL;
 
     Pet* pet = new Pet((Player*)this, HUNTER_PET);
+    pet->SetSlot(slot);
 
     if (!pet->CreateBaseAtCreature(creatureTarget))
     {
@@ -19102,7 +19094,7 @@ Pet* Unit::CreateTamedPetFrom(Creature* creatureTarget,uint32 spell_id)
     return pet;
 }
 
-Pet* Unit::CreateTamedPetFrom(uint32 creatureEntry, uint32 spell_id)
+Pet* Unit::CreateTamedPetFrom(uint32 creatureEntry, PetSlot slot, uint32 spell_id)
 {
     if (GetTypeId() != TYPEID_PLAYER)
         return NULL;
@@ -19112,6 +19104,7 @@ Pet* Unit::CreateTamedPetFrom(uint32 creatureEntry, uint32 spell_id)
         return NULL;
 
     Pet* pet = new Pet((Player*)this, HUNTER_PET);
+    pet->SetSlot(slot);
 
     if (!pet->CreateBaseAtCreatureInfo(creatureInfo, this) || !InitTamedPet(pet, getLevel(), spell_id))
     {

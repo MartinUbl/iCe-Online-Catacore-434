@@ -582,11 +582,11 @@ void WorldSession::HandleSetPetSlotOpcode(WorldPacket& recvPacket)
 
     //If we move the pet already summoned...
     if (pet && pet->GetCharmInfo() && pet->GetCharmInfo()->GetPetNumber() == petnumber)
-        _player->RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
+        _player->RemovePet(pet);
 
     //If we move to the pet already summoned...
     if (pet && GetPlayer()->m_currentPetSlot == slot)
-        _player->RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
+        _player->RemovePet(pet);
 
     m_stableChangeSlotCallback.SetParam(slot);
     m_stableChangeSlotCallback.SetFutureResult(CharacterDatabase.PQuery("SELECT slot,entry,id FROM character_pet WHERE owner = '%u' AND id = '%u'", _player->GetGUIDLow(), petnumber));

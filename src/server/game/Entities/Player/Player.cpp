@@ -1685,7 +1685,7 @@ void Player::Update(uint32 p_time)
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && !pet->IsPossessed())
     //if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && (GetCharmGUID() && (pet->GetGUID() != GetCharmGUID())))
-        RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
+        RemovePet(pet);
 
     //we should execute delayed teleports only for alive(!) players
     //because we don't want player's ghost teleported from graveyard
@@ -1716,7 +1716,7 @@ void Player::setDeathState(DeathState s)
         RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 
         //FIXME: is pet dismissed at dying or releasing spirit? if second, add setDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
-        RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT);
+        RemovePet(NULL);
 
         // save value before aura remove in Unit::setDeathState
         ressSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
@@ -4631,8 +4631,7 @@ bool Player::ResetTalents(bool no_cost)
     }
 
     //FIXME: remove pet before or after unlearn spells? for now after unlearn to allow removing of talent related, pet affecting auras
-    RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT);
-    m_currentPetSlot = PET_SLOT_DELETED;
+    RemovePet(NULL);
     /* when prev line will dropped use next line
     if (Pet* pet = GetPet())
     {
@@ -19029,7 +19028,7 @@ void Player::LoadPet()
     if (IsInWorld())
     {
         Pet *pet = new Pet(this);
-        if (!pet->LoadPetFromDB(this, 0, 0, true, PET_SLOT_ACTUAL_PET_SLOT))
+        if (!pet->LoadPetFromDB(this, 0, 0, true, m_currentPetSlot))
             delete pet;
     }
 }
@@ -20329,7 +20328,7 @@ bool Player::CreateInDB()
 
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
-        pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
+        pet->SavePetToDB();
 
     return true;
 }
@@ -20558,7 +20557,7 @@ void Player::SaveToDB()
 
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
-        pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
+        pet->SavePetToDB();
 
     if (GetGuildId() > 0)
     {
@@ -21449,7 +21448,7 @@ Pet* Player::GetPet() const
     return NULL;
 }
 
-void Player::RemovePet(Pet* pet, PetSlot mode)
+void Player::RemovePet(Pet* pet, PetRemoveMode mode)
 {
     if (!pet)
         pet = GetPet();
@@ -21465,9 +21464,6 @@ void Player::RemovePet(Pet* pet, PetSlot mode)
             return;
     }
 
-    if(mode == PET_SLOT_ACTUAL_PET_SLOT)
-        mode = m_currentPetSlot;
-
     //if(mode >= PET_SLOT_HUNTER_FIRST && mode <= PET_SLOT_HUNTER_LAST && pet->getPetType() != HUNTER_PET)
     //    assert(false); //debug code.
     //if(mode == PET_SLOT_OTHER_PET && pet->getPetType() == HUNTER_PET)
@@ -21475,13 +21471,16 @@ void Player::RemovePet(Pet* pet, PetSlot mode)
     
     pet->CombatStop();
 
-    // only if current pet in slot
-    pet->SavePetToDB(mode);
-
-    if(pet->getPetType() != HUNTER_PET && !pet->IsWarlockPet())
-        SetMinion(pet, false, PET_SLOT_UNK_SLOT);
+    if (mode == PetRemoveMode::REMOVE_AND_SAVE && pet->GetSlot() != PET_SLOT_UNK_SLOT)
+        pet->SavePetToDB();
     else
-        SetMinion(pet, false, PET_SLOT_ACTUAL_PET_SLOT);
+    {
+        pet->DeleteFromDB(pet->GetGUIDLow());
+        if (pet->IsHunterPet() && !pet->IsInStable())
+            setPetSlotUsed(pet->GetSlot(), false);
+    }
+
+    SetMinion(pet, false);
 
     pet->AddObjectToRemoveList();
     pet->m_removed = true;
@@ -21495,6 +21494,8 @@ void Player::RemovePet(Pet* pet, PetSlot mode)
         if (GetGroup())
             SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
+
+    m_currentPetSlot = PET_SLOT_DELETED;
 }
 
 void Player::SendTooManyPets(Player *pl)
@@ -23991,7 +23992,7 @@ template<>
 inline void BeforeVisibilityDestroy<Creature>(Creature* t, Player* p)
 {
     if (p->GetPetGUID() == t->GetGUID() && t->ToCreature()->IsPet())
-        ((Pet*)t)->Remove(PET_SLOT_ACTUAL_PET_SLOT);
+        ((Pet*)t)->Remove();
 }
 
 void Player::UpdateVisibilityOf(WorldObject* target)
@@ -27616,7 +27617,7 @@ void Player::UnsummonPetTemporaryIfAny()
         m_oldpetspell = pet->GetUInt32Value(UNIT_CREATED_BY_SPELL);
     }
 
-    RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
+    RemovePet(pet);
 }
 
 void Player::ResummonPetTemporaryUnSummonedIfAny()
@@ -27636,7 +27637,7 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
         return;
 
     Pet* NewPet = new Pet(this);
-    if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true, PET_SLOT_ACTUAL_PET_SLOT))
+    if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true, PET_SLOT_UNK_SLOT))
         delete NewPet;
 
     // Hackfix for reapplying Soul Link

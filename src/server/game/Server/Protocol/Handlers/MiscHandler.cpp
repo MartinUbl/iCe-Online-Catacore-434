@@ -81,7 +81,7 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket & recv_data)
     GetPlayer()->StopCastingCharm();
 
     //this is spirit release confirm?
-    GetPlayer()->RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT);
+    GetPlayer()->RemovePet(GetPlayer()->GetPet());
     GetPlayer()->BuildPlayerRepop();
     GetPlayer()->RepopAtGraveyard();
 }

@@ -276,8 +276,9 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint32 spellid
                         ASSERT(pet->GetTypeId() == TYPEID_UNIT);
                         if (pet->IsPet())
                         {
-                            if (((Pet*)pet)->getPetType() == HUNTER_PET)
-                                GetPlayer()->RemovePet((Pet*)pet, PET_SLOT_DELETED);
+                            Pet *petInst = pet->ToPet();
+                            if (petInst->getPetType() == HUNTER_PET)
+                                GetPlayer()->RemovePet(petInst, PetRemoveMode::REMOVE_AND_DELETE);
                             else
                             {
                                 // Warlock pets should be also removed from active slot
@@ -288,7 +289,7 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint32 spellid
                                     case 1863:
                                     case 417:
                                     case 17252:
-                                        GetPlayer()->RemovePet((Pet*)pet, PET_SLOT_DELETED);
+                                        GetPlayer()->RemovePet(petInst, PetRemoveMode::REMOVE_AND_DELETE);
                                         break;
                                     default:
                                         break;
@@ -669,7 +670,7 @@ void WorldSession::HandlePetAbandon(WorldPacket & recv_data)
     if (pet)
     {
         if (pet->IsPet())
-            _player->RemovePet((Pet*)pet,PET_SLOT_ABANDON);
+            _player->RemovePet((Pet*)pet, PetRemoveMode::REMOVE_AND_DELETE);
         else if (pet->GetGUID() == _player->GetCharmGUID())
             _player->StopCastingCharm();
     }

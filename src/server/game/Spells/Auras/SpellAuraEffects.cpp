@@ -5828,10 +5828,7 @@ void AuraEffect::HandleModPossessPet(AuraApplication const *aurApp, uint8 mode, 
 
         if (!pet->IsWithinDistInMap(caster, pet->GetMap()->GetVisibilityDistance()))
         {
-            if(pet->IsHunterPet() || pet->IsWarlockPet())
-                pet->Remove(PET_SLOT_ACTUAL_PET_SLOT);
-            else
-                pet->Remove(PET_SLOT_OTHER_PET);
+            pet->Remove();
         }
         else
         {
@@ -8336,7 +8333,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                         if (apply)
                             owner->CastSpell(owner, 8985, true);
                         else
-                            owner->ToPlayer()->RemovePet(NULL, PET_SLOT_OTHER_PET);
+                            owner->ToPlayer()->RemovePet(NULL);
                     }
                     break;
                 }
@@ -8352,7 +8349,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                         if (apply)
                             owner->CastSpell(owner, 19704, true);
                         else
-                            owner->ToPlayer()->RemovePet(NULL, PET_SLOT_OTHER_PET);
+                            owner->ToPlayer()->RemovePet(NULL);
                     }
                     break;
                 }

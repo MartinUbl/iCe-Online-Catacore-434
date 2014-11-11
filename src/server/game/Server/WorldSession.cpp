@@ -488,7 +488,7 @@ void WorldSession::LogoutPlayer(bool Save)
             pGuild->HandleMemberLogout(this);
 
         ///- Remove pet
-        _player->RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT);
+        _player->RemovePet(_player->GetPet());
 
         // Despawn wild mushrooms
         if (_player->getClass() == CLASS_DRUID)
