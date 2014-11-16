@@ -3223,12 +3223,9 @@ inline uint8 GetClassFromSpellFamily(uint32 spellFamily)
 enum PetSlot
 {
     //Some not-in-db slots
-    PET_SLOT_ABANDON         =  -5,        //Used when abandoning pet
     PET_SLOT_FULL_LIST       =  -4,        //Used when there is no slot free for tameing
     PET_SLOT_UNK_SLOT        =  -3,        //Used in some scripts.
-    
-    PET_SLOT_ACTUAL_PET_SLOT =  -2,        //Save the pet in his actual slot.
-    PET_SLOT_DELETED         =  -1,        //Delete the pet
+    PET_SLOT_NO_PET          =  -1,        //player does not have any pet summoned
     
     //Hunter pet slots, sended to client at stable.
     PET_SLOT_HUNTER_FIRST    =   0,        //PetType == HUNTER_PET

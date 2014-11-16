@@ -425,7 +425,7 @@ Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achie
     m_speakCount = 0;
 
     m_petSlotUsed = 0;
-    m_currentPetSlot = PET_SLOT_DELETED;
+    m_currentPetSlot = PET_SLOT_NO_PET;
 
     m_emote = 0;
 
@@ -19025,7 +19025,7 @@ void Player::LoadPet()
 {
     //fixme: the pet should still be loaded if the player is not in world
     // just not added to the map
-    if (IsInWorld())
+    if (IsInWorld() && m_currentPetSlot != PET_SLOT_NO_PET)
     {
         Pet *pet = new Pet(this);
         if (!pet->LoadPetFromDB(this, 0, 0, true, m_currentPetSlot))
@@ -21495,7 +21495,7 @@ void Player::RemovePet(Pet* pet, PetRemoveMode mode)
             SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
 
-    m_currentPetSlot = PET_SLOT_DELETED;
+    m_currentPetSlot = PET_SLOT_NO_PET;
 }
 
 void Player::SendTooManyPets(Player *pl)

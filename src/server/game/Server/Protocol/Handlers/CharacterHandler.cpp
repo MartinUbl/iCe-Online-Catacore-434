@@ -1134,7 +1134,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_PET_SLOT))
     {
-        pCurrChar->m_currentPetSlot = PET_SLOT_DELETED;
+        pCurrChar->m_currentPetSlot = PET_SLOT_NO_PET;
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_RESET_PET_SLOT);
     }
 
