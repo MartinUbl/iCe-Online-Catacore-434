@@ -2624,6 +2624,10 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     float range = GetSpellMaxRange(m_spellInfo, IsPositiveSpell(m_spellInfo->Id));
                     if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
 
+                    // Allow AfterUnitTargetSelectHandlers force push some units in case of TARGET_DST_NEARBY_ENTRY
+                    std::list<Unit*> unitList;
+                    CallScriptAfterUnitTargetSelectHandlers(unitList, SpellEffIndex(i));
+
                     // Ring Toss - Darkmoon Faire
                     // explicit randomization since missile handling is little bit fucked up
                     // and also the spell target is set to be "nearby_entry", which is, obviously, wrong for us and our implementation
@@ -2639,6 +2643,10 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             y += radius * sin(angle);
                             m_targets.setDst(x, y, z, 0.0f);
                         }
+                    }
+                    else if (!unitList.empty()) // Add first target in list (in case unit was added explicitly via SpellScript)
+                    {
+                        m_targets.setDst(*(unitList.front()));
                     }
                     // Standard case
                     else if (WorldObject *target = SearchNearbyTarget(range, SPELL_TARGETS_ENTRY, SpellEffIndex(i)))
