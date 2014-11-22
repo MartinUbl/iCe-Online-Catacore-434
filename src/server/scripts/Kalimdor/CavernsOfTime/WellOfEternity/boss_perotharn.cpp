@@ -21,6 +21,16 @@
 
 #define CAST_WOE_INSTANCE(i)     (dynamic_cast<instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript*>(i))
 
+static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
+{
+    source->PlayDistanceSound(quote.soundID);
+
+    if (yell)
+        source->MonsterYell(quote.text, LANG_UNIVERSAL,0,200.0f);
+    else
+        source->MonsterSay(quote.text, LANG_UNIVERSAL,0,200.0f);
+}
+
 static const SimpleQuote introQuotes[3] =
 {
     { 26118, "He is near, lurking in the shadows... I can sense it." },

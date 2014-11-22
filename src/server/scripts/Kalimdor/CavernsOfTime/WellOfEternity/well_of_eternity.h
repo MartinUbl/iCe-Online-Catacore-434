@@ -311,16 +311,6 @@ struct SimpleQuote
     const char * text;
 };
 
-static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
-{
-    source->PlayDistanceSound(quote.soundID);
-
-    if (yell)
-        source->MonsterYell(quote.text, LANG_UNIVERSAL,0,200.0f);
-    else
-        source->MonsterSay(quote.text, LANG_UNIVERSAL,0,200.0f);
-}
-
 enum miscData
 {
     DATA_SET_WAVE_NUMBER,

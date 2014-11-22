@@ -22,6 +22,16 @@
 
 #define NEVER  (0xffffffff)
 
+static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
+{
+    source->PlayDistanceSound(quote.soundID);
+
+    if (yell)
+        source->MonsterYell(quote.text, LANG_UNIVERSAL,0,200.0f);
+    else
+        source->MonsterSay(quote.text, LANG_UNIVERSAL,0,200.0f);
+}
+
 const Position leftEndPositions[2] =
 {
     {3260.16f,-4943.4f, 181.7f, 3.7f},     //LEFT
@@ -1097,10 +1107,12 @@ namespace Illidan
                 HandleVehicle(true);
         }
 
-        void MovementInform(uint32 type, uint32 id) override
+        void MovementInform(uint32 type, uint32 wpID) override
         {
             if (!pInstance)
                 return;
+
+            int32 id = (int32)wpID; // Shut the compiler mouth about unsigned / signed comparsion
 
             if (type != POINT_MOTION_TYPE)
                 return;
