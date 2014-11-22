@@ -6048,8 +6048,6 @@ SpellCastResult Spell::CheckCast(bool strict)
     {
         case 98619: // Wings of Flame 
             return SPELL_CAST_OK;
-        case 110231: // ShadowCloak
-            return (m_caster->IsInCombat()) ? SPELL_FAILED_AFFECTING_COMBAT : SPELL_CAST_OK;
         case 52610: // Savage Roar
             if (m_caster->GetShapeshiftForm() != FORM_CAT)
                return SPELL_FAILED_NOT_SHAPESHIFT;

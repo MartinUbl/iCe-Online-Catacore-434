@@ -9111,6 +9111,29 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                         if (GetStat(STAT_SPIRIT)   > stat) { trigger_spell_id = 60235;                               }
                         break;
                     }
+                    case 103004: // Shadowcloak (Well of Eternity)
+                    {
+                        // First remove passenger !
+                        if (Creature* vehPassenger = GetVehicleCreatureBase())
+                        {
+                            vehPassenger->Kill(vehPassenger);
+                            vehPassenger->ForcedDespawn();
+                        }
+
+                        RemoveAura(102994); // Remove Stealth + vehicle kit
+
+                        uint32 stacks = 1;
+                        if (Aura * aur = GetAura(103020))
+                            stacks = aur->GetStackAmount();
+
+                        RemoveAura(103020); // Remove stacks of dummy aura
+
+                        if (!HasAura(103018) && stacks > 1)
+                        if (Aura * ambusher = AddAura(103018,this)) // Scale duration of Shadow Ambusher with number of dummy stacks
+                            ambusher->SetDuration(stacks * 1000);
+
+                        break;
+                    }
                     case 64568:             // Blood Reserve
                     {
                         if (GetHealth() - damage < GetMaxHealth() * 0.35)

@@ -3273,6 +3273,29 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
             {
                 switch(auraId)
                 {
+                    case 103004: // Shadowcloak (Well of Eternity)
+                    {
+                        if (!caster || caster->IsInCombat() || caster->GetMapId() != 939) // only in WoE and only if out of combat
+                            break;
+
+                        #define PLAYER_SHADOWCLOAK_STALKER      (55154)
+                        #define ILLIDAN_SHADOWCLOAK_STALKER     (56389)
+
+                        if (!caster->HasAura(102994))
+                        {
+                            caster->CastSpell(caster, 102994, true); // apply stealth + create vehicle kit for player
+                            if (Unit * stalker = caster->SummonCreature(caster->GetTypeId() == TYPEID_PLAYER ? PLAYER_SHADOWCLOAK_STALKER : ILLIDAN_SHADOWCLOAK_STALKER,
+                                                   caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), 0))
+                            {
+                                stalker->EnterVehicle(caster,0);
+                                stalker->AddAura(102951, stalker); // add visual circle aura
+                                stalker->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE); // for sure
+                            }
+                        }
+
+                        triggerSpellId = 103020; // continue stack dummy aura
+                        break;
+                    }
                     // Thaumaturgy Channel
                     case 9712:
                         triggerSpellId = 21029;

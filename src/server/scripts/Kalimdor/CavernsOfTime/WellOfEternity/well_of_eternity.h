@@ -89,6 +89,10 @@ enum TrashEntry
 
     LEGION_PORTAL_DEMON = 54500,
     DISTRACION_STALKER_ENTRY = 58200,
+
+    // Vehicle stuff creatures
+    ILLIDAN_SHADOWCLOAK_VEHICLE_ENTRY = 56389,
+    PLAYER_SHADOWCLOAK_VEHICLE_ENTRY = 55154
 };
 
 enum CrystalOrientations
@@ -105,7 +109,7 @@ enum TrashSpells
     SPELL_PORTAL_STATUS_ACTIVE = 102456,
     SPELL_PORTAL_STATUS_SHUTTING_DOWN = 102457,
 
-    SPELL_CRYSTAL_MELTDOWN = 105074, // intesne green light
+    SPELL_CRYSTAL_MELTDOWN = 105074, // intense green light
     SPELL_SHATTER_CRYSTALS = 105004, // some kind of explosion -> some kind of die anim kit and then freeze anim
     SPELL_CRYSTAL_DESTRUCTION = 105079, // another explosion ?
     SPELL_CRYSTAL_FEL_GROUND = 105119,
@@ -132,19 +136,80 @@ enum TrashSpells
     SPELL_CARRION_SWARM = 107840, // frontal cone AoE
     SPELL_DEMONIC_WARDING = 107900, // absorb aura
 
-    SPELL_DEMON_GRIP = 105720,
+    SPELL_DEMON_GRIP = 102561,
+    SPELL_DEMON_GRIP_ROOT = 102937,
+    SPELL_INCINERATE = 102573
 };
 
 enum IntroData
 {
     DATA_CRYSTAL_DESTROYED = 4000,
-    DATA_SET_GUARDIAN_WAVE,
-    DATA_GET_GUARDIAN_WAVE
+    DATA_SET_GUARDIAN_LANE,
+    DATA_GET_GUARDIAN_LANE,
+    DATA_GET_PEROTHARN_PHASE,
+    DATA_ILLIDAN // for guid
 };
 
 enum Actions
 {
     ACTION_PORTAL_CLOSING,
+    ACTION_PORTAL_HURRY,
+    ACTION_ILLIDAN_DELAY_MOVE, // force illidan to move to next WP point after few seconds
+    ACTION_ON_ALL_DEFFENDERS_KILLED, // if all pack of deffedners was killed
+    ACTION_PEROTHRAN_PREPARE_TO_AGGRO,
+    ACTION_HIDE_AND_SEKK_END,
+    ACTION_ILLIDAN_CREATE_VEHICLE,
+    ACTION_ILLIDAN_REMOVE_VEHICLE,
+};
+
+enum SpecialActions
+{
+    SPECIAL_ACTION_NONE,
+    SPECIAL_ACTION_MOVE_TO_DEFFENDERS,
+    SPECIAL_ACTION_WAIT_INTRO,
+};
+
+enum IllidanSteps
+{
+    ILLIDAN_FIRST_STEP = 0,
+    ILLIDAN_FIRST_LOOK_STEP,
+    ILLIDAN_DISTRACT_STEP,
+    ILLIDAN_FIRST_PACK_STEP,
+    ILLIDAN_STAIRS_1_STEP,
+    ILLIDAN_STAIRS_2_STEP,
+    ILLIDAN_SECOND_PACK_STEP,
+    ILLIDAN_WAIT_SECOND_PORTAL_STEP,
+    ILLIDAN_BEFORE_STAIRS_STEP,
+    ILLIDAN_UPSTAIRS_STEP,
+    ILLIDAN_THIRD_PACK_STEP,
+    ILLIDAN_BACK_STEP_1,
+    ILLIDAN_BACK_STEP_2,
+    ILLIDAN_TOO_EASY_STEP,
+    ILLIDAN_PEROTHARN_STEP,
+    ILLIDAN_MAX_STEPS,
+
+    ILLIDAN_ATTACK_START_WP,
+    ILLIDAN_ATTACK_END_WP,
+    ILLIDAN_STEP_NULL
+};
+
+static const Position illidanPos[ILLIDAN_MAX_STEPS] =
+{
+    { 3187.0f, -4891.0f, 194.36f, 5.08f },      // ILLIDAN_FIRST_STEP
+    { 3246.0f, -4901.0f, COURTYARD_Z, 6.22f },      // ILLIDAN_FIRST_LOOK_STEP
+    { 3297.0f, -4903.0f, COURTYARD_Z, 5.25f },  // ILLIDAN_DISTRACT_STEP
+    { 3298.0f, -4959.0f, COURTYARD_Z, 4.50f },  // ILLIDAN_FIRST_PACK_STEP
+    { 3380.0f, -4983.0f, COURTYARD_Z, 0.50f },  // ILLIDAN_STAIRS_1_STEP
+    { 3398.0f, -4972.0f, COURTYARD_Z, 1.24f },  // ILLIDAN_STAIRS_2_STEP
+    { 3425.0f, -4905.0f, COURTYARD_Z, 0.83f },  // ILLIDAN_SECOND_PACK_STEP
+    { 3402.0f, -4884.0f, COURTYARD_Z, 2.10f },  // ILLIDAN_WAIT_SECOND_PORTAL_STEP
+    { 3377.0f, -4816.0f, COURTYARD_Z, 1.07f },  // ILLIDAN_BEFORE_STAIRS_STEP
+    { 3418.0f, -4765.0f, 194.15f, 5.61f },      // ILLIDAN_UPSTAIRS_STEP
+    { 3458.0f, -4828.0f, 194.19f, 5.12f },      // ILLIDAN_THIRD_PACK_STEP
+    { 3418.0f, -4765.0f, 194.15f, 5.61f },      // ILLIDAN_BACK_STEP_1
+    { 3377.0f, -4816.0f, COURTYARD_Z, 1.07f },  // ILLIDAN_BACK_STEP_2
+    { 3350.0f, -4866.0f, 181.29f, 3.92f },      // ILLIDAN_TOO_EASY_STEP
+    { 3332.0f, -4884.0f, COURTYARD_Z, 5.40f }   // ILLIDAN_PEROTHARN_STEP
 };
 
 enum CrystalPosition
@@ -240,6 +305,22 @@ static const guardianWPPositions guardPos [MAX_CRYSTALS] =
     {{3305.9f,-4845.24f,COURTYARD_Z,2.52f}, {3289.08f,-4819.37f,PORTAL_Z,2.18f} }, // WAVE_THREE -> straight
 };
 
+struct SimpleQuote
+{
+    uint32 soundID;
+    const char * text;
+};
+
+static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
+{
+    source->PlayDistanceSound(quote.soundID);
+
+    if (yell)
+        source->MonsterYell(quote.text, LANG_UNIVERSAL,0,200.0f);
+    else
+        source->MonsterSay(quote.text, LANG_UNIVERSAL,0,200.0f);
+}
+
 enum miscData
 {
     DATA_SET_WAVE_NUMBER,
@@ -268,7 +349,7 @@ public:
     {
         instance_well_of_eternity_InstanceMapScript(Map *pMap) : InstanceScript(pMap) { Initialize(); }
 
-        // Timers
+        private:
         uint32 legionTimer;
         DemonWave waveCounter;
 
@@ -276,40 +357,52 @@ public:
         uint32 currEnc[MAX_ENCOUNTER];
 
         // Creature GUIDS
+        uint64 illidanGUID;
         uint64 perotharnGUID;
         uint64 queenGUID;
         uint64 mannorothGUID;
         uint64 varothenGUID;
 
-        uint32 crystalsRemaining;
+        uint32 deffendersKilled;
 
         std::string saveData;
         std::list<CONNECTOR_INFO> connectors;
         std::list<uint64> guardians;
         std::list<uint64> crystalGUIDS;
+        std::list<uint64> illidanVictims;
 
         uint32 crystals[MAX_CRYSTALS];
+        IllidanSteps illidanStep;
 
+        bool IsIlidanCurrentWPReached(uint64 victimGUID);
+        void SummonAndInitDemon(Creature * summoner, Position summonPos, DemonDirection dir, DemonWave wave, Position movePos, WayPointStep wpID);
         void Initialize();
         void Update(uint32 diff);
         std::string GetSaveData();
         void Load(const char* chrIn);
         void OnCreatureCreate(Creature* pCreature, bool add);
         void OnGameObjectCreate(GameObject* go, bool add);
-        uint32 GetData(uint32 DataId);
-        void SetData(uint32 type, uint32 data);
-        uint64 GetData64(uint32 type);
-        void SetData64(uint32 identifier, uint64 data);
         virtual uint32* GetCorrUiEncounter();
 
-        // Custom methods
-        void TurnOffConnectors(uint32 connEntry, Creature * source);
-        void CrystalDestroyed(uint32 crystalXCoord);
-        bool IsPortalClosing(DemonDirection dir);
-        Creature * GetGuardianByDirection(uint32 wave, Creature * source);
+        public:
 
-        private:
-            void SummonAndInitDemon(Creature * summoner, Position summonPos, DemonDirection dir, DemonWave wave, Position movePos, WayPointStep wpID);
+            uint32 crystalsRemaining; // TODO: move this to private
+
+            uint32 GetData(uint32 DataId);
+            void SetData(uint32 type, uint32 data);
+            uint64 GetData64(uint32 type);
+
+            // Custom WoE methods
+            void RegisterIllidanVictim(uint64 victimGUID);
+            void UnRegisterIllidanVictim(uint64 victimGUID);
+            Creature * GetIllidanVictim();
+            void OnDeffenderDeath(Creature * deffender);
+            void SetIllidanStep(IllidanSteps step) { this->illidanStep = step; }
+            IllidanSteps GetIllidanMoveStep() { return illidanStep; }
+            void TurnOffConnectors(uint32 connEntry, Creature * source);
+            void CrystalDestroyed(uint32 crystalXCoord);
+            bool IsPortalClosing(DemonDirection dir);
+            Creature * GetGuardianByDirection(uint32 direction);
     };
 
     InstanceScript* GetInstanceScript(InstanceMap* pMap) const

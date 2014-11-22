@@ -4751,6 +4751,16 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
 /********************------- END_TIME 5 MAN DUNGEON END -------********************/
 
+/********************-------- WELL OF ETERNITY START ---------********************/
+        case 103004: // Shadowcloak
+            spellInfo->EffectAmplitude[EFFECT_1] = 1000; // prenerfed
+            break;
+        case 105543: // Absorb Fel Energy
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_UNIT_TARGET_ANY;
+            break;
+/********************-------- WELL OF ETERNITY END -----------********************/
+
         // Heart of the Crusader
         case 20335:
         case 20336:

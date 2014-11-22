@@ -25,6 +25,7 @@
 
 void INST_WOE_SCRIPT::Initialize()
 {
+    illidanGUID = 0;
     perotharnGUID = 0;
     queenGUID = 0;
     mannorothGUID = 0;
@@ -34,6 +35,7 @@ void INST_WOE_SCRIPT::Initialize()
     waveCounter = WAVE_ONE;
 
     crystalsRemaining = MAX_CRYSTALS;
+    deffendersKilled = 0;
 
     memset(m_auiEncounter, 0, sizeof(uint32)* MAX_ENCOUNTER);
     memset(crystals, CRYSTAL_ACTIVE, sizeof(uint32)* MAX_CRYSTALS);
@@ -111,6 +113,9 @@ void INST_WOE_SCRIPT::OnCreatureCreate(Creature* pCreature, bool add)
         case GUARDIAN_DEMON_ENTRY:
             guardians.push_back(pCreature->GetGUID());
             break;
+        case ILLIDAN_STORMRAGE_ENTRY:
+            illidanGUID = pCreature->GetGUID();
+            break;
     }
 }
 
@@ -165,6 +170,8 @@ uint64 INST_WOE_SCRIPT::GetData64(uint32 type)
             return varothenGUID;
         case DATA_MANNOROTH:
             return mannorothGUID;
+        case DATA_ILLIDAN:
+            return illidanGUID;
     }
     return 0;
 }
@@ -197,11 +204,8 @@ void INST_WOE_SCRIPT::CrystalDestroyed(uint32 crystalXCoord)
             crystals[1] = CRYSTAL_INACTIVE;
             break;
         case THIRD_CRYSTAL_X_COORD:
-        {
-            // last crystal destroyed -> some kind of timer ?
             crystals[2] = CRYSTAL_INACTIVE;
             break;
-        }
     }
 }
 
@@ -212,21 +216,79 @@ bool INST_WOE_SCRIPT::IsPortalClosing(DemonDirection dir)
     return false;
 }
 
-Creature * INST_WOE_SCRIPT::GetGuardianByDirection(uint32 wave, Creature * source)
+void INST_WOE_SCRIPT::OnDeffenderDeath(Creature * deffender)
+{
+    ++deffendersKilled;
+
+    if (deffendersKilled % 3 == 0)
+    {
+        if (GameObject * pGoCrystal = deffender->FindNearestGameObject(PORTAL_ENERGY_FOCUS_ENTRY, 200.0f))
+            pGoCrystal->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+
+        if (Creature* pIllidan = ObjectAccessor::GetObjectInMap(illidanGUID, this->instance, (Creature*)NULL))
+            pIllidan->AI()->DoAction(ACTION_ON_ALL_DEFFENDERS_KILLED);
+    }
+}
+
+bool INST_WOE_SCRIPT::IsIlidanCurrentWPReached(uint64 victimGUID)
+{
+    bool result = false;
+    if (Creature * pIllidanVictim = ObjectAccessor::GetObjectInMap(victimGUID, this->instance, (Creature*)NULL))
+    if (Creature * pCrystalStalker = pIllidanVictim->FindNearestCreature(FEL_CRYSTAL_STALKER_ENTRY,100.0f,true))
+    {
+        uint32 xPos = pCrystalStalker->GetPositionX();
+
+        // Attacker from first group
+        if (xPos == FIRST_CRYSTAL_X_COORD && illidanStep == ILLIDAN_FIRST_PACK_STEP)
+            result = true;
+        else if (xPos == SECOND_CRYSTAL_X_COORD && illidanStep == ILLIDAN_SECOND_PACK_STEP)
+            result = true;
+        else if (xPos == THIRD_CRYSTAL_X_COORD && illidanStep == ILLIDAN_THIRD_PACK_STEP)
+            result = true;
+
+        if (pIllidanVictim->GetEntry() == PEROTHARN_ENTRY) // Should be no problem
+            return true;
+    }
+    return result;
+}
+
+void INST_WOE_SCRIPT::RegisterIllidanVictim(uint64 victimGUID)
+{
+    illidanVictims.push_back(victimGUID);
+}
+
+void INST_WOE_SCRIPT::UnRegisterIllidanVictim(uint64 victimGUID)
+{
+    illidanVictims.remove(victimGUID);
+
+    if (illidanVictims.empty())
+    if (Creature * pIllidan = ObjectAccessor::GetObjectInMap(illidanGUID, this->instance, (Creature*)NULL))
+        if(IsIlidanCurrentWPReached(victimGUID))
+            pIllidan->GetMotionMaster()->MovePoint(ILLIDAN_ATTACK_END_WP, illidanPos[illidanStep]);
+}
+
+Creature * INST_WOE_SCRIPT::GetIllidanVictim()
+{
+    if (illidanVictims.empty())
+        return NULL;
+
+    if (IsIlidanCurrentWPReached(illidanVictims.front()) == false)
+        return NULL;
+
+    return ObjectAccessor::GetObjectInMap(illidanVictims.front(), this->instance, (Creature*)NULL);
+}
+
+Creature * INST_WOE_SCRIPT::GetGuardianByDirection(uint32 direction)
 {
     for (std::list<uint64>::iterator it = guardians.begin(); it != guardians.end(); it++)
     {
-        if (Creature * pGuardian = ObjectAccessor::GetCreature(*source, *it))
+        if (Creature * pGuardian = ObjectAccessor::GetObjectInMap(*it, this->instance, (Creature*)NULL))
         {
-            if (pGuardian->AI()->GetData(DATA_GET_GUARDIAN_WAVE) == wave)
+            if (pGuardian->AI()->GetData(DATA_GET_GUARDIAN_LANE) == direction)
                 return pGuardian;
         }
     }
     return NULL;
-}
-
-void INST_WOE_SCRIPT::SetData64(uint32 identifier, uint64 data)
-{
 }
 
 void INST_WOE_SCRIPT::SummonAndInitDemon(Creature * summoner,Position summonPos, DemonDirection dir, DemonWave wave, Position movePos, WayPointStep wpID)

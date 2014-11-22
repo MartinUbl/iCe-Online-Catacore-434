@@ -21,7 +21,6 @@
 #define CAST_WOE_INSTANCE(i)     (dynamic_cast<instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript*>(i))
 
 #define NEVER  (0xffffffff)
-#define GO_FIREWALL (207679)
 
 const Position leftEndPositions[2] =
 {
@@ -34,6 +33,99 @@ const Position rightEndPositions[2] =
     {3411.3f,-4841.3f, 181.7f, 0.65f},     //LEFT
     {3413.7f,-4845.3f, 181.7f, 0.65f},     //RIGHT
 };
+
+namespace Illidan
+{
+    static const SimpleQuote explainQuotes[3] = // used all
+    {
+        {26080, "Explain your presence." },
+        {26523, "Talk with me now." },
+        {26524, "Are you here to help?" },
+    };
+
+    static const SimpleQuote introQuotes[3] = // used all
+    {
+        {26076, "Over here! In the shadows!" },
+        {26054, "We now hide in shadows, hidden from our enemies." },
+        {26525, "I think we stand a better chance fighting along side one another"}
+    };
+
+    static const SimpleQuote distractQuote[2] = // used all
+    {
+        {26063, "I'll hold them back so we get past. Be ready." },
+        {26064, "My magic is fading. I'm going through!" }
+    };
+
+    static const SimpleQuote escortQuotes[11] =
+    {
+        {26065, "Come with me if you like to live long enough to see me save this world!" },
+        // random from these 2
+        {26066, "So many demons. Not enough time." },
+        {26068, "I've seen a Guardian Demon slaughter a hundred elves. Tread lightly." },
+        // random from these 2
+        {26069, "They come endlessly from the palace." },
+        {26067, "They will get what they deserve. In due time." },
+
+        {26070, "The stench of sulfur and brimstone. These portals are as foul as the demons themselves." },
+        {26071, "Cut this one down from the shadows." },
+        {26072, "Let us shut down this final portal and finish this." },
+        {26073, "The demons should be leaving. We'll be in the palace in no time." },
+        {26074, "The demons are no longer pouring from the palace. We can move ahead." },
+        {26075, "Too easy." }
+    };
+
+    static const SimpleQuote onEventStart [2] =
+    {
+        {26050, "Another demon ready to be slaughtered" },
+        {26127, "Who shut down the portals!? Clever. Little worms."},
+    }; 
+
+    static const SimpleQuote waitingAttack[4] = // used all
+    {
+        {26100, "Waitng to attack." },
+        {26081, "Attack, I don't like to be kept waiting." },
+        {26082, "I'll let you have the first kill. Don't make me regret that." },
+        {26083, "Patience is not one of my virtues." }
+    };
+
+    static const SimpleQuote onAggro[3] = // used all
+    {
+        {26056, "Death to the Legion!" },
+        {26057, "My blades hunger." },
+        {26058, "This won't hurt a bit." }
+    };
+
+    static const SimpleQuote crystalOrder[4] =
+    {
+        {26106, "Shut down the portal, and we'll continue." },
+        {26103, "Destroy the crystal so we can move on." },
+        {26105, "Destroy the portal energy focus!" },
+        {26104, "Smash the crystal. We need to move." }
+    };
+    static const SimpleQuote onLeaving = {26055, "Were leaving, stay close."};
+
+    const char * GOSSIP_ITEM_ILLIDAN_1 = "I am ready to be hidden by your shadowcloak.";
+    const char * GOSSIP_ITEM_ILLIDAN_2 = "Let's go!";
+
+    #define ILLIDAN_GOSSIP_MENU_TEXT_ID_1 555001
+    #define ILLIDAN_GOSSIP_MENU_TEXT_ID_2 555002
+}
+
+namespace GuardianDemon
+{
+    static const SimpleQuote portalClosing[2] =
+    {
+        {26037, "The portal is closing! Hurry!" },
+        {26038, "There! Go! GO!!!" }
+    };
+
+    static const SimpleQuote onKill[3] =
+    {
+        {26040, "Their fate is sealed." },
+        {26039, "Such fragile creatures. Worthless!" },
+        {26041, "Leave nothing but smoldering husks."}
+    };
+}
 
 class Legion_demon_WoE : public CreatureScript
 {
@@ -67,11 +159,8 @@ public:
         {
             if (CAST_WOE_INSTANCE(pInstance)->IsPortalClosing(direction))
             {
-                if (Creature * pGaurd = CAST_WOE_INSTANCE(pInstance)->GetGuardianByDirection(waveNumber,me))
-                {
-                    pGaurd->AI()->SetData(DATA_SET_WAVE_NUMBER, waveNumber);
+                if (Creature * pGaurd = CAST_WOE_INSTANCE(pInstance)->GetGuardianByDirection(direction))
                     pGaurd->AI()->DoAction(ACTION_PORTAL_CLOSING);
-                }
 
                 if (Creature * pPortalDummy = me->FindNearestCreature(LEGION_PORTAL_DUMMY,50.0f,true))
                 {
@@ -88,7 +177,7 @@ public:
             }
         }
 
-        void SetData(uint32 type, uint32 data)
+        void SetData(uint32 type, uint32 data)  override
         {
             if (type == DEMON_DATA_DIRECTION)
             {
@@ -100,7 +189,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 type, uint32 id)
+        void MovementInform(uint32 type, uint32 id)  override
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -140,21 +229,21 @@ public:
             }
         }
 
-        void Reset()
+        void Reset()  override
         {
-            me->SetReactState(REACT_DEFENSIVE); // Temporary
+            me->SetReactState(REACT_AGGRESSIVE);
             waitTimer = NEVER;
             guardMoveTimer = NEVER;
             distractionTimer = 10000;
         }
 
-        void EnterEvadeMode()
+        void EnterEvadeMode()  override
         {
             // Nah ...
             me->ForcedDespawn();
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff)  override
         {
             if (!pInstance)
                 return;
@@ -199,7 +288,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady(); // Probably only beat the shit out of players with bare hands
         }
     };
 };
@@ -244,7 +333,7 @@ public:
         bool colapsed;
         bool calm;
 
-        void DoAction(const int32 action)
+        void DoAction(const int32 action)  override
         {
             if (action == DATA_CRYSTAL_DESTROYED)
             {
@@ -252,10 +341,16 @@ public:
                 me->RemoveAura(SPELL_CRYSTAL_PERIODIC);
                 calm = false;
                 colapseTimer = 3500;
+
+                if (Creature * pIllidan = me->FindNearestCreature(ILLIDAN_STORMRAGE_ENTRY, 200.0f, true))
+                {
+                    pIllidan->AI()->DoAction(ACTION_ILLIDAN_DELAY_MOVE);
+                    PlayQuote(pIllidan, Illidan::onLeaving);
+                }
             }
         }
 
-        void Reset()
+        void Reset() override
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
             me->CastSpell(me, SPELL_CRYSTAL_PERIODIC, true);
@@ -265,7 +360,7 @@ public:
             beamCasted = false;
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             if (beamCasted == false && beamTimer <= diff)
             {
@@ -289,13 +384,19 @@ public:
                 // This will trigger die anim at crystals and freeze anim after 1.5s cca -> exactly what we need
                 me->CastSpell(me, SPELL_SHATTER_CRYSTALS , true);
 
+                if (Creature * pGuardian = me->FindNearestCreature(GUARDIAN_DEMON_ENTRY, 200.0f, true))
+                {
+                    pGuardian->AI()->DoAction(ACTION_PORTAL_HURRY);
+                    PlayQuote(pGuardian, GuardianDemon::portalClosing[1],true);
+                }
+
                 uint32 connectorEntry = GetConnectorEntryByXCoord(me->GetPositionX());
 
                 // Turn off connectors
                 CAST_WOE_INSTANCE(pInstance)->TurnOffConnectors(connectorEntry, me);
                 CAST_WOE_INSTANCE(pInstance)->CrystalDestroyed(me->GetPositionX());
 
-                //Remove visual auras
+                // Remove visual auras
                 me->RemoveAura(SPELL_FEL_CRYSTAL_STALKER_GLOW);
                 colapsed = true;
             }
@@ -319,18 +420,21 @@ public:
         npc_woe_genericAI(Creature* creature) : ScriptedAI(creature)
         {
             entry = me->GetEntry();
+            pInstance = me->GetInstanceScript();
             portalClosed = false;
         }
 
         uint32 entry;
+        InstanceScript * pInstance;
 
         // guardian demon
         uint32 gripTimer;
         uint32 finalWalkTimer;
-        DemonWave wave;
+        uint32 hurryTimer;
         uint32 lane;
         bool portalClosed;
         bool firstWP;
+        bool textSaid;
         // legion demon
         bool canMoveToPoint;
         uint32 leapTimer;
@@ -341,10 +445,10 @@ public:
         uint32 swarmTimer;
         uint32 wardingTimer;
 
-        void Reset()
+        void Reset() override
         {
             finalWalkTimer = NEVER;
-            wave = WAVE_ONE; // by default
+            hurryTimer = NEVER;
             lane = 0;
 
             if (entry == GUARDIAN_DEMON_ENTRY)
@@ -352,7 +456,8 @@ public:
 
             firstWP = true;
             canMoveToPoint = false;
-            gripTimer = 1000;
+            textSaid = false;
+            gripTimer = 4000;
             leapTimer = 4000;
             strikeTimer = 5000;
 
@@ -362,38 +467,39 @@ public:
             wardingTimer = 1000;
         }
 
-        void SetData(uint32 type, uint32 data)
+        void SetData(uint32 type, uint32 data) override
         {
-            if (type == DATA_SET_WAVE_NUMBER)
-                wave = (DemonWave)data;
-            else if (type == DATA_SET_GUARDIAN_WAVE)
+            if (type == DATA_SET_GUARDIAN_LANE)
                 lane = data;
         }
 
-        uint32 GetData(uint32 type)
+        uint32 GetData(uint32 type) override
         {
-            if (type == DATA_GET_GUARDIAN_WAVE && entry == GUARDIAN_DEMON_ENTRY)
+            if (type == DATA_GET_GUARDIAN_LANE && entry == GUARDIAN_DEMON_ENTRY)
                 return lane;
 
             return 0;
         }
 
-        void DoAction(const int32 action)
+        void DoAction(const int32 action) override
         {
             if (action == ACTION_PORTAL_CLOSING && portalClosed == false)
             {
                 portalClosed = true;
                 finalWalkTimer = 25000;
             }
+
+            if (action == ACTION_PORTAL_HURRY)
+                hurryTimer = 5000;
         }
 
-        void SpellHit(Unit* caster, const SpellEntry* pSpell)
+        void SpellHit(Unit*, const SpellEntry* pSpell) override
         {
-            if (caster == me && pSpell->Id == 107867)
+            if (pSpell->Id == SPELL_ARCANE_ANNIHILATION)
                 arcaneTimer = 500;
         }
 
-        void SpellHitTarget(Unit *pTarget,const SpellEntry* spell)
+        void SpellHitTarget(Unit *pTarget,const SpellEntry* spell) override
         {
             if (spell->Id == SPELL_SUMMON_FIREWALL_DUMMY)
             {
@@ -402,9 +508,12 @@ public:
                 if (GameObject * pGo = me->FindNearestGameObject(FIREWALL_INVIS_ENTRY, 200.0f))
                     pGo->Delete();
             }
+
+            if (spell->Id == SPELL_DEMON_GRIP && pTarget->GetTypeId() == TYPEID_PLAYER)
+                pTarget->CastSpell(pTarget, SPELL_DEMON_GRIP_ROOT, true); // must root manualy
         }
 
-        void MovementInform(uint32 type, uint32 id)
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -419,7 +528,7 @@ public:
             {
                 if (Creature * pPortalDummy = me->FindNearestCreature(LEGION_PORTAL_DUMMY,50.0f,true))
                 if (Aura * a = pPortalDummy->GetAura(SPELL_PORTAL_STATUS_SHUTTING_DOWN))
-                    a->SetDuration(1000);
+                    a->SetDuration(4000);
                 me->ForcedDespawn();
             }
 
@@ -436,16 +545,74 @@ public:
                 canMoveToPoint = true;
         }
 
-        void JustDied(Unit * killer)
+        void JustDied(Unit * killer) override
         {
             if (entry == LEGION_DEMON_ENTRY)
             {
                 if (GameObject * pGo = me->FindNearestGameObject(FIREWALL_ENTRY, 200.0f))
                     pGo->Delete();
+
+                if (me->ToTempSummon() == NULL && pInstance)
+                {
+                    if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
+                        pIllidan->AI()->DoAction(ACTION_ILLIDAN_DELAY_MOVE);
+                }
+            }
+
+            switch (entry)
+            {
+                case CORRUPTED_ARCANIST_ENTRY:
+                case DREADLORD_DEFFENDER_ENTRY:
+                {
+                    if (pInstance)
+                    {
+                        CAST_WOE_INSTANCE(pInstance)->OnDeffenderDeath(me);
+                        CAST_WOE_INSTANCE(pInstance)->UnRegisterIllidanVictim(me->GetGUID());
+                    }
+                    break;
+                }
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void KilledUnit(Unit * victim) override
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                if (entry == GUARDIAN_DEMON_ENTRY)
+                    PlayQuote(me, GuardianDemon::onKill[urand(0, 2)]);
+        }
+
+        void EnterEvadeMode() override
+        {
+            if (!pInstance)
+                return;
+
+            if (entry == CORRUPTED_ARCANIST_ENTRY || entry == DREADLORD_DEFFENDER_ENTRY)
+                CAST_WOE_INSTANCE(pInstance)->UnRegisterIllidanVictim(me->GetGUID());
+
+            if (CAST_WOE_INSTANCE(pInstance)->IsPortalClosing((DemonDirection)lane) && entry == GUARDIAN_DEMON_ENTRY)
+                me->ForcedDespawn();
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void EnterCombat(Unit * /*who*/) override
+        {
+            if (pInstance && (entry == CORRUPTED_ARCANIST_ENTRY || entry == DREADLORD_DEFFENDER_ENTRY))
+            {
+                CAST_WOE_INSTANCE(pInstance)->RegisterIllidanVictim(me->GetGUID());
+
+                if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
+                {
+                    if (textSaid == false)
+                    {
+                        textSaid = true;
+                        PlayQuote(pIllidan, Illidan::onAggro[urand(0, 2)]);
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override
         {
             if (canMoveToPoint)
             {
@@ -465,15 +632,23 @@ public:
                     me->SetWalk(true);
                     me->SetSpeed(MOVE_WALK, 3.0f, true);
 
-                    me->GetMotionMaster()->MovePoint(2, guardPos[(uint32)wave].first);
+                    me->GetMotionMaster()->MovePoint(2, guardPos[(uint32)lane].first);
                     finalWalkTimer = NEVER; // set in movement inform, when WP2 is reached
                     return;
                 }
 
-                me->GetMotionMaster()->MovePoint(3, guardPos[(uint32)wave].last);
+                me->GetMotionMaster()->MovePoint(3, guardPos[(uint32)lane].last);
                 finalWalkTimer = NEVER;
             }
             else finalWalkTimer -= diff;
+
+            // GUARDIAN DEMON TIMER
+            if (hurryTimer <= diff)
+            {
+                PlayQuote(me, GuardianDemon::portalClosing[0], true);
+                hurryTimer = NEVER;
+            }
+            else hurryTimer -= diff;
 
             if (!UpdateVictim())
                 return;
@@ -512,9 +687,17 @@ public:
                 {
                     if (gripTimer <= diff)
                     {
-                        if (me->GetVictim())
-                            me->CastSpell(me->GetVictim(), SPELL_DEMON_GRIP, true);
-                        gripTimer = 2000;
+                        if (!me->IsNonMeleeSpellCasted(false))
+                        {
+                            if (urand(0,100) < 50)
+                            {
+                                me->CastSpell(me, SPELL_DEMON_GRIP, false); // TODO: not triggering 105720 ?
+                                // me->CastSpell(me, SPELL_DEMON_GRIP_ROOT, true);
+                            }
+                            else 
+                                me->CastSpell(me, SPELL_INCINERATE, false);
+                        }
+                        gripTimer = 7000;
                     }
                     else gripTimer -= diff;
                 }
@@ -529,12 +712,14 @@ public:
                                 me->CastSpell(me->GetVictim(), SPELL_ARCANE_ANNIHILATION, false);
                             // timer set in SpellHit -> 500 ms delay after finish casting of previous one
                             // canot simply set timer to cast time of spell + 500 ms because spell is triggering casting speed stack aura on caster
+                            arcaneTimer = NEVER;
                         }
                     }
                     else arcaneTimer -= diff;
 
-                    float manaPct = me->GetPower(POWER_MANA) / me->GetMaxPower(POWER_MANA);
-                    if (manaPct <= 0.12f && !me->IsNonMeleeSpellCasted(false))
+                    const SpellEntry * spellProto = GetSpellStore()->LookupEntry(SPELL_ARCANE_ANNIHILATION);
+                    uint32 manaCost = CalculatePowerCost(spellProto, me, GetSpellSchoolMask(spellProto));
+                    if (manaCost >= me->GetPower(POWER_MANA) && !me->IsNonMeleeSpellCasted(false))
                     {
                         me->CastSpell(me, SPELL_INFINITE_MANA, false);
                         arcaneTimer = 5500;
@@ -598,13 +783,13 @@ public:
         uint32 beamTimer;
         bool connected;
 
-        void Reset()
+        void Reset() override
         {
             beamTimer = 5000;
             connected = false;
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             if (connected)
                 return;
@@ -676,7 +861,7 @@ class spell_gen_woe_crystal_selector : public SpellScriptLoader
                         unitList.push_back(*itr);
             }
 
-            void Register()
+            void Register() override
             {
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_woe_crystal_selector_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENTRY_DST);
             }
@@ -685,6 +870,47 @@ class spell_gen_woe_crystal_selector : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_gen_woe_crystal_selector_SpellScript();
+        }
+};
+
+class spell_gen_woe_distract_selector : public SpellScriptLoader
+{
+    public:
+        spell_gen_woe_distract_selector() : SpellScriptLoader("spell_gen_woe_distract_selector") { }
+
+        class spell_gen_woe_distract_selector_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_woe_distract_selector_SpellScript);
+
+            void FilterTargets(std::list<Unit*>& unitList)
+            {
+                unitList.clear();
+                std::list<Creature*> crystals;
+                GetCreatureListWithEntryInGrid(crystals, GetCaster(), DISTRACION_STALKER_ENTRY, 100.0f);
+                unitList.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
+
+                for (std::list<Creature*>::const_iterator itr = crystals.begin(); itr != crystals.end(); ++itr)
+                    if (!(*itr)->HasAura(SPELL_DISTRACTION_AURA))
+                    {
+                        (*itr)->CastSpell((*itr), SPELL_DISTRACTION_AURA, true);
+
+                        if (Aura * aura = (*itr)->GetAura(SPELL_DISTRACTION_AURA))
+                            aura->SetDuration(15000);
+
+                        unitList.push_back(*itr);
+                        break;
+                    }
+            }
+
+            void Register() override
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_woe_distract_selector_SpellScript::FilterTargets, EFFECT_0, TARGET_DST_NEARBY_ENTRY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_woe_distract_selector_SpellScript();
         }
 };
 
@@ -708,7 +934,7 @@ public:
 
         InstanceScript * pInstance;
 
-        void Reset()
+        void Reset() override
         {
             if (!pInstance)
                 return;
@@ -717,7 +943,7 @@ public:
                 me->CastSpell(me,SPELL_PORTAL_STATUS_ACTIVE,true);
         }
 
-        void UpdateAI(const uint32 /*uiDiff*/)
+        void UpdateAI(const uint32 /*uiDiff*/) override
         {
             if (!UpdateVictim())
                 return;
@@ -746,15 +972,514 @@ public:
 
         InstanceScript * pInstance;
 
-        void Reset()
+        void Reset() override
         {
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
         }
     };
 };*/
+
+namespace Illidan
+{
+    enum IllidanSpells
+    {
+        SPELL_ILLIDAN_GREEN_ARROW = 105924,
+        SPELL_SHADOW_CLOAK_ILLIDAN = 105915,    // good one ?
+        SPELL_SHADOW_CLOAK_CIRCLE = 102951,      // visual circle
+        SPELL_DISTRACT_MISSILE_AURA = 110100,
+
+        // Shadow system on players
+        SPELL_SHADOW_WALK_STEALTH = 102994, // stealth + speed + SPELL_AURA_SET_VEHICLE_ID -> misc value 1763)
+        SPELL_SHADOW_CLOAK_TRIGGERER = 103004, // Triggering two spells every second (THESE SHOULD TRIGGER SHADOW WALK OUT OF COMBAT)
+        SPELL_SHADOW_WALK_STACK_AURA = 103020, // just dummy stacking aura
+        SPELL_SHADOW_CLOAK_FAKE_STEALTH = 105915,
+        SPELL_SHADOW_WALK_ILLIDAN_KIT = 105915
+    };
+
+    class npc_illidan_intro_woe : public CreatureScript
+    {
+        public:
+            npc_illidan_intro_woe() : CreatureScript("npc_illidan_intro_woe") { }
+        struct npc_illidan_intro_woeAI : public ScriptedAI
+        {
+            npc_illidan_intro_woeAI(Creature* c) : ScriptedAI(c)
+            {
+                pInstance = c->GetInstanceScript();
+                ResetEvent(true);
+                playerSpotted = false;
+            }
+
+        // Call this functon with false parameter in case of wipe
+        void ResetEvent(bool init)
+        {
+            if (init)
+            {
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                me->CastSpell(me, SPELL_ILLIDAN_GREEN_ARROW, true);
+                me->CastSpell(me, SPELL_SHADOW_CLOAK_ILLIDAN, true);
+            }
+            else
+            {
+                me->SetHomePosition(illidanPos[ILLIDAN_FIRST_STEP]);
+                me->AI()->EnterEvadeMode();
+                me->GetMotionMaster()->MovePoint(0, illidanPos[ILLIDAN_FIRST_STEP]);
+            }
+            if (pInstance)
+                CAST_WOE_INSTANCE(pInstance)->SetIllidanStep(ILLIDAN_STEP_NULL);
+
+            attackTimer = 2000;
+            eventTimer = NEVER;
+            explainTimer = NEVER;
+            delayMoveTimer = NEVER;
+            orderTimer = NEVER;
+            waitingTimer = NEVER;
+            explainCounter = 0;
+            eventStarted = false;
+            gossipDone = false;
+            specialAction = SPECIAL_ACTION_NONE;
+            me->SetWalk(true);
+            me->SetSpeed(MOVE_WALK, 3.0f, true);
+        }
+
+        InstanceScript * pInstance;
+        SpecialActions specialAction;
+        uint32 eventTimer;
+        uint32 explainTimer;
+        uint32 delayMoveTimer;
+        uint32 waitingTimer;
+        uint32 orderTimer;
+        uint8 explainCounter;
+        uint32 attackTimer;
+        bool weaponSwitcher;
+        bool eventStarted;
+        bool gossipDone;
+        bool playerSpotted;
+
+        void Reset() override
+        {
+        }
+
+        void EnterEvadeMode() override
+        {
+            me->RemoveAllAuras();
+            me->DeleteThreatList();
+            me->CombatStop(true);
+        }
+        void EnterCombat(Unit * /*who*/) override {}
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (playerSpotted == true)
+                return;
+
+            if (who->GetTypeId() == TYPEID_PLAYER && me->GetDistance(who) < 40.0f)
+            {
+                playerSpotted = true;
+                me->SetHomePosition(illidanPos[ILLIDAN_FIRST_STEP]);
+                me->GetMotionMaster()->MovePoint(0, illidanPos[ILLIDAN_FIRST_STEP]);
+                PlayQuote(me, introQuotes[0]);
+            }
+        }
+
+        void DoAction(const int32 action) override
+        {
+            if (action == ACTION_ILLIDAN_DELAY_MOVE)
+                delayMoveTimer = 5000;
+            else if (action == ACTION_ON_ALL_DEFFENDERS_KILLED)
+                orderTimer = 6000;
+            else if (action == ACTION_ILLIDAN_REMOVE_VEHICLE)
+                HandleVehicle(false);
+            else if (action == ACTION_ILLIDAN_CREATE_VEHICLE)
+                HandleVehicle(true);
+        }
+
+        void MovementInform(uint32 type, uint32 id) override
+        {
+            if (!pInstance)
+                return;
+
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (id >= ILLIDAN_FIRST_STEP && id < ILLIDAN_MAX_STEPS)
+                CAST_WOE_INSTANCE(pInstance)->SetIllidanStep(IllidanSteps(id));
+
+            if ((id >= ILLIDAN_FIRST_STEP && id <= ILLIDAN_THIRD_PACK_STEP) || id == ILLIDAN_PEROTHARN_STEP)
+                me->SetFacingTo(illidanPos[id].m_orientation);
+
+            switch (id)
+            {
+                case ILLIDAN_FIRST_STEP: // first move -> players can start event
+                    explainTimer = 30000;
+                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    PlayQuote(me, introQuotes[2]);
+                    me->RemoveAllAuras();
+                    break;
+                case ILLIDAN_FIRST_LOOK_STEP:
+                {
+                    PlayQuote(me, escortQuotes[urand(1,2)]);
+                    eventTimer = 1000; // move to distract point in 1 second
+                    break;
+                }
+                case ILLIDAN_DISTRACT_STEP:
+                    PlayQuote(me, distractQuote[0]);
+                    eventTimer = 4000;
+                    break;
+                case ILLIDAN_FIRST_PACK_STEP:
+                    eventTimer = 10000; // wait 10 seconds, then say waiting quote
+                    break;
+                case ILLIDAN_STAIRS_1_STEP:
+                    PlayQuote(me, escortQuotes[urand(3, 4)]);
+                    eventTimer = 100; // move to next point
+                    break;
+                case ILLIDAN_STAIRS_2_STEP:
+                    eventTimer = 100;
+                    break;
+                case ILLIDAN_SECOND_PACK_STEP:
+                    eventTimer = 15000;
+                    break;
+                case ILLIDAN_WAIT_SECOND_PORTAL_STEP:
+                    PlayQuote(me, escortQuotes[5]);
+                    eventTimer = 32000;
+                    break;
+                case ILLIDAN_BEFORE_STAIRS_STEP:
+                    PlayQuote(me, escortQuotes[6]);
+                    eventTimer = 500;
+                    break;
+                case ILLIDAN_UPSTAIRS_STEP:
+                    // next move after legion demon kill ->
+                    break;
+                case ILLIDAN_THIRD_PACK_STEP:
+                    break;
+                case ILLIDAN_BACK_STEP_1:
+                    PlayQuote(me, escortQuotes[8]);
+                    eventTimer = 4000;
+                    break;
+                case ILLIDAN_BACK_STEP_2:
+                {
+                    PlayQuote(me, escortQuotes[9]);
+                    eventTimer = 6000;
+                    break;
+                }
+                case ILLIDAN_TOO_EASY_STEP:
+                {
+                    PlayQuote(me, escortQuotes[10]);
+                    eventTimer = 2000;
+                    break;
+                }
+                case ILLIDAN_PEROTHARN_STEP:
+                    eventTimer = 1000;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        /*
+         // TODO: Remove this after TESTING !!!
+        */
+        void ReceiveEmote(Player* player, uint32 uiTextEmote) override
+        {
+            if (uiTextEmote == TEXTEMOTE_KNEEL && player->IsGameMaster())
+            {
+                me->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_STEP, illidanPos[ILLIDAN_PEROTHARN_STEP]);
+                CAST_WOE_INSTANCE(pInstance)->crystalsRemaining = 0;
+                return;
+            }
+
+            uint32 id = uint32(CAST_WOE_INSTANCE(pInstance)->GetIllidanMoveStep()) + 1;
+            me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (!pInstance)
+                return;
+
+            // Order to smash crystals
+            if (orderTimer <= diff)
+            {
+                if (GameObject * pfocusCrsytal = me->FindNearestGameObject(PORTAL_ENERGY_FOCUS_ENTRY,50.0f))
+                    if (!pfocusCrsytal->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE))
+                        PlayQuote(me, crystalOrder[urand(0,3)]);
+                orderTimer = NEVER;
+            }
+            else orderTimer -= diff;
+
+            // Tell wait quote if group is not attacking too long
+            if (waitingTimer <= diff)
+            {
+                if (Creature * pArcanist = me->FindNearestCreature(CORRUPTED_ARCANIST_ENTRY,50.0f,true))
+                    if (pArcanist->IsInCombat() == false)
+                        PlayQuote(me, waitingAttack[urand(0, 3)]);
+                waitingTimer = NEVER;
+            }
+            else waitingTimer -= diff;
+
+            if (delayMoveTimer <= diff)
+            {
+                // Next step point
+                uint32 id = uint32(CAST_WOE_INSTANCE(pInstance)->GetIllidanMoveStep()) + 1;
+                me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+
+                if (id == ILLIDAN_THIRD_PACK_STEP)
+                    PlayQuote(me, escortQuotes[7]);
+
+                delayMoveTimer = NEVER;
+            }
+            else delayMoveTimer -= diff;
+
+            // If players dont start event after some time, Illidan will speak to them
+            if (explainTimer <= diff)
+            {
+                IllidanSteps step = CAST_WOE_INSTANCE(pInstance)->GetIllidanMoveStep();
+                if (explainCounter < 4 && step == ILLIDAN_FIRST_STEP)
+                {
+                    PlayQuote(me, explainQuotes[explainCounter]);
+                    explainCounter++;
+                }
+                explainTimer = urand(10000, 30000);
+            }
+            else explainTimer -= diff;
+
+            if (eventTimer <= diff)
+            {
+                // Check special action first (shared timer), so we must be sure, that no action will come before special action occur
+                switch (specialAction)
+                {
+                    // No special action set
+                    case SPECIAL_ACTION_NONE:
+                        break;
+                    case SPECIAL_ACTION_MOVE_TO_DEFFENDERS:
+                    {
+                        uint32 id = (uint32)ILLIDAN_FIRST_PACK_STEP;
+                        me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+                        PlayQuote(me, distractQuote[1]);
+                        // This need to be done after every special action ...
+                        specialAction = SPECIAL_ACTION_NONE; eventTimer = NEVER; return;
+                    }
+                    case SPECIAL_ACTION_WAIT_INTRO:
+                    {
+                        // ILLIDAN_FIRST_LOOK_STEP
+                        uint32 id = (uint32)ILLIDAN_FIRST_LOOK_STEP;
+                        me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+                        PlayQuote(me, escortQuotes[0]);
+                        specialAction = SPECIAL_ACTION_NONE; eventTimer = NEVER; return;
+                    }
+                }
+
+                IllidanSteps step = CAST_WOE_INSTANCE(pInstance)->GetIllidanMoveStep();
+                eventTimer = NEVER;
+                specialAction = SPECIAL_ACTION_NONE;
+
+                switch (step)
+                {
+                    case ILLIDAN_FIRST_STEP: // nothing to do
+                        break;
+                    case ILLIDAN_FIRST_LOOK_STEP:
+                    {
+                        uint32 id = (uint32)ILLIDAN_DISTRACT_STEP;
+                        me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+                        break;
+                    }
+                    case ILLIDAN_DISTRACT_STEP:
+                        me->CastSpell(me, SPELL_DISTRACT_MISSILE_AURA, true);
+                        specialAction = SPECIAL_ACTION_MOVE_TO_DEFFENDERS;
+                        eventTimer = 12000;
+                        break;
+                    case ILLIDAN_FIRST_PACK_STEP:
+                        waitingTimer = 8000; // say quote after 8 seconds
+                        break;
+                    case ILLIDAN_STAIRS_1_STEP:
+                    {
+                        uint32 id = (uint32)step + 1;
+                        me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+                        break;
+                    }
+                    case ILLIDAN_STAIRS_2_STEP:
+                    {
+                        uint32 id = (uint32)step + 1;
+                        me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+                        break;
+                    }
+                    case ILLIDAN_SECOND_PACK_STEP:
+                        break;
+                    case ILLIDAN_WAIT_SECOND_PORTAL_STEP:
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_BEFORE_STAIRS_STEP, illidanPos[ILLIDAN_BEFORE_STAIRS_STEP]);
+                        break;
+                    case ILLIDAN_BEFORE_STAIRS_STEP:
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_UPSTAIRS_STEP, illidanPos[ILLIDAN_UPSTAIRS_STEP]);
+                        break;
+                    case ILLIDAN_UPSTAIRS_STEP:
+                        break;
+                    case ILLIDAN_THIRD_PACK_STEP:
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_BACK_STEP_1, illidanPos[ILLIDAN_BACK_STEP_1]);
+                        break;
+                    case ILLIDAN_BACK_STEP_1:
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_BACK_STEP_2, illidanPos[ILLIDAN_BACK_STEP_2]);
+                        break;
+                    case ILLIDAN_BACK_STEP_2:
+                    {
+                        if (Creature * pPerotharn = me->FindNearestCreature(PEROTHARN_ENTRY, 100.0f, true))
+                            PlayQuote(pPerotharn, Illidan::onEventStart[1]);
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_TOO_EASY_STEP, illidanPos[ILLIDAN_TOO_EASY_STEP]);
+                        break;
+                    }
+                    case ILLIDAN_TOO_EASY_STEP:
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_STEP, illidanPos[ILLIDAN_PEROTHARN_STEP]);
+                        break;
+                    case ILLIDAN_PEROTHARN_STEP:
+                    {
+                        PlayQuote(me, Illidan::onEventStart[0]);
+                        if (Creature * pPerotharn = me->FindNearestCreature(PEROTHARN_ENTRY, 100.0f, true))
+                            pPerotharn->AI()->DoAction(ACTION_PEROTHRAN_PREPARE_TO_AGGRO);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+            else eventTimer -= diff;
+
+            if (attackTimer <= diff)
+            {
+                bool hideAndSeekPhase = false;
+                if (Creature * pPerotharn = me->FindNearestCreature(PEROTHARN_ENTRY,200.0f, true))
+                if (pPerotharn->AI()->GetData(DATA_GET_PEROTHARN_PHASE) == 1) // 1 -> PHASE_HIDE_AND_SEEK
+                    hideAndSeekPhase = true;
+
+                // if (eventTimer > NEVER / 2) -> This should prvent skipping event pathing issuses ..., dont attack if we dont arrive to WP point yet)
+                if (pInstance && gossipDone && (eventTimer > NEVER / 2) && !me->IsNonMeleeSpellCasted(false) && !hideAndSeekPhase)
+                {
+                    if (Creature * victim = CAST_WOE_INSTANCE(pInstance)->GetIllidanVictim())
+                    {
+                        HandleVehicle(false);
+
+                        if (me->IsWithinMeleeRange(victim))
+                        {
+                            if (weaponSwitcher == true)
+                                me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
+                            else
+                                me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACKOFF);
+
+                            me->SetFacingTo(me->GetAngle(victim));
+                            weaponSwitcher = !weaponSwitcher;
+                        }
+                        else
+                        {
+                            float x, y, z;
+                            float range = me->GetExactDist(victim) - victim->GetCombatReach();
+                            if (range < 5.0f) // just for sure
+                                range = 5.0f;
+                            me->GetNearPoint(me, x, y, z, range, 0, me->GetAngle(victim));
+                                me->GetMotionMaster()->MovePoint(ILLIDAN_ATTACK_START_WP, x, y, z);
+                        }
+                    }
+                    else
+                    {
+                        HandleVehicle(true);
+                    }
+
+                }
+                attackTimer = 1000;
+            }
+            else attackTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+        void HandleVehicle(bool enter)
+        {
+            if (enter)
+            {
+                if (!me->HasAura(SPELL_SHADOW_WALK_ILLIDAN_KIT))
+                {
+                    me->AddAura(SPELL_SHADOW_WALK_ILLIDAN_KIT, me); // Create vehicle kit
+                    if (Unit * stalker = me->SummonCreature(ILLIDAN_SHADOWCLOAK_VEHICLE_ENTRY,me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0))
+                    {
+                        stalker->EnterVehicle(me,0);
+                        stalker->AddAura(102951, stalker); // add visual circle aura
+                        stalker->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE); // for sure
+                    }
+                }
+            }
+            else
+            {
+                Creature* vehPassenger = me->GetVehicleCreatureBase();
+                if (vehPassenger == NULL)
+                    vehPassenger = me->FindNearestCreature(ILLIDAN_SHADOWCLOAK_VEHICLE_ENTRY, 10.0f, true);
+
+                if (vehPassenger)
+                {
+                    vehPassenger->Kill(vehPassenger);
+                    vehPassenger->ForcedDespawn();
+                }
+                me->RemoveAura(SPELL_SHADOW_WALK_ILLIDAN_KIT);
+            }
+        }
+
+        };
+
+        bool OnGossipSelect(Player* player, Creature* cr, uint32 /*Sender*/, uint32 action) override
+        {
+            player->PlayerTalkClass->ClearMenus();
+            npc_illidan_intro_woe::npc_illidan_intro_woeAI* pAI = (npc_illidan_intro_woe::npc_illidan_intro_woeAI*)(cr->GetAI());
+
+            if (!pAI)
+                return false;
+
+            switch (action)
+            {
+                case GOSSIP_ACTION_INFO_DEF + 1:
+                    if (pAI->gossipDone == false)
+                        PlayQuote(cr,introQuotes[1]);
+
+                    pAI->explainTimer = NEVER;
+                    pAI->HandleVehicle(true);
+                    if (pAI->pInstance)
+                        pAI->pInstance->DoAddAuraOnPlayers(NULL, SPELL_SHADOW_CLOAK_TRIGGERER);
+
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ILLIDAN_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2); // bubble
+                    player->SEND_GOSSIP_MENU(ILLIDAN_GOSSIP_MENU_TEXT_ID_2, cr->GetGUID()); // text
+
+                    if (pAI)
+                        pAI->gossipDone = true;
+                    break;
+                case GOSSIP_ACTION_INFO_DEF + 2:
+                {
+                    if (pAI->eventStarted == true)
+                        return false;
+                    cr->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    cr->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    pAI->specialAction = SPECIAL_ACTION_WAIT_INTRO;
+                    pAI->eventTimer = 6000;
+                    pAI->eventStarted = true;
+                    break;
+                }
+            }
+            return true;
+        }
+        bool OnGossipHello(Player* player, Creature* creature) override
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ILLIDAN_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1); // bubble
+            player->SEND_GOSSIP_MENU(ILLIDAN_GOSSIP_MENU_TEXT_ID_1, creature->GetGUID()); // text
+            return true;
+        }
+
+        CreatureAI* GetAI(Creature* pCreature) const
+        {
+            return new npc_illidan_intro_woeAI(pCreature);
+        }
+    };
+}
 
 void AddSC_well_of_eternity_trash()
 {
@@ -764,10 +1489,12 @@ void AddSC_well_of_eternity_trash()
     new npc_woe_generic(); // 55503,54927,55654,55656
     new npc_portal_connector(); // 55541,55542,55543
     new npc_legion_portal_woe(); // 54513
+    new Illidan::npc_illidan_intro_woe();
     // GO SCRIPTS
     new go_fel_crystal_woe();
     // SPELLSCRIPTS
     new spell_gen_woe_crystal_selector(); // 105018 + 105074 + 105004
+    new spell_gen_woe_distract_selector(); // 110121 
 }
 
 /*
@@ -785,6 +1512,10 @@ UPDATE `creature_template` SET `ScriptName`='npc_woe_generic' WHERE  `entry`=556
 UPDATE `creature_template` SET `ScriptName`='npc_legion_portal_woe' WHERE  `entry`=54513 LIMIT 1;
 
 select * from creature_template where entry in (55503,54927,55654,55656);
+
+
+REPLACE INTO `npc_text` (`ID`, `text0_0`, `text0_1`, `lang0`, `prob0`, `em0_0`, `em0_1`, `em0_2`, `em0_3`, `em0_4`, `em0_5`, `text1_0`, `text1_1`, `lang1`, `prob1`, `em1_0`, `em1_1`, `em1_2`, `em1_3`, `em1_4`, `em1_5`, `text2_0`, `text2_1`, `lang2`, `prob2`, `em2_0`, `em2_1`, `em2_2`, `em2_3`, `em2_4`, `em2_5`, `text3_0`, `text3_1`, `lang3`, `prob3`, `em3_0`, `em3_1`, `em3_2`, `em3_3`, `em3_4`, `em3_5`, `text4_0`, `text4_1`, `lang4`, `prob4`, `em4_0`, `em4_1`, `em4_2`, `em4_3`, `em4_4`, `em4_5`, `text5_0`, `text5_1`, `lang5`, `prob5`, `em5_0`, `em5_1`, `em5_2`, `em5_3`, `em5_4`, `em5_5`, `text6_0`, `text6_1`, `lang6`, `prob6`, `em6_0`, `em6_1`, `em6_2`, `em6_3`, `em6_4`, `em6_5`, `text7_0`, `text7_1`, `lang7`, `prob7`, `em7_0`, `em7_1`, `em7_2`, `em7_3`, `em7_4`, `em7_5`, `WDBVerified`) VALUES (555001, 'The shadows will hide us well.I am concealed by this shadowcloak, and can imbue its magics onto you.It will not make us invisible, but as long as we keep our distance from our foes we will remain hidden.', NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 1);
+REPLACE INTO `npc_text` (`ID`, `text0_0`, `text0_1`, `lang0`, `prob0`, `em0_0`, `em0_1`, `em0_2`, `em0_3`, `em0_4`, `em0_5`, `text1_0`, `text1_1`, `lang1`, `prob1`, `em1_0`, `em1_1`, `em1_2`, `em1_3`, `em1_4`, `em1_5`, `text2_0`, `text2_1`, `lang2`, `prob2`, `em2_0`, `em2_1`, `em2_2`, `em2_3`, `em2_4`, `em2_5`, `text3_0`, `text3_1`, `lang3`, `prob3`, `em3_0`, `em3_1`, `em3_2`, `em3_3`, `em3_4`, `em3_5`, `text4_0`, `text4_1`, `lang4`, `prob4`, `em4_0`, `em4_1`, `em4_2`, `em4_3`, `em4_4`, `em4_5`, `text5_0`, `text5_1`, `lang5`, `prob5`, `em5_0`, `em5_1`, `em5_2`, `em5_3`, `em5_4`, `em5_5`, `text6_0`, `text6_1`, `lang6`, `prob6`, `em6_0`, `em6_1`, `em6_2`, `em6_3`, `em6_4`, `em6_5`, `text7_0`, `text7_1`, `lang7`, `prob7`, `em7_0`, `em7_1`, `em7_2`, `em7_3`, `em7_4`, `em7_5`, `WDBVerified`) VALUES (555002, 'Anything outside of that circle around you will not be able to see you, but the illusion will fade if you attack or take damage.I suggest you remain hidden until I say otherwise, these demons are too powerful to face head on and in full force.', NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 1);
 
 
 
