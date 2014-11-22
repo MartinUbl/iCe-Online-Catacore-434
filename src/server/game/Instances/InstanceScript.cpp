@@ -427,7 +427,12 @@ void InstanceScript::DoAddAuraOnPlayers(Unit * source, uint32 auraId)
     if (!PlayerList.isEmpty())
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
         if (Player* pPlayer = i->getSource())
-            source->AddAura(auraId, pPlayer);
+        {
+            if (source == NULL)
+                pPlayer->AddAura(auraId, pPlayer);
+            else
+                source->AddAura(auraId, pPlayer);
+        }
 }
 
 // Set scripted power to all players in instance
