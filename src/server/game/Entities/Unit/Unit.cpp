@@ -3821,7 +3821,6 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
 {
     AuraApplication * aurApp = i->second;
     ASSERT(aurApp);
-    ASSERT(!aurApp->GetRemoveMode());
     ASSERT(aurApp->GetTarget() == this);
     aurApp->SetRemoveMode(removeMode);
     Aura * aura = aurApp->GetBase();
