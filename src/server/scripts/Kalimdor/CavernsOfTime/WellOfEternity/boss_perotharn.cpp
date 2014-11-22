@@ -752,7 +752,7 @@ public:
                 float x, y, z;
                 me->GetNearPoint(me, x, y, z, 8.0f, 0.0f, angle);
 
-                Creature * pEye;
+                Creature * pEye = NULL;
 
                 if (Creature * pPerotharn = me->FindNearestCreature(PEROTHARN_ENTRY,250.0f,true))
                     pEye = pPerotharn->SummonCreature(ENTRY_EYE_OF_PEROTHARN, x, y, z, angle);
