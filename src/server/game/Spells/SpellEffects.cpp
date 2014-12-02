@@ -6500,9 +6500,8 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
         case 17252:  // Felguard
             slot = (PetSlot)(PET_SLOT_HUNTER_FIRST+4);
             break;
-
         default:
-            slot = PET_SLOT_UNK_SLOT;
+            slot = PET_SLOT_OTHER_PET;
             break;
     }
     
