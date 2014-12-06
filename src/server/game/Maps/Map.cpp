@@ -135,7 +135,6 @@ void Map::LoadMMap(int gx, int gy)
 
 void Map::LoadVMap(int gx, int gy)
 {
-                                                            // x and y are swapped !!
     int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld->GetDataPath()+ "vmaps").c_str(),  GetId(), gx,gy);
     switch(vmapLoadResult)
     {
