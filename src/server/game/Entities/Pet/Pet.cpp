@@ -501,7 +501,7 @@ void Pet::Update(uint32 diff)
     {
         case CORPSE:
         {
-            if (!IsHunterPet() && m_corpseRemoveTime <= time(NULL))
+            if (!IsHunterPet())
             {
                 Remove();               //hunters' pets never get removed because of death, NEVER!
                 return;
