@@ -23869,9 +23869,7 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
         // if player is dead then he can't detect anyone in any cases
         //do not know what is the use of this detect
         // stealth and detected and visible for some seconds
-        if (!IsAlive())
-            detect = false;
-        if (!HaveAtClient(u))
+        if (IsAlive())
             if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(u->ToPlayer())))
                 if (!detect || !m_mover->canDetectStealthOf(u, GetDistance(u)))
                     return false;
