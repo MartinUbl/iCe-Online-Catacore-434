@@ -17100,7 +17100,7 @@ Creature* Unit::GetCreature(WorldObject& object, uint64 guid)
 
 bool Unit::isVisibleForInState(Player const* u, bool inVisibleList) const
 {
-    return u->canSeeOrDetect(this, false, inVisibleList, false);
+    return u->canSeeOrDetect(this, true, inVisibleList, false);
 }
 
 uint32 Unit::GetCreatureType() const
