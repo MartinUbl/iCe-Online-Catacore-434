@@ -1623,15 +1623,11 @@ void Player::Update(uint32 p_time)
     }
 
     //Handle detect stealth players
-    if (m_DetectInvTimer > 0)
+    m_DetectInvTimer -= (int)p_time;
+    if (m_DetectInvTimer <= 0)
     {
-        if (p_time >= m_DetectInvTimer)
-        {
-            HandleStealthedUnitsDetection();
-            m_DetectInvTimer = 3000;
-        }
-        else
-            m_DetectInvTimer -= p_time;
+        m_DetectInvTimer = 3000;
+        HandleStealthedUnitsDetection();
     }
 
     // Played time
@@ -23875,7 +23871,7 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
         // stealth and detected and visible for some seconds
         if (!IsAlive())
             detect = false;
-        if (m_DetectInvTimer < 300 || !HaveAtClient(u))
+        if (!HaveAtClient(u))
             if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(const_cast<Player*>(u->ToPlayer()))))
                 if (!detect || !m_mover->canDetectStealthOf(u, GetDistance(u)))
                     return false;
