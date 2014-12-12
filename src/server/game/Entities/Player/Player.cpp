@@ -1626,7 +1626,7 @@ void Player::Update(uint32 p_time)
     m_DetectInvTimer -= (int)p_time;
     if (m_DetectInvTimer <= 0)
     {
-        m_DetectInvTimer = 3000;
+        m_DetectInvTimer = 1*IN_MILLISECONDS;
         HandleStealthedUnitsDetection();
     }
 
