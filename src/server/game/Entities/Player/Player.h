@@ -1978,7 +1978,7 @@ class Player : public Unit, public GridObject<Player>
         void DuelComplete(DuelCompleteType type);
         void SendDuelCountdown(uint32 counter);
 
-        bool IsGroupVisibleFor(Player* p) const;
+        bool IsGroupVisibleFor(Player const* p) const;
         bool IsInSameGroupWith(Player const* p) const;
         bool IsInSameRaidWith(Player const* p) const { return p == this || (GetGroup() != NULL && GetGroup() == p->GetGroup()); }
         void UninviteFromGroup();

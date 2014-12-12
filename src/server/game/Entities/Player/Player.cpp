@@ -2911,7 +2911,7 @@ void Player::SetGMVisible(bool on)
     }
 }
 
-bool Player::IsGroupVisibleFor(Player* p) const
+bool Player::IsGroupVisibleFor(Player const* p) const
 {
     switch(sWorld->getIntConfig(CONFIG_GROUP_VISIBILITY))
     {
@@ -23855,7 +23855,7 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
 
         // player see other player with stealth/invisibility only if he in same group or raid or same team (raid/team case dependent from conf setting)
         if (!m_mover->canDetectInvisibilityOf(u))
-            if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(const_cast<Player*>(u->ToPlayer()))))
+            if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(u->ToPlayer())))
             {
                 // Mage's Invisibility, Rogue's Killing Spree - can see other players
                 if ((!m_mover->HasAura(32612) || (m_mover->HasAura(32612) && u->HasAura(32612))) && !HasAura(69107))
@@ -23872,7 +23872,7 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
         if (!IsAlive())
             detect = false;
         if (!HaveAtClient(u))
-            if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(const_cast<Player*>(u->ToPlayer()))))
+            if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(u->ToPlayer())))
                 if (!detect || !m_mover->canDetectStealthOf(u, GetDistance(u)))
                     return false;
     }
