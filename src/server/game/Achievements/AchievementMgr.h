@@ -239,8 +239,8 @@ struct CompletedAchievementData
     bool changed;
 };
 
-typedef UNORDERED_MAP<uint32, CriteriaProgress> CriteriaProgressMap;
-typedef UNORDERED_MAP<uint32, CompletedAchievementData> CompletedAchievementMap;
+typedef std::unordered_map<uint32, CriteriaProgress> CriteriaProgressMap;
+typedef std::unordered_map<uint32, CompletedAchievementData> CompletedAchievementMap;
 
 enum ProgressType
 {

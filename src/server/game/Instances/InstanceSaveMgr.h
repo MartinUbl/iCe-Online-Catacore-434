@@ -28,7 +28,7 @@
 #include <ace/Thread_Mutex.h>
 #include <list>
 #include <map>
-#include "UnorderedMap.h"
+#include <unordered_map>
 #include "DatabaseEnv.h"
 #include "DBCEnums.h"
 #include "ObjectDefines.h"
@@ -116,7 +116,7 @@ class InstanceSave
         bool m_canReset;
 };
 
-typedef UNORDERED_MAP<uint32 /*PAIR32(map,difficulty)*/,time_t /*resetTime*/> ResetTimeByMapDifficultyMap;
+typedef std::unordered_map<uint32 /*PAIR32(map,difficulty)*/,time_t /*resetTime*/> ResetTimeByMapDifficultyMap;
 
 class InstanceSaveManager
 {
@@ -126,8 +126,8 @@ class InstanceSaveManager
         InstanceSaveManager() : lock_instLists(false) {};
         ~InstanceSaveManager();
 
-        typedef UNORDERED_MAP<uint32 /*InstanceId*/, InstanceSave*> InstanceSaveHashMap;
-        typedef UNORDERED_MAP<uint32 /*mapId*/, InstanceSaveHashMap> InstanceSaveMapMap;
+        typedef std::unordered_map<uint32 /*InstanceId*/, InstanceSave*> InstanceSaveHashMap;
+        typedef std::unordered_map<uint32 /*mapId*/, InstanceSaveHashMap> InstanceSaveMapMap;
 
         /* resetTime is a global propery of each (raid/heroic) map
            all instances of that map reset at the same time */
@@ -224,8 +224,8 @@ class InstanceSaveManager
         // fast lookup for reset times (always use existed functions for access/set)
         ResetTimeByMapDifficultyMap m_resetTimeByMapDifficulty;
         ResetTimeQueue m_resetTimeQueue;
-        UNORDERED_MAP<uint32 /*instanceId*/,std::map<uint32/*boss poss*/,uint32/*boss data*/> > InstanceSaveData;
-        UNORDERED_MAP<uint32 /*mapId*/,uint32 /*number of bosses*/> bossNumber;
+        std::unordered_map<uint32 /*instanceId*/,std::map<uint32/*boss poss*/,uint32/*boss data*/> > InstanceSaveData;
+        std::unordered_map<uint32 /*mapId*/,uint32 /*number of bosses*/> bossNumber;
 };
 
 #define sInstanceSaveMgr ACE_Singleton<InstanceSaveManager, ACE_Thread_Mutex>::instance()

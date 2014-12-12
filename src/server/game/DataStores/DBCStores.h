@@ -237,8 +237,8 @@ extern DBCStorage <WorldMapAreaEntry>            sWorldMapAreaStore;
 extern DBCStorage <WorldMapOverlayEntry>         sWorldMapOverlayStore;
 extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
 
-typedef UNORDERED_MAP<uint8, std::list<uint32> > TaxiNodesByType;
-typedef UNORDERED_MAP<uint32, TaxiNodesByType> TaxiNodesByZoneAndType;
+typedef std::unordered_map<uint8, std::list<uint32> > TaxiNodesByType;
+typedef std::unordered_map<uint32, TaxiNodesByType> TaxiNodesByZoneAndType;
 extern TaxiNodesByZoneAndType sTaxiNodesByZoneAndType;
 
 void LoadDBCStores(const std::string& dataPath);

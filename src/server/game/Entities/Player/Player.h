@@ -181,9 +181,9 @@ struct SpellModifier
     Aura * const ownerAura;
 };
 
-typedef UNORDERED_MAP<uint32, PlayerTalent*> PlayerTalentMap;
-typedef UNORDERED_MAP<uint32, PlayerSpell*> PlayerSpellMap;
-typedef UNORDERED_MAP<uint32, PlayerCurrency> PlayerCurrenciesMap;
+typedef std::unordered_map<uint32, PlayerTalent*> PlayerTalentMap;
+typedef std::unordered_map<uint32, PlayerSpell*> PlayerSpellMap;
+typedef std::unordered_map<uint32, PlayerCurrency> PlayerCurrenciesMap;
 typedef std::list<SpellModifier*> SpellModList;
 
 /// Maximum number of CompactUnitFrames profiles
@@ -665,7 +665,7 @@ struct SkillStatusData
     SkillUpdateState uState;
 };
 
-typedef UNORDERED_MAP<uint32, SkillStatusData> SkillStatusMap;
+typedef std::unordered_map<uint32, SkillStatusData> SkillStatusMap;
 
 class Quest;
 class Spell;
@@ -1765,7 +1765,7 @@ class Player : public Unit, public GridObject<Player>
         uint8 unReadMails;
         time_t m_nextMailDelivereTime;
 
-        typedef UNORDERED_MAP<uint32, Item*> ItemMap;
+        typedef std::unordered_map<uint32, Item*> ItemMap;
 
         ItemMap mMitems;                                    //template defined in objectmgr.cpp
 
@@ -2626,8 +2626,8 @@ class Player : public Unit, public GridObject<Player>
         void SetAtLoginFlag(AtLoginFlags f) { m_atLoginFlags |= f; }
         void RemoveAtLoginFlag(AtLoginFlags f, bool in_db_also = false);
 
-        typedef UNORDERED_MAP<uint64, uint64> GUIDTimestampMap;
-        typedef UNORDERED_MAP<uint32, GUIDTimestampMap> SummonMap;
+        typedef std::unordered_map<uint64, uint64> GUIDTimestampMap;
+        typedef std::unordered_map<uint32, GUIDTimestampMap> SummonMap;
 
         SummonMap m_summonMap;
 
@@ -2663,7 +2663,7 @@ class Player : public Unit, public GridObject<Player>
         /***                 INSTANCE SYSTEM                   ***/
         /*********************************************************/
 
-        typedef UNORDERED_MAP< uint32 /*mapId*/, InstancePlayerBind > BoundInstancesMap;
+        typedef std::unordered_map< uint32 /*mapId*/, InstancePlayerBind > BoundInstancesMap;
 
         void UpdateHomebindTime(uint32 time);
 
@@ -3206,8 +3206,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_timeSyncClient;
         uint32 m_timeSyncServer;
 
-        UNORDERED_MAP<uint32 /*mapId*/, uint32 /*progress*/> RaidDiffProgress;//players difficulty progress in raid
-        UNORDERED_MAP<uint32 /*mapId*/, uint32 /*oldId*/> raidId;//players deafult IDs for his raids
+        std::unordered_map<uint32 /*mapId*/, uint32 /*progress*/> RaidDiffProgress;//players difficulty progress in raid
+        std::unordered_map<uint32 /*mapId*/, uint32 /*oldId*/> raidId;//players deafult IDs for his raids
 };
 
 void AddItemsSetItem(Player*player,Item *item);

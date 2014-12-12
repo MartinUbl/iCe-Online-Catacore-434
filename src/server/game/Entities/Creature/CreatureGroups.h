@@ -48,7 +48,7 @@ class CreatureGroupManager
 
 #define formation_mgr ACE_Singleton<CreatureGroupManager, ACE_Null_Mutex>::instance()
 
-typedef UNORDERED_MAP<uint32/*memberDBGUID*/, FormationInfo*>   CreatureGroupInfoType;
+typedef std::unordered_map<uint32/*memberDBGUID*/, FormationInfo*>   CreatureGroupInfoType;
 
 extern CreatureGroupInfoType    CreatureGroupMap;
 

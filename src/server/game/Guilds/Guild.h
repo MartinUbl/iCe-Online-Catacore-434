@@ -775,7 +775,7 @@ private:
         void _CanStoreItemInTab(Item* pItem, uint8 skipSlotId, bool merge, uint32& count);
     };
 
-    typedef UNORDERED_MAP<uint32, Member*> Members;
+    typedef std::unordered_map<uint32, Member*> Members;
     typedef std::vector<RankInfo> Ranks;
     typedef std::vector<BankTab*> BankTabs;
 

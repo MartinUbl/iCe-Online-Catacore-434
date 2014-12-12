@@ -58,8 +58,8 @@ class WeatherMgr
 
         void Update(uint32 diff);
 
-        typedef UNORDERED_MAP<uint32, Weather*> WeatherMap;
-        typedef UNORDERED_MAP<uint32, WeatherData> WeatherZoneMap;
+        typedef std::unordered_map<uint32, Weather*> WeatherMap;
+        typedef std::unordered_map<uint32, WeatherData> WeatherZoneMap;
 
     private:
 

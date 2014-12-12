@@ -65,8 +65,8 @@ public:
 
 private:
     //Typedefs HERE !
-    typedef UNORDERED_MAP<uint32, GameObjectTeleportCond*> GOTeleCondMap;
-    typedef UNORDERED_MAP<uint32, CreaturePersonal*> CreaturePersonalMap;
+    typedef std::unordered_map<uint32, GameObjectTeleportCond*> GOTeleCondMap;
+    typedef std::unordered_map<uint32, CreaturePersonal*> CreaturePersonalMap;
 
     //Storages HERE !
     GOTeleCondMap m_GOTeleCond;

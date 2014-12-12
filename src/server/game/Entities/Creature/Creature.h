@@ -206,7 +206,7 @@ struct CreatureBaseStats
     static CreatureBaseStats const* GetBaseStats(uint8 level, uint8 unitClass);
 };
 
-typedef UNORDERED_MAP<uint16, CreatureBaseStats> CreatureBaseStatsMap;
+typedef std::unordered_map<uint16, CreatureBaseStats> CreatureBaseStatsMap;
 
 struct CreatureLocale
 {
@@ -386,7 +386,7 @@ struct TrainerSpell
     bool IsCastable() const { return learnedSpell[0] != spell; }
 };
 
-typedef UNORDERED_MAP<uint32 /*spellid*/, TrainerSpell> TrainerSpellMap;
+typedef std::unordered_map<uint32 /*spellid*/, TrainerSpell> TrainerSpellMap;
 
 struct TrainerSpellData
 {

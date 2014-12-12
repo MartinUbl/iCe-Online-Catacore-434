@@ -122,7 +122,7 @@ class ZoneScript;
 class Unit;
 class Transport;
 
-typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
+typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
 class Object
 {

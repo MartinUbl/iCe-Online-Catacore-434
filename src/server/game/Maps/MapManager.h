@@ -37,8 +37,8 @@ struct TransportCreatureProto;
 class MapManager
 {
     friend class ACE_Singleton<MapManager, ACE_Thread_Mutex>;
-    typedef UNORDERED_MAP<uint32, Map*> MapMapType;
-    typedef std::pair<UNORDERED_MAP<uint32, Map*>::iterator, bool>  MapMapPair;
+    typedef std::unordered_map<uint32, Map*> MapMapType;
+    typedef std::pair<std::unordered_map<uint32, Map*>::iterator, bool>  MapMapPair;
 
     public:
 
