@@ -83,6 +83,7 @@
 #include "GuildFinderMgr.h"
 #include "TicketMgr.h"
 #include "CalendarMgr.h"
+#include "ChannelMgr.h"
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -104,13 +105,17 @@ int32 World::m_visibility_notify_periodInBGArenas   = DEFAULT_VISIBILITY_NOTIFY_
 /// World constructor
 World::World()
 {
+    numOf3v3TeamsInQueue = 0;
+    numOf3v3TeamsInArena = 0;
+    m_messageTimer =  60 * IN_MILLISECONDS;
+    messageCounter = 0;
     m_playerLimit = 0;
     m_allowedSecurityLevel = SEC_PLAYER;
     m_allowMovement = true;
     m_ShutdownMask = 0;
     m_ShutdownTimer = 0;
-    m_gameTime=time(NULL);
-    m_startTime=m_gameTime;
+    m_gameTime = time(NULL);
+    m_startTime = m_gameTime;
     m_maxActiveSessionCount = 0;
     m_maxQueuedSessionCount = 0;
     m_PlayerCount = 0;
@@ -1961,22 +1966,13 @@ void World::LoadAutobroadcasts()
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded 0 autobroadcasts definitions");
         return;
     }
-
-    
-
     uint32 count = 0;
-
     do
     {
-        
-
         Field *fields = result->Fetch();
         std::string message = fields[0].GetString();
 
@@ -2008,6 +2004,23 @@ void World::Update(uint32 diff)
             ++m_updateTimeCount;
         }
     }
+
+    if (m_messageTimer <= diff)
+    {
+        messageCounter++;
+        if (numOf3v3TeamsInQueue || numOf3v3TeamsInArena) // Only if some teams in queue or inside arena
+        {
+            char buff[100];
+            sprintf(buff,"Current teams inside 3v3 arenas : %d . In Queue : %d",numOf3v3TeamsInQueue, numOf3v3TeamsInArena);
+
+            if (messageCounter % 5 == 0) // Every 5 minute
+                SendWorldTextToChannel("krcma",LANG_SYSTEMMESSAGE, buff);
+
+            SendWorldTextToChannel("pvp",LANG_SYSTEMMESSAGE, buff);
+        }
+        m_messageTimer = 60 * IN_MILLISECONDS;
+    }
+    else m_messageTimer -= diff;
 
     ///- Update the different timers
     for (int i = 0; i < WUPDATE_COUNT; ++i)
@@ -2279,6 +2292,29 @@ void World::SendWorldText(int32 string_id, ...)
             continue;
 
         wt_do(itr->second->GetPlayer());
+    }
+
+    va_end(ap);
+}
+
+void World::SendWorldTextToChannel(std::string channelName,int32 string_id, ...)
+{
+    va_list ap;
+    va_start(ap, string_id);
+
+    Trinity::WorldWorldTextBuilder wt_builder(string_id, &ap);
+    Trinity::LocalizedPacketListDo<Trinity::WorldWorldTextBuilder> wt_do(wt_builder);
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    {
+        if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
+            continue;
+
+        Player * player = itr->second->GetPlayer();
+
+        if (ChannelMgr* cMgr = channelMgr(player->GetTeam()))
+            if (Channel * channel = cMgr->GetChannel(channelName, player))
+                if (channel->IsPlayerInChannel(player->GetGUID()))
+                    wt_do(itr->second->GetPlayer());
     }
 
     va_end(ap);
@@ -2895,6 +2931,12 @@ void World::UpdateMaxSessionCounters()
 {
     m_maxActiveSessionCount = std::max(m_maxActiveSessionCount,uint32(m_sessions.size()-m_QueuedPlayer.size()));
     m_maxQueuedSessionCount = std::max(m_maxQueuedSessionCount,uint32(m_QueuedPlayer.size()));
+}
+
+void World::SetPvPArenaInfo(uint32 numOf3v3TeamsInQueue, uint32 numOf3v3TeamsInArena)
+{
+    this->numOf3v3TeamsInQueue = numOf3v3TeamsInQueue;
+    this->numOf3v3TeamsInArena = numOf3v3TeamsInArena;
 }
 
 void World::ProcessStartEvent()

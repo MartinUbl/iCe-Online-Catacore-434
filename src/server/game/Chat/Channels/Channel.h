@@ -258,6 +258,7 @@ class Channel
         bool IsConstant() const { return m_channelId != 0; }
         bool IsAnnounce() const { return m_announce; }
         bool IsLFG() const { return GetFlags() & CHANNEL_FLAG_LFG; }
+        bool IsPlayerInChannel (uint64 playerGUID) const;
         std::string GetPassword() const { return m_password; }
         void SetPassword(const std::string& npassword) { m_password = npassword; }
         void SetAnnounce(bool nannounce) { m_announce = nannounce; }

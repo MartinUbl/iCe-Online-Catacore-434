@@ -663,6 +663,7 @@ class World
         void LoadConfigSettings(bool reload = false);
 
         void SendWorldText(int32 string_id, ...);
+        void SendWorldTextToChannel(std::string channelName, int32 string_id, ...);
         void SendGlobalText(const char* text, WorldSession *self);
         void SendGMText(int32 string_id, ...);
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0, uint32 team = 0);
@@ -794,6 +795,8 @@ class World
         bool IsAutosaveAllowed() { return m_allowAutosave; };
         void AllowAutosave(bool allow) { m_allowAutosave = allow; };
 
+        void SetPvPArenaInfo(uint32 numOf3v3TeamsInQueue, uint32 numOf3v3TeamsInArena);
+
         bool isEventKillStart;
     protected:
         void _UpdateGameTime();
@@ -812,6 +815,11 @@ class World
         static uint8 m_ExitCode;
         uint32 m_ShutdownTimer;
         uint32 m_ShutdownMask;
+
+        uint32 m_messageTimer;
+        uint32 messageCounter;
+        uint32 numOf3v3TeamsInQueue;
+        uint32 numOf3v3TeamsInArena;
 
         bool m_allowAutosave;
 

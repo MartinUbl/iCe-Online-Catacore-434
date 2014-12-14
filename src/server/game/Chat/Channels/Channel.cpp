@@ -131,6 +131,12 @@ void Channel::_UpdateBanListInDB() const
     }
 }
 
+bool Channel::IsPlayerInChannel(uint64 playerGUID) const
+{
+    PlayerList::const_iterator p_itr = players.find(playerGUID);
+    return !(p_itr == players.end());
+}
+
 void Channel::Join(uint64 p, const char *pass)
 {
     WorldPacket data;
