@@ -12781,7 +12781,18 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
                         DoneTotalMod *= 1.25f;
                 }
             }
-
+            // Frostbolt (mage)
+            else if (spellProto->Id == 116 && GetTypeId() == TYPEID_PLAYER)
+            {
+                // talent Shatter - target must be frozen
+                if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+                {
+                    if (HasAura(11170))
+                        DoneTotalMod *= 1.1f;
+                    else if (HasAura(12982))
+                        DoneTotalMod *= 1.2f;
+                }
+            }
             // Torment the weak
             if (spellProto->SchoolMask & SPELL_SCHOOL_MASK_ARCANE)
                 if (victim->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
@@ -12930,7 +12941,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, u
                 AddPctN(TakenTotalMod, (*i)->GetAmount());
     }
 
-    //Ebon plague (need special handling)
+    // Ebon plague (need special handling)
     if (Aura * aura = GetAura(65142))
     {
         int32 amount = aura->GetSpellProto()->EffectBasePoints[EFFECT_1];
@@ -12958,7 +12969,8 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, u
                 break;
         }
     }
-        // Spells with SPELL_ATTR4_FIXED_DAMAGE should only benefit from mechanic damage mod auras.
+
+    // Spells with SPELL_ATTR4_FIXED_DAMAGE should only benefit from mechanic damage mod auras.
     if (!(spellProto->AttributesEx4 & SPELL_ATTR4_FIXED_DAMAGE))
     {
         // get all auras from caster that allow the spell to ignore resistance (sanctified wrath)
@@ -13528,23 +13540,6 @@ uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32
                     if (!caster->ToPlayer()->HasSpellCooldown(55682) && caster->HasAura(55682))
                         caster->CastSpell(caster, 77691, true); // dummy hack!
                 }
-            }
-            break;
-        }
-        // Frostbolt (mage)
-        case 116:
-        {
-            // Frostbolt is involved in some other things, so we must ensure that mage is the caster
-            if (!unitTarget || caster->getClass() != CLASS_MAGE)
-                break;
-
-            // talent Shatter - target must be frozen
-            if (unitTarget->HasAuraState(AURA_STATE_FROZEN, spellProto, caster))
-            {
-                if (caster->HasAura(11170))
-                    damage *= 1.1f;
-                else if (caster->HasAura(12982))
-                    damage *= 1.2f;
             }
             break;
         }
