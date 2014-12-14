@@ -1014,6 +1014,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
                     damage *= pOwner->GetTotalAuraMultiplierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo, SPELLMOD_DAMAGE);
                 }
+                else if (m_spellInfo->Id == 48181) // Haunt
+                {
+                    damage += m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW) * 0.5577f * 1.25f;
+                    break;
+                }
                 break;
             }
             case SPELLFAMILY_PRIEST:

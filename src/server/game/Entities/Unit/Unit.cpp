@@ -13556,16 +13556,7 @@ uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32
 
             // If the target is affected by Immolate spell, let's increase damage by 1/6 (info by DBC tooltip)
             if (unitTarget->HasAura(348))
-                damage += uint32((float)damage/6.0f);
-            break;
-        }
-        // Haunt
-        case 48181:
-        {
-            if (caster->GetTypeId() != TYPEID_PLAYER)
-                break;
-
-            damage += caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW) * 0.5577f * 1.25f;
+                damage += damage / 6;
             break;
         }
         // Soul Fire
