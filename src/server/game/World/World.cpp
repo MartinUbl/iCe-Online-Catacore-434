@@ -2007,6 +2007,7 @@ void World::Update(uint32 diff)
 
     if (m_messageTimer <= diff)
     {
+        sBattlegroundMgr->Update3v3ArenaInfo();
         messageCounter++;
         if (numOf3v3TeamsInQueue || numOf3v3TeamsInArena) // Only if some teams in queue or inside arena
         {

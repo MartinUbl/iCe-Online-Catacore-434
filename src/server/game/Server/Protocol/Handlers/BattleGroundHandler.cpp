@@ -932,32 +932,6 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recv_data)
         sLog->outDebug("Battleground: player joined queue for arena, skirmish, bg queue type %u bg type %u: GUID %u, NAME %s",bgQueueTypeId,bgTypeId,_player->GetGUIDLow(), _player->GetName());
     }
     sBattlegroundMgr->ScheduleQueueUpdate(matchmakerRating, arenatype, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId(), twink);
-
-
-    if(arenatype == ARENA_TYPE_3v3)
-    {
-        /*Players in queue*/
-        int numOfTeamsInQueue = bgQueue.m_QueuedGroups[bracketEntry->GetBracketId()][BG_QUEUE_NORMAL_ALLIANCE].size()
-                              + bgQueue.m_QueuedGroups[bracketEntry->GetBracketId()][BG_QUEUE_NORMAL_HORDE].size();
-
-        /*Players ne arena*/
-        int numOfTeamsInArena = 0;
-        BattlegroundSet tset;
-        sBattlegroundMgr->GetSpectatableArenas(&tset);
-        for (BattlegroundSet::iterator itr = tset.begin(); itr != tset.end(); ++itr)
-        {
-            if (!itr->second)
-                continue;
-
-            if (itr->second->GetAlivePlayersCountByTeam(ALLIANCE) > 0) //Alliance team in arena
-                numOfTeamsInArena++;
-
-            if (itr->second->GetAlivePlayersCountByTeam(HORDE) > 0) //Horde team in arena
-                numOfTeamsInArena++;
-        }
-
-        sWorld->SetPvPArenaInfo(numOfTeamsInQueue,numOfTeamsInArena);
-    }
 }
 
 void WorldSession::HandleReportPvPAFK(WorldPacket & recv_data)

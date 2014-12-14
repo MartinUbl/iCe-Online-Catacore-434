@@ -61,6 +61,7 @@ class BattlegroundMgr
         void SendAreaSpiritHealerQueryOpcode(Player *pl, Battleground *bg, const uint64& guid);
 
         /* Battlegrounds */
+        void Update3v3ArenaInfo();
         Battleground* GetBattlegroundThroughClientInstance(uint32 instanceId, BattlegroundTypeId bgTypeId);
         Battleground* GetBattleground(uint32 InstanceID, BattlegroundTypeId bgTypeId); //there must be uint32 because MAX_BATTLEGROUND_TYPE_ID means unknown
 

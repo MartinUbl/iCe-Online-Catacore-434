@@ -770,6 +770,41 @@ void BattlegroundMgr::BuildPlayerJoinedBattlegroundPacket(WorldPacket *data, Pla
     *data << uint64(plr->GetGUID());
 }
 
+void BattlegroundMgr::Update3v3ArenaInfo()
+{
+    // Players in queue
+    uint32 numOfTeamsInQueue = 0;
+
+    BattlegroundQueue &bgQueue = m_BattlegroundQueues[BATTLEGROUND_QUEUE_3v3][BATTLEGROUND_NOTWINK];
+
+    for (int bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
+    {
+        for (int queueGroupType = BG_QUEUE_PREMADE_ALLIANCE;  queueGroupType < BG_QUEUE_GROUP_TYPES_COUNT; ++queueGroupType)
+        numOfTeamsInQueue += bgQueue.m_QueuedGroups[bracket][BG_QUEUE_NORMAL_ALLIANCE].size() + bgQueue.m_QueuedGroups[bracket][BG_QUEUE_NORMAL_HORDE].size();
+    }
+
+    // Players in arena
+    int numOfTeamsInArena = 0;
+    BattlegroundSet tset;
+    GetSpectatableArenas(&tset);
+    for (BattlegroundSet::iterator itr = tset.begin(); itr != tset.end(); ++itr)
+    {
+        if (!itr->second || !itr->second->isArena())
+            continue;
+
+        if (itr->second->GetArenaType() == ARENA_TYPE_3v3)
+        {
+            if (itr->second->GetAlivePlayersCountByTeam(ALLIANCE) > 0) // Alliance team in arena
+                numOfTeamsInArena++;
+
+            if (itr->second->GetAlivePlayersCountByTeam(HORDE) > 0) // Horde team in arena
+                numOfTeamsInArena++;
+        }
+    }
+
+    sWorld->SetPvPArenaInfo(numOfTeamsInQueue,numOfTeamsInArena);
+}
+
 Battleground * BattlegroundMgr::GetBattlegroundThroughClientInstance(uint32 instanceId, BattlegroundTypeId bgTypeId)
 {
     //cause at HandleBattlegroundJoinOpcode the clients sends the instanceid he gets from
