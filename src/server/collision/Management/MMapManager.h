@@ -20,6 +20,7 @@
 #define _MMAP_MANAGER_H
 
 #include <unordered_map>
+#include <string>
 #include "CompilerDefs.h"
 #include "Define.h"
 #include "DetourAlloc.h"
