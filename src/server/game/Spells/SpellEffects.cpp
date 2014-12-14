@@ -1693,6 +1693,18 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         m_damage /= count;                    // divide to all targets
     }
 
+    // After first damage calculation (without crit, without absorb, etc ..)
+    switch (m_spellInfo->Id)
+    {
+        // Shadow Word: Death
+        case 32379:
+        {
+            // Deals three times as much damage to targets below 25%
+            if (unitTarget->GetHealthPct() < 25.0f)
+                m_damage *= 3;
+        }
+    }
+
     /*
         If you want some special handling after ALL damage calculation (crit,absorbs,resil,etc. ...)
         -> use Unit::AfterAllSpellDamageComputation !

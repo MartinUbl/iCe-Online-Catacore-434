@@ -12804,6 +12804,14 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
                     if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x100000, 0, 0, GetGUID()))
                         AddPctN(DoneTotalMod, aurEff->GetAmount());
             }
+            else if (spellProto->Id == 32379) // Shadow Word: Death
+            {
+                if (victim->GetHealthPct() <= 25.0f) // At or below 25 %
+                {
+                    if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY,SPELLFAMILY_PRIEST,3139,EFFECT_0)) // Mind Melt
+                        AddPctN(DoneTotalMod, aurEff->GetAmount());
+                }
+            }
         break;
         case SPELLFAMILY_PALADIN:
             // Judgement of Vengeance/Judgement of Corruption
@@ -13504,19 +13512,6 @@ uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32
         // Shadow Word: Death
         case 32379:
         {
-            if (unitTarget->GetHealthPct() <= 25.0f) // At or below 25 %
-            {
-                if(caster->HasAura(14910)) // Mind Melt (Rank 1)
-                    damage *= 1.15f;
-
-                if(caster->HasAura(33371)) // Mind Melt (Rank 2)
-                    damage *= 1.30f;
-            }
-
-            // Deals three times as much damage to targets below 25%
-            if (unitTarget->GetHealthPct() < 25.0f)
-                damage *= 3;
-
             // Target is not killed
             if (damage < unitTarget->GetHealth())
             {
