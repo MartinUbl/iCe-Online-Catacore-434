@@ -1207,6 +1207,9 @@ class Player : public Unit, public GridObject<Player>
         void setClass(uint8 new_class) { m_class = new_class; };
         uint8 getClass() const { return m_class; };
 
+        bool getDisabledPVPAnnounceStatus(){ return disabledPVPAnnounce;}
+        void setDisabledPVPAnnounceStatus(bool disabled){ disabledPVPAnnounce = disabled;}
+
         void SetInWater(bool apply);
 
         bool IsInWater() const { return m_isInWater; }
@@ -3175,6 +3178,8 @@ class Player : public Unit, public GridObject<Player>
         uint8 m_MirrorTimerFlags;
         uint8 m_MirrorTimerFlagsLast;
         bool m_isInWater;
+
+        bool disabledPVPAnnounce = false;
 
         // Current teleport data
         WorldLocation m_teleport_dest;

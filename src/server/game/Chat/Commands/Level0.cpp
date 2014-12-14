@@ -500,3 +500,24 @@ bool ChatHandler::HandleServerMotdCommand(const char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleDisableArenaAnnounceCommand(const char* args)
+{
+    //INSERT INTO `command` (`name`, `help`) VALUES ('disarena', 'Syntax: .disarena on/off')
+    std::string argstr = (char*)args;
+
+    if (argstr == "on")
+    {
+        m_session->GetPlayer()->setDisabledPVPAnnounceStatus(true);
+        return true;
+    }
+
+    if (argstr == "off")
+    {
+        m_session->GetPlayer()->setDisabledPVPAnnounceStatus(false);
+        return true;
+    }
+
+    SendSysMessage(LANG_USE_BOL);
+    SetSentErrorMessage(true);
+    return false;
+}
