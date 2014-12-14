@@ -896,9 +896,6 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
             // Amplify Magic, Dampen Magic
             if (spellproto->SpellFamilyFlags[0] == 0x00002000)
                 return true;
-            // Ignite    
-            if (spellproto->SpellIconID == 45)
-                return true;
             // Dragon's Breath
             if (spellproto->Id == 31661)
                 return false;

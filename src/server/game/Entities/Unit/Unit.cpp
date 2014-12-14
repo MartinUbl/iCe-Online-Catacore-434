@@ -6431,25 +6431,25 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
                     return true;
                 }
-                // Ignite
+                // Ignite talent aura
                 case 11119:
                 case 11120:
                 case 12846:
                 {
-                    switch (dummySpell->Id)
-                    {
-                        case 11119: basepoints0 = int32(0.13f*damage); break;
-                        case 11120: basepoints0 = int32(0.26f*damage); break;
-                        case 12846: basepoints0 = int32(0.40f*damage); break;
-                        default:
-                            sLog->outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)",dummySpell->Id);
-                            return false;
-                    }
+                    AuraEffect * aurEff = GetAuraEffect(dummySpell->Id, EFFECT_0, GetGUID());
+
+                    if (!aurEff)
+                        return false;
+
+                    basepoints0 = damage * aurEff->GetAmount() / 100;
                     triggered_spell_id = 12654;
+
+                    // Ignite should profit from mastery
                     if (GetTypeId() == TYPEID_PLAYER)
                         ToPlayer()->ApplySpellMod(12654, SPELLMOD_DOT, basepoints0);
-                    basepoints0 += pVictim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id,SPELL_AURA_PERIODIC_DAMAGE,EFFECT_0);
+
                     basepoints0 = basepoints0 / 2;
+                    basepoints0 += pVictim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id,SPELL_AURA_PERIODIC_DAMAGE,EFFECT_0);
                     break;
                 }
                 // Glyph of Ice Block
@@ -21822,6 +21822,10 @@ uint32 Unit::GetRemainingPeriodicAmount(uint64 casterGUID, uint32 spellId, AuraT
                 damage = (*i)->GetDamage();
                 break;
         }
+        /*char buffer[100];
+        sprintf(buffer, "Remaining damage is %d", damage);
+        const_cast<Unit*>(this)->MonsterSay(buffer, LANG_UNIVERSAL, 0);*/
+
         amount += uint32((damage * ticksRemaining) / (*i)->GetTotalTicks());
         break;
     }
