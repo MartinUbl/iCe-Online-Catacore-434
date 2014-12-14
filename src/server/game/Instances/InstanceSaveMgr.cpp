@@ -524,7 +524,8 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
     while (!pList.empty())
     {
         Player *player = *(pList.begin());
-        player->UnbindInstance(itr->second->GetMapId(), itr->second->GetDifficulty(), true);
+        if (player && player->IsInWorld())
+            player->UnbindInstance(itr->second->GetMapId(), itr->second->GetDifficulty(), true);
     }
 
     InstanceSave::GroupListType &gList = itr->second->m_groupList;
