@@ -1207,7 +1207,7 @@ class Player : public Unit, public GridObject<Player>
         void setClass(uint8 new_class) { m_class = new_class; };
         uint8 getClass() const { return m_class; };
 
-        bool getDisabledPVPAnnounceStatus(){ return disabledPVPAnnounce;}
+        bool isDisabledPVPAnnounceStatus(){ return disabledPVPAnnounce;}
         void setDisabledPVPAnnounceStatus(bool disabled){ disabledPVPAnnounce = disabled;}
 
         void SetInWater(bool apply);
