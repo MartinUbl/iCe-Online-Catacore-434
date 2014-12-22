@@ -7661,35 +7661,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 85804:
                 case 85803:
                     return false;
-                // Heart of the Crusader
-                case 20335: // rank 1
-                    triggered_spell_id = 21183;
-                    break;
-                case 20336: // rank 2
-                    triggered_spell_id = 54498;
-                    break;
-                case 20337: // rank 3
-                    triggered_spell_id = 54499;
-                    break;
-                // Judgement of Light
-                case 20185:
-                {
-                    // 2% of base mana
-                    basepoints0 = int32(pVictim->CountPctFromMaxHealth(2));
-                    pVictim->CastCustomSpell(pVictim, 20267, &basepoints0, 0, 0, true, 0, triggeredByAura);
-                    return true;
-                }
-                // Judgement of Wisdom
-                case 20186:
-                {
-                    if (pVictim && pVictim->IsAlive() && pVictim->getPowerType() == POWER_MANA)
-                    {
-                        // 2% of base mana
-                        basepoints0 = int32(pVictim->GetCreateMana() * 2 / 100);
-                        pVictim->CastCustomSpell(pVictim, 20268, &basepoints0, NULL, NULL, true, 0, triggeredByAura);
-                    }
-                    return true;
-                }
                 // Holy Power (Redemption Armor set)
                 case 28789:
                 {
