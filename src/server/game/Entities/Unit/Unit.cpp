@@ -6438,26 +6438,18 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 {
                     AuraEffect * aurEff = GetAuraEffect(dummySpell->Id, EFFECT_0, GetGUID());
 
-                    if (!aurEff || !procSpell || procSpell->SpellIconID == 4650) // Do not proc from Flame orb
+                    if (!aurEff)
                         return false;
 
-                    #define IGNITE_SPELL 12654
-
                     basepoints0 = damage * aurEff->GetAmount() / 100;
-                    triggered_spell_id = IGNITE_SPELL;
+                    triggered_spell_id = 12654;
 
                     // Ignite should profit from mastery
                     if (GetTypeId() == TYPEID_PLAYER)
                         ToPlayer()->ApplySpellMod(12654, SPELLMOD_DOT, basepoints0);
 
                     basepoints0 = basepoints0 / 2;
-
-                    if (Aura * pIgniteAura = pVictim->GetAura(IGNITE_SPELL,GetGUID()))
-                    {
-                        // This is very ugly check, but I dont trust auraeffect tick getters, cause ignite is refreshed
-                        uint32 ticksRemaining = pIgniteAura->GetDuration() < 2000 ? 1 : 2; 
-                        basepoints0 += pVictim->GetRemainingPeriodicAmount(GetGUID(), IGNITE_SPELL,SPELL_AURA_PERIODIC_DAMAGE,EFFECT_0) / ticksRemaining;
-                    }
+                    basepoints0 += pVictim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id,SPELL_AURA_PERIODIC_DAMAGE,EFFECT_0);
                     break;
                 }
                 // Glyph of Ice Block
