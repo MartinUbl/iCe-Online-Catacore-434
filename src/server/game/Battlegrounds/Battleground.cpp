@@ -846,6 +846,29 @@ void Battleground::EndBattleground(uint32 winner)
         }
     }
 
+    // NOTE: iCelike modification - give some items on 3v3, when rating is > 500 and hour in 18-23
+    bool giveCustomItems_winner = false;
+    bool giveCustomItems_loser = false;
+    if (winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+    {
+        if (winner_arena_team->GetType() == ARENA_TEAM_3v3 && loser_arena_team->GetType() == ARENA_TEAM_3v3)
+        {
+            time_t now;
+            struct tm *lcltime;
+
+            now = time(NULL);
+            lcltime = localtime(&now);
+
+            if (lcltime->tm_hour >= 18 && lcltime->tm_hour <= 23)
+            {
+                if (winner_arena_team->GetTeamRating() >= 500)
+                    giveCustomItems_winner = true;
+                if (loser_arena_team->GetTeamRating() >= 500)
+                    giveCustomItems_loser = true;
+            }
+        }
+    }
+
     for (BattlegroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
         uint32 team = itr->second.Team;
@@ -930,6 +953,10 @@ void Battleground::EndBattleground(uint32 winner)
                     member->SetMatchmakerRating(winner_matchmaker_rating + winner_change);
 
                 winner_arena_team->MemberWon(plr, loser_matchmaker_rating);
+
+                // iCelike modification
+                if (giveCustomItems_winner)
+                    plr->AddItem(89964, 2);
             }
             else if (winner != WINNER_NONE)     // player lost
             {
@@ -937,6 +964,10 @@ void Battleground::EndBattleground(uint32 winner)
                     member->SetMatchmakerRating(loser_matchmaker_rating + loser_change);
 
                 loser_arena_team->MemberLost(plr, winner_matchmaker_rating);
+
+                // iCelike modification
+                if (giveCustomItems_loser)
+                    plr->AddItem(89964, 1);
 
                 // Arena lost => reset the win_rated_arena having the "no_lose" condition
                 plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, ACHIEVEMENT_CRITERIA_CONDITION_NO_LOSE);
