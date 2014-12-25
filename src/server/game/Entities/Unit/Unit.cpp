@@ -19670,11 +19670,16 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const * a
     if (!charmer)
         return false;
 
-    // unmount players when charmed
+    // dismount players when charmed -> do not use Unit:UnMount()
     if (GetTypeId() == TYPEID_PLAYER)
-        Unmount();
+        RemoveAurasByType(SPELL_AURA_MOUNTED);
+
+    if (charmer->GetTypeId() == TYPEID_PLAYER)
+        charmer->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
     ASSERT(type != CHARM_TYPE_POSSESS || charmer->GetTypeId() == TYPEID_PLAYER);
+
+    // Unit:UnMount() was triggering this assert, because it removed vehicle kit from player created by aura (example spell -> 102334) !!!
     ASSERT((type == CHARM_TYPE_VEHICLE) == IsVehicle());
 
     sLog->outDebug("SetCharmedBy: charmer %u (GUID %u), charmed %u (GUID %u), type %u.", charmer->GetEntry(), charmer->GetGUIDLow(), GetEntry(), GetGUIDLow(), uint32(type));
