@@ -48,17 +48,19 @@ VisibleNotifier::SendToSelf()
 
                 switch ((*itr)->GetTypeId())
                 {
-                case TYPEID_GAMEOBJECT:
-                    i_player.UpdateVisibilityOf((*itr)->ToGameObject(), i_data, i_visibleNow);
-                    break;
-                case TYPEID_PLAYER:
-                    i_player.UpdateVisibilityOf((*itr)->ToPlayer(), i_data, i_visibleNow);
-                    if (!(*itr)->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-                        (*itr)->ToPlayer()->UpdateVisibilityOf(&i_player);
-                    break;
-                case TYPEID_UNIT:
-                    i_player.UpdateVisibilityOf((*itr)->ToCreature(), i_data, i_visibleNow);
-                    break;
+                    case TYPEID_GAMEOBJECT:
+                        i_player.UpdateVisibilityOf((*itr)->ToGameObject(), i_data, i_visibleNow);
+                        break;
+                    case TYPEID_PLAYER:
+                        i_player.UpdateVisibilityOf((*itr)->ToPlayer(), i_data, i_visibleNow);
+                        if (!(*itr)->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+                            (*itr)->ToPlayer()->UpdateVisibilityOf(&i_player);
+                        break;
+                    case TYPEID_UNIT:
+                        i_player.UpdateVisibilityOf((*itr)->ToCreature(), i_data, i_visibleNow);
+                        break;
+                    default:
+                        break;
                 }
             }
         }

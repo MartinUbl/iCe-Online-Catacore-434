@@ -355,7 +355,7 @@ void Map::SwitchGridContainers(GameObject* obj, bool on)
     }
 
     Cell cell(p);
-    if (!IsGridLoaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)))
+    if (!loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)))
         return;
 
     sLog->outDebug("Switch object " UI64FMTD " from grid[%u, %u] %u", obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y, on);
@@ -1240,7 +1240,7 @@ bool Map::GameObjectCellRelocation(GameObject* go, Cell new_cell)
     }
 
     // in diff. loaded grid normal GameObject
-    if (IsGridLoaded(GridPair(new_cell.GridX(), new_cell.GridY())))
+    if (loaded(GridPair(new_cell.GridX(), new_cell.GridY())))
     {
         RemoveFromGrid(go, getNGrid(old_cell.GridX(), old_cell.GridY()), old_cell);
         EnsureGridCreated(GridPair(new_cell.GridX(), new_cell.GridY()));
@@ -2526,7 +2526,7 @@ void Map::RemoveAllObjectsInRemoveList()
         bool on = itr->second;
         i_objectsToSwitch.erase(itr);
 
-        if (obj->GetTypeId() == TYPEID_UNIT || obj->GetTypeId() == TYPEID_GAMEOBJECT && !obj->m_isWorldObject)
+        if (obj->GetTypeId() == TYPEID_UNIT || (obj->GetTypeId() == TYPEID_GAMEOBJECT && !obj->m_isWorldObject))
             SwitchGridContainers(obj, on);
     }
 
@@ -2691,7 +2691,10 @@ template void Map::Remove(Creature *,bool);
 template void Map::Remove(GameObject *, bool);
 template void Map::Remove(DynamicObject *, bool);
 
+template void Map::AddToActive(Corpse*);
+template void Map::AddToActive(GameObject*);
 template void Map::AddToActive(DynamicObject*);
+
 template void Map::RemoveFromActive(DynamicObject*);
 
 /* ******* Dungeon Instance Maps ******* */

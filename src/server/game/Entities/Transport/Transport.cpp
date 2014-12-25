@@ -454,18 +454,22 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
         {
             switch ((*itr)->GetTypeId())
             {
-            case TYPEID_UNIT:
-                (*itr)->ToCreature()->FarTeleportTo(newMap, x, y, z, (*itr)->GetOrientation());
-                break;
-            case TYPEID_GAMEOBJECT:
-            {
-                GameObject* go = (*itr)->ToGameObject();
-                go->GetMap()->Remove(go, false);
-                Relocate(x, y, z, go->GetOrientation());
-                SetMap(newMap);
-                newMap->Add(go);
-                break;
-            }
+                case TYPEID_UNIT:
+                {
+                    (*itr)->ToCreature()->FarTeleportTo(newMap, x, y, z, (*itr)->GetOrientation());
+                    break;
+                }
+                case TYPEID_GAMEOBJECT:
+                {
+                    GameObject* go = (*itr)->ToGameObject();
+                    go->GetMap()->Remove(go, false);
+                    Relocate(x, y, z, go->GetOrientation());
+                    SetMap(newMap);
+                    newMap->Add(go);
+                    break;
+                }
+                default:
+                    break;
             }
         }
 
@@ -473,22 +477,28 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
         {
             switch ((*itr)->GetTypeId())
             {
-            case TYPEID_UNIT:
-                if (!IS_PLAYER_GUID((*itr)->ToUnit()->GetOwnerGUID()))  // pets should be teleported with player
-                    (*itr)->ToCreature()->FarTeleportTo(newMap, x, y, z, (*itr)->GetOrientation());
-                break;
-            case TYPEID_GAMEOBJECT:
-            {
-                GameObject* go = (*itr)->ToGameObject();
-                go->GetMap()->Remove(go, false);
-                Relocate(x, y, z, go->GetOrientation());
-                SetMap(newMap);
-                newMap->Add(go);
-                break;
-            }
-            case TYPEID_PLAYER:
-                (*itr)->ToPlayer()->TeleportTo(newMapid, x, y, z, (*itr)->GetOrientation(), TELE_TO_NOT_LEAVE_TRANSPORT);
-                break;
+                case TYPEID_UNIT:
+                {
+                    if (!IS_PLAYER_GUID((*itr)->ToUnit()->GetOwnerGUID()))  // pets should be teleported with player
+                        (*itr)->ToCreature()->FarTeleportTo(newMap, x, y, z, (*itr)->GetOrientation());
+                    break;
+                }
+                case TYPEID_GAMEOBJECT:
+                {
+                    GameObject* go = (*itr)->ToGameObject();
+                    go->GetMap()->Remove(go, false);
+                    Relocate(x, y, z, go->GetOrientation());
+                    SetMap(newMap);
+                    newMap->Add(go);
+                    break;
+                }
+                case TYPEID_PLAYER:
+                {
+                    (*itr)->ToPlayer()->TeleportTo(newMapid, x, y, z, (*itr)->GetOrientation(), TELE_TO_NOT_LEAVE_TRANSPORT);
+                    break;
+                }
+                default:
+                    break;
             }
         }
 
@@ -527,21 +537,27 @@ void Transport::UpdatePassengerPositions(std::set<WorldObject*>& passengers)
         CalculatePassengerPosition(x, y, z, &o);
         switch (passenger->GetTypeId())
         {
-        case TYPEID_UNIT:
-        {
-            Creature* creature = passenger->ToCreature();
-            GetMap()->CreatureRelocation(creature, x, y, z, o, false);
-            creature->GetTransportHomePosition(x, y, z, o);
-            CalculatePassengerPosition(x, y, z, &o);
-            creature->SetHomePosition(x, y, z, o);
-            break;
-        }
-        case TYPEID_PLAYER:
-            GetMap()->PlayerRelocation(passenger->ToPlayer(), x, y, z, o);
-            break;
-        case TYPEID_GAMEOBJECT:
-            GetMap()->GameObjectRelocation(passenger->ToGameObject(), x, y, z, o, false);
-            break;
+            case TYPEID_UNIT:
+            {
+                Creature* creature = passenger->ToCreature();
+                GetMap()->CreatureRelocation(creature, x, y, z, o, false);
+                creature->GetTransportHomePosition(x, y, z, o);
+                CalculatePassengerPosition(x, y, z, &o);
+                creature->SetHomePosition(x, y, z, o);
+                break;
+            }
+            case TYPEID_PLAYER:
+            {
+                GetMap()->PlayerRelocation(passenger->ToPlayer(), x, y, z, o);
+                break;
+            }
+            case TYPEID_GAMEOBJECT:
+            {
+                GetMap()->GameObjectRelocation(passenger->ToGameObject(), x, y, z, o, false);
+                break;
+            }
+            default:
+                break;
         }
 
         if (Unit* unit = passenger->ToUnit())

@@ -49,8 +49,6 @@ void TransportMgr::Unload()
 
 void TransportMgr::LoadTransportTemplates()
 {
-    uint32 oldMSTime = getMSTime();
-
     QueryResult result = WorldDatabase.Query("SELECT entry FROM gameobject_template WHERE type = 15 ORDER BY entry ASC");
 
     if (!result)
@@ -390,8 +388,6 @@ void TransportMgr::SpawnContinentTransports()
 {
     if (_transportTemplates.empty())
         return;
-
-    uint32 oldMSTime = getMSTime();
 
     QueryResult result = WorldDatabase.Query("SELECT guid, entry FROM transports");
 
