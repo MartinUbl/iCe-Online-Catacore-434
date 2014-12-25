@@ -611,12 +611,13 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     if (flags & UPDATEFLAG_TRANSPORT)
     {
         GameObject const* go = ToGameObject();
-        /** @TODO Use IsTransport() to also handle type 11 (TRANSPORT)
+        /**
         Currently grid objects are not updated if there are no nearby players,
         this causes clients to receive different PathProgress
         resulting in players seeing the object in a different position
+        - this may therefore lead to desynchronization
         */
-        if (go && go->ToTransport())
+        if (go && go->IsTransport())
             *data << uint32(go->GetGOValue()->Transport.PathProgress);
         else
             *data << uint32(getMSTime());
