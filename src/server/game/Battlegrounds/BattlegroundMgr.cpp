@@ -1586,7 +1586,7 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket *data, const uint6
     data->WriteBit(guidBytes[3]);
     data->WriteBit(0);                                      // unk
     data->WriteBit(guidBytes[5]);
-    data->WriteBit(0);                                      // unk
+    data->WriteBit(1);                                      // hide battleground window
 
     data->FlushBits();
 
