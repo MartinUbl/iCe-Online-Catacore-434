@@ -1376,7 +1376,13 @@ class Unit : public WorldObject
         void Mount(uint32 mount, uint32 vehicleId = 0, uint32 creatureEntry = 0);
         void Unmount();
 
-        void PlayOneShotAnimKit(uint32 id);
+        uint16 GetAIAnimKitId() const { return m_aiAnimKitId; }
+        void SetAIAnimKitId(uint16 animKitId);
+        uint16 GetMovementAnimKitId() const { return m_movementAnimKitId; }
+        void SetMovementAnimKitId(uint16 animKitId);
+        uint16 GetMeleeAnimKitId() const { return m_meleeAnimKitId; }
+        void SetMeleeAnimKitId(uint16 animKitId);
+        void PlayOneShotAnimKit(uint16 animKitId);
         void SendMoveKnockBack(Player* player, float speedXY, float speedZ, float vcos, float vsin);
         void SendMoveRoot(uint32 value);
         void SendMoveUnroot(uint32 value);
@@ -2295,6 +2301,10 @@ class Unit : public WorldObject
 
         uint32 m_reducedThreatPercent;
         uint64 m_misdirectionTargetGUID;
+
+        uint16 m_aiAnimKitId;
+        uint16 m_movementAnimKitId;
+        uint16 m_meleeAnimKitId;
 
         bool m_cleanupDone; // lock made to not add stuff after cleanup before delete
         bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world

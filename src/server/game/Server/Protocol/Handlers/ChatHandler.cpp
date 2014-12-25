@@ -922,6 +922,10 @@ void WorldSession::HandleEmoteOpcode(WorldPacket & recv_data)
     recv_data >> emote;
     sScriptMgr->OnPlayerEmote(GetPlayer(), emote);
     GetPlayer()->HandleEmoteCommand(emote);
+
+    // if cancelling emote packet was sent, clear also state stored in updatefields
+    if (emote == 0 && GetPlayer()->GetUInt32Value(UNIT_NPC_EMOTESTATE) != 0)
+        GetPlayer()->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
 }
 
 namespace Trinity
@@ -992,6 +996,8 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket & recv_data)
             break;
         case EMOTE_STATE_DANCE:
         case EMOTE_STATE_READ:
+        case EMOTE_STATE_READ_ALLOWMOVEMENT:
+        case EMOTE_STATE_READ_CHRISTMAS:
             GetPlayer()->SetUInt32Value(UNIT_NPC_EMOTESTATE, emote_anim);
             break;
         default:

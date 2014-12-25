@@ -210,6 +210,10 @@ m_vehicleKit(NULL), m_unitTypeMask(UNIT_MASK_NONE), m_HostileRefManager(this)
     m_reducedThreatPercent = 0;
     m_misdirectionTargetGUID = 0;
 
+    m_aiAnimKitId = 0;
+    m_movementAnimKitId = 0;
+    m_meleeAnimKitId = 0;
+
     // remove aurastates allowing special moves
     for (uint8 i = 0; i < MAX_REACTIVE; ++i)
         m_reactiveTimer[i] = 0;
@@ -18902,11 +18906,50 @@ bool Unit::HandleAuraRaidProcFromCharge(AuraEffect* triggeredByAura)
     return true;
 }
 
-void Unit::PlayOneShotAnimKit(uint32 id)
+void Unit::SetAIAnimKitId(uint16 animKitId)
+{
+    if (m_aiAnimKitId == animKitId)
+        return;
+
+    m_aiAnimKitId = animKitId;
+
+    WorldPacket data(SMSG_SET_AI_ANIM_KIT, 8 + 2);
+    data.appendPackGUID(GetGUID());
+    data << uint16(animKitId);
+    SendMessageToSet(&data, true);
+}
+
+void Unit::SetMovementAnimKitId(uint16 animKitId)
+{
+    if (m_movementAnimKitId == animKitId)
+        return;
+
+    m_movementAnimKitId = animKitId;
+
+    WorldPacket data(SMSG_SET_MOVEMENT_ANIM_KIT, 8 + 2);
+    data.appendPackGUID(GetGUID());
+    data << uint16(animKitId);
+    SendMessageToSet(&data, true);
+}
+
+void Unit::SetMeleeAnimKitId(uint16 animKitId)
+{
+    if (m_meleeAnimKitId == animKitId)
+        return;
+
+    m_meleeAnimKitId = animKitId;
+
+    WorldPacket data(SMSG_SET_MELEE_ANIM_KIT, 8 + 2);
+    data.appendPackGUID(GetGUID());
+    data << uint16(animKitId);
+    SendMessageToSet(&data, true);
+}
+
+void Unit::PlayOneShotAnimKit(uint16 animKitId)
 {
     WorldPacket data(SMSG_PLAY_ONE_SHOT_ANIM_KIT, 8+1);
     data.appendPackGUID(GetGUID());
-    data << uint16(id);
+    data << uint16(animKitId);
     SendMessageToSet(&data, true);
 }
 
