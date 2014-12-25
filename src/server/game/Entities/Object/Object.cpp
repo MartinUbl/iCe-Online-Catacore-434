@@ -301,7 +301,10 @@ void Object::HideForPlayer(Player *target) const
 
 void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
 {
-    uint32 unkLoopCounter = 0;
+    uint32 stopFrameCount = 0;
+    if (GameObject const* go = ToGameObject())
+        if (go->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT)
+            stopFrameCount = go->GetGOValue()->Transport.StopFrames->size();
 
     bool hasTransportTime2 = false;
     bool hasTransportTime3 = false;
@@ -317,7 +320,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     data->WriteBit(flags & UPDATEFLAG_HAS_SELF);
     data->WriteBit(flags & UPDATEFLAG_HAS_VEHICLE);
     data->WriteBit(flags & UPDATEFLAG_HAS_LIVING);
-    data->WriteBits(unkLoopCounter, 24);
+    data->WriteBits(stopFrameCount, 24);
     data->WriteBit(0);
     data->WriteBit(flags & UPDATEFLAG_HAS_GO_POSITION);
     data->WriteBit(flags & UPDATEFLAG_HAS_STATIONARY_POSITION);
@@ -422,8 +425,9 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     data->FlushBits();
 
     // Data
-    for (uint32 i = 0; i < unkLoopCounter; ++i)
-        *data << uint32(0);
+    if (GameObject const* go = ToGameObject())
+        for (uint32 i = 0; i < stopFrameCount; ++i)
+            *data << uint32(go->GetGOValue()->Transport.StopFrames->at(i));
 
     if (flags & UPDATEFLAG_HAS_LIVING)
     {
@@ -837,6 +841,8 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
     }
     else if (isType(TYPEMASK_GAMEOBJECT))                    // gameobject case
     {
+        GameObjectValue const* goValue = ToGameObject()->GetGOValue();
+
         for (uint16 index = 0; index < valCount; ++index)
         {
             if (updateMask->GetBit(index))
@@ -866,9 +872,18 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                                 else
                                     dynFlags |= GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE;
                                 break;
-                            case GAMEOBJECT_TYPE_MO_TRANSPORT:
-                                pathProgress = int16(float(((GameObject*)this)->GetGOValue()->Transport.PathProgress) / float(GetUInt32Value(GAMEOBJECT_LEVEL)) * 65535.0f);
+                            case GAMEOBJECT_TYPE_TRANSPORT:
+                            {
+                                float timer = float(goValue->Transport.PathProgress % ToGameObject()->GetTransportPeriod());
+                                pathProgress = int16(timer / float(ToGameObject()->GetTransportPeriod()) * 65535.0f);
                                 break;
+                            }
+                            case GAMEOBJECT_TYPE_MO_TRANSPORT:
+                            {
+                                float timer = float(goValue->Transport.PathProgress % GetUInt32Value(GAMEOBJECT_LEVEL));
+                                pathProgress = int16(timer / float(GetUInt32Value(GAMEOBJECT_LEVEL)) * 65535.0f);
+                                break;
+                            }
                             default:
                                 // unknown and other
                                 break;
@@ -889,6 +904,31 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                         flags = GO_FLAG_NODESPAWN | GO_FLAG_TRANSPORT;
 
                     *data << flags;
+                }
+                else if (index == GAMEOBJECT_LEVEL)
+                {
+                    bool isStoppableTransport = ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT && !goValue->Transport.StopFrames->empty();
+
+                    if (isStoppableTransport)
+                        *data << uint32(goValue->Transport.PathProgress);
+                    else
+                        *data << m_uint32Values[index];
+                }
+                else if (index == GAMEOBJECT_BYTES_1)
+                {
+                    bool isStoppableTransport = ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT && !goValue->Transport.StopFrames->empty();
+
+                    uint32 bytes1 = m_uint32Values[index];
+                    if (isStoppableTransport && ToGameObject()->GetGoState() == GO_STATE_TRANSPORT_ACTIVE)
+                    {
+                        if ((goValue->Transport.StateUpdateTimer / 20000) & 1)
+                        {
+                            bytes1 &= 0xFFFFFF00;
+                            bytes1 |= GO_STATE_TRANSPORT_STOPPED;
+                        }
+                    }
+
+                    *data << bytes1;
                 }
                 else
                     *data << m_uint32Values[index];                // other cases
