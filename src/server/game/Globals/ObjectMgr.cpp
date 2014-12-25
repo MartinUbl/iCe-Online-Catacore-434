@@ -9442,7 +9442,6 @@ void ObjectMgr::LoadTaxiData()
         memset(sHordeTaxiNodesMask, 0, sizeof(sHordeTaxiNodesMask));
         memset(sAllianceTaxiNodesMask, 0, sizeof(sAllianceTaxiNodesMask));
         memset(sDeathKnightTaxiNodesMask, 0, sizeof(sDeathKnightTaxiNodesMask));
-        sTaxiNodesByZoneAndType.clear();
         for (uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
         {
             TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(i);
@@ -9479,16 +9478,6 @@ void ObjectMgr::LoadTaxiData()
             if (node->MountCreatureID[0] == 32981 || node->MountCreatureID[1] == 32981)
                 sDeathKnightTaxiNodesMask[field] |= submask;
 
-            // Store taxi nodes by their type. Do not store "special" nodes cause we don't need them and they're
-            // problematic when looking for zone ID - often located far away from map, in invalid grid
-            if (sMapStore.LookupEntry(node->map_id) != NULL && node->team_id != TAXI_NODE_TYPE_SPECIAL)
-            {
-                uint32 zoneid = sMapMgr->GetZoneId(node->map_id, node->x, node->y, node->z);
-
-                if (zoneid > 0)
-                    sTaxiNodesByZoneAndType[zoneid][node->team_id].push_back(node->ID);
-            }
-
             // old continent node (+ nodes virtually at old continents, check explicitly to avoid loading map files for zone info)
             if (node->map_id < 2 || i == 82 || i == 83 || i == 93 || i == 94)
                 sOldContinentsNodesMask[field] |= submask;
@@ -9499,6 +9488,23 @@ void ObjectMgr::LoadTaxiData()
             }
         }
     }
+
+    sLog->outString("Loading taxi nodes by zone and team...");
+    sTaxiNodesByZoneAndType.clear();
+    QueryResult qres = WorldDatabase.Query("SELECT * FROM taxi_nodes_by_zone");
+    if (qres && qres->GetRowCount() > 0)
+    {
+        uint32 count = 0;
+        do
+        {
+            sTaxiNodesByZoneAndType[(*qres)[0].GetInt32()][(*qres)[1].GetInt32()].push_back((*qres)[2].GetInt32());
+            count++;
+        } while (qres->NextRow());
+
+        sLog->outString(">> Loaded %d taxi nodes by zone and team", count);
+    }
+    else
+        sLog->outString(">> Loaded 0 taxi nodes by zone and team, table taxi_nodes_by_zone does not exist or is empty");
 }
 
 // Functions for scripting access
