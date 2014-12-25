@@ -112,6 +112,8 @@ class TransportMgr
         // Spawns all continent transports, used at core startup
         void SpawnContinentTransports();
 
+        void LoadTransportNPCs();
+
         // creates all transports for instance
         void CreateInstanceTransports(Map* map);
 
@@ -153,6 +155,8 @@ class TransportMgr
 
         // Container storing transport entries to create for instanced maps
         TransportInstanceMap _instanceTransports;
+
+        TransportMap _continentTransports;
 
         TransportAnimationContainer _transportAnimations;
 };

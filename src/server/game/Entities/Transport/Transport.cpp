@@ -190,7 +190,11 @@ void Transport::Update(uint32 diff)
 void Transport::AddPassenger(WorldObject* passenger)
 {
     if (_passengers.insert(passenger).second)
+    {
+        passenger->SetTransport(this);
+        passenger->m_movementInfo.t_guid = GetGUID();
         sLog->outDetail("Object %s boarded transport %s.", passenger->GetName(), GetName());
+    }
 
     if (Player* plr = passenger->ToPlayer())
         sScriptMgr->OnAddPassenger(this, plr);
@@ -228,8 +232,11 @@ Creature* Transport::CreateNPCPassenger(uint32 guid, CreatureData const* data)
     creature->m_movementInfo.t_pos.Relocate(x, y, z, o);
     CalculatePassengerPosition(x, y, z, &o);
     creature->Relocate(x, y, z, o);
+
     creature->SetHomePosition(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation());
     creature->SetTransportHomePosition(creature->m_movementInfo.t_pos);
+
+    creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
 
     if (!creature->IsPositionValid())
     {
@@ -243,6 +250,53 @@ Creature* Transport::CreateNPCPassenger(uint32 guid, CreatureData const* data)
 
     sScriptMgr->OnAddCreaturePassenger(this, creature);
     return creature;
+}
+
+Creature* Transport::SpawnNPCPassenger(uint32 entry, float x, float y, float z, float o, uint32 emoteId)
+{
+    Map* map = GetMap();
+
+    CreatureInfo const *ci = sObjectMgr->GetCreatureTemplate(entry);
+
+    if (!ci)
+        return 0;
+
+    Creature* pCreature = new Creature();
+
+    if (!pCreature->Create(sObjectMgr->GenerateLowGuidForUnit(true), map, GetPhaseMask(), entry, 0, GetGOInfo()->faction, 0, 0, 0, 0))
+    {
+        delete pCreature;
+        return NULL;
+    }
+
+    pCreature->SetTransport(this);
+    pCreature->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+    pCreature->m_movementInfo.t_guid = GetGUID();
+    pCreature->m_movementInfo.t_pos.Relocate(x, y, z, o);
+    CalculatePassengerPosition(x, y, z, &o);
+    pCreature->Relocate(x, y, z, o);
+
+    pCreature->SetHomePosition(pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ(), pCreature->GetOrientation());
+    pCreature->SetTransportHomePosition(pCreature->m_movementInfo.t_pos);
+
+    pCreature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+
+    if (emoteId)
+        pCreature->SetUInt32Value(UNIT_NPC_EMOTESTATE, emoteId);
+
+    if (!pCreature->IsPositionValid())
+    {
+        sLog->outError("Creature (guidlow %d, entry %d) not spawned. Suggested coordinates aren't valid (X: %f Y: %f)", pCreature->GetGUIDLow(), pCreature->GetEntry(), pCreature->GetPositionX(), pCreature->GetPositionY());
+        delete pCreature;
+        return NULL;
+    }
+
+    map->Add(pCreature);
+    _passengers.insert(pCreature);
+
+    sScriptMgr->OnAddCreaturePassenger(this, pCreature);
+
+    return pCreature;
 }
 
 GameObject* Transport::CreateGOPassenger(uint32 guid, GameObjectData const* data)

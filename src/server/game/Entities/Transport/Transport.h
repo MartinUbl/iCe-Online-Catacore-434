@@ -43,6 +43,7 @@ public:
     std::set<WorldObject*> const& GetPassengers() const { return _passengers; }
 
     Creature* CreateNPCPassenger(uint32 guid, CreatureData const* data);
+    Creature* SpawnNPCPassenger(uint32 entry, float x, float y, float z, float o, uint32 emoteId);
     GameObject* CreateGOPassenger(uint32 guid, GameObjectData const* data);
 
     /// This method transforms supplied transport offsets into global coordinates

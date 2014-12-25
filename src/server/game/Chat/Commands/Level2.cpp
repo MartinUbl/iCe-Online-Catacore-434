@@ -39,6 +39,7 @@
 #include "AccountMgr.h"
 #include "WaypointManager.h"
 #include "Util.h"
+#include "MapManager.h"
 #include <cctype>
 #include <iostream>
 #include <fstream>
@@ -1068,9 +1069,32 @@ bool ChatHandler::HandleNpcAddCommand(const char* args)
         data.posZ = chr->GetTransOffsetZ();
         data.orientation = chr->GetTransOffsetO();
 
-        Creature* creature = trans->CreateNPCPassenger(guid, &data);
+        CreatureInfo const *ci = sObjectMgr->GetCreatureTemplate(id);
+        if (!ci)
+            return false;
 
-        creature->SaveToDB(trans->GetGOInfo()->moTransport.mapID, 1 << map->GetSpawnMode(), chr->GetPhaseMaskForSpawn());
+        Creature* pCreature = NULL;
+        if (ci->ScriptID)
+            pCreature = sScriptMgr->GetCreatureScriptedClass(ci->ScriptID);
+        if (pCreature == NULL)
+            pCreature = new Creature();
+
+        map = sMapMgr->CreateMap(trans->GetGOInfo()->moTransport.mapID, chr, 0);
+
+        if (!pCreature->Create(guid, map, chr->GetPhaseMaskForSpawn(), id, 0, (uint32)teamval, x, y, z, o))
+        {
+            delete pCreature;
+            return false;
+        }
+
+        pCreature->SaveToDB(trans->GetGOInfo()->moTransport.mapID, 1 << map->GetSpawnMode(), chr->GetPhaseMaskForSpawn());
+
+        Creature* cr = trans->CreateNPCPassenger(guid, &data);
+
+        if (cr)
+        {
+            cr->SaveToDB(trans->GetGOInfo()->moTransport.mapID, 1 << map->GetSpawnMode(), chr->GetPhaseMaskForSpawn());
+        }
 
         sObjectMgr->AddCreatureToGrid(guid, &data);
 

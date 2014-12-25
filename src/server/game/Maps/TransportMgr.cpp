@@ -402,13 +402,58 @@ void TransportMgr::SpawnContinentTransports()
 
             if (TransportTemplate const* tInfo = GetTransportTemplate(entry))
                 if (!tInfo->inInstance)
-                    if (CreateTransport(entry, guid))
+                    if (Transport* tr = CreateTransport(entry, guid))
+                    {
+                        _continentTransports[entry].insert(tr);
                         ++count;
+                    }
 
         } while (result->NextRow());
     }
 
     sLog->outString(">> Spawned %u continent transports", count);
+}
+
+void TransportMgr::LoadTransportNPCs()
+{
+    // Spawn NPCs linked to the transport
+    //                                                0     1          2                3             4             5             6             7
+    QueryResult result = WorldDatabase.PQuery("SELECT guid, npc_entry, transport_entry, TransOffsetX, TransOffsetY, TransOffsetZ, TransOffsetO, emote FROM creature_transport");
+    uint32 count = 0;
+
+    if (!result)
+    {
+        sLog->outString();
+        sLog->outString(">> Loaded 0 transport NPCs.");
+        return;
+    }
+
+    do
+    {
+        Field *fields = result->Fetch();
+        //uint32 guid = fields[0].GetUInt32();
+        uint32 entry = fields[1].GetUInt32();
+        uint32 transportEntry = fields[2].GetUInt32();
+        float tX = fields[3].GetFloat();
+        float tY = fields[4].GetFloat();
+        float tZ = fields[5].GetFloat();
+        float tO = fields[6].GetFloat();
+        uint32 anim = fields[7].GetUInt32();
+
+        TransportMap::iterator iter = _continentTransports.find(transportEntry);
+        if (iter != _continentTransports.end())
+        {
+            for (TransportSet::iterator itr = (*iter).second.begin(); itr != (*iter).second.end(); ++itr)
+            {
+                (*itr)->SpawnNPCPassenger(entry, tX, tY, tZ, tO, anim);
+                break;
+            }
+        }
+
+        count++;
+    } while (result->NextRow());
+    sLog->outString();
+    sLog->outString(">> Loaded %u transport npcs", count);
 }
 
 void TransportMgr::CreateInstanceTransports(Map* map)

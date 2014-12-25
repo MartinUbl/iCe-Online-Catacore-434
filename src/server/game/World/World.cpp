@@ -1856,6 +1856,7 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("Loading Transports...");
     sTransportMgr->SpawnContinentTransports();
+    sTransportMgr->LoadTransportNPCs();
 
     sLog->outString("Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate");
