@@ -306,6 +306,10 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
         return;
     }
 
+    // stop some emotes at player move
+    if (plMover && (plMover->GetUInt32Value(UNIT_NPC_EMOTESTATE) != 0))
+        plMover->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+
     /* handle special cases */
     if (movementInfo.t_guid)
     {
