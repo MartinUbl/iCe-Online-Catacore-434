@@ -1369,7 +1369,7 @@ void Group::OnGroupSlain(Unit* pVictim)
         {
             AccessRequirement const* ar = sObjectMgr->GetAccessRequirement(de->mapId, GetDifficulty(isRaidGroup()));
             // allow only 4 level difference between desired min level and average group member level
-            if (ar->levelMin == 0 || abs((int32)ar->levelMin - (int32)GetAverageLevel()) <= 4)
+            if (ar && (ar->levelMin == 0 || abs((int32)ar->levelMin - (int32)GetAverageLevel()) <= 4))
             {
                 for (Group::MemberSlotList::const_iterator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
                     if (Player* player = sObjectMgr->GetPlayer(itr->guid))
