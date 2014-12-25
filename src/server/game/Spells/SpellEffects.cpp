@@ -8703,7 +8703,7 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
 
     Player* plr = m_caster->m_movedPlayer;
 
-    if (plr == NULL)
+    if (!plr || !plr->IsInWorld())
         return;
 
     if (damage > 0)
