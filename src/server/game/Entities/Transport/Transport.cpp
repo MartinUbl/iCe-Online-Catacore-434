@@ -34,7 +34,7 @@
 Transport::Transport() : GameObject(),
 _transportInfo(NULL), _isMoving(true), _pendingStop(false)
 {
-    m_updateFlag = (UPDATEFLAG_HAS_GO_TRANSPORT_TIME | UPDATEFLAG_HAS_LOWGUID | UPDATEFLAG_HAS_STATIONARY_POSITION | UPDATEFLAG_HAS_GO_ROTATION);
+    m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_LOWGUID | UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_ROTATION);
 }
 
 Transport::~Transport()

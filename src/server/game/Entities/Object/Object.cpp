@@ -170,7 +170,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
 
     /** lower flag1 **/
     if (target == this)                                      // building packet for yourself
-        flags |= UPDATEFLAG_HAS_SELF;
+        flags |= UPDATEFLAG_SELF;
     else if (GetTypeId() == TYPEID_PLAYER)
         valCount = PLAYER_END_NOT_SELF;
 
@@ -195,7 +195,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
             break;
     }
 
-    if (flags & UPDATEFLAG_HAS_STATIONARY_POSITION)
+    if (flags & UPDATEFLAG_STATIONARY_POSITION)
     {
         // UPDATETYPE_CREATE_OBJECT2 for some gameobject types...
         if (isType(TYPEMASK_GAMEOBJECT))
@@ -215,7 +215,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     }
 
     if (ToUnit() && ToUnit()->GetVictim())
-        flags |= UPDATEFLAG_HAS_ATTACKING_TARGET;
+        flags |= UPDATEFLAG_HAS_TARGET;
 
     ByteBuffer buf(500);
     buf << uint8(updateType);
@@ -314,21 +314,21 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     // Bit content
     data->WriteBit(0);
     data->WriteBit(0);
-    data->WriteBit(flags & UPDATEFLAG_HAS_GO_ROTATION);
-    data->WriteBit(flags & UPDATEFLAG_HAS_ANIMKITS);
-    data->WriteBit(flags & UPDATEFLAG_HAS_ATTACKING_TARGET);
-    data->WriteBit(flags & UPDATEFLAG_HAS_SELF);
-    data->WriteBit(flags & UPDATEFLAG_HAS_VEHICLE);
-    data->WriteBit(flags & UPDATEFLAG_HAS_LIVING);
+    data->WriteBit(flags & UPDATEFLAG_ROTATION);
+    data->WriteBit(flags & UPDATEFLAG_ANIMKITS);
+    data->WriteBit(flags & UPDATEFLAG_HAS_TARGET);
+    data->WriteBit(flags & UPDATEFLAG_SELF);
+    data->WriteBit(flags & UPDATEFLAG_VEHICLE);
+    data->WriteBit(flags & UPDATEFLAG_LIVING);
     data->WriteBits(stopFrameCount, 24);
     data->WriteBit(0);
-    data->WriteBit(flags & UPDATEFLAG_HAS_GO_POSITION);
-    data->WriteBit(flags & UPDATEFLAG_HAS_STATIONARY_POSITION);
-    data->WriteBit(flags & UPDATEFLAG_HAS_GO_TRANSPORT_TIME_ARRAY);
+    data->WriteBit(flags & UPDATEFLAG_GO_TRANSPORT_POSITION);
+    data->WriteBit(flags & UPDATEFLAG_STATIONARY_POSITION);
+    data->WriteBit(flags & UPDATEFLAG_UNK5);
     data->WriteBit(0);
-    data->WriteBit(flags & UPDATEFLAG_HAS_GO_TRANSPORT_TIME);
+    data->WriteBit(flags & UPDATEFLAG_TRANSPORT);
 
-    if (flags & UPDATEFLAG_HAS_LIVING)
+    if (flags & UPDATEFLAG_LIVING)
     {
         Unit* self = ((Unit*)this);
         ObjectGuid guid = GetGUID();
@@ -386,7 +386,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             data->WriteBits(movementFlagsExtra, 12);
     }
 
-    if (flags & UPDATEFLAG_HAS_GO_POSITION)
+    if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.t_guid;
@@ -402,7 +402,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         data->WriteBit(transGuid[7]);
     }
 
-    if (flags & UPDATEFLAG_HAS_ATTACKING_TARGET)
+    if (flags & UPDATEFLAG_HAS_TARGET)
     {
         ObjectGuid victimGuid = ToUnit()->GetVictim()->GetGUID();   // checked in BuildCreateUpdateBlockForPlayer
         data->WriteBit(victimGuid[2]);
@@ -415,7 +415,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         data->WriteBit(victimGuid[3]);
     }
 
-    if (flags & UPDATEFLAG_HAS_ANIMKITS)
+    if (flags & UPDATEFLAG_ANIMKITS)
     {
         data->WriteBit(1);                                                      // Missing AnimKit1
         data->WriteBit(1);                                                      // Missing AnimKit2
@@ -429,7 +429,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         for (uint32 i = 0; i < stopFrameCount; ++i)
             *data << uint32(go->GetGOValue()->Transport.StopFrames->at(i));
 
-    if (flags & UPDATEFLAG_HAS_LIVING)
+    if (flags & UPDATEFLAG_LIVING)
     {
         Unit* self = ((Unit*)this);
         ObjectGuid guid = GetGUID();
@@ -516,14 +516,14 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         *data << self->GetSpeed(MOVE_FLIGHT);
     }
 
-    if (flags & UPDATEFLAG_HAS_VEHICLE)
+    if (flags & UPDATEFLAG_VEHICLE)
     {
         Unit const* self = ToUnit();
         *data << float(self->GetOrientation());
         *data << uint32(self->GetVehicleKit()->GetVehicleInfo()->m_ID);
     }
 
-    if (flags & UPDATEFLAG_HAS_GO_POSITION)
+    if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.t_guid;
@@ -549,10 +549,10 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             *data << uint32(transportTime2);
     }
 
-    if (flags & UPDATEFLAG_HAS_GO_ROTATION)
+    if (flags & UPDATEFLAG_ROTATION)
         *data << uint64(ToGameObject()->GetRotation());
 
-    if (flags & UPDATEFLAG_HAS_GO_TRANSPORT_TIME_ARRAY)
+    if (flags & UPDATEFLAG_UNK5)
     {
         *data << float(0.0f);
         *data << float(0.0f);
@@ -573,7 +573,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         *data << float(0.0f);
     }
 
-    if (flags & UPDATEFLAG_HAS_STATIONARY_POSITION)
+    if (flags & UPDATEFLAG_STATIONARY_POSITION)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         *data << float(self->GetStationaryO());
@@ -585,7 +585,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             *data << float(self->GetStationaryZ());
     }
 
-    if (flags & UPDATEFLAG_HAS_ATTACKING_TARGET)
+    if (flags & UPDATEFLAG_HAS_TARGET)
     {
         ObjectGuid victimGuid = ToUnit()->GetVictim()->GetGUID();   // checked in BuildCreateUpdateBlockForPlayer
         data->WriteByteSeq(victimGuid[4]);
@@ -608,7 +608,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     //        *data << uint16(animKit3);
     //}
 
-    if (flags & UPDATEFLAG_HAS_GO_TRANSPORT_TIME)
+    if (flags & UPDATEFLAG_TRANSPORT)
     {
         GameObject const* go = ToGameObject();
         /** @TODO Use IsTransport() to also handle type 11 (TRANSPORT)
