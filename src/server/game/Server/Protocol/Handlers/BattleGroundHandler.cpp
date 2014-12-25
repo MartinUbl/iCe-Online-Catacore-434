@@ -1115,7 +1115,6 @@ void WorldSession::HandleWargameStart(WorldPacket& recvData)
     // there are several disabled battlegrounds / arenas
     switch (bgTypeId)
     {
-        case BATTLEGROUND_RV:
         case BATTLEGROUND_IC:
         case BATTLEGROUND_SA:
             SendNotification("This battleground is currently disabled.");
