@@ -341,6 +341,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
     unit->m_movementInfo.t_time = 0; // 1 for player
     unit->m_movementInfo.t_seat = seat->first;
     unit->m_movementInfo.t_guid = me->GetGUID();
+    unit->m_movementInfo.t_vehicleId = m_vehicleInfo->m_ID;
 
     if (me->GetTypeId() == TYPEID_UNIT
         && unit->GetTypeId() == TYPEID_PLAYER

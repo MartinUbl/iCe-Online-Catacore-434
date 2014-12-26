@@ -472,7 +472,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
     bool hasOrientation = false;
     bool hasTransportData = false;
     bool hasTransportTime2 = false;
-    bool hasTransportTime3 = false;
+    bool hasTransportVehicleId = false;
     bool hasPitch = false;
     bool hasFallData = false;
     bool hasFallDirection = false;
@@ -541,9 +541,9 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
                 if (hasTransportData)
                     hasTransportTime2 = data.ReadBit();
                 break;
-            case MSEHasTransportTime3:
+            case MSEhasTransportVehicleId:
                 if (hasTransportData)
-                    hasTransportTime3 = data.ReadBit();
+                    hasTransportVehicleId = data.ReadBit();
                 break;
             case MSEHasPitch:
                 hasPitch = !data.ReadBit();
@@ -614,9 +614,9 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
                 if (hasTransportData && hasTransportTime2)
                     data >> mi->t_time2;
                 break;
-            case MSETransportTime3:
-                if (hasTransportData && hasTransportTime3)
-                    data >> mi->t_time3;
+            case MSETransportVehicleId:
+                if (hasTransportData && hasTransportVehicleId)
+                    data >> mi->t_vehicleId;
                 break;
             case MSEPitch:
                 if (hasPitch)
@@ -741,7 +741,7 @@ void WorldSession::WriteMovementInfo(WorldPacket &data, MovementInfo *mi)
     bool hasOrientation = !G3D::fuzzyEq(mi->pos.GetOrientation(), 0.0f);
     bool hasTransportData = mi->t_guid != 0;
     bool hasTransportTime2 = mi->HasExtraMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
-    bool hasTransportTime3 = false;
+    bool hasTransportVehicleId = false;
     bool hasPitch = mi->HasMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mi->HasExtraMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
     bool hasFallData = mi->HasMovementFlag(MOVEMENTFLAG_FALLING);
     bool hasFallDirection = mi->HasMovementFlag(MOVEMENTFLAG_FALLING);
@@ -813,9 +813,9 @@ void WorldSession::WriteMovementInfo(WorldPacket &data, MovementInfo *mi)
             if (hasTransportData)
                 data.WriteBit(hasTransportTime2);
             break;
-        case MSEHasTransportTime3:
+        case MSEhasTransportVehicleId:
             if (hasTransportData)
-                data.WriteBit(hasTransportTime3);
+                data.WriteBit(hasTransportVehicleId);
             break;
         case MSEHasPitch:
             data.WriteBit(!hasPitch);
@@ -886,9 +886,9 @@ void WorldSession::WriteMovementInfo(WorldPacket &data, MovementInfo *mi)
             if (hasTransportData && hasTransportTime2)
                 data << mi->t_time2;
             break;
-        case MSETransportTime3:
-            if (hasTransportData && hasTransportTime3)
-                data << mi->t_time3;
+        case MSETransportVehicleId:
+            if (hasTransportData && hasTransportVehicleId)
+                data << mi->t_vehicleId;
             break;
         case MSEPitch:
             if (hasPitch)

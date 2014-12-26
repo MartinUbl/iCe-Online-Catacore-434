@@ -21081,6 +21081,9 @@ void Unit::ExitVehicle()
     if (vehicleBase->HasUnitTypeMask(UNIT_MASK_MINION))
         if (((Minion*)vehicleBase)->GetOwner() == this)
             vehicle->Dismiss();
+
+    // vehicle ID should be set explicitly since we can't be sure we receive it back on movement update
+    m_movementInfo.t_vehicleId = 0;
 }
 
 void Unit::BuildMovementPacket(ByteBuffer *data) const

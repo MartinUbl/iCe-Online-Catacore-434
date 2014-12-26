@@ -2138,6 +2138,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             m_movementInfo.t_time = 0;
             m_movementInfo.t_seat = -1;
             m_movementInfo.t_guid = 0;
+            m_movementInfo.t_vehicleId = 0;
         }
     }
 

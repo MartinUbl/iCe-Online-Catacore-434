@@ -312,10 +312,11 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         if (go->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT)
             stopFrameCount = go->GetGOValue()->Transport.StopFrames->size();
 
-    bool hasTransportTime2 = false;
-    bool hasTransportTime3 = false;
     uint32 transportTime2 = 0;
-    uint32 transportTime3 = 0;
+    bool hasTransportTime2 = false;
+
+    uint32 transportVehicleId = (ToUnit() ? ToUnit()->m_movementInfo.t_vehicleId : 0);
+    bool hasTransportVehicleId = (transportVehicleId != 0);
 
     // Bit content
     data->WriteBit(0);
@@ -369,7 +370,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             data->WriteBit(transGuid[4]);
             data->WriteBit(transGuid[0]);
             data->WriteBit(transGuid[6]);
-            data->WriteBit(hasTransportTime3);                                                  // Has transport time 3
+            data->WriteBit(hasTransportVehicleId);                                                  // Has transport time 3
             data->WriteBit(transGuid[7]);
             data->WriteBit(transGuid[5]);
             data->WriteBit(transGuid[3]);
@@ -397,7 +398,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.t_guid;
         data->WriteBit(transGuid[5]);
-        data->WriteBit(hasTransportTime3);                                                      // Has GO transport time 3
+        data->WriteBit(hasTransportVehicleId);                                                      // Has GO transport time 3
         data->WriteBit(transGuid[0]);
         data->WriteBit(transGuid[3]);
         data->WriteBit(transGuid[6]);
@@ -485,8 +486,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             data->WriteByteSeq(transGuid[3]);
             *data << float(self->GetTransOffsetZ());
             data->WriteByteSeq(transGuid[0]);
-            if (hasTransportTime3)
-                *data << uint32(transportTime3);
+            if (hasTransportVehicleId)
+                *data << uint32(transportVehicleId);
 
             *data << int8(self->GetTransSeat());
             data->WriteByteSeq(transGuid[1]);
@@ -537,8 +538,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
 
         data->WriteBit(transGuid[0]);
         data->WriteBit(transGuid[5]);
-        if (hasTransportTime3)
-            *data << uint32(transportTime3);
+        if (hasTransportVehicleId)
+            *data << uint32(transportVehicleId);
 
         data->WriteBit(transGuid[3]);
         *data << float(self->GetTransOffsetX());
