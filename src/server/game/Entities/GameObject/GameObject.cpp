@@ -79,11 +79,12 @@ GameObject::GameObject() : WorldObject(), m_model(NULL), m_goValue(new GameObjec
 
 GameObject::~GameObject()
 {
+    if (m_goInfo && m_goInfo->type == GAMEOBJECT_TYPE_TRANSPORT && m_goValue->Transport.StopFrames)
+        delete m_goValue->Transport.StopFrames;
+
     delete m_goValue;
     delete m_AI;
     delete m_model;
-    if (m_goInfo->type == GAMEOBJECT_TYPE_TRANSPORT)
-        delete m_goValue->Transport.StopFrames;
     //if (m_uint32Values)                                      // field array can be not exist if GameOBject not loaded
     //    CleanupsBeforeDelete();
 }
