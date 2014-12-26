@@ -74,7 +74,17 @@ void BattlegroundRV::Update(uint32 diff)
                 setState(BG_RV_STATE_OPEN_PILARS);
                 break;
             case BG_RV_STATE_OPEN_PILARS:
-                for (i = BG_RV_OBJECT_PILAR_1; i <= BG_RV_OBJECT_PULLEY_2; ++i)
+                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_1]))
+                {
+                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
+                        gob->SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
+                }
+                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_3]))
+                {
+                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
+                        gob->SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
+                }
+                for (i = BG_RV_OBJECT_PILAR_COLLISION_1; i <= BG_RV_OBJECT_PULLEY_2; ++i)
                     DoorOpen(i);
                 TogglePillarCollision(false);
                 setTimer(BG_RV_PILAR_TO_FIRE_TIMER);
@@ -88,7 +98,17 @@ void BattlegroundRV::Update(uint32 diff)
                 break;
             case BG_RV_STATE_CLOSE_PILARS:
                 uint32 i;
-                for (i = BG_RV_OBJECT_PILAR_1; i <= BG_RV_OBJECT_PULLEY_2; ++i)
+                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_2]))
+                {
+                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
+                        gob->SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
+                }
+                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_4]))
+                {
+                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
+                        gob->SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
+                }
+                for (i = BG_RV_OBJECT_PILAR_COLLISION_1; i <= BG_RV_OBJECT_PULLEY_2; ++i)
                 {
                     //DoorClose(i);
                     if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[i]))
@@ -243,30 +263,37 @@ bool BattlegroundRV::SetupBattleground()
         sLog->outErrorDb("BatteGroundRV: Failed to spawn some object!");
         return false;
     }
+
+    // the pillars have to be stopped at the beginning
+    for (uint8 i = BG_RV_OBJECT_PILAR_1; i <= BG_RV_OBJECT_PILAR_4; ++i)
+    {
+        if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[i]))
+        {
+            gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
+        }
+    }
+
     return true;
 }
 
 void BattlegroundRV::TogglePillarCollision(bool apply)
 {
-    for (uint8 i = BG_RV_OBJECT_PILAR_1; i <= BG_RV_OBJECT_PILAR_COLLISION_4; ++i)
+    for (uint8 i = BG_RV_OBJECT_PILAR_COLLISION_1; i <= BG_RV_OBJECT_PILAR_COLLISION_4; ++i)
     {
         if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[i]))
         {
-            if (i >= BG_RV_OBJECT_PILAR_COLLISION_1)
-            {
-                uint32 _state = GO_STATE_READY;
-                if (gob->GetGOInfo()->door.startOpen)
-                    _state = GO_STATE_ACTIVE;
-                gob->SetGoState(apply ? (GOState)_state : (GOState)(!_state));
+            uint32 _state = GO_STATE_READY;
+            if (gob->GetGOInfo()->door.startOpen)
+                _state = GO_STATE_ACTIVE;
+            gob->SetGoState(apply ? (GOState)_state : (GOState)(!_state));
 
-                if (apply)
-                    gob->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_TRANSPORT);
-                else
-                    gob->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_TRANSPORT);
+            if (apply)
+                gob->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_TRANSPORT);
+            else
+                gob->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_TRANSPORT);
 
-                if (gob->GetGOInfo()->door.startOpen)
-                    gob->EnableCollision(apply); // Forced collision toggle
-            }
+            if (gob->GetGOInfo()->door.startOpen)
+                gob->EnableCollision(apply); // Forced collision toggle
 
             for (BattlegroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
                 if (Player* player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER)))
