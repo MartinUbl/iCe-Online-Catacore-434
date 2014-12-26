@@ -713,7 +713,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_BYTES_1, 1)); }
         void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_BYTES_1, 1, type); }
         GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_BYTES_1, 0)); }
-        void SetGoState(GOState state);
+        void SetGoState(GOState state, bool force = false);
         uint32 GetTransportPeriod() const;
         void SetTransportState(GOState state, uint32 stopFrame = 0);
         uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_BYTES_1, 2); }

@@ -242,7 +242,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
 
     // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
     SetGoType(GameobjectTypes(goinfo->type));
-    SetGoState(go_state);
+    SetGoState(go_state, true);
 
     SetGoArtKit(0);                                         // unknown what this is
     SetByteValue(GAMEOBJECT_BYTES_1, 2, artKit);
@@ -274,10 +274,20 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
                 m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame3);
             if (goinfo->transport.stopFrame4 > 0)
                 m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame4);
-            if (goinfo->transport.startOpen)
-                SetTransportState(GO_STATE_TRANSPORT_STOPPED, goinfo->transport.startOpen - 1);
-            else
-                SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
+
+            // set proper transport state only when dealing with non-custom transports
+            if (m_goValue->Transport.AnimationInfo)
+            {
+                if (goinfo->transport.startOpen)
+                {
+                    if (goinfo->transport.startOpen > 0 && goinfo->transport.startOpen <= m_goValue->Transport.StopFrames->size())
+                        SetTransportState(GO_STATE_TRANSPORT_STOPPED, goinfo->transport.startOpen - 1);
+                    else
+                        SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
+                }
+                else
+                    SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
+            }
 
             SetGoAnimProgress(animprogress);
             break;
@@ -2102,8 +2112,23 @@ void GameObject::SetLootState(LootState s)
     }
 }
 
-void GameObject::SetGoState(GOState state)
+void GameObject::SetGoState(GOState state, bool force)
 {
+    // do not allow transport objects to have "ordinary" states - they have their own
+    if (!force && (GetGoType() == GAMEOBJECT_TYPE_TRANSPORT || GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT))
+    {
+        if (state == GO_STATE_ACTIVE || state == GO_STATE_ACTIVE_ALTERNATIVE)
+        {
+            SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
+            return;
+        }
+        else if (state == GO_STATE_READY)
+        {
+            SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
+            return;
+        }
+    }
+
     SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
     if (m_model && GetGOData() && GetGOInfo())
     {
@@ -2125,7 +2150,9 @@ void GameObject::SetGoState(GOState state)
 
 uint32 GameObject::GetTransportPeriod() const
 {
-    ASSERT(GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT);
+    if (GetGOInfo()->type != GAMEOBJECT_TYPE_TRANSPORT)
+        return 1;
+
     if (m_goValue->Transport.AnimationInfo)
         return m_goValue->Transport.AnimationInfo->TotalTime;
 
@@ -2138,22 +2165,33 @@ void GameObject::SetTransportState(GOState state, uint32 stopFrame /*= 0*/)
     if (GetGoState() == state)
         return;
 
-    ASSERT(GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT);
-    ASSERT(state >= GO_STATE_TRANSPORT_ACTIVE);
+    if (GetGOInfo()->type != GAMEOBJECT_TYPE_TRANSPORT || state < GO_STATE_TRANSPORT_ACTIVE)
+        return;
+
     if (state == GO_STATE_TRANSPORT_ACTIVE)
     {
         m_goValue->Transport.StateUpdateTimer = 0;
         m_goValue->Transport.PathProgress = getMSTime();
         if (GetGoState() >= GO_STATE_TRANSPORT_STOPPED)
-            m_goValue->Transport.PathProgress += m_goValue->Transport.StopFrames->at(GetGoState() - GO_STATE_TRANSPORT_STOPPED);
+        {
+            if (m_goValue->Transport.StopFrames->size() > 0 && (int32) m_goValue->Transport.StopFrames->size() > GetGoState() - GO_STATE_TRANSPORT_STOPPED)
+                m_goValue->Transport.PathProgress += m_goValue->Transport.StopFrames->at(GetGoState() - GO_STATE_TRANSPORT_STOPPED);
+        }
         SetGoState(GO_STATE_TRANSPORT_ACTIVE);
     }
     else
     {
         if (state < GO_STATE_TRANSPORT_STOPPED + MAX_GO_STATE_TRANSPORT_STOP_FRAMES && stopFrame < m_goValue->Transport.StopFrames->size())
         {
-            m_goValue->Transport.PathProgress = getMSTime() + m_goValue->Transport.StopFrames->at(stopFrame);
-            SetGoState(GOState(GO_STATE_TRANSPORT_STOPPED + stopFrame));
+            if (m_goValue->Transport.StopFrames->size() > 0)
+            {
+                m_goValue->Transport.PathProgress = getMSTime() + m_goValue->Transport.StopFrames->at(stopFrame);
+                SetGoState(GOState(GO_STATE_TRANSPORT_STOPPED + stopFrame));
+            }
+            else
+            {
+                // is there such thing as "stopped" elevator with no stopframe?
+            }
         }
     }
 }

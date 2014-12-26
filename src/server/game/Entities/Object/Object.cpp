@@ -626,7 +626,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         resulting in players seeing the object in a different position
         - this may therefore lead to desynchronization
         */
-        if (go && go->IsTransport())
+        if (go && go->IsTransport() && go->GetGOValue()->Transport.AnimationInfo)
             *data << uint32(go->GetGOValue()->Transport.PathProgress);
         else
             *data << uint32(getMSTime());
@@ -884,14 +884,20 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                                 break;
                             case GAMEOBJECT_TYPE_TRANSPORT:
                             {
-                                float timer = float(goValue->Transport.PathProgress % ToGameObject()->GetTransportPeriod());
-                                pathProgress = int16(timer / float(ToGameObject()->GetTransportPeriod()) * 65535.0f);
+                                if (goValue->Transport.AnimationInfo)
+                                {
+                                    float timer = float(goValue->Transport.PathProgress % ToGameObject()->GetTransportPeriod());
+                                    pathProgress = int16(timer / float(ToGameObject()->GetTransportPeriod()) * 65535.0f);
+                                }
                                 break;
                             }
                             case GAMEOBJECT_TYPE_MO_TRANSPORT:
                             {
-                                float timer = float(goValue->Transport.PathProgress % GetUInt32Value(GAMEOBJECT_LEVEL));
-                                pathProgress = int16(timer / float(GetUInt32Value(GAMEOBJECT_LEVEL)) * 65535.0f);
+                                if (goValue->Transport.AnimationInfo)
+                                {
+                                    float timer = float(goValue->Transport.PathProgress % GetUInt32Value(GAMEOBJECT_LEVEL));
+                                    pathProgress = int16(timer / float(GetUInt32Value(GAMEOBJECT_LEVEL)) * 65535.0f);
+                                }
                                 break;
                             }
                             default:
