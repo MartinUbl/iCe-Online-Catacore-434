@@ -916,6 +916,14 @@ bool GameObject::IsDynTransport() const
     return gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT || (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT && m_goValue->Transport.StopFrames->empty());
 }
 
+// large objects (map objects only, GO type 14) does not disappear with large distances
+bool GameObject::IsLargeObject() const
+{
+    GameObjectInfo const * gInfo = GetGOInfo();
+    if (!gInfo) return false;
+    return gInfo->type == GAMEOBJECT_TYPE_MAP_OBJECT && gInfo->mapObject.largeObject != 0;
+}
+
 bool GameObject::IsDestructibleBuilding() const
 {
     GameObjectInfo const* gInfo = GetGOInfo();

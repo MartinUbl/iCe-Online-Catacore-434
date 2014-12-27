@@ -233,7 +233,14 @@ struct GameObjectInfo
             uint32 eventID;                                 //2
             uint32 openTextID;                              //3 can be used to replace castBarCaption?
         } camera;
-        //14 GAMEOBJECT_TYPE_MAPOBJECT - empty
+        //14 GAMEOBJECT_TYPE_MAPOBJECT
+        struct
+        {
+            uint32 unknown1;                                //0
+            uint32 unknown2;                                //1
+            uint32 unknown3;                                //2
+            uint32 largeObject;                             //3
+        } mapObject;
         //15 GAMEOBJECT_TYPE_MO_TRANSPORT
         struct
         {
@@ -641,6 +648,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
 
         bool IsTransport() const;
         bool IsDynTransport() const;
+        bool IsLargeObject() const;
 
         bool IsDestructibleBuilding() const;
 
