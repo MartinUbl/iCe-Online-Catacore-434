@@ -182,7 +182,7 @@ public:
 
         void RespawnMages()
         {
-            for (int i = 0; i < magesGUIDs.size(); i++)
+            for (uint32 i = 0; i < magesGUIDs.size(); i++)
                 if (Creature * magus = ObjectAccessor::GetCreature(*me,magesGUIDs[i]))
                 {
                     magus->CombatStop(true);
