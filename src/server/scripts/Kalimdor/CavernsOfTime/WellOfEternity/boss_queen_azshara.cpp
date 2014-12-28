@@ -442,7 +442,6 @@ public:
 
             if (magusReleaseTimer <= diff)
             {
-                uint32 _magusWave = magusWave;
                 uint32 _magesToSummon = magesToCall;
                 for (uint32 i = 0; i < _magesToSummon; i++)
                 {
