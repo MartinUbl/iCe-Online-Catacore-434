@@ -4753,8 +4753,15 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectAmplitude[EFFECT_1] = 1000; // prenerfed
             break;
         case 105543: // Absorb Fel Energy
+        case 105509: // Attack Me Peroth'arn
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
             spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_UNIT_TARGET_ANY;
+            break;
+        case 108141: // Fel Flames missile trigger
+            spellInfo->AttributesEx9 &= ~SPELL_ATTR9_SPECIAL_DELAY_CALCULATION; // with this attribute, spell will hit instantly after cast, we dont want it
+            break;
+        case 105544: // Fel Decay
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
             break;
 /********************-------- WELL OF ETERNITY END -----------********************/
 

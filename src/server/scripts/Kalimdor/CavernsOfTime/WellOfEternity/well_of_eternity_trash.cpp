@@ -20,8 +20,6 @@
 
 #define CAST_WOE_INSTANCE(i)     (dynamic_cast<instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript*>(i))
 
-#define NEVER  (0xffffffff)
-
 static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
 {
     source->PlayDistanceSound(quote.soundID);
@@ -253,6 +251,14 @@ public:
             me->ForcedDespawn();
         }
 
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (me->GetExactDist2d(who) > 5.0f || who->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            ScriptedAI::MoveInLineOfSight(who);
+        }
+
         void UpdateAI(const uint32 diff)  override
         {
             if (!pInstance)
@@ -432,6 +438,12 @@ public:
             entry = me->GetEntry();
             pInstance = me->GetInstanceScript();
             portalClosed = false;
+
+            if ((entry == CORRUPTED_ARCANIST_ENTRY || DREADLORD_DEFFENDER_ENTRY) && me->ToTempSummon())
+            {
+                me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            }
         }
 
         uint32 entry;
@@ -544,6 +556,8 @@ public:
 
             if (id == 1 && entry == LEGION_DEMON_ENTRY)
             {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetReactState(REACT_AGGRESSIVE);
                 me->CastSpell(me, SPELL_SUMMON_FIREWALL_DUMMY, false);
                 me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
             }
@@ -609,6 +623,8 @@ public:
         {
             if (pInstance && (entry == CORRUPTED_ARCANIST_ENTRY || entry == DREADLORD_DEFFENDER_ENTRY))
             {
+                // Remove stealth auras
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(102994); // TODO: is this safe ? -> we should kill vehicle ...
                 CAST_WOE_INSTANCE(pInstance)->RegisterIllidanVictim(me->GetGUID());
 
                 if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
@@ -620,6 +636,15 @@ public:
                     }
                 }
             }
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (entry == GUARDIAN_DEMON_ENTRY)
+            if (me->GetExactDist2d(who) > 5.0f || who->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            ScriptedAI::MoveInLineOfSight(who);
         }
 
         void UpdateAI(const uint32 diff) override
@@ -1112,7 +1137,7 @@ namespace Illidan
             if (!pInstance)
                 return;
 
-            int32 id = (int32)wpID; // Shut the compiler mouth about unsigned / signed comparsion
+            int32 id = (int32)wpID; // Stop compiler bitching about unsigned / signed comparsion
 
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -1389,7 +1414,7 @@ namespace Illidan
                             if (range < 5.0f) // just for sure
                                 range = 5.0f;
                             me->GetNearPoint(me, x, y, z, range, 0, me->GetAngle(victim));
-                                me->GetMotionMaster()->MovePoint(ILLIDAN_ATTACK_START_WP, x, y, z);
+                            me->GetMotionMaster()->MovePoint(ILLIDAN_ATTACK_START_WP, x, y, z);
                         }
                     }
                     else
@@ -1457,7 +1482,10 @@ namespace Illidan
                     pAI->explainTimer = NEVER;
                     pAI->HandleVehicle(true);
                     if (pAI->pInstance)
+                    {
+                        pAI->pInstance->DoUpdateWorldState(WORLD_STATE_DEMONS_IN_COURTYARD, 1); // lets see hoe it looks like
                         pAI->pInstance->DoAddAuraOnPlayers(NULL, SPELL_SHADOW_CLOAK_TRIGGERER);
+                    }
 
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ILLIDAN_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2); // bubble
                     player->SEND_GOSSIP_MENU(ILLIDAN_GOSSIP_MENU_TEXT_ID_2, cr->GetGUID()); // text

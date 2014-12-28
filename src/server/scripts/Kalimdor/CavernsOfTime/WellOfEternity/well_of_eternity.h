@@ -19,20 +19,20 @@
 #define _WELL_OF_ETER_H_
 
 // Max timer
-#define NEVER  (0xffffffff)
+#define NEVER  0xffffffff
 
 // First demons Z coordinate
-#define START_Z_COORD (189.53f)
+#define START_Z_COORD 189.53f
 
-// Middle of Perotharn room
-#define COURTYARD_X (3339.75f)
-#define COURTYARD_Y (-4897.18f)
-#define COURTYARD_Z (181.08f)
+// Peroth'arn home position
+#define COURTYARD_X 3339.75f
+#define COURTYARD_Y -4897.18f
+#define COURTYARD_Z 181.08f
 
 // Coordinates of first escape waypoint for Perotharn and demons/arcanist (INTRO)
-#define ESCAPE_X (3192.74f)
-#define ESCAPE_Y (-4903.62f)
-#define ESCAPE_Z (194.35f)
+#define ESCAPE_X 3192.74f
+#define ESCAPE_Y -4903.62f
+#define ESCAPE_Z 194.35f
 
 enum EncounterData
 {
@@ -52,7 +52,8 @@ enum BossEntry
 
 enum WorldState
 {
-    WORLD_STATE_DEMONS_IN_COURTYARD = 6018
+    WORLD_STATE_DEMONS_IN_COURTYARD = 6018,
+    WORLD_STATE_DEMONS_IN_COURTYARD_COUNTER = 6017
 };
 
 enum goEntry

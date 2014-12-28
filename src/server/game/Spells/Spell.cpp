@@ -4016,6 +4016,8 @@ bool Spell::CanCancel()
         case 103821:
         // Warlord spell
         case 103946:
+        // Peroth'arn
+        case 104905:
             return false;
     }
     return true;

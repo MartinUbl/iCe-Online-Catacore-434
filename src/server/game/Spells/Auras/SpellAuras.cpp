@@ -1127,7 +1127,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                         break;
                     case 43648:     // Electrical Storm
-                    case 104905:    // Drain Essence (WoE)
+                    case 104905:    // Drain Essence
                         target->SetStunned(true);
                         break;
                     case 82724: // Eye of the Storm - Al'akir encounter fly aura
@@ -1846,7 +1846,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                         break;
                     case 43648:     // Electrical Storm
-                    case 104905:    // Drain Essence (WoE)
+                    case 104905:    // Drain Essence
                         target->SetStunned(false);
                         break;
                     case 99516: // Countdown - Baleroc HC
