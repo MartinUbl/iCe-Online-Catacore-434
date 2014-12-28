@@ -4763,6 +4763,14 @@ void SpellMgr::LoadSpellCustomAttr()
         case 105544: // Fel Decay
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
             break;
+        case 102478: // Ice Fling
+            spellInfo->MaxAffectedTargets = 1;
+            break;
+        case 102334: // Servant of the Queen
+            spellInfo->MaxAffectedTargets = 1;
+            //spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
+            break;
+
 /********************-------- WELL OF ETERNITY END -----------********************/
 
         // Heart of the Crusader
