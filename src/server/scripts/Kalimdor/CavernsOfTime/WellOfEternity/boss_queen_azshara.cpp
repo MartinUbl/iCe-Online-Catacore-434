@@ -1101,7 +1101,7 @@ public:
                 {
                     player->AddAura(SPELL_PUPPET_STRING_HOVER, player);
                     pHand->setFaction(14); // for sure
-                    pHand->EnterVehicle(player->GetVehicleKit(),0); // Must be explicit 0, if -1 emu will fuck us up
+                    pHand->EnterVehicle(veh,0); // Must be explicit 0, if -1 emu will fuck us up
                     pHand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 }
             }
