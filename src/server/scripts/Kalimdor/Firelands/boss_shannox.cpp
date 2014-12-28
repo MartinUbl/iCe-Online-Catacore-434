@@ -112,6 +112,8 @@ class boss_shannox : public CreatureScript
             uint32 riplimbRespawnTimer;
             uint32 enrageTimer;
             uint32 areaCheckTimer;
+            uint32 LoSCheckTimer;
+            uint32 LoSCounter;
             bool aggroBool;
 
             void ResetVisitedAreas()
@@ -143,6 +145,9 @@ class boss_shannox : public CreatureScript
 
             void Reset()
             {
+                LoSCheckTimer = 5000;
+                LoSCounter = 0;
+
                 pRiplimb = NULL;
                 pRageface = NULL;
 
@@ -486,6 +491,24 @@ class boss_shannox : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
+                // LOS glitch check
+                if (LoSCheckTimer <= diff)
+                {
+                    if (!me->IsWithinLOSInMap(me->GetVictim()) && !me->isMoving())
+                        LoSCounter++;
+                    else
+                        LoSCounter = 0;
+
+                    if (LoSCounter >= 5)
+                    {
+                        me->Kill(me->GetVictim()); // no mercy
+                        LoSCounter = 0;
+                    }
+
+                    LoSCheckTimer = 1000;
+                }
+                else LoSCheckTimer -= diff;
+
                 if (areaCheckTimer <= diff)
                 {
                     UpdateVisitedAreas();
@@ -528,7 +551,7 @@ class boss_shannox : public CreatureScript
                 if (enrageTimer <= diff)
                 {
                     me->CastSpell(me,SPELL_BERSERK,true);
-                    enrageTimer = 999999999;
+                    enrageTimer = NEVER;
                 }
                 else enrageTimer -= diff;
 
