@@ -3422,6 +3422,12 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool wi
         // for example, do not let self-stun aura interrupt itself
         if (!spell->IsInterruptable())
             return;
+        // AI interupt inform
+        if (GetTypeId() == TYPEID_UNIT)
+        {
+            if (ToCreature()->IsAIEnabled && spell->m_spellInfo)
+                ToCreature()->AI()->SpellCastInterrupted(spell->m_spellInfo);
+        }
 
         m_currentSpells[spellType] = NULL;
 
