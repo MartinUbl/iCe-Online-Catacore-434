@@ -621,6 +621,7 @@ void AddSC_boss_queen_azshara();
 void AddSC_boss_mannoroth();
 void AddSC_boss_perotharn();
 void AddSC_well_of_eternity_trash();
+void AddSC_woe_aspects_event();
 
 
 // battlegrounds
@@ -1279,6 +1280,7 @@ void AddCataclysmScripts()
     AddSC_boss_mannoroth();
     AddSC_boss_perotharn();
     AddSC_well_of_eternity_trash();
+    AddSC_woe_aspects_event();
 
     AddSC_instance_end_time();
     AddSC_boss_echo_of_jaina();
