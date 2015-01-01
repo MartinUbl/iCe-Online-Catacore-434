@@ -547,7 +547,7 @@ union GameObjectValue
         TransportAnimation const* AnimationInfo;
         uint32 CurrentSeg;
         std::vector<uint32>* StopFrames;
-        uint32 StateUpdateTimer;
+        uint8 VisualState;
     } Transport;
     //29 GAMEOBJECT_TYPE_CAPTURE_POINT
     struct

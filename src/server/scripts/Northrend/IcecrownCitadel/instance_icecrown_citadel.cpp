@@ -332,7 +332,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (state == DONE)
                             if (GameObject* elevator = instance->GetGameObject(ladyDeathwisperElevator))
                             {
-                                elevator->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
                                 elevator->SetGoState(GO_STATE_READY);
                             }
                         break;

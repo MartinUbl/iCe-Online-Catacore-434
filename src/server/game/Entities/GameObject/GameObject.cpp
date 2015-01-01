@@ -264,7 +264,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
             if (m_goValue->Transport.AnimationInfo)
                 m_goValue->Transport.PathProgress -= m_goValue->Transport.PathProgress % GetTransportPeriod();    // align to period
             m_goValue->Transport.CurrentSeg = 0;
-            m_goValue->Transport.StateUpdateTimer = 0;
+            m_goValue->Transport.VisualState = 0;
             m_goValue->Transport.StopFrames = new std::vector<uint32>();
             if (goinfo->transport.stopFrame1 > 0)
                 m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame1);
@@ -365,13 +365,16 @@ void GameObject::Update(uint32 diff)
 
                         if (!m_goValue->Transport.StopFrames->empty())
                         {
-                            uint32 visualStateBefore = (m_goValue->Transport.StateUpdateTimer / 20000) & 1;
-                            m_goValue->Transport.StateUpdateTimer += diff;
-                            uint32 visualStateAfter = (m_goValue->Transport.StateUpdateTimer / 20000) & 1;
-                            if (visualStateBefore != visualStateAfter)
+                            // TODO: verify that 20000, because i don't think TC got it right
+                            //       this causes active transport to change stop frame every 20s
+                            uint32 visualStateAfter = (m_goValue->Transport.PathProgress / 20000) % m_goValue->Transport.StopFrames->size();
+
+                            if (m_goValue->Transport.VisualState != visualStateAfter)
                             {
                                 ForceValuesUpdateAtIndex(GAMEOBJECT_LEVEL);
                                 ForceValuesUpdateAtIndex(GAMEOBJECT_BYTES_1);
+
+                                m_goValue->Transport.VisualState = visualStateAfter;
                             }
                         }
                     }
@@ -2178,7 +2181,6 @@ void GameObject::SetTransportState(GOState state, uint32 stopFrame /*= 0*/)
 
     if (state == GO_STATE_TRANSPORT_ACTIVE)
     {
-        m_goValue->Transport.StateUpdateTimer = 0;
         m_goValue->Transport.PathProgress = getMSTime();
         if (GetGoState() >= GO_STATE_TRANSPORT_STOPPED)
         {
@@ -2194,6 +2196,7 @@ void GameObject::SetTransportState(GOState state, uint32 stopFrame /*= 0*/)
             if (m_goValue->Transport.StopFrames->size() > 0)
             {
                 m_goValue->Transport.PathProgress = getMSTime() + m_goValue->Transport.StopFrames->at(stopFrame);
+                m_goValue->Transport.VisualState = (uint8)stopFrame;
                 SetGoState(GOState(GO_STATE_TRANSPORT_STOPPED + stopFrame));
             }
             else

@@ -887,7 +887,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                                 if (goValue->Transport.AnimationInfo)
                                 {
                                     float timer = float(goValue->Transport.PathProgress % ToGameObject()->GetTransportPeriod());
-                                    pathProgress = int16(timer / float(ToGameObject()->GetTransportPeriod()) * 65535.0f);
+                                    pathProgress = int16((timer / float(ToGameObject()->GetTransportPeriod())) * 65535.0f);
                                 }
                                 break;
                             }
@@ -896,7 +896,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                                 if (goValue->Transport.AnimationInfo)
                                 {
                                     float timer = float(goValue->Transport.PathProgress % GetUInt32Value(GAMEOBJECT_LEVEL));
-                                    pathProgress = int16(timer / float(GetUInt32Value(GAMEOBJECT_LEVEL)) * 65535.0f);
+                                    pathProgress = int16((timer / float(GetUInt32Value(GAMEOBJECT_LEVEL))) * 65535.0f);
                                 }
                                 break;
                             }
@@ -926,7 +926,10 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                     bool isStoppableTransport = ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT && !goValue->Transport.StopFrames->empty();
 
                     if (isStoppableTransport)
-                        *data << uint32(goValue->Transport.PathProgress);
+                    {
+                        int32 statePos = goValue->Transport.StopFrames->at((goValue->Transport.VisualState + 1) % goValue->Transport.StopFrames->size()) - goValue->Transport.StopFrames->at(goValue->Transport.VisualState);
+                        *data << uint32(goValue->Transport.PathProgress + abs(statePos));
+                    }
                     else
                         *data << m_uint32Values[index];
                 }
@@ -937,11 +940,8 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                     uint32 bytes1 = m_uint32Values[index];
                     if (isStoppableTransport && ToGameObject()->GetGoState() == GO_STATE_TRANSPORT_ACTIVE)
                     {
-                        if ((goValue->Transport.StateUpdateTimer / 20000) & 1)
-                        {
-                            bytes1 &= 0xFFFFFF00;
-                            bytes1 |= GO_STATE_TRANSPORT_STOPPED;
-                        }
+                        bytes1 &= 0xFFFFFF00;
+                        bytes1 |= GO_STATE_TRANSPORT_STOPPED + goValue->Transport.VisualState;
                     }
 
                     *data << bytes1;
