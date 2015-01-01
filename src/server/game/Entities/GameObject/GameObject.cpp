@@ -275,6 +275,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
             if (goinfo->transport.stopFrame4 > 0)
                 m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame4);
 
+            // when any stop frame is defined, it also includes the lowest frame possible
+            if (!m_goValue->Transport.StopFrames->empty())
+                m_goValue->Transport.StopFrames->insert(m_goValue->Transport.StopFrames->begin(), 0);
+
             // set proper transport state only when dealing with non-custom transports
             if (m_goValue->Transport.AnimationInfo)
             {
