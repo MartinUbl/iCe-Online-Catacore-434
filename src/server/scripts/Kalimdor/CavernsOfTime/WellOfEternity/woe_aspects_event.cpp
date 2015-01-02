@@ -349,34 +349,30 @@ public:
                 if (quoteStep < 3) // Don't summon when cleansing well
                 {
                     float x,y,z,o;
-                    if (Creature * doomguardLeader = me->SummonCreature(ENTRY_WELL_DOOMGUARD_DEVASTATOR,demonWellSummonPos1,TEMPSUMMON_TIMED_DESPAWN,12000))
+                    me->SummonCreature(ENTRY_WELL_DOOMGUARD_DEVASTATOR, demonWellSummonPos1, TEMPSUMMON_TIMED_DESPAWN, 12000);
+                    for (uint32 i = 0; i < 5; i++)
                     {
-                        for (uint32 i = 0; i < 5; i++)
-                        {
-                            x = demonWellSummonPos1.GetPositionX();
-                            y = demonWellSummonPos1.GetPositionY();
-                            z = demonWellSummonPos1.GetPositionZ();
-                            o = demonWellSummonPos1.GetOrientation() + (M_PI / 3.0f) * (i + 1);
+                        x = demonWellSummonPos1.GetPositionX();
+                        y = demonWellSummonPos1.GetPositionY();
+                        z = demonWellSummonPos1.GetPositionZ();
+                        o = demonWellSummonPos1.GetOrientation() + (M_PI / 3.0f) * (i + 1);
 
-                            GetLinePoint(x, y, 10.0f, MapManager::NormalizeOrientation(o));
+                        GetLinePoint(x, y, 10.0f, MapManager::NormalizeOrientation(o));
 
-                            me->SummonCreature(ENTRY_WELL_DOOMGUARD_DEVASTATOR, x, y, z, demonWellSummonPos1.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 12000);
-                        }
+                        me->SummonCreature(ENTRY_WELL_DOOMGUARD_DEVASTATOR, x, y, z, demonWellSummonPos1.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 12000);
                     }
 
-                    if (Creature * doomguardLeader = me->SummonCreature(ENTRY_WELL_DOOMGUARD_DEVASTATOR,demonWellSummonPos2,TEMPSUMMON_TIMED_DESPAWN,12000))
+                    me->SummonCreature(ENTRY_WELL_DOOMGUARD_DEVASTATOR, demonWellSummonPos2, TEMPSUMMON_TIMED_DESPAWN, 12000);
+                    for (uint32 i = 0; i < 5; i++)
                     {
-                        for (uint32 i = 0; i < 5; i++)
-                        {
-                            x = demonWellSummonPos2.GetPositionX();
-                            y = demonWellSummonPos2.GetPositionY();
-                            z = demonWellSummonPos2.GetPositionZ();
-                            o = demonWellSummonPos2.GetOrientation() + (M_PI / 3.0f) * (i + 1);
+                        x = demonWellSummonPos2.GetPositionX();
+                        y = demonWellSummonPos2.GetPositionY();
+                        z = demonWellSummonPos2.GetPositionZ();
+                        o = demonWellSummonPos2.GetOrientation() + (M_PI / 3.0f) * (i + 1);
 
-                            GetLinePoint(x, y, 10.0f, MapManager::NormalizeOrientation(o));
+                        GetLinePoint(x, y, 10.0f, MapManager::NormalizeOrientation(o));
 
-                            me->SummonCreature(ENTRY_WELL_DOOMGUARD_DEVASTATOR, x, y, z, demonWellSummonPos2.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 12000);
-                        }
+                        me->SummonCreature(ENTRY_WELL_DOOMGUARD_DEVASTATOR, x, y, z, demonWellSummonPos2.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 12000);
                     }
                 }
                 summonDemonsTimer = 10000;
