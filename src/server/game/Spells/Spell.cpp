@@ -7156,6 +7156,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                         break;
                 }
 
+                /* Ignore next triggered jump like checks if spell was triggered*/
+                if (IsTriggered())
+                    break;
+
                 /* destination must stand on flat ground (in players map) */
                 if (!sObjectMgr->IsFlatGround(m_caster->GetMap(), dpos->GetPositionX(), dpos->GetPositionY(), dpos->GetPositionZ()))
                     return SPELL_FAILED_OUT_OF_RANGE;
