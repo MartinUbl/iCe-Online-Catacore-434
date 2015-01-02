@@ -96,6 +96,14 @@ bool ChatHandler::HandleUnstuckCommand(const char* /*args*/)
         return false;
     }
 
+    uint32 mapId = chr->GetMapId();  
+    if (mapId == 609/*Plaguelands: The Scarlet Enclave*/ || mapId == 654/*Gilneas*/ || mapId == 648/*Kezan and Lost Isles*/ || mapId == 746/*iCe plantaz*/)
+    {
+        SendSysMessage("You can not use unstuck here, please contact GM directly if needed");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
     // cast spell Stuck
     chr->CastSpell(chr, 7355, false);
     return true;
