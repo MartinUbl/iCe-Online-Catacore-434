@@ -51,6 +51,7 @@ class WorldSocket;
 class LoginQueryHolder;
 class CharacterHandler;
 class SpellCastTargets;
+class ExtraMovementStatusElement;
 struct AreaTableEntry;
 struct GM_Ticket;
 struct LfgJoinResultData;
@@ -173,8 +174,8 @@ class WorldSession
         void ReadAddonsInfo(WorldPacket &data);
         void SendAddonsInfo();
 
-        void ReadMovementInfo(WorldPacket &data, MovementInfo *mi);
-        void WriteMovementInfo(WorldPacket &data, MovementInfo *mi);
+        void ReadMovementInfo(WorldPacket &data, MovementInfo *mi, ExtraMovementStatusElement* miextra = NULL);
+        void WriteMovementInfo(WorldPacket &data, MovementInfo *mi, ExtraMovementStatusElement* miextra = NULL);
 
         void SendPacket(WorldPacket const* packet);
         void SendNotification(const char *format,...) ATTR_PRINTF(2,3);

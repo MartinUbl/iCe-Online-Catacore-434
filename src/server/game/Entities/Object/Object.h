@@ -589,6 +589,7 @@ struct MovementInfo
     float   j_zspeed, j_sinAngle, j_cosAngle, j_xyspeed;
     // spline
     float   splineElevation;
+    uint32  movementCounter;
 
     MovementInfo()
     {
@@ -603,6 +604,7 @@ struct MovementInfo
         t_guid = 0;
         t_pos.Relocate(0,0,0,0);
         t_seat = -1;
+        movementCounter = 0;
     }
 
     uint32 GetMovementFlags() const { return flags; }

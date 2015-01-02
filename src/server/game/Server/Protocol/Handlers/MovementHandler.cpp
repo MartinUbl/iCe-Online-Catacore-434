@@ -464,7 +464,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
     }
 }
 
-void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
+void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi, ExtraMovementStatusElement* miextra)
 {
     bool hasMovementFlags = false;
     bool hasMovementFlags2 = false;
@@ -479,7 +479,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
     bool hasSplineElevation = false;
     /*bool hasSpline = false;*/ // unused (for now)
 
-    MovementStatusElements *sequence = GetMovementStatusElementsSequence(data.GetOpcode());
+    MovementStatusElements const* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (sequence == NULL)
         return;
 
@@ -541,7 +541,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
                 if (hasTransportData)
                     hasTransportTime2 = data.ReadBit();
                 break;
-            case MSEhasTransportVehicleId:
+            case MSEHasTransportTime3:
                 if (hasTransportData)
                     hasTransportVehicleId = data.ReadBit();
                 break;
@@ -646,9 +646,16 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
                 if (hasSplineElevation)
                     data >> mi->splineElevation;
                 break;
+            case MSECounter:
+                data.read_skip<uint32>();   /// @TODO: Maybe compare it with m_movementCounter to verify that packets are sent & received in order?
+                break;
             case MSEZeroBit:
             case MSEOneBit:
                 data.ReadBit();
+                break;
+            case MSEExtraElement:
+                if (miextra)
+                    miextra->ReadNextElement(data);
                 break;
             default:
                 ASSERT(false && "Incorrect sequence element detected at ReadMovementInfo");
@@ -733,7 +740,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
     #undef REMOVE_VIOLATING_FLAGS
 }
 
-void WorldSession::WriteMovementInfo(WorldPacket &data, MovementInfo *mi)
+void WorldSession::WriteMovementInfo(WorldPacket &data, MovementInfo *mi, ExtraMovementStatusElement* miextra)
 {
     bool hasMovementFlags = mi->GetMovementFlags() != 0;
     bool hasMovementFlags2 = mi->GetExtraMovementFlags() != 0;
@@ -741,14 +748,14 @@ void WorldSession::WriteMovementInfo(WorldPacket &data, MovementInfo *mi)
     bool hasOrientation = !G3D::fuzzyEq(mi->pos.GetOrientation(), 0.0f);
     bool hasTransportData = mi->t_guid != 0;
     bool hasTransportTime2 = mi->HasExtraMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
-    bool hasTransportVehicleId = false;
+    bool hasTransportVehicleId = hasTransportData && mi->t_vehicleId != 0;
     bool hasPitch = mi->HasMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mi->HasExtraMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
     bool hasFallData = mi->HasMovementFlag(MOVEMENTFLAG_FALLING);
     bool hasFallDirection = mi->HasMovementFlag(MOVEMENTFLAG_FALLING);
     bool hasSplineElevation = mi->HasMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
     bool hasSpline = false;
 
-    MovementStatusElements* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
+    MovementStatusElements const* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (!sequence)
     {
         sLog->outError("WorldSession::WriteMovementInfo: No movement sequence found for opcode 0x%04X", uint32(data.GetOpcode()));
@@ -813,7 +820,7 @@ void WorldSession::WriteMovementInfo(WorldPacket &data, MovementInfo *mi)
             if (hasTransportData)
                 data.WriteBit(hasTransportTime2);
             break;
-        case MSEhasTransportVehicleId:
+        case MSEHasTransportTime3:
             if (hasTransportData)
                 data.WriteBit(hasTransportVehicleId);
             break;
@@ -918,11 +925,18 @@ void WorldSession::WriteMovementInfo(WorldPacket &data, MovementInfo *mi)
             if (hasSplineElevation)
                 data << mi->splineElevation;
             break;
+        case MSECounter:
+            data << mi->movementCounter++;
+            break;
         case MSEZeroBit:
             data.WriteBit(0);
             break;
         case MSEOneBit:
             data.WriteBit(1);
+            break;
+        case MSEExtraElement:
+            if (miextra)
+                miextra->WriteNextElement(data);
             break;
         default:
             ASSERT(false && "Incorrect sequence element detected at ReadMovementInfo");
