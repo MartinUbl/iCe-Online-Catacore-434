@@ -2316,7 +2316,7 @@ void World::SendWorldTextToChannel(std::string channelName,int32 string_id, ...)
 
         if (ChannelMgr* cMgr = channelMgr(player->GetTeam()))
             if (Channel * channel = cMgr->GetChannel(channelName, player))
-                if (channel->IsPlayerInChannel(player->GetGUID()) && !(channelName.compare("krcma") == 0 && player->getDisabledPVPAnnounceStatus()))
+            if (channel->IsPlayerInChannel(player->GetGUID()) && !(channelName.compare("krcma") == 0 && player->isDisabledPVPAnnounceStatus()))  
                     wt_do(itr->second->GetPlayer());
     }
 
