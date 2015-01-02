@@ -600,7 +600,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi, ExtraMo
                 break;
             case MSETransportOrientation:
                 if (hasTransportData)
-                    mi->pos.SetOrientation(data.read<float>());
+                    mi->t_pos.SetOrientation(data.read<float>());
                 break;
             case MSETransportSeat:
                 if (hasTransportData)
