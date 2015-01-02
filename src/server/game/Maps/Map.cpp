@@ -2726,6 +2726,17 @@ void InstanceMap::InitVisibilityDistance()
     //init visibility distance for instances
     m_VisibleDistance = World::GetMaxVisibleDistanceInInstances();
     m_VisibilityNotifyPeriod = World::GetVisibilityNotifyPeriodInInstances();
+
+    // Allow some explicit visibility distances for instance maps (should be less than SIZE_OF_GRIDS ?)
+    switch (GetId())
+    {
+        // Well Of Eternity
+        case 939:
+            m_VisibleDistance = 500.0f;
+            break;
+        default:
+            break;
+    }
 }
 
 /*
