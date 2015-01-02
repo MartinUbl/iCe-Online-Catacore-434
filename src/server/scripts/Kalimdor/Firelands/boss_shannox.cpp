@@ -551,7 +551,7 @@ class boss_shannox : public CreatureScript
                 if (enrageTimer <= diff)
                 {
                     me->CastSpell(me,SPELL_BERSERK,true);
-                    enrageTimer = NEVER;
+                    enrageTimer = MAX_TIMER;
                 }
                 else enrageTimer -= diff;
 
@@ -1281,7 +1281,7 @@ class npc_rageface : public CreatureScript
                 jumpTimer = 30000;
                 //debuffTimer = jumpTimer + 3000;
                 changeTargetTimer = urand(5000,8000);
-                faceRageTimer = NEVER;
+                faceRageTimer = MAX_TIMER;
 
                 me->RemoveAllAuras();
                 me->SetReactState(REACT_PASSIVE);
@@ -1389,7 +1389,7 @@ class npc_rageface : public CreatureScript
                 if (faceRageTimer <= diff)
                 {
                     me->CastSpell(me->GetVictim(),99947,false); // Stunning and mauling enemy for 30 seconds with increasing damage
-                    faceRageTimer = NEVER;
+                    faceRageTimer = MAX_TIMER;
                 }
                 else faceRageTimer -= diff;
 

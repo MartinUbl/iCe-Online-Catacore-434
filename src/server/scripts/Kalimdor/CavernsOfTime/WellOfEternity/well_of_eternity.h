@@ -18,9 +18,6 @@
 #ifndef _WELL_OF_ETER_H_
 #define _WELL_OF_ETER_H_
 
-// Max timer
-#define NEVER  0xffffffff
-
 // First demons Z coordinate
 #define START_Z_COORD 189.53f
 

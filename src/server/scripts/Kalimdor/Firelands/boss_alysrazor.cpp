@@ -407,7 +407,7 @@ class boss_Alysrazor : public CreatureScript
 
                 EggSatchelTimer = 26000;
                 firestormTimer = 97000;
-                feathersTimer = NEVER;
+                feathersTimer = MAX_TIMER;
                 SummonInitiate = true;
                 SummonInitiateTimer = 20000;
                 firstPhaseTimer = IsHeroic() ? 250000 : 175000;
@@ -1046,7 +1046,7 @@ class boss_Alysrazor : public CreatureScript
                     FieryVortex = false;
                     Cycle = 0;
                     Rounds = 0;
-                    firstPhaseTimer = NEVER;
+                    firstPhaseTimer = MAX_TIMER;
                 }
                 else firstPhaseTimer -= diff;
 
@@ -1162,7 +1162,7 @@ class boss_Alysrazor : public CreatureScript
                         if(!IsHeroic())
                             SpawnWorms = false;
                         else
-                            SpawnWormsTimer = NEVER; // Should spawn 8 seconds after eggs hatch
+                            SpawnWormsTimer = MAX_TIMER; // Should spawn 8 seconds after eggs hatch
                     }
                     else SpawnWormsTimer -= diff;
 
@@ -1182,7 +1182,7 @@ class boss_Alysrazor : public CreatureScript
                         if(IsHeroic())
                             EggSatchelTimer = 60000 + 26000;
                         else
-                            EggSatchelTimer = NEVER; // Spawn only one pack of Hatchlings in normal mode
+                            EggSatchelTimer = MAX_TIMER; // Spawn only one pack of Hatchlings in normal mode
                     }
                     else EggSatchelTimer -= diff;
 
@@ -1227,7 +1227,7 @@ class boss_Alysrazor : public CreatureScript
                             float iCycleSLot = (M_PI/max)*l; // summon feather in cycle - only for visual effect
                             me->SummonCreature(53089, sx + 2*cos(iCycleSLot), sy + 2*sin(iCycleSLot), z, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 35000);
                         }
-                        feathersTimer = NEVER;
+                        feathersTimer = MAX_TIMER;
                         FlyTimer = 100; // Continue flying
                         me->SetUInt64Value(UNIT_FIELD_TARGET,0);
                     }

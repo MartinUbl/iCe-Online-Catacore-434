@@ -140,7 +140,7 @@ public:
             }
 
             castShardTimer          = 4000;
-            summonShardTimer        = NEVER;
+            summonShardTimer        = MAX_TIMER;
             blazeOfGloryTimer       = 8000;
             countDownTimer          = 27000;
             bladeTimer              = 28000;
@@ -430,7 +430,7 @@ public:
             {
                 PlayAndYell(onBerserk.sound,onBerserk.text);
                 me->CastSpell(me,BERSERK,true);
-                berserkTimer = NEVER;
+                berserkTimer = MAX_TIMER;
             }
             else berserkTimer -= diff;
 
@@ -459,7 +459,7 @@ public:
                         SpawnShardOfTorment(true);
                 }
 
-                summonShardTimer = NEVER;
+                summonShardTimer = MAX_TIMER;
                 return;
             }
             else summonShardTimer -= diff;

@@ -28,8 +28,6 @@ Autor: Lazik
 #include "UnitAI.h"
 #include "endtime.h"
 
-#define NEVER (0xffffffff) // Used as "delayed" timer
-
 enum NPC
 {
     MUROZOND           = 54432,
@@ -127,8 +125,8 @@ public:
             Distortion_Bomb_Timer = 5000;
             Rewind_Time_Check = 500;
             Nozdormu_Say_Timer = 3000;
-            Kill_Timer = NEVER;
-            RemoveDynamicObjects_Timer = NEVER;
+            Kill_Timer = MAX_TIMER;
+            RemoveDynamicObjects_Timer = MAX_TIMER;
             Kill_Say = false;
             Ready_To_Die = false;
             Nozdormu_Say = false;
@@ -452,7 +450,7 @@ public:
             if (RemoveDynamicObjects_Timer <= diff)
             {
                 me->RemoveAllDynObjects();
-                RemoveDynamicObjects_Timer = NEVER;
+                RemoveDynamicObjects_Timer = MAX_TIMER;
             }
             else RemoveDynamicObjects_Timer -= diff;
 

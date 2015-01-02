@@ -278,8 +278,8 @@ public:
             summonTimer          = 22000;
             lavaCheckTimer       = 1000;
             EruptionTimer        = 20000;
-            sitTimer             = NEVER;
-            sitAnimTimer         = NEVER;
+            sitTimer             = MAX_TIMER;
+            sitAnimTimer         = MAX_TIMER;
             magmaDrinkCount      = 0;
             magmaDrinkTimer      = 0;
             displayIdPhase       = 0;
@@ -960,7 +960,7 @@ public:
                 if (sitTimer <= diff)
                 {
                     me->RemoveAura(SPELL_SIT_DOWN);
-                    sitTimer = NEVER;
+                    sitTimer = MAX_TIMER;
                 }
                 else sitTimer -= diff;
 
@@ -973,7 +973,7 @@ public:
                     me->GetMotionMaster()->MovementExpired(true);
                     me->GetMotionMaster()->MoveChase(me->GetVictim());
                     canAttackIn2Phase = true;
-                    sitAnimTimer = NEVER;
+                    sitAnimTimer = MAX_TIMER;
                 }
                 else sitAnimTimer -= diff;
 
@@ -1461,7 +1461,7 @@ public:
             {
                 me->CastSpell(me, SPELL_SPARK_IMMOLATION, true);
                 me->SetInCombatWithZone();
-                aggressiveTimer = NEVER;
+                aggressiveTimer = MAX_TIMER;
                 infernalRageTimer = 5000;
             }
             else aggressiveTimer -= diff;
@@ -1516,7 +1516,7 @@ public:
             {
                 me->CastSpell(me, SPELL_FRAGMENT_MELTDOWN, true);
                 me->SetInCombatWithZone();
-                aggressiveTimer = NEVER;
+                aggressiveTimer = MAX_TIMER;
                 meltdownTimer = 30000;
             }
             else aggressiveTimer -= diff;
@@ -1531,7 +1531,7 @@ public:
                     victimGUID = target->GetGUID();
                     me->GetMotionMaster()->MoveCharge(target->GetPositionX(),target->GetPositionY(),target->GetPositionZ());
                 }
-                meltdownTimer = NEVER;
+                meltdownTimer = MAX_TIMER;
             }
             else
                 meltdownTimer -= diff;

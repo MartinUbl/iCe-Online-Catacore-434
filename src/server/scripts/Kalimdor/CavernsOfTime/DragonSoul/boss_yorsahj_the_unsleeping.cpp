@@ -26,8 +26,6 @@
 
 #define GLOBULE_Z (-172.0f)
 
-#define NEVER  (0xffffffff)
-
 struct FacelessQuote
 {
     uint32 soundId;
@@ -222,9 +220,9 @@ public:
             summons.DespawnAll();
             oozeTimer = 22000;
             abilityTimer = 6000;
-            attackTimer = NEVER;
-            manaVoidTimer = NEVER;
-            forgottenTimer = NEVER;
+            attackTimer = MAX_TIMER;
+            manaVoidTimer = MAX_TIMER;
+            forgottenTimer = MAX_TIMER;
             enrageTimer = 10 * MINUTE * IN_MILLISECONDS;
         }
 
@@ -328,7 +326,7 @@ public:
             if (enrageTimer <= diff)
             {
                 me->CastSpell(me, SPELL_ENRAGE, true);
-                enrageTimer = NEVER;
+                enrageTimer = MAX_TIMER;
             }
             else enrageTimer -= diff;
 
@@ -340,7 +338,7 @@ public:
                 if (me->GetVictim())
                     me->SetUInt64Value(UNIT_FIELD_TARGET, me->GetVictim()->GetGUID());
 
-                attackTimer = NEVER;
+                attackTimer = MAX_TIMER;
 
                 if (me->HasAura(SPELL_COBALT_BLOOD_OF_SHUMA))
                     me->CastSpell(me, SPELL_MANA_VOID_VISUAL_CASTING, true);
@@ -353,7 +351,7 @@ public:
             if (manaVoidTimer <= diff)
             {
                 SpawnManaVoid();
-                manaVoidTimer = NEVER;
+                manaVoidTimer = MAX_TIMER;
             }
             else manaVoidTimer -= diff;
 
@@ -369,7 +367,7 @@ public:
                     forgottenTimer = 1000;
                 }
                 else
-                    forgottenTimer = NEVER;
+                    forgottenTimer = MAX_TIMER;
             }
             else forgottenTimer -= diff;
 

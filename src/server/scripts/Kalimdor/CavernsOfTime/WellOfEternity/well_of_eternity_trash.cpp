@@ -240,8 +240,8 @@ public:
         void Reset()  override
         {
             me->SetReactState(REACT_AGGRESSIVE);
-            waitTimer = NEVER;
-            guardMoveTimer = NEVER;
+            waitTimer = MAX_TIMER;
+            guardMoveTimer = MAX_TIMER;
             distractionTimer = 10000;
         }
 
@@ -289,7 +289,7 @@ public:
             // Second demon in line must wait for another demon , because his path is a bit longer
             if (waitTimer <= diff)
             {
-                waitTimer = NEVER;
+                waitTimer = MAX_TIMER;
 
                 if (direction == DIRECTION_STRAIGHT || waveNumber == WAVE_THREE)
                     return;
@@ -469,8 +469,8 @@ public:
 
         void Reset() override
         {
-            finalWalkTimer = NEVER;
-            hurryTimer = NEVER;
+            finalWalkTimer = MAX_TIMER;
+            hurryTimer = MAX_TIMER;
             lane = 0;
 
             if (entry == GUARDIAN_DEMON_ENTRY)
@@ -668,12 +668,12 @@ public:
                     me->SetSpeed(MOVE_WALK, 3.0f, true);
 
                     me->GetMotionMaster()->MovePoint(2, guardPos[(uint32)lane].first);
-                    finalWalkTimer = NEVER; // set in movement inform, when WP2 is reached
+                    finalWalkTimer = MAX_TIMER; // set in movement inform, when WP2 is reached
                     return;
                 }
 
                 me->GetMotionMaster()->MovePoint(3, guardPos[(uint32)lane].last);
-                finalWalkTimer = NEVER;
+                finalWalkTimer = MAX_TIMER;
             }
             else finalWalkTimer -= diff;
 
@@ -681,7 +681,7 @@ public:
             if (hurryTimer <= diff)
             {
                 PlayQuote(me, GuardianDemon::portalClosing[0], true);
-                hurryTimer = NEVER;
+                hurryTimer = MAX_TIMER;
             }
             else hurryTimer -= diff;
 
@@ -747,7 +747,7 @@ public:
                                 me->CastSpell(me->GetVictim(), SPELL_ARCANE_ANNIHILATION, false);
                             // timer set in SpellHit -> 500 ms delay after finish casting of previous one
                             // canot simply set timer to cast time of spell + 500 ms because spell is triggering casting speed stack aura on caster
-                            arcaneTimer = NEVER;
+                            arcaneTimer = MAX_TIMER;
                         }
                     }
                     else arcaneTimer -= diff;
@@ -1067,11 +1067,11 @@ namespace Illidan
                 CAST_WOE_INSTANCE(pInstance)->SetIllidanStep(ILLIDAN_STEP_NULL);
 
             attackTimer = 2000;
-            eventTimer = NEVER;
-            explainTimer = NEVER;
-            delayMoveTimer = NEVER;
-            orderTimer = NEVER;
-            waitingTimer = NEVER;
+            eventTimer = MAX_TIMER;
+            explainTimer = MAX_TIMER;
+            delayMoveTimer = MAX_TIMER;
+            orderTimer = MAX_TIMER;
+            waitingTimer = MAX_TIMER;
             explainCounter = 0;
             eventStarted = false;
             gossipDone = false;
@@ -1244,7 +1244,7 @@ namespace Illidan
                 if (GameObject * pfocusCrsytal = me->FindNearestGameObject(PORTAL_ENERGY_FOCUS_ENTRY,50.0f))
                     if (!pfocusCrsytal->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE))
                         PlayQuote(me, crystalOrder[urand(0,3)]);
-                orderTimer = NEVER;
+                orderTimer = MAX_TIMER;
             }
             else orderTimer -= diff;
 
@@ -1254,7 +1254,7 @@ namespace Illidan
                 if (Creature * pArcanist = me->FindNearestCreature(CORRUPTED_ARCANIST_ENTRY,50.0f,true))
                     if (pArcanist->IsInCombat() == false)
                         PlayQuote(me, waitingAttack[urand(0, 3)]);
-                waitingTimer = NEVER;
+                waitingTimer = MAX_TIMER;
             }
             else waitingTimer -= diff;
 
@@ -1267,7 +1267,7 @@ namespace Illidan
                 if (id == ILLIDAN_THIRD_PACK_STEP)
                     PlayQuote(me, escortQuotes[7]);
 
-                delayMoveTimer = NEVER;
+                delayMoveTimer = MAX_TIMER;
             }
             else delayMoveTimer -= diff;
 
@@ -1298,7 +1298,7 @@ namespace Illidan
                         me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
                         PlayQuote(me, distractQuote[1]);
                         // This need to be done after every special action ...
-                        specialAction = SPECIAL_ACTION_NONE; eventTimer = NEVER; return;
+                        specialAction = SPECIAL_ACTION_NONE; eventTimer = MAX_TIMER; return;
                     }
                     case SPECIAL_ACTION_WAIT_INTRO:
                     {
@@ -1306,12 +1306,12 @@ namespace Illidan
                         uint32 id = (uint32)ILLIDAN_FIRST_LOOK_STEP;
                         me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
                         PlayQuote(me, escortQuotes[0]);
-                        specialAction = SPECIAL_ACTION_NONE; eventTimer = NEVER; return;
+                        specialAction = SPECIAL_ACTION_NONE; eventTimer = MAX_TIMER; return;
                     }
                 }
 
                 IllidanSteps step = CAST_WOE_INSTANCE(pInstance)->GetIllidanMoveStep();
-                eventTimer = NEVER;
+                eventTimer = MAX_TIMER;
                 specialAction = SPECIAL_ACTION_NONE;
 
                 switch (step)
@@ -1391,7 +1391,7 @@ namespace Illidan
                     hideAndSeekPhase = true;
 
                 // if (eventTimer > NEVER / 2) -> This should prvent skipping event pathing issuses ..., dont attack if we dont arrive to WP point yet)
-                if (pInstance && gossipDone && (eventTimer > NEVER / 2) && !me->IsNonMeleeSpellCasted(false) && !hideAndSeekPhase)
+                if (pInstance && gossipDone && (eventTimer > MAX_TIMER / 2) && !me->IsNonMeleeSpellCasted(false) && !hideAndSeekPhase)
                 {
                     if (Creature * victim = CAST_WOE_INSTANCE(pInstance)->GetIllidanVictim())
                     {
@@ -1479,7 +1479,7 @@ namespace Illidan
                     if (pAI->gossipDone == false)
                         PlayQuote(cr,introQuotes[1]);
 
-                    pAI->explainTimer = NEVER;
+                    pAI->explainTimer = MAX_TIMER;
                     pAI->HandleVehicle(true);
                     if (pAI->pInstance)
                     {

@@ -39,6 +39,9 @@
 
 #define GET_SPELL(a)    (const_cast<SpellEntry*>(GetSpellStore()->LookupEntry(a)))
 
+// Max uint32 timer
+static const uint32 MAX_TIMER = 0xffffffff;
+
 class InstanceScript;
 
 class SummonList : public std::list<uint64>

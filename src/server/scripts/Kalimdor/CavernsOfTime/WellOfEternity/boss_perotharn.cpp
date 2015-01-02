@@ -253,9 +253,9 @@ public:
 
             felFlamesTimer = 5000;
             felDecayTimer = 8000;
-            aggroTimer = NEVER;
-            seekTimer = NEVER;
-            freeIllidanTimer = NEVER;
+            aggroTimer = MAX_TIMER;
+            seekTimer = MAX_TIMER;
+            freeIllidanTimer = MAX_TIMER;
 
             me->CastSpell(me, SPELL_CORRUPTING_TOUCH, true);
             Summons.DespawnAll();
@@ -488,7 +488,7 @@ public:
                 me->SetInCombatWithZone();
                 me->CastSpell(me,SPELL_CORRUPTING_TOUCH, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                aggroTimer = NEVER;
+                aggroTimer = MAX_TIMER;
             }
             else aggroTimer -= diff;
 
@@ -556,7 +556,7 @@ public:
                         me->MonsterTextEmote("The Eyes of Peroth'arn are looking for you.", LANG_UNIVERSAL, true);
                         // Summon our eye summoner, he will take care of everthing ...
                         me->SummonCreature(ENTRY_HUNTING_SUMMONER, MIDDLE_X, MIDDLE_Y, MIDDLE_Z, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 42000);
-                        seekTimer = NEVER;
+                        seekTimer = MAX_TIMER;
                     }
                 }
                 else seekTimer -= diff;
@@ -600,7 +600,7 @@ public:
                     pIllidan->RemoveAllAuras();
                     PlayQuote(pIllidan, eyesQuotes[4]);
                 }
-                freeIllidanTimer = NEVER;
+                freeIllidanTimer = MAX_TIMER;
             }
             else freeIllidanTimer -= diff;
 
@@ -704,7 +704,7 @@ public:
         void Reset() override
         {
             startAngle = endAngle = 0.0f;
-            moveTimer = NEVER;
+            moveTimer = MAX_TIMER;
             me->SetReactState(REACT_AGGRESSIVE);
         }
 
@@ -782,7 +782,7 @@ public:
             if (moveTimer <= diff)
             {
                 MoveToNextPoint();
-                moveTimer = NEVER; // next move will be set when current WP will be reached
+                moveTimer = MAX_TIMER; // next move will be set when current WP will be reached
             }
             else moveTimer -= diff;
         }
@@ -857,7 +857,7 @@ public:
                 if (Creature * pPerotharn = ObjectAccessor::GetCreature(*me,pInstance->GetData64(DATA_PEROTHARN)))
                     pPerotharn->SummonCreature(ENTRY_HUNTING_CIRCLE_PUFFER, x, y, z, angle, TEMPSUMMON_TIMED_DESPAWN, 40000 - (vectorSize * 200));
 
-                summonPufferTimer = positions.empty() ? NEVER : 200;
+                summonPufferTimer = positions.empty() ? MAX_TIMER : 200;
             }
             else summonPufferTimer -= diff;
 

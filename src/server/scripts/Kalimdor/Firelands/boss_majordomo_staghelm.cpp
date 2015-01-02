@@ -93,7 +93,6 @@ static const Yells RandomKill[4]=
 uint32 energyField[10] = {18,12,10,8,7,6,5,4,3,2}; // Very wierd calculation of time, so i do it manually for sure
 
 #define MINUTE 60000
-#define NEVER  (0xffffffff) // used as "delayed" timer ( max uint32 value)
 
 #define MIDDLE_X  430.0f
 #define MIDDLE_Y -63.0f
@@ -159,7 +158,7 @@ public:
             Morph_timer = 2000;
             Energy_timer = 1000;
             Berserk_timer = 10 * MINUTE;
-            Human_timer = NEVER;
+            Human_timer = MAX_TIMER;
             barUsed = false;
 
             me->RemoveAllDynObjects();
@@ -508,7 +507,7 @@ public:
                             me->SetReactState(REACT_AGGRESSIVE);
                             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
                         }
-                        eventTimer = NEVER;
+                        eventTimer = MAX_TIMER;
                         return;
                     }
 
@@ -663,7 +662,7 @@ public:
                         SpawnBurningOrb(); // For safety I spawn orbs manually
                 }
 
-                Human_timer = NEVER;
+                Human_timer = MAX_TIMER;
             }
             else Human_timer -= diff;
 
@@ -683,7 +682,7 @@ public:
             if(Berserk_timer <= diff) // Berserk after 10 minutes
             {
                 me->CastSpell(me,SPELL_BERSERK,true);
-                Berserk_timer = NEVER;
+                Berserk_timer = MAX_TIMER;
             }
             else Berserk_timer -= diff;
 
@@ -868,7 +867,7 @@ public:
 
         void Reset()
         {
-            checkTimer = NEVER;
+            checkTimer = MAX_TIMER;
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             me->SetReactState(REACT_PASSIVE);
             me->CastSpell(me,SPELL_BURNING_ORB_VISUAL,true);
@@ -920,7 +919,7 @@ public:
                     if (InstanceScript * instance = me->GetInstanceScript())
                         instance->DoCompleteAchievement(5799); // Only the Penitent... achievement
                 }
-                checkTimer = NEVER;
+                checkTimer = MAX_TIMER;
             }
             else checkTimer -= diff;
 
@@ -979,7 +978,7 @@ public:
             sunfireTimer = 2000;
             kneelTimer = 1000;
             jumpTimer = 2000;
-            StunTimer = NEVER;
+            StunTimer = MAX_TIMER;
         }
 
         void SpellHitTarget(Unit* pTarget, const SpellEntry* spell)
@@ -1081,7 +1080,7 @@ public:
                 if(StunTimer <= diff)
                 {
                     me->CastSpell(me->GetVictim(),RECKLESS_LEAP_STUN,true);
-                    StunTimer = NEVER;
+                    StunTimer = MAX_TIMER;
                 }
                 else StunTimer -= diff;
 

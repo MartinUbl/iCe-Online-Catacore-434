@@ -478,12 +478,12 @@ public:
             Wrath_timer             = 30000;
             Sulfurus_timer          = 32000;
             Enrage_timer            = 15 * MINUTE;
-            AllowTurning_timer      = NEVER;
-            HeroicIntermissionTimer = NEVER;
-            geyserTimer             = NEVER;
-            spreadFlamesTimer       = NEVER;
-            chaseTimer              = NEVER;
-            QuoteTimer              = NEVER;
+            AllowTurning_timer      = MAX_TIMER;
+            HeroicIntermissionTimer = MAX_TIMER;
+            geyserTimer             = MAX_TIMER;
+            spreadFlamesTimer       = MAX_TIMER;
+            chaseTimer              = MAX_TIMER;
+            QuoteTimer              = MAX_TIMER;
             IntermissionStep        = 0;
             PHASE = PHASE1;
             reemerge = 0;
@@ -1143,7 +1143,7 @@ public:
             if (QuoteTimer <= diff)
             {
                 canQuote = true; // Can say kill quote again :)
-                QuoteTimer = NEVER;
+                QuoteTimer = MAX_TIMER;
             }
             else QuoteTimer -= diff;
 
@@ -1186,14 +1186,14 @@ public:
             {
                 if (me->GetVictim() && me->GetVictim()->IsInWorld())
                     me->SetUInt64Value(UNIT_FIELD_TARGET,me->GetVictim()->GetGUID());
-                AllowTurning_timer = NEVER;
+                AllowTurning_timer = MAX_TIMER;
             }
             else AllowTurning_timer -= diff;
 
             if (Enrage_timer <= diff) // Enrage after 15 minutes
             {
                 me->CastSpell(me,BERSERK,true);
-                Enrage_timer = NEVER;
+                Enrage_timer = MAX_TIMER;
             }
             else Enrage_timer -= diff;
 
@@ -1732,7 +1732,7 @@ public:
                 {
                     me->SetVisible(false);
                     me->Kill(me);
-                    Kill_timer = NEVER;
+                    Kill_timer = MAX_TIMER;
                 }
                 else Kill_timer -= diff;
             }
@@ -1828,7 +1828,7 @@ public:
                         }
                         case 9:                     // Melee phase
                             me->SetInternalCombatReach(18.0f); // Need to be called after SetFloatValue !!!
-                            HeroicIntermissionTimer = NEVER;
+                            HeroicIntermissionTimer = MAX_TIMER;
                             PHASE = PHASE4;
                             breadthTimer = 3000;
                             geyserTimer = breadthTimer + 10000;
@@ -1858,7 +1858,7 @@ public:
                     if (!me->IsNonMeleeSpellCasted(false) && me->GetVictim())
                     {
                         me->GetMotionMaster()->MoveChase(me->GetVictim());
-                        chaseTimer = NEVER;
+                        chaseTimer = MAX_TIMER;
                     }
                 }
                 else chaseTimer -= diff;
@@ -1889,7 +1889,7 @@ public:
                         if (pCloud)
                             pMalfurion->CastSpell(pCloud,SUMMON_CLOUDBURST_MISSILE,false);
                     }
-                    cloudBurstTimer = NEVER;
+                    cloudBurstTimer = MAX_TIMER;
                 }
                 else cloudBurstTimer -= diff;
 
@@ -2156,7 +2156,7 @@ public:
                 me->RemoveAurasDueToSpell(SS_LAVA_POOLS);
                 me->ForcedDespawn(11000);
 
-                Lava_timer = NEVER;
+                Lava_timer = MAX_TIMER;
             }
             else Lava_timer -= diff;
         }
@@ -2311,7 +2311,7 @@ public:
                     rag->SummonCreature(LAVA_SCION,1028.05f,-118.75f,55.37f,1.25f,TEMPSUMMON_CORPSE_DESPAWN,0);
                 }
 
-                Summon_sons_timer = NEVER;
+                Summon_sons_timer = MAX_TIMER;
             }
             else Summon_sons_timer -= diff;
 
@@ -2418,7 +2418,7 @@ public:
                     me->CastSpell(me,BURNING_SPEED,true); // Burning speed
                 }
 
-                Transform_timer = NEVER;
+                Transform_timer = MAX_TIMER;
             }
             else Transform_timer -= diff;
 
@@ -2438,7 +2438,7 @@ public:
                     if (!me->HasAuraType(SPELL_AURA_MOD_STUN))
                         me->GetMotionMaster()->MovePoint(0,x,y,z);
                 }
-                GetPosition_timer = NEVER;
+                GetPosition_timer = MAX_TIMER;
             }
             else GetPosition_timer -= diff;
 
@@ -2513,7 +2513,7 @@ public:
                     me->ForcedDespawn(9000);
 
                 me->CastSpell(me,ENGULFING_FLAME_DMG,true);
-                Flame_timer = NEVER;
+                Flame_timer = MAX_TIMER;
             }
             else Flame_timer -= diff;
         }
@@ -2545,10 +2545,10 @@ public:
 
         void Reset()
         {
-            morphTimer = NEVER;
+            morphTimer = MAX_TIMER;
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetDisplayId(11686); // Invis model
-            Demorph_timer = NEVER;
+            Demorph_timer = MAX_TIMER;
             me->SetInCombatWithZone();
             me->SetFloatValue(OBJECT_FIELD_SCALE_X,0.9f);
         }
@@ -2571,7 +2571,7 @@ public:
             if (morphTimer <= diff)
             {
                 me->CastSpell(me,MOLTEN_SEED,true); // Molten seed efekt ( 10 s duration)
-                morphTimer = NEVER;
+                morphTimer = MAX_TIMER;
                 Demorph_timer = 10000;
             }
             else morphTimer -= diff;
@@ -2589,7 +2589,7 @@ public:
                     me->AddThreat(player,5000000.0f);
                     me->GetMotionMaster()->MoveChase(player);
                 }
-                Demorph_timer = NEVER;
+                Demorph_timer = MAX_TIMER;
             }
             else Demorph_timer -= diff;
 
@@ -2735,7 +2735,7 @@ public:
             if (Blazing_heat_timer <= diff)
             {
                 me->CastSpell(me,BLAZING_HEAT_DMG_HEAL,true);
-                Blazing_heat_timer = NEVER;
+                Blazing_heat_timer = MAX_TIMER;
             }
             else Blazing_heat_timer -= diff;
         }
@@ -2788,7 +2788,7 @@ public:
 
         void Reset()
         {
-            ClearRoot_timer = Combustible_timer = NEVER; // Not now
+            ClearRoot_timer = Combustible_timer = MAX_TIMER; // Not now
             Chasin_timer = 1500;
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetInCombatWithZone();
@@ -2886,21 +2886,21 @@ public:
             if (Chasin_timer <= diff) // Few seconds after spawn Metoer should be passive
             {
                 StartChasing(); 
-                Chasin_timer = NEVER;
+                Chasin_timer = MAX_TIMER;
             }
             else Chasin_timer -= diff;
 
             if (Combustible_timer <= diff)
             {
                 me->CastSpell(me,COMBUSTIBLE,true);
-                Combustible_timer = NEVER;
+                Combustible_timer = MAX_TIMER;
             }
             else Combustible_timer-= diff;
 
             if (ClearRoot_timer <= diff)
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
-                ClearRoot_timer = NEVER;
+                ClearRoot_timer = MAX_TIMER;
             }
             else ClearRoot_timer -= diff;
         }
@@ -3076,7 +3076,7 @@ public:
             if (flowTimer <= diff)
             {
                 me->AddAura(RAISE_LAVA,me);
-                flowTimer = NEVER;
+                flowTimer = MAX_TIMER;
             }
             else flowTimer -= diff;
         }
@@ -3129,8 +3129,8 @@ public:
             moltenBoltTimer = 8000;
             checkMeleeTimer = 2500;
             burryTimer      = urand(10000,20000);
-            teleTimer       = NEVER;
-            emergeTimer     = NEVER;
+            teleTimer       = MAX_TIMER;
+            emergeTimer     = MAX_TIMER;
         }
 
         void EnterCombat(Unit * who)
@@ -3219,7 +3219,7 @@ public:
                     inHome = true;
                 }
 
-                teleTimer = NEVER;
+                teleTimer = MAX_TIMER;
                 emergeTimer = 2000;
             }
             else teleTimer -= diff;
@@ -3230,7 +3230,7 @@ public:
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->SetVisible(true);
                 me->RemoveAura(SUBMERGE_STATE_AURA);
-                emergeTimer = NEVER;
+                emergeTimer = MAX_TIMER;
             }
             else emergeTimer -= diff;
 
@@ -3781,7 +3781,7 @@ public:
             {
                 me->CastSpell(me,CLOUDBURST_VISUAL,true);
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-                transformTimer = NEVER;
+                transformTimer = MAX_TIMER;
             }
             else transformTimer -= diff;
         }
@@ -4015,7 +4015,7 @@ public:
             if (geyserTimer <= diff)
             {
                 me->CastSpell(me,MAGMA_GEYSER,true);
-                geyserTimer = NEVER;
+                geyserTimer = MAX_TIMER;
             }
             else geyserTimer -= diff;
         }
@@ -4102,7 +4102,7 @@ public:
                     case 5:
                         me->MonsterYell(HeroicDeath[6].text,LANG_UNIVERSAL,0);
                         DoPlaySoundToSet(me,HeroicDeath[6].sound);
-                        talkTimer = NEVER;
+                        talkTimer = MAX_TIMER;
                         canStart = false;
                         if (Creature * pHamuul = me->FindNearestCreature(HAMUUL_RUNETOTEM,500.0f,true))
                             pHamuul->ForcedDespawn(5000);

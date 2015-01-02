@@ -99,7 +99,6 @@ static const Quote killQuotes[3] =
 
 
 #define DARK_PHASE_NORMAL (30000)
-#define NEVER  (0xffffffff)
 
 const Position eyePos [8]  =
 {
@@ -245,9 +244,9 @@ public:
                 me->MonsterYell("INSTANCE OK",0,0);
 
             enrageTimer = 6 * MINUTE * IN_MILLISECONDS;
-            phaseTimer = NEVER; // must be set before summonig of sphere
-            roarTimer = NEVER;
-            voidSphereTimer = NEVER;
+            phaseTimer = MAX_TIMER; // must be set before summonig of sphere
+            roarTimer = MAX_TIMER;
+            voidSphereTimer = MAX_TIMER;
             focusedAngerTimer = 10500;
             psychicDrainTimer = 13000;
 
@@ -359,7 +358,7 @@ public:
             if (enrageTimer <= diff)
             {
                 me->CastSpell(me, SPELL_BERSERK, true);
-                enrageTimer = NEVER;
+                enrageTimer = MAX_TIMER;
             }
             else enrageTimer -= diff;
 
@@ -368,7 +367,7 @@ public:
                 me->SetReactState(REACT_PASSIVE);
                 me->GetMotionMaster()->MovePoint(0, MIDDLE_X, MIDDLE_Y, MIDDLE_Z);
                 phase = TRANSITION_PHASE;
-                phaseTimer = NEVER; // not happend periodicaly
+                phaseTimer = MAX_TIMER; // not happend periodicaly
                 return;
             }
             else phaseTimer -= diff;
@@ -380,7 +379,7 @@ public:
                     if (CanCast())
                     {
                         SpawnVoidSphere();
-                        voidSphereTimer = NEVER;
+                        voidSphereTimer = MAX_TIMER;
                     }
                 }
                 else voidSphereTimer -= diff;
@@ -545,7 +544,7 @@ public:
             {
                 // Collision is allowed only with this aura
                 me->CastSpell(me, SPELL_VOID_OF_THE_UNMAKING_VISUAL, true);
-                refreshTimer = NEVER;
+                refreshTimer = MAX_TIMER;
             }
             else refreshTimer -= diff;
 

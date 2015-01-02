@@ -568,7 +568,7 @@ public:
         Spawn_calen_timer = 16000;
         Spitecaller_timer = Spawn_calen_timer + 55000;
         Voice_losing_time = 90000 - 21000;
-        Repeat_timer = NEVER;
+        Repeat_timer = MAX_TIMER;
 
         me->InterruptNonMeleeSpells(false);
         me->MonsterYell("I tire of this. Do you see this clutch amidst which you stand? I have nurtured the spark within them, but that life-force is and always will be mine. Behold, power beyond your comprehension!", LANG_UNIVERSAL, 0);
@@ -611,7 +611,7 @@ public:
         {
             me->SummonCreature(CREATURE_BARRIER_COMSMETIC_STALKER,-988.927f,-783.37f,439.0f, 0.0f,TEMPSUMMON_CORPSE_DESPAWN,0);
             me->SummonCreature(CREATURE_CALEN,-1015.624207f,-815.707947f,438.593506f, 0.0f,TEMPSUMMON_CORPSE_DESPAWN,5000);
-            Spawn_calen_timer = NEVER;
+            Spawn_calen_timer = MAX_TIMER;
         }
         else Spawn_calen_timer -= Diff;
 
@@ -621,7 +621,7 @@ public:
             if (Creature *pStalker = me->FindNearestCreature(CREATURE_BARRIER_COMSMETIC_STALKER, 500.0f, true))
                 me->CastSpell(pStalker,SPELL_TWILIGHT_POWER,false);
 
-            Beam_timer = NEVER;
+            Beam_timer = MAX_TIMER;
         }
         else Beam_timer -= Diff;
 
@@ -635,7 +635,7 @@ public:
             if (pStalker)
                 pStalker->GetMotionMaster()->MovePoint(0,-995.16f,-793.48f,438.6f);
 
-            Voice_losing_time = NEVER;
+            Voice_losing_time = MAX_TIMER;
         }
         else Voice_losing_time -= Diff;
 
@@ -658,7 +658,7 @@ public:
         {
             me->CastSpell(me,SPELL_MANA_BARRIER,true);
             me->ModifyPower(POWER_MANA, me->GetMaxPower(POWER_MANA)); // Fill mana to full again
-            Repeat_timer = NEVER;
+            Repeat_timer = MAX_TIMER;
         }
         else Repeat_timer -= Diff;
 
@@ -891,7 +891,7 @@ public:
                     me->AddThreat(fix_pl,5000000.0f);
                 }
 
-                Fixate_timer = NEVER;
+                Fixate_timer = MAX_TIMER;
             }
             else Fixate_timer -= diff;
 
@@ -919,7 +919,7 @@ public:
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                 me->CastSpell(me,SPELL_SHADOW_PULSE,true);
 
-                Pulse_timer = NEVER;
+                Pulse_timer = MAX_TIMER;
             }
             else Pulse_timer -= diff;
 
@@ -933,7 +933,7 @@ public:
             if(Despawn_timer <= diff)
             {
                 me->Kill(me);
-                Despawn_timer = NEVER;
+                Despawn_timer = MAX_TIMER;
             }
             else Despawn_timer -= diff;
 
@@ -1042,7 +1042,7 @@ public:
                     me->AddThreat(fix_pl,5000000.0f);
                 }
 
-                Fixate_timer = NEVER;
+                Fixate_timer = MAX_TIMER;
             }
             else Fixate_timer -= diff;
 
@@ -1050,7 +1050,7 @@ public:
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                 me->CastSpell(me,SPELL_SHADOW_PULSE,true);
-                Pulse_timer = NEVER;
+                Pulse_timer = MAX_TIMER;
             }
             else Pulse_timer -= diff;
 
@@ -1073,7 +1073,7 @@ public:
             if(Despawn_timer <= diff)
             {
                 me->Kill(me);
-                Despawn_timer = NEVER;
+                Despawn_timer = MAX_TIMER;
             }
             else Despawn_timer -=diff;
 
@@ -1356,12 +1356,12 @@ public:
         void Reset()
         {
             Beam_timer = 18000;
-            Desummon_Timer = NEVER; // 90000
+            Desummon_Timer = MAX_TIMER; // 90000
             Winning_timer = 47200;
             Talk_timer = 1000;
             Remove_barrier = 20000;
-            Ticking_timer = NEVER;
-            Voice_timer = NEVER; // 74000
+            Ticking_timer = MAX_TIMER;
+            Voice_timer = MAX_TIMER; // 74000
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); // Stop HP regeneration
             if(instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -1407,7 +1407,7 @@ public:
                 me->CastSpell(me,87229,true); // - 99% reduction shadow reduction na friendly units v okoli
                 me->MonsterYell("Heroes! You are not alone in this dark place!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(21588, false);
-                Talk_timer = NEVER;
+                Talk_timer = MAX_TIMER;
             }
             else Talk_timer -= diff;
 
@@ -1420,7 +1420,7 @@ public:
                 if(pStalker)
                     pStalker->GetMotionMaster()->MovePoint(0,-979.4f,-772.18f,438.6f);
 
-                Winning_timer = NEVER;
+                Winning_timer = MAX_TIMER;
             }
             else Winning_timer -= diff;
 
@@ -1431,7 +1431,7 @@ public:
                 me->RemoveAurasDueToSpell(SPELL_FIERRY_BARRIER); // visual barrier
                 me->RemoveAurasDueToSpell(96431); // DND viusal
                 me->RemoveAurasDueToSpell(87229); // shadow reduction buff
-                Remove_barrier = NEVER;
+                Remove_barrier = MAX_TIMER;
             }
             else Remove_barrier -= diff;
 
@@ -1443,7 +1443,7 @@ public:
                 Creature* pStalker = me->FindNearestCreature(CREATURE_BARRIER_COMSMETIC_STALKER, 200, true);
                 if(pStalker)
                    DoCast(pStalker,SPELL_FIERY_RESOLVE);
-                Beam_timer = NEVER;
+                Beam_timer = MAX_TIMER;
             }
             else Beam_timer -= diff;
 
@@ -1475,7 +1475,7 @@ public:
             {
                 me->MonsterYell("The fires dim, champions... Take this, the last of my power. Succeed where I have failed... Avenge me. Avenge the world...", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(21591, false);
-                Voice_timer = NEVER;
+                Voice_timer = MAX_TIMER;
             }
             else Voice_timer -= diff;
 
@@ -1486,7 +1486,7 @@ public:
 
                 if (Creature* pStalker = me->FindNearestCreature(CREATURE_BARRIER_COMSMETIC_STALKER, 500, true))
                     pStalker->ForcedDespawn();
-                Desummon_Timer = NEVER;
+                Desummon_Timer = MAX_TIMER;
                 if (Creature* pSinestra = me->FindNearestCreature(SINESTRA_ENTRY, 200.0f, true))
                     pSinestra->Kill(me);
             }
@@ -1528,7 +1528,7 @@ public:
         void Reset()
         {
             can_remove = false;
-            Reapply_timer = NEVER;
+            Reapply_timer = MAX_TIMER;
             me->SetReactState(REACT_PASSIVE);
             me->SetInCombatWithZone();
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
@@ -1573,7 +1573,7 @@ public:
             {
                 me->CastSpell(me,SPELL_TWILIGHT_CARAPACE,true); // Reapply absorb
                 me->SetFullHealth();
-                Reapply_timer = NEVER;
+                Reapply_timer = MAX_TIMER;
                 can_remove = false;
             }
             else Reapply_timer -= diff;
@@ -1633,7 +1633,7 @@ public:
             {
                 me->CastSpell(me,FLAMES_DND,true); // visual + aoe dmg
                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
-                Burn_timer = NEVER;
+                Burn_timer = MAX_TIMER;
             }
             else Burn_timer -= diff;
         }
@@ -1734,7 +1734,7 @@ public:
                 if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                     me->GetMotionMaster()->MoveChase(player);
 
-                Walk_timer = NEVER;
+                Walk_timer = MAX_TIMER;
             }
             else Walk_timer -= diff;
 

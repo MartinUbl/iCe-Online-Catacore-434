@@ -511,7 +511,7 @@ public:
             if (explodeTimer <= diff)
             {
                 me->CastSpell(me, SPELL_CRYSTAL_DAMAGE, false);
-                explodeTimer = NEVER;
+                explodeTimer = MAX_TIMER;
                 me->RemoveAllAuras();
                 RemoveBeamAuraFromPlayers();
                 refreshTimer = 2000; // Prevent applying of beam after explosion ( need 1 second to play spell animation and than despawn)
@@ -522,7 +522,7 @@ public:
             if (beamTimer <= diff)
             {
                 SelectBeamTargets(); // Mark players with beams
-                beamTimer = NEVER;
+                beamTimer = MAX_TIMER;
             }
             else beamTimer -= diff;
 
