@@ -82,6 +82,11 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
     m_goValue->Transport.PathProgress = 0;
     SetFloatValue(OBJECT_FIELD_SCALE_X, goinfo->size);
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
+
+    // force transport and nodespawn flags (all mo transports must have them)
+    uint32 flags = goinfo->flags;
+    flags |= GO_FLAG_TRANSPORT | GO_FLAG_NODESPAWN;
+
     SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
     SetPeriod(tInfo->pathTime);
     SetEntry(goinfo->id);
