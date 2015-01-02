@@ -169,7 +169,7 @@ spellCombination spellCombs[6] =
 static void PlayQuoteAndWhisper(Unit* source, uint32 soundId, const char * text, const char * whisperText)
 {
     source->MonsterYell(text, LANG_UNIVERSAL, 0);
-    source->PlayDistanceSound(soundId);
+    source->PlayDirectSound(soundId);
 
     Map::PlayerList const &playerList = source->GetMap()->GetPlayers();
 

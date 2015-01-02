@@ -1057,12 +1057,12 @@ public:
                 {
                     case 0 :
                         me->MonsterYell("Well well... I admire your tenacity. Baleroc stood guard over this keep for a thousand mortal lifetimes.",LANG_UNIVERSAL,0);
-                        me->PlayDistanceSound(24473);
+                        me->PlayDirectSound(24473);
                         talkTimer = 12000;
                         break;
                     case 1:
                         me->MonsterYell("But NONE may enter the Firelord's abode!",LANG_UNIVERSAL,0);
-                        me->PlayDistanceSound(24474);
+                        me->PlayDirectSound(24474);
                         talkTimer = 6500;
                         break;
                     case 2:
@@ -1070,7 +1070,7 @@ public:
                         if (Creature * dummy = me->SummonCreature(540100,247.0f,-64.0f,62.0f,0.01f,TEMPSUMMON_TIMED_DESPAWN,20000))
                             dummy->CastSpell(dummy,BRIDGE_FORMING_ANIM,true);
                         me->MonsterYell("Beg for mercy now, and I may yet allow you to live. Well, \"heroes\", what is your answer?",LANG_UNIVERSAL,0);
-                        me->PlayDistanceSound(24475);
+                        me->PlayDirectSound(24475);
                         talkTimer = 10000;
                         break;
                     case 3:

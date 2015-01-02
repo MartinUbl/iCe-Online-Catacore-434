@@ -194,7 +194,7 @@ public:
 
             Summons.DespawnAll();
             me->MonsterYell("My studies... had only just begun...", LANG_UNIVERSAL, 0);
-            me->PlayDistanceSound(24464);
+            me->PlayDirectSound(24464);
 
             GameObject * wall = me->FindNearestGameObject(FIREWALL_MAJORDOMO,500.0f);
 
@@ -308,7 +308,7 @@ public:
             me->CastSpell(me,SPELL_FURY,false);
             PHASE = PHASE_CAT;
             me->MonsterYell("Behold the rage of the Firelands!", LANG_UNIVERSAL, 0);
-            me->PlayDistanceSound(24485);
+            me->PlayDirectSound(24485);
         }
 
         void TransformToScorpion()
@@ -342,7 +342,7 @@ public:
 
             PHASE = PHASE_SCORPION;
             me->MonsterYell("The master's power takes on many forms...", LANG_UNIVERSAL, 0);
-            me->PlayDistanceSound(24483);
+            me->PlayDirectSound(24483);
         }
 
         void TransformToDruid()
@@ -500,7 +500,7 @@ public:
                         if (!me->isMoving())
                         {
                             me->MonsterYell("Very well. Witness the raw power of my new lord!", LANG_UNIVERSAL, 0);
-                            me->PlayDistanceSound(24464);
+                            me->PlayDirectSound(24464);
 
                             me->SetWalk(true);
                             me->GetMotionMaster()->MovePoint(0,516.0f,-62.0f,85.0f);
@@ -619,13 +619,13 @@ public:
                     {
                         me->CastSpell(me,SPELL_SEARING_SEEDS,false); // cast searing seeds
                         me->MonsterYell("Blaze of Glory!", LANG_UNIVERSAL, 0);
-                        me->PlayDistanceSound(24472);
+                        me->PlayDirectSound(24472);
                     }
                     else                  // if we are transforming from scorpion to cat
                     {
                         me->CastSpell(me,SPELL_BURNING_ORBS,false); // cast Burning orbs
                         me->MonsterYell("Nothing but ash!", LANG_UNIVERSAL, 0);
-                        me->PlayDistanceSound(24478);
+                        me->PlayDirectSound(24478);
                     }
 
                     Human_timer = 4050;

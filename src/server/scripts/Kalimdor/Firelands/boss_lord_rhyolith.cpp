@@ -161,7 +161,7 @@ static void PlayAndYell(Unit* source, uint32 index)
         return;
 
     source->MonsterYell(rhyolithQuotes[index].text, LANG_UNIVERSAL, 0);
-    source->PlayDistanceSound(rhyolithQuotes[index].sound);
+    source->PlayDirectSound(rhyolithQuotes[index].sound);
 }
 
 class boss_rhyolith: public CreatureScript

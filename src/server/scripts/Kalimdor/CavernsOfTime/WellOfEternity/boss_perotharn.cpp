@@ -30,7 +30,7 @@
 
 static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
 {
-    source->PlayDistanceSound(quote.soundID);
+    source->PlayDirectSound(quote.soundID);
 
     if (yell)
         source->MonsterYell(quote.text, LANG_UNIVERSAL,0,200.0f);
