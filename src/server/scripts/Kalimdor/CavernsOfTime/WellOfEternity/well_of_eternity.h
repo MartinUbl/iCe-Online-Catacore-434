@@ -314,6 +314,13 @@ enum miscData
     DATA_SET_WAVE_NUMBER,
 };
 
+enum drakeActions
+{
+    ACTION_SPAWN_DRAKE_VEHICLES,
+    ACTION_BRONZE_DRAKE_ARRIVED,
+    ACTION_VEHICLE_MOVE
+};
+
 #define MAX_ENCOUNTER      (3)
 
 struct CONNECTOR_INFO
