@@ -45,7 +45,7 @@ enum entries
     ENTRY_ARCANE_MAGUS = 54884,
 
     ENTRY_ROYAL_HANDMAIDEN = 54645,
-    ENTRY_SHADOWBAT_VEHICLE = 55453,
+    ENTRY_SHADOWBAT_VEHICLE = 57117,
     ENTRY_CAPTAIN_VAROTHEN = 57118,
 
     ENTRY_HAND_OF_THE_QUEEN = 54728,
@@ -66,7 +66,7 @@ static const Position magesPos[MAX_MAGES] =
 
 static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = true)
 {
-    source->PlayDistanceSound(quote.soundID);
+    source->PlayDirectSound(quote.soundID);
 
     if (yell)
         source->MonsterYell(quote.text, LANG_UNIVERSAL,0,200.0f);
@@ -147,7 +147,6 @@ enum actions
 };
 
 #define GO_ROYAL_CHEST 210025
-#define NEVER  0xffffffff
 
 static int magusEntries[MAX_MAGES] = {ENTRY_FROST_MAGUS,ENTRY_ARCANE_MAGUS,ENTRY_FIRE_MAGUS,ENTRY_FROST_MAGUS,ENTRY_FIRE_MAGUS,ENTRY_ARCANE_MAGUS};
 
@@ -219,7 +218,7 @@ public:
             interruptCounter = 0;
             me->CastSpell(me, SPELL_SHROUD_OF_LUMINOSITY, true);
             magusWave = 0;
-            magusReleaseTimer = NEVER;
+            magusReleaseTimer = MAX_TIMER;
             magusWaveTimer = 12000;
             magusPeriodicSummonTimer = magusWaveTimer + 60000;
             magusRemaining = MAX_MAGES;
@@ -414,7 +413,7 @@ public:
                 {
                     me->RemoveAllAuras(); // Remove shroud
                     me->GetMotionMaster()->MovePoint(0, 3455.8f,-5249.5f,230.4f, false, true);
-                    dialogTimer = NEVER;
+                    dialogTimer = MAX_TIMER;
                 }
                 else dialogTimer -= diff;
             }
@@ -426,7 +425,7 @@ public:
             {
                 if (++magusWave >= MAX_MAGUS_WAVES)
                 {
-                    magusWaveTimer = NEVER;
+                    magusWaveTimer = MAX_TIMER;
                     return;
                 }
 
@@ -436,7 +435,7 @@ public:
                     PlayMagusWaveQuote(magusWave);
 
                 magusReleaseTimer = 5000;
-                magusWaveTimer = NEVER;
+                magusWaveTimer = MAX_TIMER;
             }
             else magusWaveTimer -= diff;
 
@@ -448,7 +447,7 @@ public:
                     ReleaseMages(magusWave - i);
                     magesToCall--;
                 }
-                magusReleaseTimer = NEVER;
+                magusReleaseTimer = MAX_TIMER;
             }
             else magusReleaseTimer -= diff;
 
@@ -456,7 +455,7 @@ public:
             {
                 if (++magusWave >= MAX_MAGUS_WAVES)
                 {
-                    magusPeriodicSummonTimer = NEVER;
+                    magusPeriodicSummonTimer = MAX_TIMER;
                     return;
                 }
                 ReleaseMages(magusWave);
@@ -788,7 +787,7 @@ public:
                 me->RemoveAura(SPELL_ARCANE_BOMB_FALLING_VISUAL);
                 me->CastSpell(me, SPELL_ARCANE_BOMB_DAMAGE, true);
                 me->ForcedDespawn(2000);
-                explodeTimer = NEVER;
+                explodeTimer = MAX_TIMER;
             }
             else explodeTimer -= diff;
         }
@@ -802,19 +801,19 @@ enum shadowbatWP
     WP_FLY
 };
 
-class npc_shadowbat_woe : public CreatureScript
+class npc_queen_shadowbat_woe : public CreatureScript
 {
 public:
-    npc_shadowbat_woe() : CreatureScript("npc_shadowbat_woe") { }
+    npc_queen_shadowbat_woe() : CreatureScript("npc_queen_shadowbat_woe") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_shadowbat_woeAI(creature);
+        return new npc_queen_shadowbat_woeAI(creature);
     }
 
-    struct npc_shadowbat_woeAI : public ScriptedAI
+    struct npc_queen_shadowbat_woeAI : public ScriptedAI
     {
-        npc_shadowbat_woeAI(Creature* creature) : ScriptedAI(creature)
+        npc_queen_shadowbat_woeAI(Creature* creature) : ScriptedAI(creature)
         {
             pInstance = me->GetInstanceScript();
             me->SetReactState(REACT_PASSIVE);
@@ -832,7 +831,7 @@ public:
             }
             me->GetMotionMaster()->MovePoint(WP_GROUND,3451.0f,-5264.0f,231.0f,false,true);
             me->ForcedDespawn(60000);
-            moveTimer = NEVER;
+            moveTimer = MAX_TIMER;
             moveStep = 0;
         }
 
@@ -869,6 +868,10 @@ public:
                     pQueen->Kill(pQueen);
                     //TODO: Set instance data
                 }
+
+                #define ENTRY_DRAGON_SOUL 55078
+                if (Creature * pDragonSoul = me->FindNearestCreature(ENTRY_DRAGON_SOUL, 500.0f, true))
+                    pDragonSoul->AI()->DoAction(ACTION_SPAWN_DRAKE_VEHICLES);
                 // Despaw us also
                 me->ForcedDespawn();
             }
@@ -903,7 +906,7 @@ public:
                     case 2:
                     {
                         me->GetMotionMaster()->MovePoint(WP_FLY, 3566.33f, -5331.0f, 270.0f, false, true);
-                        moveTimer = NEVER;
+                        moveTimer = MAX_TIMER;
                         break;
                     }
                 }
@@ -1123,7 +1126,7 @@ void AddSC_boss_queen_azshara()
 {
     new boss_queen_azshara_woe(); // 54853
     new npc_enchanted_magus_woe(); // 54882 - 54884 select * from creature_template where entry between 54882 and 54884;
-    new npc_shadowbat_woe(); // 55453
+    new npc_queen_shadowbat_woe(); // 57117
     new npc_royal_handmaiden_woe(); // 54645
     new npc_arcane_bomb_woe(); // 54639
 
