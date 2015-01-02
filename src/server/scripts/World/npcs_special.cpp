@@ -4136,7 +4136,8 @@ class npc_odevzdavac: public CreatureScript
                      counter = field[0].GetUInt32();
                  }
 
-                 if (pPlayer->GetItemCount(54619) >= counter)
+                 uint32 countInInventory = pPlayer->GetItemCount(54619);
+                 if (countInInventory >= counter) 
                  {
                        pPlayer->GetSession()->SendNotification("Ok, your punishment is finished.");
                        pPlayer->RemoveAurasDueToSpell(15007); // Remove Ressurect Sickness
@@ -4147,8 +4148,17 @@ class npc_odevzdavac: public CreatureScript
                        else // If Horde
                            pPlayer->TeleportTo(1,1571.49f,-4398.65f,16.0f,0.0f); // Teleport to Orgrimmar
 
-                       pPlayer->DestroyItemCount(54619, pPlayer->GetItemCount(54619), true); // Remove all bananas
+                       pPlayer->DestroyItemCount(54619, countInInventory, true); // Remove all bananas
 
+                       sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(%d) %s:(%d)", 
+                           pPlayer ? pPlayer->GetSession()->GetRemoteAddress().c_str() : "none",
+                           pPlayer->GetSession()->GetAccountId(),
+                           pPlayer->GetName(),
+                           "leave banana field",
+                           "banana owned count",
+                           countInInventory,
+                           "needed:", 
+                           counter);
                  }
                  else // If not item count
                  {
