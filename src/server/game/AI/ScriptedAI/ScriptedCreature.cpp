@@ -183,24 +183,32 @@ Creature* ScriptedAI::DoSpawnCreature(uint32 uiId, float fX, float fY, float fZ,
 
 Player* ScriptedAI::SelectRandomPlayer(float range)
 {
-    Map *map = me->GetMap();
-    if (map->IsDungeon())
+    Map* pMap = me->GetMap();
+    if (!pMap->IsDungeon())
+        return nullptr;
+
+    Map::PlayerList const &PlayerList = pMap->GetPlayers();
+    Map::PlayerList::const_iterator i;
+    if (PlayerList.isEmpty())
+        return nullptr;
+
+    std::list<Player*> temp;
+    std::list<Player*>::const_iterator j;
+
+    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
     {
-        Map::PlayerList const &PlayerList = map->GetPlayers();
-
-        if (PlayerList.isEmpty())
-            return NULL;
-
-        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-        {
-            if((range == 0.0f || me->IsWithinDistInMap(i->getSource(), range))
-            && i->getSource()->isTargetableForAttack())
-                return i->getSource();
-        }
-        return NULL;
+        if((range == 0.0f || me->IsWithinDistInMap(i->getSource(), range))
+        && i->getSource()->isTargetableForAttack())
+            temp.push_back(i->getSource());
     }
-    else
-        return NULL;
+
+    if (!temp.empty())
+    {
+        j = temp.begin();
+        advance(j, rand()%temp.size());
+        return (*j);
+    }
+    return nullptr;
 }
 
 Unit* ScriptedAI::SelectUnit(SelectAggroTarget pTarget, uint32 uiPosition)
