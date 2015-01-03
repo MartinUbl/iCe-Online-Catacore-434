@@ -2734,6 +2734,10 @@ void InstanceMap::InitVisibilityDistance()
         case 939:
             m_VisibleDistance = 500.0f;
             break;
+        // Throne of the Four Winds
+        case 754:
+            m_VisibleDistance = SIZE_OF_GRIDS - 1;
+            break;       
         default:
             break;
     }
