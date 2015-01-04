@@ -1275,7 +1275,7 @@ namespace Illidan
             if (explainTimer <= diff)
             {
                 IllidanSteps step = CAST_WOE_INSTANCE(pInstance)->GetIllidanMoveStep();
-                if (explainCounter < 4 && step == ILLIDAN_FIRST_STEP)
+                if (explainCounter < 3 && step == ILLIDAN_FIRST_STEP)
                 {
                     PlayQuote(me, explainQuotes[explainCounter]);
                     explainCounter++;
