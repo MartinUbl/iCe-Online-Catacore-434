@@ -309,7 +309,8 @@ bool ChatHandler::HandleBanankyCommandAdd(const char* args)
 
     if (!chname || !pocet || !tailStr)
         return false;
-
+    if (atoi(pocet) < 1)
+        return false;
 
     char* duvod = extractQuotedArg(tailStr);
 
@@ -318,6 +319,9 @@ bool ChatHandler::HandleBanankyCommandAdd(const char* args)
 
     uint64 pguid = sObjectMgr->GetPlayerGUIDByName(chname);
     Player* target = sObjectMgr->GetPlayer(pguid);
+
+    if (!pguid)
+        return false;
 
     if (target) // if online
     {
