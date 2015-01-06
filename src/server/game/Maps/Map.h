@@ -509,9 +509,7 @@ class Map : public GridRefManager<NGridType>
         bool GameObjectCellRelocation(GameObject* go, Cell new_cell);
 
         void AddCreatureToMoveList(Creature *c, float x, float y, float z, float ang);
-
         CreatureMoveList i_creaturesToMove;
-        bool _creatureToMoveLock;
 
         std::vector<GameObject*> i_gameObjectsToMove;
 
