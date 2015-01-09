@@ -165,6 +165,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/ZulAman/boss_nalorakk.cpp
   EasternKingdoms/ZulAman/zulaman.cpp
   EasternKingdoms/ZulAman/zulaman.h
+  EasternKingdoms/hillsbrad_foothills.cpp
   EasternKingdoms/hinterlands.cpp
   EasternKingdoms/western_plaguelands.cpp
   EasternKingdoms/alterac_mountains.cpp

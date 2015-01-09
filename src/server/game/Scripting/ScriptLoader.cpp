@@ -227,6 +227,7 @@ void AddSC_elwynn_forest();
 void AddSC_eversong_woods();
 void AddSC_ghostlands();
 void AddSC_hinterlands();
+void AddSC_hillsbrad_foothills();
 void AddSC_ironforge();
 void AddSC_isle_of_queldanas();
 void AddSC_loch_modan();
@@ -872,6 +873,7 @@ void AddEasternKingdomsScripts()
     AddSC_eversong_woods();
     AddSC_ghostlands();
     AddSC_hinterlands();
+    AddSC_hillsbrad_foothills();
     AddSC_ironforge();
     AddSC_isle_of_queldanas();
     AddSC_loch_modan();

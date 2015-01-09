@@ -3315,12 +3315,16 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
 
     uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[effIndex];
 
-    // Dalaran Sewers arena spell Flush triggering deleted spell
-    if (triggered_spell_id == 61698)
+    switch (triggered_spell_id)
     {
-        if (unitTarget)
-            unitTarget->KnockbackFrom(m_caster->GetPositionX(), m_caster->GetPositionY(), 20.0f, 20.0f);
-        return;
+        case 61698: // Dalaran Sewers arena spell Flush triggering deleted spell
+            if (unitTarget)
+                unitTarget->KnockbackFrom(m_caster->GetPositionX(), m_caster->GetPositionY(), 20.0f, 20.0f);
+            return;
+        case 88563: // Quest Giver spell - do not trigger Summon High Executor Darthalia
+            return;
+        default:
+            break;
     }
 
     // normal case
