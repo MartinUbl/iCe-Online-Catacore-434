@@ -525,6 +525,22 @@ void Map::Add(Transport* obj)
 
     obj->AddToWorld();
     _transports.insert(obj);
+
+    // Broadcast creation to players
+    if (!GetPlayers().isEmpty())
+    {
+        for (Map::PlayerList::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+        {
+            if (itr->getSource()->GetTransport() != obj)
+            {
+                UpdateData data(GetId());
+                obj->BuildCreateUpdateBlockForPlayer(&data, itr->getSource());
+                WorldPacket packet;
+                data.BuildPacket(&packet);
+                itr->getSource()->SendDirectMessage(&packet);
+            }
+        }
+    }
 }
 
 template<>
