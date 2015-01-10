@@ -153,6 +153,7 @@ public:
             canMoveToNextPoint = false;
             me->SetWalk(true);
             me->SetSpeed(MOVE_WALK, 1.28571f, true);
+            me->ForcedDespawn(5 * MINUTE * IN_MILLISECONDS); // default
         }
 
         InstanceScript * pInstance;
@@ -439,7 +440,7 @@ public:
             pInstance = me->GetInstanceScript();
             portalClosed = false;
 
-            if ((entry == CORRUPTED_ARCANIST_ENTRY || DREADLORD_DEFFENDER_ENTRY) && me->ToTempSummon())
+            if ((entry == CORRUPTED_ARCANIST_ENTRY || entry == DREADLORD_DEFFENDER_ENTRY) && me->ToTempSummon())
             {
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -540,7 +541,7 @@ public:
             if (type != POINT_MOTION_TYPE)
                 return;
 
-            if (me->ToTempSummon() == NULL)
+            if (me->ToTempSummon() == nullptr)
                 return;
 
             if (id == 2 && entry == GUARDIAN_DEMON_ENTRY)
@@ -548,7 +549,7 @@ public:
 
             if (id == 3 && entry == GUARDIAN_DEMON_ENTRY)
             {
-                if (Creature * pPortalDummy = me->FindNearestCreature(LEGION_PORTAL_DUMMY,50.0f,true))
+                if (Creature * pPortalDummy = me->FindNearestCreature(LEGION_PORTAL_DUMMY,60.0f,true))
                 if (Aura * a = pPortalDummy->GetAura(SPELL_PORTAL_STATUS_SHUTTING_DOWN))
                     a->SetDuration(4000);
                 me->ForcedDespawn();
@@ -652,7 +653,7 @@ public:
             if (canMoveToPoint)
             {
                 canMoveToPoint = false;
-                if (entry == CORRUPTED_ARCANIST_ENTRY || DREADLORD_DEFFENDER_ENTRY)
+                if (entry == CORRUPTED_ARCANIST_ENTRY || entry == DREADLORD_DEFFENDER_ENTRY)
                 {
                     me->GetMotionMaster()->MovePoint(1, COURTYARD_X,COURTYARD_Y, COURTYARD_Z, true);
                     me->ForcedDespawn(5000);
@@ -1483,7 +1484,7 @@ namespace Illidan
                     pAI->HandleVehicle(true);
                     if (pAI->pInstance)
                     {
-                        pAI->pInstance->DoUpdateWorldState(WORLD_STATE_DEMONS_IN_COURTYARD, 1); // lets see hoe it looks like
+                        pAI->pInstance->DoUpdateWorldState(WORLD_STATE_DEMONS_IN_COURTYARD, 1); // lets see how it looks like
                         pAI->pInstance->DoAddAuraOnPlayers(NULL, SPELL_SHADOW_CLOAK_TRIGGERER);
                     }
 
@@ -1521,6 +1522,223 @@ namespace Illidan
     };
 }
 
+enum eyeSpells
+{
+    SPELL_FEL_FLAMES = 102356,
+    SPELL_FEL_LIGHTNING = 102361 
+};
+
+class npc_eye_of_the_legion_trash : public CreatureScript
+{
+public:
+    npc_eye_of_the_legion_trash() : CreatureScript("npc_eye_of_the_legion_trash") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_eye_of_the_legion_trashAI(creature);
+    }
+
+    struct npc_eye_of_the_legion_trashAI : public ScriptedAI
+    {
+        npc_eye_of_the_legion_trashAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint32 felFlamesTimer;
+        uint32 felLightningTimer;
+
+        void Reset() override
+        {
+            felFlamesTimer = urand(6000, 8000);
+            felLightningTimer = urand(4000, 5000);
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (felFlamesTimer <= diff)
+            {
+                me->CastSpell(me->GetVictim(),SPELL_FEL_FLAMES , true);
+                felFlamesTimer = urand(9000,12000);
+            }
+            else felFlamesTimer -= diff;
+
+            if (felLightningTimer <= diff)
+            {
+                if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f, true))
+                    me->CastSpell(target, SPELL_FEL_LIGHTNING, false);
+                felLightningTimer = urand(4000,5000);
+            }
+            else felLightningTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+enum championSpells
+{
+    SPELL_QUEENS_BLADE = 102260,
+    SPELL_SHIMMERING_STRIKE_AOE = 102257
+};
+
+class npc_eternal_champion_trash_woe : public CreatureScript
+{
+public:
+    npc_eternal_champion_trash_woe() : CreatureScript("npc_eternal_champion_trash_woe") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_eternal_champion_trash_woeAI(creature);
+    }
+
+    struct npc_eternal_champion_trash_woeAI : public ScriptedAI
+    {
+        npc_eternal_champion_trash_woeAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint32 bladeTimer;
+        uint32 strikeTimer;
+
+        void Reset() override
+        {
+            bladeTimer = urand(2000, 4000);
+            strikeTimer = urand(8000, 10000);
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (bladeTimer <= diff)
+            {
+                me->CastSpell(me->GetVictim(),SPELL_QUEENS_BLADE , true);
+                bladeTimer = urand(9000,12000);
+            }
+            else bladeTimer -= diff;
+
+            if (strikeTimer <= diff)
+            {
+                me->CastSpell(me, SPELL_SHIMMERING_STRIKE_AOE, true);
+                strikeTimer = urand(4000,5000);
+            }
+            else strikeTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+enum EnchantedMistressSpells
+{
+    SPELL_BLIZZARD = 102267,
+    SPELL_FROSTBOLT = 102266,
+    SPELL_FIREBALL = 102265,
+    SPELL_FIREBOMB = 102263
+};
+
+enum EnchantedMistressEntry
+{
+    ENTRY_FROST_MISTRESS = 54589,
+    ENTRY_FIRE_MISTRESS = 56579
+};
+
+enum events
+{
+    EVENT_FROSTBOLT,
+    EVENT_FIREBALL,
+    EVENT_BLIZZARD,
+    EVENT_FIREBOMB
+};
+
+class npc_enchanted_mistress_woe : public CreatureScript
+{
+public:
+    npc_enchanted_mistress_woe() : CreatureScript("npc_enchanted_mistress_woe") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_enchanted_mistress_woeAI(creature);
+    }
+
+    struct npc_enchanted_mistress_woeAI : public ScriptedAI
+    {
+        npc_enchanted_mistress_woeAI(Creature* creature) : ScriptedAI(creature)
+        {
+            entry = me->GetEntry();
+        }
+
+        uint32 entry;
+        EventMap events;
+
+        void Reset() override
+        {
+            events.Reset();
+        }
+
+        void EnterCombat(Unit * /*who*/) override
+        {
+            if (entry == ENTRY_FROST_MISTRESS)
+            {
+                events.ScheduleEvent(EVENT_FROSTBOLT, 1000);
+                events.ScheduleEvent(EVENT_BLIZZARD, 8000);
+            }
+            else if (entry == ENTRY_FIRE_MISTRESS)
+            {
+                events.ScheduleEvent(EVENT_FIREBALL, 1000);
+                events.ScheduleEvent(EVENT_FIREBOMB, 6000);
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_FROSTBOLT:
+                        if (!me->IsNonMeleeSpellCasted(false))
+                        {
+                            me->CastSpell(me->GetVictim(), SPELL_FROSTBOLT, false);
+                            events.ScheduleEvent(EVENT_FROSTBOLT, 2500);
+                        }
+                        break;
+                    case EVENT_FIREBALL:
+                        if (!me->IsNonMeleeSpellCasted(false))
+                        {
+                            me->CastSpell(me->GetVictim(), SPELL_FIREBALL, false);
+                            events.ScheduleEvent(EVENT_FIREBALL, 2500);
+                        }
+                        break;
+                    case EVENT_BLIZZARD:
+                        if (!me->IsNonMeleeSpellCasted(false))
+                        {
+                            if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
+                                me->CastSpell(target, SPELL_BLIZZARD, false);
+                            events.ScheduleEvent(EVENT_BLIZZARD, urand(8000,10000));
+                        }
+                        break;
+                    case EVENT_FIREBOMB:
+                        if (!me->IsNonMeleeSpellCasted(false))
+                        {
+                            if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
+                                me->CastSpell(target, SPELL_FIREBOMB, false);
+                            events.ScheduleEvent(EVENT_FIREBOMB, urand(8000,10000));
+                        }
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_well_of_eternity_trash()
 {
     // NPC SCRIPTS
@@ -1530,11 +1748,14 @@ void AddSC_well_of_eternity_trash()
     new npc_portal_connector(); // 55541,55542,55543
     new npc_legion_portal_woe(); // 54513
     new Illidan::npc_illidan_intro_woe();
+    new npc_eye_of_the_legion_trash(); // 54747 ?
+    new npc_eternal_champion_trash_woe(); // 54612 ?
+    new npc_enchanted_mistress_woe(); // 54589 + 56579 ?
     // GO SCRIPTS
     new go_fel_crystal_woe();
     // SPELLSCRIPTS
     new spell_gen_woe_crystal_selector(); // 105018 + 105074 + 105004
-    new spell_gen_woe_distract_selector(); // 110121 
+    new spell_gen_woe_distract_selector(); // 110121
 }
 
 /*

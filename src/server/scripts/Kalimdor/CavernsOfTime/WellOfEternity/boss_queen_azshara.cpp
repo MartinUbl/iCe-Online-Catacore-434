@@ -918,10 +918,12 @@ public:
     };
 };
 
-
 enum royalMaidenSPells
 {
     SPELL_GOLDEN_BOWL = 102415,
+    SPELL_PIERCING_THORNS = 102238,
+    SPELL_CHOKING_PARFUME = 102208,
+    SPELL_SWEET_LULLABY_SLEEP = 102245,
 };
 
 class npc_royal_handmaiden_woe : public CreatureScript
@@ -938,14 +940,27 @@ public:
     {
         npc_royal_handmaiden_woeAI(Creature* creature) : ScriptedAI(creature)
         {
-            if (me->ToTempSummon())
+            isTempSummon = me->ToTempSummon();
+
+            if (isTempSummon)
             {
                 me->LoadEquipment(0, true);
                 me->CastSpell(me, SPELL_GOLDEN_BOWL, true);
             }
         }
 
-        void Reset() override {}
+        bool isTempSummon;
+        uint32 lullabyTimer;
+        uint32 parfumeTimer;
+
+        void Reset() override
+        {
+            if (!isTempSummon)
+                me->CastSpell(me, SPELL_PIERCING_THORNS, true);
+
+            lullabyTimer = urand(2000, 5000);
+            parfumeTimer = urand(4000, 6000);
+        }
 
         void MovementInform(uint32 type, uint32 id) override
         {
@@ -959,14 +974,27 @@ public:
             }
         }
 
-        void EnterEvadeMode() override {}
-        void AttackStart(Unit*) {}
-        void MoveInLineOfSight(Unit * who) override {}
-
         void UpdateAI(const uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
+
+            if (lullabyTimer <= diff)
+            {
+                if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f, true))
+                    me->CastSpell(target, SPELL_SWEET_LULLABY_SLEEP, true);
+
+                lullabyTimer = 10000;
+            }
+            else lullabyTimer -= diff;
+
+            if (parfumeTimer <= diff)
+            {
+                if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f, true))
+                    me->CastSpell(target, SPELL_CHOKING_PARFUME, false);
+                parfumeTimer = urand(6000,8000);
+            }
+            else parfumeTimer -= diff;
 
             DoMeleeAttackIfReady();
         }

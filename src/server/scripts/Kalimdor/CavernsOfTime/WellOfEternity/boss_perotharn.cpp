@@ -397,10 +397,13 @@ public:
         {
             HandleFireWallCircle(false);
             Summons.DespawnAll();
-            PlayQuote(me,onDeathQuotes[urand(0,2)]);
+            PlayQuote(me,onDeathQuotes[0]);
 
             if (pInstance)
             {
+                if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
+                    PlayQuote(pIllidan,onDeathQuotes[1]);
+
                 CAST_WOE_INSTANCE(pInstance)->UnRegisterIllidanVictim(me->GetGUID());
                 pInstance->SetData(DATA_PEROTHARN, DONE);
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
