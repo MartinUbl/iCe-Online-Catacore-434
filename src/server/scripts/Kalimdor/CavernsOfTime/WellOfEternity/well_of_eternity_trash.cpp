@@ -1020,6 +1020,12 @@ public:
 
 namespace Illidan
 {
+    static const SimpleQuote afterPerotharnDeathQuote[2] = // used all
+    {
+        { 26051, "The hunter became the prey." },
+        { 26052, "You did well, but for now I must continue alone. Good hunting." }
+    };
+
     enum IllidanSpells
     {
         SPELL_ILLIDAN_GREEN_ARROW = 105924,
@@ -1073,6 +1079,7 @@ namespace Illidan
             delayMoveTimer = MAX_TIMER;
             orderTimer = MAX_TIMER;
             waitingTimer = MAX_TIMER;
+            sayDelayTimer = MAX_TIMER;
             explainCounter = 0;
             eventStarted = false;
             gossipDone = false;
@@ -1090,6 +1097,7 @@ namespace Illidan
         uint32 orderTimer;
         uint8 explainCounter;
         uint32 attackTimer;
+        uint32 sayDelayTimer;
         bool weaponSwitcher;
         bool eventStarted;
         bool gossipDone;
@@ -1131,6 +1139,8 @@ namespace Illidan
                 HandleVehicle(false);
             else if (action == ACTION_ILLIDAN_CREATE_VEHICLE)
                 HandleVehicle(true);
+            else  if (action == ACTION_AFTER_PEROTHARN_DEATH)
+                sayDelayTimer = 3000;
         }
 
         void MovementInform(uint32 type, uint32 wpID) override
@@ -1140,10 +1150,17 @@ namespace Illidan
 
             int32 id = (int32)wpID; // Stop compiler bitching about unsigned / signed comparsion
 
+            if (type == EFFECT_MOTION_TYPE && id == ILLIDAN_PALACE_JUMP_WP) // jump point
+            {
+                eventTimer = 100;
+                CAST_WOE_INSTANCE(pInstance)->SetIllidanStep(IllidanSteps(id));
+                return;
+            }
+
             if (type != POINT_MOTION_TYPE)
                 return;
 
-            if (id >= ILLIDAN_FIRST_STEP && id < ILLIDAN_MAX_STEPS)
+            if ((id >= ILLIDAN_FIRST_STEP && id < ILLIDAN_MAX_STEPS) || id > ILLIDAN_STEP_NULL) // or post wps...
                 CAST_WOE_INSTANCE(pInstance)->SetIllidanStep(IllidanSteps(id));
 
             if ((id >= ILLIDAN_FIRST_STEP && id <= ILLIDAN_THIRD_PACK_STEP) || id == ILLIDAN_PEROTHARN_STEP)
@@ -1216,10 +1233,28 @@ namespace Illidan
                 default:
                     break;
             }
+
+            // After Perotharn kill way points
+            switch (id)
+            {
+                case ILLIDAN_PEROTHARN_DEFEATED_STAIRS_WP:
+                {
+                    PlayQuote(me, afterPerotharnDeathQuote[1]);
+                    eventTimer = 5000;
+                    me->SetFacingTo(afterPerotharnDeathWP[0].m_orientation);
+                }
+                break;
+                case ILLIDAN_HANDRAIL_WP:
+                case ILLIDAN_RUNAWAY_WP:
+                    eventTimer = 100;
+                break;
+                default:
+                    break;
+            }
         }
 
         /*
-         // TODO: Remove this after TESTING !!!
+            TODO: Remove this after TESTING !!!
         */
         void ReceiveEmote(Player* player, uint32 uiTextEmote) override
         {
@@ -1238,6 +1273,13 @@ namespace Illidan
         {
             if (!pInstance)
                 return;
+
+            if (sayDelayTimer <= diff)
+            {
+                PlayQuote(me, afterPerotharnDeathQuote[0]);
+                sayDelayTimer = MAX_TIMER;
+            }
+            else sayDelayTimer -= diff;
 
             // Order to smash crystals
             if (orderTimer <= diff)
@@ -1378,6 +1420,31 @@ namespace Illidan
                             pPerotharn->AI()->DoAction(ACTION_PEROTHRAN_PREPARE_TO_AGGRO);
                         break;
                     }
+                    default:
+                        break;
+                }
+
+                // After Perotharn kill way points
+                switch (step)
+                {
+                    case ILLIDAN_PEROTHARN_DEFEATED_STAIRS_WP:
+                    {
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_HANDRAIL_WP, afterPerotharnDeathWP[1]);
+                    }
+                    break;
+                    case ILLIDAN_HANDRAIL_WP:
+                        me->GetMotionMaster()->MoveJump(afterPerotharnDeathWP[2].GetPositionX(),
+                                                        afterPerotharnDeathWP[2].GetPositionY(),
+                                                        afterPerotharnDeathWP[2].GetPositionZ(),
+                                                        10.0f, 30.0f, ILLIDAN_PALACE_JUMP_WP);
+                        break;
+                    case ILLIDAN_PALACE_JUMP_WP:
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_RUNAWAY_WP, afterPerotharnDeathWP[3]);
+                        break;
+                    case ILLIDAN_RUNAWAY_WP:
+                        me->SetVisible(false);
+                        me->Kill(me);
+                        break;
                     default:
                         break;
                 }

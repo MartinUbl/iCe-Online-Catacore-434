@@ -79,12 +79,7 @@ static const SimpleQuote onKillQuotes[2] =
     { 26131, "None compare to Peroth'arn." },
 };
 
-static const SimpleQuote onDeathQuotes[3] =
-{
-    { 26113, "Noooo! How could this be?" },
-    { 26051, "The hunter became the prey." },
-    { 26052, "You did well, but for now I must continue alone. Good hunting." },
-};
+static const SimpleQuote onDeathQuote = { 26113, "Noooo! How could this be?" };
 
 enum Spells
 {
@@ -316,7 +311,7 @@ public:
                     angle = MapManager::NormalizeOrientation(angle);
 
                     me->GetNearPoint(me, x, y, z, 58.0f, 0, angle);
-                    if (GameObject * go = me->SummonGameObject(FIREWALL_GO_ENTRY, x, y, z, MapManager::NormalizeOrientation(angle + M_PI/3.5f + 0.45f), 0.0f, 0, 0, 0, 0))
+                    if (GameObject * go = me->SummonGameObject(FIREWALL_GO_ENTRY, x, y, z, MapManager::NormalizeOrientation(angle + M_PI/2 + 1.0f), 0.0f, 0, 0, 0, 0))
                         goList.push_back(go->GetGUID());
                 }
             }
@@ -397,16 +392,19 @@ public:
         {
             HandleFireWallCircle(false);
             Summons.DespawnAll();
-            PlayQuote(me,onDeathQuotes[0]);
+            PlayQuote(me,onDeathQuote);
 
             if (pInstance)
             {
-                if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
-                    PlayQuote(pIllidan,onDeathQuotes[1]);
-
                 CAST_WOE_INSTANCE(pInstance)->UnRegisterIllidanVictim(me->GetGUID());
                 pInstance->SetData(DATA_PEROTHARN, DONE);
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+                if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
+                {
+                    pIllidan->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_DEFEATED_STAIRS_WP, afterPerotharnDeathWP[0]);
+                    pIllidan->AI()->DoAction(ACTION_AFTER_PEROTHARN_DEATH);
+                }
             }
         }
 
