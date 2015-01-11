@@ -238,14 +238,61 @@ public:
     }
 };
 
+class go_makers_lift_controller : public GameObjectScript
+{
+public:
+    go_makers_lift_controller() : GameObjectScript("go_makers_lift_controller") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        InstanceScript* pInstance = player->GetInstanceScript();
+        if (pInstance)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Take me to the first floor", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            if (pInstance->GetData(DATA_ANRAPHET) == DONE)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Take me to the second floor", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+
+            player->SEND_GOSSIP_MENU(1, go->GetGUID());
+        }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, GameObject* go, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        player->CLOSE_GOSSIP_MENU();
+
+        GameObject* lift = go->FindNearestGameObject(207547, 500.0f);
+        if (!lift)
+            return false;
+
+        switch (uiAction)
+        {
+            case GOSSIP_ACTION_INFO_DEF + 1:
+                lift->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 2:
+                lift->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 1);
+                break;
+            default:
+                break;
+        }
+
+        return true;
+    }
+
+};
+
 void AddSC_instance_halls_of_origination()
 {
     new instance_halls_of_origination();
+    new go_makers_lift_controller();
 }
 
 /* SQL 
 * UPDATE instance_template SET script='instance_halls_of_origination' WHERE map=644;
 * UPDATE creature_template SET faction_A=35, faction_H=35 WHERE entry in (39788, 39587, 39731, 39732, 39378, 48815, 48710, 48715, 48776, 48902);
+* UPDATE gameobject_template SET scriptname='go_makers_lift_controller' WHERE entry = 207669;
 * INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (3942598, 39425, 6, 6, 34, 0, 3, 'instance script');
 * INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (3978898, 39788, 6, 6, 34, 1, 3, 'instance script');
 * INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (3958798, 39587, 6, 6, 34, 2, 3, 'instance script');
