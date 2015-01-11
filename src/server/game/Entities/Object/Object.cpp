@@ -626,7 +626,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         resulting in players seeing the object in a different position
         - this may therefore lead to desynchronization
         */
-        if (go && go->IsTransport() && go->GetGOValue()->Transport.AnimationInfo)
+        if (go && go->IsDynTransport() && go->GetGOValue()->Transport.AnimationInfo)
             *data << uint32(go->GetGOValue()->Transport.PathProgress);
         else
             *data << uint32(getMSTime());
@@ -912,12 +912,20 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                 else if (index == GAMEOBJECT_FLAGS)
                 {
                     uint32 flags = m_uint32Values[index];
-                    if (ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_CHEST)
-                        if (ToGameObject()->GetGOInfo()->chest.groupLootRules)
+
+                    GameObject const* go = ToGameObject();
+
+                    if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+                        if (go->GetGOInfo()->chest.groupLootRules)
                             flags |= GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE;
 
-                    if (ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
-                        flags = GO_FLAG_NODESPAWN | GO_FLAG_TRANSPORT;
+                    if (go->IsTransport())
+                    {
+                        if (go->IsDynTransport())
+                            flags = GO_FLAG_NODESPAWN | GO_FLAG_TRANSPORT;
+                        else
+                            flags |= GO_FLAG_NODESPAWN | GO_FLAG_TRANSPORT;
+                    }
 
                     *data << flags;
                 }
@@ -926,10 +934,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                     bool isStoppableTransport = ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT && !goValue->Transport.StopFrames->empty();
 
                     if (isStoppableTransport)
-                    {
-                        int32 statePos = goValue->Transport.StopFrames->at((goValue->Transport.VisualState + 1) % goValue->Transport.StopFrames->size()) - goValue->Transport.StopFrames->at(goValue->Transport.VisualState);
-                        *data << uint32(goValue->Transport.PathProgress + abs(statePos));
-                    }
+                        *data << uint32(goValue->Transport.PathProgress + goValue->Transport.StateChangeTime);
                     else
                         *data << m_uint32Values[index];
                 }

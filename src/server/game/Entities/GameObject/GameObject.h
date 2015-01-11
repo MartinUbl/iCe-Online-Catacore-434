@@ -544,6 +544,7 @@ union GameObjectValue
     struct
     {
         uint32 PathProgress;
+        uint32 StateChangeTime;
         TransportAnimation const* AnimationInfo;
         uint32 CurrentSeg;
         std::vector<uint32>* StopFrames;

@@ -344,7 +344,7 @@ void GameObject::Update(uint32 diff)
 
                     if (GetGoState() == GO_STATE_TRANSPORT_ACTIVE)
                     {
-                        m_goValue->Transport.PathProgress += diff;
+                        m_goValue->Transport.PathProgress = getMSTime();
                         /* TODO: Fix movement in unloaded grid - currently GO will just disappear
                         uint32 timer = m_goValue->Transport.PathProgress % m_goValue->Transport.AnimationInfo->TotalTime;
                         TransportAnimationEntry const* node = m_goValue->Transport.AnimationInfo->GetAnimNode(timer);
@@ -373,10 +373,11 @@ void GameObject::Update(uint32 diff)
 
                             if (m_goValue->Transport.VisualState != visualStateAfter)
                             {
+                                m_goValue->Transport.StateChangeTime = abs((int32)m_goValue->Transport.StopFrames->at(visualStateAfter) - (int32)m_goValue->Transport.StopFrames->at(m_goValue->Transport.VisualState));
+                                m_goValue->Transport.VisualState = visualStateAfter;
+
                                 ForceValuesUpdateAtIndex(GAMEOBJECT_LEVEL);
                                 ForceValuesUpdateAtIndex(GAMEOBJECT_BYTES_1);
-
-                                m_goValue->Transport.VisualState = visualStateAfter;
                             }
                         }
                     }
@@ -2175,7 +2176,7 @@ uint32 GameObject::GetTransportPeriod() const
 
 void GameObject::SetTransportState(GOState state, uint32 stopFrame /*= 0*/)
 {
-    if (GetGoState() == state)
+    if (GetGoState() == state+stopFrame)
         return;
 
     if (GetGOInfo()->type != GAMEOBJECT_TYPE_TRANSPORT || state < GO_STATE_TRANSPORT_ACTIVE)
@@ -2189,6 +2190,8 @@ void GameObject::SetTransportState(GOState state, uint32 stopFrame /*= 0*/)
             if (m_goValue->Transport.StopFrames->size() > 0 && (int32) m_goValue->Transport.StopFrames->size() > GetGoState() - GO_STATE_TRANSPORT_STOPPED)
                 m_goValue->Transport.PathProgress += m_goValue->Transport.StopFrames->at(GetGoState() - GO_STATE_TRANSPORT_STOPPED);
         }
+        m_goValue->Transport.StateChangeTime = 0;
+        m_goValue->Transport.VisualState = (uint8)(GetGoState() - GO_STATE_TRANSPORT_STOPPED);
         SetGoState(GO_STATE_TRANSPORT_ACTIVE);
     }
     else
@@ -2197,7 +2200,8 @@ void GameObject::SetTransportState(GOState state, uint32 stopFrame /*= 0*/)
         {
             if (m_goValue->Transport.StopFrames->size() > 0)
             {
-                m_goValue->Transport.PathProgress = getMSTime() + m_goValue->Transport.StopFrames->at(stopFrame);
+                m_goValue->Transport.PathProgress = getMSTime();
+                m_goValue->Transport.StateChangeTime = abs((int32)m_goValue->Transport.StopFrames->at(stopFrame) - (int32)m_goValue->Transport.StopFrames->at(m_goValue->Transport.VisualState));
                 m_goValue->Transport.VisualState = (uint8)stopFrame;
                 SetGoState(GOState(GO_STATE_TRANSPORT_STOPPED + stopFrame));
             }
@@ -2207,6 +2211,9 @@ void GameObject::SetTransportState(GOState state, uint32 stopFrame /*= 0*/)
             }
         }
     }
+
+    ForceValuesUpdateAtIndex(GAMEOBJECT_LEVEL);
+    ForceValuesUpdateAtIndex(GAMEOBJECT_BYTES_1);
 }
 
 void GameObject::SetDisplayId(uint32 displayid)
