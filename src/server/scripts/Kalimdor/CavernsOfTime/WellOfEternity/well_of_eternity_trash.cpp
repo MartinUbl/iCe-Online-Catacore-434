@@ -1425,13 +1425,11 @@ namespace Illidan
                 }
 
                 // After Perotharn kill way points
-                switch (step)
+                switch ((uint32)step)
                 {
                     case ILLIDAN_PEROTHARN_DEFEATED_STAIRS_WP:
-                    {
                         me->GetMotionMaster()->MovePoint(ILLIDAN_HANDRAIL_WP, afterPerotharnDeathWP[1]);
-                    }
-                    break;
+                        break;
                     case ILLIDAN_HANDRAIL_WP:
                         me->GetMotionMaster()->MoveJump(afterPerotharnDeathWP[2].GetPositionX(),
                                                         afterPerotharnDeathWP[2].GetPositionY(),
