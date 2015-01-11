@@ -261,23 +261,27 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
         {
             m_goValue->Transport.AnimationInfo = sTransportMgr->GetTransportAnimInfo(goinfo->id);
             m_goValue->Transport.PathProgress = getMSTime();
-            if (m_goValue->Transport.AnimationInfo)
-                m_goValue->Transport.PathProgress -= m_goValue->Transport.PathProgress % GetTransportPeriod();    // align to period
             m_goValue->Transport.CurrentSeg = 0;
             m_goValue->Transport.VisualState = 0;
+            m_goValue->Transport.StateChangeTime = 0;
             m_goValue->Transport.StopFrames = new std::vector<uint32>();
-            if (goinfo->transport.stopFrame1 > 0)
-                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame1);
-            if (goinfo->transport.stopFrame2 > 0)
-                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame2);
-            if (goinfo->transport.stopFrame3 > 0)
-                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame3);
-            if (goinfo->transport.stopFrame4 > 0)
-                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame4);
 
-            // when any stop frame is defined, it also includes the lowest frame possible
-            if (!m_goValue->Transport.StopFrames->empty())
-                m_goValue->Transport.StopFrames->insert(m_goValue->Transport.StopFrames->begin(), 0);
+            uint32 framesPresent = 0;
+            if (goinfo->transport.stopFrame4 > 0)
+                framesPresent = 4;
+            else if (goinfo->transport.stopFrame3 > 0)
+                framesPresent = 3;
+            else if (goinfo->transport.stopFrame2 > 0)
+                framesPresent = 2;
+
+            if (goinfo->transport.stopFrame1 > 0 || framesPresent > 1)
+                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame1);
+            if (goinfo->transport.stopFrame2 > 0 || framesPresent > 2)
+                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame2);
+            if (goinfo->transport.stopFrame3 > 0 || framesPresent > 3)
+                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame3);
+            if (goinfo->transport.stopFrame4 > 0 || framesPresent > 4)
+                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame4);
 
             // set proper transport state only when dealing with non-custom transports
             if (m_goValue->Transport.AnimationInfo)
