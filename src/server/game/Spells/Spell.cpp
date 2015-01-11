@@ -6054,6 +6054,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (m_caster->GetShapeshiftForm() != FORM_CAT)
                return SPELL_FAILED_NOT_SHAPESHIFT;
             break;
+        case 91836: // Fury of Angerforge
+            if (!m_caster->HasAura(91832) || m_caster->GetAura(91832)->GetStackAmount() < m_spellInfo->StackAmount)
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            break;
     }
 
     // Combat ressurections per encounter are limited since Cataclysm
