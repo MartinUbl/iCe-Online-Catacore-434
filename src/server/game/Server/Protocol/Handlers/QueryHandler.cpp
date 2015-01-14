@@ -43,7 +43,7 @@ void WorldSession::SendNameQueryOpcode(Player *p)
                                                             // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8+1+1+1+1+1+10));
     data.append(p->GetPackGUID());                          // player guid
-    data << uint8(0);                                       // added in 3.1
+    data << uint8(0);                                       // 0 = name known, 1 = name unknown
     data << p->GetName();                                   // played name
     data << uint8(0);                                       // realm name for cross realm BG usage
     data << uint8(p->getRace());
@@ -94,9 +94,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult result)
     uint32 guid      = fields[0].GetUInt32();
     std::string name = fields[1].GetString();
     uint8 pRace = 0, pGender = 0, pClass = 0;
-    if (name == "")
-        name         = GetTrinityString(LANG_NON_EXIST_CHARACTER);
-    else
+    if (name != "")
     {
         pRace        = fields[2].GetUInt8();
         pGender      = fields[3].GetUInt8();
@@ -105,7 +103,14 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult result)
                                                             // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8+1+1+1+1+1+1+10));
     data.appendPackGUID(MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
-    data << uint8(0);                                       // added in 3.1
+    if (name == "")
+    {
+        data << uint8(1);                                   // name unknown
+        SendPacket(&data);
+        return;
+    }
+
+    data << uint8(0);                                       // name known
     data << name;
     data << uint8(0);                                       // realm name for cross realm BG usage
     data << uint8(pRace);                                   // race
@@ -182,8 +187,13 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket & recv_data)
         data << uint32(entry);                              // creature entry
         data << Name;
 
-        for (uint32 i = 0; i < 7; i++)
-            data << uint8(0);           // name2, .., name8
+        for (uint8 i = 0; i < 3; i++)
+            data << uint8(0);                               // name2, ..., name3
+
+        data << uint8(0);                                   // FemaleName
+
+        for (uint8 i = 0; i < 3; i++)
+            data << uint8(0);                               // name5, ..., name8
 
         data << SubName;
         data << ci->IconName;                               // "Directions" for guard, string for Icons 2.3.0
@@ -504,7 +514,7 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recv_data)
                     data << int32(itr->ObjectiveIndex);     // objective index
                     data << uint32(itr->MapId);             // mapid
                     data << uint32(itr->AreaId);            // areaid
-                    data << uint32(itr->Unk2);              // unknown
+                    data << uint32(itr->FloorId);           // Floor ID
                     data << uint32(itr->Unk3);              // unknown
                     data << uint32(itr->Unk4);              // unknown
                     data << uint32(itr->points.size());     // POI points count
