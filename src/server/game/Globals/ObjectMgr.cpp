@@ -6840,6 +6840,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             }
             return id;
         case HIGHGUID_GAMEOBJECT:
+        case HIGHGUID_TRANSPORT:
             id = m_goGuidMap.UseEmpty();
             if (id >= 0x00FFFFFE)
             {

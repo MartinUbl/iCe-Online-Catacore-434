@@ -432,10 +432,22 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
 
     data->FlushBits();
 
-    // Data
-    if (GameObject const* go = ToGameObject())
-        for (uint32 i = 0; i < stopFrameCount; ++i)
-            *data << uint32(go->GetGOValue()->Transport.StopFrames->at(i));
+    // Transport object stop frame data
+    if (stopFrameCount > 0)
+    {
+        GameObject const* go = ToGameObject();
+
+        if (go && go->GetGOValue()->Transport.StopFrames)
+        {
+            for (uint32 i = 0; i < stopFrameCount; ++i)
+                *data << uint32(go->GetGOValue()->Transport.StopFrames->at(i));
+        }
+        else
+        {
+            for (uint32 i = 0; i < stopFrameCount; ++i)
+                *data << uint32(0);
+        }
+    }
 
     if (flags & UPDATEFLAG_LIVING)
     {
@@ -862,48 +874,46 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                 {
                     uint16 dynFlags = 0;
                     int16 pathProgress = -1;
-                    if (IsActivateToQuest)
+
+                    switch (ToGameObject()->GetGoType())
                     {
-                        switch (ToGameObject()->GetGoType())
+                        case GAMEOBJECT_TYPE_CHEST:
+                            if (IsActivateToQuest)
+                            {
+                                if (target->IsGameMaster())
+                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE;
+                                else
+                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE;
+                            }
+                            break;
+                        case GAMEOBJECT_TYPE_GENERIC:
+                            if (!target->IsGameMaster() && IsActivateToQuest)
+                                dynFlags |= GO_DYNFLAG_LO_SPARKLE;
+                            break;
+                        case GAMEOBJECT_TYPE_GOOBER:
+                            if (IsActivateToQuest)
+                            {
+                                if (target->IsGameMaster())
+                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE;
+                                else
+                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE;
+                            }
+                            break;
+                        case GAMEOBJECT_TYPE_TRANSPORT:
                         {
-                            case GAMEOBJECT_TYPE_CHEST:
-                                if (target->IsGameMaster())
-                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE;
-                                else
-                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE;
-                                break;
-                            case GAMEOBJECT_TYPE_GENERIC:
-                                if (!target->IsGameMaster())
-                                    dynFlags |= GO_DYNFLAG_LO_SPARKLE;
-                                break;
-                            case GAMEOBJECT_TYPE_GOOBER:
-                                if (target->IsGameMaster())
-                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE;
-                                else
-                                    dynFlags |= GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE;
-                                break;
-                            case GAMEOBJECT_TYPE_TRANSPORT:
-                            {
-                                if (goValue->Transport.AnimationInfo)
-                                {
-                                    float timer = float(goValue->Transport.PathProgress % ToGameObject()->GetTransportPeriod());
-                                    pathProgress = int16((timer / float(ToGameObject()->GetTransportPeriod())) * 65535.0f);
-                                }
-                                break;
-                            }
-                            case GAMEOBJECT_TYPE_MO_TRANSPORT:
-                            {
-                                if (goValue->Transport.AnimationInfo)
-                                {
-                                    float timer = float(goValue->Transport.PathProgress % GetUInt32Value(GAMEOBJECT_LEVEL));
-                                    pathProgress = int16((timer / float(GetUInt32Value(GAMEOBJECT_LEVEL))) * 65535.0f);
-                                }
-                                break;
-                            }
-                            default:
-                                // unknown and other
-                                break;
+                            float timer = float(goValue->Transport.PathProgress % ToGameObject()->GetTransportPeriod());
+                            pathProgress = int16((timer / float(ToGameObject()->GetTransportPeriod())) * 65535.0f);
+                            break;
                         }
+                        case GAMEOBJECT_TYPE_MO_TRANSPORT:
+                        {
+                            float timer = float(goValue->Transport.PathProgress % GetUInt32Value(GAMEOBJECT_LEVEL));
+                            pathProgress = int16((timer / float(GetUInt32Value(GAMEOBJECT_LEVEL))) * 65535.0f);
+                            break;
+                        }
+                        default:
+                            // unknown and other
+                            break;
                     }
 
                     *data << uint16(dynFlags);
