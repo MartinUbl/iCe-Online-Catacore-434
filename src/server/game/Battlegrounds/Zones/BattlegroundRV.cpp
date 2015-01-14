@@ -53,14 +53,14 @@ void BattlegroundRV::Update(uint32 diff)
 {
     Battleground::Update(diff);
 
-    if (GetStatus() == STATUS_IN_PROGRESS)
+    if (GetStatus() != STATUS_IN_PROGRESS)
+        return;
+
+    if (GetElapsedTime() >= 47*MINUTE*IN_MILLISECONDS)    // after 47 minutes without one team losing, the arena closes with no winner and no rating change
     {
-        if (GetElapsedTime() >= 47*MINUTE*IN_MILLISECONDS)    // after 47 minutes without one team losing, the arena closes with no winner and no rating change
-        {
-            UpdateArenaWorldState();
-            CheckArenaAfterTimerConditions();
-        }
-    } 
+        UpdateArenaWorldState();
+        CheckArenaAfterTimerConditions();
+    }
 
     if (getTimer() < diff)
     {
@@ -74,30 +74,18 @@ void BattlegroundRV::Update(uint32 diff)
                 setState(BG_RV_STATE_OPEN_PILARS);
                 break;
             case BG_RV_STATE_OPEN_PILARS:
-                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_1]))
+
+                // change state of pillars
+                for (i = 0; i < 4; i++)
                 {
-                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 1);
+                    // activated by pairs, 1+3, 0+2
+                    if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_1 + i]))
+                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, i % 2);
                 }
-                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_3]))
-                {
-                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 1);
-                }
-                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_2]))
-                {
-                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
-                }
-                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_4]))
-                {
-                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
-                }
-                for (i = BG_RV_OBJECT_PILAR_COLLISION_1; i <= BG_RV_OBJECT_PULLEY_2; ++i)
+
+                for (i = BG_RV_OBJECT_PULLEY_1; i <= BG_RV_OBJECT_PULLEY_2; ++i)
                     DoorOpen(i);
 
-                //TogglePillarCollision(false);
                 setTimer(BG_RV_PILAR_TO_FIRE_TIMER);
                 setState(BG_RV_STATE_OPEN_FIRE);
                 break;
@@ -108,28 +96,18 @@ void BattlegroundRV::Update(uint32 diff)
                 setState(BG_RV_STATE_CLOSE_PILARS);
                 break;
             case BG_RV_STATE_CLOSE_PILARS:
-                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_1]))
+
+                // change state of pillars
+                for (i = 0; i < 4; i++)
                 {
-                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
-                }
-                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_3]))
-                {
-                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
-                }
-                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_2]))
-                {
-                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 1);
-                }
-                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_4]))
-                {
-                    if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED)
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 1);
+                    // activated by pairs, 1+3, 0+2; change to opposite state (i+1)%2
+                    if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_1 + i]))
+                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, (i + 1) % 2);
                 }
 
-                //TogglePillarCollision(true);
+                for (i = BG_RV_OBJECT_PULLEY_1; i <= BG_RV_OBJECT_PULLEY_2; ++i)
+                    DoorClose(i);
+
                 setTimer(BG_RV_PILAR_TO_FIRE_TIMER);
                 setState(BG_RV_STATE_CLOSE_FIRE);
                 break;
@@ -205,22 +183,11 @@ bool BattlegroundRV::GetUnderMapReturnPosition(Player* plr, Position& pos)
     return true;
 }
 
-
 void BattlegroundRV::HandleAreaTrigger(Player *Source, uint32 Trigger)
 {
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
+    // We won't handle any areatriggers in this arena
 
-    switch(Trigger)
-    {
-        case 5224:
-        case 5226:
-            break;
-        default:
-            sLog->outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
-            Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
-            break;
-    }
+    return;
 }
 
 void BattlegroundRV::FillInitialWorldStates(WorldPacket &data)
