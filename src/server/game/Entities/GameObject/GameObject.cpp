@@ -283,6 +283,22 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
             if (goinfo->transport.stopFrame4 > 0 || framesPresent > 4)
                 m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame4);
 
+            if (!m_goValue->Transport.StopFrames->empty())
+            {
+                bool nullPresent = false;
+                for (uint32 i = 0; i < m_goValue->Transport.StopFrames->size(); i++)
+                {
+                    if (m_goValue->Transport.StopFrames->at(i) == 0)
+                    {
+                        nullPresent = true;
+                        break;
+                    }
+                }
+
+                if (!nullPresent)
+                    m_goValue->Transport.StopFrames->insert(m_goValue->Transport.StopFrames->begin(), 0);
+            }
+
             // set proper transport state only when dealing with non-custom transports
             if (m_goValue->Transport.AnimationInfo)
             {
