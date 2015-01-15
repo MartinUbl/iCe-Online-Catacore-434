@@ -50,7 +50,7 @@ class BattlegroundRLScore : public BattlegroundScore
         //TODO fix me
 };
 
-class BattlegroundRL : public Battleground
+class BattlegroundRL : public BattlegroundArena
 {
     friend class BattlegroundMgr;
 

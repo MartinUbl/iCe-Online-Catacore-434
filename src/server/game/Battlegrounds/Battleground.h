@@ -347,6 +347,8 @@ enum BGHonorMode
 #define BG_AWARD_ARENA_POINTS_MIN_LEVEL 71
 #define ARENA_TIMELIMIT_POINTS_LOSS    -16
 
+class BattlegroundArena;
+
 /*
 This class is used to:
 1. Add player to battleground
@@ -357,6 +359,7 @@ This class is used to:
 class Battleground
 {
     friend class BattlegroundMgr;
+    friend class BattlegroundArena;
 
     public:
         /* Construction */
@@ -410,6 +413,8 @@ class Battleground
         uint32 GetBattlemasterEntry() const;
         uint32 GetBonusHonorFromKill(uint32 kills) const;
         bool IsRandom() const { return m_IsRandom; }
+
+        BattlegroundArena* ToArena() { if (isArena()) return reinterpret_cast<BattlegroundArena*>(this); else return NULL; }
 
         // Set methods:
         void SetName(char const* Name)      { m_Name = Name; }
@@ -743,5 +748,21 @@ class Battleground
         // Rated Battlegroud
         BattlegroundRatingChangeMap m_bgRatingChange;
 };
+
+class BattlegroundArena : public Battleground
+{
+    friend class BattlegroundMgr;
+
+    public:
+        virtual bool GetUnderMapReturnPosition(Player* /*plr*/, Position& pos) { return false; }
+        virtual bool GetUnderMapLimitZPosition(float &z) { return false; }
+
+    protected:
+        //
+
+    private:
+        //
+};
+
 #endif
 

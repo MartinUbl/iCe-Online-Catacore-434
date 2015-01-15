@@ -54,7 +54,7 @@ class BattlegroundNAScore : public BattlegroundScore
         //TODO fix me
 };
 
-class BattlegroundNA : public Battleground
+class BattlegroundNA : public BattlegroundArena
 {
     friend class BattlegroundMgr;
 

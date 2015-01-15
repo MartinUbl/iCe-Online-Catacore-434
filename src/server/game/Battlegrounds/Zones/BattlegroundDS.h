@@ -92,7 +92,7 @@ class BattlegroundDSScore : public BattlegroundScore
         //TODO fix me
 };
 
-class BattlegroundDS : public Battleground
+class BattlegroundDS : public BattlegroundArena
 {
     friend class BattlegroundMgr;
 

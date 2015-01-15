@@ -33,7 +33,7 @@ class BattlegroundAAScore : public BattlegroundScore
         //TODO fix me
 };
 
-class BattlegroundAA : public Battleground
+class BattlegroundAA : public BattlegroundArena
 {
     friend class BattlegroundMgr;
 

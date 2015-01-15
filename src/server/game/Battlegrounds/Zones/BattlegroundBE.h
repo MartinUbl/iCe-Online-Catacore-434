@@ -53,7 +53,7 @@ class BattlegroundBEScore : public BattlegroundScore
         virtual ~BattlegroundBEScore() {};
 };
 
-class BattlegroundBE : public Battleground
+class BattlegroundBE : public BattlegroundArena
 {
     friend class BattlegroundMgr;
 

@@ -102,7 +102,7 @@ class BattlegroundRVScore : public BattlegroundScore
         virtual ~BattlegroundRVScore() {};
 };
 
-class BattlegroundRV : public Battleground
+class BattlegroundRV : public BattlegroundArena
 {
     friend class BattlegroundMgr;
 
