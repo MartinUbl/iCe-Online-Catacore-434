@@ -80,11 +80,17 @@ void BattlegroundRV::Update(uint32 diff)
                 {
                     // activated by pairs, 1+3, 0+2
                     if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_1 + i]))
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, i % 2);
+                    {
+                        gob->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_TRANSPORT);
+                        gob->ForceValuesUpdateAtIndex(GAMEOBJECT_FLAGS);
+                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, i % 2, 6966);
+                    }
                 }
 
                 for (i = BG_RV_OBJECT_PULLEY_1; i <= BG_RV_OBJECT_PULLEY_2; ++i)
                     DoorOpen(i);
+                for (i = BG_RV_OBJECT_GEAR_1; i <= BG_RV_OBJECT_GEAR_2; ++i)
+                    DoorClose(i);
 
                 setTimer(BG_RV_PILAR_TO_FIRE_TIMER);
                 setState(BG_RV_STATE_OPEN_FIRE);
@@ -102,11 +108,17 @@ void BattlegroundRV::Update(uint32 diff)
                 {
                     // activated by pairs, 1+3, 0+2; change to opposite state (i+1)%2
                     if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_1 + i]))
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, (i + 1) % 2);
+                    {
+                        gob->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_TRANSPORT);
+                        gob->ForceValuesUpdateAtIndex(GAMEOBJECT_FLAGS);
+                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, (i + 1) % 2, 6966);
+                    }
                 }
 
                 for (i = BG_RV_OBJECT_PULLEY_1; i <= BG_RV_OBJECT_PULLEY_2; ++i)
                     DoorClose(i);
+                for (i = BG_RV_OBJECT_GEAR_1; i <= BG_RV_OBJECT_GEAR_2; ++i)
+                    DoorOpen(i);
 
                 setTimer(BG_RV_PILAR_TO_FIRE_TIMER);
                 setState(BG_RV_STATE_CLOSE_FIRE);
@@ -235,10 +247,13 @@ bool BattlegroundRV::SetupBattleground()
         || !AddObject(BG_RV_OBJECT_PILAR_3, BG_RV_OBJECT_TYPE_PILAR_3, 763.611145f, -261.856750f, 25.909504f, 0.000000f, 0, 0, 0, 0, RESPAWN_IMMEDIATELY)
         || !AddObject(BG_RV_OBJECT_PILAR_4, BG_RV_OBJECT_TYPE_PILAR_4, 802.211609f, -284.493256f, 24.648525f, 0.000000f, 0, 0, 0, 0, RESPAWN_IMMEDIATELY)
     // Pilars Collision
+    // Do not spawn pillar collision objects, they are probably no longer needed
+    /*
         || !AddObject(BG_RV_OBJECT_PILAR_COLLISION_1, BG_RV_OBJECT_TYPE_PILAR_COLLISION_1, 763.632385f, -306.162384f, 30.639660f, 3.141593f, 0, 0, 0, 0, RESPAWN_IMMEDIATELY)
         || !AddObject(BG_RV_OBJECT_PILAR_COLLISION_2, BG_RV_OBJECT_TYPE_PILAR_COLLISION_2, 723.644287f, -284.493256f, 32.382710f, 0.000000f, 0, 0, 0, 0, RESPAWN_IMMEDIATELY)
         || !AddObject(BG_RV_OBJECT_PILAR_COLLISION_3, BG_RV_OBJECT_TYPE_PILAR_COLLISION_3, 763.611145f, -261.856750f, 30.639660f, 0.000000f, 0, 0, 0, 0, RESPAWN_IMMEDIATELY)
         || !AddObject(BG_RV_OBJECT_PILAR_COLLISION_4, BG_RV_OBJECT_TYPE_PILAR_COLLISION_4, 802.211609f, -284.493256f, 32.382710f, 3.141593f, 0, 0, 0, 0, RESPAWN_IMMEDIATELY)
+    */
 )
     {
         sLog->outErrorDb("BatteGroundRV: Failed to spawn some object!");
