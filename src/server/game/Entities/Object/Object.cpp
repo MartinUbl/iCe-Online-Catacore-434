@@ -915,8 +915,15 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                         }
                         case GAMEOBJECT_TYPE_MO_TRANSPORT:
                         {
-                            float timer = float(goValue->Transport.PathProgress % GetUInt32Value(GAMEOBJECT_LEVEL));
-                            pathProgress = int16((timer / float(GetUInt32Value(GAMEOBJECT_LEVEL))) * 65535.0f);
+                            uint32 lvl = GetUInt32Value(GAMEOBJECT_LEVEL);
+                            // when MO_TRANSPORT object does not have period set, it is implicitly
+                            // set to zero - to avoid division by zero, apply something that will
+                            // nicely divide path progress itself
+                            if (lvl == 0)
+                                lvl = goValue->Transport.PathProgress;
+
+                            float timer = float(goValue->Transport.PathProgress % lvl);
+                            pathProgress = int16((timer / float(lvl)) * 65535.0f);
                             break;
                         }
                         default:
