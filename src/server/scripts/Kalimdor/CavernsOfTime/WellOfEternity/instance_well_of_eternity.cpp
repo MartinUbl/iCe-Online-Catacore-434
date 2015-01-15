@@ -264,7 +264,7 @@ void INST_WOE_SCRIPT::UnRegisterIllidanVictim(uint64 victimGUID)
     if (illidanVictims.empty())
     if (Creature * pIllidan = ObjectAccessor::GetObjectInMap(illidanGUID, this->instance, (Creature*)NULL))
         if(IsIlidanCurrentWPReached(victimGUID))
-            pIllidan->GetMotionMaster()->MovePoint(ILLIDAN_ATTACK_END_WP, illidanPos[illidanStep]);
+            pIllidan->GetMotionMaster()->MovePoint(ILLIDAN_ATTACK_END_WP, illidanPos[illidanStep],true);
 }
 
 Creature * INST_WOE_SCRIPT::GetIllidanVictim()
@@ -305,7 +305,7 @@ void INST_WOE_SCRIPT::SummonAndInitDemon(Creature * summoner,Position summonPos,
     {
         pDemon->AI()->SetData(DEMON_DATA_DIRECTION, dir);
         pDemon->AI()->SetData(DEMON_DATA_WAVE, wave);
-        pDemon->GetMotionMaster()->MovePoint(wpID, movePos);
+        pDemon->GetMotionMaster()->MovePoint(wpID, movePos,true);
     }
 }
 

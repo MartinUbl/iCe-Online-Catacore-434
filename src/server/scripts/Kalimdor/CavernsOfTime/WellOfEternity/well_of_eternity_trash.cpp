@@ -282,9 +282,9 @@ public:
                 canMoveToNextPoint = false;
 
                 if (direction == DIRECTION_LEFT)
-                    me->GetMotionMaster()->MovePoint(WP_END, leftEndPositions[DIRECTION_RIGHT]);
+                    me->GetMotionMaster()->MovePoint(WP_END, leftEndPositions[DIRECTION_RIGHT],true);
                 else
-                    me->GetMotionMaster()->MovePoint(WP_END, rightEndPositions[DIRECTION_RIGHT]);
+                    me->GetMotionMaster()->MovePoint(WP_END, rightEndPositions[DIRECTION_RIGHT],true);
             }
 
             // Second demon in line must wait for another demon , because his path is a bit longer
@@ -296,9 +296,9 @@ public:
                     return;
 
                 if (direction == DIRECTION_LEFT)
-                    me->GetMotionMaster()->MovePoint(WP_END, leftEndPositions[DIRECTION_LEFT]);
+                    me->GetMotionMaster()->MovePoint(WP_END, leftEndPositions[DIRECTION_LEFT],true);
                 else
-                    me->GetMotionMaster()->MovePoint(WP_END, rightEndPositions[DIRECTION_LEFT]);
+                    me->GetMotionMaster()->MovePoint(WP_END, rightEndPositions[DIRECTION_LEFT],true);
             }
             else waitTimer -= diff;
 
@@ -668,12 +668,12 @@ public:
                     me->SetWalk(true);
                     me->SetSpeed(MOVE_WALK, 3.0f, true);
 
-                    me->GetMotionMaster()->MovePoint(2, guardPos[(uint32)lane].first);
+                    me->GetMotionMaster()->MovePoint(2, guardPos[(uint32)lane].first,true);
                     finalWalkTimer = MAX_TIMER; // set in movement inform, when WP2 is reached
                     return;
                 }
 
-                me->GetMotionMaster()->MovePoint(3, guardPos[(uint32)lane].last);
+                me->GetMotionMaster()->MovePoint(3, guardPos[(uint32)lane].last,true);
                 finalWalkTimer = MAX_TIMER;
             }
             else finalWalkTimer -= diff;
@@ -1068,7 +1068,7 @@ namespace Illidan
             {
                 me->SetHomePosition(illidanPos[ILLIDAN_FIRST_STEP]);
                 me->AI()->EnterEvadeMode();
-                me->GetMotionMaster()->MovePoint(0, illidanPos[ILLIDAN_FIRST_STEP]);
+                me->GetMotionMaster()->MovePoint(0, illidanPos[ILLIDAN_FIRST_STEP],true);
             }
             if (pInstance)
                 CAST_WOE_INSTANCE(pInstance)->SetIllidanStep(ILLIDAN_STEP_NULL);
@@ -1124,7 +1124,7 @@ namespace Illidan
             {
                 playerSpotted = true;
                 me->SetHomePosition(illidanPos[ILLIDAN_FIRST_STEP]);
-                me->GetMotionMaster()->MovePoint(0, illidanPos[ILLIDAN_FIRST_STEP]);
+                me->GetMotionMaster()->MovePoint(0, illidanPos[ILLIDAN_FIRST_STEP],true);
                 PlayQuote(me, introQuotes[0]);
             }
         }
@@ -1260,13 +1260,13 @@ namespace Illidan
         {
             if (uiTextEmote == TEXTEMOTE_KNEEL && player->IsGameMaster())
             {
-                me->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_STEP, illidanPos[ILLIDAN_PEROTHARN_STEP]);
+                me->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_STEP, illidanPos[ILLIDAN_PEROTHARN_STEP],true);
                 CAST_WOE_INSTANCE(pInstance)->crystalsRemaining = 0;
                 return;
             }
 
             uint32 id = uint32(CAST_WOE_INSTANCE(pInstance)->GetIllidanMoveStep()) + 1;
-            me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+            me->GetMotionMaster()->MovePoint(id, illidanPos[id],true);
         }
 
         void UpdateAI(const uint32 diff) override
@@ -1305,7 +1305,7 @@ namespace Illidan
             {
                 // Next step point
                 uint32 id = uint32(CAST_WOE_INSTANCE(pInstance)->GetIllidanMoveStep()) + 1;
-                me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+                me->GetMotionMaster()->MovePoint(id, illidanPos[id],true);
 
                 if (id == ILLIDAN_THIRD_PACK_STEP)
                     PlayQuote(me, escortQuotes[7]);
@@ -1338,7 +1338,7 @@ namespace Illidan
                     case SPECIAL_ACTION_MOVE_TO_DEFFENDERS:
                     {
                         uint32 id = (uint32)ILLIDAN_FIRST_PACK_STEP;
-                        me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+                        me->GetMotionMaster()->MovePoint(id, illidanPos[id],true);
                         PlayQuote(me, distractQuote[1]);
                         // This need to be done after every special action ...
                         specialAction = SPECIAL_ACTION_NONE; eventTimer = MAX_TIMER; return;
@@ -1347,7 +1347,7 @@ namespace Illidan
                     {
                         // ILLIDAN_FIRST_LOOK_STEP
                         uint32 id = (uint32)ILLIDAN_FIRST_LOOK_STEP;
-                        me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+                        me->GetMotionMaster()->MovePoint(id, illidanPos[id],true);
                         PlayQuote(me, escortQuotes[0]);
                         specialAction = SPECIAL_ACTION_NONE; eventTimer = MAX_TIMER; return;
                     }
@@ -1364,7 +1364,7 @@ namespace Illidan
                     case ILLIDAN_FIRST_LOOK_STEP:
                     {
                         uint32 id = (uint32)ILLIDAN_DISTRACT_STEP;
-                        me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+                        me->GetMotionMaster()->MovePoint(id, illidanPos[id],true);
                         break;
                     }
                     case ILLIDAN_DISTRACT_STEP:
@@ -1378,40 +1378,40 @@ namespace Illidan
                     case ILLIDAN_STAIRS_1_STEP:
                     {
                         uint32 id = (uint32)step + 1;
-                        me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+                        me->GetMotionMaster()->MovePoint(id, illidanPos[id],true);
                         break;
                     }
                     case ILLIDAN_STAIRS_2_STEP:
                     {
                         uint32 id = (uint32)step + 1;
-                        me->GetMotionMaster()->MovePoint(id, illidanPos[id]);
+                        me->GetMotionMaster()->MovePoint(id, illidanPos[id],true);
                         break;
                     }
                     case ILLIDAN_SECOND_PACK_STEP:
                         break;
                     case ILLIDAN_WAIT_SECOND_PORTAL_STEP:
-                        me->GetMotionMaster()->MovePoint(ILLIDAN_BEFORE_STAIRS_STEP, illidanPos[ILLIDAN_BEFORE_STAIRS_STEP]);
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_BEFORE_STAIRS_STEP, illidanPos[ILLIDAN_BEFORE_STAIRS_STEP],true);
                         break;
                     case ILLIDAN_BEFORE_STAIRS_STEP:
-                        me->GetMotionMaster()->MovePoint(ILLIDAN_UPSTAIRS_STEP, illidanPos[ILLIDAN_UPSTAIRS_STEP]);
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_UPSTAIRS_STEP, illidanPos[ILLIDAN_UPSTAIRS_STEP],true);
                         break;
                     case ILLIDAN_UPSTAIRS_STEP:
                         break;
                     case ILLIDAN_THIRD_PACK_STEP:
-                        me->GetMotionMaster()->MovePoint(ILLIDAN_BACK_STEP_1, illidanPos[ILLIDAN_BACK_STEP_1]);
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_BACK_STEP_1, illidanPos[ILLIDAN_BACK_STEP_1],true);
                         break;
                     case ILLIDAN_BACK_STEP_1:
-                        me->GetMotionMaster()->MovePoint(ILLIDAN_BACK_STEP_2, illidanPos[ILLIDAN_BACK_STEP_2]);
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_BACK_STEP_2, illidanPos[ILLIDAN_BACK_STEP_2],true);
                         break;
                     case ILLIDAN_BACK_STEP_2:
                     {
                         if (Creature * pPerotharn = me->FindNearestCreature(PEROTHARN_ENTRY, 100.0f, true))
                             PlayQuote(pPerotharn, Illidan::onEventStart[1]);
-                        me->GetMotionMaster()->MovePoint(ILLIDAN_TOO_EASY_STEP, illidanPos[ILLIDAN_TOO_EASY_STEP]);
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_TOO_EASY_STEP, illidanPos[ILLIDAN_TOO_EASY_STEP],true);
                         break;
                     }
                     case ILLIDAN_TOO_EASY_STEP:
-                        me->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_STEP, illidanPos[ILLIDAN_PEROTHARN_STEP]);
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_STEP, illidanPos[ILLIDAN_PEROTHARN_STEP],true);
                         break;
                     case ILLIDAN_PEROTHARN_STEP:
                     {
@@ -1428,7 +1428,7 @@ namespace Illidan
                 switch ((uint32)step)
                 {
                     case ILLIDAN_PEROTHARN_DEFEATED_STAIRS_WP:
-                        me->GetMotionMaster()->MovePoint(ILLIDAN_HANDRAIL_WP, afterPerotharnDeathWP[1]);
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_HANDRAIL_WP, afterPerotharnDeathWP[1],true);
                         break;
                     case ILLIDAN_HANDRAIL_WP:
                         me->GetMotionMaster()->MoveJump(afterPerotharnDeathWP[2].GetPositionX(),
@@ -1437,7 +1437,7 @@ namespace Illidan
                                                         10.0f, 30.0f, ILLIDAN_PALACE_JUMP_WP);
                         break;
                     case ILLIDAN_PALACE_JUMP_WP:
-                        me->GetMotionMaster()->MovePoint(ILLIDAN_RUNAWAY_WP, afterPerotharnDeathWP[3]);
+                        me->GetMotionMaster()->MovePoint(ILLIDAN_RUNAWAY_WP, afterPerotharnDeathWP[3],true);
                         break;
                     case ILLIDAN_RUNAWAY_WP:
                         me->SetVisible(false);
@@ -1480,7 +1480,7 @@ namespace Illidan
                             if (range < 5.0f) // just for sure
                                 range = 5.0f;
                             me->GetNearPoint(me, x, y, z, range, 0, me->GetAngle(victim));
-                            me->GetMotionMaster()->MovePoint(ILLIDAN_ATTACK_START_WP, x, y, z);
+                            me->GetMotionMaster()->MovePoint(ILLIDAN_ATTACK_START_WP, x, y, z,true);
                         }
                     }
                     else

@@ -402,7 +402,7 @@ public:
 
                 if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
                 {
-                    pIllidan->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_DEFEATED_STAIRS_WP, afterPerotharnDeathWP[0]);
+                    pIllidan->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_DEFEATED_STAIRS_WP, afterPerotharnDeathWP[0],true,false);
                     pIllidan->AI()->DoAction(ACTION_AFTER_PEROTHARN_DEATH);
                 }
             }
