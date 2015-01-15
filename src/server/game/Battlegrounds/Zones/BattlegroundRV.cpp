@@ -88,9 +88,9 @@ void BattlegroundRV::Update(uint32 diff)
                 }
 
                 for (i = BG_RV_OBJECT_PULLEY_1; i <= BG_RV_OBJECT_PULLEY_2; ++i)
-                    DoorOpen(i);
-                for (i = BG_RV_OBJECT_GEAR_1; i <= BG_RV_OBJECT_GEAR_2; ++i)
                     DoorClose(i);
+                for (i = BG_RV_OBJECT_GEAR_1; i <= BG_RV_OBJECT_GEAR_2; ++i)
+                    DoorOpen(i);
 
                 setTimer(BG_RV_PILAR_TO_FIRE_TIMER);
                 setState(BG_RV_STATE_OPEN_FIRE);
@@ -116,9 +116,9 @@ void BattlegroundRV::Update(uint32 diff)
                 }
 
                 for (i = BG_RV_OBJECT_PULLEY_1; i <= BG_RV_OBJECT_PULLEY_2; ++i)
-                    DoorClose(i);
-                for (i = BG_RV_OBJECT_GEAR_1; i <= BG_RV_OBJECT_GEAR_2; ++i)
                     DoorOpen(i);
+                for (i = BG_RV_OBJECT_GEAR_1; i <= BG_RV_OBJECT_GEAR_2; ++i)
+                    DoorClose(i);
 
                 setTimer(BG_RV_PILAR_TO_FIRE_TIMER);
                 setState(BG_RV_STATE_CLOSE_FIRE);
