@@ -47,7 +47,7 @@ BattlegroundAA::~BattlegroundAA()
 
 void BattlegroundAA::Update(uint32 diff)
 {
-    Battleground::Update(diff);
+    BattlegroundArena::Update(diff);
 }
 
 void BattlegroundAA::StartingEventCloseDoors()

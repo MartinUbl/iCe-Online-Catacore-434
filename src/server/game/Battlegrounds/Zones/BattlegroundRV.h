@@ -111,12 +111,15 @@ class BattlegroundRV : public BattlegroundArena
         ~BattlegroundRV();
         void Update(uint32 diff);
 
-        /* inherited from BattlegroundClass */
+        /* inherited from Battleground class */
         virtual void AddPlayer(Player *plr);
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
         virtual void Reset();
         virtual void FillInitialWorldStates(WorldPacket &d);
+
+        /* inherited from BattlegroundArena class */
+        virtual bool GetUnderMapLimitZPosition(float &z);
 
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);

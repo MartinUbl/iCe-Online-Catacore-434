@@ -101,10 +101,13 @@ class BattlegroundDS : public BattlegroundArena
         ~BattlegroundDS();
         void Update(uint32 diff);
 
-        /* inherited from BattlegroundClass */
+        /* inherited from Battleground class */
         virtual void AddPlayer(Player *plr);
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
+
+        /* inherited from BattlegroundArena class */
+        virtual bool GetUnderMapLimitZPosition(float &z);
 
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);

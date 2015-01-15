@@ -51,7 +51,7 @@ BattlegroundBE::~BattlegroundBE()
 
 void BattlegroundBE::Update(uint32 diff)
 {
-    Battleground::Update(diff);
+    BattlegroundArena::Update(diff);
 
     if (GetStatus() == STATUS_IN_PROGRESS)
     {

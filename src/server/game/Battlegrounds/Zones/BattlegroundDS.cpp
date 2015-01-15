@@ -52,7 +52,7 @@ BattlegroundDS::~BattlegroundDS()
 
 void BattlegroundDS::Update(uint32 diff)
 {
-    Battleground::Update(diff);
+    BattlegroundArena::Update(diff);
 
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -242,6 +242,12 @@ void BattlegroundDS::HandleAreaTrigger(Player *Source, uint32 Trigger)
             Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
+}
+
+bool BattlegroundDS::GetUnderMapLimitZPosition(float &z)
+{
+    z = 2.8f;
+    return true;
 }
 
 bool BattlegroundDS::GetUnderMapReturnPosition(Player* plr, Position& pos)

@@ -121,6 +121,7 @@ enum BattlegroundTimeIntervals
     BUFF_RESPAWN_TIME               = 180,                  // secs
     BATTLEGROUND_COUNTDOWN_MAX      = 120,                  // secs
     ARENA_COUNTDOWN_MAX             = 60,                   // secs
+    ARENA_CHECK_UNDER_MAP_TIME      = 8,                    // secs
 };
 
 enum BattlegroundStartTimeIntervals
@@ -754,6 +755,12 @@ class BattlegroundArena : public Battleground
     friend class BattlegroundMgr;
 
     public:
+
+        BattlegroundArena();
+        virtual ~BattlegroundArena();
+
+        virtual void Update(uint32 diff);
+
         virtual bool GetUnderMapReturnPosition(Player* /*plr*/, Position& pos) { return false; }
         virtual bool GetUnderMapLimitZPosition(float &z) { return false; }
 
@@ -761,7 +768,7 @@ class BattlegroundArena : public Battleground
         //
 
     private:
-        //
+        uint32 m_underMapCheckTimer;
 };
 
 #endif

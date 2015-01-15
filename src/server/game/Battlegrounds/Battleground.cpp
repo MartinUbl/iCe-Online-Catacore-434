@@ -125,6 +125,48 @@ namespace Trinity
     };
 }                                                           // namespace Trinity
 
+BattlegroundArena::BattlegroundArena() : Battleground()
+{
+    m_underMapCheckTimer = ARENA_CHECK_UNDER_MAP_TIME;
+}
+
+BattlegroundArena::~BattlegroundArena()
+{
+    //
+}
+
+void BattlegroundArena::Update(uint32 diff)
+{
+    Battleground::Update(diff);
+
+    // under map Z check
+    if (m_underMapCheckTimer <= diff)
+    {
+        // this check would be performed only if subclass implements the method
+        // for retrieving fatal Z position (GetUnderMapLimitZPosition)
+        float fatal_z;
+        if (GetUnderMapLimitZPosition(fatal_z))
+        {
+            BattlegroundPlayerMap const& players = GetPlayers();
+            Player* pl;
+            for (BattlegroundPlayerMap::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+            {
+                // player has to be online and active
+                pl = itr->second.OfflineRemoveTime ? NULL : ObjectAccessor::FindPlayer(itr->first);
+                if (pl)
+                {
+                    if (pl->GetPositionZ() < fatal_z)
+                        HandlePlayerUnderMap(pl);
+                }
+            }
+        }
+
+        m_underMapCheckTimer = ARENA_CHECK_UNDER_MAP_TIME*1000;
+    }
+    else
+        m_underMapCheckTimer -= diff;
+}
+
 template<class Do>
 void Battleground::BroadcastWorker(Do& _do)
 {

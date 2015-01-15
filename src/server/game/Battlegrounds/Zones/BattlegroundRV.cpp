@@ -51,7 +51,7 @@ BattlegroundRV::~BattlegroundRV()
 
 void BattlegroundRV::Update(uint32 diff)
 {
-    Battleground::Update(diff);
+    BattlegroundArena::Update(diff);
 
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -175,6 +175,12 @@ void BattlegroundRV::HandleKillPlayer(Player *player, Player *killer)
     UpdateWorldState(BG_RV_WORLD_STATE_H, GetAlivePlayersCountByTeam(HORDE));
 
     CheckArenaWinConditions();
+}
+
+bool BattlegroundRV::GetUnderMapLimitZPosition(float &z)
+{
+    z = 27.5f;
+    return true;
 }
 
 bool BattlegroundRV::GetUnderMapReturnPosition(Player* plr, Position& pos)
