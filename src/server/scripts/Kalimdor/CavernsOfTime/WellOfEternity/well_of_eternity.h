@@ -272,12 +272,8 @@ enum WayPointStep
 
 static const Position legionDemonSpawnPositions[2] =
 {
-    // These are correct !!! , but i will use temporary points -> at stairs
-    //{3442.0f,-5067.8f, 213.6f, 2.12f},     //LEFT
-    //{3448.4f,-5065.2f, 213.6f, 2.12f},     //RIGHT
-
-    {3373.7f,-4957.7f, 181.1f, 2.12f},     //LEFT
-    {3379.2f,-4954.7f, 181.1f, 2.12f},     //RIGHT
+    {3442.0f,-5067.8f, 213.6f, 2.12f},     //LEFT
+    {3448.4f,-5065.2f, 213.6f, 2.12f}      //RIGHT
 };
 
 static const Position midPositions[2] =
