@@ -68,8 +68,8 @@ void BattlegroundRV::Update(uint32 diff)
         switch (getState())
         {
             case BG_RV_STATE_CLOSE_FIRE:
-                for (i = BG_RV_OBJECT_FIRE_1; i <= BG_RV_OBJECT_FIREDOOR_2; ++i)
-                    DoorClose(i);
+                //for (i = BG_RV_OBJECT_FIRE_1; i <= BG_RV_OBJECT_FIREDOOR_2; ++i)
+                //    DoorClose(i);
                 setTimer(BG_RV_FIRE_TO_PILAR_TIMER);
                 setState(BG_RV_STATE_OPEN_PILARS);
                 break;
@@ -96,8 +96,8 @@ void BattlegroundRV::Update(uint32 diff)
                 setState(BG_RV_STATE_OPEN_FIRE);
                 break;
             case BG_RV_STATE_OPEN_FIRE:
-                for (i = BG_RV_OBJECT_FIRE_1; i <= BG_RV_OBJECT_FIREDOOR_2; ++i)
-                    DoorOpen(i);
+                //for (i = BG_RV_OBJECT_FIRE_1; i <= BG_RV_OBJECT_FIREDOOR_2; ++i)
+                //    DoorOpen(i);
                 setTimer(BG_RV_FIRE_TO_PILAR_TIMER);
                 setState(BG_RV_STATE_CLOSE_PILARS);
                 break;
