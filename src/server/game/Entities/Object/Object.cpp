@@ -669,16 +669,24 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
     }
     else                                                    // case UPDATETYPE_VALUES
     {
-        if (isType(TYPEMASK_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
+        if (isType(TYPEMASK_GAMEOBJECT))
         {
-            if (((GameObject*)this)->ActivateToQuest(target) || target->IsGameMaster())
-                IsActivateToQuest = true;
-
-            updateMask->SetBit(GAMEOBJECT_BYTES_1);
-
-            if (ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_CHEST && ToGameObject()->GetGOInfo()->chest.groupLootRules/* &&
-                ToGameObject()->HasLootRecipient()*/)
+            if (((GameObject*)this)->IsTransport())
+            {
+                // We have to always send flags in update packet for all transports
                 updateMask->SetBit(GAMEOBJECT_FLAGS);
+            }
+            else
+            {
+                if (((GameObject*)this)->ActivateToQuest(target) || target->IsGameMaster())
+                    IsActivateToQuest = true;
+
+                updateMask->SetBit(GAMEOBJECT_BYTES_1);
+
+                if (ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_CHEST && ToGameObject()->GetGOInfo()->chest.groupLootRules/* &&
+                    ToGameObject()->HasLootRecipient()*/)
+                    updateMask->SetBit(GAMEOBJECT_FLAGS);
+            }
         }
         else if (isType(TYPEMASK_UNIT))
         {
@@ -934,7 +942,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                         if (go->IsDynTransport())
                             flags = GO_FLAG_NODESPAWN | GO_FLAG_TRANSPORT;
                         else
-                            flags |= GO_FLAG_NODESPAWN | GO_FLAG_TRANSPORT;
+                            flags |= GO_FLAG_TRANSPORT;
                     }
 
                     *data << flags;
