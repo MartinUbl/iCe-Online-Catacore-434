@@ -261,7 +261,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
         {
             m_goValue->Transport.AnimationInfo = sTransportMgr->GetTransportAnimInfo(goinfo->id);
             m_goValue->Transport.PathProgress = getMSTime();
-            m_goValue->Transport.CurrentSeg = 0;
+            m_goValue->Transport.StateChangeStartProgress = 0;
             m_goValue->Transport.VisualState = 0;
             m_goValue->Transport.StateChangeTime = 0;
             m_goValue->Transport.StopFrames = new std::vector<uint32>();
@@ -365,25 +365,7 @@ void GameObject::Update(uint32 diff)
                     if (GetGoState() == GO_STATE_TRANSPORT_ACTIVE)
                     {
                         m_goValue->Transport.PathProgress = getMSTime();
-                        /* TODO: Fix movement in unloaded grid - currently GO will just disappear
-                        uint32 timer = m_goValue->Transport.PathProgress % m_goValue->Transport.AnimationInfo->TotalTime;
-                        TransportAnimationEntry const* node = m_goValue->Transport.AnimationInfo->GetAnimNode(timer);
-                        if (node && m_goValue->Transport.CurrentSeg != node->TimeSeg)
-                        {
-                            m_goValue->Transport.CurrentSeg = node->TimeSeg;
-
-                            G3D::Quat rotation = m_goValue->Transport.AnimationInfo->GetAnimRotation(timer);
-                            G3D::Vector3 pos = rotation.toRotationMatrix()
-                                             * G3D::Matrix3::fromEulerAnglesZYX(GetOrientation(), 0.0f, 0.0f)
-                                             * G3D::Vector3(node->X, node->Y, node->Z);
-
-                            pos += G3D::Vector3(GetStationaryX(), GetStationaryY(), GetStationaryZ());
-
-                            G3D::Vector3 src(GetPositionX(), GetPositionY(), GetPositionZ());
-
-                            GetMap()->GameObjectRelocation(this, pos.x, pos.y, pos.z, GetOrientation());
-                        }
-                        */
+                        /* TODO: Fix movement in unloaded grid - currently GO will just disappear */
 
                         if (!m_goValue->Transport.StopFrames->empty())
                         {
@@ -394,6 +376,7 @@ void GameObject::Update(uint32 diff)
                             if (m_goValue->Transport.VisualState != visualStateAfter)
                             {
                                 m_goValue->Transport.StateChangeTime = abs((int32)m_goValue->Transport.StopFrames->at(visualStateAfter) - (int32)m_goValue->Transport.StopFrames->at(m_goValue->Transport.VisualState));
+                                m_goValue->Transport.StateChangeStartProgress = m_goValue->Transport.PathProgress;
                                 m_goValue->Transport.VisualState = visualStateAfter;
 
                                 ForceValuesUpdateAtIndex(GAMEOBJECT_LEVEL);
@@ -2229,6 +2212,8 @@ void GameObject::SetTransportState(GOState state, uint32 stopFrame /*= 0*/, uint
                     m_goValue->Transport.StateChangeTime = stateChangeTime;
                 m_goValue->Transport.VisualState = (uint8)stopFrame;
                 SetGoState(GOState(GO_STATE_TRANSPORT_STOPPED + stopFrame));
+
+                m_goValue->Transport.StateChangeStartProgress = m_goValue->Transport.PathProgress;
             }
             else
             {

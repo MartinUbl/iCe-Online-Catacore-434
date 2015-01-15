@@ -546,7 +546,7 @@ union GameObjectValue
         uint32 PathProgress;
         uint32 StateChangeTime;
         TransportAnimation const* AnimationInfo;
-        uint32 CurrentSeg;
+        uint32 StateChangeStartProgress;
         std::vector<uint32>* StopFrames;
         uint8 VisualState;
     } Transport;

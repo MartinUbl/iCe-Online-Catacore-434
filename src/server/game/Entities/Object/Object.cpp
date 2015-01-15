@@ -881,7 +881,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                 if (index == GAMEOBJECT_DYNAMIC)
                 {
                     uint16 dynFlags = 0;
-                    int16 pathProgress = -1;
+                    uint16 pathProgress = uint16(-1);
 
                     switch (ToGameObject()->GetGoType())
                     {
@@ -909,8 +909,16 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                             break;
                         case GAMEOBJECT_TYPE_TRANSPORT:
                         {
-                            float timer = float(goValue->Transport.PathProgress % ToGameObject()->GetTransportPeriod());
-                            pathProgress = int16((timer / float(ToGameObject()->GetTransportPeriod())) * 65535.0f);
+                            if (goValue->Transport.StateChangeStartProgress > 0)
+                            {
+                                uint32 diff = getMSTimeDiff(goValue->Transport.StateChangeStartProgress, goValue->Transport.PathProgress);
+                                if (diff < goValue->Transport.StateChangeTime)
+                                    pathProgress = uint16(65535.0f * float(diff) / float(goValue->Transport.StateChangeTime));
+                                else
+                                    pathProgress = 0;
+                            }
+                            else
+                                pathProgress = 0;
                             break;
                         }
                         case GAMEOBJECT_TYPE_MO_TRANSPORT:
@@ -923,7 +931,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                                 lvl = goValue->Transport.PathProgress;
 
                             float timer = float(goValue->Transport.PathProgress % lvl);
-                            pathProgress = int16((timer / float(lvl)) * 65535.0f);
+                            pathProgress = uint16((timer / float(lvl)) * 65535.0f);
                             break;
                         }
                         default:
@@ -932,7 +940,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                     }
 
                     *data << uint16(dynFlags);
-                    *data << int16(pathProgress);
+                    *data << uint16(pathProgress);
                 }
                 else if (index == GAMEOBJECT_FLAGS)
                 {
