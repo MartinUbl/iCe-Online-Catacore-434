@@ -201,6 +201,43 @@ bool BattlegroundRV::GetUnderMapReturnPosition(Player* plr, Position& pos)
     return true;
 }
 
+static bool circleLineIntersection(float ax, float ay, float bx, float by, float cpx, float cpy, float circleRadius)
+{
+    float a = ay - by;
+    float b = bx - ax;
+    float c1 = -a*ax - b*ay;
+    float c2 = a*cpy - b*cpx;
+
+    float in_y = (a*c2 - b*c1) / (a*a + b*b);
+    float in_x = (-b*in_y - c1) / a;
+
+    float dist = sqrt(std::pow(in_x - cpx, 2) + std::pow(in_y - cpy, 2));
+
+    return (dist <= circleRadius);
+}
+
+bool BattlegroundRV::CheckSpecialLOS(float ax, float ay, float az, float bx, float by, float bz)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_1 + i]))
+        {
+            if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED + 1)
+            {
+                float rad = 4.3f;
+                // pillars _1 and _3 have smaller radius
+                if (i == 0 || i == 2)
+                    rad = 2.24f;
+
+                if (circleLineIntersection(ax, ay, bx, by, gob->GetPositionX(), gob->GetPositionY(), rad))
+                    return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 void BattlegroundRV::HandleAreaTrigger(Player *Source, uint32 Trigger)
 {
     // We won't handle any areatriggers in this arena
@@ -266,6 +303,8 @@ bool BattlegroundRV::SetupBattleground()
         if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[i]))
         {
             gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
+            // disable collision - the LoS will be handled by our special method
+            gob->EnableCollision(false);
         }
     }
 

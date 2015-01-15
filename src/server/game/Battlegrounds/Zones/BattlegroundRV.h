@@ -117,6 +117,7 @@ class BattlegroundRV : public BattlegroundArena
         virtual void StartingEventOpenDoors();
         virtual void Reset();
         virtual void FillInitialWorldStates(WorldPacket &d);
+        virtual bool CheckSpecialLOS(float ax, float ay, float az, float bx, float by, float bz);
 
         /* inherited from BattlegroundArena class */
         virtual bool GetUnderMapLimitZPosition(float &z);

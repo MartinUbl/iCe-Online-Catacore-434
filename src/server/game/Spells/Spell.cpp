@@ -6490,8 +6490,23 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (!m_IsTriggeredSpell && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS))
             {
                 if (m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
-                    if (VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
-                        return SPELL_FAILED_LINE_OF_SIGHT;
+                {
+                    if (VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id))
+                    {
+                        bool inLoS = m_caster->IsWithinLOSInMap(target);
+
+                        // If the player is in battleground, we may check special LoS conditions
+                        // i.e. pillars in Ring of Valor arena - they are dynamic, the system won't handle them
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            if (Battleground* bg = m_caster->ToPlayer()->GetBattleground())
+                                 inLoS = inLoS && bg->CheckSpecialLOS(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ() + 2.f, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + 2.f);
+                        }
+
+                        if (!inLoS)
+                            return SPELL_FAILED_LINE_OF_SIGHT;
+                    }
+                }
                 if (m_caster->IsVisionObscured(target))
                 {
                     // Camouflage should be ripped by melee abilities
