@@ -83,7 +83,7 @@ void BattlegroundRV::Update(uint32 diff)
                     {
                         gob->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_TRANSPORT);
                         gob->ForceValuesUpdateAtIndex(GAMEOBJECT_FLAGS);
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, i % 2, 6966);
+                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, (i + 1) % 2/*, 6966*/);
                     }
                 }
 
@@ -111,7 +111,7 @@ void BattlegroundRV::Update(uint32 diff)
                     {
                         gob->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_TRANSPORT);
                         gob->ForceValuesUpdateAtIndex(GAMEOBJECT_FLAGS);
-                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, (i + 1) % 2, 6966);
+                        gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, i % 2/*, 6966*/);
                     }
                 }
 
