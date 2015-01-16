@@ -185,7 +185,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
         case SMSG_THREAT_UPDATE:
             break;
         default:
-            sLog->outString("sent opcode 0x%.4X (%s)", packet->GetRealOpcode(), LookupOpcodeName(packet->GetRealOpcode()));
+            sLog->outDetail("sent opcode 0x%.4X (%s)", packet->GetRealOpcode(), LookupOpcodeName(packet->GetRealOpcode()));
             break;
     }
 #endif
@@ -249,7 +249,7 @@ bool WorldSession::Update(uint32 diff)
             case CMSG_WORLD_STATE_UI_TIMER_UPDATE:
                 break;
             default:
-                sLog->outString("received opcode 0x%.4X (%s)", packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
+                sLog->outDetail("received opcode 0x%.4X (%s)", packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
                 break;
         }
 #endif
