@@ -206,14 +206,15 @@ static bool circleLineIntersection(float ax, float ay, float bx, float by, float
     float a = ay - by;
     float b = bx - ax;
     float c1 = -a*ax - b*ay;
-    float c2 = a*cpy - b*cpx;
 
-    float in_y = (a*c2 - b*c1) / (a*a + b*b);
+    float in_y = (a*(a*cpy - b*cpx) - b*c1) / (a*a + b*b);
     float in_x = (-b*in_y - c1) / a;
 
-    float dist = sqrt(std::pow(in_x - cpx, 2) + std::pow(in_y - cpy, 2));
+    // verify the intersection point is between the two points
+    if (!((in_x > ax ^ in_x > bx) && (in_y > ay ^ in_y > by)))
+        return false;
 
-    return (dist <= circleRadius);
+    return (sqrt(std::pow(in_x - cpx, 2) + std::pow(in_y - cpy, 2)) <= circleRadius);
 }
 
 bool BattlegroundRV::CheckSpecialLOS(float ax, float ay, float az, float bx, float by, float bz)
