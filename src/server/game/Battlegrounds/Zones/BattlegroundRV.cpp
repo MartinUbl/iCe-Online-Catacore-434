@@ -211,7 +211,7 @@ static bool circleLineIntersection(float ax, float ay, float bx, float by, float
     float in_x = (-b*in_y - c1) / a;
 
     // verify the intersection point is between the two points
-    if (!((in_x > ax ^ in_x > bx) && (in_y > ay ^ in_y > by)))
+    if (!(((in_x > ax) ^ (in_x > bx)) && ((in_y > ay) ^ (in_y > by))))
         return false;
 
     return (sqrt(std::pow(in_x - cpx, 2) + std::pow(in_y - cpy, 2)) <= circleRadius);
@@ -230,8 +230,22 @@ bool BattlegroundRV::CheckSpecialLOS(float ax, float ay, float az, float bx, flo
                 if (i == 0 || i == 2)
                     rad = 2.24f;
 
+                // the line goes through pillar
                 if (circleLineIntersection(ax, ay, bx, by, gob->GetPositionX(), gob->GetPositionY(), rad))
-                    return false;
+                {
+                    // not so different heights
+                    if (fabs(bz - az) < 1.0f)
+                    {
+                        // both standing on pillar - they can see each other
+                        if (bz > 32.0f)
+                            return true;
+                        // both standing on ground
+                        return false;
+                    }
+
+                    // NOTE: for now, LoS from ground to pillar (and vice-versa) is always fine
+                    // TODO: find the way how to add pillars (transports) to dynamic vmap tree
+                }
             }
         }
     }
