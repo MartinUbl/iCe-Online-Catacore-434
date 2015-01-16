@@ -6497,10 +6497,10 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                         // If the player is in battleground, we may check special LoS conditions
                         // i.e. pillars in Ring of Valor arena - they are dynamic, the system won't handle them
-                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        if (inLoS && m_caster->GetTypeId() == TYPEID_PLAYER)
                         {
                             if (Battleground* bg = m_caster->ToPlayer()->GetBattleground())
-                                 inLoS = inLoS && bg->CheckSpecialLOS(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ() + 2.f, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + 2.f);
+                                inLoS = inLoS && bg->CheckSpecialLOS(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ() + m_caster->GetTransOffsetZ() + 2.f, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + target->GetTransOffsetZ() + 2.f);
                         }
 
                         if (!inLoS)
