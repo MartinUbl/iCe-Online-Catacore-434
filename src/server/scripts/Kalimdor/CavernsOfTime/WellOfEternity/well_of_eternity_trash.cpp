@@ -1054,7 +1054,7 @@ namespace Illidan
                 playerSpotted = false;
             }
 
-        // Call this functon with false parameter in case of wipe
+        // Call this function with false parameter in case of wipe
         void ResetEvent(bool init)
         {
             if (init)

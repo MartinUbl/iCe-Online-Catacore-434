@@ -30,6 +30,7 @@ void INST_WOE_SCRIPT::Initialize()
     queenGUID = 0;
     mannorothGUID = 0;
     varothenGUID = 0;
+    illidanPreludeEntry = 0;
 
     legionTimer = 2000;
     waveCounter = WAVE_ONE;
@@ -116,6 +117,9 @@ void INST_WOE_SCRIPT::OnCreatureCreate(Creature* pCreature, bool add)
         case ILLIDAN_STORMRAGE_ENTRY:
             illidanGUID = pCreature->GetGUID();
             break;
+        case ENTRY_ILLIDAN_PRELUDE:
+            illidanPreludeEntry = pCreature->GetGUID();
+            break;
     }
 }
 
@@ -172,6 +176,8 @@ uint64 INST_WOE_SCRIPT::GetData64(uint32 type)
             return mannorothGUID;
         case DATA_ILLIDAN:
             return illidanGUID;
+        case ENTRY_ILLIDAN_PRELUDE:
+            return illidanPreludeEntry;
     }
     return 0;
 }

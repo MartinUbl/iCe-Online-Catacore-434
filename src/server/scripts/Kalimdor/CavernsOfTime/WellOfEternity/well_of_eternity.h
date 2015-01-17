@@ -93,6 +93,18 @@ enum TrashEntry
     PLAYER_SHADOWCLOAK_VEHICLE_ENTRY = 55154
 };
 
+enum mannorothEntries
+{
+    // Friendly trio
+    ENTRY_ILLIDAN_PRELUDE = 55532,
+    ENTRY_MALFURION_PRELUDE = 55570,
+    ENTRY_TYRANDE_PRELUDE = 55524,
+    // Badasses
+    ENTRY_DOOMGUARD_ANNIHILATOR = 55519,
+    ENTRY_ABYSSAL_DOOMBRINGER = 55510,
+    ENTRY_HIGHGUARD_ELITE = 55426,
+};
+
 enum CrystalOrientations
 {
     FIRST_CRYSTAL_X_COORD = 3288,
@@ -158,7 +170,8 @@ enum Actions
     ACTION_HIDE_AND_SEKK_END,
     ACTION_ILLIDAN_CREATE_VEHICLE,
     ACTION_ILLIDAN_REMOVE_VEHICLE,
-    ACTION_AFTER_PEROTHARN_DEATH
+    ACTION_AFTER_PEROTHARN_DEATH,
+    ACTION_ILIDAN_PRELUDE_EVENT_START
 };
 
 enum SpecialActions
@@ -272,8 +285,8 @@ enum WayPointStep
 
 static const Position legionDemonSpawnPositions[2] =
 {
-    {3442.0f,-5067.8f, 213.6f, 2.12f},     //LEFT
-    {3448.4f,-5065.2f, 213.6f, 2.12f}      //RIGHT
+    {3443.17f,-5067.00f, 213.6f, 2.12f},     //LEFT
+    {3450.60f,-5064.36f, 213.6f, 2.12f},     //RIGHT
 };
 
 static const Position midPositions[2] =
@@ -370,6 +383,8 @@ public:
         uint64 queenGUID;
         uint64 mannorothGUID;
         uint64 varothenGUID;
+
+        uint64 illidanPreludeEntry;
 
         uint32 deffendersKilled;
 

@@ -65,6 +65,7 @@ set(scripts_STAT_SRCS
   Kalimdor/CavernsOfTime/WellOfEternity/well_of_eternity_trash.cpp
   Kalimdor/CavernsOfTime/WellOfEternity/instance_well_of_eternity.cpp
   Kalimdor/CavernsOfTime/WellOfEternity/woe_aspects_event.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/mannoroth_intro.cpp
   Kalimdor/CavernsOfTime/WellOfEternity/well_of_eternity.h
   Kalimdor/CavernsOfTime/HourOfTwilight/boss_archbishop_benedictus.cpp
   Kalimdor/CavernsOfTime/HourOfTwilight/hour_of_twilight.h

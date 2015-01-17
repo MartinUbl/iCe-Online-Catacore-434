@@ -622,7 +622,13 @@ public:
                                                                20.0f, 10.0f);
                     }
                 }
-                me->Kill(me); // TODO: Killed by shadowbats ...
+                me->Kill(me);
+
+                // Prepare to prelude intro before Mannoroth
+                if (m_number == 0)
+                if (InstanceScript * pInstance = me->GetInstanceScript())
+                if (Creature * pIllidanPrelude = ObjectAccessor::GetCreature(*me, pInstance->GetData64(ENTRY_ILLIDAN_PRELUDE)))
+                    pIllidanPrelude->AI()->DoAction(ACTION_ILIDAN_PRELUDE_EVENT_START);
             }
         }
 
