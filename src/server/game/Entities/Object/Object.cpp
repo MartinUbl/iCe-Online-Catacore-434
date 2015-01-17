@@ -928,7 +928,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                             // set to zero - to avoid division by zero, apply something that will
                             // nicely divide path progress itself
                             if (lvl == 0)
-                                lvl = goValue->Transport.PathProgress;
+                                lvl = goValue->Transport.PathProgress != 0 ? goValue->Transport.PathProgress : 1;
 
                             float timer = float(goValue->Transport.PathProgress % lvl);
                             pathProgress = uint16((timer / float(lvl)) * 65535.0f);
