@@ -34,7 +34,21 @@
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
 
-Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : me(unit), m_vehicleInfo(vehInfo), m_usableSeatNum(0), m_bonusHP(0)
+GameObject* TransportBase::ToGameObject()
+{
+    if (m_transportType == TRANSPORT_TYPE_GENERIC || m_transportType == TRANSPORT_TYPE_DYNAMIC)
+        return (GameObject*)(m_woRef->ToGameObject());
+    return NULL;
+}
+
+GameObject const* TransportBase::ToGameObject() const
+{
+    if (m_transportType == TRANSPORT_TYPE_GENERIC || m_transportType == TRANSPORT_TYPE_DYNAMIC)
+        return m_woRef->ToGameObject();
+    return NULL;
+}
+
+Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : TransportBase(TRANSPORT_TYPE_VEHICLE, (WorldObject const*)this), me(unit), m_vehicleInfo(vehInfo), m_usableSeatNum(0), m_bonusHP(0)
 {
     for (uint32 i = 0; i < MAX_VEHICLE_SEATS; ++i)
     {
@@ -287,8 +301,10 @@ void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion)
     }
 }
 
-bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
+bool Vehicle::AddPassenger(WorldObject *obj, int8 seatId, bool byAura)
 {
+    Unit* unit = (Unit*)obj;
+
     if (unit->GetVehicle() != this)
         return false;
 
@@ -392,8 +408,10 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
     return true;
 }
 
-void Vehicle::RemovePassenger(Unit *unit)
+void Vehicle::RemovePassenger(WorldObject* obj)
 {
+    Unit *unit = (Unit*)obj;
+
     if (unit->GetVehicle() != this)
         return;
 

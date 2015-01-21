@@ -31,6 +31,7 @@
 
 class GameObjectAI;
 class Transport;
+class DynamicTransport;
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined(__GNUC__)
@@ -548,6 +549,7 @@ union GameObjectValue
         TransportAnimation const* AnimationInfo;
         uint32 StateChangeStartProgress;
         std::vector<uint32>* StopFrames;
+        uint32 CurrentSeg;
         uint8 VisualState;
     } Transport;
     //29 GAMEOBJECT_TYPE_CAPTURE_POINT
@@ -640,15 +642,16 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         void RemoveFromWorld();
         void CleanupsBeforeDelete(bool finalCleanup = true);
 
-        bool Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMask, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 artKit = 0);
-        void Update(uint32 p_time);
+        virtual bool Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMask, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 artKit = 0);
+        virtual void Update(uint32 p_time);
         static GameObject* GetGameObject(WorldObject& object, uint64 guid);
         GameObjectInfo const* GetGOInfo() const { return m_goInfo; }
         GameObjectData const* GetGOData() const { return m_goData; }
         GameObjectValue * GetGOValue() const { return m_goValue; }
 
         bool IsTransport() const;
-        bool IsDynTransport() const;
+        bool IsDynamicTransport() const;
+        bool IsStaticTransport() const;
         bool IsLargeObject() const;
 
         bool IsDestructibleBuilding() const;
@@ -813,12 +816,14 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         void GetRespawnPosition(float &x, float &y, float &z, float* ori = NULL) const;
 
         Transport* ToTransport() { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport*>(this); else return NULL; }
+        DynamicTransport* ToDynamicTransport() { if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT) return reinterpret_cast<DynamicTransport*>(this); else return NULL; }
         Transport const* ToTransport() const { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport const*>(this); else return NULL; }
+        DynamicTransport const* ToDynamicTransport() const { if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT) return reinterpret_cast<DynamicTransport const*>(this); else return NULL; }
 
-        float GetStationaryX() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionX(); return GetPositionX(); }
-        float GetStationaryY() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionY(); return GetPositionY(); }
-        float GetStationaryZ() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionZ(); return GetPositionZ(); }
-        float GetStationaryO() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetOrientation(); return GetOrientation(); }
+        float GetStationaryX() const { return m_stationaryPosition.GetPositionX(); }
+        float GetStationaryY() const { return m_stationaryPosition.GetPositionY(); }
+        float GetStationaryZ() const { return m_stationaryPosition.GetPositionZ(); }
+        float GetStationaryO() const { return m_stationaryPosition.GetOrientation(); }
 
         GameObjectModel * m_model;
     protected:

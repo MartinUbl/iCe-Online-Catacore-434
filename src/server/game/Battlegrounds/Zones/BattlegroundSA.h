@@ -505,7 +505,7 @@ class BattlegroundSA : public Battleground
 
         /* Scorekeeping */
         /// Update score board
-		//uint32 GetPlayerDemolisherScore(Player* /*source*/);  // Future use
+        //uint32 GetPlayerDemolisherScore(Player* /*source*/);  // Future use
 
         void UpdatePlayerScore(Player *Source, uint32 type, int32 value, bool doAddHonor = true);
 
@@ -555,11 +555,6 @@ class BattlegroundSA : public Battleground
 
         /// Respawn dead demolisher
         void UpdateDemolisherSpawns();
-
-        /// Send packet to player for create boats (client part)
-        void SendTransportInit(Player *player);
-        /// Send packet to player for destroy boats (client part)
-        void SendTransportsRemove(Player * player);
 
         /// Id of attacker team
         TeamId Attackers;

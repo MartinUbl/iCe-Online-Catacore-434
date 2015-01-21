@@ -578,6 +578,9 @@ void Map::Add(GameObject *obj)
     if (obj->isActiveObject())
         AddToActive(obj);
 
+    if (obj->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT)
+        _transports.insert(obj);
+
     sLog->outStaticDebug("Object %u enters grid[%u,%u]", GUID_LOPART(obj->GetGUID()), cell.GridX(), cell.GridY());
 
     //something, such as vehicle, needs to be update immediately
@@ -748,7 +751,7 @@ void Map::Update(const uint32 &t_diff)
         WorldObject* obj = *_transportsUpdateIter;
         ++_transportsUpdateIter;
 
-        if (!obj->IsInWorld())
+        if (!obj->IsInWorld() || obj->isActiveObject())
             continue;
 
         obj->Update(t_diff);
@@ -941,6 +944,21 @@ Map::Remove(T *obj, bool remove)
             UpdateObjectVisibility(obj, cell, p);
             RemoveFromGrid(obj,grid,cell);
         }
+    }
+
+    if (obj->ToGameObject())
+    {
+        if (_transportsUpdateIter != _transports.end())
+        {
+            TransportsContainer::iterator itr = _transports.find(obj->ToGameObject());
+            if (itr == _transports.end())
+                return;
+            if (itr == _transportsUpdateIter)
+                ++_transportsUpdateIter;
+            _transports.erase(itr);
+        }
+        else
+            _transports.erase(obj->ToGameObject());
     }
 
     obj->ResetMap();
@@ -2430,22 +2448,24 @@ void Map::SendInitSelf(Player * player)
     UpdateData data(player->GetMapId());
 
     // attach to player data current transport data
-    if (Transport* transport = player->GetTransport())
+    if (TransportBase* transportBase = player->GetTransport())
     {
-        transport->BuildCreateUpdateBlockForPlayer(&data, player);
+        if (GameObject* goBase = transportBase->ToGameObject())
+            goBase->BuildCreateUpdateBlockForPlayer(&data, player);
     }
 
     // build data for self presence in world at own client (one time for map)
     player->BuildCreateUpdateBlockForPlayer(&data, player);
 
     // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
-    if (Transport* transport = player->GetTransport())
+    if (TransportBase* transportBase = player->GetTransport())
     {
-        for (std::set<WorldObject*>::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
+        if (Transport* transport = transportBase->ToGenericTransport())
         {
-            if (player != (*itr) && player->HaveAtClient(*itr))
+            for (std::set<WorldObject*>::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
             {
-                (*itr)->BuildCreateUpdateBlockForPlayer(&data, player);
+                if (player != (*itr) && player->HaveAtClient(*itr))
+                    (*itr)->BuildCreateUpdateBlockForPlayer(&data, player);
             }
         }
     }
@@ -2460,7 +2480,7 @@ void Map::SendInitTransports(Player * player)
     UpdateData transData(player->GetMapId());
 
     for (TransportsContainer::const_iterator i = _transports.begin(); i != _transports.end(); ++i)
-        if (*i != player->GetTransport())
+        if (!(*i)->isActiveObject() && (player->GetTransport() == NULL || *i != player->GetTransport()->ToGameObject()))
             (*i)->BuildCreateUpdateBlockForPlayer(&transData, player);
 
     WorldPacket packet;
@@ -2473,7 +2493,7 @@ void Map::SendRemoveTransports(Player * player)
     UpdateData transData(player->GetMapId());
 
     for (TransportsContainer::const_iterator i = _transports.begin(); i != _transports.end(); ++i)
-        if (*i != player->GetTransport())
+        if (player->GetTransport() == NULL || *i != player->GetTransport()->ToGameObject())
             (*i)->BuildOutOfRangeUpdateBlock(&transData);
 
     WorldPacket packet;
@@ -2752,8 +2772,10 @@ void InstanceMap::InitVisibilityDistance()
             break;
         // Throne of the Four Winds
         case 754:
-            m_VisibleDistance = SIZE_OF_GRIDS - 1;
-            break;       
+        // Strand of the Ancients
+        case 607:
+            m_VisibleDistance = SIZE_OF_GRIDS - 1.0f;
+            break;
         default:
             break;
     }

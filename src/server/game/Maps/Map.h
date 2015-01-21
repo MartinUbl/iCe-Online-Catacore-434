@@ -560,7 +560,7 @@ class Map : public GridRefManager<NGridType>
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
 
         // Objects that must update even in inactive grids without activating them
-        typedef std::set<Transport*> TransportsContainer;
+        typedef std::set<GameObject*> TransportsContainer;
         TransportsContainer _transports;
         TransportsContainer::iterator _transportsUpdateIter;
 

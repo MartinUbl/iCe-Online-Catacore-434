@@ -923,7 +923,7 @@ class WorldObject : public Object, public WorldLocation
         uint32  LastUsedScriptID;
 
         // Transports
-        Transport *GetTransport() const { return m_transport; }
+        TransportBase *GetTransport() const { return m_transport; }
         float GetTransOffsetX() const { return m_movementInfo.t_pos.GetPositionX(); }
         float GetTransOffsetY() const { return m_movementInfo.t_pos.GetPositionY(); }
         float GetTransOffsetZ() const { return m_movementInfo.t_pos.GetPositionZ(); }
@@ -931,7 +931,7 @@ class WorldObject : public Object, public WorldLocation
         uint32 GetTransTime()   const { return m_movementInfo.t_time; }
         int8 GetTransSeat()     const { return m_movementInfo.t_seat; }
         virtual uint64 GetTransGUID()   const;
-        void SetTransport(Transport *t) { m_transport = t; }
+        void SetTransport(TransportBase *t) { m_transport = t; }
 
         virtual float GetStationaryX() const { return GetPositionX(); }
         virtual float GetStationaryY() const { return GetPositionY(); }
@@ -945,7 +945,7 @@ class WorldObject : public Object, public WorldLocation
         ZoneScript *m_zoneScript;
 
         // transports
-        Transport *m_transport;
+        TransportBase *m_transport;
 
         //these functions are used mostly for Relocate() and Corpse/Player specific stuff...
         //use them ONLY in LoadFromDB()/Create() funcs and nowhere else!

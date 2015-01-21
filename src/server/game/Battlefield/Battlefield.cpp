@@ -32,6 +32,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "CreatureTextMgr.h"
+#include "DynamicTransport.h"
 
 #include "Group.h"
 
@@ -1012,9 +1013,13 @@ GameObject* Battlefield::SpawnGameObject(uint32 entry, float x, float y, float z
     if (!map)
         return 0;
 
+    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
+    if (!goinfo)
+        return 0;
+
     // Create gameobject
     uint32 db_lowGUID = sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT);
-    GameObject* go = new GameObject;
+    GameObject* go = (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT) ? new DynamicTransport() : new GameObject();
     if (!go->Create(db_lowGUID, entry, map, PHASEMASK_NORMAL, x, y, z, o, 0, 0, 0, 0, 100, GO_STATE_READY))
     {
         sLog->outErrorDb("Gameobject template %u not found in database! Battleground not created!", entry);

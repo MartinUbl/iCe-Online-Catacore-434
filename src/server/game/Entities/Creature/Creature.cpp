@@ -49,12 +49,12 @@
 #include "OutdoorPvPMgr.h"
 #include "GameEventMgr.h"
 #include "CreatureGroups.h"
+#include "Transport.h"
 #include "Vehicle.h"
 #include "SpellAuraEffects.h"
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
 #include "Map.h"
-#include "Transport.h"
 
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
 {
@@ -1044,7 +1044,7 @@ void Creature::SaveToDB()
         return;
     }
 
-    uint32 mapId = GetTransport() ? GetTransport()->GetGOInfo()->moTransport.mapID : GetMapId();
+    uint32 mapId = (GetTransport() && GetTransport()->ToGameObject()) ? GetTransport()->ToGameObject()->GetGOInfo()->moTransport.mapID : GetMapId();
     SaveToDB(mapId, data->spawnMask, GetPhaseMask());
 }
 

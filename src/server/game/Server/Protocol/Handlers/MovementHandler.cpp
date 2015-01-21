@@ -32,6 +32,7 @@
 #include "SpellAuras.h"
 #include "MapManager.h"
 #include "Transport.h"
+#include "DynamicTransport.h"
 #include "Battleground.h"
 #include "WaypointMovementGenerator.h"
 #include "InstanceSaveMgr.h"
@@ -331,7 +332,8 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
         // if we boarded a transport, add us to it
         if (plMover)
         {
-            if (!plMover->GetTransport())
+            TransportBase* transBase = plMover->GetTransport();
+            if (!transBase)
             {
                 // elevators also cause the client to send MOVEMENTFLAG_ONTRANSPORT - just dismount if the guid can be found in the transport list
                 if (Transport* transport = plMover->GetMap()->GetTransport(movementInfo.t_guid))
@@ -339,8 +341,16 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
                     plMover->m_transport = transport;
                     transport->AddPassenger(plMover);
                 }
+                else if (GameObject* dynTransport = plMover->GetMap()->GetGameObject(movementInfo.t_guid))
+                {
+                    if (DynamicTransport* transport = dynTransport->ToDynamicTransport())
+                    {
+                        plMover->m_transport = transport;
+                        transport->AddPassenger(plMover);
+                    }
+                }
             }
-            else if (plMover->GetTransport()->GetGUID() != movementInfo.t_guid)
+            else if (transBase->ToGameObject() && transBase->ToGameObject()->GetGUID() != movementInfo.t_guid)
             {
                 bool foundNewTransport = false;
                 plMover->m_transport->RemovePassenger(plMover);
@@ -349,6 +359,15 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
                     foundNewTransport = true;
                     plMover->m_transport = transport;
                     transport->AddPassenger(plMover);
+                }
+                else if (GameObject* dynTransport = plMover->GetMap()->GetGameObject(movementInfo.t_guid))
+                {
+                    if (DynamicTransport* transport = dynTransport->ToDynamicTransport())
+                    {
+                        foundNewTransport = true;
+                        plMover->m_transport = transport;
+                        transport->AddPassenger(plMover);
+                    }
                 }
 
                 if (!foundNewTransport)

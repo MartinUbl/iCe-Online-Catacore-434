@@ -34,6 +34,7 @@
 #include "Player.h"
 #include "Opcodes.h"
 #include "GameObject.h"
+#include "DynamicTransport.h"
 #include "Chat.h"
 #include "Log.h"
 #include "Guild.h"
@@ -4500,9 +4501,9 @@ bool ChatHandler::HandleNpcPlayEmoteCommand(const char *args)
         return false;
     }
 
-    if (target->GetTransport())
+    if (target->GetTransport() && target->GetTransport()->ToDynamicTransport())
         if (target->GetGUIDTransport())
-            WorldDatabase.PQuery("UPDATE creature_transport SET emote=%u WHERE transport_entry=%u AND guid=%u", emote, target->GetTransport()->GetEntry(), target->GetGUIDTransport());
+            WorldDatabase.PQuery("UPDATE creature_transport SET emote=%u WHERE transport_entry=%u AND guid=%u", emote, target->GetTransport()->ToDynamicTransport()->GetEntry(), target->GetGUIDTransport());
 
     target->SetUInt32Value(UNIT_NPC_EMOTESTATE,emote);
 

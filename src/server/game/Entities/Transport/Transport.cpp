@@ -31,7 +31,7 @@
 #include "MapReference.h"
 #include "Player.h"
 
-Transport::Transport() : GameObject(),
+Transport::Transport() : GameObject(), TransportBase(TRANSPORT_TYPE_GENERIC, this),
 _transportInfo(NULL), _isMoving(true), _pendingStop(false)
 {
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_LOWGUID | UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_ROTATION);
@@ -192,7 +192,7 @@ void Transport::Update(uint32 diff)
     sScriptMgr->OnTransportUpdate(this, diff);
 }
 
-void Transport::AddPassenger(WorldObject* passenger)
+bool Transport::AddPassenger(WorldObject* passenger, int8 seatId, bool byAura)
 {
     if (_passengers.insert(passenger).second)
     {
@@ -203,6 +203,8 @@ void Transport::AddPassenger(WorldObject* passenger)
 
     if (Player* plr = passenger->ToPlayer())
         sScriptMgr->OnAddPassenger(this, plr);
+
+    return true;
 }
 
 void Transport::RemovePassenger(WorldObject* passenger)

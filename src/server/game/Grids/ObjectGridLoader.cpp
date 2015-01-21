@@ -28,6 +28,7 @@
 #include "Vehicle.h"
 #include "GameObject.h"
 #include "DynamicObject.h"
+#include "DynamicTransport.h"
 #include "Corpse.h"
 #include "World.h"
 #include "CellImpl.h"
@@ -165,6 +166,28 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair &cell, GridRefManager<T> &
     }
 }
 
+void LoadHelperGO(CellGuidSet const& guid_set, CellPair &cell, GridRefManager<GameObject> &m, uint32 &count, Map* map)
+{
+    GameObjectInfo const* goinfo;
+
+    for (CellGuidSet::const_iterator i_guid = guid_set.begin(); i_guid != guid_set.end(); ++i_guid)
+    {
+        goinfo = ObjectMgr::GetGameObjectInfoFromGUID(*i_guid);
+        if (!goinfo)
+            continue;
+
+        GameObject* obj = (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT) ? new DynamicTransport() : new GameObject();
+        uint32 guid = *i_guid;
+        if (!obj->LoadFromDB(guid, map))
+        {
+            delete obj;
+            continue;
+        }
+
+        AddObjectHelper<GameObject>(cell, m, count, map, obj);
+    }
+}
+
 void LoadHelper(CellCorpseSet const& cell_corpses, CellPair &cell, CorpseMapType &m, uint32 &count, Map* map)
 {
     if (cell_corpses.empty())
@@ -201,7 +224,7 @@ ObjectGridLoader::Visit(GameObjectMapType &m)
 
     CellObjectGuids const& cell_guids = sObjectMgr->GetCellObjectGuids(i_map->GetId(), i_map->GetSpawnMode(), cell_id);
 
-    LoadHelper(cell_guids.gameobjects, cell_pair, m, i_gameObjects, i_map);
+    LoadHelperGO(cell_guids.gameobjects, cell_pair, m, i_gameObjects, i_map);
 }
 
 void

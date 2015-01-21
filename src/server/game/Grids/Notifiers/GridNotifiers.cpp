@@ -39,31 +39,36 @@ VisibleNotifier::SendToSelf()
 {
     // at this moment i_clientGUIDs have guids that not iterate at grid level checks
     // but exist one case when this possible and object not out of range: transports
-    if (Transport* transport = i_player.GetTransport())
-        for (std::set<WorldObject*>::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
+    if (TransportBase* transportBase = i_player.GetTransport())
+    {
+        if (Transport* transport = transportBase->ToGenericTransport())
         {
-            if (vis_guids.find((*itr)->GetGUID()) != vis_guids.end())
+            for (std::set<WorldObject*>::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
             {
-                vis_guids.erase((*itr)->GetGUID());
-
-                switch ((*itr)->GetTypeId())
+                if (vis_guids.find((*itr)->GetGUID()) != vis_guids.end())
                 {
-                    case TYPEID_GAMEOBJECT:
-                        i_player.UpdateVisibilityOf((*itr)->ToGameObject(), i_data, i_visibleNow);
-                        break;
-                    case TYPEID_PLAYER:
-                        i_player.UpdateVisibilityOf((*itr)->ToPlayer(), i_data, i_visibleNow);
-                        if (!(*itr)->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-                            (*itr)->ToPlayer()->UpdateVisibilityOf(&i_player);
-                        break;
-                    case TYPEID_UNIT:
-                        i_player.UpdateVisibilityOf((*itr)->ToCreature(), i_data, i_visibleNow);
-                        break;
-                    default:
-                        break;
+                    vis_guids.erase((*itr)->GetGUID());
+
+                    switch ((*itr)->GetTypeId())
+                    {
+                        case TYPEID_GAMEOBJECT:
+                            i_player.UpdateVisibilityOf((*itr)->ToGameObject(), i_data, i_visibleNow);
+                            break;
+                        case TYPEID_PLAYER:
+                            i_player.UpdateVisibilityOf((*itr)->ToPlayer(), i_data, i_visibleNow);
+                            if (!(*itr)->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+                                (*itr)->ToPlayer()->UpdateVisibilityOf(&i_player);
+                            break;
+                        case TYPEID_UNIT:
+                            i_player.UpdateVisibilityOf((*itr)->ToCreature(), i_data, i_visibleNow);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
+    }
 
     for (uint64 vis_guid : vis_guids)
     {

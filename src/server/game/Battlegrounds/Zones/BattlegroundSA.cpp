@@ -74,15 +74,10 @@ bool BattlegroundSA::SetupBattleground()
 
 bool BattlegroundSA::ResetObjs()
 {
-    for (int i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; i++)
-        for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-            if (Player *plr = sObjectMgr->GetPlayer(itr->first))
-                SendTransportsRemove(plr);
-
     uint32 atF = BG_SA_Factions[Attackers];
     uint32 defF = BG_SA_Factions[Attackers ? TEAM_ALLIANCE : TEAM_HORDE];
 
-    for (uint8 i = 0; i <BG_SA_MAXOBJ; i++)
+    for (uint8 i = 0; i < BG_SA_MAXOBJ; i++)
         DelObject(i);
 
     for (uint8 i = 0; i < BG_SA_MAXNPC; i++)
@@ -94,30 +89,41 @@ bool BattlegroundSA::ResetObjs()
     for (uint8 i = 0; i < 6; i++)
         GateStatus[i] = BG_SA_GATE_OK;
 
-    for (uint8 i = 0; i < BG_SA_BOAT_ONE; i++)
+    for (uint8 i = BG_SA_GREEN_GATE; i <= BG_SA_TITAN_RELIC; i++)
     {
         if (!AddObject(i,BG_SA_ObjEntries[i],BG_SA_ObjSpawnlocs[i][0],BG_SA_ObjSpawnlocs[i][1], BG_SA_ObjSpawnlocs[i][2],BG_SA_ObjSpawnlocs[i][3],0,0,0,0,RESPAWN_ONE_DAY))
             return false;
     }
 
-    for (uint8 i = BG_SA_BOAT_ONE; i < BG_SA_SIGIL_1; i++)
+    for (uint8 i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; i++)
     {
-        uint32 boatid=0;
+        uint32 boatid;
+        float rotation;
         switch (i)
         {
             case BG_SA_BOAT_ONE:
-                boatid= Attackers ? BG_SA_BOAT_ONE_H : BG_SA_BOAT_ONE_A;
+                boatid = Attackers ? BG_SA_BOAT_ONE_H : BG_SA_BOAT_ONE_A;
+                rotation = 0.0002f;
                 break;
             case BG_SA_BOAT_TWO:
-                boatid= Attackers ? BG_SA_BOAT_TWO_H : BG_SA_BOAT_TWO_A;
+                boatid = Attackers ? BG_SA_BOAT_TWO_H : BG_SA_BOAT_TWO_A;
+                rotation = 0.00001f;
                 break;
         }
+
         if (!AddObject(i,boatid,BG_SA_ObjSpawnlocs[i][0],
-          BG_SA_ObjSpawnlocs[i][1],
-          BG_SA_ObjSpawnlocs[i][2]+(Attackers ? -3.750f: 0),
-          BG_SA_ObjSpawnlocs[i][3],0,0,0,0,RESPAWN_ONE_DAY))
+                                BG_SA_ObjSpawnlocs[i][1],
+                                BG_SA_ObjSpawnlocs[i][2]+(Attackers ? -3.750f: 0),
+                                BG_SA_ObjSpawnlocs[i][3],0,0,0,0,RESPAWN_ONE_DAY))
             return false;
+
+        GetBGObject(i)->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
+        GetBGObject(i)->UpdateRotationFields(1.0f, rotation);
     }
+
+    SpawnBGObject(BG_SA_BOAT_ONE, RESPAWN_IMMEDIATELY);
+    SpawnBGObject(BG_SA_BOAT_TWO, RESPAWN_IMMEDIATELY);
+
     for (uint8 i = BG_SA_SIGIL_1; i < BG_SA_CENTRAL_FLAG; i++)
     {
         if (!AddObject(i,BG_SA_ObjEntries[i],
@@ -127,14 +133,8 @@ bool BattlegroundSA::ResetObjs()
         return false;
     }
 
-    // MAD props for Kiper for discovering those values - 4 hours of his work.
-    GetBGObject(BG_SA_BOAT_ONE)->UpdateRotationFields(1.0f, 0.0002f);
-    GetBGObject(BG_SA_BOAT_TWO)->UpdateRotationFields(1.0f, 0.00001f);
-    SpawnBGObject(BG_SA_BOAT_ONE, RESPAWN_IMMEDIATELY);
-    SpawnBGObject(BG_SA_BOAT_TWO, RESPAWN_IMMEDIATELY);
-
-    //Cannons and demolishers - NPCs are spawned
-    //By capturing GYs.
+    // Cannons and demolishers - NPCs are spawned
+    // By capturing GYs.
     for (uint8 i = 0; i < BG_SA_NPC_SPARKLIGHT; i++)
     {
         if (!AddCreature(BG_SA_NpcEntries[i], i, (Attackers == TEAM_ALLIANCE ? TEAM_HORDE : TEAM_ALLIANCE),
@@ -186,7 +186,7 @@ bool BattlegroundSA::ResetObjs()
         }
     }
 
-    //GY capture points
+    // GY capture points
     for (uint8 i = BG_SA_CENTRAL_FLAG; i < BG_SA_PORTAL_DEFFENDER_BLUE; i++)
     {
         AddObject(i, (BG_SA_ObjEntries[i] - (Attackers == TEAM_ALLIANCE ? 1:0)),
@@ -257,11 +257,6 @@ bool BattlegroundSA::ResetObjs()
     UpdateWorldState(BG_SA_YELLOW_GATEWS, 1);
     UpdateWorldState(BG_SA_ANCIENT_GATEWS, 1);
 
-    for (int i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; i++)
-        for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-            if (Player *plr = sObjectMgr->GetPlayer(itr->first))
-                SendTransportInit(plr);
-
     TeleportPlayers();
     return true;
 }
@@ -271,28 +266,19 @@ void BattlegroundSA::StartShips()
     if (ShipsStarted)
         return;
 
-    DoorOpen(BG_SA_BOAT_ONE);
-    DoorOpen(BG_SA_BOAT_TWO);
-
-    for (int i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; i++)
+    for (uint32 i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; i++)
     {
-        for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end();itr++)
-        {
-            if (Player* p = sObjectMgr->GetPlayer(itr->first))
-            {
-                UpdateData data(p->GetMapId());
-                WorldPacket pkt;
-                GetBGObject(i)->BuildValuesUpdateBlockForPlayer(&data, p);
-                data.BuildPacket(&pkt);
-                p->GetSession()->SendPacket(&pkt);
-            }
-        }
+        if (GameObject* go = GetBGObject(i))
+            go->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 1);
     }
+
     ShipsStarted = true;
 }
 
 void BattlegroundSA::Update(uint32 diff)
 {
+    Battleground::Update(diff);
+
     if (InitSecondRound)
     {
         if (UpdateWaitTimer < diff)
@@ -472,12 +458,17 @@ void BattlegroundSA::AddPlayer(Player *plr)
         else
             plr->TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f, 0);
     }
-    SendTransportInit(plr);
+    //SendTransportInit(plr);
     m_PlayerScores[plr->GetGUID()] = sc;
 }
 
 void BattlegroundSA::RemovePlayer(Player* /*plr*/,uint64 /*guid*/)
 {
+    if (GetPlayers().size() == 0)
+    {
+        EndBattleground(WINNER_NONE);
+        SetDeleteThis();
+    }
 }
 
 void BattlegroundSA::HandleAreaTrigger(Player * /*Source*/, uint32 /*Trigger*/)
@@ -913,34 +904,3 @@ void BattlegroundSA::UpdateDemolisherSpawns()
         }
     }
 }
-
-void BattlegroundSA::SendTransportInit(Player *player)
-{
-    if (m_BgObjects[BG_SA_BOAT_ONE] ||  m_BgObjects[BG_SA_BOAT_TWO])
-    {
-        UpdateData transData(player->GetMapId());
-        if (m_BgObjects[BG_SA_BOAT_ONE])
-            GetBGObject(BG_SA_BOAT_ONE)->BuildCreateUpdateBlockForPlayer(&transData, player);
-        if (m_BgObjects[BG_SA_BOAT_TWO])
-            GetBGObject(BG_SA_BOAT_TWO)->BuildCreateUpdateBlockForPlayer(&transData, player);
-        WorldPacket packet;
-        transData.BuildPacket(&packet);
-        player->GetSession()->SendPacket(&packet);
-    }
-}
-
-void BattlegroundSA::SendTransportsRemove(Player * player)
-{
-    if (m_BgObjects[BG_SA_BOAT_ONE] ||  m_BgObjects[BG_SA_BOAT_TWO])
-    {
-        UpdateData transData(player->GetMapId());
-        if (m_BgObjects[BG_SA_BOAT_ONE])
-            GetBGObject(BG_SA_BOAT_ONE)->BuildOutOfRangeUpdateBlock(&transData);
-        if (m_BgObjects[BG_SA_BOAT_TWO])
-            GetBGObject(BG_SA_BOAT_TWO)->BuildOutOfRangeUpdateBlock(&transData);
-        WorldPacket packet;
-        transData.BuildPacket(&packet);
-        player->GetSession()->SendPacket(&packet);
-    }
-}
-

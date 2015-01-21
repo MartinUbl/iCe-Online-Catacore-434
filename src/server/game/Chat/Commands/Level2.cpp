@@ -46,6 +46,7 @@
 #include <map>
 #include "OutdoorPvPMgr.h"
 #include "Transport.h"
+#include "DynamicTransport.h"
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "CreatureGroups.h"
 #include "ScriptMgr.h"
@@ -765,7 +766,7 @@ bool ChatHandler::HandleGameObjectAddCommand(const char* args)
     float o = float(chr->GetOrientation());
     Map *map = chr->GetMap();
 
-    GameObject* pGameObj = new GameObject;
+    GameObject* pGameObj = (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT) ? new DynamicTransport() : new GameObject();
     uint32 db_lowGUID = sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
     if (!pGameObj->Create(db_lowGUID, gInfo->id, map, chr->GetPhaseMaskForSpawn(), x, y, z, o, 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
@@ -1058,47 +1059,52 @@ bool ChatHandler::HandleNpcAddCommand(const char* args)
     float o = chr->GetOrientation();
     Map *map = chr->GetMap();
 
-    if (Transport* trans = chr->GetTransport())
+    TransportBase* trBase = chr->GetTransport();
+
+    if (trBase)
     {
-        uint32 guid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
-        CreatureData& data = sObjectMgr->NewOrExistCreatureData(guid);
-        data.id = id;
-        data.phaseMask = chr->GetPhaseMaskForSpawn();
-        data.posX = chr->GetTransOffsetX();
-        data.posY = chr->GetTransOffsetY();
-        data.posZ = chr->GetTransOffsetZ();
-        data.orientation = chr->GetTransOffsetO();
-
-        CreatureInfo const *ci = sObjectMgr->GetCreatureTemplate(id);
-        if (!ci)
-            return false;
-
-        Creature* pCreature = NULL;
-        if (ci->ScriptID)
-            pCreature = sScriptMgr->GetCreatureScriptedClass(ci->ScriptID);
-        if (pCreature == NULL)
-            pCreature = new Creature();
-
-        map = sMapMgr->CreateMap(trans->GetGOInfo()->moTransport.mapID, chr, 0);
-
-        if (!pCreature->Create(guid, map, chr->GetPhaseMaskForSpawn(), id, 0, (uint32)teamval, x, y, z, o))
+        if (Transport* trans = trBase->ToGenericTransport())
         {
-            delete pCreature;
-            return false;
+            uint32 guid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
+            CreatureData& data = sObjectMgr->NewOrExistCreatureData(guid);
+            data.id = id;
+            data.phaseMask = chr->GetPhaseMaskForSpawn();
+            data.posX = chr->GetTransOffsetX();
+            data.posY = chr->GetTransOffsetY();
+            data.posZ = chr->GetTransOffsetZ();
+            data.orientation = chr->GetTransOffsetO();
+
+            CreatureInfo const *ci = sObjectMgr->GetCreatureTemplate(id);
+            if (!ci)
+                return false;
+
+            Creature* pCreature = NULL;
+            if (ci->ScriptID)
+                pCreature = sScriptMgr->GetCreatureScriptedClass(ci->ScriptID);
+            if (pCreature == NULL)
+                pCreature = new Creature();
+
+            map = sMapMgr->CreateMap(trans->GetGOInfo()->moTransport.mapID, chr, 0);
+
+            if (!pCreature->Create(guid, map, chr->GetPhaseMaskForSpawn(), id, 0, (uint32)teamval, x, y, z, o))
+            {
+                delete pCreature;
+                return false;
+            }
+
+            pCreature->SaveToDB(trans->GetGOInfo()->moTransport.mapID, 1 << map->GetSpawnMode(), chr->GetPhaseMaskForSpawn());
+
+            Creature* cr = trans->CreateNPCPassenger(guid, &data);
+
+            if (cr)
+            {
+                cr->SaveToDB(trans->GetGOInfo()->moTransport.mapID, 1 << map->GetSpawnMode(), chr->GetPhaseMaskForSpawn());
+            }
+
+            sObjectMgr->AddCreatureToGrid(guid, &data);
+
+            return true;
         }
-
-        pCreature->SaveToDB(trans->GetGOInfo()->moTransport.mapID, 1 << map->GetSpawnMode(), chr->GetPhaseMaskForSpawn());
-
-        Creature* cr = trans->CreateNPCPassenger(guid, &data);
-
-        if (cr)
-        {
-            cr->SaveToDB(trans->GetGOInfo()->moTransport.mapID, 1 << map->GetSpawnMode(), chr->GetPhaseMaskForSpawn());
-        }
-
-        sObjectMgr->AddCreatureToGrid(guid, &data);
-
-        return true;
     }
 
     CreatureInfo const *ci = sObjectMgr->GetCreatureTemplate(id);

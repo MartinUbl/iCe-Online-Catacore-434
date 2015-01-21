@@ -40,6 +40,7 @@
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
 #include "Util.h"
+#include "DynamicTransport.h"
 
 namespace Trinity
 {
@@ -584,8 +585,8 @@ inline void Battleground::_ProcessJoin(uint32 diff)
                     }
 
                     /* teleport to team start point */
-                    /* exclude AV - sometimes causes trouble */
-                    if (GetTypeID() != BATTLEGROUND_AV)
+                    /* exclude AV and SA - sometimes causes trouble */
+                    if (GetTypeID() != BATTLEGROUND_AV && GetTypeID() != BATTLEGROUND_SA)
                     {
                         float sx, sy, sz, so;
                         GetTeamStartLoc(plr->GetBGTeam(), sx, sy, sz, so);
@@ -1669,13 +1670,15 @@ bool Battleground::AddObject(uint32 type, uint32 entry, float x, float y, float 
     // If the assert is called, means that m_BgObjects must be resized!
     ASSERT(type < m_BgObjects.size());
 
+    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
+
     Map *map = GetBgMap();
     if (!map)
         return false;
     // Must be created this way, adding to godatamap would add it to the base map of the instance
     // and when loading it (in go::LoadFromDB()), a new guid would be assigned to the object, and a new object would be created
     // So we must create it specific for this instance
-    GameObject * go = new GameObject;
+    GameObject * go = (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT) ? new DynamicTransport() : new GameObject();
     if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, GetBgMap(),
         PHASEMASK_NORMAL, x, y, z, o, rotation0, rotation1, rotation2, rotation3, 100, GO_STATE_READY))
     {

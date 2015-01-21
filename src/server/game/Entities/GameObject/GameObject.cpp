@@ -209,9 +209,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
         return false;
     }
 
-    if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
-        m_updateFlag = (m_updateFlag | UPDATEFLAG_TRANSPORT) & ~UPDATEFLAG_GO_TRANSPORT_POSITION;
-
     Object::_Create(guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
 
     m_goInfo = goinfo;
@@ -247,7 +244,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
     SetGoArtKit(0);                                         // unknown what this is
     SetByteValue(GAMEOBJECT_BYTES_1, 2, artKit);
 
-    switch(goinfo->type)
+    switch (goinfo->type)
     {
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
             m_goValue->building.health = goinfo->building.intactNumHits + goinfo->building.damagedNumHits;
@@ -258,64 +255,15 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
             SetDisplayId(goinfo->building.destructibleData);
             break;
         case GAMEOBJECT_TYPE_TRANSPORT:
-        {
+            // just init values, they will be filled properly in child create method (this method is called from it)
             m_goValue->Transport.AnimationInfo = sTransportMgr->GetTransportAnimInfo(goinfo->id);
             m_goValue->Transport.PathProgress = getMSTime();
             m_goValue->Transport.StateChangeStartProgress = 0;
             m_goValue->Transport.VisualState = 0;
+            m_goValue->Transport.CurrentSeg = 0;
             m_goValue->Transport.StateChangeTime = 0;
             m_goValue->Transport.StopFrames = new std::vector<uint32>();
-
-            uint32 framesPresent = 0;
-            if (goinfo->transport.stopFrame4 > 0)
-                framesPresent = 4;
-            else if (goinfo->transport.stopFrame3 > 0)
-                framesPresent = 3;
-            else if (goinfo->transport.stopFrame2 > 0)
-                framesPresent = 2;
-
-            if (goinfo->transport.stopFrame1 > 0 || framesPresent > 1)
-                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame1);
-            if (goinfo->transport.stopFrame2 > 0 || framesPresent > 2)
-                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame2);
-            if (goinfo->transport.stopFrame3 > 0 || framesPresent > 3)
-                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame3);
-            if (goinfo->transport.stopFrame4 > 0 || framesPresent > 4)
-                m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame4);
-
-            if (!m_goValue->Transport.StopFrames->empty())
-            {
-                bool nullPresent = false;
-                for (uint32 i = 0; i < m_goValue->Transport.StopFrames->size(); i++)
-                {
-                    if (m_goValue->Transport.StopFrames->at(i) == 0)
-                    {
-                        nullPresent = true;
-                        break;
-                    }
-                }
-
-                if (!nullPresent)
-                    m_goValue->Transport.StopFrames->insert(m_goValue->Transport.StopFrames->begin(), 0);
-            }
-
-            // set proper transport state only when dealing with non-custom transports
-            if (m_goValue->Transport.AnimationInfo)
-            {
-                if (goinfo->transport.startOpen)
-                {
-                    if (goinfo->transport.startOpen > 0 && goinfo->transport.startOpen <= m_goValue->Transport.StopFrames->size())
-                        SetTransportState(GO_STATE_TRANSPORT_STOPPED, goinfo->transport.startOpen - 1);
-                    else
-                        SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
-                }
-                else
-                    SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
-            }
-
-            SetGoAnimProgress(animprogress);
             break;
-        }
         case GAMEOBJECT_TYPE_FISHINGNODE:
             SetGoAnimProgress(0);
             break;
@@ -355,35 +303,6 @@ void GameObject::Update(uint32 diff)
                             m_cooldownTime = time(NULL) + goInfo->trap.startDelay;
                     }
                     m_lootState = GO_READY;
-                    break;
-                }
-                case GAMEOBJECT_TYPE_TRANSPORT:
-                {
-                    if (!m_goValue->Transport.AnimationInfo)
-                        break;
-
-                    if (GetGoState() == GO_STATE_TRANSPORT_ACTIVE)
-                    {
-                        m_goValue->Transport.PathProgress = getMSTime();
-                        /* TODO: Fix movement in unloaded grid - currently GO will just disappear */
-
-                        if (!m_goValue->Transport.StopFrames->empty())
-                        {
-                            // TODO: verify that 20000, because i don't think TC got it right
-                            //       this causes active transport to change stop frame every 20s
-                            uint32 visualStateAfter = (m_goValue->Transport.PathProgress / 20000) % m_goValue->Transport.StopFrames->size();
-
-                            if (m_goValue->Transport.VisualState != visualStateAfter)
-                            {
-                                m_goValue->Transport.StateChangeTime = abs((int32)m_goValue->Transport.StopFrames->at(visualStateAfter) - (int32)m_goValue->Transport.StopFrames->at(m_goValue->Transport.VisualState));
-                                m_goValue->Transport.StateChangeStartProgress = m_goValue->Transport.PathProgress;
-                                m_goValue->Transport.VisualState = visualStateAfter;
-
-                                ForceValuesUpdateAtIndex(GAMEOBJECT_LEVEL);
-                                ForceValuesUpdateAtIndex(GAMEOBJECT_BYTES_1);
-                            }
-                        }
-                    }
                     break;
                 }
                 case GAMEOBJECT_TYPE_FISHINGNODE:
@@ -912,16 +831,29 @@ bool GameObject::IsTransport() const
 {
     // If something is marked as a transport, don't transmit an out of range packet for it.
     GameObjectInfo const * gInfo = GetGOInfo();
-    if (!gInfo) return false;
+    if (!gInfo)
+        return false;
+
     return gInfo->type == GAMEOBJECT_TYPE_TRANSPORT || gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT;
 }
 
-// is Dynamic transport = non-stop Transport
-bool GameObject::IsDynTransport() const
+// Dynamic transport = stoppable transport
+bool GameObject::IsDynamicTransport() const
 {
-    // If something is marked as a transport, don't transmit an out of range packet for it.
     GameObjectInfo const * gInfo = GetGOInfo();
-    if (!gInfo) return false;
+    if (!gInfo)
+        return false;
+
+    return (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT && !m_goValue->Transport.StopFrames->empty()); 
+}
+
+// Static transport = non-stop transport, no controlled motion changes
+bool GameObject::IsStaticTransport() const
+{
+    GameObjectInfo const * gInfo = GetGOInfo();
+    if (!gInfo)
+        return false;
+
     return gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT || (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT && m_goValue->Transport.StopFrames->empty());
 }
 

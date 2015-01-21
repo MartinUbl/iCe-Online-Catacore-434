@@ -21,7 +21,6 @@
 
 #include "GameObject.h"
 #include "TransportMgr.h"
-#include "Vehicle.h"
 
 struct CreatureData;
 
@@ -38,7 +37,7 @@ public:
 
     void BuildUpdate(UpdateDataMapType& data_map);
 
-    void AddPassenger(WorldObject* passenger);
+    bool AddPassenger(WorldObject* passenger, int8 seatId = -1, bool byAura = false);
     void RemovePassenger(WorldObject* passenger);
     std::set<WorldObject*> const& GetPassengers() const { return _passengers; }
 
@@ -67,6 +66,11 @@ public:
     void UnloadStaticPassengers();
 
     void EnableMovement(bool enabled);
+
+    float GetStationaryX() const { return GetPositionX(); }
+    float GetStationaryY() const { return GetPositionY(); }
+    float GetStationaryZ() const { return GetPositionZ(); }
+    float GetStationaryO() const { return GetOrientation(); }
 
 private:
     void MoveToNextWaypoint();

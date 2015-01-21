@@ -29,6 +29,7 @@
 #include "GameObject.h"
 #include "DynamicObject.h"
 #include "Vehicle.h"
+#include "Transport.h"
 #include "WorldPacket.h"
 #include "Item.h"
 #include "Corpse.h"

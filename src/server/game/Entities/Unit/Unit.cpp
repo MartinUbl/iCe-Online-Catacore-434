@@ -20011,7 +20011,7 @@ uint64 Unit::GetTransGUID() const
     if (GetVehicle())
         return GetVehicle()->GetBase()->GetGUID();
     if (GetTransport())
-        return GetTransport()->GetGUID();
+        return GetTransport()->ToWorldObject()->GetGUID();
 
     return 0;
 }
@@ -21142,7 +21142,7 @@ void Unit::BuildMovementPacket(ByteBuffer *data) const
         if (m_vehicle)
             *data << uint64(m_vehicle->GetBase()->GetGUID());
         else if (GetTransport())
-            *data << uint64(GetTransport()->GetGUID());
+            *data << uint64(GetTransport()->ToWorldObject()->GetGUID());
         else // probably should never happen
             *data << (uint64)0;
 

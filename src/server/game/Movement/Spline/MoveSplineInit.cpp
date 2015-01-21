@@ -171,8 +171,8 @@ namespace Movement
         {
             if (Unit* vehicle = unit->GetVehicleBase())
                 angle -= vehicle->GetOrientation();
-            else if (Transport* transport = unit->GetTransport())
-                angle -= transport->GetOrientation();
+            else if (TransportBase* transport = unit->GetTransport())
+                angle -= transport->ToWorldObject()->GetOrientation();
         }
 
         args.facing.angle = G3D::wrap(angle, 0.f, (float)G3D::twoPi());

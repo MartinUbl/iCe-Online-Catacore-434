@@ -35,6 +35,7 @@
 #include "Guild.h"
 #include "ArenaTeam.h"
 #include "Transport.h"
+#include "DynamicTransport.h"
 
 #include "Language.h"
 #include "GameEventMgr.h"
@@ -1709,11 +1710,17 @@ uint32 ObjectMgr::AddGOData(uint32 entry, uint32 mapId, float x, float y, float 
     AddGameobjectToGrid(guid, &data);
     SetGameObjectSpawned(entry);
 
+    GameObject *go;
+
     // Spawn if necessary (loaded grids only)
     // We use spawn coords to spawn
     if (!map->Instanceable() && map->IsLoaded(x, y))
     {
-        GameObject *go = new GameObject;
+        if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+            go = new DynamicTransport();
+        else
+            go = new GameObject();
+
         if (!go->LoadFromDB(guid, map))
         {
             sLog->outError("AddGOData: cannot add gameobject entry %u to map", entry);
@@ -2092,6 +2099,14 @@ uint64 ObjectMgr::GetPlayerGUIDByName(std::string name) const
         guid = MAKE_NEW_GUID((*result)[0].GetUInt32(), 0, HIGHGUID_PLAYER);
 
     return guid;
+}
+
+GameObjectInfo const * ObjectMgr::GetGameObjectInfoFromGUID(uint32 guidlow)
+{
+    QueryResult result = WorldDatabase.PQuery("SELECT id FROM gameobject WHERE guid = %u", guidlow);
+    if (result)
+        return ObjectMgr::GetGameObjectInfo((*result)[0].GetUInt32());
+    return NULL;
 }
 
 bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const

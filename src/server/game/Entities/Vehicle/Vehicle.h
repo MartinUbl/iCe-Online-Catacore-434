@@ -27,7 +27,13 @@
 
 struct VehicleEntry;
 struct VehicleSeatEntry;
+class WorldObject;
+class GameObject;
+class DynamicTransport;
+class TransportBase;
+class Transport;
 class Unit;
+class Vehicle;
 
 enum PowerType
 {
@@ -69,7 +75,7 @@ enum VehicleFlags
     VEHICLE_FLAG_ALLOW_PITCHING                  = 0x00000010,           // Sets MOVEFLAG2_ALLOW_PITCHING
     VEHICLE_FLAG_FULLSPEEDPITCHING               = 0x00000020,           // Sets MOVEFLAG2_FULLSPEEDPITCHING
     VEHICLE_FLAG_CUSTOM_PITCH                    = 0x00000040,           // If set use pitchMin and pitchMax from DBC, otherwise pitchMin = -pi/2, pitchMax = pi/2    
-	VEHICLE_FLAG_ADJUST_AIM_ANGLE                = 0x00000400,           // Lua_IsVehicleAimAngleAdjustable
+    VEHICLE_FLAG_ADJUST_AIM_ANGLE                = 0x00000400,           // Lua_IsVehicleAimAngleAdjustable
     VEHICLE_FLAG_ADJUST_AIM_POWER                = 0x00000800,           // Lua_IsVehicleAimPowerAdjustable
 };
 
@@ -115,7 +121,6 @@ enum VehicleSpells
 {
     VEHICLE_SPELL_PARACHUTE                      = 45472
 };
-  
 
 struct VehicleSeat
 {
@@ -145,14 +150,44 @@ typedef std::map<uint32, VehicleScalingInfo> VehicleScalingMap;
 typedef std::map<int8, VehicleSeat> SeatMap;
 typedef std::set<uint64> GuidSet;
 
+enum TransportType
+{
+    TRANSPORT_TYPE_GENERIC = 0, // for Transport class (gameobject with type GAMEOBJECT_MO_TRANSPORT)
+    TRANSPORT_TYPE_DYNAMIC = 1, // for DynamicTransport class (gameobject with type GAMEOBJECT_TRANSPORT)
+    TRANSPORT_TYPE_VEHICLE = 2  // for Vehicle class
+};
+
 class TransportBase
 {
     public:
+        explicit TransportBase(TransportType transType, WorldObject const* woRef) : m_transportType(transType), m_woRef(woRef) { };
+
         /// This method transforms supplied transport offsets into global coordinates
         virtual void CalculatePassengerPosition(float& x, float& y, float& z, float* o) const = 0;
 
         /// This method transforms supplied global coordinates into local offsets
         virtual void CalculatePassengerOffset(float& x, float& y, float& z, float* o) const = 0;
+
+        virtual bool AddPassenger(WorldObject *passenger, int8 seatId = -1, bool byAura = false) = 0;
+
+        virtual void RemovePassenger(WorldObject *passenger) = 0;
+
+        Transport* ToGenericTransport() { if (m_transportType == TRANSPORT_TYPE_GENERIC) return reinterpret_cast<Transport*>((WorldObject*)m_woRef); else return NULL; }
+        DynamicTransport* ToDynamicTransport() { if (m_transportType == TRANSPORT_TYPE_DYNAMIC) return reinterpret_cast<DynamicTransport*>((WorldObject*)m_woRef); else return NULL; }
+        Vehicle* ToVehicleTransport() { if (m_transportType == TRANSPORT_TYPE_VEHICLE) return reinterpret_cast<Vehicle*>(this); else return NULL; }
+        Transport const* ToGenericTransport() const { if (m_transportType == TRANSPORT_TYPE_GENERIC) return reinterpret_cast<Transport const*>(m_woRef); else return NULL; }
+        DynamicTransport const* ToDynamicTransport() const { if (m_transportType == TRANSPORT_TYPE_DYNAMIC) return reinterpret_cast<DynamicTransport const*>((WorldObject*)m_woRef); else return NULL; }
+        Vehicle const* ToVehicleTransport() const { if (m_transportType == TRANSPORT_TYPE_VEHICLE) return reinterpret_cast<Vehicle const*>(this); else return NULL; }
+
+        WorldObject* ToWorldObject() { return (WorldObject*)(m_woRef); }
+        WorldObject const* ToWorldObject() const { return (WorldObject*)(m_woRef); }
+
+        GameObject* ToGameObject();
+        GameObject const* ToGameObject() const;
+
+    protected:
+        TransportType m_transportType;
+        WorldObject const* m_woRef;
 };
 
 class Vehicle : public TransportBase
@@ -181,8 +216,8 @@ class Vehicle : public TransportBase
         bool HasEmptySeat(int8 seatId) const;
         Unit *GetPassenger(int8 seatId) const;
         int8 GetNextEmptySeat(int8 seatId, bool next, bool byAura = false) const;
-        bool AddPassenger(Unit *passenger, int8 seatId = -1, bool byAura = false);
-        void RemovePassenger(Unit *passenger);
+        bool AddPassenger(WorldObject *passenger, int8 seatId = -1, bool byAura = false);
+        void RemovePassenger(WorldObject *passenger);
         void RelocatePassengers(float x, float y, float z, float ang);
         void RelocatePassengers();
         void RemoveAllPassengers();

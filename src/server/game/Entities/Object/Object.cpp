@@ -39,6 +39,7 @@
 #include "ObjectAccessor.h"
 #include "Log.h"
 #include "Transport.h"
+#include "DynamicTransport.h"
 #include "TargetedMovementGenerator.h"
 #include "WaypointMovementGenerator.h"
 #include "VMapFactory.h"
@@ -638,7 +639,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         resulting in players seeing the object in a different position
         - this may therefore lead to desynchronization
         */
-        if (go && go->IsDynTransport() && go->GetGOValue()->Transport.AnimationInfo)
+        if (go && go->IsTransport())
             *data << uint32(go->GetGOValue()->Transport.PathProgress);
         else
             *data << uint32(getMSTime());
@@ -653,7 +654,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
     bool IsActivateToQuest = false;
     if (updatetype == UPDATETYPE_CREATE_OBJECT || updatetype == UPDATETYPE_CREATE_OBJECT2)
     {
-        if (isType(TYPEMASK_GAMEOBJECT) && !((GameObject*)this)->IsDynTransport())
+        if (isType(TYPEMASK_GAMEOBJECT) && !((GameObject*)this)->IsStaticTransport())
         {
             if (((GameObject*)this)->ActivateToQuest(target) || target->IsGameMaster())
                 IsActivateToQuest = true;
@@ -671,12 +672,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
     {
         if (isType(TYPEMASK_GAMEOBJECT))
         {
-            if (((GameObject*)this)->IsTransport())
-            {
-                // We have to always send flags in update packet for all transports
-                updateMask->SetBit(GAMEOBJECT_FLAGS);
-            }
-            else
+            if (!((GameObject*)this)->IsTransport())
             {
                 if (((GameObject*)this)->ActivateToQuest(target) || target->IsGameMaster())
                     IsActivateToQuest = true;
@@ -692,6 +688,17 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
         {
             if (((Unit*)this)->HasFlag(UNIT_FIELD_AURASTATE, PER_CASTER_AURA_STATE_MASK))
                 updateMask->SetBit(UNIT_FIELD_AURASTATE);
+        }
+    }
+
+    if (isType(TYPEMASK_GAMEOBJECT))
+    {
+        if (((GameObject*)this)->IsTransport())
+        {
+            // We have to always send flags in update packet for all transports
+            updateMask->SetBit(GAMEOBJECT_FLAGS);
+            updateMask->SetBit(GAMEOBJECT_LEVEL);
+            updateMask->SetBit(GAMEOBJECT_DYNAMIC);
         }
     }
 
@@ -954,7 +961,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
 
                     if (go->IsTransport())
                     {
-                        if (go->IsDynTransport())
+                        if (go->IsStaticTransport())
                             flags = GO_FLAG_NODESPAWN | GO_FLAG_TRANSPORT;
                         else
                             flags |= GO_FLAG_TRANSPORT;
@@ -964,19 +971,15 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                 }
                 else if (index == GAMEOBJECT_LEVEL)
                 {
-                    bool isStoppableTransport = ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT && !goValue->Transport.StopFrames->empty();
-
-                    if (isStoppableTransport)
-                        *data << uint32(goValue->Transport.PathProgress + goValue->Transport.StateChangeTime);
+                    if (ToGameObject()->IsDynamicTransport())
+                        *data << uint32(goValue->Transport.StateChangeStartProgress + goValue->Transport.StateChangeTime);
                     else
                         *data << m_uint32Values[index];
                 }
                 else if (index == GAMEOBJECT_BYTES_1)
                 {
-                    bool isStoppableTransport = ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT && !goValue->Transport.StopFrames->empty();
-
                     uint32 bytes1 = m_uint32Values[index];
-                    if (isStoppableTransport && ToGameObject()->GetGoState() == GO_STATE_TRANSPORT_ACTIVE)
+                    if (ToGameObject()->IsDynamicTransport() && ToGameObject()->GetGoState() == GO_STATE_TRANSPORT_ACTIVE)
                     {
                         bytes1 &= 0xFFFFFF00;
                         bytes1 |= GO_STATE_TRANSPORT_STOPPED + goValue->Transport.VisualState;
@@ -1671,7 +1674,7 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
     /* add size of the objects themselves, resulting in real max distance */
     dist2compare += GetObjectSize() + obj->GetObjectSize();
 
-    if (m_transport && obj->GetTransport() && obj->GetTransport()->GetGUIDLow() == m_transport->GetGUIDLow())
+    if (m_transport && obj->GetTransport() && obj->GetTransport()->ToWorldObject()->GetGUIDLow() == m_transport->ToWorldObject()->GetGUIDLow())
     {
         dx = m_movementInfo.t_pos.m_positionX - obj->m_movementInfo.t_pos.m_positionX;
         dy = m_movementInfo.t_pos.m_positionY - obj->m_movementInfo.t_pos.m_positionY;
@@ -2573,7 +2576,7 @@ GameObject* WorldObject::SummonGameObject(uint32 entry, float x, float y, float 
         return NULL;
     }
     Map *map = GetMap();
-    GameObject *go = new GameObject();
+    GameObject *go = (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT) ? new DynamicTransport() : new GameObject();
     if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, map, GetPhaseMask(), x,y,z,ang,rotation0,rotation1,rotation2,rotation3,100,GO_STATE_READY))
     {
         delete go;
@@ -3129,7 +3132,7 @@ void WorldObject::BuildUpdate(UpdateDataMapType& data_map)
 uint64 WorldObject::GetTransGUID() const
 {
     if (GetTransport())
-        return GetTransport()->GetGUID();
+        return GetTransport()->ToWorldObject()->GetGUID();
     return 0;
 }
 

@@ -711,6 +711,7 @@ class ObjectMgr
         Player* GetPlayerByLowGUID(uint32 lowguid) const;
 
         static GameObjectInfo const *GetGameObjectInfo(uint32 id) { return sGOStorage.LookupEntry<GameObjectInfo>(id); }
+        static GameObjectInfo const *GetGameObjectInfoFromGUID(uint32 guidlow);
         int LoadReferenceVendor(int32 vendor, int32 item_id, std::set<uint32> *skip_vendors);
 
         void LoadGameobjectInfo();

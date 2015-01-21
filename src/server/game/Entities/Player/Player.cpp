@@ -2293,7 +2293,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 if (m_transport)
                 {
                     data.WriteBit(1);   // has transport
-                    data << GetMapId() << m_transport->GetEntry();
+                    data << GetMapId() << m_transport->ToWorldObject()->GetEntry();
                 }
                 else
                     data.WriteBit(0);   // has transport
@@ -18060,7 +18060,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
             if (m_transport)
             {
                 m_transport->AddPassenger(this);
-                mapId = m_transport->GetMapId();
+                mapId = m_transport->ToWorldObject()->GetMapId();
             }
             else
             {
@@ -20220,8 +20220,8 @@ bool Player::CreateInDB()
     ss << finiteAlways(m_movementInfo.t_pos.GetPositionY()) << ", ";
     ss << finiteAlways(m_movementInfo.t_pos.GetPositionZ()) << ", ";
     ss << finiteAlways(m_movementInfo.t_pos.GetOrientation()) << ", ";
-    if (m_transport)
-        ss << m_transport->GetGUIDLow();
+    if (m_transport && m_transport->ToGenericTransport())
+        ss << m_transport->ToWorldObject()->GetGUIDLow();
     else
         ss << "0";
     ss << ", ";
@@ -20405,8 +20405,8 @@ void Player::SaveToDB()
     ss << "trans_o = " << finiteAlways(m_movementInfo.t_pos.GetOrientation()) << ", ";
 
     ss << "transguid = ";
-    if (m_transport)
-        ss << m_transport->GetGUIDLow();
+    if (m_transport && m_transport->ToGenericTransport())
+        ss << m_transport->ToWorldObject()->GetGUIDLow();
     else
         ss << "0";
     ss << ", ";
@@ -23962,7 +23962,7 @@ inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, GameObject* target,
     // But exclude stoppable elevators from this hack - they would be teleporting from one end to another
     // if affected transports move so far horizontally that it causes them to run out of visibility range then you are out of luck
     // fix visibility instead of adding hacks here
-    if (!target->IsDynTransport() && !target->IsLargeObject())
+    if (!target->IsStaticTransport() && !target->IsLargeObject())
         s64.insert(target->GetGUID());
 }
 
