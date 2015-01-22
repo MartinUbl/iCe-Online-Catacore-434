@@ -464,11 +464,7 @@ void BattlegroundSA::AddPlayer(Player *plr)
 
 void BattlegroundSA::RemovePlayer(Player* /*plr*/,uint64 /*guid*/)
 {
-    if (GetPlayers().size() == 0)
-    {
-        EndBattleground(WINNER_NONE);
-        SetDeleteThis();
-    }
+    //
 }
 
 void BattlegroundSA::HandleAreaTrigger(Player * /*Source*/, uint32 /*Trigger*/)
