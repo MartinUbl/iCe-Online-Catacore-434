@@ -74,6 +74,7 @@
 #include "ScriptedCreature.h"
 #include "MoveSpline.h"
 #include "PathGenerator.h"
+#include "DynamicTransport.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -7239,7 +7240,9 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
 {
     uint32 gameobject_id = m_spellInfo->EffectMiscValue[effIndex];
 
-    GameObject* pGameObj = new GameObject;
+    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(gameobject_id);
+
+    GameObject* pGameObj = (goinfo && goinfo->type == GAMEOBJECT_TYPE_TRANSPORT) ? new DynamicTransport() : new GameObject();
 
     WorldObject* target = focusObject;
     if (!target)
@@ -7303,7 +7306,8 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
 
     if (uint32 linkedEntry = pGameObj->GetGOInfo()->GetLinkedGameObjectEntry())
     {
-        GameObject* linkedGO = new GameObject;
+        GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(linkedEntry);
+        GameObject* linkedGO = (goinfo && goinfo->type == GAMEOBJECT_TYPE_TRANSPORT) ? new DynamicTransport() : new GameObject();
         if (linkedGO->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, map,
             m_caster->GetPhaseMask(), x, y, z, target->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GO_STATE_READY))
         {
@@ -9339,7 +9343,8 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
         m_caster->m_ObjectSlot[slot] = 0;
     }
 
-    GameObject* pGameObj = new GameObject;
+    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(go_id);
+    GameObject* pGameObj = (goinfo && goinfo->type == GAMEOBJECT_TYPE_TRANSPORT) ? new DynamicTransport() : new GameObject();
 
     Map *map = m_caster->GetMap();
     if (!pGameObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), go_id, map,
@@ -10050,7 +10055,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
         m_caster->GetPosition(fx, fy, fz);
     }
 
-    GameObject* pGameObj = new GameObject;
+    GameObject* pGameObj = (goinfo && goinfo->type == GAMEOBJECT_TYPE_TRANSPORT) ? new DynamicTransport() : new GameObject();
 
     if (!pGameObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id, cMap,
         m_caster->GetPhaseMask(), fx, fy, fz, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GO_STATE_READY))
@@ -10117,7 +10122,8 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
 
     if (uint32 linkedEntry = pGameObj->GetGOInfo()->GetLinkedGameObjectEntry())
     {
-        GameObject* linkedGO = new GameObject;
+        GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(linkedEntry);
+        GameObject* linkedGO = (goinfo && goinfo->type == GAMEOBJECT_TYPE_TRANSPORT) ? new DynamicTransport() : new GameObject();
         if (linkedGO->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, cMap,
             m_caster->GetPhaseMask(), fx, fy, fz, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GO_STATE_READY))
         {

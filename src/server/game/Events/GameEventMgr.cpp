@@ -34,6 +34,7 @@
 #include "Player.h"
 #include "BattlegroundMgr.h"
 #include "ScriptMgr.h"
+#include "DynamicTransport.h"
 
 bool GameEventMgr::CheckOneGameEvent(uint16 entry) const
 {
@@ -1239,7 +1240,8 @@ void GameEventMgr::GameEventSpawn(int16 event_id)
             // We use current coords to unspawn, not spawn coords since creature can have changed grid
             if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
             {
-                GameObject* pGameobject = new GameObject;
+                GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(data->id);
+                GameObject* pGameobject = (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT) ? new DynamicTransport() : new GameObject();
                 //sLog->outDebug("Spawning gameobject %u", *itr);
                 if (!pGameobject->LoadFromDB(*itr, map))
                     delete pGameobject;
