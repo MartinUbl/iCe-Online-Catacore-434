@@ -1054,7 +1054,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
                 BATTLEGROUND_NA, // Nagrand Arena
                 BATTLEGROUND_BE, // Blade's Edge Arena
                 BATTLEGROUND_RL, // Ruins of Lordaeron
-                //BATTLEGROUND_RV, // Ring of Valor
+                BATTLEGROUND_RV, // Ring of Valor
                 BATTLEGROUND_DS, // Dalaran Severs
             };
 
