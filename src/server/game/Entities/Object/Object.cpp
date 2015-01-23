@@ -1684,7 +1684,7 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
     /* add size of the objects themselves, resulting in real max distance */
     dist2compare += GetObjectSize() + obj->GetObjectSize();
 
-    if (m_transport && obj->GetTransport() && obj->GetTransport()->ToWorldObject()->GetGUIDLow() == m_transport->ToWorldObject()->GetGUIDLow())
+    if (m_transport && obj->GetTransport() && obj->GetTransport() == m_transport)
     {
         dx = m_movementInfo.t_pos.m_positionX - obj->m_movementInfo.t_pos.m_positionX;
         dy = m_movementInfo.t_pos.m_positionY - obj->m_movementInfo.t_pos.m_positionY;

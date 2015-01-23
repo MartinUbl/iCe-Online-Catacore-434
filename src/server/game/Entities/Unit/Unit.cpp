@@ -20072,7 +20072,7 @@ void Unit::GetRaidMember(std::list<Unit*> &nearMembers, float radius)
         {
             Player* Target = itr->getSource();
 
-            if (Target && !IsHostileTo(Target))
+            if (Target && Target->IsInWorld() && !IsHostileTo(Target))
             {
                 if (Target->IsAlive() && IsWithinDistInMap(Target, radius))
                     nearMembers.push_back(Target);
