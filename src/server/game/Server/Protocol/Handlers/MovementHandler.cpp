@@ -362,7 +362,8 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
                 }
                 else if (GameObject* dynTransport = plMover->GetMap()->GetGameObject(movementInfo.t_guid))
                 {
-                    if (DynamicTransport* transport = dynTransport->ToDynamicTransport())
+                    DynamicTransport* transport = dynTransport->ToDynamicTransport();
+                    if (dynTransport->IsDynamicTransport() && transport != NULL)
                     {
                         foundNewTransport = true;
                         plMover->m_transport = transport;
