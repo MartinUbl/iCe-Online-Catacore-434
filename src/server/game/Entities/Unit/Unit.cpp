@@ -11150,7 +11150,7 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
         return false;
 
     // dead units can neither attack nor be attacked
-    if (!IsAlive() || !victim->IsInWorld() || !victim->IsAlive())
+    if (!IsInWorld() || !IsAlive() || !victim->IsInWorld() || !victim->IsAlive())
         return false;
 
     // player cannot attack in mount state
