@@ -3348,7 +3348,6 @@ bool BattlegroundMap::CanEnter(Player * player)
     if (player->GetMapRef().getTarget() == this)
     {
         sLog->outError("BGMap::CanEnter - player %u is already in map!", player->GetGUIDLow());
-        ASSERT(false);
         return false;
     }
 
