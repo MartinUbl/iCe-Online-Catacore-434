@@ -313,8 +313,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         if (go->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT)
             stopFrameCount = go->GetGOValue()->Transport.StopFrames->size();
 
-    uint32 transportTime2 = 0;
-    bool hasTransportTime2 = false;
+    uint32 transportTime2 = (ToUnit() ? ToUnit()->m_movementInfo.t_time2 : 0);
+    bool hasTransportTime2 = (transportTime2 != 0);
 
     uint32 transportVehicleId = (ToUnit() ? ToUnit()->m_movementInfo.t_vehicleId : 0);
     bool hasTransportVehicleId = (transportVehicleId != 0);
@@ -371,7 +371,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             data->WriteBit(transGuid[4]);
             data->WriteBit(transGuid[0]);
             data->WriteBit(transGuid[6]);
-            data->WriteBit(hasTransportVehicleId);                                                  // Has transport time 3
+            data->WriteBit(hasTransportVehicleId);                                              // Has transport time 3
             data->WriteBit(transGuid[7]);
             data->WriteBit(transGuid[5]);
             data->WriteBit(transGuid[3]);
@@ -465,9 +465,9 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         {
             if (movementFlags & MOVEMENTFLAG_FALLING)
             {
-                *data << float(self->m_movementInfo.j_cosAngle);
                 *data << float(self->m_movementInfo.j_xyspeed);
                 *data << float(self->m_movementInfo.j_sinAngle);
+                *data << float(self->m_movementInfo.j_cosAngle);
             }
 
             *data << uint32(self->m_movementInfo.fallTime);
@@ -1493,6 +1493,16 @@ bool Object::PrintIndexError(uint32 index, bool set) const
 
     // ASSERT must fail after function call
     return false;
+}
+
+void WorldObject::SetTransport(TransportBase* t)
+{
+    m_transport = t;
+
+    /*if (t != NULL)
+        m_updateFlag |= UPDATEFLAG_GO_TRANSPORT_POSITION;
+    else
+        m_updateFlag &= ~UPDATEFLAG_GO_TRANSPORT_POSITION;*/
 }
 
 bool Position::HasInLine(const Unit * const target, float distance, float width) const

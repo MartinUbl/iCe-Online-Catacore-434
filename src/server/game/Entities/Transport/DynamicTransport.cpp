@@ -37,7 +37,7 @@ bool DynamicTransport::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 p
     // goinfo is always existant if parent Create method returned true
     GameObjectInfo const* goinfo = sObjectMgr->GetGameObjectInfo(name_id);
 
-    m_updateFlag = (m_updateFlag | UPDATEFLAG_TRANSPORT) & ~UPDATEFLAG_GO_TRANSPORT_POSITION;
+    m_updateFlag |= UPDATEFLAG_TRANSPORT;
 
     // insert as many frames, as possible
     // if DB data holds stopFrame1 as 0, and stopFrame2 as higher number, insert both
