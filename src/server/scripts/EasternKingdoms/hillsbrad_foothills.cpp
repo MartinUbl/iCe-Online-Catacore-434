@@ -102,17 +102,20 @@ public:
 
         skeletal_steedAI(Creature* creature) : VehicleAI(creature) {}
 
-        void Reset()
+        void Reset() override
         {
-            npc_questGiver = NULL;
+            npc_questGiver = nullptr;
 
             DoCast(me, SPELL_ROOT, true);
 
-            plPassenger = NULL;
+            plPassenger = nullptr;
         }
 
-        void PassengerBoarded(Unit* player, int8 /*seat*/, bool apply)
+        void PassengerBoarded(Unit* player, int8 /*seat*/, bool apply) override
         {
+            if (player->GetTypeId() != TYPEID_PLAYER)
+                return;
+
             if (apply)
             {
                 if (player->ToPlayer()->GetQuestStatus(QUEST_ID) != QUEST_STATUS_INCOMPLETE)
@@ -126,7 +129,7 @@ public:
 
                 plPassenger = player->ToPlayer();
 
-                npc_questGiver = NULL;
+                npc_questGiver = nullptr;
                 npc_questGiver = me->FindNearestCreature(NPC_QUEST_GIVER, 30, true);
 
                 if (!npc_questGiver)
@@ -137,29 +140,29 @@ public:
             }
             else
             {
-                plPassenger = NULL;
+                plPassenger = nullptr;
 
                 player->RemoveAura(SPELL_QUEST_GIVER_BUFF);
 
-                Creature* dumass = me->FindNearestCreature(NPC_DUMASS, 100, true);
-                if (dumass)
+                if(Creature* dumass = me->FindNearestCreature(NPC_DUMASS, 100, true))
                     dumass->DespawnOrUnsummon();
 
-                Creature* orkus = me->FindNearestCreature(NPC_DUMASS, 100, true);
-                if (orkus)
+                if(Creature* orkus = me->FindNearestCreature(NPC_DUMASS, 100, true))
                     orkus->DespawnOrUnsummon();
 
-                Creature* johny = me->FindNearestCreature(NPC_DUMASS, 100, true);
-                if (johny)
+                if (Creature* johny = me->FindNearestCreature(NPC_DUMASS, 100, true))
                     johny->DespawnOrUnsummon();
 
                 _events.Reset();
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             _events.Update(diff);
+
+            if (!plPassenger || !npc_questGiver)
+                return;
 
             while (uint32 eventId = _events.ExecuteEvent())
             {
@@ -205,6 +208,9 @@ public:
 
         void GetReadyToSpawnJohny()
         {
+            if (!plPassenger || !npc_questGiver)
+                return;
+
             std::stringstream ss;
             ss << "Ah, crap. You're on your own with this one, " << plPassenger->GetName() << ".";
             npc_questGiver->MonsterSay(ss.str().c_str(), LANG_UNIVERSAL, 0);
@@ -268,12 +274,12 @@ public:
     {
         custom_dumassAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset()
+        void Reset() override
         {
             _events.ScheduleEvent(EVENT_DUMASS_MOVE_1, 1000);
         }
 
-        void IsSummonedBy(Unit* owner)
+        void IsSummonedBy(Unit* owner) override
         {
             if (owner->GetTypeId() != TYPEID_UNIT)
                 return;
@@ -281,7 +287,7 @@ public:
             myOwner = owner;
         }
 
-        void MovementInform(uint32 type, uint32 id)
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -313,7 +319,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             _events.Update(diff);
 
@@ -354,13 +360,11 @@ public:
                     break;
 
                 case EVENT_DUMASS_MOVE_5:
-                    Creature* npc_questGiver = me->FindNearestCreature(NPC_QUEST_GIVER, 30, true);
-
-                    if (npc_questGiver)
+                    if(Creature* npc_questGiver = me->FindNearestCreature(NPC_QUEST_GIVER, 30, true))
                         npc_questGiver->MonsterSay("These new Forsaken tend to be a little... um... stupid. It usually takes awhile for them to acclimate.", LANG_UNIVERSAL, 0);
 
-                    //pPlayer->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
-                    pPlayer->CastSpell(me, SPELL_DUMMY_QUESTCOMPLETE, true);
+                    if (pPlayer)
+                        pPlayer->CastSpell(me, SPELL_DUMMY_QUESTCOMPLETE, true);
 
                     me->GetMotionMaster()->MovePoint(5, -586.961f, 381.282f, 76.259f);
                     break;
@@ -397,7 +401,7 @@ class custom_orkus : public CreatureScript
 public:
     custom_orkus() : CreatureScript("custom_orkus_script") { }
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (player->GetQuestStatus(QUEST_ID) != QUEST_STATUS_INCOMPLETE)
             return false;
@@ -410,7 +414,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 actions)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 actions) override
     {
         player->PlayerTalkClass->ClearMenus();
         if (sender != GOSSIP_SENDER_MAIN)
@@ -443,10 +447,8 @@ public:
     {
         custom_orkusAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset()
+        void Reset() override
         {
-            //me->SetDisableGravity(true);
-            //me->SetCanFly(true);
             me->SetFlying(true);
             me->SetUnitMovementFlags(MOVEMENTFLAG_FLYING);
 
@@ -454,7 +456,7 @@ public:
             _events.ScheduleEvent(EVENT_ORKUS_YELL, 500);
         }
 
-        void IsSummonedBy(Unit* owner)
+        void IsSummonedBy(Unit* owner) override
         {
             if (owner->GetTypeId() != TYPEID_UNIT)
                 return;
@@ -463,7 +465,7 @@ public:
         }
 
 
-        void MovementInform(uint32 type, uint32 id)
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -490,7 +492,7 @@ public:
         }
 
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             _events.Update(diff);
 
@@ -513,7 +515,6 @@ public:
 
                 case EVENT_ORKUS_MOVE_3:
                     me->GetMotionMaster()->MovePoint(3, -579.539f, 425.550f, 79.755f);
-                    //me->SetDisableGravity(false);
                     me->SetFlying(false);
                     break;
 
@@ -540,15 +541,11 @@ public:
                     break;
 
                 case EVENT_ORKUS_MOVE_4:
-                    //me->SetDisableGravity(true);
                     me->SetFlying(true);
                     me->GetMotionMaster()->MovePoint(4, -589.408f, 384.678f, 94.005f);
 
-                    Creature* npc_questGiver = me->FindNearestCreature(NPC_QUEST_GIVER, 30, true);
-
-                    if (npc_questGiver)
+                    if (Creature* npc_questGiver = me->FindNearestCreature(NPC_QUEST_GIVER, 30, true))
                         npc_questGiver->MonsterSay("Here's to hoping he never returns. Maybe he'll drown?", LANG_UNIVERSAL, 0);
-
                     break;
                 }
             }
@@ -577,7 +574,7 @@ class custom_johny : public CreatureScript
 public:
     custom_johny() : CreatureScript("custom_johny_script") { }
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (player->GetQuestStatus(QUEST_ID) != QUEST_STATUS_INCOMPLETE)
             return false;
@@ -590,7 +587,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 actions)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 actions) override
     {
         player->PlayerTalkClass->ClearMenus();
         if (sender != GOSSIP_SENDER_MAIN)
@@ -614,7 +611,6 @@ public:
             (CAST_AI(custom_johny::custom_johnyAI, creature->AI()))->Set_pPlayer(player);
             break;
         }
-
         return true;
     }
 
@@ -622,15 +618,15 @@ public:
     {
         custom_johnyAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset()
+        void Reset() override
         {
             DoCast(me, SPELL_CELESTIAL_STEED, true);
             me->SetSpeed(MOVE_RUN, 1.0f, true);
             _events.ScheduleEvent(EVENT_JOHNY_MOVE_1, 0);
         }
 
-        void IsSummonedBy(Unit* owner)
-        {
+        void IsSummonedBy(Unit* owner) override
+        { 
             if (owner->GetTypeId() != TYPEID_UNIT)
                 return;
 
@@ -638,7 +634,7 @@ public:
         }
 
 
-        void MovementInform(uint32 type, uint32 id)
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -670,9 +666,12 @@ public:
                 break;
 
             case 7:
-                pPlayer->RemoveAura(SPELL_QUEST_GIVER_BUFF);
+                if(pPlayer)
+                {
+                    pPlayer->RemoveAura(SPELL_QUEST_GIVER_BUFF);
+                    pPlayer->ExitVehicle();
+                }
                 _events.ScheduleEvent(EVENT_JOHNY_MOVE_8, 0);
-                pPlayer->ExitVehicle();
                 break;
 
             case 8:
@@ -682,7 +681,7 @@ public:
         }
 
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             _events.Update(diff);
 
@@ -734,8 +733,8 @@ public:
                     break;
 
                 case EVENT_JOHNY_MOVE_7:
-                    //pPlayer->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
-                    pPlayer->CastSpell(me, SPELL_DUMMY_QUESTCOMPLETE, true);
+                    if (pPlayer)
+                        pPlayer->CastSpell(me, SPELL_DUMMY_QUESTCOMPLETE, true);
                     me->GetMotionMaster()->MovePoint(7, -584.784f, 405.342f, 78.210f);
                     break;
 
