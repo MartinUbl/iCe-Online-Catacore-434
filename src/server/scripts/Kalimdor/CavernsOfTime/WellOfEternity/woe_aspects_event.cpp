@@ -628,7 +628,7 @@ public:
                 if (m_number == 0)
                 if (InstanceScript * pInstance = me->GetInstanceScript())
                 if (Creature * pIllidanPrelude = ObjectAccessor::GetCreature(*me, pInstance->GetData64(ENTRY_ILLIDAN_PRELUDE)))
-                    pIllidanPrelude->AI()->DoAction(ACTION_ILIDAN_PRELUDE_EVENT_START);
+                    pIllidanPrelude->AI()->DoAction(ACTION_ILLIDAN_PRELUDE_EVENT_START);
             }
         }
 

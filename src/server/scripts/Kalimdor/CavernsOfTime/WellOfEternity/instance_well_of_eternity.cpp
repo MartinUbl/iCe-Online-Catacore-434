@@ -25,6 +25,9 @@
 
 void INST_WOE_SCRIPT::Initialize()
 {
+    demonPulseDone = false;
+    abyssalSlained = false;
+
     illidanGUID = 0;
     perotharnGUID = 0;
     queenGUID = 0;
@@ -43,6 +46,7 @@ void INST_WOE_SCRIPT::Initialize()
     connectors.clear();
     guardians.clear();
     crystalGUIDS.clear();
+    doomguards.clear();
 
     GetCorrUiEncounter();
 }
@@ -119,6 +123,9 @@ void INST_WOE_SCRIPT::OnCreatureCreate(Creature* pCreature, bool add)
             break;
         case ENTRY_ILLIDAN_PRELUDE:
             illidanPreludeEntry = pCreature->GetGUID();
+            break;
+        case ENTRY_DOOMGUARD_ANNIHILATOR:
+            doomguards.push_back(pCreature->GetGUID());
             break;
     }
 }
@@ -367,6 +374,22 @@ void INST_WOE_SCRIPT::Update(uint32 diff)
         legionTimer = 1500;
     }
     else legionTimer -= diff;
+}
+
+void INST_WOE_SCRIPT::CallDoomGuardsForHelp(Unit * victim)
+{
+    for (std::list<uint64>::iterator itr = doomguards.begin(); itr != doomguards.end(); ++itr)
+    {
+        if (Creature * doomGuard = ObjectAccessor::GetObjectInMap(*itr, this->instance, (Creature*)NULL))
+        {
+            if (doomGuard->isDead())
+                continue;
+
+            doomGuard->AddThreat(victim, 10.0f);
+            doomGuard->SetInCombatWith(victim);
+            victim->SetInCombatWith(doomGuard);
+        }
+    }
 }
 
 uint32* INST_WOE_SCRIPT::GetCorrUiEncounter()

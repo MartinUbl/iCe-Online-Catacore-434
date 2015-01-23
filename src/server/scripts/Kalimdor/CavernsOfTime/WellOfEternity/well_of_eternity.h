@@ -103,6 +103,7 @@ enum mannorothEntries
     ENTRY_DOOMGUARD_ANNIHILATOR = 55519,
     ENTRY_ABYSSAL_DOOMBRINGER = 55510,
     ENTRY_HIGHGUARD_ELITE = 55426,
+    ENTRY_SHADOWBAT_HIGHGUARD = 55453,
 };
 
 enum CrystalOrientations
@@ -171,7 +172,9 @@ enum Actions
     ACTION_ILLIDAN_CREATE_VEHICLE,
     ACTION_ILLIDAN_REMOVE_VEHICLE,
     ACTION_AFTER_PEROTHARN_DEATH,
-    ACTION_ILIDAN_PRELUDE_EVENT_START
+    ACTION_ILLIDAN_PRELUDE_EVENT_START,
+    ACTION_ILLIDAN_PRELUDE_EVENT_CONTINUE,
+    ACTION_ILLIDAN_PRECOMBAT_QUOTES_START,
 };
 
 enum SpecialActions
@@ -389,10 +392,13 @@ public:
         uint32 deffendersKilled;
 
         std::string saveData;
+        // Perotharn intro
         std::list<CONNECTOR_INFO> connectors;
         std::list<uint64> guardians;
         std::list<uint64> crystalGUIDS;
         std::list<uint64> illidanVictims;
+        // Mannoroth intro
+        std::list<uint64> doomguards;
 
         uint32 crystals[MAX_CRYSTALS];
         IllidanSteps illidanStep;
@@ -408,8 +414,10 @@ public:
         virtual uint32* GetCorrUiEncounter();
 
         public:
-
-            uint32 crystalsRemaining; // TODO: move this to private
+            //  Fuck it -> public
+            uint32 crystalsRemaining;
+            bool demonPulseDone;
+            bool abyssalSlained;
 
             uint32 GetData(uint32 DataId);
             void SetData(uint32 type, uint32 data);
@@ -426,6 +434,8 @@ public:
             void CrystalDestroyed(uint32 crystalXCoord);
             bool IsPortalClosing(DemonDirection dir);
             Creature * GetGuardianByDirection(uint32 direction);
+
+            void CallDoomGuardsForHelp(Unit * victim);
     };
 
     InstanceScript* GetInstanceScript(InstanceMap* pMap) const

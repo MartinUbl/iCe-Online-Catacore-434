@@ -4770,10 +4770,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->MaxAffectedTargets = 1;
             //spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
             break;
-        case 108759:
+        case 108759: // Evil Dragon Soul Beam (Deathwing)
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
             break;
-
+        case 103918: // Blessing of Elune
+        case 103954: // Waters of Eternity
+            spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_AREA_ALLY_SRC;
+            break;
 /********************-------- WELL OF ETERNITY END -----------********************/
 
         // Heart of the Crusader
