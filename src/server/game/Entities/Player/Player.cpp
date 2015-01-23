@@ -55,6 +55,7 @@
 #include "Pet.h"
 #include "Util.h"
 #include "Transport.h"
+#include "DynamicTransport.h"
 #include "Weather.h"
 #include "Battleground.h"
 #include "BattlegroundAV.h"
@@ -18037,37 +18038,44 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     // currently we do not support transport in bg
     else if (transGUID)
     {
-        m_movementInfo.t_guid = MAKE_NEW_GUID(transGUID, 0, HIGHGUID_MO_TRANSPORT);
-        m_movementInfo.t_pos.Relocate(fields[26].GetFloat(), fields[27].GetFloat(), fields[28].GetFloat(), fields[29].GetFloat());
+        GameObject* trans = NULL;
 
-        if (!Trinity::IsValidMapCoord(
-            GetPositionX()+m_movementInfo.t_pos.m_positionX,GetPositionY()+m_movementInfo.t_pos.m_positionY,
-            GetPositionZ()+m_movementInfo.t_pos.m_positionZ,GetOrientation()+m_movementInfo.t_pos.m_orientation) ||
-            // transport size limited
-            m_movementInfo.t_pos.m_positionX > 250 || m_movementInfo.t_pos.m_positionY > 250 || m_movementInfo.t_pos.m_positionZ > 250)
+        if (trans = HashMapHolder<GameObject>::Find(MAKE_NEW_GUID(transGUID, 0, HIGHGUID_MO_TRANSPORT)))
         {
-            sLog->outError("Player (guidlow %d) have invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to bind location.",
-                guid,GetPositionX()+m_movementInfo.t_pos.m_positionX,GetPositionY()+m_movementInfo.t_pos.m_positionY,
-                GetPositionZ()+m_movementInfo.t_pos.m_positionZ,GetOrientation()+m_movementInfo.t_pos.m_orientation);
+            m_movementInfo.t_guid = trans->GetGUID();
+            m_movementInfo.t_pos.Relocate(fields[26].GetFloat(), fields[27].GetFloat(), fields[28].GetFloat(), fields[29].GetFloat());
 
-            RelocateToHomebind();
-        }
-        else
-        {
-            if (GameObject* go = HashMapHolder<GameObject>::Find(m_movementInfo.t_guid))
-                m_transport = go->ToTransport();
-
-            if (m_transport)
+            if (!Trinity::IsValidMapCoord(
+                GetPositionX() + m_movementInfo.t_pos.m_positionX, GetPositionY() + m_movementInfo.t_pos.m_positionY,
+                GetPositionZ() + m_movementInfo.t_pos.m_positionZ, GetOrientation() + m_movementInfo.t_pos.m_orientation) ||
+                // transport size limited
+                m_movementInfo.t_pos.m_positionX > 250 || m_movementInfo.t_pos.m_positionY > 250 || m_movementInfo.t_pos.m_positionZ > 250)
             {
-                m_transport->AddPassenger(this);
-                mapId = m_transport->ToWorldObject()->GetMapId();
+                sLog->outError("Player (guidlow %d) have invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to bind location.",
+                    guid, GetPositionX() + m_movementInfo.t_pos.m_positionX, GetPositionY() + m_movementInfo.t_pos.m_positionY,
+                    GetPositionZ() + m_movementInfo.t_pos.m_positionZ, GetOrientation() + m_movementInfo.t_pos.m_orientation);
+
+                RelocateToHomebind();
             }
             else
             {
-                sLog->outError("Player (guidlow %d) have problems with transport guid (%u). Teleport to bind location.",
-                    guid,transGUID);
+                m_transport = NULL;
 
-                RelocateToHomebind();
+                if (trans->ToTransport())
+                    m_transport = trans->ToTransport();
+
+                if (m_transport)
+                {
+                    m_transport->AddPassenger(this);
+                    mapId = m_transport->ToWorldObject()->GetMapId();
+                }
+                else
+                {
+                    sLog->outError("Player (guidlow %d) have problems with transport guid (%u). Teleport to bind location.",
+                        guid, transGUID);
+
+                    RelocateToHomebind();
+                }
             }
         }
     }
@@ -20405,7 +20413,9 @@ void Player::SaveToDB()
     ss << "trans_o = " << finiteAlways(m_movementInfo.t_pos.GetOrientation()) << ", ";
 
     ss << "transguid = ";
-    if (m_transport && m_transport->ToGenericTransport())
+
+    // this would be accepting Transport and DynamicTransport classes (GAMEOBJECT_TYPE_MO_TRANSPORT and GAMEOBJECT_TYPE_TRANSPORT types)
+    if (m_transport && m_transport->ToGameObject())
         ss << m_transport->ToWorldObject()->GetGUIDLow();
     else
         ss << "0";
