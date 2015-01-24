@@ -2532,7 +2532,8 @@ void Map::DelayedUpdate(const uint32 t_diff)
 
 void Map::AddObjectToRemoveList(WorldObject *obj)
 {
-    ASSERT(obj->GetMapId() == GetId() && obj->GetInstanceId() == GetInstanceId());
+    if (obj->GetMapId() != GetId() || obj->GetInstanceId() != GetInstanceId())
+        return;
 
     obj->CleanupsBeforeDelete(false);                            // remove or simplify at least cross referenced links
 
