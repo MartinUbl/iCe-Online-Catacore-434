@@ -204,15 +204,26 @@ struct GameObjectInfo
         {
             int32 stopFrame1;                               //0
             uint32 startOpen;                               //1
-            uint32 autoCloseTime;                           //2 secs till autoclose = autoCloseTime / 0x10000
-            uint32 pause1EventID;                           //3
-            uint32 pause2EventID;                           //4
+            uint32 autoCloseTime;                           //2 seconds till autoclose = autoCloseTime / 0x10000
+            uint32 stopFrame0EventID;                       //3 event at frame 0 (default, always present)
+            uint32 stopFrame1EventID;                       //4 event at stopframe 1, etc..
             uint32 mapId;                                   //5
             int32 stopFrame2;                               //6
-            uint32 unknown;                                 //7
+            uint32 stopFrame2EventID;                       //7
             int32 stopFrame3;                               //8
-            uint32 unknown2;                                //9
+            uint32 stopFrame3EventID;                       //9
             int32 stopFrame4;                               //10
+            uint32 stopFrame4EventID;                       //11
+            int32 stopFrame5;                               //12
+            uint32 stopFrame5EventID;                       //13
+            int32 stopFrame6;                               //14
+            uint32 stopFrame6EventID;                       //15
+            int32 stopFrame7;                               //16
+            uint32 stopFrame7EventID;                       //17
+            int32 stopFrame8;                               //18
+            uint32 stopFrame8EventID;                       //19
+            int32 stopFrame9;                               //20
+            uint32 stopFrame9EventID;                       //21
         } transport;
         //12 GAMEOBJECT_TYPE_AREADAMAGE
         struct
@@ -549,7 +560,9 @@ union GameObjectValue
         TransportAnimation const* AnimationInfo;
         uint32 StateChangeStartProgress;
         std::vector<uint32>* StopFrames;
+        uint32 MaxStopFrameTime;
         uint32 CurrentSeg;
+        uint8 OldVisualState;
         uint8 VisualState;
     } Transport;
     //29 GAMEOBJECT_TYPE_CAPTURE_POINT

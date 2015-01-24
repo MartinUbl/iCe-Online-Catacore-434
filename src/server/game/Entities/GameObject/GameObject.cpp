@@ -48,6 +48,7 @@
 #include "GameObjectModel.h"
 #include "DynamicTree.h"
 #include "Transport.h"
+#include "DynamicTransport.h"
 
 GameObject::GameObject() : WorldObject(), m_model(NULL), m_goValue(new GameObjectValue), m_AI(NULL)
 {
@@ -263,6 +264,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
             m_goValue->Transport.PathProgress = getMSTime();
             m_goValue->Transport.StateChangeStartProgress = 0;
             m_goValue->Transport.VisualState = 0;
+            m_goValue->Transport.OldVisualState = 0;
+            m_goValue->Transport.MaxStopFrameTime = 1; // we will divide by this value, so rather 1
             m_goValue->Transport.CurrentSeg = 0;
             m_goValue->Transport.StateChangeTime = 0;
             m_goValue->Transport.StopFrames = new std::vector<uint32>();
@@ -2129,6 +2132,8 @@ void GameObject::SetTransportState(GOState state, uint32 stopFrame /*= 0*/, uint
             if (m_goValue->Transport.StopFrames->size() > 0 && (int32) m_goValue->Transport.StopFrames->size() > GetGoState() - GO_STATE_TRANSPORT_STOPPED)
                 m_goValue->Transport.PathProgress += m_goValue->Transport.StopFrames->at(GetGoState() - GO_STATE_TRANSPORT_STOPPED);
 
+            m_goValue->Transport.OldVisualState = m_goValue->Transport.VisualState;
+            ToDynamicTransport()->ResetPositionTimer();
             m_goValue->Transport.VisualState = (uint8)(GetGoState() - GO_STATE_TRANSPORT_STOPPED);
         }
         m_goValue->Transport.StateChangeTime = 0;
@@ -2145,6 +2150,9 @@ void GameObject::SetTransportState(GOState state, uint32 stopFrame /*= 0*/, uint
                     m_goValue->Transport.StateChangeTime = abs((int32)m_goValue->Transport.StopFrames->at(stopFrame) - (int32)m_goValue->Transport.StopFrames->at(m_goValue->Transport.VisualState));
                 else
                     m_goValue->Transport.StateChangeTime = stateChangeTime;
+
+                ToDynamicTransport()->ResetPositionTimer();
+                m_goValue->Transport.OldVisualState = m_goValue->Transport.VisualState;
                 m_goValue->Transport.VisualState = (uint8)stopFrame;
                 SetGoState(GOState(GO_STATE_TRANSPORT_STOPPED + stopFrame));
 

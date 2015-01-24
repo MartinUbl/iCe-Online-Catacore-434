@@ -39,28 +39,34 @@ bool DynamicTransport::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 p
 
     m_updateFlag |= UPDATEFLAG_TRANSPORT;
 
-    // insert as many frames, as possible
-    // if DB data holds stopFrame1 as 0, and stopFrame2 as higher number, insert both
-    // incrementally add stopframes to always have the count of highest frame
-    uint32 framesPresent = 0;
-    if (goinfo->transport.stopFrame4 > 0)
-        framesPresent = 4;
-    else if (goinfo->transport.stopFrame3 > 0)
-        framesPresent = 3;
-    else if (goinfo->transport.stopFrame2 > 0)
-        framesPresent = 2;
-
-    if (goinfo->transport.stopFrame1 > 0 || framesPresent > 1)
+    // insert first stopframe, if needed
+    if (goinfo->transport.stopFrame1 > 0)
+    {
         m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame1);
-    if (goinfo->transport.stopFrame2 > 0 || framesPresent > 2)
-        m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame2);
-    if (goinfo->transport.stopFrame3 > 0 || framesPresent > 3)
-        m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame3);
-    if (goinfo->transport.stopFrame4 > 0 || framesPresent > 4)
-        m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame4);
+        m_goValue->Transport.MaxStopFrameTime = goinfo->transport.stopFrame1;
+    }
+
+    // go through other stopframe fields, they are defined like this
+    // - second stopframe is at position 6, and each next stopframe is +2 from current, up to 20 (including)
+    for (uint32 i = 6; i <= 20; i += 2)
+    {
+        if (goinfo->raw.data[i] > 0)
+        {
+            // stopframes has to be in ascending order, otherwise the client would not handle it
+            if (goinfo->raw.data[i] <= m_goValue->Transport.MaxStopFrameTime)
+            {
+                sLog->outError("DynamicTransport::Create: error when creating dynamic transport object (entry %u) - stopframes are not in ascending order!", goinfo->id);
+                break;
+            }
+
+            m_goValue->Transport.StopFrames->push_back(goinfo->raw.data[i]);
+            m_goValue->Transport.MaxStopFrameTime = goinfo->raw.data[i];
+        }
+        else
+            break;
+    }
 
     // the nullth frame should always be here
-    // TODO: maybe the same for the very last frame? maybe not neccessary
     if (!m_goValue->Transport.StopFrames->empty())
     {
         bool nullPresent = false;
@@ -129,6 +135,8 @@ void DynamicTransport::Update(uint32 p_time)
                 // calculate how long will it take, save progress start time and set visual state
                 m_goValue->Transport.StateChangeTime = abs((int32)m_goValue->Transport.StopFrames->at(visualStateAfter) - (int32)m_goValue->Transport.StopFrames->at(m_goValue->Transport.VisualState));
                 m_goValue->Transport.StateChangeStartProgress = m_goValue->Transport.PathProgress;
+                ResetPositionTimer();
+                m_goValue->Transport.OldVisualState = m_goValue->Transport.VisualState;
                 m_goValue->Transport.VisualState = visualStateAfter;
 
                 // this forces client update
@@ -139,34 +147,89 @@ void DynamicTransport::Update(uint32 p_time)
     }
 
     // if the transport is moving (not reached destination point yet), then we should move it by animation frames defined in DBC
-    if (m_goValue->Transport.StateChangeTime && getMSTimeDiff(m_goValue->Transport.StateChangeStartProgress, getMSTime()) < m_goValue->Transport.StateChangeTime)
+    if (m_goValue->Transport.StateChangeTime && (getMSTimeDiff(m_goValue->Transport.StateChangeStartProgress, m_goValue->Transport.PathProgress) < m_goValue->Transport.StateChangeTime ||
+        m_goValue->Transport.OldVisualState != m_goValue->Transport.VisualState))
     {
+        bool movingToNext = m_goValue->Transport.OldVisualState < m_goValue->Transport.VisualState;
+
+        float progress = ((float)getMSTimeDiff(m_goValue->Transport.StateChangeStartProgress, m_goValue->Transport.PathProgress)) / ((float)(m_goValue->Transport.StateChangeTime));
+        if (progress > 1.0f)
+            progress = 1.0f;
+
         // this evaluates time segment the transport is currently in, and retrieve specific node
-        uint32 timer = (m_goValue->Transport.PathProgress - m_goValue->Transport.StateChangeStartProgress) % m_goValue->Transport.AnimationInfo->TotalTime;
-        TransportAnimationEntry const* node = m_goValue->Transport.AnimationInfo->GetAnimNode(timer);
+        uint32 timer = m_goValue->Transport.StopFrames->at(m_goValue->Transport.OldVisualState) +
+            progress * ((float)m_goValue->Transport.StopFrames->at(m_goValue->Transport.VisualState) - (float)m_goValue->Transport.StopFrames->at(m_goValue->Transport.OldVisualState));
 
-        //if we moved to next node
-        if (node && m_goValue->Transport.CurrentSeg != node->TimeSeg)
+        TransportAnimationEntry const* node = m_goValue->Transport.AnimationInfo->GetAnimNode(timer, movingToNext);
+
+        // if we moved to next node
+        if (node)
         {
-            m_goValue->Transport.CurrentSeg = node->TimeSeg;
+            // reached next node
+            if (m_goValue->Transport.CurrentSeg != node->TimeSeg)
+            {
+                m_goValue->Transport.CurrentSeg = node->TimeSeg;
 
-            // evaluate position
-            // note we are not including GO orientation in those fields - we should not, the moving process is independent
-            G3D::Quat rotation = m_goValue->Transport.AnimationInfo->GetAnimRotation(timer);
-            G3D::Vector3 pos = rotation.toRotationMatrix()
-                * G3D::Vector3(-node->X, -node->Y, node->Z);
-            // also note the negative coordinates here - Blizzard decided to save "return offset" which would, by subtraction, help us retrieve
-            // the original position. But since we use different model (stationary position plus offset instead of dynamic position minus offset),
-            // we have to consider it negative. This applies only to X and Y coordinates, not the Z one
+                // evaluate position
+                // note we are not including GO orientation in those fields - we should not, the moving process is independent
+                G3D::Quat rotation = m_goValue->Transport.AnimationInfo->GetAnimRotation(timer, movingToNext);
+                G3D::Vector3 pos = rotation.toRotationMatrix() * G3D::Vector3(-node->X, -node->Y, node->Z);
+                // also note the negative coordinates here - Blizzard decided to save "return offset" which would, by subtraction, help us retrieve
+                // the original position. But since we use different model (stationary position plus offset instead of dynamic position minus offset),
+                // we have to consider it negative. This applies only to X and Y coordinates, not the Z one
 
-            pos += G3D::Vector3(m_stationaryPosition.GetPositionX(), m_stationaryPosition.GetPositionY(), m_stationaryPosition.GetPositionZ());
+                pos += G3D::Vector3(m_stationaryPosition.GetPositionX(), m_stationaryPosition.GetPositionY(), m_stationaryPosition.GetPositionZ());
 
-            // this will cause also grid/cell relocation if needed
-            GetMap()->GameObjectRelocation(this, pos.x, pos.y, pos.z, GetOrientation());
+                // this will cause also grid/cell relocation if needed
+                GetMap()->GameObjectRelocation(this, pos.x, pos.y, pos.z, GetOrientation());
 
-            UpdatePosition(pos.x, pos.y, pos.z, GetOrientation());
+                UpdatePosition(pos.x, pos.y, pos.z, GetOrientation());
+            }
+            else // not reached next node, interpolate movement between current and next node
+            {
+                if (positionInterpolateTimer <= p_time)
+                {
+                    TransportAnimationEntry const* nextnode = m_goValue->Transport.AnimationInfo->GetAnimNode(m_goValue->Transport.CurrentSeg + (movingToNext ? 1 : -1), !movingToNext);
+
+                    G3D::Quat oldrotation = m_goValue->Transport.AnimationInfo->GetAnimRotation(timer, movingToNext);
+                    G3D::Vector3 oldpos = oldrotation.toRotationMatrix() * G3D::Vector3(-node->X, -node->Y, node->Z);
+
+                    oldpos += G3D::Vector3(m_stationaryPosition.GetPositionX(), m_stationaryPosition.GetPositionY(), m_stationaryPosition.GetPositionZ());
+
+                    G3D::Quat newrotation = m_goValue->Transport.AnimationInfo->GetAnimRotation(m_goValue->Transport.CurrentSeg + (movingToNext ? 1 : -1), !movingToNext);
+                    G3D::Vector3 newpos = newrotation.toRotationMatrix() * G3D::Vector3(-nextnode->X, -nextnode->Y, nextnode->Z);
+
+                    newpos += G3D::Vector3(m_stationaryPosition.GetPositionX(), m_stationaryPosition.GetPositionY(), m_stationaryPosition.GetPositionZ());
+
+                    // use linear interpolation between points, since we can afford it - client does the same
+
+                    G3D::Vector3 interpolated(oldpos.x + (newpos.x - oldpos.x)*progress, oldpos.y + (newpos.y - oldpos.y)*progress, oldpos.z + (newpos.z - oldpos.z)*progress);
+
+                    // this will cause also grid/cell relocation if needed
+                    GetMap()->GameObjectRelocation(this, interpolated.x, interpolated.y, interpolated.z, GetOrientation());
+
+                    UpdatePosition(interpolated.x, interpolated.y, interpolated.z, GetOrientation());
+
+                    ResetPositionTimer();
+                }
+                else
+                    positionInterpolateTimer -= p_time;
+            }
+        }
+
+        // if we reached destination node, set old state to current
+        if (getMSTimeDiff(m_goValue->Transport.StateChangeStartProgress, getMSTime()) >= m_goValue->Transport.StateChangeTime)
+        {
+            m_goValue->Transport.OldVisualState = m_goValue->Transport.VisualState;
+
+            // TODO: maybe some "reached node" event hook?
         }
     }
+}
+
+void DynamicTransport::ResetPositionTimer()
+{
+    positionInterpolateTimer = DYNAMIC_TRANSPORT_INTERPOLATE_TIMER;
 }
 
 bool DynamicTransport::AddPassenger(WorldObject* passenger, int8 seatId, bool byAura)

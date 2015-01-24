@@ -26,6 +26,8 @@
 
 // how often an active dynamic transport changes states - for now 20 seconds, seems to be right
 #define DYNAMIC_TRANSPORT_ACTIVE_TIMESPAN 20000
+// how often do we recalculate passenger positions between frames
+#define DYNAMIC_TRANSPORT_INTERPOLATE_TIMER 500
 
 class DynamicTransport : public GameObject, public TransportBase
 {
@@ -49,11 +51,14 @@ class DynamicTransport : public GameObject, public TransportBase
         float GetStationaryZ() const { return m_stationaryPosition.GetPositionZ(); }
         float GetStationaryO() const { return m_stationaryPosition.GetOrientation(); }
 
+        void ResetPositionTimer();
+
     protected:
 
         void UpdatePassengerPositions(std::set<WorldObject*>& passengers);
 
         std::set<WorldObject*> _passengers;
+        uint32 positionInterpolateTimer;
 };
 
 #endif

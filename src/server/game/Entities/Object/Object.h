@@ -121,6 +121,7 @@ class CreatureAI;
 class ZoneScript;
 class Unit;
 class Transport;
+class TransportBase;
 
 typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
@@ -991,5 +992,18 @@ namespace Trinity
             const bool m_ascending;
     };
 }
+
+struct TransportPositionContainer
+{
+    // default constructor (in case of something missing)
+    TransportPositionContainer() {};
+    // constructor retaining complete information
+    TransportPositionContainer(TransportBase* transbase, Position &pos) : transport(transbase), position(pos) {  };
+
+    // transport to be wrapped
+    TransportBase* transport;
+    // transport offset position
+    Position position;
+};
 
 #endif

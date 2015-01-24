@@ -90,8 +90,8 @@ struct TransportAnimation
     TransportPathRotationContainer Rotations;
     uint32 TotalTime;
 
-    TransportAnimationEntry const* GetAnimNode(uint32 time) const;
-    G3D::Quat GetAnimRotation(uint32 time) const;
+    TransportAnimationEntry const* GetAnimNode(uint32 time, bool next = true) const;
+    G3D::Quat GetAnimRotation(uint32 time, bool next = true) const;
 };
 
 typedef std::map<uint32, TransportAnimation> TransportAnimationContainer;

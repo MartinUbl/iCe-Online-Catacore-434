@@ -1498,11 +1498,6 @@ bool Object::PrintIndexError(uint32 index, bool set) const
 void WorldObject::SetTransport(TransportBase* t)
 {
     m_transport = t;
-
-    /*if (t != NULL)
-        m_updateFlag |= UPDATEFLAG_GO_TRANSPORT_POSITION;
-    else
-        m_updateFlag &= ~UPDATEFLAG_GO_TRANSPORT_POSITION;*/
 }
 
 bool Position::HasInLine(const Unit * const target, float distance, float width) const

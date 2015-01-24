@@ -469,30 +469,55 @@ void TransportMgr::CreateInstanceTransports(Map* map)
         CreateTransport(*itr, 0, map);
 }
 
-TransportAnimationEntry const* TransportAnimation::GetAnimNode(uint32 time) const
+TransportAnimationEntry const* TransportAnimation::GetAnimNode(uint32 time, bool next) const
 {
     if (Path.empty())
         return NULL;
 
-    for (TransportPathContainer::const_reverse_iterator itr2 = Path.rbegin(); itr2 != Path.rend(); ++itr2)
-        if (time >= itr2->first)
-            return itr2->second;
+    // find current or closest next animation frame
+    if (next)
+    {
+        for (TransportPathContainer::const_reverse_iterator itr2 = Path.rbegin(); itr2 != Path.rend(); ++itr2)
+            if (time >= itr2->first)
+                return itr2->second;
+    }
+    else // find current or closest previous animation frame
+    {
+        for (TransportPathContainer::const_iterator itr2 = Path.begin(); itr2 != Path.end(); ++itr2)
+            if (time <= itr2->first)
+                return itr2->second;
+    }
 
     return Path.begin()->second;
 }
 
-G3D::Quat TransportAnimation::GetAnimRotation(uint32 time) const
+G3D::Quat TransportAnimation::GetAnimRotation(uint32 time, bool next) const
 {
     if (Rotations.empty())
         return G3D::Quat(0.0f, 0.0f, 0.0f, 1.0f);
 
     TransportRotationEntry const* rot = Rotations.begin()->second;
-    for (TransportPathRotationContainer::const_reverse_iterator itr2 = Rotations.rbegin(); itr2 != Rotations.rend(); ++itr2)
+    // find current or closest next animation frame
+    if (next)
     {
-        if (time >= itr2->first)
+        for (TransportPathRotationContainer::const_reverse_iterator itr2 = Rotations.rbegin(); itr2 != Rotations.rend(); ++itr2)
         {
-            rot = itr2->second;
-            break;
+            if (time >= itr2->first)
+            {
+                rot = itr2->second;
+                break;
+            }
+        }
+    }
+    else // find current or closest previous animation frame
+    {
+        for (TransportPathRotationContainer::const_iterator itr2 = Rotations.begin(); itr2 != Rotations.end(); ++itr2)
+        {
+            if (time <= itr2->first)
+            {
+                rot = itr2->second;
+                break;
+            }
         }
     }
 
