@@ -18038,9 +18038,9 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     // currently we do not support transport in bg
     else if (transGUID)
     {
-        GameObject* trans = NULL;
+        GameObject* trans = HashMapHolder<GameObject>::Find(MAKE_NEW_GUID(transGUID, 0, HIGHGUID_MO_TRANSPORT));
 
-        if (trans = HashMapHolder<GameObject>::Find(MAKE_NEW_GUID(transGUID, 0, HIGHGUID_MO_TRANSPORT)))
+        if (trans)
         {
             m_movementInfo.t_guid = trans->GetGUID();
             m_movementInfo.t_pos.Relocate(fields[26].GetFloat(), fields[27].GetFloat(), fields[28].GetFloat(), fields[29].GetFloat());
