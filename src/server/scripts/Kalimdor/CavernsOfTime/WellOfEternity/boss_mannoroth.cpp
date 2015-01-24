@@ -20,7 +20,7 @@
 
 #define CAST_WOE_INSTANCE(i)     (dynamic_cast<instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript*>(i))
 
-static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
+/*static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
 {
     source->PlayDirectSound(quote.soundID);
 
@@ -28,7 +28,7 @@ static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
         source->MonsterYell(quote.text, LANG_UNIVERSAL,0,200.0f);
     else
         source->MonsterSay(quote.text, LANG_UNIVERSAL,0,200.0f);
-}
+}*/
 
 enum entries
 {
