@@ -2291,10 +2291,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 // send transfer packets
                 WorldPacket data(SMSG_TRANSFER_PENDING, (4 + 4 + 4));
                 data.WriteBit(0);       // unknown
-                if (m_transport)
+                if (m_transport && m_transport->ToGameObject())
                 {
                     data.WriteBit(1);   // has transport
-                    data << GetMapId() << m_transport->ToWorldObject()->GetEntry();
+                    data << GetMapId() << m_transport->ToGameObject()->GetEntry();
                 }
                 else
                     data.WriteBit(0);   // has transport
@@ -18063,11 +18063,13 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
 
                 if (trans->ToTransport())
                     m_transport = trans->ToTransport();
+                else if (trans->ToDynamicTransport())
+                    m_transport = trans->ToDynamicTransport();
 
                 if (m_transport)
                 {
                     m_transport->AddPassenger(this);
-                    mapId = m_transport->ToWorldObject()->GetMapId();
+                    mapId = m_transport->ToGameObject()->GetMapId();
                 }
                 else
                 {
@@ -20228,8 +20230,8 @@ bool Player::CreateInDB()
     ss << finiteAlways(m_movementInfo.t_pos.GetPositionY()) << ", ";
     ss << finiteAlways(m_movementInfo.t_pos.GetPositionZ()) << ", ";
     ss << finiteAlways(m_movementInfo.t_pos.GetOrientation()) << ", ";
-    if (m_transport && m_transport->ToGenericTransport())
-        ss << m_transport->ToWorldObject()->GetGUIDLow();
+    if (m_transport && m_transport->ToGameObject())
+        ss << m_transport->ToGameObject()->GetGUIDLow();
     else
         ss << "0";
     ss << ", ";
@@ -20416,7 +20418,7 @@ void Player::SaveToDB()
 
     // this would be accepting Transport and DynamicTransport classes (GAMEOBJECT_TYPE_MO_TRANSPORT and GAMEOBJECT_TYPE_TRANSPORT types)
     if (m_transport && m_transport->ToGameObject())
-        ss << m_transport->ToWorldObject()->GetGUIDLow();
+        ss << m_transport->ToGameObject()->GetGUIDLow();
     else
         ss << "0";
     ss << ", ";

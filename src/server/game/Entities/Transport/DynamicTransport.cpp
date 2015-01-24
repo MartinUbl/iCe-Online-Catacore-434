@@ -19,7 +19,7 @@
 #include "gamePCH.h"
 #include "DynamicTransport.h"
 
-DynamicTransport::DynamicTransport() : GameObject(), TransportBase(TRANSPORT_TYPE_DYNAMIC, this)
+DynamicTransport::DynamicTransport() : GameObject(), TransportBase(TRANSPORT_TYPE_DYNAMIC)
 {
     //
 }

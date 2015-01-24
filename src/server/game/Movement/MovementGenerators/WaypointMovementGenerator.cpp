@@ -117,9 +117,10 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
                 creature->SetHomePosition(x, y, z, o);
             else
             {
-                if (TransportBase* trans = creature->GetTransport())
+                TransportBase* trans = creature->GetTransport();
+                if (trans && trans->ToGameObject())
                 {
-                    o -= trans->ToWorldObject()->GetOrientation();
+                    o -= trans->ToGameObject()->GetOrientation();
                     creature->SetTransportHomePosition(x, y, z, o);
                     trans->CalculatePassengerPosition(x, y, z, &o);
                     creature->SetHomePosition(x, y, z, o);

@@ -31,7 +31,7 @@
 #include "MapReference.h"
 #include "Player.h"
 
-Transport::Transport() : GameObject(), TransportBase(TRANSPORT_TYPE_GENERIC, this),
+Transport::Transport() : GameObject(), TransportBase(TRANSPORT_TYPE_GENERIC),
 _transportInfo(NULL), _isMoving(true), _pendingStop(false)
 {
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_LOWGUID | UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_ROTATION);

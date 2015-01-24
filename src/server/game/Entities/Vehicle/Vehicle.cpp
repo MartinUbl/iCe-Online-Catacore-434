@@ -34,21 +34,76 @@
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
 
+#include "Transport.h"
+#include "DynamicTransport.h"
+
+Transport* TransportBase::ToGenericTransport()
+{
+    if (m_transportType == TRANSPORT_TYPE_GENERIC)
+        return dynamic_cast<Transport*>(this);
+    return NULL;
+}
+
+DynamicTransport* TransportBase::ToDynamicTransport()
+{
+    if (m_transportType == TRANSPORT_TYPE_DYNAMIC)
+        return dynamic_cast<DynamicTransport*>(this);
+    return NULL;
+}
+
+Vehicle* TransportBase::ToVehicleTransport()
+{
+    if (m_transportType == TRANSPORT_TYPE_VEHICLE)
+        return dynamic_cast<Vehicle*>(this);
+    return NULL;
+}
+
+Transport const* TransportBase::ToGenericTransport() const
+{
+    if (m_transportType == TRANSPORT_TYPE_GENERIC)
+        return dynamic_cast<Transport const*>(this);
+    return NULL;
+}
+
+DynamicTransport const* TransportBase::ToDynamicTransport() const
+{
+    if (m_transportType == TRANSPORT_TYPE_DYNAMIC)
+        return dynamic_cast<DynamicTransport const*>(this);
+    return NULL;
+}
+
+Vehicle const* TransportBase::ToVehicleTransport() const
+{
+    if (m_transportType == TRANSPORT_TYPE_VEHICLE)
+        return dynamic_cast<Vehicle const*>(this);
+    return NULL;
+}
+
+WorldObject* TransportBase::ToWorldObject()
+{
+    return dynamic_cast<WorldObject*>(this);
+}
+
+WorldObject const* TransportBase::ToWorldObject() const
+{
+    return dynamic_cast<WorldObject const*>(this);
+}
+
 GameObject* TransportBase::ToGameObject()
 {
     if (m_transportType == TRANSPORT_TYPE_GENERIC || m_transportType == TRANSPORT_TYPE_DYNAMIC)
-        return (GameObject*)(m_woRef->ToGameObject());
+        return dynamic_cast<GameObject*>(this);
     return NULL;
 }
 
 GameObject const* TransportBase::ToGameObject() const
 {
     if (m_transportType == TRANSPORT_TYPE_GENERIC || m_transportType == TRANSPORT_TYPE_DYNAMIC)
-        return m_woRef->ToGameObject();
+        return dynamic_cast<GameObject const*>(this);
     return NULL;
 }
 
-Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : TransportBase(TRANSPORT_TYPE_VEHICLE, (WorldObject const*)this), me(unit), m_vehicleInfo(vehInfo), m_usableSeatNum(0), m_bonusHP(0)
+Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : TransportBase(TRANSPORT_TYPE_VEHICLE), me(unit), m_vehicleInfo(vehInfo), m_usableSeatNum(0), m_bonusHP(0)
 {
     for (uint32 i = 0; i < MAX_VEHICLE_SEATS; ++i)
     {

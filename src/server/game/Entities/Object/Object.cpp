@@ -3141,8 +3141,8 @@ void WorldObject::BuildUpdate(UpdateDataMapType& data_map)
 
 uint64 WorldObject::GetTransGUID() const
 {
-    if (GetTransport())
-        return GetTransport()->ToWorldObject()->GetGUID();
+    if (m_transport && m_transport->ToGameObject())
+        return m_transport->ToGameObject()->GetGUID();
     return 0;
 }
 

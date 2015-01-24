@@ -160,7 +160,7 @@ enum TransportType
 class TransportBase
 {
     public:
-        explicit TransportBase(TransportType transType, WorldObject const* woRef) : m_transportType(transType), m_woRef(woRef) { };
+        explicit TransportBase(TransportType transType) : m_transportType(transType) { };
 
         /// This method transforms supplied transport offsets into global coordinates
         virtual void CalculatePassengerPosition(float& x, float& y, float& z, float* o) const = 0;
@@ -172,22 +172,21 @@ class TransportBase
 
         virtual void RemovePassenger(WorldObject *passenger) = 0;
 
-        Transport* ToGenericTransport() { if (m_transportType == TRANSPORT_TYPE_GENERIC) return reinterpret_cast<Transport*>((WorldObject*)m_woRef); else return NULL; }
-        DynamicTransport* ToDynamicTransport() { if (m_transportType == TRANSPORT_TYPE_DYNAMIC) return reinterpret_cast<DynamicTransport*>((WorldObject*)m_woRef); else return NULL; }
-        Vehicle* ToVehicleTransport() { if (m_transportType == TRANSPORT_TYPE_VEHICLE) return reinterpret_cast<Vehicle*>(this); else return NULL; }
-        Transport const* ToGenericTransport() const { if (m_transportType == TRANSPORT_TYPE_GENERIC) return reinterpret_cast<Transport const*>(m_woRef); else return NULL; }
-        DynamicTransport const* ToDynamicTransport() const { if (m_transportType == TRANSPORT_TYPE_DYNAMIC) return reinterpret_cast<DynamicTransport const*>((WorldObject*)m_woRef); else return NULL; }
-        Vehicle const* ToVehicleTransport() const { if (m_transportType == TRANSPORT_TYPE_VEHICLE) return reinterpret_cast<Vehicle const*>(this); else return NULL; }
+        Transport* ToGenericTransport();
+        DynamicTransport* ToDynamicTransport();
+        Vehicle* ToVehicleTransport();
+        Transport const* ToGenericTransport() const;
+        DynamicTransport const* ToDynamicTransport() const;
+        Vehicle const* ToVehicleTransport() const;
 
-        WorldObject* ToWorldObject() { return (WorldObject*)(m_woRef); }
-        WorldObject const* ToWorldObject() const { return (WorldObject*)(m_woRef); }
+        WorldObject* ToWorldObject();
+        WorldObject const* ToWorldObject() const;
 
         GameObject* ToGameObject();
         GameObject const* ToGameObject() const;
 
     protected:
         TransportType m_transportType;
-        WorldObject const* m_woRef;
 };
 
 class Vehicle : public TransportBase

@@ -20014,8 +20014,8 @@ uint64 Unit::GetTransGUID() const
 {
     if (GetVehicle())
         return GetVehicle()->GetBase()->GetGUID();
-    if (GetTransport())
-        return GetTransport()->ToWorldObject()->GetGUID();
+    if (GetTransport() && GetTransport()->ToGameObject())
+        return GetTransport()->ToGameObject()->GetGUID();
 
     return 0;
 }
@@ -21145,8 +21145,8 @@ void Unit::BuildMovementPacket(ByteBuffer *data) const
     {
         if (m_vehicle)
             *data << uint64(m_vehicle->GetBase()->GetGUID());
-        else if (GetTransport())
-            *data << uint64(GetTransport()->ToWorldObject()->GetGUID());
+        else if (GetTransport() && GetTransport()->ToGameObject())
+            *data << uint64(GetTransport()->ToGameObject()->GetGUID());
         else // probably should never happen
             *data << (uint64)0;
 
