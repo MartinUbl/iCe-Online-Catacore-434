@@ -290,52 +290,99 @@ void DynamicTransport::UpdatePosition(float x, float y, float z, float o)
     }
 }
 
+void DynamicTransport::ForcePositionUpdate()
+{
+    // if the transport is not moving, no need to recalculate - it's already been done in Update function
+    if (!m_goValue->Transport.StateChangeTime ||
+        (getMSTimeDiff(m_goValue->Transport.StateChangeStartProgress, m_goValue->Transport.PathProgress) >= m_goValue->Transport.StateChangeTime &&
+        m_goValue->Transport.OldVisualState == m_goValue->Transport.VisualState))
+        return;
+
+    bool movingToNext = m_goValue->Transport.OldVisualState < m_goValue->Transport.VisualState;
+
+    float progress = ((float)getMSTimeDiff(m_goValue->Transport.StateChangeStartProgress, m_goValue->Transport.PathProgress)) / ((float)(m_goValue->Transport.StateChangeTime));
+    if (progress > 1.0f)
+        progress = 1.0f;
+
+    // this evaluates time segment the transport is currently in, and retrieve specific node
+    uint32 timer = m_goValue->Transport.StopFrames->at(m_goValue->Transport.OldVisualState) +
+        progress * ((float)m_goValue->Transport.StopFrames->at(m_goValue->Transport.VisualState) - (float)m_goValue->Transport.StopFrames->at(m_goValue->Transport.OldVisualState));
+
+    TransportAnimationEntry const* node = m_goValue->Transport.AnimationInfo->GetAnimNode(timer, movingToNext);
+    TransportAnimationEntry const* nextnode = m_goValue->Transport.AnimationInfo->GetAnimNode(m_goValue->Transport.CurrentSeg + (movingToNext ? 1 : -1), !movingToNext);
+
+    G3D::Quat oldrotation = m_goValue->Transport.AnimationInfo->GetAnimRotation(timer, movingToNext);
+    G3D::Vector3 oldpos = oldrotation.toRotationMatrix() * G3D::Vector3(-node->X, -node->Y, node->Z);
+
+    oldpos += G3D::Vector3(m_stationaryPosition.GetPositionX(), m_stationaryPosition.GetPositionY(), m_stationaryPosition.GetPositionZ());
+
+    G3D::Quat newrotation = m_goValue->Transport.AnimationInfo->GetAnimRotation(m_goValue->Transport.CurrentSeg + (movingToNext ? 1 : -1), !movingToNext);
+    G3D::Vector3 newpos = newrotation.toRotationMatrix() * G3D::Vector3(-nextnode->X, -nextnode->Y, nextnode->Z);
+
+    newpos += G3D::Vector3(m_stationaryPosition.GetPositionX(), m_stationaryPosition.GetPositionY(), m_stationaryPosition.GetPositionZ());
+
+    // use linear interpolation between points, since we can afford it - client does the same
+
+    G3D::Vector3 interpolated(oldpos.x + (newpos.x - oldpos.x)*progress, oldpos.y + (newpos.y - oldpos.y)*progress, oldpos.z + (newpos.z - oldpos.z)*progress);
+
+    // this will cause also grid/cell relocation if needed
+    GetMap()->GameObjectRelocation(this, interpolated.x, interpolated.y, interpolated.z, GetOrientation());
+
+    UpdatePosition(interpolated.x, interpolated.y, interpolated.z, GetOrientation());
+
+    ResetPositionTimer();
+}
+
+void DynamicTransport::UpdateSinglePassengerPosition(WorldObject* passenger)
+{
+    // if passenger is on vehicle we have to assume the vehicle is also on transport
+    // and its the vehicle that will be updating its passengers
+    if (Unit* unit = passenger->ToUnit())
+        if (unit->GetVehicle())
+            return;
+
+    // Do not use Unit::UpdatePosition here, we don't want to remove auras
+    // as if regular movement occurred
+    float x, y, z, o;
+    passenger->m_movementInfo.t_pos.GetPosition(x, y, z, o);
+    CalculatePassengerPosition(x, y, z, &o);
+    // for now we accept only player passengers, the other cases are there for future use
+    switch (passenger->GetTypeId())
+    {
+        case TYPEID_UNIT:
+        {
+            Creature* creature = passenger->ToCreature();
+            GetMap()->CreatureRelocation(creature, x, y, z, o, false);
+            creature->GetTransportHomePosition(x, y, z, o);
+            CalculatePassengerPosition(x, y, z, &o);
+            creature->SetHomePosition(x, y, z, o);
+            break;
+        }
+        case TYPEID_PLAYER:
+        {
+            GetMap()->PlayerRelocation(passenger->ToPlayer(), x, y, z, o);
+            break;
+        }
+        case TYPEID_GAMEOBJECT:
+        {
+            GetMap()->GameObjectRelocation(passenger->ToGameObject(), x, y, z, o, false);
+            break;
+        }
+        default:
+            break;
+    }
+
+    if (Unit* unit = passenger->ToUnit())
+        if (Vehicle* vehicle = unit->GetVehicleKit())
+            vehicle->RelocatePassengers();
+}
+
 void DynamicTransport::UpdatePassengerPositions(std::set<WorldObject*>& passengers)
 {
     for (std::set<WorldObject*>::iterator itr = passengers.begin(); itr != passengers.end(); ++itr)
     {
         WorldObject* passenger = *itr;
-
-        // if passenger is on vehicle we have to assume the vehicle is also on transport
-        // and its the vehicle that will be updating its passengers
-        if (Unit* unit = passenger->ToUnit())
-            if (unit->GetVehicle())
-                continue;
-
-        // Do not use Unit::UpdatePosition here, we don't want to remove auras
-        // as if regular movement occurred
-        float x, y, z, o;
-        passenger->m_movementInfo.t_pos.GetPosition(x, y, z, o);
-        CalculatePassengerPosition(x, y, z, &o);
-        // for now we accept only player passengers, the other cases are there for future use
-        switch (passenger->GetTypeId())
-        {
-            case TYPEID_UNIT:
-            {
-                Creature* creature = passenger->ToCreature();
-                GetMap()->CreatureRelocation(creature, x, y, z, o, false);
-                creature->GetTransportHomePosition(x, y, z, o);
-                CalculatePassengerPosition(x, y, z, &o);
-                creature->SetHomePosition(x, y, z, o);
-                break;
-            }
-            case TYPEID_PLAYER:
-            {
-                GetMap()->PlayerRelocation(passenger->ToPlayer(), x, y, z, o);
-                break;
-            }
-            case TYPEID_GAMEOBJECT:
-            {
-                GetMap()->GameObjectRelocation(passenger->ToGameObject(), x, y, z, o, false);
-                break;
-            }
-            default:
-                break;
-        }
-
-        if (Unit* unit = passenger->ToUnit())
-            if (Vehicle* vehicle = unit->GetVehicleKit())
-                vehicle->RelocatePassengers();
+        UpdateSinglePassengerPosition(passenger);
     }
 }
 

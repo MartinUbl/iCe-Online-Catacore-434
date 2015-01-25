@@ -45,6 +45,7 @@ class DynamicTransport : public GameObject, public TransportBase
 
         void CalculatePassengerPosition(float& x, float& y, float& z, float* o /*= NULL*/) const;
         void CalculatePassengerOffset(float& x, float& y, float& z, float* o /*= NULL*/) const;
+        void ForcePositionUpdate();
 
         float GetStationaryX() const { return m_stationaryPosition.GetPositionX(); }
         float GetStationaryY() const { return m_stationaryPosition.GetPositionY(); }
@@ -55,6 +56,7 @@ class DynamicTransport : public GameObject, public TransportBase
 
     protected:
 
+        void UpdateSinglePassengerPosition(WorldObject* passenger);
         void UpdatePassengerPositions(std::set<WorldObject*>& passengers);
 
         std::set<WorldObject*> _passengers;
