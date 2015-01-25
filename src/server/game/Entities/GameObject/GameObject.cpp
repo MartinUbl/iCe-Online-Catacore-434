@@ -2235,6 +2235,27 @@ void GameObject::UpdateModelPosition(float x, float y, float z, bool gridChange)
         GetMap()->Insert(*m_model);
 }
 
+void GameObject::RemoveModelFromMap()
+{
+    if (!m_model)
+        return;
+
+    if (GetMap()->Contains(*m_model))
+        GetMap()->Remove(*m_model);
+}
+
+void GameObject::AddModelToMap()
+{
+    if (!m_model)
+        return;
+
+    if (!GetMap()->Contains(*m_model))
+    {
+        GetMap()->Insert(*m_model);
+        m_model->setPosition(G3D::Vector3(GetPositionX(), GetPositionY(), GetPositionZ()));
+    }
+}
+
 void GameObject::UpdateModel()
 {
     if (!IsInWorld())

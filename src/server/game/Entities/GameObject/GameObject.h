@@ -868,6 +868,10 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         Position m_stationaryPosition;
 
         uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
+
+        void RemoveModelFromMap();
+        void AddModelToMap();
+
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);
         GameObjectAI* m_AI;

@@ -73,6 +73,7 @@ void TransportMgr::LoadTransportTemplates()
         // paths are generated per template, saves us from generating it again in case of instanced transports
         TransportTemplate& transport = _transportTemplates[entry];
         transport.entry = entry;
+        transport.inInstance = false;
         GeneratePath(goInfo, &transport);
 
         // transports in instance are only on one map
@@ -85,28 +86,64 @@ void TransportMgr::LoadTransportTemplates()
     sLog->outString(">> Loaded %u transport templates in", count);
 }
 
+class SplineRawInitializer
+{
+    public:
+        SplineRawInitializer(Movement::PointsArray& points) : _points(points) { }
+
+        void operator()(uint8& mode, bool& cyclic, Movement::PointsArray& points, int& lo, int& hi) const
+        {
+            mode = Movement::SplineBase::ModeCatmullrom;
+            cyclic = false;
+            points.assign(_points.begin(), _points.end());
+            lo = 1;
+            hi = points.size() - 2;
+        }
+
+        Movement::PointsArray& _points;
+};
+
 void TransportMgr::GeneratePath(GameObjectInfo const* goInfo, TransportTemplate* transport)
 {
     uint32 pathId = goInfo->moTransport.taxiPathId;
     TaxiPathNodeList const& path = sTaxiPathNodesByPath[pathId];
+
+    if (path.size() == 0)
+        return;
+
     std::vector<KeyFrame>& keyFrames = transport->keyFrames;
-    Movement::PointsArray splinePath;
+    Movement::PointsArray splinePath, allPoints;
     bool mapChange = false;
-    bool cyclic = true;
-    for (int32 i = 1; i < ((int32)path.size()) - 1; ++i)
+    for (size_t i = 0; i < path.size(); ++i)
+        allPoints.push_back(G3D::Vector3(path[i].x, path[i].y, path[i].z));
+
+    // Add extra points to allow derivative calculations for all path nodes
+    allPoints.insert(allPoints.begin(), allPoints.front().lerp(allPoints[1], -0.2f));
+    allPoints.push_back(allPoints.back().lerp(allPoints[allPoints.size() - 2], -0.2f));
+    allPoints.push_back(allPoints.back().lerp(allPoints[allPoints.size() - 2], -1.0f));
+
+    SplineRawInitializer initer(allPoints);
+    TransportSpline orientationSpline;
+    orientationSpline.init_spline_custom(initer);
+    orientationSpline.initLengths();
+
+    for (size_t i = 0; i < path.size(); ++i)
     {
         if (!mapChange)
         {
             TaxiPathNodeEntry const& node_i = path[i];
-            if (node_i.actionFlag == 1 || node_i.mapid != path[i + 1].mapid)
+            if (i != path.size() - 1 && (node_i.actionFlag & 1 || node_i.mapid != path[i + 1].mapid))
             {
-                cyclic = false;
                 keyFrames.back().Teleport = true;
                 mapChange = true;
             }
             else
             {
                 KeyFrame k(node_i);
+                G3D::Vector3 h;
+                orientationSpline.evaluate_derivative(i + 1, 0.0f, h);
+                k.InitialOrientation = Position::NormalizeOrientation(std::atan2(h.y, h.x) + float(M_PI));
+
                 keyFrames.push_back(k);
                 splinePath.push_back(G3D::Vector3(node_i.x, node_i.y, node_i.z));
                 transport->mapsUsed.insert(k.Node->mapid);
@@ -116,6 +153,24 @@ void TransportMgr::GeneratePath(GameObjectInfo const* goInfo, TransportTemplate*
             mapChange = false;
     }
 
+    if (splinePath.size() >= 2)
+    {
+        // Remove special catmull-rom spline points
+        if (!keyFrames.front().IsStopFrame() && !keyFrames.front().Node->arrivalEventID && !keyFrames.front().Node->departureEventID)
+        {
+            splinePath.erase(splinePath.begin());
+            keyFrames.erase(keyFrames.begin());
+        }
+        if (!keyFrames.back().IsStopFrame() && !keyFrames.back().Node->arrivalEventID && !keyFrames.back().Node->departureEventID)
+        {
+            splinePath.pop_back();
+            keyFrames.pop_back();
+        }
+    }
+
+    if (keyFrames.empty())
+        return;
+
     if (transport->mapsUsed.size() > 1)
     {
         for (std::set<uint32>::const_iterator itr = transport->mapsUsed.begin(); itr != transport->mapsUsed.end(); ++itr)
@@ -124,11 +179,7 @@ void TransportMgr::GeneratePath(GameObjectInfo const* goInfo, TransportTemplate*
         transport->inInstance = false;
     }
     else
-        transport->inInstance = (transport->mapsUsed.size() != 0) ? sMapStore.LookupEntry(*transport->mapsUsed.begin())->Instanceable() : false;
-
-    // nothing to calculate
-    if (keyFrames.size() == 0)
-        return;
+        transport->inInstance = sMapStore.LookupEntry(*transport->mapsUsed.begin())->Instanceable();
 
     // last to first is always "teleport", even for closed paths
     keyFrames.back().Teleport = true;
@@ -154,70 +205,48 @@ void TransportMgr::GeneratePath(GameObjectInfo const* goInfo, TransportTemplate*
 
     // find the rest of the distances between key points
     // Every path segment has its own spline
-    if (cyclic)
+    size_t start = 0;
+    for (size_t i = 1; i < keyFrames.size(); ++i)
     {
-        TransportSpline* spline = new TransportSpline();
-        spline->init_cyclic_spline(&splinePath[0], splinePath.size(), Movement::SplineBase::ModeCatmullrom, 0);
-        spline->initLengths();
-        keyFrames[0].DistFromPrev = spline->length(spline->last() - 2, spline->last() - 1);
-        keyFrames[0].Spline = spline;
-        for (size_t i = 1; i < keyFrames.size(); ++i)
+        if (keyFrames[i - 1].Teleport || i + 1 == keyFrames.size())
         {
-            keyFrames[i].Index = i + 1;
-            keyFrames[i].DistFromPrev = spline->length(i, i + 1);
-            keyFrames[i - 1].NextDistFromPrev = keyFrames[i].DistFromPrev;
-            keyFrames[i].Spline = spline;
-            if (keyFrames[i].IsStopFrame())
+            size_t extra = !keyFrames[i - 1].Teleport ? 1 : 0;
+            TransportSpline* spline = new TransportSpline();
+            spline->init_spline(&splinePath[start], i - start + extra, Movement::SplineBase::ModeCatmullrom);
+            spline->initLengths();
+            for (size_t j = start; j < i + extra; ++j)
             {
-                // remember first stop frame
-                if (firstStop == -1)
-                    firstStop = i;
-                lastStop = i;
+                keyFrames[j].Index = j - start + 1;
+                keyFrames[j].DistFromPrev = float(spline->length(j - start, j + 1 - start));
+                if (j > 0)
+                    keyFrames[j - 1].NextDistFromPrev = keyFrames[j].DistFromPrev;
+                keyFrames[j].Spline = spline;
             }
+
+            if (keyFrames[i - 1].Teleport)
+            {
+                keyFrames[i].Index = i - start + 1;
+                keyFrames[i].DistFromPrev = 0.0f;
+                keyFrames[i - 1].NextDistFromPrev = 0.0f;
+                keyFrames[i].Spline = spline;
+            }
+
+            start = i;
         }
-    }
-    else
-    {
-        size_t start = 0;
-        for (size_t i = 1; i < keyFrames.size(); ++i)
+
+        if (keyFrames[i].IsStopFrame())
         {
-            if (keyFrames[i - 1].Teleport || i + 1 == keyFrames.size())
-            {
-                size_t extra = !keyFrames[i - 1].Teleport ? 1 : 0;
-                TransportSpline* spline = new TransportSpline();
-                spline->init_spline(&splinePath[start], i - start + extra, Movement::SplineBase::ModeCatmullrom);
-                spline->initLengths();
-                for (size_t j = start; j < i + extra; ++j)
-                {
-                    keyFrames[j].Index = j - start + 1;
-                    keyFrames[j].DistFromPrev = spline->length(j - start, j + 1 - start);
-                    if (j > 0)
-                        keyFrames[j - 1].NextDistFromPrev = keyFrames[j].DistFromPrev;
-                    keyFrames[j].Spline = spline;
-                }
-
-                if (keyFrames[i - 1].Teleport)
-                {
-                    keyFrames[i].Index = i - start + 1;
-                    keyFrames[i].DistFromPrev = 0.0f;
-                    keyFrames[i - 1].NextDistFromPrev = 0.0f;
-                    keyFrames[i].Spline = spline;
-                }
-
-                start = i;
-            }
-
-            if (keyFrames[i].IsStopFrame())
-            {
-                // remember first stop frame
-                if (firstStop == -1)
-                    firstStop = i;
-                lastStop = i;
-            }
+            // remember first stop frame
+            if (firstStop == -1)
+                firstStop = i;
+            lastStop = i;
         }
     }
 
     keyFrames.back().NextDistFromPrev = keyFrames.front().DistFromPrev;
+
+    if (firstStop == -1 || lastStop == -1)
+        firstStop = lastStop = 0;
 
     // at stopping keyframes, we define distSinceStop == 0,
     // and distUntilStop is to the next stopping keyframe.
@@ -226,7 +255,7 @@ void TransportMgr::GeneratePath(GameObjectInfo const* goInfo, TransportTemplate*
     for (size_t i = 0; i < keyFrames.size(); ++i)
     {
         int32 j = (i + lastStop) % keyFrames.size();
-        if (keyFrames[j].IsStopFrame())
+        if (keyFrames[j].IsStopFrame() || j == lastStop)
             tmpDist = 0.0f;
         else
             tmpDist += keyFrames[j].DistFromPrev;
@@ -239,7 +268,7 @@ void TransportMgr::GeneratePath(GameObjectInfo const* goInfo, TransportTemplate*
         int32 j = (i + firstStop) % keyFrames.size();
         tmpDist += keyFrames[(j + 1) % keyFrames.size()].DistFromPrev;
         keyFrames[j].DistUntilStop = tmpDist;
-        if (keyFrames[j].IsStopFrame())
+        if (keyFrames[j].IsStopFrame() || j == firstStop)
             tmpDist = 0.0f;
     }
 
@@ -251,22 +280,22 @@ void TransportMgr::GeneratePath(GameObjectInfo const* goInfo, TransportTemplate*
             if (keyFrames[i].DistSinceStop < keyFrames[i].DistUntilStop) // is still accelerating
             {
                 // calculate accel+brake time for this short segment
-                float segment_time = 2.0f * sqrt((keyFrames[i].DistUntilStop + keyFrames[i].DistSinceStop) / accel);
+                float segment_time = 2.0f * std::sqrt((keyFrames[i].DistUntilStop + keyFrames[i].DistSinceStop) / accel);
                 // substract acceleration time
-                keyFrames[i].TimeTo = segment_time - sqrt(2 * keyFrames[i].DistSinceStop / accel);
+                keyFrames[i].TimeTo = segment_time - std::sqrt(2 * keyFrames[i].DistSinceStop / accel);
             }
             else // slowing down
-                keyFrames[i].TimeTo = sqrt(2 * keyFrames[i].DistUntilStop / accel);
+                keyFrames[i].TimeTo = std::sqrt(2 * keyFrames[i].DistUntilStop / accel);
         }
         else if (keyFrames[i].DistSinceStop < accel_dist) // still accelerating (but will reach full speed)
         {
             // calculate accel + cruise + brake time for this long segment
             float segment_time = (keyFrames[i].DistUntilStop + keyFrames[i].DistSinceStop) / speed + (speed / accel);
             // substract acceleration time
-            keyFrames[i].TimeTo = segment_time - sqrt(2 * keyFrames[i].DistSinceStop / accel);
+            keyFrames[i].TimeTo = segment_time - std::sqrt(2 * keyFrames[i].DistSinceStop / accel);
         }
         else if (keyFrames[i].DistUntilStop < accel_dist) // already slowing down (but reached full speed)
-            keyFrames[i].TimeTo = sqrt(2 * keyFrames[i].DistUntilStop / accel);
+            keyFrames[i].TimeTo = std::sqrt(2 * keyFrames[i].DistUntilStop / accel);
         else // at full speed
             keyFrames[i].TimeTo = (keyFrames[i].DistUntilStop / speed) + (0.5f * speed / accel);
     }
@@ -276,7 +305,7 @@ void TransportMgr::GeneratePath(GameObjectInfo const* goInfo, TransportTemplate*
     for (size_t i = 0; i < keyFrames.size(); ++i)
     {
         int32 j = (i + lastStop) % keyFrames.size();
-        if (keyFrames[j].IsStopFrame())
+        if (keyFrames[j].IsStopFrame() || j == lastStop)
             segmentTime = keyFrames[j].TimeTo;
         keyFrames[j].TimeFrom = segmentTime - keyFrames[j].TimeTo;
     }
@@ -292,12 +321,12 @@ void TransportMgr::GeneratePath(GameObjectInfo const* goInfo, TransportTemplate*
 
     for (size_t i = 1; i < keyFrames.size(); ++i)
     {
-        curPathTime += keyFrames[i-1].TimeTo;
+        curPathTime += keyFrames[i - 1].TimeTo;
         if (keyFrames[i].IsStopFrame())
         {
             keyFrames[i].ArriveTime = uint32(curPathTime * IN_MILLISECONDS);
             keyFrames[i - 1].NextArriveTime = keyFrames[i].ArriveTime;
-            curPathTime += (float)keyFrames[i].Node->delay;
+            curPathTime += float(keyFrames[i].Node->delay);
             keyFrames[i].DepartureTime = uint32(curPathTime * IN_MILLISECONDS);
         }
         else
@@ -308,10 +337,10 @@ void TransportMgr::GeneratePath(GameObjectInfo const* goInfo, TransportTemplate*
             keyFrames[i].DepartureTime = keyFrames[i].ArriveTime;
         }
     }
+
     keyFrames.back().NextArriveTime = keyFrames.back().DepartureTime;
 
     transport->pathTime = keyFrames.back().DepartureTime;
-    //WorldDatabase.DirectPExecute("UPDATE `transports` SET `period_gen`=%u WHERE `entry`=%u", transport->pathTime, transport->entry);
 }
 
 void TransportMgr::AddPathNodeToTransport(uint32 transportEntry, uint32 timeSeg, TransportAnimationEntry const* node)
@@ -381,6 +410,7 @@ Transport* TransportMgr::CreateTransport(uint32 entry, uint32 guid /*= 0*/, Map*
     // Passengers will be loaded once a player is near
 
     trans->GetMap()->Add<Transport>(trans);
+    trans->EnableCollision(true); // needed after putting into map
     return trans;
 }
 

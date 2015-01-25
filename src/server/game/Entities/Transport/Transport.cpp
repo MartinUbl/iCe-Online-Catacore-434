@@ -79,7 +79,7 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
     _triggeredArrivalEvent = false;
     _triggeredDepartureEvent = false;
 
-    m_goValue->Transport.PathProgress = 0;
+    m_goValue->Transport.PathProgress = getMSTime();
     SetFloatValue(OBJECT_FIELD_SCALE_X, goinfo->size);
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
 
@@ -97,6 +97,9 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
     SetGoAnimProgress(animprogress);
     SetName(goinfo->name);
     UpdateRotationFields(0.0f, 1.0f);
+
+    m_model = GameObjectModel::Create(*this);
+
     return true;
 }
 
@@ -112,7 +115,8 @@ void Transport::Update(uint32 diff)
     if (GetKeyFrames().size() <= 1)
         return;
 
-    m_goValue->Transport.PathProgress += diff;
+    if (IsMoving() || !_pendingStop)
+        m_goValue->Transport.PathProgress += diff;
 
     uint32 timer = m_goValue->Transport.PathProgress % GetPeriod();
 
@@ -370,6 +374,11 @@ void Transport::UpdatePosition(float x, float y, float z, float o)
 {
     bool newActive = GetMap()->IsLoaded(x, y);
 
+    if (Cell(x, y).DiffGrid(Cell(GetPositionX(), GetPositionY())))
+        UpdateModelPosition(x, y, z, true);
+    else
+        UpdateModelPosition(x, y, z, false);
+
     Relocate(x, y, z, o);
 
     UpdatePassengerPositions(_passengers);
@@ -490,6 +499,9 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
         }
 
         UnloadStaticPassengers();
+
+        EnableCollision(false);
+        RemoveModelFromMap();
         GetMap()->Remove<Transport>(this, false);
         SetMap(newMap);
 
@@ -564,6 +576,8 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
         }
 
         GetMap()->Add<Transport>(this);
+        AddModelToMap();
+        EnableCollision(true);
     }
     else
     {
