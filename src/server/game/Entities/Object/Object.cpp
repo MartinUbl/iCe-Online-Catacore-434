@@ -549,20 +549,20 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.t_guid;
 
-        data->WriteBit(transGuid[0]);
-        data->WriteBit(transGuid[5]);
+        data->WriteByteSeq(transGuid[0]);
+        data->WriteByteSeq(transGuid[5]);
         if (hasTransportVehicleId)
             *data << uint32(transportVehicleId);
 
-        data->WriteBit(transGuid[3]);
+        data->WriteByteSeq(transGuid[3]);
         *data << float(self->GetTransOffsetX());
-        data->WriteBit(transGuid[4]);
-        data->WriteBit(transGuid[6]);
-        data->WriteBit(transGuid[1]);
+        data->WriteByteSeq(transGuid[4]);
+        data->WriteByteSeq(transGuid[6]);
+        data->WriteByteSeq(transGuid[1]);
         *data << uint32(self->GetTransTime());
         *data << float(self->GetTransOffsetY());
-        data->WriteBit(transGuid[2]);
-        data->WriteBit(transGuid[7]);
+        data->WriteByteSeq(transGuid[2]);
+        data->WriteByteSeq(transGuid[7]);
         *data << float(self->GetTransOffsetZ());
         *data << int8(self->GetTransSeat());
         *data << float(self->GetTransOffsetO());
@@ -1498,6 +1498,15 @@ bool Object::PrintIndexError(uint32 index, bool set) const
 void WorldObject::SetTransport(TransportBase* t)
 {
     m_transport = t;
+
+    // gameobjects needs to have transport position sent separatelly
+    if (ToGameObject())
+    {
+        if (t != NULL)
+            m_updateFlag |= UPDATEFLAG_GO_TRANSPORT_POSITION;
+        else
+            m_updateFlag &= ~UPDATEFLAG_GO_TRANSPORT_POSITION;
+    }
 }
 
 bool Position::HasInLine(const Unit * const target, float distance, float width) const
