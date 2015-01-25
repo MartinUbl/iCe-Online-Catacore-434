@@ -9354,6 +9354,16 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
         return;
     }
 
+    // if the object is being summoned right on caster's position, and caster has transport, add it to transport also
+    // this should and will be done by transport object finding and resolving, this is some sort of workaround for "critical" stuff
+    // - i.e. Demonic Circle - when summoned on moving object, the teleport destination should change as well
+    if (m_spellInfo->EffectImplicitTargetA[effIndex] == TARGET_DST_CASTER && m_spellInfo->EffectImplicitTargetB[effIndex] == TARGET_NONE && m_caster->GetTransport())
+    {
+        m_caster->GetTransport()->AddPassenger(pGameObj);
+        pGameObj->m_movementInfo.t_guid = m_caster->GetTransGUID();
+        pGameObj->m_movementInfo.t_pos.Relocate(&(m_caster->m_movementInfo.t_pos));
+    }
+
     //pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
     pGameObj->SetRespawnTime(duration > 0 ? duration/IN_MILLISECONDS : 0);
     pGameObj->SetSpellId(m_spellInfo->Id);
