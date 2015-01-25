@@ -2228,7 +2228,8 @@ void GameObject::UpdateModelPosition(float x, float y, float z, bool gridChange)
     if (gridChange)
         GetMap()->Remove(*m_model);
 
-    m_model->setPosition(G3D::Vector3(x, y, z));
+    G3D::Vector3 pos(x, y, z);
+    m_model->setPosition(pos);
 
     // and if we removed the model from tree, return it back to new position
     if (gridChange)
@@ -2252,7 +2253,8 @@ void GameObject::AddModelToMap()
     if (!GetMap()->Contains(*m_model))
     {
         GetMap()->Insert(*m_model);
-        m_model->setPosition(G3D::Vector3(GetPositionX(), GetPositionY(), GetPositionZ()));
+        G3D::Vector3 pos(GetPositionX(), GetPositionY(), GetPositionZ());
+        m_model->setPosition(pos);
     }
 }
 
