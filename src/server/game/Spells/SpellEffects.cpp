@@ -5706,6 +5706,17 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
 
                     summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster, 0, lowGUID);
 
+                    if (GameObject* go = m_caster->GetMap()->GetGroundCollisionObject(pos.m_positionX, pos.m_positionY, pos.m_positionZ, m_caster->GetPhaseMask()))
+                    {
+                        if (DynamicTransport* dyntr = go->ToDynamicTransport())
+                        {
+                            dyntr->AddPassenger(summon);
+                            summon->m_movementInfo.t_guid = dyntr->GetGUID();
+                            // this is due to position refresh - the packet containing create info has already been sent by Map::Add
+                            summon->GetMotionMaster()->MovePoint(0, pos, false, true);
+                        }
+                    }
+
                     if (!summon || !summon->IsTotem())
                         return;
 
