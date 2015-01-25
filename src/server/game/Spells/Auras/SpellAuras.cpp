@@ -39,6 +39,7 @@
 #include "CellImpl.h"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
+#include "DynamicTransport.h"
 
 AuraApplication::AuraApplication(Unit * target, Unit * caster, Aura * aura, uint8 effMask):
 m_target(target), m_base(aura), m_slot(MAX_AURAS), m_flags(AFLAG_NONE),
@@ -1298,7 +1299,19 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 caster->RemoveAura(74434);
                             }
 
-                            target->ToPlayer()->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),TELE_TO_NOT_LEAVE_COMBAT);
+                            if (obj->GetTransport())
+                            {
+                                if (DynamicTransport* dt = obj->GetTransport()->ToDynamicTransport())
+                                    dt->ForcePositionUpdate();
+
+                                TransportPositionContainer transcont;
+                                transcont.transport = obj->GetTransport();
+                                transcont.position.Relocate(obj->m_movementInfo.t_pos);
+                                target->ToPlayer()->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(), TELE_TO_NOT_LEAVE_COMBAT, false, &transcont);
+                            }
+                            else
+                                target->ToPlayer()->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(), TELE_TO_NOT_LEAVE_COMBAT);
+
                             target->ToPlayer()->RemoveMovementImpairingAuras();
                         }
                         break;
