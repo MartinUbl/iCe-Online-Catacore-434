@@ -2043,6 +2043,15 @@ float Map::GetWaterOrGroundLevel(float x, float y, float z, float* ground /*= NU
     return VMAP_INVALID_HEIGHT_VALUE;
 }
 
+GameObject* Map::GetGroundCollisionObject(float x, float y, float z, uint32 phaseMask)
+{
+    GameObjectModel* colmodel = m_dyn_tree.getFirstCollisionModel(x, y, z, DEFAULT_HEIGHT_SEARCH, phaseMask);
+    if (!colmodel)
+        return NULL;
+
+    return HashMapHolder<GameObject>::Find(colmodel->getOwnerGUID());
+}
+
 bool Map::isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const
 {
     return VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(GetId(), x1, y1, z1, x2, y2, z2)

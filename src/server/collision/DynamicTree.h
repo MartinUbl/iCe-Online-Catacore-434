@@ -49,6 +49,7 @@ public:
     bool getIntersectionTime(uint32 phasemask, const G3D::Ray& ray, const Vector3& endPos, float& maxDist) const;
     bool getObjectHitPos(uint32 phasemask, const Vector3& pPos1, const Vector3& pPos2, Vector3& pResultHitPos, float pModifyDist) const;
     float getHeight(float x, float y, float z, float maxSearchDist, uint32 phasemask) const;
+    GameObjectModel* getFirstCollisionModel(float x, float y, float z, float maxSearchDist, uint32 phasemask) const;
 
     void insert(const GameObjectModel&);
     void remove(const GameObjectModel&);

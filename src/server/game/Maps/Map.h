@@ -491,6 +491,8 @@ class Map : public GridRefManager<NGridType>
         void Insert(const GameObjectModel& mdl) { m_dyn_tree.insert(mdl); }
         bool Contains(const GameObjectModel& mdl) const { return m_dyn_tree.contains(mdl);}
 
+        GameObject* GetGroundCollisionObject(float x, float y, float z, uint32 phaseMask);
+
         void SendInitTransports(Player* player);
         void SendRemoveTransports(Player* player);
 

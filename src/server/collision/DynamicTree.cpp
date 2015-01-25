@@ -152,7 +152,27 @@ struct DynamicTreeIntersectionCallback
         did_hit = obj.intersectRay(r, distance, true, phase_mask);
         return did_hit;
     }
-    bool didHit() const { return did_hit;}
+    bool didHit() const { return did_hit; }
+};
+
+struct DynamicTreeIntersectionStateCallback
+{
+    bool did_hit;
+    uint32 phase_mask;
+    GameObjectModel* firstIntersectionModel;
+
+    DynamicTreeIntersectionStateCallback(uint32 phasemask) : did_hit(false), phase_mask(phasemask), firstIntersectionModel(NULL) { }
+
+    bool operator()(const Ray& r, const GameObjectModel& obj, float& distance)
+    {
+        did_hit = obj.intersectRay(r, distance, true, phase_mask);
+        if (did_hit && !firstIntersectionModel)
+            firstIntersectionModel = const_cast<GameObjectModel*>(&obj);
+        return did_hit;
+    }
+
+    bool didHit() const { return did_hit; }
+    GameObjectModel* intersectModel() const { return firstIntersectionModel; }
 };
 
 struct DynamicTreeIntersectionCallback_WithLogger
@@ -252,4 +272,17 @@ float DynamicMapTree::getHeight(float x, float y, float z, float maxSearchDist, 
         return v.z - maxSearchDist;
     else
         return -G3D::inf();
+}
+
+GameObjectModel* DynamicMapTree::getFirstCollisionModel(float x, float y, float z, float maxSearchDist, uint32 phasemask) const
+{
+    Vector3 v(x, y, z);
+    Ray r(v, Vector3(0, 0, -1));
+    DynamicTreeIntersectionStateCallback callback(phasemask);
+    impl.intersectZAllignedRay(r, callback, maxSearchDist);
+
+    if (callback.didHit())
+        return callback.intersectModel();
+    else
+        return NULL;
 }

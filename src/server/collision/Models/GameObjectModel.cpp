@@ -109,6 +109,7 @@ bool GameObjectModel::initialize(const GameObject& go, const GameObjectDisplayIn
     if (!iModel)
         return false;
 
+    iOwnerGUID = go.GetGUID();
     name = it->second.name;
     //flags = VMAP::MOD_M2;
     //adtId = 0;

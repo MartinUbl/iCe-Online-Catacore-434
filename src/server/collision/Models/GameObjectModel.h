@@ -44,14 +44,17 @@ class GameObjectModel /*, public Intersectable*/
     float iInvScale;
     float iScale;
     VMAP::WorldModel* iModel;
+    uint64 iOwnerGUID;
 
-    GameObjectModel() : phasemask(0), iModel(NULL) {}
+    GameObjectModel() : phasemask(0), iModel(NULL), iOwnerGUID(0) {}
     bool initialize(const GameObject& go, const GameObjectDisplayInfoEntry& info);
 
 public:
     std::string name;
 
     const G3D::AABox& getBounds() const { return iBound; }
+
+    uint64 getOwnerGUID() const { return iOwnerGUID; }
 
     ~GameObjectModel();
 
