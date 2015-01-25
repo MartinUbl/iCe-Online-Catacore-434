@@ -1059,6 +1059,7 @@ void Map::GameObjectRelocation(GameObject* go, float x, float y, float z, float 
     {
         go->Relocate(x, y, z, orientation);
         go->UpdateObjectVisibility(false);
+        go->UpdateModelPosition(x, y, z, false);
         RemoveGameObjectFromMoveList(go);
     }
 
@@ -1173,6 +1174,9 @@ void Map::MoveAllGameObjectsInMoveList()
                 AddObjectToRemoveList(go);
             }
         }
+
+        // update dynamic vmap tree
+        go->UpdateModelPosition(go->_newPosition.m_positionX, go->_newPosition.m_positionY, go->_newPosition.m_positionZ, true);
     }
     i_gameObjectsToMove.clear();
 }

@@ -68,6 +68,7 @@ GameObject::GameObject() : WorldObject(), m_model(NULL), m_goValue(new GameObjec
     m_goInfo = NULL;
     m_ritualOwner = NULL;
     m_goData = NULL;
+    m_model = NULL;
 
     m_DBTableGuid = 0;
     m_rotation = 0;
@@ -85,9 +86,9 @@ GameObject::~GameObject()
 
     delete m_goValue;
     delete m_AI;
-    delete m_model;
-    //if (m_uint32Values)                                      // field array can be not exist if GameOBject not loaded
-    //    CleanupsBeforeDelete();
+
+    if (m_model)
+        delete m_model;
 }
 
 bool GameObject::AIM_Initialize()
@@ -147,7 +148,7 @@ void GameObject::AddToWorld()
         sObjectAccessor->AddObject(this);
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
         // The state can be changed after GameObject::Create but before GameObject::AddToWorld
-        bool toggledState = GetGOData() ? GetGOData()->go_state == GO_STATE_READY : false;
+        bool toggledState = GetGOData() ? (GetGOData()->go_state == GO_STATE_READY || GetGOData()->go_state >= GO_STATE_TRANSPORT_ACTIVE) : false;
         if (m_model)
             GetMap()->Insert(*m_model);
         EnableCollision(startOpen ^ toggledState);
@@ -2214,16 +2215,38 @@ void GameObject::EnableCollision(bool enable)
     m_model->enable(enable ? GetPhaseMask() : 0);
 }
 
+void GameObject::UpdateModelPosition(float x, float y, float z, bool gridChange)
+{
+    if (!m_model)
+        return;
+
+    // if the model is not in dynamic vmap tree, do not perform change there
+    if (gridChange && !GetMap()->Contains(*m_model))
+        gridChange = false;
+
+    // remove from old position (only during grid changes)
+    if (gridChange)
+        GetMap()->Remove(*m_model);
+
+    m_model->setPosition(G3D::Vector3(x, y, z));
+
+    // and if we removed the model from tree, return it back to new position
+    if (gridChange)
+        GetMap()->Insert(*m_model);
+}
+
 void GameObject::UpdateModel()
 {
     if (!IsInWorld())
         return;
 
     if (m_model)
+    {
         if (GetMap()->Contains(*m_model))
             GetMap()->Remove(*m_model);
+        delete m_model;
+    }
 
-    delete m_model;
     m_model = GameObjectModel::Create(*this);
 
     if (m_model)

@@ -839,6 +839,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         float GetStationaryO() const { return m_stationaryPosition.GetOrientation(); }
 
         GameObjectModel * m_model;
+
+        void UpdateModelPosition(float x, float y, float z, bool gridChange = false);
     protected:
         bool AIM_Initialize();
         uint32      m_spellId;
