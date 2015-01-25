@@ -2076,7 +2076,7 @@ void Player::TeleportOutOfMap(Map *oldMap)
     }
 }
 
-bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options, bool stuckPort) //stuckPort set to true when player is stucked between two maps
+bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options, bool stuckPort, TransportPositionContainer* newTransport) //stuckPort set to true when player is stucked between two maps
 {
     if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
     {
@@ -2129,9 +2129,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     SetUnitMovementFlags(0);
     DisableSpline();
 
-    if (m_transport)
+    if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT))
     {
-        if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT))
+        if (m_transport)
         {
             m_transport->RemovePassenger(this);
             m_transport = NULL;
@@ -2140,6 +2140,17 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             m_movementInfo.t_seat = -1;
             m_movementInfo.t_guid = 0;
             m_movementInfo.t_vehicleId = 0;
+        }
+
+        if (newTransport && newTransport->transport)
+        {
+            newTransport->transport->AddPassenger(this);
+            m_movementInfo.t_pos.Relocate(newTransport->position);
+            float ax = m_movementInfo.t_pos.GetPositionX(), ay = m_movementInfo.t_pos.GetPositionY(), az = m_movementInfo.t_pos.GetPositionZ();
+            newTransport->transport->CalculatePassengerPosition(ax, ay, az, &orientation);
+            x = ax;
+            y = ay;
+            z = az;
         }
     }
 
@@ -2152,7 +2163,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (duel && GetMapId() != mapid && GetMap()->GetGameObject(GetUInt64Value(PLAYER_DUEL_ARBITER)))
         DuelComplete(DUEL_FLED);
 
-    if ((GetMapId() == mapid && !stuckPort && !m_transport) || (GetTransport() && GetMapId() == 628))
+    if ((GetMapId() == mapid && !stuckPort && (!m_transport || m_transport->ToDynamicTransport())) || (GetTransport() && GetMapId() == 628))
     {
         //lets reset far teleport flag if it wasn't reset during chained teleports
         SetSemaphoreTeleportFar(false);
