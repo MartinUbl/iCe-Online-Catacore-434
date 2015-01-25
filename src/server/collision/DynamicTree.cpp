@@ -279,7 +279,7 @@ GameObjectModel* DynamicMapTree::getFirstCollisionModel(float x, float y, float 
     Vector3 v(x, y, z);
     Ray r(v, Vector3(0, 0, -1));
     DynamicTreeIntersectionStateCallback callback(phasemask);
-    impl.intersectZAllignedRay(r, callback, maxSearchDist);
+    impl.intersectZAllignedRayWide(r, callback, maxSearchDist);
 
     if (callback.didHit())
         return callback.intersectModel();

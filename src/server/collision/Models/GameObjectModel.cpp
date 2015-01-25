@@ -160,6 +160,19 @@ GameObjectModel* GameObjectModel::Create(const GameObject& go)
     return mdl;
 }
 
+void GameObjectModel::setPosition(G3D::Vector3 &pos)
+{
+    // subtract old position
+    iBound = iBound - iPos;
+
+    iPos.x = pos.x;
+    iPos.y = pos.y;
+    iPos.z = pos.z;
+
+    // add new position
+    iBound = iBound + iPos;
+}
+
 bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const
 {
     if (!(phasemask & ph_mask))

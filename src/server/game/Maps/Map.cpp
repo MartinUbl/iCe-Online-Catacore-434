@@ -2045,7 +2045,7 @@ float Map::GetWaterOrGroundLevel(float x, float y, float z, float* ground /*= NU
 
 GameObject* Map::GetGroundCollisionObject(float x, float y, float z, uint32 phaseMask)
 {
-    GameObjectModel* colmodel = m_dyn_tree.getFirstCollisionModel(x, y, z, DEFAULT_HEIGHT_SEARCH, phaseMask);
+    GameObjectModel* colmodel = m_dyn_tree.getFirstCollisionModel(x, y, z, DEFAULT_HEIGHT_SEARCH*3.0f, phaseMask);
     if (!colmodel)
         return NULL;
 

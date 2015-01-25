@@ -210,6 +210,27 @@ public:
         if (Node* node = nodes[cell.x][cell.y])
             node->intersectRay(ray, intersectCallback, max_dist);
     }
+
+    // Optimized verson of intersectRay function for rays with vertical directions, and possibility of reaching to neigbour cell
+    template<typename RayCallback>
+    void intersectZAllignedRayWide(const Ray& ray, RayCallback& intersectCallback, float& max_dist)
+    {
+        Cell cell = Cell::ComputeCell(ray.origin().x, ray.origin().y);
+        if (!cell.isValid())
+            return;
+
+        for (int32 cx = cell.x - 1; cx <= cell.x + 1; cx++)
+        {
+            for (int32 cy = cell.y - 1; cy <= cell.y + 1; cy++)
+            {
+                if (Node* node = nodes[cx][cy])
+                    node->intersectRay(ray, intersectCallback, max_dist);
+
+                if (intersectCallback.didHit())
+                    return;
+            }
+        }
+    }
 };
 
 #undef CELL_SIZE

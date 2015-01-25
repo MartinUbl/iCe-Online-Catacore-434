@@ -148,7 +148,7 @@ void GameObject::AddToWorld()
         sObjectAccessor->AddObject(this);
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
         // The state can be changed after GameObject::Create but before GameObject::AddToWorld
-        bool toggledState = GetGOData() ? (GetGOData()->go_state == GO_STATE_READY || GetGOData()->go_state >= GO_STATE_TRANSPORT_ACTIVE) : false;
+        bool toggledState = (GetGOData() ? (GetGOData()->go_state == GO_STATE_READY) : false) || IsTransport();
         if (m_model)
             GetMap()->Insert(*m_model);
         EnableCollision(startOpen ^ toggledState);

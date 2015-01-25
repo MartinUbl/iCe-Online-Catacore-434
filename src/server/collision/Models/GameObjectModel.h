@@ -59,7 +59,7 @@ public:
     ~GameObjectModel();
 
     const G3D::Vector3& getPosition() const { return iPos; }
-    void setPosition(G3D::Vector3 &pos) { iPos.x = pos.x; iPos.y = pos.y; iPos.z = pos.z; }
+    void setPosition(G3D::Vector3 &pos);
 
     /**    Enables\disables collision. */
     void disable() { phasemask = 0;}
