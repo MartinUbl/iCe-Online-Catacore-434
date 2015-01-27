@@ -144,7 +144,7 @@ void BattlegroundRV::StartingEventOpenDoors()
     DoorOpen(BG_RV_OBJECT_DOOR_2);
 
     setTimer(BG_RV_PILAR_TO_FIRE_TIMER);
-    setState(BG_RV_STATE_CLOSE_FIRE);
+    setState(BG_RV_STATE_OPEN_PILARS);
 }
 
 void BattlegroundRV::AddPlayer(Player *plr)
@@ -318,8 +318,7 @@ bool BattlegroundRV::SetupBattleground()
         if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[i]))
         {
             gob->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
-            // disable collision - the LoS will be handled by our special method
-            gob->EnableCollision(false);
+            gob->EnableCollision(true);
         }
     }
 
