@@ -1725,7 +1725,7 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
 bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
 {
     if (IsInWorld())
-        return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ() + 2.f, ox, oy, oz + 2.f, GetPhaseMask());
+        return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ() + 1.5f, ox, oy, oz + 1.5f, GetPhaseMask());
 
     return true;
 }
