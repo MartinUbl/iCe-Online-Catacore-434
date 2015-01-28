@@ -113,20 +113,19 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
     }
 
     BattlegroundTypeId bgTypeId = BattlegroundTypeId(bgTypeId_);
+    uint32 bgMapId = 489;
 
     /* force random bg */
-    if (_player->getLevel() >= 80) {
-        switch (bgTypeId) {
-            case BATTLEGROUND_WS:
-            case BATTLEGROUND_AB:
-            case BATTLEGROUND_EY:
-            case BATTLEGROUND_TP:
-            case BATTLEGROUND_BG:
-                bgTypeId = BATTLEGROUND_RB;
-                break;
-            default:
-                break;
-        }
+    switch (bgTypeId) {
+        case BATTLEGROUND_WS:
+        case BATTLEGROUND_AB:
+        case BATTLEGROUND_EY:
+        case BATTLEGROUND_TP:
+        case BATTLEGROUND_BG:
+            bgTypeId = BATTLEGROUND_RB;
+            break;
+        default:
+            break;
     }
 
     // can do this, since it's battleground, not arena
@@ -152,7 +151,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
     }
 
     // expected bracket entry
-    PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(),_player->getLevel());
+    PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bgMapId, _player->getLevel());
     if (!bracketEntry)
     {
         sLog->outError("Unexpected level branch branch for player level %u",_player->getLevel());
@@ -194,7 +193,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
             return;
         }
 
-        if ((_player->InBattlegroundQueue() || _player->getLevel() < 80) && bgTypeId == BATTLEGROUND_RB)
+        if (_player->InBattlegroundQueue() && bgTypeId == BATTLEGROUND_RB)
         {
             //player is already in queue, can't start random queue
             WorldPacket data;
@@ -516,7 +515,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
         bgTypeId = bg->GetTypeID();
 
     // expected bracket entry
-    PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
+    PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bgTypeId == BATTLEGROUND_RB ? 489 : bg->GetMapId(), _player->getLevel());
     if (!bracketEntry)
     {
         sLog->outError("BattlegroundHandler: Unexpected level bracket request for level %u",_player->getLevel());

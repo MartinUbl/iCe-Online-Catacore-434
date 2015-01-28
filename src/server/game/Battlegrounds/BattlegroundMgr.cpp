@@ -1162,20 +1162,26 @@ BattlegroundTypeId BattlegroundMgr::SelectRandomBattleground(uint32 minBracketLe
     std::vector<BattlegroundTypeId> bgs;
     bgs.push_back(BATTLEGROUND_WS);
     bgs.push_back(BATTLEGROUND_AB);
-    bgs.push_back(BATTLEGROUND_EY);
+
+    if (minBracketLevel >= 35)
+        bgs.push_back(BATTLEGROUND_EY);
 
     // Twin Peaks and Battle for Gilneas exists only for level 85 (PvpDifficulty.dbc)
     if (minBracketLevel == 85)
     {
         bgs.push_back(BATTLEGROUND_TP);
         bgs.push_back(BATTLEGROUND_BG);
+        //bgs.push_back(BATTLEGROUND_SA);
 
         time_t secs = time(NULL);
         tm* date = localtime(&secs);
 
         // Allow Alterac Valley only from 16:00 to 22:00 every day
         if (date && date->tm_hour >= 16 && date->tm_hour <= 22)
+        {
             bgs.push_back(BATTLEGROUND_AV);
+            //bgs.push_back(BATTLEGROUND_IC);
+        }
     }
 
     return SelectRandomBattleground(bgs);
