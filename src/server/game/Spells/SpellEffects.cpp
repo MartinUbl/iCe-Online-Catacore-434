@@ -9489,7 +9489,19 @@ void Spell::EffectLeap(SpellEffIndex /*effIndex*/)
     if (!m_targets.HasDst())
         return;
 
-    unitTarget->NearTeleportTo(m_targets.m_dstPos.GetPositionX(), m_targets.m_dstPos.GetPositionY(), m_targets.m_dstPos.GetPositionZ(), m_targets.m_dstPos.GetOrientation(), unitTarget == m_caster);
+    // leap spells would teleport player somewhere away if not left transport
+    // - this should be fixed by removing them from transport and letting client to determine,
+    // if he's still on the same transport
+    float positionAdjustZ = 0.0f;
+    if (TransportBase* trbase = unitTarget->GetTransport())
+    {
+        trbase->RemovePassenger(unitTarget);
+        unitTarget->SetTransport(NULL);
+        unitTarget->m_movementInfo.t_guid = 0;
+        positionAdjustZ += 0.2f;
+    }
+
+    unitTarget->NearTeleportTo(m_targets.m_dstPos.GetPositionX(), m_targets.m_dstPos.GetPositionY(), m_targets.m_dstPos.GetPositionZ() + positionAdjustZ, m_targets.m_dstPos.GetOrientation(), unitTarget == m_caster);
 }
 
 void Spell::EffectReputation(SpellEffIndex effIndex)
