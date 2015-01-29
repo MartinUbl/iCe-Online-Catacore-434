@@ -113,7 +113,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
     }
 
     BattlegroundTypeId bgTypeId = BattlegroundTypeId(bgTypeId_);
-    uint32 bgMapId = 489;
+    uint32 bgMapId;
 
     /* force random bg */
     switch (bgTypeId) {
@@ -149,6 +149,11 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
         sLog->outError("Battleground template for BG Type ID %u not found!",bgTypeId_);
         return;
     }
+
+    if (_player->getLevel < 80)
+        bgMapId = 489;
+    else
+        bgMapId = bg->GetMapId();
 
     // expected bracket entry
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bgMapId, _player->getLevel());
