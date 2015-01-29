@@ -413,7 +413,6 @@ bool Vehicle::AddPassenger(WorldObject *obj, int8 seatId, bool byAura)
     unit->m_movementInfo.t_seat = seat->first;
     unit->m_movementInfo.t_guid = me->GetGUID();
     unit->m_movementInfo.t_vehicleId = m_vehicleInfo->m_ID;
-    unit->SetTransport(this);
 
     if (me->GetTypeId() == TYPEID_UNIT
         && unit->GetTypeId() == TYPEID_PLAYER
