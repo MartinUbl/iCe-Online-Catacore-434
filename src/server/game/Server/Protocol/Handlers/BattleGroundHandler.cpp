@@ -150,7 +150,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if (_player->getLevel < 80)
+    if (_player->getLevel() < 80)
         bgMapId = 489;
     else
         bgMapId = bg->GetMapId();
