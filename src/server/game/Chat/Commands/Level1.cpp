@@ -944,6 +944,15 @@ bool ChatHandler::HandleGPSCommand(const char* args)
         cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
         zone_x, zone_y, ground_z, floor_z, have_map, have_vmap);
 
+    if (obj->GetTransport() && obj->GetTransport()->ToGameObject())
+    {
+        PSendSysMessage("Transport position:\nX: %f, Y: %f, Z: %f, O: %f, transGUIDLow: %u", obj->m_movementInfo.t_pos.m_positionX
+            , obj->m_movementInfo.t_pos.m_positionY
+            , obj->m_movementInfo.t_pos.m_positionZ
+            , obj->m_movementInfo.t_pos.m_orientation
+            , GUID_LOPART(obj->m_movementInfo.t_guid));
+    }
+
     sLog->outDebug("Player %s GPS call for %s '%s' (%s: %u):",
         m_session ? GetNameLink().c_str() : GetTrinityString(LANG_CONSOLE_COMMAND),
         (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetName(),
