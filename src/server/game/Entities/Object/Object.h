@@ -814,7 +814,8 @@ class WorldObject : public Object, public WorldLocation
             return obj && IsInMap(obj) && _IsWithinDist(obj,dist2compare,is3D);
         }
         bool IsWithinLOS(float x, float y, float z) const;
-        bool IsWithinLOSInMap(const WorldObject* obj) const;
+        bool IsWithinLOS_raw(float x, float y, float z, float heightCorrection = 2.0f) const;
+        bool IsWithinLOSInMap(const WorldObject* obj, bool reducedHeight = false) const;
         bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true) const;
         bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true) const;
         bool IsInRange2d(float x, float y, float minRange, float maxRange) const;

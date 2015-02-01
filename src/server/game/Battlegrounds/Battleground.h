@@ -417,8 +417,6 @@ class Battleground
 
         BattlegroundArena* ToArena() { if (isArena()) return reinterpret_cast<BattlegroundArena*>(this); else return NULL; }
 
-        virtual bool CheckSpecialLOS(float ax, float ay, float az, float bx, float by, float bz) { return true; }
-
         // Set methods:
         void SetName(char const* Name)      { m_Name = Name; }
         void SetTypeID(BattlegroundTypeId TypeID) { m_TypeID = TypeID; }

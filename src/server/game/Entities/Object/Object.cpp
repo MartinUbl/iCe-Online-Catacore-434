@@ -1714,20 +1714,31 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
     return distsq < dist2compare * dist2compare;
 }
 
-bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
+bool WorldObject::IsWithinLOSInMap(const WorldObject* obj, bool reducedHeight) const
 {
-    if (!IsInMap(obj)) return false;
+    if (!IsInMap(obj))
+        return false;
+
     float ox,oy,oz;
     obj->GetPosition(ox,oy,oz);
-    return(IsWithinLOS(ox, oy, oz));
+
+    if (reducedHeight)
+        return (IsWithinLOS(ox, oy, oz));
+    else
+        return (!IsInWorld() || IsWithinLOS_raw(ox, oy, oz, 1.5f));
 }
 
 bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
 {
     if (IsInWorld())
-        return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ() + 1.5f, ox, oy, oz + 1.5f, GetPhaseMask());
+        return IsWithinLOS_raw(ox, oy, oz, 2.0f);
 
     return true;
+}
+
+bool WorldObject::IsWithinLOS_raw(float ox, float oy, float oz, float heightCorrection) const
+{
+    return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ() + heightCorrection, ox, oy, oz + heightCorrection, GetPhaseMask());
 }
 
 bool WorldObject::GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D /* = true */) const

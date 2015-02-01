@@ -201,58 +201,6 @@ bool BattlegroundRV::GetUnderMapReturnPosition(Player* plr, Position& pos)
     return true;
 }
 
-static bool circleLineIntersection(float ax, float ay, float bx, float by, float cpx, float cpy, float circleRadius)
-{
-    float a = ay - by;
-    float b = bx - ax;
-    float c1 = -a*ax - b*ay;
-
-    float in_y = (a*(a*cpy - b*cpx) - b*c1) / (a*a + b*b);
-    float in_x = (-b*in_y - c1) / a;
-
-    // verify the intersection point is between the two points
-    if (!(((in_x > ax) ^ (in_x > bx)) && ((in_y > ay) ^ (in_y > by))))
-        return false;
-
-    return (sqrt(std::pow(in_x - cpx, 2) + std::pow(in_y - cpy, 2)) <= circleRadius);
-}
-
-bool BattlegroundRV::CheckSpecialLOS(float ax, float ay, float az, float bx, float by, float bz)
-{
-    for (int i = 0; i < 4; i++)
-    {
-        if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_RV_OBJECT_PILAR_1 + i]))
-        {
-            if (gob->GetGoState() == GO_STATE_TRANSPORT_STOPPED + 1)
-            {
-                float rad = 4.3f;
-                // pillars _1 and _3 have smaller radius
-                if (i == 0 || i == 2)
-                    rad = 2.24f;
-
-                // the line goes through pillar
-                if (circleLineIntersection(ax, ay, bx, by, gob->GetPositionX(), gob->GetPositionY(), rad))
-                {
-                    // not so different heights
-                    if (fabs(bz - az) < 1.0f)
-                    {
-                        // both standing on pillar - they can see each other
-                        if (bz > 32.0f)
-                            return true;
-                        // both standing on ground
-                        return false;
-                    }
-
-                    // NOTE: for now, LoS from ground to pillar (and vice-versa) is always fine
-                    // TODO: find the way how to add pillars (transports) to dynamic vmap tree
-                }
-            }
-        }
-    }
-
-    return true;
-}
-
 void BattlegroundRV::HandleAreaTrigger(Player *Source, uint32 Trigger)
 {
     // We won't handle any areatriggers in this arena
