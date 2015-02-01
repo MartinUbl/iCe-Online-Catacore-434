@@ -203,8 +203,10 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (GetBossState(DATA_LADY_DEATHWHISPER) == DONE)
                         {
                             go->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
-                            go->SetGoState(GO_STATE_READY);
+                            go->SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
                         }
+                        else
+                            go->SetTransportState(GO_STATE_TRANSPORT_STOPPED, 0);
                         break;
                     case GO_SAURFANG_S_DOOR:
                         saurfangDoor = go->GetGUID();
@@ -330,10 +332,10 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case DATA_LADY_DEATHWHISPER:
                         SetBossState(DATA_GUNSHIP_EVENT, state);    // TEMP HACK UNTIL GUNSHIP SCRIPTED
                         if (state == DONE)
+                        {
                             if (GameObject* elevator = instance->GetGameObject(ladyDeathwisperElevator))
-                            {
-                                elevator->SetGoState(GO_STATE_READY);
-                            }
+                                elevator->SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
+                        }
                         break;
                     case DATA_DEATHBRINGER_SAURFANG:
                         switch (state)
@@ -411,6 +413,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case DATA_ORB_WHISPERER_ACHIEVEMENT:
                         isOrbWhispererEligible = data ? true : false;
+                        break;
+                    case DATA_LADY_DEATHWHISPER:
+                        SetBossState(DATA_LADY_DEATHWHISPER, data == 0 ? NOT_STARTED : DONE);
                         break;
                     default:
                         break;
