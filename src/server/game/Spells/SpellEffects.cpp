@@ -959,7 +959,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         maxbp *= 1.4f;
                     else
                         maxbp *= 0.7f;
-                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 50)?85112:((bp0 == 25)?91986:0));
+                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 50) ? 85112 :((bp0 == 25) ? 91986 : 0));
                     if (pSpell)
                     {
                         // Burning Embers inflicts 25/50% of damage dealt OR damage based by formula
@@ -971,11 +971,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         if (bp0 > maxbp)
                             bp0 = maxbp;
                         // If we already have aura like this, only refresh if damage is lower
-                        if (unitTarget->HasAura(85421) && unitTarget->GetAura(85421)->GetEffect(0) &&
-                            unitTarget->GetAura(85421)->GetEffect(0)->GetAmount() >= bp0)
-                            unitTarget->GetAura(85421)->RefreshDuration();
+                        AuraEffect * aurEff = unitTarget->GetAuraEffect(85421, EFFECT_0, pOwner->GetGUID());
+                        if (aurEff && aurEff->GetDamage() >= bp0)
+                            aurEff->GetBase()->RefreshDuration();
                         else
-                        pOwner->CastCustomSpell(unitTarget, 85421, &bp0, 0, 0, true);
+                            pOwner->CastCustomSpell(unitTarget, 85421, &bp0, 0, 0, true);
                     }
                 }
                 // Lash of Pain (succubus)
