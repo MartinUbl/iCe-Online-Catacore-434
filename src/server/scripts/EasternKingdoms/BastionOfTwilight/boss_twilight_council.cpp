@@ -1374,7 +1374,6 @@ public:
         uint32 walk_timer_Feludisu;
         uint32 Update_timer;
         uint64 summonerGUID;
-        Unit* pRod_marked_player;
         bool can_chaining,ported,can_tele,Hp_dropped,can_interrupt,update_movement;
 
         void Reset()
@@ -1389,9 +1388,7 @@ public:
             Disperse_timer=20000;
             Chain_timer=1000;
             Update_timer=0;
-            pRod_marked_player=NULL;
             can_chaining=ported=can_tele=Hp_dropped=can_interrupt=update_movement=false;
-            pRod_marked_player=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
@@ -1493,9 +1490,9 @@ public:
         {
                     if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC) // Ak som v 10 mane
                     {
-                        if(pRod_marked_player && pRod_marked_player->IsAlive())
+                        if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM,0,300.0f,true,83282))
                         {
-                            DoCast(pRod_marked_player,83282,true);
+                            me->CastSpell(target, 83282, true);
                             can_chaining=false;
                         }
                     }
