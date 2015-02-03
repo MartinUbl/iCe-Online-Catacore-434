@@ -1524,9 +1524,9 @@ public:
                 {
                if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC) // Ak som v 10 mane 
                 {
-                    if ((pRod_marked_player = SelectTarget(SELECT_TARGET_RANDOM, 1, 200, true))) // Na jedneho hraca pridam marku
+                    if (Unit * markedPlayer = SelectTarget(SELECT_TARGET_RANDOM, 1, 200.0f, true)) // Na jedneho hraca pridam marku
                     {
-                        me->AddAura(83099,pRod_marked_player);
+                        me->AddAura(83099,markedPlayer);
                         rod_timer=40000;
                         Chain_timer=12000; // Do marked targetu zacastim chain lightning
                         can_chaining=true;
