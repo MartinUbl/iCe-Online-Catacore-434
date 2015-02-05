@@ -1766,7 +1766,7 @@ public:
 
             if (target && target->ToPlayer())
             {
-                    const_cast<AuraEffect*>(aurEff)->SetAmount((2000 * pow (1.5,(int)(aurEff->GetTickNumber() -1 ))));
+                    const_cast<AuraEffect*>(aurEff)->SetDamage((2000 * pow (1.5,(int)(aurEff->GetTickNumber() -1 ))));
             }
         }
 
