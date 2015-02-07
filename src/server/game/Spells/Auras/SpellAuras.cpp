@@ -2466,7 +2466,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
             }
             break;
         case SPELLFAMILY_PALADIN:
-            switch(GetId())
+        {
+            uint32 spellID = GetId();
+            switch(spellID)
             {
                 case 19746:
                 case 31821:
@@ -2479,14 +2481,38 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         break;
                     if (apply)
                     {
-                        if ((GetSpellProto()->Id == 31821 && target->HasAura(19746, GetCasterGUID())) || (GetSpellProto()->Id == 19746 && target->HasAura(31821)))
+                        if ((spellID == 31821 && target->HasAura(19746, GetCasterGUID())) || (spellID == 19746 && target->HasAura(31821)))
                             target->CastSpell(target,64364,true);
                     }
                     else
                         target->RemoveAurasDueToSpell(64364, GetCasterGUID());
+
+                    // Aura mastery
+                    if (spellID == 31821)
+                    {
+                        // TODO: Find a not hacky way to correctly solve issuses with fucked up resistance system counting
+                        if (AuraEffect * aurEff = target->GetAuraEffect(465,EFFECT_0,target->GetGUID()))
+                        {
+                            aurEff->ChangeAmount( apply ? aurEff->GetAmount() * 2 : aurEff->GetAmount() / 2);
+                            aurEff->GetBase()->SetNeedClientUpdateForTargets();
+                        }
+
+                        if (AuraEffect * aurEff = target->GetAuraEffect(7294,EFFECT_0,target->GetGUID()))
+                        {
+                            aurEff->ChangeAmount( apply ? aurEff->GetAmount() * 2 : aurEff->GetAmount() / 2);
+                            aurEff->GetBase()->SetNeedClientUpdateForTargets();
+                        }
+
+                        if (AuraEffect * aurEff = target->GetAuraEffect(19891,EFFECT_0,target->GetGUID()))
+                        {
+                            aurEff->ChangeAmount( apply ? aurEff->GetAmount() * 2 : aurEff->GetAmount() / 2);
+                            aurEff->GetBase()->SetNeedClientUpdateForTargets();
+                        }
+                    }
                     break;
             }
             break;
+        }
         case SPELLFAMILY_DEATHKNIGHT:
             // Blood Presence
             if (GetId() == 48263)
