@@ -13561,6 +13561,10 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, u
         if (Unit* owner = GetOwner())
             return owner->SpellHealingBonusDone(victim, spellProto,effIndex, healamount, damagetype, stack);
 
+    // Some spells don't benefit from done bonuses at all
+    if (spellProto->AttributesEx3 & SPELL_ATTR3_NO_DONE_BONUS)
+        return 1.0f;
+
     // No bonus healing for potion spells
     if (spellProto->SpellFamilyName == SPELLFAMILY_POTION)
         return healamount;
@@ -13677,6 +13681,13 @@ float Unit::SpellHealingPctDone(Unit* victim, SpellEntry const* spellProto) cons
     if (GetTypeId() == TYPEID_UNIT && IsTotem())
         return 1.0f;
 
+    // Some spells don't benefit from pct done mods
+    if (spellProto->AttributesEx6 & SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS)
+        return 1.0f;
+
+    // Some spells don't benefit from done bonuses at all
+    if (spellProto->AttributesEx3 & SPELL_ATTR3_NO_DONE_BONUS)
+        return 1.0f;
     // No bonus healing for potion spells
     if (spellProto->SpellFamilyName == SPELLFAMILY_POTION)
         return 1.0f;
