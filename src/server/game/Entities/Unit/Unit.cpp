@@ -11416,7 +11416,8 @@ bool Unit::HasAuraState(AuraState flag, SpellEntry const *spellProto, Unit const
         // If aura with aurastate by caster not found return false
         if ((1<<(flag-1)) & PER_CASTER_AURA_STATE_MASK)
         {
-            for (AuraStateAurasMap::const_iterator itr = m_auraStateAuras.lower_bound(flag); itr != m_auraStateAuras.upper_bound(flag); ++itr)
+            AuraStateAurasMapBounds range = m_auraStateAuras.equal_range(flag);
+            for (AuraStateAurasMap::const_iterator itr = range.first; itr != range.second; ++itr)
                 if (itr->second->GetBase()->GetCasterGUID() == Caster->GetGUID())
                     return true;
             return false;
@@ -13688,6 +13689,7 @@ float Unit::SpellHealingPctDone(Unit* victim, SpellEntry const* spellProto) cons
     // Some spells don't benefit from done bonuses at all
     if (spellProto->AttributesEx3 & SPELL_ATTR3_NO_DONE_BONUS)
         return 1.0f;
+
     // No bonus healing for potion spells
     if (spellProto->SpellFamilyName == SPELLFAMILY_POTION)
         return 1.0f;

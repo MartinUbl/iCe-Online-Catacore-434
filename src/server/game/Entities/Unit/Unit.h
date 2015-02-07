@@ -1149,9 +1149,12 @@ class Unit : public WorldObject
         typedef std::set<Unit*> AttackerSet;
         typedef std::set<Unit*> ControlList;
         typedef std::pair<uint32, uint8> spellEffectPair;
-        typedef std::multimap<uint32,  Aura*> AuraMap;
-        typedef std::multimap<uint32,  AuraApplication*> AuraApplicationMap;
-        typedef std::multimap<AuraState,  AuraApplication*> AuraStateAurasMap;
+        typedef std::multimap<uint32, Aura*> AuraMap;
+        typedef std::multimap<uint32, AuraApplication*> AuraApplicationMap;
+
+        typedef std::multimap<AuraState, AuraApplication*> AuraStateAurasMap;
+        typedef std::pair<AuraStateAurasMap::const_iterator, AuraStateAurasMap::const_iterator> AuraStateAurasMapBounds;
+
         typedef std::list<AuraEffect *> AuraEffectList;
         typedef std::list<Aura *> AuraList;
         typedef std::list<AuraApplication *> AuraApplicationList;
