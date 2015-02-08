@@ -1007,6 +1007,9 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                         break;
                     case 19891: // Resistance Aura
                         amount = resist;
+                        // hack for Resistance Aura not reacting to Aura Mastery spell due to "custom" resist counting
+                        if (caster->HasAura(31821))
+                            amount *= 2;
                         break;
                 }
                 break;
