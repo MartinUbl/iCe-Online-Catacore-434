@@ -13564,7 +13564,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, u
 
     // Some spells don't benefit from done bonuses at all
     if (spellProto->AttributesEx3 & SPELL_ATTR3_NO_DONE_BONUS)
-        return 1.0f;
+        return healamount;
 
     // No bonus healing for potion spells
     if (spellProto->SpellFamilyName == SPELLFAMILY_POTION)
