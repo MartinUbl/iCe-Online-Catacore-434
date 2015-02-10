@@ -143,6 +143,10 @@ public:
         bool was_used, was_blasted,flamed;
         bool phrase1,phrase2,phrase3;
 
+        std::vector<uint32> spreadVector;
+        uint32 spreadTimer;
+        bool spreading;
+
         uint32 eggs_dead;
 
         void JustRespawned()
@@ -159,6 +163,10 @@ public:
 
         void Reset()
         {
+            spreadTimer = 200;
+            spreadVector.clear();
+            spreading = false;
+
             PHASE = 0;
             if (instance)
             {
@@ -213,7 +221,7 @@ public:
             else // Set duration for wrack
             {
                 if(param)
-                    SpreadWrack(param);
+                    spreadVector.push_back((uint32)param);
             }
         }
 
@@ -287,6 +295,8 @@ public:
 
         void SpreadWrack(int32 restDuration)
         {
+            spreading = true;
+
             std::list<Player*> spread_targets;
             std::list<Player*> backup_targets;
 
@@ -346,8 +356,8 @@ public:
                     }
                 }
             }
+            spreading = false;
         }
-
 
         void KilledUnit(Unit * victim)
         {
@@ -462,17 +472,26 @@ public:
                 if (*j && (*j)->IsInWorld() == true )
                     me->CastSpell(*j,SPELL_WRACK,true);
             }
-            /*else
-            {
-                if ( Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true) )
-                    me->CastSpell(player,SPELL_WRACK,true);
-            }*/
         }
 
         void UpdateAI(const uint32 Diff)
         {
             if (!UpdateVictim())
                 return;
+
+            if (spreadTimer <= Diff)
+            {
+                if (spreading == false)
+                {
+                    if (!spreadVector.empty())
+                    {
+                        SpreadWrack((int32)spreadVector[0]);
+                        spreadVector.erase(spreadVector.begin());
+                    }
+                }
+                spreadTimer = 100;
+            }
+            else spreading -= Diff;
 
             if (Animation_timer <= Diff && PHASE==0)
             {
