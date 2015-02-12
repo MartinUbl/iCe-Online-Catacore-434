@@ -528,15 +528,17 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
     InstanceSave::PlayerListType &pList = save->m_playerList;
     while (!pList.empty())
     {
-        if (Player *player = *(pList.begin()))
-            player->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
+        Player *player = *(pList.begin());
+        ASSERT(player);
+        player->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
     }
 
     InstanceSave::GroupListType &gList = save->m_groupList;
     while (!gList.empty())
     {
-        if(Group *group = *(gList.begin()))
-            group->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
+        Group *group = *(gList.begin());
+        ASSERT(group);
+        group->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
     }
 
     delete save;
