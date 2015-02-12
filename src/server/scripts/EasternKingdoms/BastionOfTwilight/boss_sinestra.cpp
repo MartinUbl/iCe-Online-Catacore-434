@@ -491,7 +491,7 @@ public:
                 }
                 spreadTimer = 100;
             }
-            else spreading -= Diff;
+            else spreadTimer -= Diff;
 
             if (Animation_timer <= Diff && PHASE==0)
             {
