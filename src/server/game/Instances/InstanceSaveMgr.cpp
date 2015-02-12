@@ -530,6 +530,7 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
     {
         Player *player = *(pList.begin());
         ASSERT(player);
+        ASSERT(save);
         player->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
     }
 
@@ -538,6 +539,7 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
     {
         Group *group = *(gList.begin());
         ASSERT(group);
+        ASSERT(save);
         group->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
     }
 
