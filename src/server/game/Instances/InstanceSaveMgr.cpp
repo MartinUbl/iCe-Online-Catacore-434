@@ -520,22 +520,26 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
     // do not allow UnbindInstance to automatically unload the InstanceSaves
     lock_instLists = true;
 
-    InstanceSave::PlayerListType &pList = itr->second->m_playerList;
+    InstanceSave * save = itr->second;
+
+    if (!save)
+        return;
+
+    InstanceSave::PlayerListType &pList = save->m_playerList;
     while (!pList.empty())
     {
-        Player *player = *(pList.begin());
-        if (player && player->IsInWorld())
-            player->UnbindInstance(itr->second->GetMapId(), itr->second->GetDifficulty(), true);
+        if (Player *player = *(pList.begin()))
+            player->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
     }
 
-    InstanceSave::GroupListType &gList = itr->second->m_groupList;
+    InstanceSave::GroupListType &gList = save->m_groupList;
     while (!gList.empty())
     {
-        Group *group = *(gList.begin());
-        group->UnbindInstance(itr->second->GetMapId(), itr->second->GetDifficulty(), true);
+        if(Group *group = *(gList.begin()))
+            group->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
     }
 
-    delete itr->second;
+    delete save;
     m_instanceSaveById.erase(itr++);
 
     lock_instLists = false;
