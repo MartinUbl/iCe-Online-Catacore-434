@@ -11367,6 +11367,12 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
                 }
             }
         }
+        else
+        {
+            // In case of per caster aurastate, we must send update to players anyway !
+            if ((1 << (flag - 1)) & PER_CASTER_AURA_STATE_MASK)
+                ForceValuesUpdateAtIndex(UNIT_FIELD_AURASTATE);
+        }
     }
     else
     {
