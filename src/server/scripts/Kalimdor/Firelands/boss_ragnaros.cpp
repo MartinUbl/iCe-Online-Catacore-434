@@ -2409,7 +2409,7 @@ public:
                 me->RemoveAura(FLAME_PILLAR_TRANSFORM);
                 me->RemoveAura(100133);
                 me->RemoveAura(100134);
-                me->RemoveAura(100134);
+                me->RemoveAura(100135);
 
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
 
