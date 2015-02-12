@@ -4360,6 +4360,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[2] = SPELL_EFFECT_NONE;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
             if ( i == 100292)
                 spellInfo->excludeTargetAuraSpell = 100292;
             else if ( i == 100293)
