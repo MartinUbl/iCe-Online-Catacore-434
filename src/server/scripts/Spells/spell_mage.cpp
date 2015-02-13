@@ -347,6 +347,7 @@ public:
 
         Unit * mainTarget;
         std::vector<DOT_RECORD> dots;
+        uint32 living_bomb_counter;
 
         bool Load() override
         {
@@ -354,6 +355,7 @@ public:
                 return false;
 
             mainTarget = nullptr;
+            living_bomb_counter = 0;
             return true;
         }
 
@@ -363,9 +365,6 @@ public:
             Unit * target = GetHitUnit();
 
             if (!caster || !target)
-                return;
-
-            if (!caster->HasAura(64343)) // Must have impact spreading enabler
                 return;
 
             mainTarget = target;
@@ -405,43 +404,37 @@ public:
             }
         }
 
-        void FilterHitTargets(std::list<Unit*>& unitList)
+        void HandleSpreadEffect(SpellEffIndex /*effIndex*/)
         {
+            Unit * effectTarget = GetHitUnit();
+
+            if (!effectTarget || effectTarget == mainTarget)
+                return;
+
             if (!mainTarget)
                 return;
 
-            uint32 living_bomb_counter = 0;
-
             #define LIVING_BOMB 44457
 
-            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); itr++)
+            for (auto &dot : dots)
             {
-                if (Unit * unit = *itr)
+                if(dot.aura_id == LIVING_BOMB)
                 {
-                    if (unit == mainTarget)
+                    if (++living_bomb_counter > 3) // maximum 2 copies of living bomb
                         continue;
+                }
+                GetCaster()->AddAura(dot.aura_id,effectTarget);// Add according aura
 
-                    for (auto &dot : dots)
+                if(Aura *nova = effectTarget->GetAura(dot.aura_id,GetCaster()->GetGUID()))
+                {
+                    nova->SetDuration(dot.aura_duration); // Set according duration
+
+                    if(dot.auraEff_id != -1)
                     {
-                        if(dot.aura_id == LIVING_BOMB)
+                        if (AuraEffect* aurEff = nova->GetEffect(dot.auraEff_id))
                         {
-                            if (++living_bomb_counter > 3) // maximum 2 copies of living bomb
-                                continue;
-                        }
-                        GetCaster()->AddAura(dot.aura_id,unit);// Add according aura
-
-                        if(Aura *nova = unit->GetAura(dot.aura_id,GetCaster()->GetGUID()))
-                        {
-                            nova->SetDuration(dot.aura_duration); // Set according duration
-
-                            if(dot.auraEff_id != -1)
-                            {
-                                if (AuraEffect* aurEff = nova->GetEffect(dot.auraEff_id))
-                                {
-                                    aurEff->SetPeriodicTimer(dot.aura_per_timer); // Need synchronize periodic timer
-                                    aurEff->SetAmount(dot.aura_bp);
-                                }
-                            }
+                            aurEff->SetPeriodicTimer(dot.aura_per_timer); // Need synchronize periodic timer
+                            aurEff->SetAmount(dot.aura_bp);
                         }
                     }
                 }
@@ -451,7 +444,7 @@ public:
         void Register() override
         {
             OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleDirectEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_mage_impact_SpellScript::FilterHitTargets, EFFECT_1, TARGET_UNIT_AREA_ENEMY_DST);
+            OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleSpreadEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
