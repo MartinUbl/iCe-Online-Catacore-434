@@ -1455,7 +1455,11 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
     else
         damageInfo->damage = damage;
 
-    damageInfo->hitOutCome = RollMeleeOutcomeAgainst(damageInfo->target, damageInfo->attackType);
+    // "Temporary" fix for pet sharing melee hit chances with master
+    bool hasOwner = GetTypeId() == TYPEID_UNIT && GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER;
+
+    damageInfo->hitOutCome = hasOwner ? GetOwner()->RollMeleeOutcomeAgainst(damageInfo->target, damageInfo->attackType)
+                             : RollMeleeOutcomeAgainst(damageInfo->target, damageInfo->attackType);
 
     switch (damageInfo->hitOutCome)
     {
