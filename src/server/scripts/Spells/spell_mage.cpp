@@ -343,67 +343,34 @@ public:
             int16 auraEff_id;
             uint32 aura_bp;
             struct auraRecord *next;
-        }DOT;
+        }DOT_RECORD;
 
-        #define LIVING_BOMB 44457
+        Unit * mainTarget;
+        std::vector<DOT_RECORD> dots;
 
-        Player * caster;
-        DOT* begin;
-        Unit * exclude_target;
-        uint32 living_bomb_counter;
-
-        bool Load()
+        bool Load() override
         {
-            if (GetCaster()->GetTypeId() != TYPEID_PLAYER || GetCaster()->ToPlayer()->getClass() != CLASS_MAGE )
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
                 return false;
 
-            caster = GetCaster()->ToPlayer();
-            begin = NULL;
-            exclude_target = NULL;
+            mainTarget = nullptr;
             return true;
         }
 
-        DOT * alloc(void)
+        void HandleDirectEffect(SpellEffIndex /*effIndex*/)
         {
-            DOT * temp;
-            temp = (DOT*)malloc(sizeof(DOT));
-            if(!temp)
-                return NULL;
-            else
-            {
-                temp->next = NULL;
-                return temp;
-            }
-        }
+            Unit * caster = GetCaster();
+            Unit * target = GetHitUnit();
 
-        void Push(DOT *_new)
-        {
-            if(begin == NULL) // Inserting first time
-            {
-                begin =_new;
-                return;
-            }
-
-            DOT* akt = begin;
-
-            while(akt->next) // Look up end of SLL
-            {
-                akt= akt->next;
-            }
-
-            akt->next = _new; // And insert at the end  (cause there were trouble with inserting in beginning)
-        }
-
-
-        void HandleImpactEffect(SpellEffIndex /*effIndex*/)
-        {
-            living_bomb_counter = 0;
-            exclude_target = GetHitUnit();
-
-            if(!exclude_target)
+            if (!caster || !target)
                 return;
 
-            Unit::AuraApplicationMap const& auras = exclude_target->GetAppliedAuras();
+            if (!caster->HasAura(64343)) // Must have impact spreading enabler
+                return;
+
+            mainTarget = target;
+
+            Unit::AuraApplicationMap const& auras = target->GetAppliedAuras();
             for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
             {
                 Aura* aura = itr->second->GetBase();
@@ -412,89 +379,83 @@ public:
                   && (aura->GetCaster()->ToPlayer() == caster) && aura->GetSpellProto() && aura->GetSpellProto()->SchoolMask == SPELL_SCHOOL_MASK_FIRE &&
                   (aura->HasEffectType(SPELL_AURA_PERIODIC_DAMAGE) || aura->HasEffectType(SPELL_AURA_PERIODIC_TRIGGER_SPELL)))
                 {
-                    DOT *current = alloc();
-                    if(!current)
-                        continue;
+                    DOT_RECORD dot;
 
-                    current->aura_id = aura->GetId();
-                    current->aura_duration = aura->GetDuration();
-                    current->auraEff_id = -1; // For sure -1 means fail
+                    dot.aura_id = aura->GetId();
+                    dot.aura_duration = aura->GetDuration();
+                    dot.auraEff_id = -1; // For sure -1 means fail
 
                     for(uint8 i = 0; i < MAX_SPELL_EFFECTS ; i++) // Need to find right id of effect where needed aura' are
                     {
-                        AuraEffect* aurEff = aura->GetEffect(i);
-
-                        if(aurEff && ( aurEff->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE || aurEff->GetAuraType() == SPELL_AURA_PERIODIC_TRIGGER_SPELL))
+                        if (AuraEffect* aurEff = aura->GetEffect(i))
                         {
-                            current->auraEff_id = i;
-                            current->aura_per_timer = aurEff->GetPeriodicTimer();
-                            current->aura_bp = aurEff->GetAmount();
-                            break;
+                            AuraType aurType = aurEff->GetAuraType();
+
+                            if(aurType == SPELL_AURA_PERIODIC_DAMAGE || aurType == SPELL_AURA_PERIODIC_TRIGGER_SPELL)
+                            {
+                                dot.auraEff_id = i;
+                                dot.aura_per_timer = aurEff->GetPeriodicTimer();
+                                dot.aura_bp = aurEff->GetAmount();
+                                break;
+                            }
                         }
                     }
-
-                    Push(current); // Push current aura record to SLL
+                    dots.push_back(dot);
                 }
             }
         }
 
-        void HandleEffectScriptEffect(SpellEffIndex /*effIndex*/)
+        void FilterHitTargets(std::list<Unit*>& unitList)
         {
-            if (!GetHitUnit() || GetHitUnit() == exclude_target || !begin)
+            if (!mainTarget)
                 return;
 
-            Unit * hit_unit = GetHitUnit();
+            uint32 living_bomb_counter = 0;
 
-            if(!exclude_target->IsWithinLOS(hit_unit->GetPositionX(),hit_unit->GetPositionY(),hit_unit->GetPositionZ())) // Blizz hotfix
-                return;
+            #define LIVING_BOMB 44457
 
-            DOT* akt = begin;
-
-            while(akt)
+            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); itr++)
             {
-                if(akt->aura_id == LIVING_BOMB)
-                    living_bomb_counter++;
-
-                if(akt->aura_id != LIVING_BOMB || living_bomb_counter < 3) // We can copy LIVING_BOMB max 2 times
+                if (Unit * unit = *itr)
                 {
-                    caster->AddAura(akt->aura_id,hit_unit);// Add according aura
+                    if (unit == mainTarget)
+                        continue;
 
-                    if(Aura *nova = hit_unit->GetAura(akt->aura_id,caster->GetGUID()))
+                    for (auto &dot : dots)
                     {
-                        nova->SetDuration(akt->aura_duration); // Set according duration
+                        if(dot.aura_id == LIVING_BOMB)
+                        {
+                            if (++living_bomb_counter > 3) // maximum 2 copies of living bomb
+                                continue;
+                        }
+                        GetCaster()->AddAura(dot.aura_id,unit);// Add according aura
 
-                        if(akt->auraEff_id != -1)
-                            if (AuraEffect* aurEff = nova->GetEffect(akt->auraEff_id))
+                        if(Aura *nova = unit->GetAura(dot.aura_id,GetCaster()->GetGUID()))
+                        {
+                            nova->SetDuration(dot.aura_duration); // Set according duration
+
+                            if(dot.auraEff_id != -1)
                             {
-                                aurEff->SetPeriodicTimer(akt->aura_per_timer); // Need synchronize periodic timer
-                                aurEff->SetAmount(akt->aura_bp);
+                                if (AuraEffect* aurEff = nova->GetEffect(dot.auraEff_id))
+                                {
+                                    aurEff->SetPeriodicTimer(dot.aura_per_timer); // Need synchronize periodic timer
+                                    aurEff->SetAmount(dot.aura_bp);
+                                }
                             }
+                        }
                     }
-                 }
-
-                akt = akt->next; // look for another aura in list
+                }
             }
-
-            // Dont forget dealloc memory for linked list :D
-            // Too lazy to rewrite it to C++, leave it for oldschool C learning purpose :P
-            for (akt = begin; akt != NULL;)
-            {
-                begin = akt;
-                akt = akt->next;
-                free((void*)begin);
-            }
-            begin = NULL;
         }
 
-
-        void Register()
+        void Register() override
         {
-            OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleImpactEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-            OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleEffectScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleDirectEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_mage_impact_SpellScript::FilterHitTargets, EFFECT_1, TARGET_UNIT_AREA_ENEMY_DST);
         }
     };
 
-    SpellScript* GetSpellScript() const
+    SpellScript* GetSpellScript() const override
     {
         return new spell_mage_impact_SpellScript();
     }
