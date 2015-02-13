@@ -804,7 +804,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     {
                         uint32 dotDamage = auraEff->GetDamage() > 0 ? auraEff->GetDamage() : 0;
                         damage = 0.6f * (dotDamage * auraEff->GetTotalTicks());
-                        damage += 0.528f * int32(m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE));
                         apply_direct_bonus = false;
                         break;
                     }
