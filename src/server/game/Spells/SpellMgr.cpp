@@ -896,13 +896,16 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
             // Amplify Magic, Dampen Magic
             if (spellproto->SpellFamilyFlags[0] == 0x00002000)
                 return true;
+            //Impact
+            if (spellproto->Id == 64343)
+                return true;
             // Dragon's Breath
-            if (spellproto->Id == 31661)
+            if (spellId == 31661)
                 return false;
             break;
         case SPELLFAMILY_WARRIOR:
             // Shockwave
-            if (spellId == 46968)
+            if (spellId == 46968 || spellId == 99610)
                 return false;
             break;
         case SPELLFAMILY_PRIEST:
