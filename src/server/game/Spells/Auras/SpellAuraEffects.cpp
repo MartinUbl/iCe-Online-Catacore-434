@@ -2095,7 +2095,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     case 879: // Exorcism dot from Glyph of Exorcism -> 20 % from original Exorcism damage
                     {
                         if (AuraEffect * aurEff = caster->GetAuraEffect(54934, EFFECT_0))
-                            if (aurEff->GetScriptedAmount() >= 0)
+                            if (aurEff->GetScriptedAmount() >= 0 && GetTotalTicks() != 0)
                                 damage = (aurEff->GetScriptedAmount() * aurEff->GetAmount() / 100) / GetTotalTicks();
                         break;
                     }
@@ -2462,13 +2462,15 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (m_spellProto->Id == 29841 || m_spellProto->Id == 29842)
             {
                 // Heal 2/5% max health over total ticks (instead of 2/5 hp per tick)
-                damage = caster->CountPctFromMaxHealth(damage) / GetTotalTicks();
+                if(GetTotalTicks() != 0)
+                    damage = caster->CountPctFromMaxHealth(damage) / GetTotalTicks();
             }
             // Priests mastery Echo of Light
             else if (m_spellProto->Id == 77489)
             {
                 // base points must be split between ticks
-                damage = damage / GetTotalTicks();
+                if(GetTotalTicks() != 0)
+                    damage = damage / GetTotalTicks();
             }
             // Malfurion's Gift - proc from Lifebloom
             else if (m_spellProto->Id == 33763)
