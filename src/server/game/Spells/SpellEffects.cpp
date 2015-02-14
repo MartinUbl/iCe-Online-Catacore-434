@@ -532,14 +532,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         apply_direct_bonus = false;
                         break;
                     }
-                    case 98175: // Magma trap ( Ragnaros encounter )
-                    case 100106:
-                    case 100107:
-                    case 100108:
-                    {
-                        damage = (damage * 170 ) / 100;
-                        break;
-                    }
                     // Paladin: Guardian of Ancient Kings: Ancient Fury
                     case 86704:
                     {
