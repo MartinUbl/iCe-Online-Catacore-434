@@ -394,7 +394,10 @@ public:
                             {
                                 dot.auraEff_id = i;
                                 dot.aura_per_timer = aurEff->GetPeriodicTimer();
-                                dot.aura_bp = aurEff->GetAmount();
+                                if (aurType == SPELL_AURA_PERIODIC_DAMAGE)
+                                    dot.aura_bp = aurEff->GetDamage();
+                                else
+                                    dot.aura_bp = aurEff->GetAmount();
                                 break;
                             }
                         }
@@ -434,7 +437,11 @@ public:
                         if (AuraEffect* aurEff = nova->GetEffect(dot.auraEff_id))
                         {
                             aurEff->SetPeriodicTimer(dot.aura_per_timer); // Need synchronize periodic timer
-                            aurEff->SetAmount(dot.aura_bp);
+
+                            if (aurEff->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
+                                aurEff->SetDamage(dot.aura_bp);
+                            else
+                                aurEff->SetAmount(dot.aura_bp);
                         }
                     }
                 }
