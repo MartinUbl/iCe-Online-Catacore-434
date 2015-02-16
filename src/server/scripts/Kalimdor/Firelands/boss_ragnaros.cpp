@@ -3790,11 +3790,16 @@ public:
         {
             if (spell->Id == 110469) // Borrowed harmless spell
             {
-                if (bubbles < maxBubbles)
+                if (me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
                 {
-                    bubbles++;
-                    caster->CastSpell(caster,DELUGE,true);
-                    me->ForcedDespawn();
+                    if (++bubbles == 3)
+                    {
+                        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                        caster->CastSpell(caster,DELUGE,true);
+                        me->ForcedDespawn(200);
+                    }
+                    else
+                        caster->CastSpell(caster,DELUGE,true);
                 }
             }
         }
