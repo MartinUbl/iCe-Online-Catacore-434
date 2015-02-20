@@ -6005,6 +6005,17 @@ bool Spell::ApplyEffectCondition(SpellEffIndex effIndex)
             // Glyph of Fear - apply effect #3, rooting effect
             if (effIndex == EFFECT_2 && !m_caster->HasAura(56244))
                 result = false;
+            else
+            {
+                m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, 5000);
+                // Send cooldown manully
+                WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4);
+                data << uint64(m_caster->GetGUID());
+                data << uint8(1);
+                data << uint32(m_spellInfo->Id);
+                data << uint32(5000); // 30 seconds
+                m_caster->ToPlayer()->GetSession()->SendPacket(&data);
+            }
             break;
         case 8122: // Psychic Scream
             // Glyph of Psychic Scream - apply effect #3, rooting effect
