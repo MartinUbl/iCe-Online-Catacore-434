@@ -584,13 +584,16 @@ inline void Battleground::_ProcessJoin(uint32 diff)
                             plr->CastSpell(plr, SPELL_FACTION_HORDE, true);
                     }
 
-                    /* teleport to team start point */
+                    /* teleport player to team start point if too far */
                     /* exclude AV and SA - sometimes causes trouble */
                     if (GetTypeID() != BATTLEGROUND_AV && GetTypeID() != BATTLEGROUND_SA)
                     {
                         float sx, sy, sz, so;
                         GetTeamStartLoc(plr->GetBGTeam(), sx, sy, sz, so);
-                        plr->GetMotionMaster()->MoveJump(sx, sy, sz, 10.0f, 5.0f);
+                        Position pos;
+                        pos.Relocate(sx, sy, sz);
+                        if (pos.GetExactDist(plr) > 60.0f)
+                            plr->NearTeleportTo(sx, sy, sz + 5.0f, plr->GetOrientation());
                     }
                 }
             // Announce BG starting
