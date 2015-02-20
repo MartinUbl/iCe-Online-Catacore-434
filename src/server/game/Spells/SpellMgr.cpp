@@ -3521,12 +3521,8 @@ bool SpellMgr::CanAurasStack(Aura const *aura1, Aura const *aura2, bool sameCast
 
 bool CanSpellDispelAura(SpellEntry const * dispelSpell, SpellEntry const * aura)
 {
-    // These auras (like ressurection sickness) can't be dispelled
-    if (aura->Attributes & SPELL_ATTR0_NEGATIVE_1)
-        return false;
-
-    // These spells (like Mass Dispel) can dispell all auras
-    if (dispelSpell->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
+    // These spells (like Mass Dispel) can dispell all auras, except death persistent ones (like Dungeon and Battleground Deserter)
+    if (dispelSpell->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY && !IsDeathPersistentSpell(aura))
         return true;
 
     // These auras (like Divine Shield) can't be dispelled
