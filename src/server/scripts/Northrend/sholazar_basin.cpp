@@ -220,6 +220,7 @@ public:
                 pPlayer->CLOSE_GOSSIP_MENU();
                 DoScriptText(SAY_TEXTID_VEKJIK1, pCreature, pPlayer);
                 pPlayer->AreaExploredOrEventHappens(QUEST_MAKING_PEACE);
+                pCreature->AddUnitState(UNIT_STATE_ROOT);
                 pCreature->CastSpell(pPlayer, SPELL_FREANZYHEARTS_FURY, false);
                 break;
         }
