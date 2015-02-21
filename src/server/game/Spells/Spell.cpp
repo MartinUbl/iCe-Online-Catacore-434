@@ -6005,7 +6005,7 @@ bool Spell::ApplyEffectCondition(SpellEffIndex effIndex)
             // Glyph of Fear - apply effect #3, rooting effect
             if (effIndex == EFFECT_2 && !m_caster->HasAura(56244))
                 result = false;
-            else
+            if (m_caster->HasAura(56244) && effIndex == EFFECT_2)
             {
                 m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, 5000);
                 // Send cooldown manully
