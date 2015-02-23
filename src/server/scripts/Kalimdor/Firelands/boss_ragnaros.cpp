@@ -602,8 +602,8 @@ public:
                     instance->DoRemoveAurasDueToSpellOnPlayers(SUPERHEATED_DEBUFF);
                     instance->DoRemoveAurasDueToSpellOnPlayers(100915);
                     // Deluge
-                    instance->DoRemoveAurasDueToSpellOnPlayers(DELUGE);
-                    instance->DoRemoveAurasDueToSpellOnPlayers(101015);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(DELUGE_10);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(DELUGE_25);
                 }
                 // Dont forget about cloudburst, cause it's summoned by creature
                 if (Creature * pCloud = me->FindNearestCreature(CLOUDBURST,500.0f,true))
@@ -650,8 +650,8 @@ public:
                     instance->DoRemoveAurasDueToSpellOnPlayers(SUPERHEATED_DEBUFF);
                     instance->DoRemoveAurasDueToSpellOnPlayers(100915);
                     // Deluge
-                    instance->DoRemoveAurasDueToSpellOnPlayers(DELUGE);
-                    instance->DoRemoveAurasDueToSpellOnPlayers(101015);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(DELUGE_10);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(DELUGE_25);
                 }
             }
 
