@@ -107,7 +107,8 @@ enum Spells
     LIGHTNING_BEAM              = 100342,
     SUMMON_CLOUDBURST_MISSILE   = 100714,
     CLOUDBURST_VISUAL           = 100758,
-    DELUGE                      = 100713,
+    DELUGE_10                   = 100713,
+    DELUGE_25                   = 101015,
     DELUGE_VISUAL_BLOB          = 100757,
     DELUGE_CANCEL               = 100771, // not needed
 };
@@ -3675,7 +3676,7 @@ class HasDeluge
         bool operator()(WorldObject* object) const
         {
             if (Player * pl = object->ToPlayer())
-                if(pl->HasAura(DELUGE) || pl->HasAura(101015) || pl->HasAura(100503)) // deluge + breadth of frost
+                if(pl->HasAura(DELUGE_10) || pl->HasAura(DELUGE_25) || pl->HasAura(100503)) // deluge + breadth of frost
                 {
                     pl->RemoveAura(SUPERHEATED_DEBUFF);
                     pl->RemoveAura(100915); // diff variant
@@ -3790,16 +3791,20 @@ public:
         {
             if (spell->Id == 110469) // Borrowed harmless spell
             {
+                // Dont allow players to take multiple bubbles if they already have one
+                if (caster->HasAura(DELUGE_10) || caster->HasAura(DELUGE_25))
+                    return;
+
                 if (me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
                 {
                     if (++bubbles == 3)
                     {
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-                        caster->CastSpell(caster,DELUGE,true);
+                        caster->CastSpell(caster,DELUGE_10,true);
                         me->ForcedDespawn(200);
                     }
                     else
-                        caster->CastSpell(caster,DELUGE,true);
+                        caster->CastSpell(caster,DELUGE_10,true);
                 }
             }
         }

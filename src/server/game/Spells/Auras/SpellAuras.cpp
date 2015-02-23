@@ -1172,7 +1172,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         target->RemoveAura(100284);
                         break;
                     case 101361:
-                        if (target->HasAura(100713)) // deluge
+                        if (target->HasAura(100713) || target->HasAura(101015)) // deluge
                         {
                             if (caster->ToCreature())
                                 caster->ToCreature()->AI()->SetData(3,0); // Despawn
