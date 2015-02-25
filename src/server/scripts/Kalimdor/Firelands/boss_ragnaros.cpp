@@ -3797,7 +3797,7 @@ public:
 
                 if (me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
                 {
-                    if (++bubbles == 3)
+                    if (++bubbles == Is25ManRaid() ? 3 : 1)
                     {
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                         caster->CastSpell(caster,DELUGE_10,true);
