@@ -668,32 +668,9 @@ class aoe_heal_diminisher : public SpellScriptLoader
 
             void HandleDimishing(SpellEffIndex /*eff*/)
             {
-                Player * p = GetCaster()->ToPlayer();
-                Unit * u = GetHitUnit();
-                int32 dim_heal = (hit_targets > DIMISHING_LIMIT) ? ((GetHitHeal()*DIMISHING_LIMIT) / hit_targets) : GetHitHeal(); // When healing more than 6 players at once
-
-                if(!u)
-                    return;
-
-                if( p && p->getClass() == CLASS_PALADIN) // Radiance part only
-                {
-                    float act_distance = p->GetExactDist(u->GetPositionX(),u->GetPositionY(),u->GetPositionZ());
-
-                    if(act_distance > 8.0f) //If hit unit is more than 8 yards from caster
-                    {
-                        float fdim_heal = (float)dim_heal ; // Float copy of diminishing heal
-                        float sub_percent = act_distance/ 40.0f;
-                        fdim_heal -= (fdim_heal * (sub_percent));
-
-                        if(fdim_heal <= 0)
-                            fdim_heal = 1.0f; // For sure
-
-                            dim_heal = (int32)fdim_heal;
-                    }
-                }
-
-                    SetHitHeal(dim_heal);
-
+                // When healing more than 6 players at once
+                int32 dim_heal = (hit_targets > DIMISHING_LIMIT) ? ((GetHitHeal()*DIMISHING_LIMIT) / hit_targets) : GetHitHeal();
+                SetHitHeal(dim_heal);
             }
 
             void Register()
