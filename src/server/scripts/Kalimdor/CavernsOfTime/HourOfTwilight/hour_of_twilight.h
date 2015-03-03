@@ -14,3 +14,27 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifndef INSTANCE_ENDTIME_H
+#define INSTANCE_TIME_H
+
+enum Encounters
+{
+    // Bosses
+    TYPE_BOSS_ARCURION                 = 0,
+    TYPE_BOSS_ASIRA_DAWNSLAYER         = 1,
+    TYPE_BOSS_ARCHBISHOP_BENEDICTUS    = 2,
+    MAX_ENCOUNTER                      = 3,
+};
+
+enum AdditionalEvents 
+{
+    DATA_INSTANCE_PROGRESS             = 4,
+    DATA_MOVEMENT_PROGRESS             = 5,
+};
+
+enum HourOfTwilightNpcs
+{
+    TYPE_THRALL                        = 10, 
+};
+#endif
