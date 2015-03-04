@@ -3179,7 +3179,7 @@ class Player : public Unit, public GridObject<Player>
         uint8 m_MirrorTimerFlagsLast;
         bool m_isInWater;
 
-        bool disabledPVPAnnounce = false;
+        bool disabledPVPAnnounce;
 
         // Current teleport data
         WorldLocation m_teleport_dest;

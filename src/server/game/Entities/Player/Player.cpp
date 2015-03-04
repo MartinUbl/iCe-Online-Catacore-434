@@ -667,6 +667,8 @@ Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achie
     m_lastFallTime = 0;
     m_lastFallZ = 0;
 
+    disabledPVPAnnounce = false;
+
     m_ControlledByPlayer = true;
     m_isWorldObject = true;
 
