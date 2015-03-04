@@ -1010,7 +1010,7 @@ class spell_gen_coldflame_woe : public SpellScriptLoader
         {
             PrepareAuraScript(spell_gen_coldflame_woe_AuraScript);
 
-            float radius = 0.0f;
+            float radius;
 
             void HandlePeriodicTick(AuraEffect const* /*aurEff*/)
             {
@@ -1034,6 +1034,12 @@ class spell_gen_coldflame_woe : public SpellScriptLoader
             {
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_coldflame_woe_AuraScript::HandlePeriodicTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
             }
+
+        public:
+            spell_gen_coldflame_woe_AuraScript() : AuraScript()
+            {
+                radius = 0.0f;
+            };
         };
 
         AuraScript* GetAuraScript() const
