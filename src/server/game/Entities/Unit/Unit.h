@@ -237,10 +237,16 @@ enum SheathState
 {
     SHEATH_STATE_UNARMED  = 0,                              // non prepared weapon
     SHEATH_STATE_MELEE    = 1,                              // prepared melee weapon
-    SHEATH_STATE_RANGED   = 2                               // prepared ranged weapon
+    SHEATH_STATE_RANGED   = 2,                              // prepared ranged weapon
+
+    SHEATH_STATE_DBONLY_FORCE_UNARMED = 255,                // non prepared weapon in case of NPC - this will force unarmed state
+    SHEATH_STATE_DBONLY_FORCE_RANGED = 254
 };
 
-#define MAX_SHEATH_STATE    3
+// maximum client-side sheath state
+#define MAX_SHEATH_STATE            3
+// minimum server side sheath state (may be used to force state or have a special effect) (comes from 255 down)
+#define MIN_DBONLY_SHEATH_STATE     253
 
 // byte (1 from 0..3) of UNIT_FIELD_BYTES_2
 enum UnitPVPStateFlags
@@ -1318,6 +1324,8 @@ class Unit : public WorldObject
 
         SheathState GetSheath() const { return SheathState(GetByteValue(UNIT_FIELD_BYTES_2, 0)); }
         virtual void SetSheath(SheathState sheathed) { SetByteValue(UNIT_FIELD_BYTES_2, 0, sheathed); }
+        void SetForcedSheath(SheathState sheathed) { m_sheathForced = sheathed; }
+        SheathState GetForcedSheath() const { return m_sheathForced; }
 
         // faction template id
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
@@ -2212,6 +2220,7 @@ class Unit : public WorldObject
         GameObjectList m_gameObj;
         bool m_isSorted;
         uint32 m_transform;
+        SheathState m_sheathForced;
 
         AuraMap m_ownedAuras;
         AuraApplicationMap m_appliedAuras;

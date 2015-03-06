@@ -398,8 +398,13 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data)
 
     m_regenHealth = cInfo->RegenHealth;
 
-    // creatures always have melee weapon ready if any
-    SetSheath(SHEATH_STATE_MELEE);
+    // creatures always have melee weapon ready if any; unless something different is forced
+    if (GetForcedSheath() == SHEATH_STATE_DBONLY_FORCE_UNARMED)
+        SetSheath(SHEATH_STATE_UNARMED);
+    else if (GetForcedSheath() == SHEATH_STATE_DBONLY_FORCE_RANGED)
+        SetSheath(SHEATH_STATE_RANGED);
+    else
+        SetSheath(SHEATH_STATE_MELEE);
 
     SelectLevel(GetCreatureInfo());
     if (team == HORDE)
@@ -2174,7 +2179,16 @@ bool Creature::LoadCreaturesAddon(bool reload)
         // 2 UnitRename         Pet only, so always 0 for default creature
         // 3 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
 
-        SetByteValue(UNIT_FIELD_BYTES_2, 0, uint8(cainfo->bytes2 & 0xFF));
+        uint8 addonSheath = cainfo->bytes2 & 0xFF;
+        if (addonSheath > MIN_DBONLY_SHEATH_STATE)
+        {
+            SetForcedSheath((SheathState)addonSheath);
+            addonSheath = SHEATH_STATE_UNARMED;
+        }
+        else if (addonSheath >= MAX_SHEATH_STATE)
+            addonSheath = SHEATH_STATE_UNARMED;
+
+        SetByteValue(UNIT_FIELD_BYTES_2, 0, addonSheath);
         //SetByteValue(UNIT_FIELD_BYTES_2, 1, uint8((cainfo->bytes2 >> 8) & 0xFF));
         //SetByteValue(UNIT_FIELD_BYTES_2, 2, uint8((cainfo->bytes2 >> 16) & 0xFF));
         SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
