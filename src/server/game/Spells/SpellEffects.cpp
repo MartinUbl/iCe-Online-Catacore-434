@@ -8264,6 +8264,10 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 // Defenders portal spell (Strand of the Ancients)
                 case 54640:
                 {
+                    // "Recently used teleport"
+                    if (m_caster->HasAura(54643))
+                        break;
+
                     Creature* targetTrigger = GetClosestCreatureWithEntry(m_caster, 23472, 100.0f);
                     if (targetTrigger)
                     {
