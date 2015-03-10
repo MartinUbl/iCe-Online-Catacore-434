@@ -37,10 +37,8 @@ bool DynamicTransport::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 p
     // goinfo is always existant if parent Create method returned true
     GameObjectInfo const* goinfo = sObjectMgr->GetGameObjectInfo(name_id);
 
-    m_updateFlag |= UPDATEFLAG_TRANSPORT;
-
     // insert first stopframe, if needed
-    if (goinfo->transport.stopFrame1 > 0)
+    if ((int32)goinfo->transport.stopFrame1 > 0)
     {
         m_goValue->Transport.StopFrames->push_back(goinfo->transport.stopFrame1);
         m_goValue->Transport.MaxStopFrameTime = goinfo->transport.stopFrame1;
@@ -50,7 +48,7 @@ bool DynamicTransport::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 p
     // - second stopframe is at position 6, and each next stopframe is +2 from current, up to 20 (including)
     for (uint32 i = 6; i <= 20; i += 2)
     {
-        if (goinfo->raw.data[i] > 0)
+        if ((int32)goinfo->raw.data[i] > 0)
         {
             // stopframes has to be in ascending order, otherwise the client would not handle it
             if (goinfo->raw.data[i] <= m_goValue->Transport.MaxStopFrameTime)
@@ -95,14 +93,16 @@ bool DynamicTransport::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 p
         }
         else
             SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
+
+        m_updateFlag |= UPDATEFLAG_TRANSPORT;
+
+        // we have to set those objects as active, to always update them
+        // this may be needed only for objects, which are changing position across grids/cells
+        // but for now, enable it for all dynamic transports, which have some anim frames
+        setActive(true);
     }
 
     SetGoAnimProgress(animprogress);
-
-    // we have to set those objects as active, to always update them
-    // this may be needed only for objects, which are changing position across grids/cells
-    // but for now, enable it for all dynamic transports
-    setActive(true);
 
     return true;
 }
