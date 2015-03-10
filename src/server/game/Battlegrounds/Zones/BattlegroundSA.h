@@ -63,9 +63,7 @@ enum BG_SA_Timers
 
 enum BG_SA_WorldStates
 {
-    BG_SA_TIMER_MINS = 3559,
-    BG_SA_TIMER_SEC_TENS = 3560,
-    BG_SA_TIMER_SEC_DECS = 3561,
+    BG_SA_TIME_OF_END = 3557,
     BG_SA_ALLY_ATTACKS  = 4352,
     BG_SA_HORDE_ATTACKS = 4353,
     BG_SA_PURPLE_GATEWS = 3614,
@@ -87,7 +85,7 @@ enum BG_SA_WorldStates
     BG_SA_LEFT_GY_HORDE = 3633,
     BG_SA_CENTER_GY_HORDE = 3634,
     BG_SA_BONUS_TIMER = 0xdf3,
-    BG_SA_ENABLE_TIMER = 3564,
+    BG_SA_ENABLE_TIMER = 2889,
 };
 
 enum npc
@@ -583,6 +581,8 @@ class BattlegroundSA : public Battleground
         /// for know if second round has been init
         bool InitSecondRound;
         std::map<uint32/*id*/,uint32/*timer*/> DemoliserRespawnList;
+        /// time of round start (needed to be sent in world state)
+        time_t RoundStartTime;
 
 };
 #endif

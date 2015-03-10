@@ -51,6 +51,7 @@ BattlegroundSA::BattlegroundSA()
     SignaledRoundTwo = false;
     SignaledRoundTwoHalfMin = false;
     InitSecondRound = false;
+    RoundStartTime = 0;
 }
 
 BattlegroundSA::~BattlegroundSA()
@@ -303,6 +304,7 @@ void BattlegroundSA::Update(uint32 diff)
         if (TotalTime >= BG_SA_WARMUPLENGTH)
         {
             TotalTime = 0;
+            RoundStartTime = time(NULL);
             ToggleTimer();
             DemolisherStartState(false);
             Status = BG_SA_ROUND_ONE;
@@ -333,6 +335,7 @@ void BattlegroundSA::Update(uint32 diff)
         {
             SendWarningToAll(LANG_BG_SA_HAS_BEGUN);
             TotalTime = 0;
+            RoundStartTime = time(NULL);
             ToggleTimer();
             DemolisherStartState(false);
             Status = BG_SA_ROUND_TWO;
@@ -395,9 +398,12 @@ void BattlegroundSA::Update(uint32 diff)
                 return;
             }
         }
+
         if (Status == BG_SA_ROUND_ONE || Status == BG_SA_ROUND_TWO)
         {
-            SendTime();
+            // no need to send time - it is sent once per "enabling" timer
+            // SendTime();
+
             UpdateDemolisherSpawns();
         }
     }
@@ -428,11 +434,8 @@ void BattlegroundSA::FillInitialWorldStates(WorldPacket& data)
     data << uint32(BG_SA_HORDE_ATTACKS)<< horde_attacks;
     data << uint32(BG_SA_ALLY_ATTACKS) << ally_attacks;
 
-    // Time will be sent on first update...
     data << uint32(BG_SA_ENABLE_TIMER) << ((TimerEnabled) ? uint32(1) : uint32(0));
-    data << uint32(BG_SA_TIMER_MINS) << uint32(0);
-    data << uint32(BG_SA_TIMER_SEC_TENS) << uint32(0);
-    data << uint32(BG_SA_TIMER_SEC_DECS) << uint32(0);
+    data << uint32(BG_SA_TIME_OF_END) << ((TimerEnabled ? uint32(RoundStartTime + BG_SA_ROUNDLENGTH / 1000) : 0));
 
     data << uint32(BG_SA_RIGHT_GY_HORDE) << uint32(GraveyardStatus[BG_SA_RIGHT_CAPTURABLE_GY] == TEAM_HORDE?1:0);
     data << uint32(BG_SA_LEFT_GY_HORDE) << uint32(GraveyardStatus[BG_SA_LEFT_CAPTURABLE_GY] == TEAM_HORDE?1:0);
@@ -713,10 +716,7 @@ WorldSafeLocsEntry const* BattlegroundSA::GetClosestGraveYard(Player* player)
 
 void BattlegroundSA::SendTime()
 {
-    uint32 end_of_round = (EndRoundTimer - TotalTime);
-    UpdateWorldState(BG_SA_TIMER_MINS, end_of_round/60000);
-    UpdateWorldState(BG_SA_TIMER_SEC_TENS, (end_of_round%60000)/10000);
-    UpdateWorldState(BG_SA_TIMER_SEC_DECS, ((end_of_round%60000)%10000)/1000);
+    UpdateWorldState(BG_SA_TIME_OF_END, RoundStartTime + BG_SA_ROUNDLENGTH / 1000);
 }
 
 void BattlegroundSA::EventPlayerClickedOnFlag(Player *Source, GameObject* target_obj)
@@ -877,6 +877,10 @@ void BattlegroundSA::ToggleTimer()
 {
     TimerEnabled = !TimerEnabled;
     UpdateWorldState(BG_SA_ENABLE_TIMER, (TimerEnabled) ? 1 : 0);
+
+    // if enabling timer, send the time also
+    if (TimerEnabled)
+        SendTime();
 }
 
 void BattlegroundSA::EndBattleground(uint32 winner)
