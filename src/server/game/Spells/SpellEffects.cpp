@@ -8261,6 +8261,17 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         unitTarget->CastSpell(m_caster, damage, false);  // Ride Vehicle
                     break;
                 }
+                // Defenders portal spell (Strand of the Ancients)
+                case 54640:
+                {
+                    Creature* targetTrigger = GetClosestCreatureWithEntry(m_caster, 23472, 100.0f);
+                    if (targetTrigger)
+                    {
+                        // teleport caster to the nearest trigger position
+                        m_caster->NearTeleportTo(targetTrigger->GetPositionX(), targetTrigger->GetPositionY(), targetTrigger->GetPositionZ(), targetTrigger->GetOrientation());
+                    }
+                    break;
+                }
             }
             break;
         }
