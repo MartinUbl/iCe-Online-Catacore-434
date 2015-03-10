@@ -297,7 +297,7 @@ void BattlegroundSA::Update(uint32 diff)
     }
     TotalTime += diff;
 
-    if (Status == BG_SA_WARMUP )
+    if (Status == BG_SA_WARMUP)
     {
         EndRoundTimer = BG_SA_ROUNDLENGTH;
         if (TotalTime >= BG_SA_WARMUPLENGTH)
@@ -307,6 +307,16 @@ void BattlegroundSA::Update(uint32 diff)
             DemolisherStartState(false);
             Status = BG_SA_ROUND_ONE;
             StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, (Attackers == TEAM_ALLIANCE)?23748:21702);
+
+            for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+            {
+                if (Player *plr = sObjectMgr->GetPlayer(itr->first))
+                {
+                    // if there are some players still in sea, teleport them on the ground
+                    if (plr->GetPositionX() > 1668.0f)
+                        plr->TeleportTo(607, 1502.2851f, 14.278719f, 4.857650f, 5.943011f, TELE_TO_NOT_LEAVE_COMBAT);
+                }
+            }
         }
         if (TotalTime >= BG_SA_BOAT_START)
             StartShips();
@@ -327,6 +337,16 @@ void BattlegroundSA::Update(uint32 diff)
             DemolisherStartState(false);
             Status = BG_SA_ROUND_TWO;
             StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, (Attackers == TEAM_ALLIANCE)?23748:21702);
+
+            for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+            {
+                if (Player *plr = sObjectMgr->GetPlayer(itr->first))
+                {
+                    // if there are some players still in sea, teleport them on the ground
+                    if (plr->GetPositionX() > 1668.0f)
+                        plr->TeleportTo(607, 1502.2851f, 14.278719f, 4.857650f, 5.943011f, TELE_TO_NOT_LEAVE_COMBAT);
+                }
+            }
         }
         if (TotalTime >= 30000)
         {
