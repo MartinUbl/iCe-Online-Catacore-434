@@ -454,7 +454,7 @@ bool Vehicle::AddPassenger(WorldObject *obj, int8 seatId, bool byAura)
             RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
         }
     }
-    unit->DestroyForNearbyPlayers();
+
     unit->UpdateObjectVisibility(false);
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
