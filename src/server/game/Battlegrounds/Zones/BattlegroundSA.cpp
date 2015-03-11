@@ -748,6 +748,8 @@ void BattlegroundSA::CaptureGraveyard(BG_SA_Graveyards i, Player *Source)
     if (GraveyardStatus[i] == Attackers)
         return;
 
+    std::vector<uint64> ghost_list = m_ReviveQueue[m_BgCreatures[BG_SA_MAXNPC + i]];
+
     DelCreature(BG_SA_MAXNPC + i);
     GraveyardStatus[i] = Source->GetTeamId();
     WorldSafeLocsEntry const *sg = NULL;
@@ -811,9 +813,25 @@ void BattlegroundSA::CaptureGraveyard(BG_SA_Graveyards i, Player *Source)
                 SendWarningToAll(LANG_BG_SA_H_GY_SOUTH);
             break;
         default:
-            ASSERT(0);
             break;
     };
+
+    if (!ghost_list.empty())
+    {
+        WorldSafeLocsEntry const *ClosestGrave = NULL;
+        for (std::vector<uint64>::const_iterator itr = ghost_list.begin(); itr != ghost_list.end(); ++itr)
+        {
+            Player* plr = sObjectMgr->GetPlayer(*itr);
+            if (!plr)
+                continue;
+
+            if (!ClosestGrave)                              // cache
+                ClosestGrave = GetClosestGraveYard(plr);
+
+            if (ClosestGrave)
+                plr->TeleportTo(GetMapId(), ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, plr->GetOrientation());
+        }
+    }
 }
 
 void BattlegroundSA::EventPlayerUsedGO(Player* Source, GameObject* object)
