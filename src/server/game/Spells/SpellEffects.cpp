@@ -586,6 +586,54 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
                         break;
                     }
+                    // Boulder (Hurl Boulder of Battleground Demolisher vehicle)
+                    case 52339:
+                    {
+                        Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                        if (!pOwner)
+                            break;
+
+                        // at level 85, the base damage is fixed, with some random points
+                        if (pOwner->getLevel() == 85)
+                        {
+                            damage = 24000 + urand(0, 4000);
+                            apply_direct_bonus = false;
+                        }
+
+                        break;
+                    }
+                    // Ram (Battleground Demolished vehicle spell)
+                    case 60206:
+                    {
+                        Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                        if (!pOwner)
+                            break;
+
+                        // at level 85, the base damage is fixed, with some random points
+                        if (pOwner->getLevel() == 85)
+                        {
+                            damage = 13000 + urand(0, 1000);
+                            apply_direct_bonus = false;
+                        }
+
+                        break;
+                    }
+                    // Rocket Blast (Antipersonnel Cannon vehicle spell)
+                    case 51673:
+                    {
+                        Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                        if (!pOwner)
+                            break;
+
+                        // at level 85, the base damage is fixed, with some random points
+                        if (pOwner->getLevel() == 85)
+                        {
+                            damage = 18000 + urand(0, 3000);
+                            apply_direct_bonus = false;
+                        }
+
+                        break;
+                    }
                 }
                 break;
             }
