@@ -453,6 +453,9 @@ bool Vehicle::AddPassenger(WorldObject *obj, int8 seatId, bool byAura)
             // spline system will relocate passengers automatically
             RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
         }
+
+        if (seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE)
+            unit->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
     unit->UpdateObjectVisibility(false);
@@ -492,6 +495,9 @@ void Vehicle::RemovePassenger(WorldObject* obj)
         }
         ++m_usableSeatNum;
     }
+
+    if (seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE)
+        unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     unit->ClearUnitState(UNIT_STATE_ON_VEHICLE);
 
