@@ -85,7 +85,6 @@ namespace Movement
         // correct first vertex
         args.path[0] = real_position;
         args.initialOrientation = real_position.orientation;
-        move_spline.onTransport = (unit->GetTransGUID() != 0);
 
         uint32 moveFlags = unit->m_movementInfo.GetMovementFlags();
         if (args.flags.walkmode)
@@ -106,6 +105,8 @@ namespace Movement
 
         unit->m_movementInfo.SetMovementFlags(moveFlags);
         move_spline.Initialize(args);
+
+        move_spline.onTransport = (unit->GetTransGUID() != 0);
 
         WorldPacket data(SMSG_MONSTER_MOVE, 64);
         data.append(unit->GetPackGUID());
