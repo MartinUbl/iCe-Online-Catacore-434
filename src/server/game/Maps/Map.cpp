@@ -1050,7 +1050,7 @@ void Map::GameObjectRelocation(GameObject* go, float x, float y, float z, float 
     if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
     {
 #ifdef TRINITY_DEBUG
-        TC_LOG_DEBUG(LOG_FILTER_MAPS, "GameObject (GUID: %u Entry: %u) added to moving list from grid[%u, %u]cell[%u, %u] to grid[%u, %u]cell[%u, %u].", go->GetGUIDLow(), go->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
+        sLog->outDebug("GameObject (GUID: %u Entry: %u) added to moving list from grid[%u, %u]cell[%u, %u] to grid[%u, %u]cell[%u, %u].", go->GetGUIDLow(), go->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
 #endif
         AddGameObjectToMoveList(go, x, y, z, orientation);
         // in diffcell/diffgrid case notifiers called at finishing move go in Map::MoveAllGameObjectsInMoveList
