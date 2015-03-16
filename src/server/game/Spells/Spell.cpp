@@ -9043,6 +9043,11 @@ SpellCastResult Spell::CanOpenLock(uint32 effIndex, uint32 lockId, SkillType& sk
                     skillValue = m_CastItem || m_caster->GetTypeId()!= TYPEID_PLAYER ?
                         0 : m_caster->ToPlayer()->GetSkillValue(skillId);
 
+                    if(skillId == SKILL_LOCKPICKING)
+                    {
+                        skillValue += 100; //Add lockpicking constant base bonus for first 20 levels because of spellEntry->spellLevel set to 20 => base points -= (20 * base points to level == 100)
+                    }
+
                     skillValue += spellSkillBonus;
 
                     if (skillValue < reqSkillValue)
