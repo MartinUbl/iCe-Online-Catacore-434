@@ -898,7 +898,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_INSTANCE_UNLOAD_DELAY] = sConfig->GetIntDefault("Instance.UnloadDelay", 30 * MINUTE * IN_MILLISECONDS);
 
     m_int_configs[CONFIG_MAX_PRIMARY_TRADE_SKILL] = sConfig->GetIntDefault("MaxPrimaryTradeSkill", 2);
-    m_int_configs[CONFIG_MIN_PETITION_SIGNS] = sConfig->GetIntDefault("MinPetitionSigns", 9);
+    m_int_configs[CONFIG_MIN_PETITION_SIGNS] = sConfig->GetIntDefault("MinPetitionSigns", 4);
     if (m_int_configs[CONFIG_MIN_PETITION_SIGNS] > 9)
     {
         sLog->outError("MinPetitionSigns (%i) must be in range 0..9. Set to 9.", m_int_configs[CONFIG_MIN_PETITION_SIGNS]);
