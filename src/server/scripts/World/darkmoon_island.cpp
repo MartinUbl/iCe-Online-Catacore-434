@@ -1827,9 +1827,12 @@ class npc_darkmoon_enemy_tonk: public CreatureScript
 
                 if (changePath)
                 {
-                    uint8 point = urand(0, TONK_TARGET_POSITION_COUNT);
-                    me->GetMotionMaster()->MovePoint(0, tonkTargetPositions[point]);
-                    changePath = false;
+                    if (me && me->IsAlive() && me->IsInWorld())
+                    {
+                        uint8 point = urand(0, TONK_TARGET_POSITION_COUNT);
+                        me->GetMotionMaster()->MovePoint(0, tonkTargetPositions[point]);
+                        changePath = false;
+                    }
                 }
 
                 if (targetCheckTimer <= diff)
