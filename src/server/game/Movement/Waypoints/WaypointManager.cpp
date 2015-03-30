@@ -72,7 +72,7 @@ void WaypointStore::Load()
         count++;
         WaypointData *wp = new WaypointData;
 
-        if (last_id != id)
+        if (last_id != id || path_data == nullptr)
             path_data = new WaypointPath;
 
         float x,y,z;
