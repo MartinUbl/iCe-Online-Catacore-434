@@ -8245,13 +8245,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     }
                     break;
                 case SPELLFAMILY_PRIEST:
-                    // Vampiric Touch
-                    if (caster && m_spellProto->SpellFamilyFlags[1] & 0x0400 && aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL && GetEffIndex() == 0)
-                    {
-                        // Sin and Punishment
-                        if ((caster->HasAura(87099) && roll_chance_i(50)) || caster->HasAura(87100))
-                            target->CastSpell(target, 87204, true);
-                    }
                     break;
                 case SPELLFAMILY_HUNTER:
                     // Misdirection
