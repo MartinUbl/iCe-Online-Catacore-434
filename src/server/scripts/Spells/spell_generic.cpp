@@ -850,6 +850,8 @@ public:
                         case SPEC_DRUID_FERAL:
                             spell_id = 87546; // agi
                             break;
+                        default:
+                            break;
                     }
  
                     if (player->HasHealingSpec())
@@ -879,6 +881,8 @@ public:
                                 spell_id = (player->GetActiveTalentBranchSpec() == SPEC_SHAMAN_ENHANCEMENT) ? 87546 : 87547; // agi, intelect
                                 break;
                             }
+                            default:
+                                break;
                         }
                     }
 
