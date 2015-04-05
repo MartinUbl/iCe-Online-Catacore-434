@@ -21450,22 +21450,19 @@ Pet* Player::GetPet() const
     if (uint64 pet_guid = GetPetGUID())
     {
         if (!IS_PET_GUID(pet_guid))
-            return NULL;
+            return nullptr;
 
         Pet* pet = ObjectAccessor::GetPet(*this, pet_guid);
 
-        if (!pet)
-            return NULL;
-
-        if (IsInWorld() && pet)
-            return pet;
+        if (!pet || !IsInWorld())
+            return nullptr;
 
         //there may be a guardian in slot
         //sLog->outError("Player::GetPet: Pet %u not exist.",GUID_LOPART(pet_guid));
         //const_cast<Player*>(this)->SetPetGUID(0);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void Player::RemovePet(Pet* pet, PetRemoveMode mode)
