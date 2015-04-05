@@ -8889,6 +8889,17 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                     this->CastCustomSpell(this, 67545, &bp0, NULL, NULL, true, NULL, triggeredByAura->GetEffect(0), this->GetGUID());
                     return true;
                 }
+                // Arcane Blast
+                case 36032:
+                {
+                    // Arcane Explosion should not remove Arcane Blast buff
+                    if (procSpell && procSpell->Id == 1449)
+                    {
+                        *handled = true;
+                        return false;
+                    }
+                    break;
+                }
             }
             break;
         }
