@@ -822,6 +822,82 @@ class spell_gen_gift_of_naaru : public SpellScriptLoader
         }
 };
 
+class spell_gen_fortune_cookie : public SpellScriptLoader
+{
+public:
+    spell_gen_fortune_cookie() : SpellScriptLoader("spell_gen_fortune_cookie") { }
+
+    class spell_gen_fortune_cookie_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_fortune_cookie_AuraScript);
+
+            void HandleTick(AuraEffect const* aurEff)
+            {
+                Unit* caster = GetCaster();
+
+                if (aurEff->GetTickNumber() == 1 && caster && caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Player * player = caster->ToPlayer();
+                    uint32 spell_id = 0;
+
+                    switch(player->GetActiveTalentBranchSpec())
+                    {
+                        case SPEC_WARRIOR_PROTECTION:
+                        case SPEC_PALADIN_PROTECTION:
+                        case SPEC_DK_BLOOD:
+                            spell_id = 87549; // mastery
+                            break;
+                        case SPEC_DRUID_FERAL:
+                            spell_id = 87546; // agi
+                            break;
+                    }
+ 
+                    if (player->HasHealingSpec())
+                        spell_id = 87547; // intelect
+ 
+                    if (spell_id == 0)
+                    {
+                        switch (player->getClass())
+                        {
+                            case CLASS_ROGUE:
+                            case CLASS_HUNTER:
+                                spell_id = 87546; // agi
+                                break;
+                            case CLASS_WARRIOR:
+                            case CLASS_PALADIN:
+                            case CLASS_DEATH_KNIGHT:
+                                spell_id = 87545; // srength
+                                break;
+                            case CLASS_PRIEST:
+                            case CLASS_MAGE:
+                            case CLASS_WARLOCK:
+                            case CLASS_DRUID:
+                                spell_id = 87547; // intelect
+                                break;
+                            case CLASS_SHAMAN:
+                            {
+                                spell_id = (player->GetActiveTalentBranchSpec() == SPEC_SHAMAN_ENHANCEMENT) ? 87546 : 87547; // agi, intelect
+                                break;
+                            }
+                        }
+                    }
+
+                    if (spell_id)
+                        player->CastSpell(player, spell_id, true);
+                }
+            }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_fortune_cookie_AuraScript::HandleTick, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_gen_fortune_cookie_AuraScript();
+    }
+};
 
 void AddSC_generic_spell_scripts()
 {
@@ -843,4 +919,5 @@ void AddSC_generic_spell_scripts()
     new aoe_heal_diminisher();
     new spell_gen_stay_of_execution();
     new spell_gen_gift_of_naaru();
+    new spell_gen_fortune_cookie();
 }
