@@ -887,7 +887,6 @@ public:
 
             if (uiDamageTimer <= diff)
             {
-
                 if (Unit* target = me->SelectNearestTarget(20))
                 {
                     if (!SlowedDown)

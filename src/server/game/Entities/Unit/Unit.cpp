@@ -6455,7 +6455,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 {
                     AuraEffect * aurEff = GetAuraEffect(dummySpell->Id, EFFECT_0, GetGUID());
 
-                    if (!aurEff)
+                    if (!aurEff || procSpell->Id == 82739) // Dont proc from Flame orb
                         return false;
 
                     basepoints0 = damage * aurEff->GetAmount() / 100;
