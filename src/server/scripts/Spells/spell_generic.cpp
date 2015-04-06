@@ -891,9 +891,16 @@ public:
                 }
             }
 
+        void HandleDrinkEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            // Apply also missing drink effect
+            GetCaster()->CastSpell(GetCaster(), 87958, true);
+        }
+
         void Register()
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_fortune_cookie_AuraScript::HandleTick, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            OnEffectApply += AuraEffectApplyFn(spell_gen_fortune_cookie_AuraScript::HandleDrinkEffect, EFFECT_0, SPELL_AURA_MOD_REGEN, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
