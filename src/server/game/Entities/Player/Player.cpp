@@ -21454,8 +21454,8 @@ Pet* Player::GetPet() const
 
         Pet* pet = ObjectAccessor::GetPet(*this, pet_guid);
 
-        if (!pet || !IsInWorld())
-            return nullptr;
+        if (pet && IsInWorld())
+            return pet;
 
         //there may be a guardian in slot
         //sLog->outError("Player::GetPet: Pet %u not exist.",GUID_LOPART(pet_guid));
