@@ -786,10 +786,10 @@ void PoolMgr::LoadFromDB()
         } while (result->NextRow());
 
         // Now check for circular reference
-        for (uint32 i=0; i<max_pool_id; ++i)
+        for (auto poolItrSearch = mPoolSearchMap.begin(); poolItrSearch != mPoolSearchMap.end(); ++poolItrSearch)
         {
             std::set<uint32> checkedPools;
-            for (SearchMap::iterator poolItr = mPoolSearchMap.find(i); poolItr != mPoolSearchMap.end(); poolItr = mPoolSearchMap.find(poolItr->second))
+            for (SearchMap::iterator poolItr = poolItrSearch; poolItr != mPoolSearchMap.end(); poolItr = mPoolSearchMap.find(poolItr->second))
             {
                 checkedPools.insert(poolItr->first);
                 if (checkedPools.find(poolItr->second) != checkedPools.end())
