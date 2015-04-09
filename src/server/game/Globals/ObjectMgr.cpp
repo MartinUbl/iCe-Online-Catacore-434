@@ -1492,12 +1492,12 @@ void ObjectMgr::LoadCreatures()
     mCreatureDataMap.rehash(result->GetRowCount() * 1.1f);
 
     // build single time for check creature data
-    std::set<uint32> difficultyCreatures[MAX_DIFFICULTY - 1];
+    std::map<uint32, std::vector<Difficulty>> difficultyCreatures;
     for (uint32 i = 0; i < sCreatureStorage.MaxEntry; ++i)
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
             for (uint32 diff = 0; diff < MAX_DIFFICULTY - 1; ++diff)
                 if (cInfo->DifficultyEntry[diff])
-                    difficultyCreatures[diff].insert(cInfo->DifficultyEntry[diff]);
+                    difficultyCreatures[cInfo->DifficultyEntry[diff]].push_back((Difficulty)diff);
 
     // build single time for check spawnmask
     std::map<uint32,uint32> spawnMasks;
@@ -1553,18 +1553,16 @@ void ObjectMgr::LoadCreatures()
             continue;
         }
 
-        bool ok = true;
-        for (uint32 diff = 0; diff < MAX_DIFFICULTY - 1 && ok; ++diff)
+        auto itr = difficultyCreatures.find(data.id);
+        if (itr != difficultyCreatures.end())
         {
-            if (difficultyCreatures[diff].find(data.id) != difficultyCreatures[diff].end())
+            for (Difficulty diff : itr->second)
             {
                 sLog->outErrorDb("Table `creature` have creature (GUID: %u) that listed as difficulty %u template (entry: %u) in `creature_template`, skipped.",
                     guid, diff + 1, data.id);
-                ok = false;
             }
-        }
-        if (!ok)
             continue;
+        }
 
         // I do not know why but in db most display id are not zero
         /*if (data.displayid == 11686 || data.displayid == 24719)
