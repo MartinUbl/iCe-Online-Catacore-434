@@ -55,7 +55,7 @@ class Field
         struct 
         {
             enum_field_types type;  // Field type
-            void* value;            // Actual data in memory
+            std::vector<char> value;// Actual data in memory
             bool raw;               // Raw bytes? (Prepared statement or adhoc)
             uint32 length;          // Length (prepared strings only)
         } data;

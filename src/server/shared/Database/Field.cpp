@@ -24,7 +24,6 @@
 
 Field::Field()
 {
-    data.value = NULL;
     data.type = MYSQL_TYPE_NULL;
     data.length = 0;
 }
@@ -36,32 +35,35 @@ Field::~Field()
 
 void Field::SetByteValue(const void* newValue, const size_t newSize, enum_field_types newType, uint32 length)
 {
-    if (data.value)
-        CleanUp();
-
     // This value stores raw bytes that have to be explicitly casted later
     if (newValue)
     {
-        data.value = new char[newSize];
-        memcpy(data.value, newValue, newSize);
+        data.value.resize(newSize);
+        memcpy(data.value.data(), newValue, newSize);
         data.length = length;
     }
+    else
+    {
+        CleanUp();
+    }
+
     data.type = newType;
     data.raw = true;
 }
 
 void Field::SetStructuredValue(char* newValue, enum_field_types newType)
 {
-    if (data.value)
-        CleanUp();
-
     // This value stores somewhat structured data that needs function style casting
     if (newValue)
     {
         size_t size = strlen(newValue);
-        data.value = new char [size+1];
-        strcpy((char*)data.value, newValue);
+        data.value.resize(size + 1);
+        strcpy(data.value.data(), newValue);
         data.length = size;
+    }
+    else
+    {
+        CleanUp();
     }
 
     data.type = newType;
@@ -75,7 +77,7 @@ bool Field::GetBool() const // Wrapper, actually gets integer
 
 uint8 Field::GetUInt8() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return 0;
 
 #ifdef TRINITY_DEBUG
@@ -86,13 +88,13 @@ uint8 Field::GetUInt8() const
     }
 #endif
     if (data.raw)
-        return *reinterpret_cast<uint8*>(data.value);
-    return static_cast<uint8>(atol((char*)data.value));
+        return *reinterpret_cast<const uint8*>(&data.value[0]);
+    return static_cast<uint8>(atol(&data.value[0]));
 }
 
 int8 Field::GetInt8() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return 0;
 
 #ifdef TRINITY_DEBUG
@@ -103,13 +105,13 @@ int8 Field::GetInt8() const
     }
 #endif
     if (data.raw)
-        return *reinterpret_cast<int8*>(data.value);
-    return static_cast<int8>(atol((char*)data.value));
+        return *reinterpret_cast<const int8*>(&data.value[0]);
+    return static_cast<int8>(atol(&data.value[0]));
 }
 
 uint16 Field::GetUInt16() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return 0;
 
 #ifdef TRINITY_DEBUG
@@ -120,13 +122,13 @@ uint16 Field::GetUInt16() const
     }
 #endif
     if (data.raw)
-        return *reinterpret_cast<uint16*>(data.value);
-    return static_cast<uint16>(atol((char*)data.value));
+        return *reinterpret_cast<const uint16*>(&data.value[0]);
+    return static_cast<uint16>(atol(&data.value[0]));
 }
 
 int16 Field::GetInt16() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return 0;
 
 #ifdef TRINITY_DEBUG
@@ -137,13 +139,13 @@ int16 Field::GetInt16() const
     }
 #endif
     if (data.raw)
-        return *reinterpret_cast<int16*>(data.value);
-    return static_cast<int16>(atol((char*)data.value));
+        return *reinterpret_cast<const int16*>(&data.value[0]);
+    return static_cast<int16>(atol(&data.value[0]));
 }
 
 uint32 Field::GetUInt32() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return 0;
 
 #ifdef TRINITY_DEBUG
@@ -154,13 +156,13 @@ uint32 Field::GetUInt32() const
     }
 #endif
     if (data.raw)
-        return *reinterpret_cast<uint32*>(data.value);
-    return static_cast<uint32>(atol((char*)data.value));
+        return *reinterpret_cast<const uint32*>(&data.value[0]);
+    return static_cast<uint32>(atol(&data.value[0]));
 }
 
 int32 Field::GetInt32() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return 0;
 
 #ifdef TRINITY_DEBUG
@@ -171,13 +173,13 @@ int32 Field::GetInt32() const
     }
 #endif
     if (data.raw)
-        return *reinterpret_cast<int32*>(data.value);
-    return static_cast<int32>(atol((char*)data.value));
+        return *reinterpret_cast<const int32*>(&data.value[0]);
+    return static_cast<int32>(atol(&data.value[0]));
 }
 
 uint64 Field::GetUInt64() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return 0;
 
 #ifdef TRINITY_DEBUG
@@ -188,13 +190,13 @@ uint64 Field::GetUInt64() const
     }
 #endif
     if (data.raw)
-        return *reinterpret_cast<uint64*>(data.value);
-    return static_cast<uint64>(strtoull((char*)data.value, NULL, 0));
+        return *reinterpret_cast<const uint64*>(&data.value[0]);
+    return static_cast<uint64>(strtoull(&data.value[0], NULL, 0));
 }
 
 int64 Field::GetInt64() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return 0;
 
 #ifdef TRINITY_DEBUG
@@ -205,13 +207,13 @@ int64 Field::GetInt64() const
     }
 #endif
     if (data.raw)
-        return *reinterpret_cast<int64*>(data.value);
-    return static_cast<int64>(atoll((char*)data.value));
+        return *reinterpret_cast<const int64*>(&data.value[0]);
+    return static_cast<int64>(atoll(&data.value[0]));
 }
 
 float Field::GetFloat() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return 0.0f;
 
 #ifdef TRINITY_DEBUG
@@ -222,13 +224,13 @@ float Field::GetFloat() const
     }
 #endif
     if (data.raw)
-        return *reinterpret_cast<float*>(data.value);
-    return static_cast<float>(atof((char*)data.value));
+        return *reinterpret_cast<const float*>(&data.value[0]);
+    return static_cast<float>(atof(&data.value[0]));
 }
 
 double Field::GetDouble() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return 0.0f;
 
 #ifdef TRINITY_DEBUG
@@ -239,13 +241,13 @@ double Field::GetDouble() const
     }
 #endif
     if (data.raw)
-        return *reinterpret_cast<double*>(data.value);
-    return static_cast<double>(atof((char*)data.value));
+        return *reinterpret_cast<const double*>(&data.value[0]);
+    return static_cast<double>(atof(&data.value[0]));
 }
 
 const char* Field::GetCString() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return NULL;
 
 #ifdef TRINITY_DEBUG
@@ -255,12 +257,12 @@ const char* Field::GetCString() const
         return NULL;
     }
 #endif
-    return static_cast<const char*>(data.value);
+    return &data.value[0];
 }
 
 std::string Field::GetString() const
 {
-    if (!data.value)
+    if (data.value.empty())
         return "";
 
     if (data.raw)
@@ -270,13 +272,13 @@ std::string Field::GetString() const
             string = "";
         return std::string(string, data.length);
     }
-    return std::string((char*)data.value);
+    return &data.value[0];
 }
 
 void Field::CleanUp()
 {
-    delete[]((char*)data.value);
-    data.value = NULL;
+    data.value.clear();
+    data.length = 0;
 }
 
 size_t Field::SizeForType(MYSQL_FIELD* field)
