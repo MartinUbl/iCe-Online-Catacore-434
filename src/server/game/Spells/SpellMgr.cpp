@@ -4719,6 +4719,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 107837:
             spellInfo->EffectAmplitude[0] = 10000;
             break;
+        case 75387: // Tiny Mooncloth Carpet
+            spellInfo->Attributes |= SPELL_ATTR0_CANT_USED_IN_COMBAT;
+            break;
         // Murozond
         case 102364: // Blessing of the Bronze Dragonflight
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
