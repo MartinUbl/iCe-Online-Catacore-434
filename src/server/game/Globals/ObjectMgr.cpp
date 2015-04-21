@@ -55,6 +55,7 @@
 #include "PoolMgr.h"
 #include "DB2Structure.h"
 #include "DB2Stores.h"
+#include "ItemEnchantmentMgr.h"
 
 /*
  * Granularities for guid map bitfields

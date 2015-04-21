@@ -23,11 +23,10 @@
 #ifndef TRINITY_LOOTMGR_H
 #define TRINITY_LOOTMGR_H
 
-#include "ItemEnchantmentMgr.h"
-#include "ByteBuffer.h"
 #include "RefManager.h"
 #include "SharedDefines.h"
 #include "ConditionMgr.h"
+class ByteBuffer;
 
 #include <map>
 #include <vector>
