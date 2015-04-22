@@ -668,30 +668,24 @@ public:
 
                 if (!sAchievementMgr->IsRealmCompleted(achievement)) // If (Realm First! Ragnaros achievement) is not already completed
                 {
-                    Map * map = me->GetMap();
-                    if (!map)
-                        return;
-
-                    Map::PlayerList const& plrList = map->GetPlayers();
-                    if (plrList.isEmpty())
-                        return;
-
-                    Player * player = plrList.getFirst()->getSource();
-
-                    if (player == NULL)
-                        return;
-
-                    if (!player->GetGroup() || !player->GetGroup()->IsGuildGroup(player->GetGuildId())) // Not in guild group
-                        return;
-
-                    for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                    Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
+                    if (!plrList.isEmpty())
                     {
-                        if (Player* pl = itr->getSource())
+                        if (Player * player = plrList.getFirst()->getSource())
                         {
-                            pl->CompletedAchievement(achievement); // Manually complete achievement for every player
+                            if (player->GetGroup() && player->GetGroup()->IsGuildGroup(player->GetGuildId())) // Not in guild group
+                            {
+                                for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                                {
+                                    if (Player* pl = itr->getSource())
+                                    {
+                                        pl->CompletedAchievement(achievement); // Manually complete achievement for every player
+                                    }
+                                }
+                                sAchievementMgr->SetRealmCompleted(achievement); // Lock Achievement manually
+                            }
                         }
                     }
-                    sAchievementMgr->SetRealmCompleted(achievement); // Lock Achievement manually
                 }
             }
 
