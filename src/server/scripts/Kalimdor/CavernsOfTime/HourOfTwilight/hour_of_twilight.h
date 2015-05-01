@@ -36,5 +36,7 @@ enum AdditionalEvents
 enum HourOfTwilightNpcs
 {
     TYPE_THRALL                        = 10, 
+    TYPE_THRALL1                       = 11,
+    TYPE_THRALL2                       = 12,
 };
 #endif
