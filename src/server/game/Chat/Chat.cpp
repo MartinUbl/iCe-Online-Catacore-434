@@ -885,7 +885,6 @@ ChatCommand * ChatHandler::getCommandTable()
 
     // cache for commands, needed because some commands are loaded dynamically through ScriptMgr
     // cache is never freed and will show as a memory leak in diagnostic tools
-    // can't use vector as vector storage is implementation-dependent, eg, there can be alignment gaps between elements
     static ChatCommand* commandTableCache = 0;
 
     if (load_command_table)
