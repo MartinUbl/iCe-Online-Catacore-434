@@ -31,6 +31,8 @@ enum AdditionalEvents
 {
     DATA_INSTANCE_PROGRESS             = 4,
     DATA_MOVEMENT_PROGRESS             = 5,
+    DATA_ASIRA_INTRO                   = 6,
+    DATA_DRAKES                        = 7,
 };
 
 enum HourOfTwilightNpcs

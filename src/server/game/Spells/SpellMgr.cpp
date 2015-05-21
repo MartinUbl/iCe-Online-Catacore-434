@@ -3038,6 +3038,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // some generic arena related spells have by some strange reason MECHANIC_TURN
             if  (spellproto->Mechanic == MECHANIC_TURN)
                 return DIMINISHING_NONE;
+            // Silenced - Asira Dawnslayer encounter
+            if (spellproto->Id == 103587) 
+                return DIMINISHING_NONE;
             break;
         case SPELLFAMILY_MAGE:
         {
@@ -4664,6 +4667,31 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->excludeCasterAuraSpell = 95809; // Insanity
             count++;
             break;
+
+/****************------- HOUR OF TWILIGHT 5 MAN DUNGEON -------********************/
+        // Asira Dawnslayer
+        case 103419: // Blade barrier
+        case 103562: // Lesser blade barrier
+            spellInfo->DurationIndex = 21; // Unlimited
+            spellInfo->EffectBasePoints[0] = 1000000; // Absorb amount 1M
+            break;
+        case 102726: // Mark of Silence
+            spellInfo->AttributesEx5 &= ~SPELL_ATTR5_HIDE_DURATION; // This debuff should be visible on player
+            spellInfo->DurationIndex = 21; // Unlimited
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            count++;
+            break;
+        case 103597: // Throw Knife
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
+            break;
+        case 103947: // Ancestral Spirit
+            spellInfo->Effect[0] = 0;
+            break;
+        case 103646: // Mount - Ambushed by Asira
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            break;
+/*****************------- HOUR OF TWILIGHT 5 MAN DUNGEON -------*******************/
 
 /**********************------- END TIME 5 MAN DUNGEON -------**********************/
         // Echo of Tyrande
