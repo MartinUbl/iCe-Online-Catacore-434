@@ -270,9 +270,9 @@ public:
 
         virtual uint32* GetCorrUiEncounter()
         {
-            currEnc[0] = m_auiEncounter[TYPE_BOSS_ARCURION]; // Arcurion
-            currEnc[1] = m_auiEncounter[TYPE_BOSS_ASIRA_DAWNSLAYER]; // Asira
-            currEnc[2] = m_auiEncounter[TYPE_BOSS_ARCHBISHOP_BENEDICTUS]; // Benedictus
+            currEnc[0] = m_auiEncounter[TYPE_BOSS_ASIRA_DAWNSLAYER]; // Asira 1
+            currEnc[1] = m_auiEncounter[TYPE_BOSS_ARCHBISHOP_BENEDICTUS]; // Benedictus 2
+            currEnc[2] = m_auiEncounter[TYPE_BOSS_ARCURION]; // Arcurion 0
 
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(), currEnc, MAX_ENCOUNTER);
 
