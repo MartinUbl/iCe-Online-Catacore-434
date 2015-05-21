@@ -33,6 +33,7 @@ enum AdditionalEvents
     DATA_MOVEMENT_PROGRESS             = 5,
     DATA_ASIRA_INTRO                   = 6,
     DATA_DRAKES                        = 7,
+    DATA_ECLIPSE_ACHIEVEMENT           = 8,
 };
 
 enum HourOfTwilightNpcs
@@ -40,5 +41,7 @@ enum HourOfTwilightNpcs
     TYPE_THRALL                        = 10, 
     TYPE_THRALL1                       = 11,
     TYPE_THRALL2                       = 12,
+    TYPE_THRALL3                       = 13,
+    TYPE_THRALL4                       = 14,
 };
 #endif

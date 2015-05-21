@@ -4018,6 +4018,10 @@ bool Spell::CanCancel()
         case 103946:
         // Peroth'arn
         case 104905:
+        // Archbishop Benedictus
+        case 103754:
+        case 103565:
+        case 103767:
             return false;
     }
     return true;

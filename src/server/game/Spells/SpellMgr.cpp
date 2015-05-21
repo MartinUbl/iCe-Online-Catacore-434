@@ -4696,6 +4696,50 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             break;
+        // Arcibishop Benedictus
+        case 102629: // Holly Wall
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            break;
+        case 103762: // Engulfing Twilight
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            break;
+        case 103754: // Twilight Epiphany
+            spellInfo->Effect[1] = 0;
+            spellInfo->InterruptFlags = 16;
+            break;
+        case 103678: // Wave of Virtue
+        case 103780: // Wave of Twilight
+            spellInfo->EffectAmplitude[EFFECT_0] = 1500;
+            break;
+        case 103684: // Wave of Virtue
+        case 103781: // Wave of Twilight
+            spellInfo->Effect[1] = SPELL_EFFECT_NONE;
+            break;
+        case 104534: // Seaping Twilight
+        case 104516: // Seaping Light
+            spellInfo->EffectTriggerSpell[0] = 0;
+            break;
+        case 104537: // Seaping Twilight
+        case 104528: // Seaping Light
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
+            break;
+        case 103565: // Purifying Light
+            spellInfo->PreventionType = SPELL_PREVENTION_TYPE_NONE;
+            break;
+        case 103637: // Chain Lightning
+            spellInfo->Effect[0] = SPELL_EFFECT_SCHOOL_DAMAGE;
+            spellInfo->EffectBasePoints[0] = 30000;
+            spellInfo->SpellVisual[0] = 36;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            count++;
+            break;
+        case 108442: // Lava burst
+            spellInfo->ManaCostPercentage = 0;
+            break;
 /*****************------- HOUR OF TWILIGHT 5 MAN DUNGEON -------*******************/
 
 /**********************------- END TIME 5 MAN DUNGEON -------**********************/

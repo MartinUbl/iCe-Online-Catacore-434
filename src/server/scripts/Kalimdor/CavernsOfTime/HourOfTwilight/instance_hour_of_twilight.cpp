@@ -80,6 +80,8 @@ public:
         uint64 thrallGuid;
         uint64 thrall1Guid;
         uint64 thrall2Guid;
+        uint64 thrall3Guid;
+        uint64 thrall4Guid;
 
         uint32 instance_progress;
         uint32 movement_progress;
@@ -165,6 +167,12 @@ public:
                 case 54972: // Asira`s Thrall
                     thrall2Guid = pCreature->GetGUID();
                     break;
+                case 54634: // Benedictus trash Thrall
+                    thrall3Guid = pCreature->GetGUID();
+                    break;
+                case 54971: // Benedictus Thrall
+                    thrall4Guid = pCreature->GetGUID();
+                    break;
             }
         }
 
@@ -182,6 +190,10 @@ public:
                     return thrall1Guid;
                 case TYPE_THRALL2:
                     return thrall2Guid;
+                case TYPE_THRALL3:
+                    return thrall3Guid;
+                case TYPE_THRALL4:
+                    return thrall4Guid;
             }
                 return 0;
         }
@@ -290,6 +302,8 @@ enum Thrall_NPC_IDs
     LIFE_WARDEN                  = 55415,
     ASIRA_DOWNSLAYER             = 54968,
     NPC_FOG                      = 119513,
+    BOSS_ARCHBISHOP_BENEDICTUS   = 54938,
+    NPC_WATER_SHELL              = 55447,
 };
 
 // Thrall Spells
@@ -304,6 +318,8 @@ enum Thral_Spells
     ANCESTRAL_SPIRIT               = 103947,
     RESURRECTION                   =   2006,
     RED_DRAKE                      =  59570,
+    THRALL_SPELL_LAVABURST_1       = 108442,
+    WATER_SHELL                    = 103688,
 };
 
 // List of gossip texts
@@ -1297,6 +1313,93 @@ public:
     };
 };
 
+// BENEDICTUS BOSS THRALL - 54971
+class npc_thrall_hour_of_twilight4 : public CreatureScript
+{
+public:
+    npc_thrall_hour_of_twilight4() : CreatureScript("npc_thrall_hour_of_twilight4") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_thrall_hour_of_twilight4AI(pCreature);
+    }
+
+    struct npc_thrall_hour_of_twilight4AI : public ScriptedAI
+    {
+        npc_thrall_hour_of_twilight4AI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        uint32 Check_Timer;
+        uint32 Dmg_Timer;
+        uint32 Water_Shell_Timer;
+        bool Damage;
+
+        void Reset()
+        {
+            me->SetVisible(false);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            Check_Timer = 1000;
+            Dmg_Timer = 1000;
+            Water_Shell_Timer = 60000;
+            Damage = false;
+        }
+
+        void EnterCombat(Unit * /*who*/) { }
+
+        void DoAction(const int32 /*param*/)
+        {
+            Dmg_Timer = 5000;
+            Water_Shell_Timer = 6000;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (Check_Timer <= diff)
+            {
+                if (instance && Damage == false)
+                    if (instance->GetData(TYPE_BOSS_ARCHBISHOP_BENEDICTUS) == IN_PROGRESS)
+                        Damage = true;
+
+                if (instance && Damage == true)
+                    if (instance->GetData(TYPE_BOSS_ARCHBISHOP_BENEDICTUS) == NOT_STARTED ||
+                        instance->GetData(TYPE_BOSS_ARCHBISHOP_BENEDICTUS) == DONE)
+                        Damage = false;
+
+                Check_Timer = 5000;
+            }
+            else Check_Timer -= diff;
+
+            if (Damage == true && !me->HasAura(103762)) // Engulfing Twilight aura
+            {
+                if (Dmg_Timer <= diff)
+                {
+                    Creature * archbishop = me->FindNearestCreature(BOSS_ARCHBISHOP_BENEDICTUS, 100.0f, true);
+                    if (archbishop)
+                        me->CastSpell(archbishop, THRALL_SPELL_LAVABURST_1, false);
+                    Dmg_Timer = 3000;
+                }
+                else Dmg_Timer -= diff;
+
+                if (Water_Shell_Timer <= diff)
+                {
+                    int distance = urand(10, 27);
+                    float angle = urand(22, 42) / 10; // 3.22
+                    me->SummonCreature(NPC_WATER_SHELL, me->GetPositionX() + cos(angle)*distance, me->GetPositionY() + sin(angle)*distance, me->GetPositionZ() + 1.5, angle, TEMPSUMMON_TIMED_DESPAWN, 30000);
+                    me->InterruptNonMeleeSpells(false);
+                    Creature * water_shell = me->FindNearestCreature(NPC_WATER_SHELL, 100.0f, true);
+                    if (water_shell)
+                        me->CastSpell(water_shell, WATER_SHELL, false);
+                    Water_Shell_Timer = 60000;
+                    Dmg_Timer = 15000;
+                }
+                else Water_Shell_Timer -= diff;
+            }
+        }
+    };
+};
 
 //////////////////////////////////////////////////////////////
 ////////////////        TRASH AI            //////////////////
@@ -2174,6 +2277,8 @@ void AddSC_instance_hour_of_twilight()
     new npc_thrall_hour_of_twilight();
     new npc_thrall_hour_of_twilight1();
     new npc_thrall_hour_of_twilight2();
+    new npc_thrall_hour_of_twilight3();
+    new npc_thrall_hour_of_twilight4();
 
     new npc_frozen_servitor();
     new npc_crystalline_elemental();
