@@ -18,15 +18,15 @@
 #include "ScriptPCH.h"
 #include "hour_of_twilight.h"
 
-const float ThrallMovePoints[20][4]=
+const float ThrallMovePoints[27][4]=
 {
-    // Arcurion Thrall
+    // Arcurion Thrall 0-4
     {4924.10f, 255.55f, 97.1204f, 2.132f}, // After two Frozen Servitors
     {4897.53f, 212.83f, 99.3030f, 4.155f}, // In the middle of the canyon
     {4867.65f, 162.53f, 98.0762f, 3.968f}, // Middle way in fron of Arcurion
     {4786.66f,  78.23f, 70.7800f, 3.847f}, // Stop before Arcurion
     {4762.56f,  61.55f, 66.3397f, 3.725f}, // Skywall
-    // Ghost wolf Thrall
+    // Ghost wolf Thrall 5-14
     {4684.05f,   6.57f, 65.5976f, 2.008f}, // Turn right point
     {4651.16f,  72.70f, 80.9788f, 1.419f}, // Another turn right point
     {4659.99f, 131.99f, 94.4264f, 1.973f}, // Turn again and run to the hill
@@ -37,7 +37,19 @@ const float ThrallMovePoints[20][4]=
     {4536.76f, 371.36f, 81.8557f, 2.205f}, // Turn Right
     {4472.79f, 460.27f, 54.9014f, 3.116f}, // One last stop
     {4406.05f, 462.09f, 35.7199f, 5.370f}, // 3rd Thrall position
-    // Asira Thrall
+    // Asira Thrall 15-26
+    {4410.55f, 451.16f, 35.3942f, 4.074f}, // Start of the road leading down
+    {4389.73f, 423.24f, 16.3965f, 4.026f}, // Middle of the hill
+    {4348.91f, 401.17f, -6.4098f, 3.226f}, // Bottom of the hill
+    {4321.85f, 402.56f, -8.0832f, 3.545f}, // Middle of the 1st camp
+    {4342.15f, 433.38f, -7.6375f, 1.541f}, // Turn left
+    {4337.53f, 480.67f, -8.4055f, 2.256f}, // Stop before 2nd camp
+    {4322.06f, 485.36f, -8.8445f, 3.151f}, // Closer to the 2nd camp
+    {4323.48f, 532.85f, -8.6174f, 1.492f}, // Before hill
+    {4290.04f, 568.05f, -7.0952f, 2.964f}, // Asira`s clearing
+    {4283.30f, 590.06f, -6.4609f, 1.498f}, // Revive Life-Warden
+    {4284.70f, 600.89f, -4.5608f, 1.266f}, // Jump on Life Warden
+    {4260.03f, 445.29f, 43.1593f, 4.431f}, // Fly Away
 };
 
 class instance_hour_of_twilight: public InstanceMapScript
@@ -60,16 +72,17 @@ public:
 
         uint32 instance_progress;
         uint32 movement_progress;
-        uint32 Move_Timer;
+        uint32 asira_intro;
+        uint32 drakes;
 
         std::string saveData;
 
         void Initialize()
         {
-            instance_progress = 0;
-            movement_progress = 0;
-
-            Move_Timer = 0;
+            instance_progress  = 0;
+            movement_progress  = 0;
+            asira_intro        = 0;
+            drakes             = 0;
 
             memset(m_auiEncounter, 0, sizeof(uint32) * MAX_ENCOUNTER);
             GetCorrUiEncounter();
@@ -86,6 +99,8 @@ public:
 
             saveStream << " " << instance_progress;
             saveStream << " " << movement_progress;
+            saveStream << " " << asira_intro;
+            saveStream << " " << drakes;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -107,6 +122,8 @@ public:
 
             loadStream >> instance_progress;
             loadStream >> movement_progress;
+            loadStream >> asira_intro;
+            loadStream >> drakes;
 
             for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
@@ -174,6 +191,12 @@ public:
             if (DataId == DATA_MOVEMENT_PROGRESS)
                 return movement_progress;
 
+            if (DataId == DATA_ASIRA_INTRO)
+                return asira_intro;
+
+            if (DataId == DATA_DRAKES)
+                return drakes;
+
             if (DataId < MAX_ENCOUNTER)
                 return m_auiEncounter[DataId];
 
@@ -194,6 +217,18 @@ public:
             if (type == DATA_MOVEMENT_PROGRESS)
             {
                 movement_progress += data;
+                SaveToDB();
+            }
+
+            if (type == DATA_ASIRA_INTRO)
+            {
+                asira_intro = data;
+                SaveToDB();
+            }
+
+            if (type == DATA_DRAKES)
+            {
+                drakes = data;
                 SaveToDB();
             }
 
@@ -235,22 +270,28 @@ public:
 // Thrall AIs
 enum Thrall_NPC_IDs
 {
-    THRALL                = 54548,
-    THRALL_1              = 55779,
-    THRALL_2              = 54972,
-    THRALL_3              = 54634,
-    THRALL_4              = 54971,
+    THRALL                       = 54548,
+    THRALL_1                     = 55779,
+    THRALL_2                     = 54972,
+    THRALL_3                     = 54634,
+    THRALL_4                     = 54971,
+    RISING_FLAME_TOTEM           = 55474,
+    LIFE_WARDEN                  = 55415,
+    ASIRA_DOWNSLAYER             = 54968,
 };
 
 // Thrall Spells
 enum Thral_Spells
 {
     THRALL_SPELL_LAVABURST         = 107980,
-    THRALL_SPELL_HEALING_TOUCH     = 77067,
-    THRALL_SPELL_GHOST_WOLF        = 2645,
+    THRALL_SPELL_HEALING_TOUCH     =  77067,
     THRALL_SPELL_BLOODLUST         = 103834,
     ARCURION_SPAWN_VISUAL          = 104767,
-    GHOST_WOLF_FORM                = 2645,
+    GHOST_WOLF_FORM                =   2645,
+    RISING_FLAME                   = 103813,
+    ANCESTRAL_SPIRIT               = 103947,
+    RESURRECTION                   =   2006,
+    RED_DRAKE                      =  59570,
 };
 
 // List of gossip texts
@@ -655,7 +696,7 @@ public:
                             if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-11][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-11][1]) < 1)
                             {
                                 me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-10][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-10][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-10][2]);
-                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 16-24
+                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 16-25
                             }
                             break;
                         case 25:
@@ -665,7 +706,7 @@ public:
                                 Creature * thrall_next = me->FindNearestCreature(THRALL_2, 50.0f, true);
                                 if (thrall_next)
                                     thrall_next->SetVisible(true);
-                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 25
+                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 26
                             }
                             break;
                         default:
@@ -700,16 +741,374 @@ public:
             instance = creature->GetInstanceScript();
 
             me->SetVisible(false);
+            me->SetStandState(UNIT_STAND_STATE_KNEEL);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_PASSIVE);
         }
 
         InstanceScript* instance;
+        uint32 Move_Timer;
+        uint32 Lavaburst_Timer;
+        uint32 Say_Next_Timer;
+        uint32 Summon_Totem_Timer;
+        uint32 Outro_Timer;
+        uint32 Check_Timer;
+        int Twilight;
+        int Outro_Action;
+        bool Set_Timer;
+        bool Lavaburst;
+        bool Say_Next;
+        bool Outro;
 
-        void Reset() { }
+        void Reset() 
+        {
+            Twilight = 0;
+            Set_Timer = false;
+            Lavaburst = false;
+            Say_Next = false;
+            Outro = false;
+            Summon_Totem_Timer = 0;
+            Lavaburst_Timer = 0;
+            Outro_Action = 0;
+            Outro_Timer = 0;
+            Check_Timer = 0;
+        }
+
+        void FindCorrectTarget()
+        {
+            Creature * twilight_assassin = me->FindNearestCreature(55106, 30.0f, true);       // TWILIGHT_ASSASSIN
+            Creature * twilight_shadow_walker = me->FindNearestCreature(55109, 30.0f, true);  // TWILIGHT_SHADOW_WALKER
+            Creature * twilight_bruiser = me->FindNearestCreature(55112, 30.0f, true);        // TWILIGHT_BRUISER
+            Creature * twilight_thug = me->FindNearestCreature(55111, 30.0f, true);           // TWILIGHT_THUG
+            Creature * twilight_ranger = me->FindNearestCreature(55107, 30.0f, true);         // TWILIGHT_RANGER
+
+            std::vector<int> targets;
+            targets.clear();
+
+            if (twilight_assassin && twilight_assassin->IsInCombat())
+                targets.push_back(0);
+            if (twilight_shadow_walker && twilight_shadow_walker->IsInCombat())
+                targets.push_back(1);
+            if (twilight_bruiser && twilight_bruiser->IsInCombat())
+                targets.push_back(2);
+            if (twilight_thug && twilight_thug->IsInCombat())
+                targets.push_back(3);
+            if (twilight_ranger && twilight_ranger->IsInCombat())
+                targets.push_back(4);
+
+            if (!targets.empty())
+            {
+                Twilight = targets[urand(0, targets.size() - 1)];
+
+                switch (Twilight)
+                {
+                case 0:
+                    if (twilight_assassin)
+                        me->CastSpell(twilight_assassin, THRALL_SPELL_LAVABURST, false);
+                    break;
+                case 1:
+                    if (twilight_shadow_walker)
+                        me->CastSpell(twilight_shadow_walker, THRALL_SPELL_LAVABURST, false);
+                    break;
+                case 2:
+                    if (twilight_bruiser)
+                        me->CastSpell(twilight_bruiser, THRALL_SPELL_LAVABURST, false);
+                    break;
+                case 3:
+                    if (twilight_thug)
+                        me->CastSpell(twilight_thug, THRALL_SPELL_LAVABURST, false);
+                    break;
+                case 4:
+                    if (twilight_ranger)
+                        me->CastSpell(twilight_ranger, THRALL_SPELL_LAVABURST, false);
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            Lavaburst_Timer = 3000;
+        }
 
         void EnterCombat(Unit * /*who*/) { }
 
         void UpdateAI(const uint32 diff)
         {
+            // Change this later, Move_Timer won`t work after server crash
+            if ((instance->GetData(DATA_MOVEMENT_PROGRESS)) == 1)
+                if (Set_Timer == false)
+                {
+                    Move_Timer = 3000;
+                    Set_Timer = true;
+                }
+
+            // Trash actions
+            if (Lavaburst)
+            {
+                if (Lavaburst_Timer <= diff)
+                {
+                    FindCorrectTarget();
+                }
+                else Lavaburst_Timer -= diff;
+
+                if (Summon_Totem_Timer <= diff)
+                {
+                    int distance = 7;
+                    float angle = me->GetOrientation();
+                    me->SummonCreature(RISING_FLAME_TOTEM, me->GetPositionX() + cos(angle)*distance, me->GetPositionY() + sin(angle)*distance, me->GetPositionZ()+1, angle, TEMPSUMMON_TIMED_DESPAWN, 30000);
+                    Summon_Totem_Timer = 35000+urand(0, 15000);
+                }
+                else Summon_Totem_Timer -= diff;
+            }
+
+            // Boss Asira Actions
+            if (Check_Timer <= diff)
+            {
+                if (instance)
+                {
+                    if ((instance->GetData(TYPE_BOSS_ASIRA_DAWNSLAYER)) == IN_PROGRESS)
+                    {
+                        // Cast Lavaburst
+                        if (Lavaburst_Timer <= diff)
+                        {
+                            Creature * asira = me->FindNearestCreature(ASIRA_DOWNSLAYER, 40.0f, true);
+                            if (asira)
+                                me->CastSpell(asira, THRALL_SPELL_LAVABURST, false);
+                            Lavaburst_Timer = 5000;
+                        }
+                        else Lavaburst_Timer -= diff;
+
+                        // Summon Totem
+                        if (Summon_Totem_Timer <= diff)
+                        {
+                            int distance = urand(10,40);
+                            float angle = urand(22, 39) / 10;
+                            me->SummonCreature(RISING_FLAME_TOTEM, me->GetPositionX() + cos(angle)*distance, me->GetPositionY() + sin(angle)*distance, me->GetPositionZ()+1, angle, TEMPSUMMON_TIMED_DESPAWN, 30000);
+                            Summon_Totem_Timer = 15000+urand(0, 15000);
+                        }
+                        else Summon_Totem_Timer -= diff;
+                    }
+                }
+            }
+
+            if (Say_Next)
+            {
+                if (Say_Next_Timer <= diff)
+                {
+                    me->GetMotionMaster()->MovePoint(0, 4287.48f, 565.78f, -7.1822f);
+                    me->MonsterSay("Up there, above us!", LANG_UNIVERSAL, 0);
+                    me->SendPlaySound(25888, true);
+                    Say_Next = false;
+                }
+                else Say_Next_Timer -= diff;
+            }
+
+            // Thrall movement update
+            if (Move_Timer <= diff)
+            {
+                if (instance)
+                {
+                    switch ((instance->GetData(DATA_MOVEMENT_PROGRESS)))
+                    {
+                    case 1: // Start from 26 later
+                        me->RemoveStandFlags(UNIT_STAND_STATE_KNEEL);
+                        me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[15][0], ThrallMovePoints[15][1], ThrallMovePoints[15][2]);
+                        instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 27 (2)
+                        break;
+                    case 2:
+                        if (me->GetExactDist2d(ThrallMovePoints[15][0], ThrallMovePoints[15][1]) < 1)
+                        {
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[16][0], ThrallMovePoints[16][1], ThrallMovePoints[16][2]);
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 28 (3)
+                            Summon_Totem_Timer = 5000;
+                            Lavaburst = true;
+                        }
+                        break;
+                    case 5/*28*/: // After group kills 2 Assassins 28 na 16
+                    case 6/*29*/:
+                        //if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-12][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-12][1]) < 1)
+                        if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+11][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+11][1]) < 1)
+                        {
+                            // me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-11][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-11][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-11][2]);
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+12][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+12][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+12][2]);
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 30 (7)
+                        }
+                        Lavaburst = false;
+                        break;
+                    case 7/*30*/:
+                        if (me->GetExactDist2d(ThrallMovePoints[18][0], ThrallMovePoints[18][1]) < 1)
+                        {
+                            me->MonsterYell("Be ware, enemies approach!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25883, true);
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 31 (8) + 5 Dead enemies => 36 (13)
+                            Summon_Totem_Timer = 10000 + urand(0, 10000);
+                        }
+                        Lavaburst = true;
+                        break;
+                    case 13/*36*/:
+                    case 14/*37*/:
+                    case 15/*38*/:
+                        //if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-18][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-18][1]) < 1)
+                        if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+5][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+5][1]) < 1)
+                        {
+                            // me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-17][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-17][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-17][2]);
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+6][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+6][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+6][2]);
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 13->[19], 14->[20], 15->[21]
+                        }
+                        Lavaburst = false;
+                        break;
+                    case 16/*39*/:
+                        if (me->GetExactDist2d(ThrallMovePoints[21][0], ThrallMovePoints[21][1]) < 1)
+                        {
+                            me->MonsterYell("Let none stand in our way!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25884, true);
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 40 (17) + 5 Dead enemies => 45 (22)
+                            Summon_Totem_Timer = 10000 + urand(0, 10000);
+                        }
+                        Lavaburst = true;
+                        break;
+                    case 22/*45*/:
+                        if (me->GetExactDist2d(ThrallMovePoints[21][0], ThrallMovePoints[21][1]) < 1)
+                        {
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[22][0], ThrallMovePoints[22][1], ThrallMovePoints[22][2]);
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 46 (23)
+                        }
+                        Lavaburst = false;
+                        break;
+                    case 23/*46*/:
+                        if (me->GetExactDist2d(ThrallMovePoints[22][0], ThrallMovePoints[22][1]) < 1)
+                        {
+                            me->MonsterYell("Twilight`s hammer returns!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25885, true);
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 47 (24) + 5 => 52 (29)
+                            Summon_Totem_Timer = 10000 + urand(0, 10000);
+                        }
+                        Lavaburst = true;
+                        break;
+                    case 29/*52*/:
+                        if (me->GetExactDist2d(ThrallMovePoints[22][0], ThrallMovePoints[22][1]) < 1)
+                        {
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[23][0], ThrallMovePoints[23][1], ThrallMovePoints[23][2]);
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 53 (30)
+                        }
+                        Lavaburst = false;
+                        break;
+                    case 30/*53*/:
+                        if (me->GetExactDist2d(ThrallMovePoints[23][0], ThrallMovePoints[23][1]) < 1)
+                        {
+                            me->MonsterYell("Let them come", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25886, true);
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 54 (31) + 5 => 59 (36)
+                            Summon_Totem_Timer = 10000 + urand(0, 10000);
+                        }
+                        Lavaburst = true;
+                        break;
+                    case 36/*59*/:
+                        me->MonsterSay("Alexstrasza's drakes should meet us here...", LANG_UNIVERSAL, 0);
+                        me->SendPlaySound(25887, true);
+                        me->SetOrientation(3.089f);
+                        Lavaburst = false;
+                        Say_Next_Timer = 5000;
+                        Say_Next = true;
+                        instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 55
+
+                    default:
+                        break;
+                    }
+
+                    Move_Timer = 1000;
+                }
+            }
+            else Move_Timer -= diff;
+
+            // Thrall Asira Outro
+            if (instance)
+            {
+                if ((instance->GetData(DATA_DRAKES)) == 1)
+                {
+                    if (!Outro)
+                    {
+                        if (Outro_Timer <= diff)
+                        {
+                            switch (Outro_Action) {
+                            case 0: // Walk to Life Warden
+                                me->SetWalk(true);
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[24][0], ThrallMovePoints[24][1], ThrallMovePoints[24][2]);
+                                Outro_Timer = 4000;
+                                Outro_Action++;
+                                break;
+                            case 1: // Say
+                                me->MonsterSay("Well done. Let us see to our friend...", LANG_UNIVERSAL, 0);
+                                me->SendPlaySound(25891, true);
+                                Outro_Action++;
+                                Outro_Timer = 10000;
+                                break;
+                            case 2: // Cast Ancestral Spirit
+                            {
+                                Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 50.0f, false);
+                                if (life_warden)
+                                {
+                                    me->CastSpell(life_warden, ANCESTRAL_SPIRIT, false);
+                                    me->MonsterSay("Nicco je Noob :D proto to nejde", LANG_UNIVERSAL, 0);
+                                }
+                                Outro_Timer = 3800;
+                                Outro_Action++;
+                                break;
+                            }
+                            case 3: // Revive Life Warden
+                            {
+                                Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 50.0f, false);
+                                if (life_warden)
+                                {
+                                    life_warden->setDeathState(JUST_ALIVED);
+                                    life_warden->CastSpell(life_warden, RESURRECTION, true);
+                                }
+                                Outro_Timer = 1000;
+                                Outro_Action++;
+                                break;
+                            }
+                            case 4: // Jump on Life Warden
+                            {
+                                Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 50.0f, true);
+                                if (life_warden)
+                                    me->GetMotionMaster()->MovePoint(0, life_warden->GetPositionX(), life_warden->GetPositionY(), life_warden->GetPositionZ());
+                                Outro_Timer = 3000;
+                                Outro_Action++;
+                                break;
+                            }
+                            case 5: // Despawn Life Warden - Mount Thrall
+                            {
+                                Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 50.0f, true);
+                                if (life_warden)
+                                {
+                                    life_warden->SetVisible(false);
+                                    life_warden->DespawnOrUnsummon();
+                                    me->CastSpell(me, RED_DRAKE, true);
+                                    me->MonsterSay("The rest of the drakes should be here shortly. I'll fly on ahead, catch up when you can.", LANG_UNIVERSAL, 0);
+                                    me->SendPlaySound(25892, true);
+                                    Outro_Timer = 1000;
+                                    Outro_Action++;
+                                }
+                                break;
+                            }
+                            case 6: // Fly Away
+                                me->SetFlying(true);
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[26][0], ThrallMovePoints[26][1], ThrallMovePoints[26][2]);
+                                Outro_Action++;
+                                Outro_Timer = 15000;
+                                break;
+                            case 7: // Disappear
+                                me->DespawnOrUnsummon();
+                                Outro = true;
+                                break;
+                            default:
+                                break;
+                            }
+                        }
+                        else Outro_Timer -= diff;
+                    }
+                }
+            }
         }
 
     };
@@ -980,6 +1379,388 @@ public:
     };
 };
 
+//////////////////////////
+/////  Asira  Trash  /////
+//////////////////////////
+enum CreaturesAsiraTrash
+{
+    TWILIGHT_ASSASSIN          = 55106,
+    TWILIGHT_SHADOW_WALKER     = 55109,
+    TWILIGHT_BRUISER           = 55112,
+    TWILIGHT_THUG              = 55111,
+    TWILIGHT_RANGER            = 55107,
+};
+enum AsiraTrashSpells
+{
+    STEALTH                    = 102921,
+    GARROTE                    = 102925,
+    GARROTE_SILENCE            = 102926,
+
+    HUNGERING_SHADOWS          = 103021,
+    SHADOWFORM                 = 107903,
+    MIND_FLAY                  = 103024,
+
+    CLEAVE                     = 103001,
+    MORTAL_STRIKE              = 103002,
+    STAGGERING_BLOW            = 103000,
+
+    BEATDOWN                   = 102989,
+    BASH                       = 102990,
+
+    DISENGAGE                  = 102975,
+    ICE_ARROW                  = 108443,
+    SHOOT                      = 102410,
+};
+
+class npc_twilight_assassin : public CreatureScript
+{
+public:
+    npc_twilight_assassin() : CreatureScript("npc_twilight_assassin") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_twilight_assassinAI(pCreature);
+    }
+
+    struct npc_twilight_assassinAI : public ScriptedAI
+    {
+        npc_twilight_assassinAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        uint32 Garrote_Timer;
+        bool Garrote;
+
+        void JustDied(Unit* /*who*/)
+        {
+            //if (InstanceScript *pInstance = me->GetInstanceScript())
+            //    pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+
+            if (InstanceScript *pInstance = me->GetInstanceScript())
+                pInstance->SetData(DATA_ASIRA_INTRO, 1);
+        }
+
+        void Reset() 
+        {
+            me->setPowerType(POWER_ENERGY);
+            me->SetMaxPower(POWER_ENERGY, 100);
+            me->SetPower(POWER_ENERGY, 100);
+
+            me->CastSpell(me, STEALTH, false);
+            Garrote = false;
+            Garrote_Timer = 10000+urand(0,3000);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Garrote == false)
+                if (!me->HasAura(STEALTH))
+                {
+                    me->CastSpell(me->GetVictim(), GARROTE, true);
+                    Garrote = true;
+                }
+
+            if (Garrote_Timer <= diff)
+            {
+                me->CastSpell(me->GetVictim(), GARROTE, true);
+                Garrote_Timer = 10000+urand(0,3000);
+            }
+            else Garrote_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_twilight_shadow_walker : public CreatureScript
+{
+public:
+    npc_twilight_shadow_walker() : CreatureScript("npc_twilight_shadow_walker") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_twilight_shadow_walkerAI(pCreature);
+    }
+
+    struct npc_twilight_shadow_walkerAI : public ScriptedAI
+    {
+        npc_twilight_shadow_walkerAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        uint32 Mind_Flay_Timer;
+        uint32 Hungering_Shadows_Timer;
+
+        void Reset() 
+        {
+            Mind_Flay_Timer = 1000+urand(0,3000);
+            Hungering_Shadows_Timer = 8000+urand(0,4000);
+            me->CastSpell(me, SHADOWFORM, true);
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            if (InstanceScript *pInstance = me->GetInstanceScript())
+                pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Hungering_Shadows_Timer <= diff)
+            {
+                me->CastSpell(me, HUNGERING_SHADOWS, true);
+                Hungering_Shadows_Timer = 15000+urand(0, 3000);
+            }
+            else Hungering_Shadows_Timer -= diff;
+
+            if (Mind_Flay_Timer <= diff)
+            {
+                if (!me->HasUnitState(UNIT_STATE_CASTING))
+                {
+                    Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true);
+                    if (target)
+                        me->CastSpell(target, MIND_FLAY, true);
+                    Mind_Flay_Timer = 7000 + urand(0, 1500);
+                }
+            }
+            else Mind_Flay_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_twilight_bruiser : public CreatureScript
+{
+public:
+    npc_twilight_bruiser() : CreatureScript("npc_twilight_bruiser") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_twilight_bruiserAI(pCreature);
+    }
+
+    struct npc_twilight_bruiserAI : public ScriptedAI
+    {
+        npc_twilight_bruiserAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        uint32 Special_Attack_Timer;
+        int Random;
+
+        void Reset() 
+        {
+            Special_Attack_Timer = 3000+urand(0, 5000);
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            if (InstanceScript *pInstance = me->GetInstanceScript())
+                pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Special_Attack_Timer <= diff)
+            {
+                Random = urand(0, 2);
+                switch (Random)
+                {
+                case 0:
+                    me->CastSpell(me->GetVictim(), CLEAVE, false);
+                    break;
+                case 1:
+                    me->CastSpell(me->GetVictim(), MORTAL_STRIKE, false);
+                    break;
+                case 2:
+                    me->CastSpell(me->GetVictim(), STAGGERING_BLOW, false);
+                    break;
+                }
+                Special_Attack_Timer = 3000+urand(0, 3000);
+            }
+            else Special_Attack_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_twilight_thug : public CreatureScript
+{
+public:
+    npc_twilight_thug() : CreatureScript("npc_twilight_thug") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_twilight_thugAI(pCreature);
+    }
+
+    struct npc_twilight_thugAI : public ScriptedAI
+    {
+        npc_twilight_thugAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        uint32 Bash_Timer;
+        uint32 Beatdown_Timer;
+
+        void Reset() 
+        {
+            Bash_Timer = 15000;
+            Beatdown_Timer = 15000;
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            if (InstanceScript *pInstance = me->GetInstanceScript())
+                pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Bash_Timer <= diff)
+            {
+                me->CastSpell(me->GetVictim(), BASH, false);
+                Bash_Timer = 15000+urand(0,5000);
+            }
+            else Bash_Timer -= diff;
+
+            if (Beatdown_Timer <= diff)
+            {
+                me->CastSpell(me, BEATDOWN, false);
+                Beatdown_Timer = 20000+urand(0,5000);
+            }
+            else Beatdown_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_twilight_ranger : public CreatureScript
+{
+public:
+    npc_twilight_ranger() : CreatureScript("npc_twilight_ranger") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_twilight_rangerAI(pCreature);
+    }
+
+    struct npc_twilight_rangerAI : public ScriptedAI
+    {
+        npc_twilight_rangerAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        uint32 Disengage_Timer;
+        uint32 Shoot_Timer;
+        uint32 Ice_Arrow_Timer;
+
+        void Reset() 
+        {
+            Disengage_Timer = 30000+urand(0, 10000);
+            Ice_Arrow_Timer = 0;
+            Shoot_Timer = 0;
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            if (InstanceScript *pInstance = me->GetInstanceScript())
+                pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            if (Disengage_Timer <= diff)
+            {
+                me->CastSpell(me, DISENGAGE, false);
+                Disengage_Timer = 30000;
+            }
+            else Disengage_Timer -= diff;
+
+            if (Shoot_Timer <= diff)
+            {
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true);
+                if (target)
+                    me->CastSpell(target, SHOOT, false);
+                Shoot_Timer = 15000+urand(0,5000);
+            }
+            else
+            {
+                Shoot_Timer -= diff;
+
+                if (Ice_Arrow_Timer <= diff)
+                {
+                    Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true);
+                    if (target)
+                        me->CastSpell(target, ICE_ARROW, false);
+                    Ice_Arrow_Timer = 5000+urand(0, 3000);
+                }
+                else Ice_Arrow_Timer -= diff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_rising_flame_totem : public CreatureScript
+{
+public:
+    npc_rising_flame_totem() : CreatureScript("npc_rising_flame_totem") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_rising_flame_totemAI(pCreature);
+    }
+
+    struct npc_rising_flame_totemAI : public ScriptedAI
+    {
+        npc_rising_flame_totemAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+
+        void Reset() 
+        {
+            me->CastSpell(me, RISING_FLAME, false);
+        }
+
+        void UpdateAI(const uint32 diff) { }
+    };
+};
 
 void AddSC_instance_hour_of_twilight()
 {
@@ -992,4 +1773,11 @@ void AddSC_instance_hour_of_twilight()
     new npc_frozen_servitor();
     new npc_crystalline_elemental();
     new npc_frozen_shard();
+
+    new npc_twilight_assassin();
+    new npc_twilight_shadow_walker();
+    new npc_twilight_bruiser();
+    new npc_twilight_thug();
+    new npc_twilight_ranger();
+    new npc_rising_flame_totem();
 }
