@@ -4691,6 +4691,11 @@ void SpellMgr::LoadSpellCustomAttr()
         case 103646: // Mount - Ambushed by Asira
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             break;
+        // Trash
+        case 102983: // Seeking Shadows
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            break;
 /*****************------- HOUR OF TWILIGHT 5 MAN DUNGEON -------*******************/
 
 /**********************------- END TIME 5 MAN DUNGEON -------**********************/

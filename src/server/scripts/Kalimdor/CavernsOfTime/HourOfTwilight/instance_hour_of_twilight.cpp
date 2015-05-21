@@ -18,7 +18,7 @@
 #include "ScriptPCH.h"
 #include "hour_of_twilight.h"
 
-const float ThrallMovePoints[27][4]=
+const float ThrallMovePoints[37][4]=
 {
     // Arcurion Thrall 0-4
     {4924.10f, 255.55f, 97.1204f, 2.132f}, // After two Frozen Servitors
@@ -50,6 +50,17 @@ const float ThrallMovePoints[27][4]=
     {4283.30f, 590.06f, -6.4609f, 1.498f}, // Revive Life-Warden
     {4284.70f, 600.89f, -4.5608f, 1.266f}, // Jump on Life Warden
     {4260.03f, 445.29f, 43.1593f, 4.431f}, // Fly Away
+    // Benedictus Thrall 27-36
+    { 3916.99f, 275.17f, 8.1773f, 3.190f }, // 
+    { 3895.41f, 277.70f, 2.3380f, 3.092f }, // First trash
+    { 3837.12f, 280.85f, -20.5216f, 3.060f }, // Second trash
+    { 3809.39f, 290.78f, -38.8207f, 3.010f },
+    { 3762.31f, 289.02f, -64.3801f, 3.167f }, // Third trash
+    { 3738.73f, 289.87f, -84.0984f, 3.159f },
+    { 3668.17f, 284.15f, -119.399f, 3.170f },
+    { 3595.60f, 277.90f, -119.968f, 3.232f },
+    { 3582.70f, 277.09f, -114.031f, 3.274f },
+    { 3562.59f, 274.80f, -115.964f, 3.265f }, // Benedictus
 };
 
 class instance_hour_of_twilight: public InstanceMapScript
@@ -278,6 +289,7 @@ enum Thrall_NPC_IDs
     RISING_FLAME_TOTEM           = 55474,
     LIFE_WARDEN                  = 55415,
     ASIRA_DOWNSLAYER             = 54968,
+    NPC_FOG                      = 119513,
 };
 
 // Thrall Spells
@@ -1114,6 +1126,178 @@ public:
     };
 };
 
+// List of gossip texts
+#define GOSSIP_YES_LETS_DO_THIS_THRALL     "Yes Thrall, let`s do this!"
+
+// BENEDICTUS TRASH THRALL - 54634
+class npc_thrall_hour_of_twilight3 : public CreatureScript
+{
+public:
+    npc_thrall_hour_of_twilight3() : CreatureScript("npc_thrall_hour_of_twilight3") { }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {
+        if (pCreature->IsQuestGiver())
+            pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_YES_LETS_DO_THIS_THRALL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
+
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            pCreature->AI()->DoAction();
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_thrall_hour_of_twilight3AI(pCreature);
+    }
+
+    struct npc_thrall_hour_of_twilight3AI : public ScriptedAI
+    {
+        npc_thrall_hour_of_twilight3AI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        uint32 Move_Timer;
+        bool Gossip;
+        bool Show_Trash;
+
+        void Reset()
+        {
+            Gossip = false;
+            Show_Trash = false;
+            Move_Timer = 0;
+        }
+
+        void DoAction(const int32 /*param*/)
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            Gossip = true;
+            Move_Timer = 1000;
+
+            if (InstanceScript *pInstance = me->GetInstanceScript())
+                pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+
+            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[27][0], ThrallMovePoints[27][1], ThrallMovePoints[27][2], true, true);
+        }
+
+        void ShowTrash()
+        {
+            Creature * fog = me->FindNearestCreature(NPC_FOG, 50.0f, true);
+            if (fog)
+                fog->Kill(fog);
+            me->MonsterTextEmote("Spawn of the Old Gods materialize nearby!", LANG_UNIVERSAL, true, 150.0f);
+            Show_Trash = true;
+        }
+
+        void EnterCombat(Unit * /*who*/) { }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (Gossip == true)
+            {
+                // Thrall movement update
+                if (Move_Timer <= diff)
+                {
+                    if (instance)
+                    {
+                        switch ((instance->GetData(DATA_MOVEMENT_PROGRESS)))
+                        {
+                        case 1:
+                            if (me->GetExactDist2d(ThrallMovePoints[27][0], ThrallMovePoints[27][1]) < 1)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[28][0], ThrallMovePoints[28][1], ThrallMovePoints[28][2], true);
+                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+                            }
+                            break;
+                        case 2: //
+                            if (me->GetExactDist2d(ThrallMovePoints[28][0], ThrallMovePoints[28][1]) < 1)
+                                if (Show_Trash == false)
+                                    ShowTrash();
+                            break;
+                        case 3:
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[29][0], ThrallMovePoints[29][1], ThrallMovePoints[29][2], true);
+                            Show_Trash = false;
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+                            break;
+                        case 4: // 
+                            if (me->GetExactDist2d(ThrallMovePoints[29][0], ThrallMovePoints[29][1]) < 1)
+                                if (Show_Trash == false)
+                                    ShowTrash();
+                            break;
+                        case 5:
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[30][0], ThrallMovePoints[30][1], ThrallMovePoints[30][2], true);
+                            Show_Trash = false;
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+                            break;
+                        case 6:
+                            if (me->GetExactDist2d(ThrallMovePoints[30][0], ThrallMovePoints[30][1]) < 1)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[31][0], ThrallMovePoints[31][1], ThrallMovePoints[31][2], true);
+                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+                            }
+                            break;
+                        case 7:
+                            if (me->GetExactDist2d(ThrallMovePoints[31][0], ThrallMovePoints[31][1]) < 1)
+                                if (Show_Trash == false)
+                                    ShowTrash();
+                            break;
+                        case 8:
+                        case 9:
+                        case 10:
+                        case 11:
+                            if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS)) + 23][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS)) + 23][1]) < 1)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS)) + 24][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS)) + 24][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS)) + 24][2]);
+                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+                            }
+                            break;
+                        case 12:
+                            if (me->GetExactDist2d(ThrallMovePoints[35][0], ThrallMovePoints[35][1]) < 1)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[36][0], ThrallMovePoints[36][1], ThrallMovePoints[36][2]);
+                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+                            }
+                            break;
+                        case 13:
+                            if (me->GetExactDist2d(ThrallMovePoints[36][0], ThrallMovePoints[36][1]) < 1)
+                            {
+                                Creature * last_thrall = me->FindNearestCreature(THRALL_4, 10.0f, true);
+                                if (last_thrall)
+                                {
+                                    last_thrall->SetVisible(true);
+                                }
+                                me->ForcedDespawn(0);
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    Move_Timer = 1000;
+                }
+                else Move_Timer -= diff;
+            }
+        }
+
+    };
+};
+
+
 //////////////////////////////////////////////////////////////
 ////////////////        TRASH AI            //////////////////
 //////////////////////////////////////////////////////////////
@@ -1762,6 +1946,227 @@ public:
     };
 };
 
+////////////////////////////
+///// Benedictus Trash /////
+////////////////////////////
+
+enum CreaturesBenedictusTrash
+{
+    NCP_SHADOW_BORER = 54686,
+    NPC_FACELESS_BRUTE = 54632,
+    NPC_FACELESS_SHADOW_WEAVER = 54633,
+};
+enum BenedictusTrashSpells
+{
+    SHADOW_BORE = 102995,
+
+    SQUEEZE_LIFELESS = 102860,
+    SQUEEZE_LIFELESS_1 = 102861,
+    TENTACLE_SMASH = 102848,
+
+    SEEKING_SHADOWS = 102983,
+    SEEKING_SHADOWS_1 = 102984,
+    SHADOW_VOLLEY = 102992,
+
+    FOG = 88783,
+};
+
+class npc_shadow_borer : public CreatureScript
+{
+public:
+    npc_shadow_borer() : CreatureScript("npc_shadow_borer") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_shadow_borerAI(pCreature);
+    }
+
+    struct npc_shadow_borerAI : public ScriptedAI
+    {
+        npc_shadow_borerAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        uint32 Shadow_Bore_Timer;
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            Shadow_Bore_Timer = 3000;
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            if (InstanceScript *pInstance = me->GetInstanceScript())
+                pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+
+            if (Shadow_Bore_Timer <= diff)
+            {
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true);
+                if (target)
+                    me->CastSpell(target, SHADOW_BORE, false);
+                Shadow_Bore_Timer = 17000;
+            }
+            else Shadow_Bore_Timer -= diff;
+        }
+    };
+};
+
+class npc_faceless_brute : public CreatureScript
+{
+public:
+    npc_faceless_brute() : CreatureScript("npc_faceless_brute") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_faceless_bruteAI(pCreature);
+    }
+
+    struct npc_faceless_bruteAI : public ScriptedAI
+    {
+        npc_faceless_bruteAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        uint32 Tentacle_Smash_Timer;
+        uint32 Squeeze_Lifeless_Timer;
+
+        void Reset()
+        {
+            Tentacle_Smash_Timer = 10000 + urand(0, 5000);
+            Squeeze_Lifeless_Timer = 20000 + urand(0, 10000);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Tentacle_Smash_Timer <= diff)
+            {
+                me->CastSpell(me->GetVictim(), TENTACLE_SMASH, true);
+                Tentacle_Smash_Timer = 25000 + urand(0, 5000);
+            }
+            else Tentacle_Smash_Timer -= diff;
+
+            if (Squeeze_Lifeless_Timer <= diff)
+            {
+                me->CastSpell(me, SQUEEZE_LIFELESS, true);
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true);
+                if (target)
+                    me->CastSpell(target, SQUEEZE_LIFELESS_1, true);
+                Squeeze_Lifeless_Timer = 35000 + urand(0, 10000);
+            }
+            else Squeeze_Lifeless_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_faceless_shadow_weaver : public CreatureScript
+{
+public:
+    npc_faceless_shadow_weaver() : CreatureScript("npc_faceless_shadow_weaver") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_faceless_shadow_weaverAI(pCreature);
+    }
+
+    struct npc_faceless_shadow_weaverAI : public ScriptedAI
+    {
+        npc_faceless_shadow_weaverAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        uint32 Seeking_Shadows_Timer;
+        uint32 Shadow_Volley_Timer;
+
+        void Reset()
+        {
+            Seeking_Shadows_Timer = 10000 + urand(0, 10000);
+            Shadow_Volley_Timer = 5000 + urand(0, 5000);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Seeking_Shadows_Timer <= diff)
+            {
+                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60.0f, true);
+                if (target)
+                {
+                    me->CastSpell(target, SEEKING_SHADOWS, false);
+                    me->CastSpell(target, SEEKING_SHADOWS_1, false);
+                }
+                Seeking_Shadows_Timer = 20000 + urand(0, 10000);
+            }
+            else Seeking_Shadows_Timer -= diff;
+
+            if (Shadow_Volley_Timer <= diff)
+            {
+                me->CastSpell(me, SHADOW_VOLLEY, false);
+                Shadow_Volley_Timer = 15000 + urand(0, 5000);
+            }
+            else Shadow_Volley_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+// Npc Fog - 119513
+class npc_fog : public CreatureScript
+{
+public:
+    npc_fog() : CreatureScript("npc_fog") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_fogAI(pCreature);
+    }
+
+    struct npc_fogAI : public ScriptedAI
+    {
+        npc_fogAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->CastSpell(me, FOG, false);
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            Creature * fog = me->FindNearestCreature(NPC_FOG, 20.0f, true);
+            if (fog)
+                fog->Kill(fog);
+        }
+
+    };
+};
+
 void AddSC_instance_hour_of_twilight()
 {
     new instance_hour_of_twilight();
@@ -1780,4 +2185,9 @@ void AddSC_instance_hour_of_twilight()
     new npc_twilight_thug();
     new npc_twilight_ranger();
     new npc_rising_flame_totem();
+
+    new npc_shadow_borer();
+    new npc_faceless_brute();
+    new npc_faceless_shadow_weaver();
+    new npc_fog();
 }
