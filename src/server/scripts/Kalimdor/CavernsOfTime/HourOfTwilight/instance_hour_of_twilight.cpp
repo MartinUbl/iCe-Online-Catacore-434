@@ -2270,6 +2270,64 @@ public:
     };
 };
 
+///////////////////////////
+/// Time-transit Device ///
+///////////////////////////
+
+// Time Transit Device
+#define ASIRA                 "Teleport to Galakrond`s Rest"      // Asira Dawnslayer
+#define BENEDICTUS            "Teleport to Path of the Titans"    // Archbishop Benedictus
+
+class go_hot_time_transit_device : public GameObjectScript
+{
+public:
+    go_hot_time_transit_device() : GameObjectScript("go_hot_time_transit_device") { }
+
+    bool OnGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction)
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        switch (uiSender)
+        {
+            case GOSSIP_SENDER_MAIN:    SendActionMenu(pPlayer, pGo, uiAction); break;
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* pPlayer, GameObject* pGo)
+    {
+        InstanceScript *pInstance = pGo->GetInstanceScript();
+        if (((pInstance->GetData(TYPE_BOSS_ARCURION)) == DONE) && ((pInstance->GetData(TYPE_BOSS_ASIRA_DAWNSLAYER)) != DONE))
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ASIRA, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+
+        if ((pInstance->GetData(TYPE_BOSS_ASIRA_DAWNSLAYER)) == DONE)
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ASIRA, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, BENEDICTUS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        }
+
+        pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pGo->GetGUID());
+        return true;
+    }
+
+    void SendActionMenu(Player* pPlayer, GameObject* /*pGo*/, uint32 uiAction)
+    {
+        switch (uiAction)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 1:
+            pPlayer->TeleportTo(940, 4416.76f, 453.371f, 38.554f, 3.90f);
+            pPlayer->CLOSE_GOSSIP_MENU();
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 2:
+            pPlayer->TeleportTo(940, 3932.045f, 303.857f, 12.63f, 3.16f);
+            pPlayer->CLOSE_GOSSIP_MENU();
+            break;
+        }
+    }
+};
+
+
 void AddSC_instance_hour_of_twilight()
 {
     new instance_hour_of_twilight();
@@ -2295,4 +2353,6 @@ void AddSC_instance_hour_of_twilight()
     new npc_faceless_brute();
     new npc_faceless_shadow_weaver();
     new npc_fog();
+
+    new go_hot_time_transit_device();
 }
