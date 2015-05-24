@@ -92,7 +92,8 @@ public:
         {
             instance = creature->GetInstanceScript();
 
-            //me->SetVisible(false);
+            me->SetVisible(false);
+            me->setFaction(35);
         }
 
         InstanceScript* instance;
@@ -123,7 +124,7 @@ public:
                         player->RemoveAura(MARK_OF_SILENCE);
                 }
 
-            me->MonsterYell("Ah. Well. That was even easier than I thought!", LANG_UNIVERSAL, 0);
+            me->MonsterYell("Ah. Well. That was even easier than I thought!", LANG_UNIVERSAL, 0, 30.0f);
             me->SendPlaySound(25820, true);
 
             Choking_Smoke_Bomb_Timer = 16000;
@@ -388,7 +389,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
 
-            me->GetMotionMaster()->MoveJump(0, AsiraMovePoints[5][0], AsiraMovePoints[5][1], AsiraMovePoints[5][2], 5.0f, 5.0f);
+            me->GetMotionMaster()->MoveJump(AsiraMovePoints[5][0], AsiraMovePoints[5][1], AsiraMovePoints[5][2], 10.0f, 10.0f);
         }
 
         void UpdateAI(const uint32 diff)
@@ -446,6 +447,7 @@ public:
                         me->SetVisible(false);
                         me->setFaction(35);
                         asira->SetVisible(true);
+                        asira->setFaction(16);
                         Disappear = false;
                     }
                 }
@@ -475,19 +477,15 @@ public:
 
         InstanceScript* instance;
         uint32 Move_Timer;
-        uint32 Die_Timer;
         int Move_Point;
-        bool Fly;
-        bool Die;
 
         void JustDied(Unit* /*who*/) { }
 
         void Reset()
         {
-            Move_Timer = 1000;
+            me->SetVisible(false);
             Move_Point = 0;
-            Fly = false;
-            Die = false;
+            Move_Timer = 0;
 
             me->SetFlying(true);
         }
@@ -496,42 +494,48 @@ public:
         {
             if (instance->GetData(DATA_ASIRA_INTRO) == 1)
             {
-                if (Fly == false)
+                if (Move_Timer <= diff)
                 {
-                    Fly = true;
-                    me->CastSpell(me, AMBUSH, true);
-                    me->GetMotionMaster()->MovePoint(0, AsiraMovePoints[Move_Point][0], AsiraMovePoints[Move_Point][1], AsiraMovePoints[Move_Point][2]);
-                }
-            }
+                    Move_Timer = 1000;
 
-            if (Move_Point < 5)
-            {
-                if (me->GetExactDist2d(AsiraMovePoints[Move_Point][0], AsiraMovePoints[Move_Point][1]) < 1)
-                {
-                    Move_Point++;
-                    me->GetMotionMaster()->MovePoint(0, AsiraMovePoints[Move_Point][0], AsiraMovePoints[Move_Point][1], AsiraMovePoints[Move_Point][2]);
+                    switch (Move_Point)
+                    {
+                    case 0:
+                        me->GetMotionMaster()->MovePoint(0, AsiraMovePoints[Move_Point][0], AsiraMovePoints[Move_Point][1], AsiraMovePoints[Move_Point][2]);
+                        me->SetVisible(true);
+                        me->CastSpell(me, AMBUSH, false);
+                        Move_Timer = 3500;
+                        Move_Point++;
+                        break;
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                        me->CastSpell(me, AMBUSH, false);
+                        me->GetMotionMaster()->MovePoint(0, AsiraMovePoints[Move_Point][0], AsiraMovePoints[Move_Point][1], AsiraMovePoints[Move_Point][2]);
+                        if (Move_Point == 4)
+                            Move_Timer = 5500;
+                        else Move_Timer = 3500;
+                        Move_Point++;
+                        break;
+                    case 5:
+                        me->SummonCreature(NPC_ASIRA_DAWNSLAYER_INTRO, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
+                        me->RemoveAura(AMBUSH);
+                        me->SetFlying(false);
+                        me->GetMotionMaster()->MoveJump(AsiraMovePoints[Move_Point][0], AsiraMovePoints[Move_Point][1], AsiraMovePoints[Move_Point][2], 10.0f, 10.0f);
+                        Move_Timer = 2000;
+                        Move_Point++;
+                        break;
+                    case 6:
+                        instance->SetData(DATA_ASIRA_INTRO, 2);
+                        me->Kill(me);
+                        Move_Point++;
+                        break;
+                    default:
+                        break;
+                    }
                 }
-            }
-
-            if (Move_Point == 5)
-            {
-                me->SummonCreature(NPC_ASIRA_DAWNSLAYER_INTRO, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
-                me->RemoveAura(AMBUSH);
-                me->SetFlying(false);
-                me->GetMotionMaster()->MoveJump(0, AsiraMovePoints[Move_Point][0], AsiraMovePoints[Move_Point][1], AsiraMovePoints[Move_Point][2], 5.0f);
-                Die_Timer = 2000;
-                Die = true;
-                Move_Point++;
-            }
-
-            if (Die)
-            {
-                if (Die_Timer <= diff)
-                {
-                    me->Kill(me);
-                    Die = false;
-                }
-                else Die_Timer -= diff;
+                else Move_Timer -= diff;
             }
         }
     };

@@ -231,31 +231,26 @@ public:
             // Despawn Icewall
             if (GameObject* Firewall = me->FindNearestGameObject(ICE_WALL, 500.0f))
                 Firewall->Delete();
-
-            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 13
         }
 
         void UpdateAI(const uint32 diff)
         {
-            if (instance->GetData(DATA_MOVEMENT_PROGRESS) == 11)
-            {
-                Intro_Timer = 1500;
-                instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 12
-            }
-
-            if (instance->GetData(DATA_MOVEMENT_PROGRESS) == 12)
+            if (instance->GetData(DATA_MOVEMENT_PROGRESS) == 7)
             {
                 if (Intro_Timer <= diff)
                 {
                     switch (Intro_Dialogue) {
                     case 0:
+                        Intro_Timer = 1500;
+                        break;
+                    case 1:
                         {
                             me->MonsterYell("You're a fool if you think to take your place as the Aspect of Earth, shaman!", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
                             me->SendPlaySound(25802, true);
                             Intro_Timer = 10000;
                             break;
                         }
-                    case 1:
+                    case 2:
                         {
                             Creature * thrall = me->FindNearestCreature(54548, 100.0f, true);
                             if (thrall)
@@ -266,7 +261,7 @@ public:
                             Intro_Timer = 4000;
                             break;
                         }
-                    case 2:
+                    case 3:
                         {
                             me->MonsterYell("You're a mere mortal. It is time you died like one.", LANG_UNIVERSAL, 0);
                             me->SendPlaySound(25804, true);
@@ -274,6 +269,7 @@ public:
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             me->SetReactState(REACT_AGGRESSIVE);
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 8
                             break;
                         }
                     }
@@ -499,6 +495,9 @@ public:
                 if (thrall_ghost_wolf)
                     thrall_ghost_wolf->SetVisible(true);
             }
+
+            if (instance)
+                instance->SetData(DATA_INSTANCE_PROGRESS, 2); // 2
         }
 
         void Reset()

@@ -44,23 +44,23 @@ const float ThrallMovePoints[37][4]=
     {4321.85f, 402.56f, -8.0832f, 3.545f}, // Middle of the 1st camp
     {4342.15f, 433.38f, -7.6375f, 1.541f}, // Turn left
     {4337.53f, 480.67f, -8.4055f, 2.256f}, // Stop before 2nd camp
-    {4322.06f, 485.36f, -8.8445f, 3.151f}, // Closer to the 2nd camp
+    {4322.37f, 483.20f, -8.7360f, 3.113f}, // Closer to the 2nd camp
     {4323.48f, 532.85f, -8.6174f, 1.492f}, // Before hill
     {4290.04f, 568.05f, -7.0952f, 2.964f}, // Asira`s clearing
     {4283.30f, 590.06f, -6.4609f, 1.498f}, // Revive Life-Warden
     {4284.70f, 600.89f, -4.5608f, 1.266f}, // Jump on Life Warden
     {4260.03f, 445.29f, 43.1593f, 4.431f}, // Fly Away
     // Benedictus Thrall 27-36
-    { 3916.99f, 275.17f, 8.1773f, 3.190f }, // 
-    { 3895.41f, 277.70f, 2.3380f, 3.092f }, // First trash
-    { 3837.12f, 280.85f, -20.5216f, 3.060f }, // Second trash
-    { 3809.39f, 290.78f, -38.8207f, 3.010f },
-    { 3762.31f, 289.02f, -64.3801f, 3.167f }, // Third trash
-    { 3738.73f, 289.87f, -84.0984f, 3.159f },
-    { 3668.17f, 284.15f, -119.399f, 3.170f },
-    { 3595.60f, 277.90f, -119.968f, 3.232f },
-    { 3582.70f, 277.09f, -114.031f, 3.274f },
-    { 3562.59f, 274.80f, -115.964f, 3.265f }, // Benedictus
+    {3916.99f, 275.17f,   8.1773f, 3.190f}, // First stop
+    {3895.41f, 277.70f,   2.3380f, 3.092f}, // First trash
+    {3837.12f, 280.85f, -20.5216f, 3.060f}, // Second trash
+    {3809.39f, 290.78f, -38.8207f, 3.010f}, // Second stop
+    {3762.31f, 289.02f, -64.3801f, 3.167f}, // Third trash
+    {3738.73f, 289.87f, -84.0984f, 3.159f}, // Wait here for Archbishop
+    {3668.17f, 284.15f, -119.399f, 3.170f}, // Run down the hill
+    {3595.60f, 277.90f, -119.968f, 3.232f}, // Stop before stairs
+    {3582.70f, 277.09f, -114.031f, 3.274f}, // Run up
+    {3562.59f, 274.80f, -115.964f, 3.265f}, // Benedictus
 };
 
 class instance_hour_of_twilight: public InstanceMapScript
@@ -77,6 +77,8 @@ public:
         uint32 currEnc[MAX_ENCOUNTER];
 
         uint64 arcurionGuid;
+        uint64 asiraGuid;
+        uint64 benedictusGuid;
         uint64 thrallGuid;
         uint64 thrall1Guid;
         uint64 thrall2Guid;
@@ -87,6 +89,7 @@ public:
         uint32 movement_progress;
         uint32 asira_intro;
         uint32 drakes;
+        uint32 benedictus_intro;
 
         std::string saveData;
 
@@ -96,6 +99,7 @@ public:
             movement_progress  = 0;
             asira_intro        = 0;
             drakes             = 0;
+            benedictus_intro   = 0;
 
             memset(m_auiEncounter, 0, sizeof(uint32) * MAX_ENCOUNTER);
             GetCorrUiEncounter();
@@ -114,6 +118,7 @@ public:
             saveStream << " " << movement_progress;
             saveStream << " " << asira_intro;
             saveStream << " " << drakes;
+            saveStream << " " << benedictus_intro;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -137,6 +142,7 @@ public:
             loadStream >> movement_progress;
             loadStream >> asira_intro;
             loadStream >> drakes;
+            loadStream >> benedictus_intro;
 
             for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
@@ -157,6 +163,12 @@ public:
             {
                 case 54590: // Arcurion
                     arcurionGuid = pCreature->GetGUID();
+                    break;
+                case 54968: // Asira Dawnslayer
+                    asiraGuid = pCreature->GetGUID();
+                    break;
+                case 54938: // Archbishop Benedictus
+                    benedictusGuid = pCreature->GetGUID();
                     break;
                 case 54548: // Thrall Entrance
                     thrallGuid = pCreature->GetGUID();
@@ -220,6 +232,9 @@ public:
             if (DataId == DATA_DRAKES)
                 return drakes;
 
+            if (DataId == DATA_BENEDICTUS_INTRO)
+                return benedictus_intro;
+
             if (DataId < MAX_ENCOUNTER)
                 return m_auiEncounter[DataId];
 
@@ -233,7 +248,7 @@ public:
 
             if (type == DATA_INSTANCE_PROGRESS)
             {
-                instance_progress += data;
+                instance_progress = data;
                 SaveToDB();
             }
 
@@ -252,6 +267,12 @@ public:
             if (type == DATA_DRAKES)
             {
                 drakes = data;
+                SaveToDB();
+            }
+
+            if (type == DATA_BENEDICTUS_INTRO)
+            {
+                benedictus_intro = data;
                 SaveToDB();
             }
 
@@ -367,233 +388,191 @@ public:
         }
 
         InstanceScript* instance;
-        uint32 Arcurion_Yell_Timer;
         uint32 Lava_Burst_Timer;
-        uint32 Thrall_Say_Timer;
-        uint32 Lookout_Timer;
         uint32 Move_Timer;
-        uint32 Epilogue_Timer;
-        uint32 Farewell_Timer;
-        bool Arcurion_Yell;
-        bool Enemy_Spoted;
-        bool Say_Something;
-        bool Epilogue;
-        bool Farewell;
-        bool Lookout;
-        bool Go_Nowhere;
+        uint32 Move_Point;
+        bool Lavaburst;
 
         void Reset() 
         {
-            Arcurion_Yell = false;
-            Enemy_Spoted = false;
-            Say_Something = false;
-            Epilogue = false;
-            Farewell = false;
-            Lookout = false;
-            Go_Nowhere = false;
-            Lookout_Timer = 0;
-            Epilogue_Timer = 0;
-            Thrall_Say_Timer = 0;
-            Arcurion_Yell_Timer = 0;
+            Move_Point = 0;
             Lava_Burst_Timer = 0;
-            Farewell_Timer = 0;
-            Move_Timer = 30000;
+            Move_Timer = 0;
+            Lavaburst = false;
         }
 
         void EnterCombat(Unit * /*who*/) { }
 
         void DoAction(const int32 /*param*/)
         {
-            Arcurion_Yell_Timer = 8000;
-            Arcurion_Yell = true;
+            Move_Timer = 8000;
+
+            if (instance)
+                instance->SetData(DATA_INSTANCE_PROGRESS, 1); // 1
 
             me->MonsterSay("Heroes, we have the Dragon Soul. The Aspects await us within Wyrmrest. Hurry - come with me!", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
             me->SendPlaySound(25870, true);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
 
-            Thrall_Say_Timer = 20000;
+        void CastLavaburst()
+        {
+            if (instance->GetData(TYPE_BOSS_ARCURION) == IN_PROGRESS)
+            {
+                Creature * frozen_servitor = me->FindNearestCreature(119509, 150.0, true);
+                if (frozen_servitor && frozen_servitor->IsInCombat())
+                    me->CastSpell(frozen_servitor, THRALL_SPELL_LAVABURST, false);
+            }
+            else
+            {
+                Creature * frozen_servitor = me->FindNearestCreature(54555, 30.0, true);
+                if (frozen_servitor && frozen_servitor->IsInCombat())
+                    me->CastSpell(frozen_servitor, THRALL_SPELL_LAVABURST, false);
+            }
+        }
+
+        void SetVisible()
+        {
+            if (instance->GetData(DATA_MOVEMENT_PROGRESS) < 5)
+            {
+                std::list<Creature*> frozen_servitor;
+                GetCreatureListWithEntryInGrid(frozen_servitor, me, 54555, 50.0f);
+                for (std::list<Creature*>::const_iterator itr = frozen_servitor.begin(); itr != frozen_servitor.end(); ++itr)
+                    if (*itr)
+                    {
+                        (*itr)->SetVisible(true);
+                        (*itr)->setFaction(16);
+                    }
+            }
+
+            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 5)
+            {
+                std::list<Creature*> frozen_trash;
+                GetCreatureListWithEntryInGrid(frozen_trash, me, 55559, 200.0f);
+                for (std::list<Creature*>::const_iterator itr = frozen_trash.begin(); itr != frozen_trash.end(); ++itr)
+                    if (*itr)
+                    {
+                        (*itr)->SetVisible(true);
+                        (*itr)->setFaction(16);
+                    }
+
+                std::list<Creature*> frozen_boulders;
+                GetCreatureListWithEntryInGrid(frozen_boulders, me, 55563, 200.0f);
+                for (std::list<Creature*>::const_iterator itr = frozen_boulders.begin(); itr != frozen_boulders.end(); ++itr)
+                    if (*itr)
+                    {
+                        (*itr)->SetVisible(true);
+                        (*itr)->setFaction(16);
+                    }
+            }
         }
 
         void UpdateAI(const uint32 diff) 
         {
-            if (Arcurion_Yell == true)
+            if (instance)
             {
-                if (Arcurion_Yell_Timer <= diff)
+                if (instance->GetData(DATA_INSTANCE_PROGRESS) == 1)
                 {
-                    Creature * arcurion = me->FindNearestCreature(54590, 500.0f, true);
-                    if (arcurion)
-                        arcurion->MonsterYell("Shaman! The Dragon Soul is not yours. Give it up, and you may yet walk away with your life", LANG_UNIVERSAL, 0);
-                        me->SendPlaySound(25798, false);
-
-                    // Set visible two nearby Frozen Servitors
-                    std::list<Creature*> frozen_servitor;
-                    GetCreatureListWithEntryInGrid(frozen_servitor, me, 54555, 50.0f);
-                    for (std::list<Creature*>::const_iterator itr = frozen_servitor.begin(); itr != frozen_servitor.end(); ++itr)
-                        if (*itr)
-                        {
-                            (*itr)->SetVisible(true);
-                            (*itr)->setFaction(16);
-                        }
-
-                        Enemy_Spoted = true;
-                        Arcurion_Yell = false;
-                }
-                else Arcurion_Yell_Timer -= diff;
-            }
-
-            if (Lookout)
-            {
-                if (Lookout_Timer <= diff)
-                {
-                    me->MonsterSay("Look Out!", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
-                    me->SendPlaySound(25873, true);
-
-                    Creature * arcurion = me->FindNearestCreature(54590, 400.0f, true);
-                    if (arcurion)
-                        arcurion->MonsterYell("Destroy them all, but bring the Shaman to me!", LANG_UNIVERSAL, 0);
-                    me->SendPlaySound(25799, true);
-
-                    // Set visible three nearby Frozen Servitors
-                    std::list<Creature*> frozen_servitor;
-                    GetCreatureListWithEntryInGrid(frozen_servitor, me, 54555, 50.0f);
-                    for (std::list<Creature*>::const_iterator itr = frozen_servitor.begin(); itr != frozen_servitor.end(); ++itr)
-                        if (*itr)
-                        {
-                            (*itr)->SetVisible(true);
-                            (*itr)->setFaction(16);
-                        }
-
-                    Lookout = false;
-                }
-                else Lookout_Timer -= diff;
-            }
-
-            if (Epilogue)
-            {
-                if (Epilogue_Timer <= diff)
-                {
-                    Epilogue = false;
-                    me->MonsterSay("We've been discovered. I know you are tired but we cannot keep the aspects waiting!", LANG_UNIVERSAL, 0);
-                    me->SendPlaySound(25882, true);
-                    me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[4][0], ThrallMovePoints[4][1], ThrallMovePoints[4][2]);
-                }
-                else Epilogue_Timer -= diff;
-            }
-
-            if (Enemy_Spoted == true)
-            {
-                if (Thrall_Say_Timer <= diff)
-                {
-                    me->MonsterSay("How did the Twilight Hammer find us? Ready your weapons - we've got to get out of this canyon!", LANG_UNIVERSAL, me->GetGUID(), 100.0f);
-                    me->SendPlaySound(25871, true);
-                    me->GetMotionMaster()->MovePoint(0, 4926.0f, 289.0f, 96.75f);
-                    Enemy_Spoted = false;
-                }
-                else Thrall_Say_Timer -= diff;
-            }
-
-            // Cast Lavaburst during trash phase
-            if (Lava_Burst_Timer <= diff)
-            {
-                Creature * frozen_servitor = me->FindNearestCreature(54555, 30.0, true);
-                if (frozen_servitor && frozen_servitor->GetVisibility() == VISIBILITY_ON) // Cast only if theay are visible
-                    me->CastSpell(frozen_servitor, THRALL_SPELL_LAVABURST, false);
-
-                Lava_Burst_Timer = 3000;
-            }
-            else Lava_Burst_Timer -= diff;
-
-            // Cast Lava Burst during Arcurion encounter
-            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 11)
-            {
-                // Cast Lavaburst
-                if (Lava_Burst_Timer <= diff)
-                {
-                    Creature * frozen_servitor = me->FindNearestCreature(119509, 150.0, true);
-                    if (frozen_servitor)
-                        me->CastSpell(frozen_servitor, THRALL_SPELL_LAVABURST, false);
-
-                    Lava_Burst_Timer = 3000;
-                }
-                else Lava_Burst_Timer -= diff;
-            }
-
-            // Thrall movements update
-            if (Move_Timer <= diff)
-            {
-                if (instance)
-                {
-                    switch ((instance->GetData(DATA_MOVEMENT_PROGRESS)))
+                    // Thrall movements update
+                    if (Move_Timer <= diff)
                     {
-                    case 2:
-                        me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[0][0], ThrallMovePoints[0][1], ThrallMovePoints[0][2]);
-                        instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 3
-                        break;
-                    case 3:
-                        if (me->GetExactDist2d(ThrallMovePoints[0][0], ThrallMovePoints[0][1]) < 1)
+                        Move_Timer = 1000;
+
+                        switch (Move_Point)
                         {
+                        case 0: // Arcurion yell
+                        {
+                            Creature * arcurion = me->FindNearestCreature(54590, 500.0f, true);
+                            if (arcurion)
+                                arcurion->MonsterYell("Shaman! The Dragon Soul is not yours. Give it up, and you may yet walk away with your life", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25798, false);
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            SetVisible();
+                            Move_Point++;
+                            Move_Timer = 20000;
+                            break;
+                        }
+                        case 1:
+                            me->MonsterSay("How did the Twilight Hammer find us? Ready your weapons - we've got to get out of this canyon!", LANG_UNIVERSAL, me->GetGUID(), 100.0f);
+                            me->SendPlaySound(25871, true);
+                            me->GetMotionMaster()->MovePoint(0, 4926.0f, 289.0f, 96.75f);
+                            Move_Point++;
+                            Lavaburst = true;
+                            break;
+                        case 2:
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 2)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[0][0], ThrallMovePoints[0][1], ThrallMovePoints[0][2]);
+                                Move_Timer = 5000;
+                                Move_Point++;
+                                Lavaburst = false;
+                            }
+                            else
+                                Move_Timer = 1000;
+                            break;
+                        case 3:
                             me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[1][0], ThrallMovePoints[1][1], ThrallMovePoints[1][2]);
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 4
-                        }
-                        break;
-                    case 4:
-                        if (me->GetExactDist2d(ThrallMovePoints[1][0], ThrallMovePoints[1][1]) < 1)
+                            Move_Point++;
+                            Move_Timer = 8000;
+                            break;
+                        case 4:
+                            me->MonsterSay("What magic is this?", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
+                            me->SendPlaySound(25872, true);
+                            Move_Point++;
+                            Move_Timer = 3000;
+                            break;
+                        case 5:
                         {
-                            if (Say_Something == false)
-                            {
-                                me->MonsterSay("What magic is this?", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
-                                me->SendPlaySound(25872, true);
+                            me->MonsterSay("Look Out!", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
+                            me->SendPlaySound(25873, true);
 
-                                Lookout = true;
-                                Lookout_Timer = 3000;
-                                Say_Something = true;
-                            }
+                            Creature * arcurion = me->FindNearestCreature(54590, 400.0f, true);
+                            if (arcurion)
+                                arcurion->MonsterYell("Destroy them all, but bring the Shaman to me!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25799, true);
+
+                            SetVisible();
+                            Move_Point++;
+                            Lavaburst = true;
+                            break;
                         }
-                        break;
-                    case 7:
-                        me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[2][0], ThrallMovePoints[2][1], ThrallMovePoints[2][2]);
-                        instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 8
-                        break;
-                    case 8:
-                        if (me->GetExactDist2d(ThrallMovePoints[2][0], ThrallMovePoints[2][1]) < 1)
+                        case 6:
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 5)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[2][0], ThrallMovePoints[2][1], ThrallMovePoints[2][2]);
+                                Move_Timer = 9000;
+                                Move_Point++;
+                                Lavaburst = false;
+                            }
+                            else
+                                Move_Timer = 1000;
+                            break;
+                        case 7:
                         {
-                            if (!Go_Nowhere)
-                            {
-                                Creature * arcurion = me->FindNearestCreature(54590, 400.0f, true);
-                                if (arcurion)
-                                    arcurion->MonsterYell("You will go nowhere. Shaman.", LANG_UNIVERSAL, 0);
-                                me->SendPlaySound(25800, true);
+                            Creature * arcurion = me->FindNearestCreature(54590, 400.0f, true);
+                            if (arcurion)
+                                arcurion->MonsterYell("You will go nowhere. Shaman.", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25800, true);
 
-                                // Set visible three nearby Frozen Shards and Crystalline Elemental
-                                std::list<Creature*> frozen_trash;
-                                GetCreatureListWithEntryInGrid(frozen_trash, me, 55559, 200.0f);
-                                for (std::list<Creature*>::const_iterator itr = frozen_trash.begin(); itr != frozen_trash.end(); ++itr)
-                                    if (*itr)
-                                    {
-                                        (*itr)->SetVisible(true);
-                                        (*itr)->setFaction(16);
-                                    }
-
-                                std::list<Creature*> frozen_boulders;
-                                GetCreatureListWithEntryInGrid(frozen_boulders, me, 55563, 200.0f);
-                                for (std::list<Creature*>::const_iterator itr = frozen_boulders.begin(); itr != frozen_boulders.end(); ++itr)
-                                    if (*itr)
-                                    {
-                                        (*itr)->SetVisible(true);
-                                        (*itr)->setFaction(16);
-                                    }
-
-                                Go_Nowhere = true;
-                            }
+                            SetVisible();
+                            Move_Point++;
+                            Lavaburst = true;
+                            break;
                         }
-                        break;
-                    case 9:
-                        me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[3][0], ThrallMovePoints[3][1], ThrallMovePoints[3][2]);
-                        instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 10
-                        break;
-                    case 10:
-                        if (me->GetExactDist2d(ThrallMovePoints[3][0], ThrallMovePoints[3][1]) < 1)
+                        case 8:
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 6)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[3][0], ThrallMovePoints[3][1], ThrallMovePoints[3][2]);
+                                Move_Timer = 19000;
+                                Move_Point++;
+                                Lavaburst = false;
+                            }
+                            else
+                                Move_Timer = 1000;
+                            break;
+                        case 9:
                         {
                             Creature * arcurion = me->FindNearestCreature(54590, 100.0f, true);
                             if (arcurion)
@@ -602,35 +581,60 @@ public:
                                 arcurion->CastSpell(arcurion, ARCURION_SPAWN_VISUAL, false);
                             }
 
-                            me->MonsterSay("Show yourself", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
+                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 7
+                            me->MonsterSay("Show yourself!", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
                             me->SendPlaySound(25877, true);
-
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 11
+                            Move_Point++;
+                            break;
                         }
-                        break;
-                    case 13:
-                        // Say epilogue and move to Skywall
-                        Epilogue_Timer = 5000;
-                        Epilogue = true;
-                        instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 14
-                        break;
-                    case 14:
-                        if (me->GetExactDist2d(ThrallMovePoints[4][0], ThrallMovePoints[4][1]) < 1)
+                        case 10:
+                            if (instance->GetData(TYPE_BOSS_ARCURION) == DONE)
+                            {
+                                Move_Point++;
+                                Move_Timer = 5000;
+                            }
+                            else
+                                Move_Timer = 1000;
+                            break;
+                        case 11:
+                            me->MonsterSay("We've been discovered. I know you are tired but we cannot keep the aspects waiting!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25882, true);
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[4][0], ThrallMovePoints[4][1], ThrallMovePoints[4][2]);
+                            Move_Timer = 5000;
+                            Move_Point++;
+                            break;
+                        case 12: // Thrall destroys Skywall
                         {
-                            // Thrall destroys Skywall
                             Creature * Npc_Skywall = me->FindNearestCreature(119508, 100.0f, true);
                             if (Npc_Skywall)
-                            {
                                 me->CastSpell(Npc_Skywall, THRALL_SPELL_LAVABURST, false);
-                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 15
+                            else
+                            {
+                                if (GameObject* Icewall = me->FindNearestGameObject(210049, 50.0f))
+                                    Icewall->UseDoorOrButton();
+                                instance->SetData(DATA_INSTANCE_PROGRESS, 2); // 2
                             }
+                            Move_Point++;
+                            break;
                         }
-                        break;
+                        default:
+                            break;
+                        }
+
                     }
-                    Move_Timer = 1000;
+                    else Move_Timer -= diff;
+
+                    if (Lavaburst == true || (instance->GetData(TYPE_BOSS_ARCURION) == IN_PROGRESS))
+                    {
+                        if (Lava_Burst_Timer <= diff)
+                        {
+                            CastLavaburst();
+                            Lava_Burst_Timer = 3000;
+                        }
+                        else Lava_Burst_Timer -= diff;
+                    }
                 }
             }
-            else Move_Timer -= diff;
         }
 
     };
@@ -659,7 +663,7 @@ public:
         InstanceScript* instance;
         uint32 Move_Timer;
         uint32 Ghost_Wolf_Timer;
-        int Instance_Progress;
+        uint32 Move_Point;
         bool Timer_Set;
         bool Ghost_Wolf_Form;
 
@@ -669,82 +673,92 @@ public:
             Ghost_Wolf_Form = false;
             Ghost_Wolf_Timer = 0;
             Move_Timer = 0;
+            Move_Point = 5;
         }
 
         void EnterCombat(Unit * /*who*/) { }
 
         void UpdateAI(const uint32 diff)
         {
-            if (!Timer_Set)
+            if (instance->GetData(DATA_INSTANCE_PROGRESS) == 2)
             {
-                // If visible, set 2s timer for start casting Wolf form
-                if (me->GetVisibility() == VISIBILITY_ON)
+                if (!Timer_Set)
                 {
-                    Ghost_Wolf_Timer = 2000;
-                    Timer_Set = true;
-                }
-            }
-            else
-            {
-                if (!Ghost_Wolf_Form)
-                {
-                    if (Ghost_Wolf_Timer <= diff)
+                    // If instance progress 2, set 2s timer for start casting Wolf form
                     {
-                        me->CastSpell(me, GHOST_WOLF_FORM, false);
-                        me->MonsterSay("Follow me!", LANG_UNIVERSAL, 0);
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                        Ghost_Wolf_Form = true;
+                        Ghost_Wolf_Timer = 2000;
+                        Timer_Set = true;
                     }
-                    else Ghost_Wolf_Timer -= diff;
                 }
-            }
-
-            if (me->HasAura(GHOST_WOLF_FORM))
-            {
-                // Ghost wolf Thrall movements update
-                if (Move_Timer <= diff)
+                else
                 {
-                    if (instance)
+                    if (!Ghost_Wolf_Form)
                     {
-                        switch ((instance->GetData(DATA_MOVEMENT_PROGRESS)))
+                        if (Ghost_Wolf_Timer <= diff)
                         {
+                            me->CastSpell(me, GHOST_WOLF_FORM, false);
+                            me->MonsterSay("Follow me!", LANG_UNIVERSAL, 0);
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                            Ghost_Wolf_Form = true;
+                        }
+                        else Ghost_Wolf_Timer -= diff;
+                    }
+                }
+
+                if (me->HasAura(GHOST_WOLF_FORM))
+                {
+                    if (Move_Timer <= diff)
+                    {
+                        switch (Move_Point)
+                        {
+                        case 5:
+                            Move_Timer = 10000;
+                            break;
+                        case 6:
+                            Move_Timer = 8500;
+                            break;
+                        case 7:
+                            Move_Timer = 6000;
+                            break;
+                        case 8:
+                            Move_Timer = 4000;
+                            break;
+                        case 9:
+                            Move_Timer = 9000;
+                            break;
+                        case 10:
+                            Move_Timer = 10000;
+                            break;
+                        case 11:
+                            Move_Timer = 4500;
+                            break;
+                        case 12:
+                            Move_Timer = 4500;
+                            break;
+                        case 13:
+                            Move_Timer = 12000;
+                            break;
+                        case 14:
+                            Move_Timer = 8000;
+                            break;
                         case 15:
-                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[5][0], ThrallMovePoints[5][1], ThrallMovePoints[5][2]);
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 16
-                            break;
-                        case 16:
-                        case 17:
-                        case 18:
-                        case 19:
-                        case 20:
-                        case 21:
-                        case 22:
-                        case 23:
-                        case 24:
-                            if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-11][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-11][1]) < 1)
-                            {
-                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-10][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-10][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-10][2]);
-                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 16-25
-                            }
-                            break;
-                        case 25:
-                            if (me->GetExactDist2d(ThrallMovePoints[14][0], ThrallMovePoints[14][1]) < 1)
                             {
                                 me->SetVisible(false);
                                 Creature * thrall_next = me->FindNearestCreature(THRALL_2, 50.0f, true);
                                 if (thrall_next)
                                     thrall_next->SetVisible(true);
-                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 26
+                                instance->SetData(DATA_INSTANCE_PROGRESS, 3); // 3
                             }
                             break;
                         default:
                             break;
                         }
-
-                        Move_Timer = 1000;
+                        if (instance->GetData(DATA_INSTANCE_PROGRESS) == 2)
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[Move_Point][0], ThrallMovePoints[Move_Point][1], ThrallMovePoints[Move_Point][2]);
+                        Move_Point++;
                     }
+                    else Move_Timer -= diff;
                 }
-                else Move_Timer -= diff;
             }
         }
 
@@ -771,35 +785,27 @@ public:
             me->SetVisible(false);
             me->SetStandState(UNIT_STAND_STATE_KNEEL);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-            me->SetReactState(REACT_PASSIVE);
         }
 
         InstanceScript* instance;
         uint32 Move_Timer;
+        uint32 Move_Point;
         uint32 Lavaburst_Timer;
-        uint32 Say_Next_Timer;
         uint32 Summon_Totem_Timer;
-        uint32 Outro_Timer;
         uint32 Check_Timer;
         int Twilight;
         int Outro_Action;
-        bool Set_Timer;
         bool Lavaburst;
-        bool Say_Next;
-        bool Outro;
 
         void Reset() 
         {
             Twilight = 0;
-            Set_Timer = false;
             Lavaburst = false;
-            Say_Next = false;
-            Outro = false;
             Summon_Totem_Timer = 0;
             Lavaburst_Timer = 0;
-            Outro_Action = 0;
-            Outro_Timer = 0;
             Check_Timer = 0;
+            Move_Point = 0;
+            Move_Timer = 0;
         }
 
         void FindCorrectTarget()
@@ -862,278 +868,273 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            // Change this later, Move_Timer won`t work after server crash
-            if ((instance->GetData(DATA_MOVEMENT_PROGRESS)) == 1)
-                if (Set_Timer == false)
-                {
-                    Move_Timer = 3000;
-                    Set_Timer = true;
-                }
-
-            // Trash actions
-            if (Lavaburst)
+            if (instance)
             {
-                if (Lavaburst_Timer <= diff)
+                if (instance->GetData(DATA_INSTANCE_PROGRESS) == 3)
                 {
-                    FindCorrectTarget();
-                }
-                else Lavaburst_Timer -= diff;
-
-                if (Summon_Totem_Timer <= diff)
-                {
-                    int distance = 7;
-                    float angle = me->GetOrientation();
-                    me->SummonCreature(RISING_FLAME_TOTEM, me->GetPositionX() + cos(angle)*distance, me->GetPositionY() + sin(angle)*distance, me->GetPositionZ()+1, angle, TEMPSUMMON_TIMED_DESPAWN, 30000);
-                    Summon_Totem_Timer = 35000+urand(0, 15000);
-                }
-                else Summon_Totem_Timer -= diff;
-            }
-
-            // Boss Asira Actions
-            if (Check_Timer <= diff)
-            {
-                if (instance)
-                {
-                    if ((instance->GetData(TYPE_BOSS_ASIRA_DAWNSLAYER)) == IN_PROGRESS)
+                    // Thrall movement update
+                    if (Move_Timer <= diff)
                     {
-                        // Cast Lavaburst
+                        Move_Timer = 1000;
+
+                        switch (Move_Point)
+                        {
+                        case 0:
+                            Move_Timer = 3000;
+                            Move_Point++;
+                            break;
+                        case 1:
+                            me->SetStandState(UNIT_STAND_STATE_STAND);
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[15][0], ThrallMovePoints[15][1], ThrallMovePoints[15][2]);
+                            Move_Timer = 2000;
+                            Move_Point++;
+                            break;
+                        case 2:
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[16][0], ThrallMovePoints[16][1], ThrallMovePoints[16][2]);
+                            Move_Timer = 5000;
+                            Move_Point++;
+                            break;
+                        case 3:
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 10)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[17][0], ThrallMovePoints[17][1], ThrallMovePoints[17][2]);
+                                Move_Timer = 6000;
+                                Move_Point++;
+                            }
+                            else
+                                Move_Timer = 1000;
+                            break;
+                        case 4:
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[18][0], ThrallMovePoints[18][1], ThrallMovePoints[18][2]);
+                            Move_Timer = 5000;
+                            Move_Point++;
+                            break;
+                        case 5:
+                            me->MonsterYell("Be ware, enemies approach!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25883, true);
+                            Move_Point++;
+                            Summon_Totem_Timer = 5000 + urand(0, 10000);
+                            Lavaburst = true;
+                            break;
+                        case 6:
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 15)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[19][0], ThrallMovePoints[19][1], ThrallMovePoints[19][2]);
+                                Move_Timer = 5500;
+                                Move_Point++;
+                                Lavaburst = false;
+                            }
+                            else
+                                Move_Timer = 1000;
+                            break;
+                        case 7:
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[20][0], ThrallMovePoints[20][1], ThrallMovePoints[20][2]);
+                            Move_Timer = 6000;
+                            Move_Point++;
+                            break;
+                        case 8:
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[21][0], ThrallMovePoints[21][1], ThrallMovePoints[21][2]);
+                            Move_Timer = 2500;
+                            Move_Point++;
+                            break;
+                        case 9:
+                            me->MonsterYell("Let none stand in our way!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25884, true);
+                            Move_Point++;
+                            Summon_Totem_Timer = 5000 + urand(0, 10000);
+                            Lavaburst = true;
+                            break;
+                        case 10:
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 20)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[22][0], ThrallMovePoints[22][1], ThrallMovePoints[22][2]);
+                                Move_Timer = 7000;
+                                Move_Point++;
+                                Lavaburst = false;
+                            }
+                            else
+                                Move_Timer = 1000;
+                            break;
+                        case 11:
+                            me->MonsterYell("Twilight`s hammer returns!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25885, true);
+                            Move_Point++;
+                            Summon_Totem_Timer = 5000 + urand(0, 10000);
+                            Lavaburst = true;
+                            break;
+                        case 12:
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 25)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[23][0], ThrallMovePoints[23][1], ThrallMovePoints[23][2]);
+                                Move_Timer = 7000;
+                                Move_Point++;
+                                Lavaburst = false;
+                            }
+                            else
+                                Move_Timer = 1000;
+                            break;
+                        case 13:
+                            me->GetMotionMaster()->MovePoint(0, 4286.44f, 568.85f, -6.925f);
+                            Move_Timer = 1000;
+                            Move_Point++;
+                            break;
+                        case 14:
+                            me->MonsterYell("Let them come!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25886, true);
+                            Move_Point++;
+                            Summon_Totem_Timer = 5000 + urand(0, 10000);
+                            Lavaburst = true;
+                            break;
+                        case 15:
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 30)
+                            {
+                                me->MonsterSay("Alexstrasza's drakes should meet us here...", LANG_UNIVERSAL, 0);
+                                me->SendPlaySound(25887, true);
+                                Move_Timer = 5000;
+                                Move_Point++;
+                                Lavaburst = false;
+                            }
+                            else
+                                Move_Timer = 1000;
+                            break;
+                        case 16:
+                            me->GetMotionMaster()->MovePoint(0, 4284.01f, 568.60f, -6.853f);
+                            me->MonsterSay("Up there, above us!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25888, true);
+                            instance->SetData(DATA_ASIRA_INTRO, 1); // 1
+                            Move_Timer = 20000;
+                            Move_Point++;
+                            break;
+                        case 17:
+                            me->GetMotionMaster()->MovePoint(0, 4281.76f, 568.75f, -6.761f);
+                            Move_Point++;
+                            break;
+                        // OUTRO
+                        case 18: // Walk to Life Warden
+                            if (instance->GetData(TYPE_BOSS_ASIRA_DAWNSLAYER) == DONE)
+                            {
+                                me->SetWalk(true);
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[24][0], ThrallMovePoints[24][1], ThrallMovePoints[24][2]);
+                                Move_Timer = 4000;
+                                Move_Point++;
+                            }
+                            else
+                                Move_Timer = 1000;
+                            break;
+                        case 19: // Say
+                            me->MonsterSay("Well done. Let us see to our friend...", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25891, true);
+                            Move_Timer = 5000;
+                            Move_Point++;
+                            break;
+                        case 20: // Cast Ancestral Spirit
+                        {
+                            me->CombatStop();
+                            me->CastSpell(me, ANCESTRAL_SPIRIT, false);
+                            Move_Timer = 3800;
+                            Move_Point++;
+                            break;
+                        }
+                        case 21: // Revive Life Warden
+                        {
+                            Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 50.0f, false);
+                            if (life_warden)
+                            {
+                                life_warden->setDeathState(JUST_ALIVED);
+                                life_warden->CastSpell(life_warden, RESURRECTION, true);
+                            }
+                            Move_Timer = 1000;
+                            Move_Point++;
+                            break;
+                        }
+                        case 22: // Jump on Life Warden
+                        {
+                            Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 50.0f, true);
+                            if (life_warden)
+                                me->GetMotionMaster()->MovePoint(0, life_warden->GetPositionX(), life_warden->GetPositionY(), life_warden->GetPositionZ());
+                            Move_Timer = 5000;
+                            Move_Point++;
+                            break;
+                        }
+                        case 23: // Despawn Life Warden - Mount Thrall
+                        {
+                            Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 50.0f, true);
+                            if (life_warden)
+                            {
+                                life_warden->SetVisible(false);
+                                life_warden->DespawnOrUnsummon();
+                                me->CastSpell(me, RED_DRAKE, true);
+                                me->MonsterSay("The rest of the drakes should be here shortly. I'll fly on ahead, catch up when you can.", LANG_UNIVERSAL, 0);
+                                me->SendPlaySound(25892, true);
+                                Move_Timer = 1000;
+                                Move_Point++;
+                            }
+                            break;
+                        }
+                        case 24: // Fly Away
+                            me->SetFlying(true);
+                            Move_Timer = 15000;
+                            Move_Point++;
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[26][0], ThrallMovePoints[26][1], ThrallMovePoints[26][2]);
+                            break;
+                        case 25: // Disappear
+                            me->DespawnOrUnsummon();
+                            instance->SetData(DATA_DRAKES, 1); // 1
+                            Move_Point++;
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    else Move_Timer -= diff;
+
+                    // Trash actions
+                    if (Lavaburst)
+                    {
                         if (Lavaburst_Timer <= diff)
                         {
-                            Creature * asira = me->FindNearestCreature(ASIRA_DOWNSLAYER, 40.0f, true);
-                            if (asira)
-                                me->CastSpell(asira, THRALL_SPELL_LAVABURST, false);
-                            Lavaburst_Timer = 5000;
+                            FindCorrectTarget();
                         }
                         else Lavaburst_Timer -= diff;
 
-                        // Summon Totem
                         if (Summon_Totem_Timer <= diff)
                         {
-                            int distance = urand(10,40);
-                            float angle = urand(22, 39) / 10;
-                            me->SummonCreature(RISING_FLAME_TOTEM, me->GetPositionX() + cos(angle)*distance, me->GetPositionY() + sin(angle)*distance, me->GetPositionZ()+1, angle, TEMPSUMMON_TIMED_DESPAWN, 30000);
-                            Summon_Totem_Timer = 15000+urand(0, 15000);
+                            int distance = urand(7, 15);
+                            float angle = me->GetOrientation();
+                            me->SummonCreature(RISING_FLAME_TOTEM, me->GetPositionX() + cos(angle)*distance, me->GetPositionY() + sin(angle)*distance, me->GetPositionZ() + 1, angle, TEMPSUMMON_TIMED_DESPAWN, 30000);
+                            Summon_Totem_Timer = 35000 + urand(0, 15000);
                         }
                         else Summon_Totem_Timer -= diff;
                     }
-                }
-            }
 
-            if (Say_Next)
-            {
-                if (Say_Next_Timer <= diff)
-                {
-                    me->GetMotionMaster()->MovePoint(0, 4287.48f, 565.78f, -7.1822f);
-                    me->MonsterSay("Up there, above us!", LANG_UNIVERSAL, 0);
-                    me->SendPlaySound(25888, true);
-                    Say_Next = false;
-                }
-                else Say_Next_Timer -= diff;
-            }
-
-            // Thrall movement update
-            if (Move_Timer <= diff)
-            {
-                if (instance)
-                {
-                    switch ((instance->GetData(DATA_MOVEMENT_PROGRESS)))
+                    // Boss Asira Actions
+                    if (Check_Timer <= diff)
                     {
-                    case 1: // Start from 26 later
-                        me->RemoveStandFlags(UNIT_STAND_STATE_KNEEL);
-                        me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[15][0], ThrallMovePoints[15][1], ThrallMovePoints[15][2]);
-                        instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 27 (2)
-                        break;
-                    case 2:
-                        if (me->GetExactDist2d(ThrallMovePoints[15][0], ThrallMovePoints[15][1]) < 1)
+                        if (instance)
                         {
-                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[16][0], ThrallMovePoints[16][1], ThrallMovePoints[16][2]);
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 28 (3)
-                            Summon_Totem_Timer = 5000;
-                            Lavaburst = true;
-                        }
-                        break;
-                    case 5/*28*/: // After group kills 2 Assassins 28 na 16
-                    case 6/*29*/:
-                        //if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-12][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-12][1]) < 1)
-                        if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+11][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+11][1]) < 1)
-                        {
-                            // me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-11][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-11][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-11][2]);
-                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+12][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+12][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+12][2]);
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 30 (7)
-                        }
-                        Lavaburst = false;
-                        break;
-                    case 7/*30*/:
-                        if (me->GetExactDist2d(ThrallMovePoints[18][0], ThrallMovePoints[18][1]) < 1)
-                        {
-                            me->MonsterYell("Be ware, enemies approach!", LANG_UNIVERSAL, 0);
-                            me->SendPlaySound(25883, true);
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 31 (8) + 5 Dead enemies => 36 (13)
-                            Summon_Totem_Timer = 10000 + urand(0, 10000);
-                        }
-                        Lavaburst = true;
-                        break;
-                    case 13/*36*/:
-                    case 14/*37*/:
-                    case 15/*38*/:
-                        //if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-18][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-18][1]) < 1)
-                        if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+5][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+5][1]) < 1)
-                        {
-                            // me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-17][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-17][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))-17][2]);
-                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+6][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+6][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS))+6][2]);
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 13->[19], 14->[20], 15->[21]
-                        }
-                        Lavaburst = false;
-                        break;
-                    case 16/*39*/:
-                        if (me->GetExactDist2d(ThrallMovePoints[21][0], ThrallMovePoints[21][1]) < 1)
-                        {
-                            me->MonsterYell("Let none stand in our way!", LANG_UNIVERSAL, 0);
-                            me->SendPlaySound(25884, true);
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 40 (17) + 5 Dead enemies => 45 (22)
-                            Summon_Totem_Timer = 10000 + urand(0, 10000);
-                        }
-                        Lavaburst = true;
-                        break;
-                    case 22/*45*/:
-                        if (me->GetExactDist2d(ThrallMovePoints[21][0], ThrallMovePoints[21][1]) < 1)
-                        {
-                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[22][0], ThrallMovePoints[22][1], ThrallMovePoints[22][2]);
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 46 (23)
-                        }
-                        Lavaburst = false;
-                        break;
-                    case 23/*46*/:
-                        if (me->GetExactDist2d(ThrallMovePoints[22][0], ThrallMovePoints[22][1]) < 1)
-                        {
-                            me->MonsterYell("Twilight`s hammer returns!", LANG_UNIVERSAL, 0);
-                            me->SendPlaySound(25885, true);
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 47 (24) + 5 => 52 (29)
-                            Summon_Totem_Timer = 10000 + urand(0, 10000);
-                        }
-                        Lavaburst = true;
-                        break;
-                    case 29/*52*/:
-                        if (me->GetExactDist2d(ThrallMovePoints[22][0], ThrallMovePoints[22][1]) < 1)
-                        {
-                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[23][0], ThrallMovePoints[23][1], ThrallMovePoints[23][2]);
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 53 (30)
-                        }
-                        Lavaburst = false;
-                        break;
-                    case 30/*53*/:
-                        if (me->GetExactDist2d(ThrallMovePoints[23][0], ThrallMovePoints[23][1]) < 1)
-                        {
-                            me->MonsterYell("Let them come", LANG_UNIVERSAL, 0);
-                            me->SendPlaySound(25886, true);
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 54 (31) + 5 => 59 (36)
-                            Summon_Totem_Timer = 10000 + urand(0, 10000);
-                        }
-                        Lavaburst = true;
-                        break;
-                    case 36/*59*/:
-                        me->MonsterSay("Alexstrasza's drakes should meet us here...", LANG_UNIVERSAL, 0);
-                        me->SendPlaySound(25887, true);
-                        me->SetOrientation(3.089f);
-                        Lavaburst = false;
-                        Say_Next_Timer = 5000;
-                        Say_Next = true;
-                        instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 55
-
-                    default:
-                        break;
-                    }
-
-                    Move_Timer = 1000;
-                }
-            }
-            else Move_Timer -= diff;
-
-            // Thrall Asira Outro
-            if (instance)
-            {
-                if ((instance->GetData(DATA_DRAKES)) == 1)
-                {
-                    if (!Outro)
-                    {
-                        if (Outro_Timer <= diff)
-                        {
-                            switch (Outro_Action) {
-                            case 0: // Walk to Life Warden
-                                me->SetWalk(true);
-                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[24][0], ThrallMovePoints[24][1], ThrallMovePoints[24][2]);
-                                Outro_Timer = 4000;
-                                Outro_Action++;
-                                break;
-                            case 1: // Say
-                                me->MonsterSay("Well done. Let us see to our friend...", LANG_UNIVERSAL, 0);
-                                me->SendPlaySound(25891, true);
-                                Outro_Action++;
-                                Outro_Timer = 10000;
-                                break;
-                            case 2: // Cast Ancestral Spirit
+                            if ((instance->GetData(TYPE_BOSS_ASIRA_DAWNSLAYER)) == IN_PROGRESS)
                             {
-                                Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 50.0f, false);
-                                if (life_warden)
+                                // Cast Lavaburst
+                                if (Lavaburst_Timer <= diff)
                                 {
-                                    me->CastSpell(life_warden, ANCESTRAL_SPIRIT, false);
-                                    me->MonsterSay("Nicco je Noob :D proto to nejde", LANG_UNIVERSAL, 0);
+                                    Creature * asira = me->FindNearestCreature(ASIRA_DOWNSLAYER, 40.0f, true);
+                                    if (asira)
+                                        me->CastSpell(asira, THRALL_SPELL_LAVABURST, false);
+                                    Lavaburst_Timer = 5000;
                                 }
-                                Outro_Timer = 3800;
-                                Outro_Action++;
-                                break;
-                            }
-                            case 3: // Revive Life Warden
-                            {
-                                Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 50.0f, false);
-                                if (life_warden)
+                                else Lavaburst_Timer -= diff;
+
+                                // Summon Totem
+                                if (Summon_Totem_Timer <= diff)
                                 {
-                                    life_warden->setDeathState(JUST_ALIVED);
-                                    life_warden->CastSpell(life_warden, RESURRECTION, true);
+                                    int distance = urand(10, 40);
+                                    float angle = urand(22, 39) / 10;
+                                    me->SummonCreature(RISING_FLAME_TOTEM, me->GetPositionX() + cos(angle)*distance, me->GetPositionY() + sin(angle)*distance, me->GetPositionZ() + 1, angle, TEMPSUMMON_TIMED_DESPAWN, 30000);
+                                    Summon_Totem_Timer = 15000 + urand(0, 15000);
                                 }
-                                Outro_Timer = 1000;
-                                Outro_Action++;
-                                break;
-                            }
-                            case 4: // Jump on Life Warden
-                            {
-                                Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 50.0f, true);
-                                if (life_warden)
-                                    me->GetMotionMaster()->MovePoint(0, life_warden->GetPositionX(), life_warden->GetPositionY(), life_warden->GetPositionZ());
-                                Outro_Timer = 3000;
-                                Outro_Action++;
-                                break;
-                            }
-                            case 5: // Despawn Life Warden - Mount Thrall
-                            {
-                                Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 50.0f, true);
-                                if (life_warden)
-                                {
-                                    life_warden->SetVisible(false);
-                                    life_warden->DespawnOrUnsummon();
-                                    me->CastSpell(me, RED_DRAKE, true);
-                                    me->MonsterSay("The rest of the drakes should be here shortly. I'll fly on ahead, catch up when you can.", LANG_UNIVERSAL, 0);
-                                    me->SendPlaySound(25892, true);
-                                    Outro_Timer = 1000;
-                                    Outro_Action++;
-                                }
-                                break;
-                            }
-                            case 6: // Fly Away
-                                me->SetFlying(true);
-                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[26][0], ThrallMovePoints[26][1], ThrallMovePoints[26][2]);
-                                Outro_Action++;
-                                Outro_Timer = 15000;
-                                break;
-                            case 7: // Disappear
-                                me->DespawnOrUnsummon();
-                                Outro = true;
-                                break;
-                            default:
-                                break;
+                                else Summon_Totem_Timer -= diff;
                             }
                         }
-                        else Outro_Timer -= diff;
                     }
                 }
             }
@@ -1188,27 +1189,20 @@ public:
 
         InstanceScript* instance;
         uint32 Move_Timer;
-        bool Gossip;
+        uint32 Move_Point;
         bool Show_Trash;
 
         void Reset()
         {
-            Gossip = false;
-            Show_Trash = false;
             Move_Timer = 0;
+            Move_Point = 0;
+            Show_Trash = false;
         }
 
         void DoAction(const int32 /*param*/)
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            Gossip = true;
+            instance->SetData(DATA_INSTANCE_PROGRESS, 4); // 4
             Move_Timer = 1000;
-
-            if (InstanceScript *pInstance = me->GetInstanceScript())
-                pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
-
-            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[27][0], ThrallMovePoints[27][1], ThrallMovePoints[27][2], true, true);
         }
 
         void ShowTrash()
@@ -1224,89 +1218,116 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (Gossip == true)
+            if (instance)
             {
-                // Thrall movement update
-                if (Move_Timer <= diff)
+                if (instance->GetData(DATA_INSTANCE_PROGRESS) == 4)
                 {
-                    if (instance)
+                    // Thrall movement update
+                    if (Move_Timer <= diff)
                     {
-                        switch ((instance->GetData(DATA_MOVEMENT_PROGRESS)))
+                        Move_Timer = 1000;
+
+                        switch (Move_Point)
                         {
-                        case 1:
-                            if (me->GetExactDist2d(ThrallMovePoints[27][0], ThrallMovePoints[27][1]) < 1)
-                            {
-                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[28][0], ThrallMovePoints[28][1], ThrallMovePoints[28][2], true);
-                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
-                            }
+                        case 0:
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[27][0], ThrallMovePoints[27][1], ThrallMovePoints[27][2], true, true);
+                            Move_Timer = 5000;
+                            Move_Point++;
                             break;
-                        case 2: //
-                            if (me->GetExactDist2d(ThrallMovePoints[28][0], ThrallMovePoints[28][1]) < 1)
-                                if (Show_Trash == false)
-                                    ShowTrash();
+                        case 1:
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[28][0], ThrallMovePoints[28][1], ThrallMovePoints[28][2], true);
+                            Move_Timer = 3000;
+                            Move_Point++;
+                            break;
+                        case 2:
+                            ShowTrash();
+                            Move_Point++;
                             break;
                         case 3:
-                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[29][0], ThrallMovePoints[29][1], ThrallMovePoints[29][2], true);
-                            Show_Trash = false;
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 33)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[29][0], ThrallMovePoints[29][1], ThrallMovePoints[29][2], true);
+                                Move_Timer = 9000;
+                                Move_Point++;
+                            }
+                            else 
+                                Move_Timer = 1000;
                             break;
-                        case 4: // 
-                            if (me->GetExactDist2d(ThrallMovePoints[29][0], ThrallMovePoints[29][1]) < 1)
-                                if (Show_Trash == false)
-                                    ShowTrash();
+                        case 4:
+                            ShowTrash();
+                            Move_Point++;
                             break;
                         case 5:
-                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[30][0], ThrallMovePoints[30][1], ThrallMovePoints[30][2], true);
-                            Show_Trash = false;
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 36)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[30][0], ThrallMovePoints[30][1], ThrallMovePoints[30][2], true);
+                                Move_Timer = 5000;
+                                Move_Point++;
+                            }
+                            else
+                                Move_Timer = 1000;
                             break;
                         case 6:
-                            if (me->GetExactDist2d(ThrallMovePoints[30][0], ThrallMovePoints[30][1]) < 1)
-                            {
-                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[31][0], ThrallMovePoints[31][1], ThrallMovePoints[31][2], true);
-                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
-                            }
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[31][0], ThrallMovePoints[31][1], ThrallMovePoints[31][2], true);
+                            Move_Timer = 8000;
+                            Move_Point++;
                             break;
                         case 7:
-                            if (me->GetExactDist2d(ThrallMovePoints[31][0], ThrallMovePoints[31][1]) < 1)
-                                if (Show_Trash == false)
-                                    ShowTrash();
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[32][0], ThrallMovePoints[32][1], ThrallMovePoints[32][2], true);
+                            Move_Timer = 5000;
+                            Move_Point++;
                             break;
                         case 8:
+                            ShowTrash();
+                            Move_Point++;
+                            break;
                         case 9:
-                        case 10:
-                        case 11:
-                            if (me->GetExactDist2d(ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS)) + 23][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS)) + 23][1]) < 1)
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) >= 39)
                             {
-                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS)) + 24][0], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS)) + 24][1], ThrallMovePoints[(instance->GetData(DATA_MOVEMENT_PROGRESS)) + 24][2]);
-                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+                                Move_Timer = 23000;
+                                Move_Point++;
+                                instance->SetData(DATA_BENEDICTUS_INTRO, 1); // 1
                             }
+                            else
+                                Move_Timer = 1000;
+                            break;
+                        case 10:
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[33][0], ThrallMovePoints[33][1], ThrallMovePoints[33][2], true);
+                            Move_Timer = 11000;
+                            Move_Point++;
+                            break;
+                        case 11:
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[34][0], ThrallMovePoints[34][1], ThrallMovePoints[34][2], true);
+                            Move_Timer = 10500;
+                            Move_Point++;
                             break;
                         case 12:
-                            if (me->GetExactDist2d(ThrallMovePoints[35][0], ThrallMovePoints[35][1]) < 1)
-                            {
-                                me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[36][0], ThrallMovePoints[36][1], ThrallMovePoints[36][2]);
-                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
-                            }
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[35][0], ThrallMovePoints[35][1], ThrallMovePoints[35][2], true);
+                            Move_Timer = 3000;
+                            Move_Point++;
                             break;
                         case 13:
-                            if (me->GetExactDist2d(ThrallMovePoints[36][0], ThrallMovePoints[36][1]) < 1)
-                            {
-                                Creature * last_thrall = me->FindNearestCreature(THRALL_4, 10.0f, true);
-                                if (last_thrall)
-                                {
-                                    last_thrall->SetVisible(true);
-                                }
-                                me->ForcedDespawn(0);
-                            }
+                            me->GetMotionMaster()->MovePoint(0, ThrallMovePoints[36][0], ThrallMovePoints[36][1], ThrallMovePoints[36][2], true);
+                            Move_Timer = 4000;
+                            Move_Point++;
                             break;
+                        case 14:
+                        {
+                            Creature * last_thrall = me->FindNearestCreature(THRALL_4, 10.0f, true);
+                            if (last_thrall)
+                                last_thrall->SetVisible(true);
+                            me->ForcedDespawn(0);
+                            instance->SetData(DATA_INSTANCE_PROGRESS, 5); // 5
+                            break;
+                        }
                         default:
                             break;
                         }
                     }
-                    Move_Timer = 1000;
+                    else Move_Timer -= diff;
                 }
-                else Move_Timer -= diff;
             }
         }
 
@@ -1722,11 +1743,8 @@ public:
 
         void JustDied(Unit* /*who*/)
         {
-            //if (InstanceScript *pInstance = me->GetInstanceScript())
-            //    pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
-
             if (InstanceScript *pInstance = me->GetInstanceScript())
-                pInstance->SetData(DATA_ASIRA_INTRO, 1);
+                pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
         }
 
         void Reset() 
@@ -2102,15 +2120,14 @@ public:
 
         void JustDied(Unit* /*who*/)
         {
-            if (InstanceScript *pInstance = me->GetInstanceScript())
-                pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+            if (instance)
+                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
         }
 
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
-
 
             if (Shadow_Bore_Timer <= diff)
             {
@@ -2149,6 +2166,12 @@ public:
         {
             Tentacle_Smash_Timer = 10000 + urand(0, 5000);
             Squeeze_Lifeless_Timer = 20000 + urand(0, 10000);
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            if (instance)
+                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
         }
 
         void UpdateAI(const uint32 diff)
@@ -2203,6 +2226,12 @@ public:
         {
             Seeking_Shadows_Timer = 10000 + urand(0, 10000);
             Shadow_Volley_Timer = 5000 + urand(0, 5000);
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            if (instance)
+                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
         }
 
         void UpdateAI(const uint32 diff)

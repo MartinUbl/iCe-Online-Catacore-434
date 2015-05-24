@@ -34,6 +34,7 @@ enum AdditionalEvents
     DATA_ASIRA_INTRO                   = 6,
     DATA_DRAKES                        = 7,
     DATA_ECLIPSE_ACHIEVEMENT           = 8,
+    DATA_BENEDICTUS_INTRO              = 9,
 };
 
 enum HourOfTwilightNpcs

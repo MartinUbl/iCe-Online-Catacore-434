@@ -4686,6 +4686,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
             break;
         case 103947: // Ancestral Spirit
+            spellInfo->ManaCostPercentage = 0;
             spellInfo->Effect[0] = 0;
             break;
         case 103646: // Mount - Ambushed by Asira

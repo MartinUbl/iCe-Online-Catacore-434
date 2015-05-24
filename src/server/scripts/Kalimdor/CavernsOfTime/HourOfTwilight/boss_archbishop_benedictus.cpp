@@ -639,15 +639,14 @@ public:
         InstanceScript* instance;
         uint32 Intro_Timer;
         int Intro_Action;
-        bool Intro;
 
         void JustDied(Unit* /*who*/) { }
 
         void Reset()
         {
             Intro_Timer = 0;
-            Intro = false;
             Intro_Action = 0;
+            me->SetVisible(false);
         }
 
         void UpdateAI(const uint32 diff)
@@ -655,144 +654,143 @@ public:
             // Benedictus Intro
             if (instance)
             {
-                if ((instance->GetData(DATA_MOVEMENT_PROGRESS)) == 1)
+                if ((instance->GetData(DATA_BENEDICTUS_INTRO)) == 1)
                 {
-                    if (!Intro)
+                    if (Intro_Timer <= diff)
                     {
-                        if (Intro_Timer <= diff)
-                        {
-                            switch (Intro_Action) {
-                            case 0: // Appear and go
-                                me->GetMotionMaster()->MovePoint(0, BenedictusMovePoints[0][0], BenedictusMovePoints[0][1], BenedictusMovePoints[0][2]);
-                                Intro_Timer = 8000;
-                                Intro_Action++;
-                                break;
-                            case 1: // Run towards Thrall
-                                me->GetMotionMaster()->MovePoint(0, BenedictusMovePoints[1][0], BenedictusMovePoints[1][1], BenedictusMovePoints[1][2]);
-                                Intro_Timer = 10000;
-                                Intro_Action++;
-                                break;
-                            case 2: // Say
-                                me->MonsterSay("Get inside, quickly! I'll hold them off!", LANG_UNIVERSAL, 0, 100.0f);
-                                me->SendPlaySound(25866, true);
-                                Intro_Action++;
-                                Intro_Timer = 10000;
-                                break;
-                            case 3: // Run back
-                                me->GetMotionMaster()->MovePoint(0, BenedictusMovePoints[2][0], BenedictusMovePoints[2][1], BenedictusMovePoints[2][2]);
-                                Intro_Timer = 8000;
-                                Intro_Action++;
-                                break;
-                            case 4: // Move
-                                me->GetMotionMaster()->MovePoint(0, BenedictusMovePoints[3][0], BenedictusMovePoints[3][1], BenedictusMovePoints[3][2]);
+                        Intro_Timer = 1000;
+
+                        switch (Intro_Action) {
+                        case 0: // Appear and go
+                            me->GetMotionMaster()->MovePoint(0, BenedictusMovePoints[0][0], BenedictusMovePoints[0][1], BenedictusMovePoints[0][2]);
+                            me->SetVisible(true);
+                            Intro_Timer = 8000;
+                            Intro_Action++;
+                            break;
+                        case 1: // Run towards Thrall
+                            me->GetMotionMaster()->MovePoint(0, BenedictusMovePoints[1][0], BenedictusMovePoints[1][1], BenedictusMovePoints[1][2]);
+                            Intro_Timer = 10000;
+                            Intro_Action++;
+                            break;
+                        case 2: // Say
+                            me->MonsterSay("Get inside, quickly! I'll hold them off!", LANG_UNIVERSAL, 0, 100.0f);
+                            me->SendPlaySound(25866, true);
+                            Intro_Action++;
+                            Intro_Timer = 10000;
+                            break;
+                        case 3: // Run back
+                            me->GetMotionMaster()->MovePoint(0, BenedictusMovePoints[2][0], BenedictusMovePoints[2][1], BenedictusMovePoints[2][2]);
+                            Intro_Timer = 8000;
+                            Intro_Action++;
+                            break;
+                        case 4: // Move
+                            me->GetMotionMaster()->MovePoint(0, BenedictusMovePoints[3][0], BenedictusMovePoints[3][1], BenedictusMovePoints[3][2]);
+                            Intro_Timer = 5000;
+                            Intro_Action++;
+                            break;
+                        case 5: // Cast Holly Wall
+                            {
+                                Creature * holly_wall = me->FindNearestCreature(NPC_HOLLY_WALL, 50.0f, true);
+                                if (holly_wall)
+                                    me->CastSpell(holly_wall, HOLY_WALL, false);
                                 Intro_Timer = 5000;
                                 Intro_Action++;
-                                break;
-                            case 5: // Cast Holly Wall
-                                {
-                                    Creature * holly_wall = me->FindNearestCreature(NPC_HOLLY_WALL, 50.0f, true);
-                                    if (holly_wall)
-                                        me->CastSpell(holly_wall, HOLY_WALL, false);
-                                    Intro_Timer = 5000;
-                                    Intro_Action++;
-                                }
-                                break;
-                            case 6: // Move
-                            case 7: // Move
-                            case 8: // Move
-                                if (me->GetExactDist2d(BenedictusMovePoints[Intro_Action-3][0], BenedictusMovePoints[Intro_Action-3][1]) < 1)
-                                {
-                                    me->GetMotionMaster()->MovePoint(0, BenedictusMovePoints[Intro_Action-2][0], BenedictusMovePoints[Intro_Action-2][1], BenedictusMovePoints[Intro_Action-2][2]);
-                                    if (Intro_Action == 8)
-                                        Intro_Timer = 5000;
-                                    Intro_Action++;
-                                }
-                                break;
-                            case 9: // Move
-                                if (me->GetExactDist2d(BenedictusMovePoints[6][0], BenedictusMovePoints[6][1]) < 1)
-                                {
-                                    Creature * benedictus = me->FindNearestCreature(BOSS_ARCHBISHOP_BENEDICTUS, 10.0f, true);
-                                    if (benedictus)
-                                    {
-                                        me->GetMotionMaster()->MovePoint(0, benedictus->GetPositionX(), benedictus->GetPositionY(), benedictus->GetPositionZ());
-                                        Intro_Action++;
-                                        Intro_Timer = 2000;
-                                    }
-                                }
-                                break;
-                            case 10: // Say
-                                me->MonsterSay("And now, Shaman, you will give the Dragon Soul to ME.", LANG_UNIVERSAL, 0);
-                                me->SendPlaySound(25867, true);
-                                Intro_Timer = 5000;
-                                Intro_Action++;
-                                break;
-                            case 11: // Thrall Say
-                                {
-                                    Creature * thrall = me->FindNearestCreature(THRALL, 50.0f, true);
-                                    if (thrall)
-                                    {
-                                        thrall->MonsterSay("I will NOT, Archbishop. It will never be yours.", LANG_UNIVERSAL, 0);
-                                        me->SendPlaySound(25893, true);
-                                    }
-                                    Intro_Timer = 6000;
-                                    Intro_Action++;
-                                }
-                                break;
-                            case 12: // Say
-                                me->MonsterSay("I suppose it has to be this way, then. If only you'd seen what I've seen. THEN you'd understand.", LANG_UNIVERSAL, 0);
-                                me->SendPlaySound(21410, true);
-                                Intro_Timer = 8000;
-                                Intro_Action++;
-                                break;
-                            case 13: // Thrall Say
-                                {
-                                    Creature * thrall = me->FindNearestCreature(THRALL, 50.0f, true);
-                                    if (thrall)
-                                    {
-                                        thrall->MonsterSay("You were a figurehead of the Light, Benedictus. How could you betray your own people?", LANG_UNIVERSAL, 0);
-                                        me->SendPlaySound(25894, true);
-                                    }
-                                    Intro_Timer = 8000;
-                                    Intro_Action++;
-                                }
-                                break;
-                            case 14: // Say
-                                me->MonsterSay("There is no good. No evil. No Light. There is only POWER!", LANG_UNIVERSAL, 0);
-                                me->SendPlaySound(21411, true);
-                                Intro_Timer = 9000;
-                                Intro_Action++;
-                                break;
-                            case 15: // Say
-                                me->MonsterSay("We serve the world's TRUE masters! When their rule begins, we will share in their glory!", LANG_UNIVERSAL, 0);
-                                me->SendPlaySound(21412, true);
-                                Intro_Timer = 10000;
-                                Intro_Action++;
-                                break;
-                            case 16: // Say
-                                me->MonsterSay("And YOU! We will FEAST on your ashes! Now, DIE!", LANG_UNIVERSAL, 0);
-                                me->SendPlaySound(21413, true);
-                                Intro_Timer = 9000;
-                                Intro_Action++;
-                                break;
-                            case 17: // Disappear
-                                {
-                                    Creature * benedictus = me->FindNearestCreature(BOSS_ARCHBISHOP_BENEDICTUS, 50.0f, true);
-                                    if (benedictus)
-                                    {
-                                        benedictus->SetVisible(true);
-                                        benedictus->setFaction(16);
-                                    }
-                                    me->SetVisible(false);
-                                    me->Kill(me);
-                                    Intro = true;
-                                }
-                                break;
-                            default:
-                                break;
                             }
+                            break;
+                        case 6: // Move
+                        case 7: // Move
+                        case 8: // Move
+                            if (me->GetExactDist2d(BenedictusMovePoints[Intro_Action-3][0], BenedictusMovePoints[Intro_Action-3][1]) < 1)
+                            {
+                                me->GetMotionMaster()->MovePoint(0, BenedictusMovePoints[Intro_Action-2][0], BenedictusMovePoints[Intro_Action-2][1], BenedictusMovePoints[Intro_Action-2][2]);
+                                if (Intro_Action == 8)
+                                    Intro_Timer = 5000;
+                                Intro_Action++;
+                            }
+                            break;
+                        case 9: // Move
+                            if (me->GetExactDist2d(BenedictusMovePoints[6][0], BenedictusMovePoints[6][1]) < 1)
+                            {
+                                Creature * benedictus = me->FindNearestCreature(BOSS_ARCHBISHOP_BENEDICTUS, 10.0f, true);
+                                if (benedictus)
+                                {
+                                    me->GetMotionMaster()->MovePoint(0, benedictus->GetPositionX(), benedictus->GetPositionY(), benedictus->GetPositionZ());
+                                    Intro_Action++;
+                                    Intro_Timer = 2000;
+                                }
+                            }
+                            break;
+                        case 10: // Say
+                            me->MonsterSay("And now, Shaman, you will give the Dragon Soul to ME.", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25867, true);
+                            Intro_Timer = 5000;
+                            Intro_Action++;
+                            break;
+                        case 11: // Thrall Say
+                            {
+                                Creature * thrall = me->FindNearestCreature(THRALL, 50.0f, true);
+                                if (thrall)
+                                {
+                                    thrall->MonsterSay("I will NOT, Archbishop. It will never be yours.", LANG_UNIVERSAL, 0);
+                                    me->SendPlaySound(25893, true);
+                                }
+                                Intro_Timer = 6000;
+                                Intro_Action++;
+                            }
+                            break;
+                        case 12: // Say
+                            me->MonsterSay("I suppose it has to be this way, then. If only you'd seen what I've seen. THEN you'd understand.", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(21410, true);
+                            Intro_Timer = 8000;
+                            Intro_Action++;
+                            break;
+                        case 13: // Thrall Say
+                            {
+                                Creature * thrall = me->FindNearestCreature(THRALL, 50.0f, true);
+                                if (thrall)
+                                {
+                                    thrall->MonsterSay("You were a figurehead of the Light, Benedictus. How could you betray your own people?", LANG_UNIVERSAL, 0);
+                                    me->SendPlaySound(25894, true);
+                                }
+                                Intro_Timer = 8000;
+                                Intro_Action++;
+                            }
+                            break;
+                        case 14: // Say
+                            me->MonsterSay("There is no good. No evil. No Light. There is only POWER!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(21411, true);
+                            Intro_Timer = 9000;
+                            Intro_Action++;
+                            break;
+                        case 15: // Say
+                            me->MonsterSay("We serve the world's TRUE masters! When their rule begins, we will share in their glory!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(21412, true);
+                            Intro_Timer = 10000;
+                            Intro_Action++;
+                            break;
+                        case 16: // Say
+                            me->MonsterSay("And YOU! We will FEAST on your ashes! Now, DIE!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(21413, true);
+                            Intro_Timer = 9000;
+                            Intro_Action++;
+                            break;
+                        case 17: // Disappear
+                            {
+                                Creature * benedictus = me->FindNearestCreature(BOSS_ARCHBISHOP_BENEDICTUS, 50.0f, true);
+                                if (benedictus)
+                                {
+                                    benedictus->SetVisible(true);
+                                    benedictus->setFaction(16);
+                                }
+                                me->SetVisible(false);
+                                instance->SetData(DATA_BENEDICTUS_INTRO, 2); // 2
+                            }
+                            break;
+                        default:
+                            break;
                         }
-                        else Intro_Timer -= diff;
                     }
+                    else Intro_Timer -= diff;
                 }
             }
         }
