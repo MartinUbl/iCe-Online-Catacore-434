@@ -1557,6 +1557,7 @@ public:
 
         void Reset() 
         {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             Visual_Spell = false;
             Size_Change = false;
             Icy_Boulder_Timer = urand(0,2000);
@@ -1565,11 +1566,14 @@ public:
 
         void JustDied(Unit* /*who*/)
         {
-            if (InstanceScript *pInstance = me->GetInstanceScript())
-                pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+            if (instance)
+                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
         }
 
-        void EnterCombat() { }
+        void EnterCombat(Unit * /*who*/)
+        {
+            me->SetInCombatWithZone();
+        }
 
         void UpdateAI(const uint32 diff)
         {
