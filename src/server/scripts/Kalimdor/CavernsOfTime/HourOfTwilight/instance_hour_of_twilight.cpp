@@ -91,6 +91,8 @@ public:
         uint32 drakes;
         uint32 benedictus_intro;
 
+        uint32 Check_Timer;
+
         std::string saveData;
 
         void Initialize()
@@ -100,6 +102,17 @@ public:
             asira_intro        = 0;
             drakes             = 0;
             benedictus_intro   = 0;
+
+            arcurionGuid       = 0;
+            asiraGuid          = 0;
+            benedictusGuid     = 0;
+            thrallGuid         = 0;
+            thrall1Guid        = 0;
+            thrall2Guid        = 0;
+            thrall3Guid        = 0;
+            thrall4Guid        = 0;
+
+            Check_Timer         = 0;
 
             memset(m_auiEncounter, 0, sizeof(uint32) * MAX_ENCOUNTER);
             GetCorrUiEncounter();
@@ -196,6 +209,10 @@ public:
             {
                 case TYPE_BOSS_ARCURION:
                     return arcurionGuid;
+                case TYPE_BOSS_ASIRA_DAWNSLAYER:
+                    return asiraGuid;
+                case TYPE_BOSS_ARCHBISHOP_BENEDICTUS:
+                    return benedictusGuid;
                 case TYPE_THRALL:
                     return thrallGuid;
                 case TYPE_THRALL1:
@@ -216,6 +233,74 @@ public:
         {
             if (!instance->HavePlayers())
                 return;
+
+            if (Check_Timer <= diff)
+            {
+                if (instance_progress > 1)
+                {
+                    Creature * thrall = this->instance->GetCreature(this->GetData64(TYPE_THRALL));
+                    if (thrall)
+                        thrall->SetVisible(false);
+                }
+
+                if (instance_progress == 2)
+                {
+                    Creature * thrall_1 = this->instance->GetCreature(this->GetData64(TYPE_THRALL1));
+                    if (thrall_1)
+                        thrall_1->SetVisible(true);
+                }
+
+                if (instance_progress == 3)
+                {
+                    Creature * thrall_2 = this->instance->GetCreature(this->GetData64(TYPE_THRALL2));
+                    if (thrall_2)
+                        thrall_2->SetVisible(true);
+                }
+
+                if (instance_progress == 5)
+                {
+                    Creature * thrall_3 = this->instance->GetCreature(this->GetData64(TYPE_THRALL3));
+                    if (thrall_3)
+                        thrall_3->SetVisible(false);
+
+                    Creature * thrall_4 = this->instance->GetCreature(this->GetData64(TYPE_THRALL4));
+                    if (thrall_4)
+                        thrall_4->SetVisible(true);
+
+                    Creature * benedictus = this->instance->GetCreature(this->GetData64(TYPE_BOSS_ARCHBISHOP_BENEDICTUS));
+                    if (benedictus)
+                    {
+                        benedictus->SetVisible(true);
+                        benedictus->setFaction(16);
+                    }
+                }
+
+                if (movement_progress == 8)
+                {
+                    Creature * arcurion = this->instance->GetCreature(this->GetData64(TYPE_BOSS_ARCURION));
+                    if (arcurion)
+                    {
+                        arcurion->SetVisible(true);
+                        arcurion->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        arcurion->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        arcurion->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        arcurion->SetReactState(REACT_AGGRESSIVE);
+                    }
+                }
+
+                if (asira_intro > 1)
+                {
+                    Creature * asira = this->instance->GetCreature(this->GetData64(TYPE_BOSS_ASIRA_DAWNSLAYER));
+                    if (asira)
+                    {
+                        asira->SetVisible(true);
+                        asira->setFaction(16);
+                    }
+                }
+
+                Check_Timer = 60000;
+            }
+            else Check_Timer -= diff;
         }
 
         uint32 GetData(uint32 DataId) 
