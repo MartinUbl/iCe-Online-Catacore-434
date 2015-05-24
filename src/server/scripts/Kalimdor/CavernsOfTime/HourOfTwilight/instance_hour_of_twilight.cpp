@@ -267,11 +267,14 @@ public:
                     if (thrall_4)
                         thrall_4->SetVisible(true);
 
-                    Creature * benedictus = this->instance->GetCreature(this->GetData64(TYPE_BOSS_ARCHBISHOP_BENEDICTUS));
-                    if (benedictus)
+                    if (benedictus_intro == 2)
                     {
-                        benedictus->SetVisible(true);
-                        benedictus->setFaction(16);
+                        Creature * benedictus = this->instance->GetCreature(this->GetData64(TYPE_BOSS_ARCHBISHOP_BENEDICTUS));
+                        if (benedictus)
+                        {
+                            benedictus->SetVisible(true);
+                            benedictus->setFaction(16);
+                        }
                     }
                 }
 
