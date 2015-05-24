@@ -879,7 +879,6 @@ public:
         uint32 Summon_Totem_Timer;
         uint32 Check_Timer;
         int Twilight;
-        int Outro_Action;
         bool Lavaburst;
 
         void Reset() 
