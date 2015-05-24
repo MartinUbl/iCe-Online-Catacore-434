@@ -1551,22 +1551,27 @@ public:
         InstanceScript* instance;
         uint32 Icy_Boulder_Timer;
         uint32 Size_Timer;
+        uint32 React_Timer;
         float Size;
         bool Visual_Spell;
         bool Size_Change;
+        bool React;
 
         void Reset() 
         {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             Visual_Spell = false;
             Size_Change = false;
+            React = false;
             Icy_Boulder_Timer = urand(0,2000);
             Size_Timer = 0;
+            React_Timer = 0;
         }
 
         void JustDied(Unit* /*who*/)
         {
-            if (InstanceScript *pInstance = me->GetInstanceScript())
-                pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
+            if (instance)
+                instance->SetData(DATA_MOVEMENT_PROGRESS, 1);
         }
 
         void EnterCombat() { }
@@ -1580,6 +1585,7 @@ public:
                     me->CastSpell(me, FROZEN_SERVITOR_VISUAL, false);
 
                     Size_Timer = 1000;
+                    React_Timer = 3000;
                     Visual_Spell = true;
                 }
             }
@@ -1596,6 +1602,16 @@ public:
                         Size_Change = true;
                     }
                     else Size_Timer -= diff;
+                }
+
+                if (!React)
+                {
+                    if (React_Timer <= diff)
+                    {
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        React = true;
+                    }
+                    else React_Timer -= diff;
                 }
             }
 
