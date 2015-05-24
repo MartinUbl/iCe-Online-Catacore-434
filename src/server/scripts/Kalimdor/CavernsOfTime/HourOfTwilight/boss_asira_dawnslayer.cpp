@@ -270,11 +270,11 @@ public:
             {
                 if (me->HealthBelowPct(Pct))
                 {
-                    Pct -= 10;
-                    if (Pct > 10)
+                    if (Pct%20 == 0)
                         me->CastSpell(me, LESSER_BLADE_BARRIER, false);
                     else
                         me->CastSpell(me, BLADE_BARRIER, false);
+                    Pct -= 10;
                 }
                 Check_Hp_Timer = 5000;
             }
