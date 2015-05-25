@@ -122,6 +122,8 @@ public:
         uint32 Icy_Tomb_Timer;
         uint32 Hand_Of_Frost_Timer;
         uint32 Chain_Of_Frost_Timer;
+        uint32 Pct;
+        uint32 Check_Hp_Timer;
         int Random_Text;
         int Intro_Dialogue;
         int Phase;
@@ -147,6 +149,8 @@ public:
             Icy_Tomb_Timer = 30000;
             Hand_Of_Frost_Timer = 0;
             Chain_Of_Frost_Timer = 17000;
+            Check_Hp_Timer = 5000;
+            Pct = 90;
             Intro_Timer = 0;
             Intro_Dialogue = 0;
             Intro = false;
@@ -161,6 +165,10 @@ public:
                 {
                     (*itr)->DespawnOrUnsummon(0);
                 }
+
+            Creature * icy_tomb = me->FindNearestCreature(NPC_ICY_TOMB, 200.0, true);
+            if (icy_tomb)
+                icy_tomb->Kill(icy_tomb);
         }
 
         void EnterCombat(Unit * /*who*/)
@@ -288,7 +296,7 @@ public:
                     Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0);
                     if (target)
                         me->CastSpell(target, CHAINS_OF_FROST, false);
-                    Chain_Of_Frost_Timer = 17000;
+                    Chain_Of_Frost_Timer = 26000;
                 }
                 else Chain_Of_Frost_Timer -= diff;
 
@@ -297,6 +305,12 @@ public:
                     Creature * thrall = me->FindNearestCreature(54548, 100.0f, true);
                     if (thrall)
                     {
+                        if (thrall->HasAura(ICY_TOMB_1)) // Delay new Icy Tomb timer if Thrall is already in Icy Tomb
+                        {
+                            Icy_Tomb_Timer = 10000;
+                            return;
+                        }
+
                         thrall->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
                         me->CastSpell(thrall, ICY_TOMB, false);
                         thrall->CastSpell(thrall, ICY_TOMB_1, false);
@@ -339,34 +353,56 @@ public:
                 }
             }
 
-            if (HealthBelowPct(33))
+            if (Check_Hp_Timer <= diff)
             {
-                if (!Bloodlust)
+                if (me->HealthBelowPct(Pct))
                 {
-                    Creature * thrall = me->FindNearestCreature(THRALL, 100.0f, true);
-                    if (thrall)
+                    if (Pct > 30)
                     {
-                        thrall->CastSpell(thrall, BLOODLUST, false);
-                        thrall->MonsterYell("You've almost got him! Og'nor ka Lok'tar - Now we finish this!", LANG_UNIVERSAL, 0);
-                        thrall->SendPlaySound(25881, true);
+                        std::list<Creature*> arcurion_servitors;
+                        GetCreatureListWithEntryInGrid(arcurion_servitors, me, ARCURION_FROZEN_SERVITOR, 200.0f);
+                        for (std::list<Creature*>::const_iterator itr = arcurion_servitors.begin(); itr != arcurion_servitors.end(); ++itr)
+                            if (*itr)
+                            {
+                                (*itr)->GetAI()->DoAction();
+                            }
                     }
-                    Bloodlust = true;
-                }
-            }
 
-            if (HealthBelowPct(30))
-            {
-                if (!Torment_Of_Frost)
+                    Pct -= 10;
+                }
+
+                if (me->HealthBelowPct(35))
                 {
-                    Torment_Of_Frost = true;
-                    me->InterruptNonMeleeSpells(true, 0, true);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    me->CastSpell(me, TORMENT_OF_FROST, false);
-
-                    me->MonsterYell("The Hour of Twilight falls - the end of all things - you can't stop it. You are nothing. NOTHING!", LANG_UNIVERSAL, 0);
-                    me->SendPlaySound(25801, true);
+                    if (!Bloodlust)
+                    {
+                        Creature * thrall = me->FindNearestCreature(THRALL, 100.0f, true);
+                        if (thrall)
+                        {
+                            thrall->CastSpell(thrall, BLOODLUST, false);
+                            thrall->MonsterYell("You've almost got him! Og'nor ka Lok'tar - Now we finish this!", LANG_UNIVERSAL, 0);
+                            thrall->SendPlaySound(25881, true);
+                        }
+                        Bloodlust = true;
+                    }
                 }
+
+                if (me->HealthBelowPct(30))
+                {
+                    if (!Torment_Of_Frost)
+                    {
+                        Torment_Of_Frost = true;
+                        me->InterruptNonMeleeSpells(true, 0, true);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        me->CastSpell(me, TORMENT_OF_FROST, false);
+
+                        me->MonsterYell("The Hour of Twilight falls - the end of all things - you can't stop it. You are nothing. NOTHING!", LANG_UNIVERSAL, 0);
+                        me->SendPlaySound(25801, true);
+                    }
+                }
+
+                Check_Hp_Timer = 5000;
             }
+            else Check_Hp_Timer -= diff;
 
             DoMeleeAttackIfReady();
         }
@@ -392,33 +428,91 @@ public:
 
         InstanceScript* instance;
         uint32 Icy_Boulder_Timer;
+        uint32 Health;
+        uint32 Cast_Faster_Timer;
+        uint32 Current_Health;
+        bool Cast;
 
         void Reset()
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             Icy_Boulder_Timer = urand(5000, 30000);
+            Cast = true;
+            Health = 100;
         }
 
         void JustDied(Unit* /*who*/) { }
+
+        void DoAction(const int32 /*param*/)
+        {
+            Creature * arcurion = me->FindNearestCreature(54590, 200.0, true);
+
+            if (arcurion && arcurion->HealthBelowPct(30))
+                Cast = false;
+
+            Current_Health = arcurion->GetHealthPct();
+            if (Current_Health > Health)
+            {
+                int round_health_up = 0;
+                round_health_up = 10 - (Current_Health % 10);
+                Health = Current_Health + round_health_up;
+                Cast_Faster_Timer = 15000;
+            }
+        }
 
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
 
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            if (Icy_Boulder_Timer <= diff)
+            if (Cast)
             {
-                Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true);
-                if (target)
+                if (Icy_Boulder_Timer <= diff)
                 {
-                    me->CastSpell(target, ICY_BOULDER, false);
-                    Icy_Boulder_Timer = 4000 + urand(0, 45000);
+                    if (Health < 40)
+                        Health = 40;
+
+                    Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true);
+                    if (target)
+                    {
+                        me->CastSpell(target, ICY_BOULDER, false);
+                        switch (Health)
+                        {
+                        case 100:
+                            Icy_Boulder_Timer = 3000 + urand(0, 35000);
+                            break;
+                        case 90:
+                            Icy_Boulder_Timer = 3000 + urand(0, 30000);
+                            break;
+                        case 80:
+                            Icy_Boulder_Timer = 3000 + urand(0, 25000);
+                            break;
+                        case 70:
+                            Icy_Boulder_Timer = 3000 + urand(0, 20000);
+                            break;
+                        case 60:
+                            Icy_Boulder_Timer = 3000 + urand(0, 15000);
+                            break;
+                        case 50:
+                            Icy_Boulder_Timer = 3000 + urand(0, 10000);
+                            break;
+                        case 40:
+                            Icy_Boulder_Timer = 3000 + urand(0, 5000);
+                            break;
+                        default:
+                            break;
+                        }
+                    }
                 }
+                else Icy_Boulder_Timer -= diff;
             }
-            else Icy_Boulder_Timer -= diff;
+
+            if (Cast_Faster_Timer <= diff)
+            {
+                Health -= 10;
+                Cast_Faster_Timer = 15000;
+            }
+            else Cast_Faster_Timer -= diff;
         }
     };
 };

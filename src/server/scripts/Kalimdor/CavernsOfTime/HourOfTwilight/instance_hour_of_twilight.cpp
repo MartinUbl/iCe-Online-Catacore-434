@@ -508,9 +508,15 @@ public:
         {
             if (instance->GetData(TYPE_BOSS_ARCURION) == IN_PROGRESS)
             {
-                Creature * frozen_servitor = me->FindNearestCreature(119509, 150.0, true);
-                if (frozen_servitor && frozen_servitor->IsInCombat())
-                    me->CastSpell(frozen_servitor, THRALL_SPELL_LAVABURST, false);
+                Creature * arcurion = me->FindNearestCreature(54590, 200.0, true);
+                if (arcurion && arcurion->HealthBelowPct(30))
+                    me->CastSpell(arcurion, THRALL_SPELL_LAVABURST, false);
+                else
+                {
+                    Creature * frozen_servitor = me->FindNearestCreature(119509, 150.0, true);
+                    if (frozen_servitor && frozen_servitor->IsInCombat())
+                        me->CastSpell(frozen_servitor, THRALL_SPELL_LAVABURST, false);
+                }
             }
             else
             {
