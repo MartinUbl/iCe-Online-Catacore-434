@@ -20,19 +20,11 @@
 
 #define CAST_WOE_INSTANCE(i)     (dynamic_cast<instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript*>(i))
 
-typedef struct quote_event
-{
-    const uint32 nextEventTime;
-    const uint32 entry;
-    const char * yellQuote;
-    const uint32 soundID;
-}QUOTE_EVENTS;
-
-
 enum spells
 {
     SPELL_NATURE_CHANNELING = 28892, // dont know if correct but it has same effect
     SPELL_ABSYSSAL_FLAMETHROWER = 105218, // visual
+    SPELL_TIME_SHIFT = 102602,
     SPELL_ABYSSAL_FLAMES_AOE = 103992,
 
     SPELL_WATERS_OF_ETERNITY = 103952,
@@ -57,12 +49,12 @@ enum illidanOffensiveSpells
 
 QUOTE_EVENTS preludeQuotes [MAX_PRELUDE_QUOTES] =
 {
-    {5000, ENTRY_ILLIDAN_PRELUDE, "Can you close the portal, brother?", 26084},
-    {5000, ENTRY_MALFURION_PRELUDE, "It is being maintained by the will of a powerful demon, Mannoroth.", 26494},
-    {5000, ENTRY_MALFURION_PRELUDE, "I cannot break his will alone.", 26495},
+    {4000, ENTRY_ILLIDAN_PRELUDE, "Can you close the portal, brother?", 26084},
+    {6000, ENTRY_MALFURION_PRELUDE, "It is being maintained by the will of a powerful demon, Mannoroth.", 26494},
+    {4000, ENTRY_MALFURION_PRELUDE, "I cannot break his will alone.", 26495},
     {5000, ENTRY_ILLIDAN_PRELUDE, "Very well, we shall break it for you.", 26086},
-    {5000, ENTRY_TYRANDE_PRELUDE, "He knows what we attempt. We have not much time. The forest crawls with his demons.", 25993},
-    {5000, ENTRY_ILLIDAN_PRELUDE, "Let them come.", 26085},
+    {6000, ENTRY_TYRANDE_PRELUDE, "He knows what we attempt. We have not much time. The forest crawls with his demons.", 25993},
+    {3000, ENTRY_ILLIDAN_PRELUDE, "Let them come.", 26085},
     {MAX_TIMER, ENTRY_TYRANDE_PRELUDE, "Mother moon, guide us through this darkness.", 25994}
 };
  
@@ -70,10 +62,10 @@ QUOTE_EVENTS preludeQuotes [MAX_PRELUDE_QUOTES] =
  
 QUOTE_EVENTS sequelQuotes [MAX_SEQUEL_QUOTES] =
 {
-    {3000, ENTRY_ILLIDAN_PRELUDE, "Oh, this will be fun...", 26089},
-    {2000, ENTRY_ILLIDAN_PRELUDE, "Wait, I have an idea.", 26090},
-    {6000, ENTRY_TYRANDE_PRELUDE, "Illidan, what is in that vial? What are you doing?", 25995},
-    {9000, ENTRY_ILLIDAN_PRELUDE, "What our people could not.", 26091},
+    {4000, ENTRY_ILLIDAN_PRELUDE, "Oh, this will be fun...", 26089},
+    {4000, ENTRY_ILLIDAN_PRELUDE, "Wait, I have an idea.", 26090 },
+    {5000, ENTRY_TYRANDE_PRELUDE, "Illidan, what is in that vial? What are you doing?", 25995},
+    {4000, ENTRY_ILLIDAN_PRELUDE, "What our people could not.", 26091 },
     {MAX_TIMER,  ENTRY_ILLIDAN_PRELUDE, "Yes...YES. I can feel the raw power of the Well of Eternity! It is time to end this charade!", 26092},
 };
  
@@ -83,8 +75,8 @@ SimpleQuote afterDoomguardsDeath = {26088, "Weak, pitiful creatures. Hardly wort
  
 QUOTE_EVENTS preCombatQuotes [MAX_PRECOMBAT_QUOTES] =
 {
-    {4000, MANNOROTH_ENTRY, "Varo'then, see that I am not disrupted by this rabble!", 26480}, // yell
-    {MAX_TIMER, VAROTHEN_ENTRY, "Highguard! To arms! For your queen! For Azshara!", 26137}, // yell
+    {5500, MANNOROTH_ENTRY, "Varo'then, see that I am not disrupted by this rabble!", 26480}, // yell
+    {4000, VAROTHEN_ENTRY, "Highguard! To arms! For your queen! For Azshara!", 26137}, // yell
     {4000, ENTRY_TYRANDE_PRELUDE, "I cannot strike them! What is this demon magic?", 25996},
     {MAX_TIMER, ENTRY_ILLIDAN_PRELUDE, "They are not what they appear to be! Strike in an area, it is the only way to uncover the real one!", 26093}
 };
@@ -100,10 +92,13 @@ static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
         source->MonsterSay(quote.text, LANG_UNIVERSAL,0,200.0f);
 }
 
-const Position illidanAbyssalPos = {3222.84f, -5680.7f, 18.7f,5.76f};
-const Position tyrandeAbyssalPos = {3219.0f, -5688.0f, 18.1f,5.8f};
-
-const Position illidanVarothenPos = {3223.0f, -5704.0f, 16.1f,6.12f};
+enum pathWaypointsIds
+{
+    PATH_POINT1_WP = 6789,
+    PATH_POINT2_WP,
+    PATH_POINT3_WP,
+    PATH_POINT_INVALID
+};
 
 class npc_illidan_mannoroth_woe : public CreatureScript
 {
@@ -119,24 +114,52 @@ public:
     {
         npc_illidan_mannoroth_woeAI(Creature* creature) : ScriptedAI(creature)
         {
-            pInstance = me->GetInstanceScript();
+            highGuardsKilled = 0;
             preludeStep = sequelStep = preCombatStep = 0;
-            preQuotesTimer = sequelQuoteTimer = preCombatTimer = moveTimer = MAX_TIMER;
+            preQuotesTimer = sequelQuoteTimer = preCombatTimer = moveTimer = encounterStartTimer = MAX_TIMER;
+            canAttackMannoroth = false;
+            pathCompleted = true;
+
+            darkLanceTimer = MAX_TIMER;
+            tauntTimer = MAX_TIMER;
         }
 
-        InstanceScript * pInstance; // needed ?
+        pathWaypointsIds currentWP = PATH_POINT_INVALID;
+        bool pathCompleted;
+
         uint32 preQuotesTimer;
         uint32 sequelQuoteTimer;
         uint32 preCombatTimer;
         uint32 moveTimer;
+        uint32 encounterStartTimer;
 
         uint32 preludeStep;
         uint32 sequelStep;
         uint32 preCombatStep;
 
+        uint32 highGuardsKilled;
+
+        bool canAttackMannoroth;
+
+        // Combat timers
+        uint32 darkLanceTimer;
+        uint32 tauntTimer;
+
         void Reset() override
         {
 
+        }
+
+        void AttackStart(Unit* victim) override
+        {
+            if (victim->GetTypeId() == TYPEID_UNIT && victim->GetEntry() == MANNOROTH_ENTRY)
+                ScriptedAI::AttackStart(victim);
+        }
+
+        void EnterCombat(Unit * victim) override
+        {
+            if (victim->GetTypeId() == TYPEID_UNIT && victim->GetEntry() == MANNOROTH_ENTRY)
+                ScriptedAI::EnterCombat(victim);
         }
 
         void MovementInform(uint32 type, uint32 id) override
@@ -144,10 +167,25 @@ public:
             if (type != POINT_MOTION_TYPE)
                 return;
 
-            if (id == 0)
+            pathCompleted = false;
+
+            currentWP = (pathWaypointsIds)id;
+
+            if (id == PATH_POINT3_WP)
             {
+                currentWP = PATH_POINT_INVALID;
                 sequelStep = 0; // just for sure
                 sequelQuoteTimer = 5000;
+            }
+            else if (id == 2) // Arrived before varothen pos
+            {
+                encounterStartTimer = 4000;
+                me->CastSpell(me, SPELL_AURA_OF_IMMOLATION, false);
+            }
+            else if (id == 2) // Arrived before varothen pos
+            {
+                encounterStartTimer = 4000;
+                me->CastSpell(me, SPELL_AURA_OF_IMMOLATION, false);
             }
         }
 
@@ -162,16 +200,72 @@ public:
             }
             else if (action == ACTION_ILLIDAN_PRECOMBAT_QUOTES_START)
                 preCombatTimer = 2000;
+            else if (action == ACTION_ILLIDAN_HIGHGUARD_DIED)
+            {
+                if (++highGuardsKilled == 2)
+                {
+                    me->GetMotionMaster()->MovePoint(2, illidanVarothenPos, true, true);
+                    if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE, 250.0f, true))
+                        pTyrande->AI()->DoAction(ACTION_TYRANDE_MOVE_TO_VAROTHEN);
+                }
+            }
+            else if (action == ACTION_MANNOROTH_ENCOUNTER_FAILED)
+            {
+                me->DeleteThreatList();
+                me->RemoveAllAuras();
+                me->GetMotionMaster()->MoveTargetedHome();
+                ScriptedAI::EnterEvadeMode();
+            }
+            else if (action == ACTION_MANNOROTH_FIGHT_ENDED)
+            {
+                me->DeleteThreatList();
+                me->RemoveAllAuras();
+                me->GetMotionMaster()->Clear(false);
+                me->GetMotionMaster()->MovementExpired(false);
+
+                canAttackMannoroth = false;
+            }
         }
 
-        void ReceiveEmote(Player* pPlayer, uint32 emote) // TESTING PURPOSE EVENT
+        void EnterEvadeMode() override
         {
-            if (pPlayer->IsGameMaster())
-                preQuotesTimer = 5000;
+            me->DeleteThreatList();
+            me->RemoveAllAuras();
+            //me->GetMotionMaster()->MoveTargetedHome();
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void ReceiveEmote(Player* pPlayer, uint32 emote) // TESTING PURPOSE ONLY
+        {
+            if (!pPlayer->IsGameMaster())
+                return;
+            if (emote == TEXTEMOTE_DANCE)
+            {
+                me->AI()->DoAction(ACTION_ILLIDAN_PRELUDE_EVENT_CONTINUE);
+                return;
+            }
+            preQuotesTimer = 5000;
         }
 
         void UpdateAI(const uint32 diff) override
         {
+            if (pathCompleted == false && currentWP != PATH_POINT_INVALID)
+            {
+                pathCompleted = true;
+                if (currentWP == PATH_POINT1_WP)
+                {
+                    me->GetMotionMaster()->MovePoint(currentWP + 1, pathMiddlePos, false, false);
+                    if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE, 100.0f, true))
+                        pTyrande->GetMotionMaster()->MovePoint(currentWP + 1, pathMiddlePos, false, false);
+                }
+                else if (currentWP == PATH_POINT2_WP)
+                {
+                    me->GetMotionMaster()->MovePoint(currentWP + 1, illidanAbyssalPos, false, false);
+                    if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE, 100.0f, true))
+                        pTyrande->GetMotionMaster()->MovePoint(currentWP + 1, tyrandeAbyssalPos, false,false);
+                }
+            }
+
             if (preQuotesTimer <= diff)
             {
                 if (preludeStep < MAX_PRELUDE_QUOTES) // Should not happen
@@ -218,9 +312,9 @@ public:
 
             if (moveTimer <= diff)
             {
-                me->GetMotionMaster()->MovePoint(0, illidanAbyssalPos, false);
+                me->GetMotionMaster()->MovePoint(PATH_POINT1_WP, pathStartPos, false);
                 if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE,100.0f,true))
-                    pTyrande->GetMotionMaster()->MovePoint(0,tyrandeAbyssalPos, false);
+                    pTyrande->GetMotionMaster()->MovePoint(PATH_POINT1_WP, pathStartPos, false);
 
                 moveTimer = MAX_TIMER;
             }
@@ -254,35 +348,58 @@ public:
                 }
             }
             else preCombatTimer -= diff;
-        }
-    };
-};
 
-class npc_tyrande_mannoroth_woe : public CreatureScript
-{
-public:
-    npc_tyrande_mannoroth_woe() : CreatureScript("npc_tyrande_mannoroth_woe") { }
+            if (encounterStartTimer <= diff)
+            {
+                if (Creature * pMannoroth = me->FindNearestCreature(MANNOROTH_ENTRY, 250.0f, true))
+                {
+                    pMannoroth->SetReactState(REACT_AGGRESSIVE);
+                    pMannoroth->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    pMannoroth->SetInCombatWithZone();
+                    me->GetMotionMaster()->MoveChase(pMannoroth);
+                    pMannoroth->AddThreat(me, 900000.0f); // is this safe and correct ? check factions ...
+                    me->AddThreat(pMannoroth, 900000.0f); // dont attack varothen or somone else
+                }
+                if (Creature * pVarothen = me->FindNearestCreature(VAROTHEN_ENTRY, 250.0f, true))
+                {
+                    pVarothen->SetReactState(REACT_AGGRESSIVE);
+                    pVarothen->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    pVarothen->SetInCombatWithZone();
+                }
+                me->CastSpell(me, SPELL_DEMONIC_SIGHT_DODGE, true);
+                canAttackMannoroth = true; // Allow usage of combat abilities
+                darkLanceTimer = 2000;
+                tauntTimer = 6000;
+                encounterStartTimer = MAX_TIMER;
+            }
+            else encounterStartTimer -= diff;
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_tyrande_mannoroth_woeAI(creature);
-    }
+            // COMBAT ABILITIES TO MANNOROTH
+            if (canAttackMannoroth)
+            {
+                if (darkLanceTimer <= diff && !me->IsNonMeleeSpellCasted(false))
+                {
+                    if (Creature * pMannoroth = me->FindNearestCreature(MANNOROTH_ENTRY, 250.0f, true))
+                    {
+                        if (me->IsWithinMeleeRange(pMannoroth))
+                            me->CastSpell(pMannoroth, SPELL_DARKLANCE, false);
+                        else
+                            me->GetMotionMaster()->MoveChase(pMannoroth);
+                    }
+                    darkLanceTimer = urand(5000, 8000);
+                }
+                else darkLanceTimer -= diff;
 
-    struct npc_tyrande_mannoroth_woeAI : public ScriptedAI
-    {
-        npc_tyrande_mannoroth_woeAI(Creature* creature) : ScriptedAI(creature)
-        {
-            pInstance = me->GetInstanceScript();
-        }
+                if (tauntTimer <= diff)
+                {
+                    if (Creature * pMannoroth = me->FindNearestCreature(MANNOROTH_ENTRY, 250.0f, true))
+                        me->CastSpell(pMannoroth, SPELL_TAUNT_10_SECONDS, true);
+                    tauntTimer = 6000;
+                }
+                else tauntTimer -= diff;
 
-        InstanceScript * pInstance;
-
-        void Reset() override
-        {
-        }
-
-        void UpdateAI(const uint32 diff) override
-        {
+                DoMeleeAttackIfReady();
+            }
         }
     };
 };
@@ -302,6 +419,9 @@ public:
         npc_malfurion_mannoroth_woeAI(Creature* creature) : ScriptedAI(creature)
         {
             me->CastSpell(me, SPELL_NATURE_CHANNELING, false);
+
+            if (Creature * pNozdormu = me->FindNearestCreature(ENTRY_NOZDORMU_PRELUDE, 250.0f, true))
+                pNozdormu->CastSpell(pNozdormu, SPELL_TIME_SHIFT, true);
         }
     };
 };
@@ -323,6 +443,7 @@ public:
             pInstance = me->GetInstanceScript();
             shadowbatGUID = 0;
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_DEFENSIVE);
 
             if (Creature * pShadowbat = me->SummonCreature(ENTRY_SHADOWBAT_HIGHGUARD, 0, 0, 0))
             {
@@ -357,6 +478,13 @@ public:
             if (Creature * pShadowBat = ObjectAccessor::GetCreature(*me, shadowbatGUID))
                 pShadowBat->GetMotionMaster()->MoveTargetedHome();
         }
+
+        void JustDied(Unit*)
+        {
+            if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, 250.0f, true))
+                pIllidan->AI()->DoAction(ACTION_ILLIDAN_HIGHGUARD_DIED);
+        }
+
 
         void UpdateAI(const uint32 diff) override
         {
@@ -444,7 +572,7 @@ public:
                 return;
 
             // Lock to prevent recursion
-            // Because we call entercombat in CallDoomGuardsForHelp again ...
+            // Because we enter to combat in CallDoomGuardsForHelp again ...
             CAST_WOE_INSTANCE(pInstance)->demonPulseDone = true;
 
             CAST_WOE_INSTANCE(pInstance)->CallDoomGuardsForHelp(who);
@@ -459,6 +587,8 @@ public:
         }
     };
 };
+
+#define SPELL_DEMON_PORTAL_PULL_AURA 105531
 
 class npc_abyysal_elemental_woe : public CreatureScript
 {
@@ -475,31 +605,82 @@ public:
         npc_abyysal_elemental_woeAI(Creature* creature) : ScriptedAI(creature)
         {
             pInst = me->GetInstanceScript();
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            pInst = me->GetInstanceScript();
+            me->CastSpell(me, SPELL_ABSYSSAL_FLAMETHROWER, true);
+            suckedToWell = false;
         }
 
         uint32 abyssalFlamesTimer;
         InstanceScript * pInst;
+        bool suckedToWell;
 
         void Reset() override
         {
-            abyssalFlamesTimer = 3000;
-            me->CastSpell(me, SPELL_ABSYSSAL_FLAMETHROWER, true);
+            if (me->HasAura(SPELL_DEMON_PORTAL_PULL_AURA))
+                return;
+
+            abyssalFlamesTimer = 2000;
             ScriptedAI::Reset();
+        }
+
+        void JustReachedHome() override
+        {
+            if (me->HasAura(SPELL_DEMON_PORTAL_PULL_AURA))
+                return;
+
+            me->CastSpell(me, SPELL_ABSYSSAL_FLAMETHROWER, true);
+        }
+
+        void AttackStart(Unit* victim) override
+        {
+            if (me->HasAura(SPELL_DEMON_PORTAL_PULL_AURA))
+                return;
+
+            if (victim->GetTypeId() == TYPEID_UNIT && victim->GetOwnerGUID() == 0)
+                return;
+
+            ScriptedAI::AttackStart(victim);
+        }
+
+        void EnterCombat(Unit * victim) override
+        {
+            if (me->HasAura(SPELL_DEMON_PORTAL_PULL_AURA))
+                return;
+
+            if (victim->GetTypeId() == TYPEID_UNIT && victim->GetOwnerGUID() == 0)
+                return;
+
+            me->SetInCombatWithZone();
+            ScriptedAI::EnterCombat(victim);
         }
 
         void JustDied(Unit *) override
         {
             if (CAST_WOE_INSTANCE(pInst)->abyssalSlained == false)
             {
+                //Abyssal killed -> move to next pos + start precombat quotes
                 if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, 100.0f, true))
+                {
+                    pIllidan->GetMotionMaster()->MovePoint(1, illidanHighGuardPos, true, true);
                     pIllidan->AI()->DoAction(ACTION_ILLIDAN_PRECOMBAT_QUOTES_START);
+                }
+
+                if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE, 100.0f, true))
+                {
+                    pTyrande->GetMotionMaster()->MovePoint(1, tyrandeHighGuardPos, true, true);
+                }
 
                 CAST_WOE_INSTANCE(pInst)->abyssalSlained = true;
             }
+            me->ForcedDespawn(2000);
         }
 
         void UpdateAI(const uint32 diff) override
         {
+            if (me->HasAura(SPELL_DEMON_PORTAL_PULL_AURA))
+                return;
+
             if (!UpdateVictim())
                 return;
 
@@ -521,6 +702,5 @@ void AddSC_mannoroth_intro()
     new npc_doomgurad_annihilator_woe();
     new npc_highguard_elite_woe();
     new npc_illidan_mannoroth_woe();
-    new npc_tyrande_mannoroth_woe();
     new npc_abyysal_elemental_woe();
 }
