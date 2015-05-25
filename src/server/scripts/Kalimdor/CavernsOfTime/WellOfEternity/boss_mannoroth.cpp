@@ -541,7 +541,7 @@ public:
 
             if (portalCollapsed == true)
             {
-                if (Creature * pFocusTarget = ObjectAccessor::GetCreature(*me, m_focusGUID))
+                if (ObjectAccessor::GetCreature(*me, m_focusGUID))
                     me->SetUInt64Value(UNIT_FIELD_TARGET,m_focusGUID);
                 return;
             }
