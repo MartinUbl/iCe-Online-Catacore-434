@@ -33,7 +33,9 @@ void INST_WOE_SCRIPT::Initialize()
     queenGUID = 0;
     mannorothGUID = 0;
     varothenGUID = 0;
-    illidanPreludeEntry = 0;
+    illidanPreludeGUID = 0;
+    tyrandePreludeGUID = 0;
+    portalToTwistingNetherGUID = 0;
 
     legionTimer = 2000;
     waveCounter = WAVE_ONE;
@@ -122,7 +124,13 @@ void INST_WOE_SCRIPT::OnCreatureCreate(Creature* pCreature, bool add)
             illidanGUID = pCreature->GetGUID();
             break;
         case ENTRY_ILLIDAN_PRELUDE:
-            illidanPreludeEntry = pCreature->GetGUID();
+            illidanPreludeGUID = pCreature->GetGUID();
+            break;
+        case ENTRY_TYRANDE_PRELUDE:
+            tyrandePreludeGUID = pCreature->GetGUID();
+            break;
+        case DATA_PORTAL_TO_TWISTING_NETHER:
+            portalToTwistingNetherGUID = pCreature->GetGUID();
             break;
         case ENTRY_DOOMGUARD_ANNIHILATOR:
             doomguards.push_back(pCreature->GetGUID());
@@ -177,6 +185,7 @@ uint64 INST_WOE_SCRIPT::GetData64(uint32 type)
             return perotharnGUID;
         case DATA_QUEEN_AZSHARA:
             return queenGUID;
+        case VAROTHEN_ENTRY:
         case DATA_CAPTAIN_VAROTHEN:
             return varothenGUID;
         case DATA_MANNOROTH:
@@ -184,7 +193,11 @@ uint64 INST_WOE_SCRIPT::GetData64(uint32 type)
         case DATA_ILLIDAN:
             return illidanGUID;
         case ENTRY_ILLIDAN_PRELUDE:
-            return illidanPreludeEntry;
+            return illidanPreludeGUID;
+        case ENTRY_TYRANDE_PRELUDE:
+            return tyrandePreludeGUID;
+        case DATA_PORTAL_TO_TWISTING_NETHER:
+            return portalToTwistingNetherGUID;
     }
     return 0;
 }
@@ -390,6 +403,31 @@ void INST_WOE_SCRIPT::CallDoomGuardsForHelp(Unit * victim)
             victim->SetInCombatWith(doomGuard);
         }
     }
+}
+
+bool INST_WOE_SCRIPT::PlayersWipedOnMannoroth()
+{
+    Map * map = this->instance;
+
+    Map::PlayerList const& plrList = map->GetPlayers();
+    if (plrList.isEmpty())
+        return true;
+
+    uint32 playersCount = plrList.getSize();
+    uint32 invalidPlayersCount = 0;
+    Creature * pMannoroth = ObjectAccessor::GetObjectInMap(this->mannorothGUID, map, (Creature*)nullptr);
+
+    for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+    {
+        Player* pPlayer = itr->getSource();
+        if(pPlayer && pMannoroth)
+        {
+            if (pPlayer->isDead() || pMannoroth->GetExactDist2d(pPlayer) > 120.0f)
+                invalidPlayersCount++;
+        }
+    }
+
+    return invalidPlayersCount == playersCount;
 }
 
 uint32* INST_WOE_SCRIPT::GetCorrUiEncounter()

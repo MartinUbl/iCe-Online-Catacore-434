@@ -4475,14 +4475,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
 /*************************  END OF RAGNAROS FIRELANDS *****************************/
 
-/*************************  WELL_OF_ETERNITY  *****************************/
-
-        case 107900: // Demonic Warding 
-            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
-            break;
-
-/*************************  END OF WELL_OF_ETERNITY *****************************/
-
 /*************************         DRAGON SOUL        *****************************/
 
         case 104512: // Earthen Vortex ( unwanted summon effect)
@@ -4753,6 +4745,7 @@ void SpellMgr::LoadSpellCustomAttr()
 /********************------- END_TIME 5 MAN DUNGEON END -------********************/
 
 /********************-------- WELL OF ETERNITY START ---------********************/
+
         case 103004: // Shadowcloak
             spellInfo->EffectAmplitude[EFFECT_1] = 1000; // prenerfed
             break;
@@ -4775,12 +4768,32 @@ void SpellMgr::LoadSpellCustomAttr()
             //spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
             break;
         case 108759: // Evil Dragon Soul Beam (Deathwing)
+        case 104961: // Fel Drain
+        case 105041: // Nether tear
+        case 107900: // Demonic Warding
+        case 104818: // Varothen magic blade
+        case 104817: // Varothen magic blade triggered
+        {
+            if (i == 104818)
+                spellInfo->EffectTriggerSpell[EFFECT_0] = 0;
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
             break;
+        }
         case 103918: // Blessing of Elune
         case 103954: // Waters of Eternity
             spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_AREA_ALLY_SRC;
             break;
+        case 104678: // Debilitating Flay
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            break;
+        case 103888: // Fel Firestorm periodic
+            spellInfo->EffectAmplitude[EFFECT_0] = 150; // prenerfed ?
+            break;
+        case 103889: // Fel Firestorm summon
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_70_YARDS;
+            break;
+
 /********************-------- WELL OF ETERNITY END -----------********************/
 
         // Heart of the Crusader

@@ -31,6 +31,36 @@
 #define ESCAPE_Y -4903.62f
 #define ESCAPE_Z 194.35f
 
+// These three enmus taken from https://github.com/WoWSource/WoWSource434/blob/master/src/server/scripts/Kalimdor/CavernsOfTime/WellOfEternity/well_of_eternity.h
+// TODO: Make research and implement this
+
+enum GameObjectIds
+{
+    GO_COURTYARD_DOOR_1         = 210084,
+    GO_LARGE_FIREWALL_DOOR      = 210234,
+    GO_SMALL_FIREWALL_DOOR      = 210130,
+    GO_INVISIBLE_FIREWALL_DOOR  = 210097,
+};
+
+enum QuestIds
+{
+    QUEST_DOCUMENTING_THE_TIMEWAYS      = 30104,
+    QUEST_IN_UNENDING_NUMBERS           = 30099,
+    QUEST_THE_VAINGLORIOUS              = 30100,
+    QUEST_THE_PATH_TO_THE_DRAGON_SOUL   = 30101,
+};
+
+enum QuestSpells
+{
+    SPELL_ARCHIVED_DEMON_1      = 109265,
+    SPELL_ARCHIVED_DEMON_2      = 109266,
+    SPELL_ARCHIVED_HANDMAIDEN_1 = 109270,
+    SPELL_ARCHIVED_HANDMAIDEN_2 = 109271,
+    SPELL_ARCHIVED_VAROTHEN_1   = 109273,
+    SPELL_ARCHIVED_VAROTHEN_2   = 109274,
+};
+
+
 enum EncounterData
 {
    DATA_PEROTHARN,
@@ -65,7 +95,6 @@ enum TrashEntry
     NOZDORMU_ENTRY = 55624,
 
     FIREWALL_ENTRY = 250301, // not sure if correct
-    FIREWALL_INVIS_ENTRY = 210097,
 
     PORTAL_CONNECTOR_1_ENTRY = 55541,
     PORTAL_CONNECTOR_2_ENTRY = 55542,
@@ -99,11 +128,16 @@ enum mannorothEntries
     ENTRY_ILLIDAN_PRELUDE = 55532,
     ENTRY_MALFURION_PRELUDE = 55570,
     ENTRY_TYRANDE_PRELUDE = 55524,
+    ENTRY_NOZDORMU_PRELUDE = 55624, // TODO : same entry as in entrance ? :)
     // Badasses
     ENTRY_DOOMGUARD_ANNIHILATOR = 55519,
     ENTRY_ABYSSAL_DOOMBRINGER = 55510,
     ENTRY_HIGHGUARD_ELITE = 55426,
     ENTRY_SHADOWBAT_HIGHGUARD = 55453,
+
+    // Encounter mobs
+    ENTRY_DDREADLORD_DEBILITATOR = 55762,
+    ENTRY_DOOMGUARD_ANNIHILATOR_SUMMON = 55700
 };
 
 enum CrystalOrientations
@@ -175,6 +209,11 @@ enum Actions
     ACTION_ILLIDAN_PRELUDE_EVENT_START,
     ACTION_ILLIDAN_PRELUDE_EVENT_CONTINUE,
     ACTION_ILLIDAN_PRECOMBAT_QUOTES_START,
+    ACTION_ILLIDAN_HIGHGUARD_DIED,
+    ACTION_TYRANDE_MOVE_TO_VAROTHEN,
+    ACTION_MANNOROTH_ENCOUNTER_FAILED,
+    ACTION_MANNOROTH_FIGHT_ENDED,
+    ACTION_TYRANDE_PREPARE_WRATH_OF_ELUNE
 };
 
 enum SpecialActions
@@ -338,9 +377,18 @@ struct SimpleQuote
     const char * text;
 };
 
+typedef struct quote_event
+{
+    const uint32 nextEventTime;
+    const uint32 entry;
+    const char * yellQuote;
+    const uint32 soundID;
+}QUOTE_EVENTS;
+
 enum miscData
 {
     DATA_SET_WAVE_NUMBER,
+    DATA_PORTAL_TO_TWISTING_NETHER = 56087
 };
 
 enum drakeActions
@@ -364,14 +412,33 @@ struct CONNECTOR_INFO
     }
 };
 
+#define NIGH_ELF_ILLUSION_MALE 108465 
+#define NIGH_ELF_ILLUSION_FEMALE 108466
+
+// Path from forest to Mannoroth (shore path)
+const Position pathStartPos = {3173.0f, -5595.0f, 17.65f,5.08f};
+const Position pathMiddlePos = {3210.0f, -5678.0f, 18.02f,5.5f};
+
+//Before abbysal
+const Position illidanAbyssalPos = {3222.84f, -5680.7f, 18.7f,5.76f};
+const Position tyrandeAbyssalPos = {3219.0f, -5688.0f, 18.1f,5.8f};
+//Before highguards
+const Position illidanHighGuardPos = {3250.0f, -5695.0f, 18.28f,6.12f};
+const Position tyrandeHighGuardPos = {3249.0f, -5702.0f, 17.72f,6.12f};
+//Before Varothen
+const Position illidanVarothenPos = {3278.0f, -5705.0f, 16.35f,6.1f};
+const Position tyrandeVarothenPos = {3284.0f, -5693.0f, 15.37f,6.1f};
+// Tyrande combat position
+const Position tyrandeCombatPos = {3308.0f, -5695.0f, 15.5f,5.6f};
+
 class instance_well_of_eternity : public InstanceMapScript
 {
 public:
-    instance_well_of_eternity() : InstanceMapScript("instance_well_of_eternity", 939) { }
+    instance_well_of_eternity() : InstanceMapScript("instance_well_of_eternity", 939) {}
 
-    struct instance_well_of_eternity_InstanceMapScript : public InstanceScript
+    struct instance_well_of_eternity_InstanceMapScript : public InstanceScript, public MapScript
     {
-        instance_well_of_eternity_InstanceMapScript(Map *pMap) : InstanceScript(pMap) { Initialize(); }
+        instance_well_of_eternity_InstanceMapScript(Map *pMap) : InstanceScript(pMap), MapScript(939) { Initialize(); }
 
         private:
         uint32 legionTimer;
@@ -387,7 +454,10 @@ public:
         uint64 mannorothGUID;
         uint64 varothenGUID;
 
-        uint64 illidanPreludeEntry;
+        uint64 illidanPreludeGUID;
+        uint64 tyrandePreludeGUID;
+
+        uint64 portalToTwistingNetherGUID;
 
         uint32 deffendersKilled;
 
@@ -413,6 +483,15 @@ public:
         void OnGameObjectCreate(GameObject* go, bool add);
         virtual uint32* GetCorrUiEncounter();
 
+        // Only this works ?
+        void OnPlayerEnter(Player * p) override
+        {
+            if (p->getGender() == GENDER_MALE)
+                p->CastSpell(p, NIGH_ELF_ILLUSION_MALE, true);
+            else
+                p->CastSpell(p, NIGH_ELF_ILLUSION_FEMALE, true);
+        }
+
         public:
             //  Fuck it -> public
             uint32 crystalsRemaining;
@@ -435,7 +514,9 @@ public:
             bool IsPortalClosing(DemonDirection dir);
             Creature * GetGuardianByDirection(uint32 direction);
 
+            // Mannoroth stuff
             void CallDoomGuardsForHelp(Unit * victim);
+            bool PlayersWipedOnMannoroth();
     };
 
     InstanceScript* GetInstanceScript(InstanceMap* pMap) const

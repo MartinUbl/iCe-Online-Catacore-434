@@ -27682,6 +27682,7 @@ bool Player::CanSeeSpellClickOn(Creature const *c) const
     switch (c->GetEntry())
     {
         case 53696: // Flame Orb ( Firelands )
+        case 55837: // Varothen's magic blade
             return true;
         default:
             break;

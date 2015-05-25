@@ -83,6 +83,9 @@ static const SimpleQuote onDeathQuote = { 26113, "Noooo! How could this be?" };
 
 enum Spells
 {
+    SPELL_PUNISHING_FLAMES          = 107532,
+    SPELL_PUNISHING_FLAMES_DMG      = 107536, // 80k
+
     SPELL_CAMOUFLAGE = 105341,
     SPELL_REMOVE_CAMOUFLAGE = 105541,
 
@@ -106,7 +109,7 @@ enum Spells
     SPELL_ATTACK_ME_PEROTHARN = 105509, // Taunt spell
     SPELL_ABSORB_FEL_ENERGY = 105543, // triggering 105546 -> TARGET_UNIT_NEARBY_ENTRY !!!
     SPELL_ILLIADAN_MEDITATION = 105547, // stun + regenerate health
-    SPELL_REMOVE_MEDITATION = 105548, // don't work ?
+    SPELL_REMOVE_MEDITATION = 105548, // does not work ?
 };
 
 enum Phase
@@ -178,7 +181,7 @@ public:
             goList.clear();
             pInstance = creature->GetInstanceScript();
 
-            me->SummonGameObject(FIREWALL_INVIS_ENTRY, 3226.0f, -4981.0f, 194.2f, 3.86f, 0, 0, 0, 0, 0);
+            me->SummonGameObject(GO_INVISIBLE_FIREWALL_DOOR, 3226.0f, -4981.0f, 194.2f, 3.86f, 0, 0, 0, 0, 0);
             SummonIntroCreatures();
 
             introTimer = 30000;
@@ -326,6 +329,7 @@ public:
 
         void EnterCombat(Unit * /*who*/) override
         {
+            me->CastSpell(me, SPELL_PUNISHING_FLAMES, true);
             HandleFireWallCircle(true);
 
             DespawnNearbyCreaturesWithEntry(me, GUARDIAN_DEMON_ENTRY);
@@ -404,6 +408,23 @@ public:
                 {
                     pIllidan->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_DEFEATED_STAIRS_WP, afterPerotharnDeathWP[0],true,false);
                     pIllidan->AI()->DoAction(ACTION_AFTER_PEROTHARN_DEATH);
+                }
+            }
+
+            // TODO: Research what is this for
+            if (me->GetMap()->IsHeroic())
+            {
+                if (!me->GetMap()->GetPlayers().isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
+                    {
+                        if (!i->getSource())
+                            continue;
+
+                        i->getSource()->KilledMonsterCredit(58239,0);
+                        i->getSource()->KilledMonsterCredit(58240,0);
+                        i->getSource()->KilledMonsterCredit(58241,0);
+                    }
                 }
             }
         }
@@ -926,6 +947,48 @@ public:
     };
 };
 
+class spell_perotharn_punishing_flames_dmg : public SpellScriptLoader
+{
+public:
+    spell_perotharn_punishing_flames_dmg() : SpellScriptLoader("spell_perotharn_punishing_flames_dmg") { }
+
+    class spell_perotharn_punishing_flames_dmg_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_perotharn_punishing_flames_dmg_SpellScript);
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            if (!GetCaster())
+                return;
+
+            if (!unitList.empty())
+                unitList.remove_if(DistanceCheck());
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_perotharn_punishing_flames_dmg_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
+        }
+
+    private:
+        class DistanceCheck
+        {
+        public:
+        DistanceCheck() {}
+
+            bool operator()(WorldObject* obj)
+            {
+                return (!obj->ToUnit() || obj->GetDistance(MIDDLE_X,MIDDLE_X,MIDDLE_Z) < 80.0f);
+            }
+        };
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_perotharn_punishing_flames_dmg_SpellScript();
+    }
+};
+
 void AddSC_boss_perotharn()
 {
     new boss_perotharn(); // 55085
@@ -933,4 +996,6 @@ void AddSC_boss_perotharn()
     new npc_hunting_summoner_woe(); // 56248
     new npc_hunting_puffer_woe(); // 56182
     new npc_eye_of_perotharn_woe(); // 55868
+
+    new spell_perotharn_punishing_flames_dmg(); // 107536 
 }

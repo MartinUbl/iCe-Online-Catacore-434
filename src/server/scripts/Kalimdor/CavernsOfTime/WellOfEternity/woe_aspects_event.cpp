@@ -73,14 +73,6 @@ enum entries
     ENTRY_WELL_DOOMGUARD_DEVASTATOR = 57410
 };
 
-typedef struct quote_event
-{
-    const uint32 nextEventTime;
-    const uint32 entry;
-    const char * yellQuote;
-    const uint32 soundID;
-}QUOTE_EVENTS;
-
 #define MAX_QUOTES 14
 
 QUOTE_EVENTS quoteEvents [MAX_QUOTES] =
@@ -349,6 +341,7 @@ public:
                 if (quoteStep < 3) // Don't summon when cleansing well
                 {
                     float x,y,z,o;
+
                     me->SummonCreature(ENTRY_WELL_DOOMGUARD_DEVASTATOR, demonWellSummonPos1, TEMPSUMMON_TIMED_DESPAWN, 12000);
                     for (uint32 i = 0; i < 5; i++)
                     {

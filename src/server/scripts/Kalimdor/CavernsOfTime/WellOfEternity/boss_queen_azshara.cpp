@@ -304,6 +304,21 @@ public:
                     if (Player * pPlayer = SelectRandomPlayer(250.0f))
                         pPlayer->SummonGameObject(GO_ROYAL_CHEST, 3464.8f, -5244.4f, 230.0f, 4.55f, 0, 0, 0, 0, 0);
 
+                    // TODO: Again research this
+                    if (me->GetMap()->IsHeroic())
+                    {
+                        if (!me->GetMap()->GetPlayers().isEmpty())
+                        {
+                            for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
+                            {
+                                if (!i->getSource())
+                                    continue;
+
+                                i->getSource()->KilledMonsterCredit(me->GetEntry(),0);
+                            }
+                        }
+                    }
+
                     // Summon friendly maidens
                     SummonMaidens();
                     // Cancel combat

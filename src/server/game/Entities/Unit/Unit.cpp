@@ -10230,7 +10230,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         case 103918: // Blessing of Elune
-            if (pVictim && pVictim->GetEntry() == 55519)
+            if (pVictim && (pVictim->GetEntry() == 55519 || pVictim->GetEntry() == 55700))
                 break;
             else return false;
         default:

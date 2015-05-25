@@ -528,7 +528,7 @@ public:
             {
                 me->SummonGameObject(FIREWALL_ENTRY, 3193.9f, -4931.0f, 189.6f, 1.1f, 0, 0, 0, 0, 0);
 
-                if (GameObject * pGo = me->FindNearestGameObject(FIREWALL_INVIS_ENTRY, 200.0f))
+                if (GameObject * pGo = me->FindNearestGameObject(GO_INVISIBLE_FIREWALL_DOOR, 200.0f))
                     pGo->Delete();
             }
 
