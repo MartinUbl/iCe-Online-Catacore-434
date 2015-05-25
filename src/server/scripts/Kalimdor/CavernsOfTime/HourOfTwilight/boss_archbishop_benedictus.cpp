@@ -385,7 +385,7 @@ public:
             }
             else Light_Or_Twilight_Timer -= diff;
 
-            // Forse Twilight bolts to target 3 different players, so they don`t jump on the same player
+            // Force Twilight bolts to target 3 different players, so they don`t jump on the same player
             if (Phase == 1)
             {
                 if (Jump_Timer <= diff)
