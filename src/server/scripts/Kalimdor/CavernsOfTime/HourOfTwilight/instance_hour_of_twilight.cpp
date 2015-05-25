@@ -669,7 +669,8 @@ public:
                                 arcurion->CastSpell(arcurion, ARCURION_SPAWN_VISUAL, false);
                             }
 
-                            instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 7
+                            if (instance->GetData(DATA_MOVEMENT_PROGRESS) == 6) // Avoid change counter when Thrall is running again after server crash
+                                instance->SetData(DATA_MOVEMENT_PROGRESS, 1); // 7
                             me->MonsterSay("Show yourself!", LANG_UNIVERSAL, me->GetGUID(), 150.0f);
                             me->SendPlaySound(25877, true);
                             Move_Point++;
