@@ -183,6 +183,7 @@ public:
                     instance->SetData(TYPE_BOSS_ARCHBISHOP_BENEDICTUS, NOT_STARTED);
             }
 
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveAura(103765); // Transform aura
             Random_Text = 0;
@@ -202,7 +203,11 @@ public:
 
             Creature * thrall = me->FindNearestCreature(THRALL, 100.0f, true);
             if (thrall)
+            {
                 thrall->RemoveAura(ENGULFING_TWILIGHT);
+                thrall->InterruptNonMeleeSpells(false);
+                thrall->CombatStop();
+            }
 
             // Remove Twilight epiphany from players
             Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
@@ -385,16 +390,16 @@ public:
             }
             else Light_Or_Twilight_Timer -= diff;
 
-            // Force Twilight bolts to target 3 different players, so they don`t jump on the same player
-            if (Phase == 1)
+            if (Jump_Timer <= diff)
             {
-                if (Jump_Timer <= diff)
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    me->GetMotionMaster()->MoveChase(me->GetVictim());
-                    me->SendMovementFlagUpdate();
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
+                me->SendMovementFlagUpdate();
 
+                // Force Twilight bolts to target 3 different players, so they don`t jump on the same player
+                if (Phase == 1)
+                {
                     uint32 target_pl = 1; // Target 3 players - probably better exclude tank
 
                     std::list<Creature*> corrupting_twilight;
@@ -414,10 +419,10 @@ public:
                                 target_pl++;
                             }
                         }
-                    Jump_Timer = 60000;
                 }
-                else Jump_Timer -= diff;
+                Jump_Timer = 60000;
             }
+            else Jump_Timer -= diff;
 
             // Smite / Twilight blast timer
             if (Spell_Timer <= diff)
