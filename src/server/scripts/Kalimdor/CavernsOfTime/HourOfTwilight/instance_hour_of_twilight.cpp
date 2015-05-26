@@ -291,7 +291,7 @@ public:
                     }
                 }
 
-                if (asira_intro > 1)
+                if (asira_intro >= 3)
                 {
                     Creature * asira = this->instance->GetCreature(this->GetData64(TYPE_BOSS_ASIRA_DAWNSLAYER));
                     if (asira)
@@ -1092,10 +1092,16 @@ public:
                                 Move_Timer = 1000;
                             break;
                         case 16:
+                            if (instance->GetData(DATA_ASIRA_INTRO == 0) || instance->GetData(DATA_ASIRA_INTRO == 2))
+                            {
+                                Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 300.0f, false);
+                                if (life_warden)
+                                    life_warden->Respawn(true);
+                                instance->SetData(DATA_ASIRA_INTRO, 1); // 1
+                            }
                             me->GetMotionMaster()->MovePoint(0, 4284.01f, 568.60f, -6.853f);
                             me->MonsterSay("Up there, above us!", LANG_UNIVERSAL, 0);
                             me->SendPlaySound(25888, true);
-                            instance->SetData(DATA_ASIRA_INTRO, 1); // 1
                             Move_Timer = 20000;
                             Move_Point++;
                             break;
@@ -1157,12 +1163,12 @@ public:
                             {
                                 life_warden->SetVisible(false);
                                 life_warden->DespawnOrUnsummon();
-                                me->CastSpell(me, RED_DRAKE, true);
-                                me->MonsterSay("The rest of the drakes should be here shortly. I'll fly on ahead, catch up when you can.", LANG_UNIVERSAL, 0);
-                                me->SendPlaySound(25892, true);
-                                Move_Timer = 1000;
-                                Move_Point++;
                             }
+                            me->CastSpell(me, RED_DRAKE, true);
+                            me->MonsterSay("The rest of the drakes should be here shortly. I'll fly on ahead, catch up when you can.", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(25892, true);
+                            Move_Timer = 1000;
+                            Move_Point++;
                             break;
                         }
                         case 24: // Fly Away

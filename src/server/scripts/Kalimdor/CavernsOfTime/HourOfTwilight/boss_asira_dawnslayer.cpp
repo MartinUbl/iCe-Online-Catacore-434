@@ -449,6 +449,7 @@ public:
                         asira->SetVisible(true);
                         asira->setFaction(16);
                         Disappear = false;
+                        instance->SetData(DATA_ASIRA_INTRO, 3); // 3
                     }
                 }
                 else Disappear_Timer -= diff;
@@ -527,7 +528,7 @@ public:
                         Move_Point++;
                         break;
                     case 6:
-                        instance->SetData(DATA_ASIRA_INTRO, 2);
+                        instance->SetData(DATA_ASIRA_INTRO, 2); // 2
                         me->Kill(me);
                         Move_Point++;
                         break;
