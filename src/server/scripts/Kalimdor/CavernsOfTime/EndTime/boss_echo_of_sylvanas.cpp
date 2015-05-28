@@ -152,6 +152,7 @@ public:
             Ghoul_Died = false;
             Achievement_Gain = false;
             Brittle_Despawn = false;
+            KillGhouls();
 
             // Event Timers
             Blink_Timer = 34500;
@@ -207,6 +208,7 @@ public:
 
             me->MonsterYell("This... isn't how it's supposed to... end.", LANG_UNIVERSAL, 0);
             me->SendPlaySound(25967, true);
+            KillGhouls();
 
             if (Achievement_Gain == true)
             {
@@ -223,6 +225,25 @@ public:
                 if (Player * pPlayer = i->getSource())
                     pPlayer->SummonGameObject(209438, 3821.3f, 935.617f, 55.8123f, 5.50447f, 0.0f, 0.0f, 0.379594f, -0.925153f, 86400);
                     return;
+        }
+
+        void KillGhouls()
+        {
+            std::list<Creature*> trigger_mist;
+            me->GetCreatureListWithEntryInGrid(trigger_mist, TRIGGER_WITH_MIST, 150.0f);
+            for (std::list<Creature*>::iterator itr = trigger_mist.begin(); itr != trigger_mist.end(); ++itr)
+            {
+                if (*itr)
+                    (*itr)->Kill((*itr));
+            }
+
+            std::list<Creature*> risen_ghouls;
+            me->GetCreatureListWithEntryInGrid(risen_ghouls, RISEN_GHOUL, 150.0f);
+            for (std::list<Creature*>::iterator itr = risen_ghouls.begin(); itr != risen_ghouls.end(); ++itr)
+            {
+                if (*itr)
+                    (*itr)->Kill((*itr));
+            }
         }
 
         // Summon triggers with Mist
