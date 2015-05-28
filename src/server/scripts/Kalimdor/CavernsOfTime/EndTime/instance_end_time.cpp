@@ -1428,6 +1428,14 @@ public:
                         pInstance->SetData(DATA_TRASH_TYRANDE, 1);
         }
 
+        void DamageDealt(Unit* victim, uint32& /*damage*/, DamageEffectType /*typeOfDamage*/)
+        {
+            if (victim->HasAura(102491)) // Tyrande Achievement Tracker
+            {
+                victim->RemoveAura(102491);
+            }
+        }
+
         void UpdateAI(const uint32 diff) 
         {
             if (!UpdateVictim())

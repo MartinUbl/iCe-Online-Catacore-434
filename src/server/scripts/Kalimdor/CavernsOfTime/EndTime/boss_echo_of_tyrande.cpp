@@ -62,6 +62,8 @@ enum Spells
 
     PIERCING_GAZE_OF_ELUNE      = 102182, // Aura
     PIERCING_GAZE_EFFECT        = 102183, // Effect
+
+    TYRANDE_ACHIEVEMENT_TRACKER = 102491, // Tyrande achievement tracker
 };
 
 enum PoolsOfMoonlight
@@ -700,6 +702,7 @@ public:
         float size;
         bool Say;
         bool Say_Next;
+        bool Achievement;
 
         void Reset()
         {
@@ -712,6 +715,7 @@ public:
             Check_Size = 2000;
             Say = false;
             Say_Next = false;
+            Achievement = false;
         }
 
         void EnterCombat(Unit * /*who*/) { }
@@ -829,6 +833,28 @@ public:
                     break;
                 case 119507:
                     {
+                        Map::PlayerList const &playerList = me->GetMap()->GetPlayers();
+                        if (!playerList.isEmpty())
+                            for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                                if (Player* pPlayer = i->getSource())
+                                {
+                                    if (pPlayer->HasHealingSpec() && pPlayer->HasAura(TYRANDE_ACHIEVEMENT_TRACKER))
+                                    {
+                                        pPlayer->RemoveAura(TYRANDE_ACHIEVEMENT_TRACKER);
+                                        Achievement = true;
+                                    }
+                                }
+
+                        if (Achievement == true)
+                        {
+                            if (!playerList.isEmpty())
+                                for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                                    if (Player* pPlayer = i->getSource())
+                                    {
+                                        pPlayer->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(5995), true); // Moon Guard Achievement
+                                    }
+                        }
+
                         me->MonsterTextEmote("A pool of dark moonlight appears nearby!", 0, true);
                         if (tyrande)
                         {
@@ -862,6 +888,11 @@ public:
                             for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
                                 if (Player* pPlayer = i->getSource())
                                 {
+                                    if (pPlayer->HasHealingSpec())
+                                    {
+                                        pPlayer->CastSpell(pPlayer, TYRANDE_ACHIEVEMENT_TRACKER, true);
+                                    }
+
                                     distance = me->GetExactDist2d(pPlayer);
                                     if (distance<30)
                                         count = count+1;

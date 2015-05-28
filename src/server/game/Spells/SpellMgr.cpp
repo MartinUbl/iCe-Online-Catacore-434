@@ -4769,6 +4769,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
             break;
+        case 102491: // Tyrande achievement tracker
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            break;
         // Echo of Jaina
         case 101337: // Frost Blades
             spellInfo->EffectRadiusIndex[0] = 7; // 3 yd
