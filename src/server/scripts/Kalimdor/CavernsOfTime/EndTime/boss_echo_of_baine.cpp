@@ -279,6 +279,13 @@ public:
                 }
                 else SetEquipmentSlots(true);
 
+                // Evade when too far away from spawn position so players can`t go with him on "beach"
+                if (me->GetDistance(me->GetHomePosition()) >= 90)
+                {
+                    me->AI()->EnterEvadeMode();
+                    return;
+                }
+
             } else Molten_Axe_Check -= diff;
 
             DoMeleeAttackIfReady();
