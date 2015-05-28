@@ -200,7 +200,6 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_ASIRA_DAWNSLAYER, DONE);
-                instance->SetData(DATA_DRAKES, 1);
             }
 
             // Remove Mark of Silence

@@ -4697,6 +4697,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             break;
+        case 104230: // Twilight Breath
+            spellInfo->rangeIndex = 6; // Vision range 100yd
+            spellInfo->EffectTriggerSpell[0] = 0;
+            count++;
+            break;
         // Arcibishop Benedictus
         case 102629: // Holly Wall
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;

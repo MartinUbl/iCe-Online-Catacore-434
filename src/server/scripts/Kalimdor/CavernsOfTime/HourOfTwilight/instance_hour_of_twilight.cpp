@@ -1092,7 +1092,7 @@ public:
                                 Move_Timer = 1000;
                             break;
                         case 16:
-                            if (instance->GetData(DATA_ASIRA_INTRO == 0) || instance->GetData(DATA_ASIRA_INTRO == 2))
+                            if (instance->GetData(DATA_ASIRA_INTRO) == 0 || instance->GetData(DATA_ASIRA_INTRO) == 2)
                             {
                                 Creature * life_warden = me->FindNearestCreature(LIFE_WARDEN, 300.0f, false);
                                 if (life_warden)
@@ -2403,6 +2403,320 @@ public:
     };
 };
 
+///////////////////////////////////////
+//////////// Drakes Event /////////////
+///////////////////////////////////////
+
+static const Position DrakePoint[40] =
+{
+    // 1st Drake
+    {4287.72f, 501.17f,  9.24f},
+    {4314.09f, 528.44f,  0.10f},
+    {4308.13f, 550.56f, -4.07f}, // Point before landing
+    {4294.28f, 555.91f, -7.97f}, // Land Point
+    {4196.73f, 546.82f, 64.49f},
+    {4048.49f, 500.73f, 83.64f},
+    {3929.77f, 318.68f, 55.63f},
+    // 2nd Drake
+    {4290.52f, 502.15f, 14.14f},
+    {4309.92f, 537.00f,  1.36f},
+    {4308.31f, 558.77f, -4.65f}, // Point before landing
+    {4296.77f, 562.69f, -7.66f}, // Land Point
+    {4195.51f, 555.06f, 70.30f},
+    {4040.02f, 510.73f, 95.19f},
+    {3945.68f, 314.75f, 55.63f},
+    // 3rd Drake
+    {4286.70f, 503.97f, 10.02f},
+    {4322.38f, 534.14f, -3.02f},
+    {4310.94f, 566.24f, -4.14f}, // Point before landing
+    {4299.22f, 570.16f, -7.11f}, // Land Point
+    {4194.70f, 560.60f, 64.49f},
+    {4035.52f, 515.14f, 83.64f},
+    {3928.76f, 319.15f, 49.82f},
+    // 4th Drake
+    {4298.37f, 512.10f, 15.84f},
+    {4314.56f, 542.10f,  6.09f},
+    {4315.82f, 573.50f, -3.03f}, // Point before landing
+    {4300.74f, 576.98f, -6.77f}, // Land Point
+    {4193.51f, 568.63f, 70.30f},
+    {4028.56f, 521.94f, 95.19f},
+    {3921.31f, 322.56f, 49.82f},
+    // 5th Drake
+    {4295.91f, 492.10f, 17.80f},
+    {4329.42f, 536.24f,  5.95f},
+    {4319.26f, 580.12f, -3.24f}, // Point before landing
+    {4301.56f, 584.29f, -6.68f}, // Land Point
+    {4192.92f, 576.66f, 64.49f},
+    {4020.46f, 529.88f, 83.64f},
+    {3941.48f, 313.30f, 49.82f},
+    // Finish
+    {3928.34f, 242.78f, 49.17f},
+};
+
+// Life Wardens - 119511, 119517, 119518, 119519, 119520
+class npc_life_warden_event_drake : public CreatureScript
+{
+public:
+    npc_life_warden_event_drake() : CreatureScript("npc_life_warden_event_drake") { }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {
+        pCreature->AI()->DoAction();
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_life_warden_event_drake_AI(pCreature);
+    }
+
+    struct npc_life_warden_event_drake_AI : public ScriptedAI
+    {
+        npc_life_warden_event_drake_AI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        uint32 Move_Timer;
+        uint32 Move_Point;
+        uint32 Action;
+        uint32 Check_Timer;
+        uint64 Guid;
+        bool CanDie;
+
+        void Reset()
+        {
+            me->SetVisible(false);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlying(true);
+            Action = 0;
+            Move_Timer = 1000;
+            Check_Timer = 1000;
+            CanDie = false;
+        }
+
+        void SpellHit(Unit* caster, const SpellEntry *spell)
+        {
+            if (spell->Id == 104230)
+            {
+                Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+                    if (Player* player = i->getSource())
+                    {
+                        if (caster->GetDistance(player) < 55.0 && !player->HasAura(66131))
+                        {
+                            player->CastSpell(player, 66131, true); // Cast Parachute
+                        }
+                    }
+                me->Kill(me);
+            }
+        }
+
+        void DoAction(const int32 /*param*/)
+        {
+            Action = 5;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (instance)
+            {
+                if (instance->GetData(DATA_DRAKES) == 1)
+                {
+                    if (Move_Timer <= diff)
+                    {
+                        Move_Timer = 1000;
+
+                        switch (Action)
+                        {
+                        case 0:
+                            {
+                                switch (me->GetEntry())
+                                {
+                                case 119511:
+                                    Move_Point = 0;
+                                    Move_Timer = 4800;
+                                    break;
+                                case 119517:
+                                    Move_Point = 7;
+                                    Move_Timer = 4800;
+                                    break;
+                                case 119518:
+                                    Move_Point = 14;
+                                    Move_Timer = 4800;
+                                    break;
+                                case 119519:
+                                    Move_Point = 21;
+                                    Move_Timer = 5000;
+                                    break;
+                                case 119520:
+                                    Move_Point = 28;
+                                    Move_Timer = 5000;
+                                    break;
+                                default:
+                                    break;
+                                }
+                                me->SetVisible(true);
+                                break;
+                            }
+                            break;
+                        case 1:
+                            {
+                                switch (me->GetEntry())
+                                {
+                                case 119511:
+                                    Move_Timer = 2700;
+                                    break;
+                                case 119517:
+                                    Move_Timer = 2800;
+                                    break;
+                                case 119518:
+                                    Move_Timer = 3000;
+                                    break;
+                                case 119519:
+                                case 119520:
+                                    Move_Timer = 3500;
+                                    break;
+                                default:
+                                    break;
+                                }
+                            }
+                            break;
+                        case 2:
+                            {
+                                switch (me->GetEntry())
+                                {
+                                case 119511:
+                                    Move_Timer = 1500;
+                                    break;
+                                case 119517:
+                                    Move_Timer = 1800;
+                                    break;
+                                case 119518:
+                                case 119519:
+                                    Move_Timer = 2000;
+                                    break;
+                                case 119520:
+                                    Move_Timer = 3000;
+                                    break;
+                                default:
+                                    break;
+                                }
+                            }
+                            break;
+                        case 3:
+                            Move_Timer = 1000;
+                            break;
+                        case 4:
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            break;
+                        case 5:
+                            {
+                                me->SetSpeed(MOVE_FLIGHT, 4.0f, true);
+
+                                switch (me->GetEntry())
+                                {
+                                case 119511:
+                                    Move_Timer = 4200;
+                                    break;
+                                case 119517:
+                                case 119518:
+                                    Move_Timer = 4300;
+                                    break;
+                                case 119519:
+                                case 119520:
+                                    Move_Timer = 4500;
+                                    break;
+                                default:
+                                    break;
+                                }
+                            }
+                            break;
+                        case 6:
+                            {
+                                switch (me->GetEntry())
+                                {
+                                case 119511:
+                                    Move_Timer = 5000;
+                                    break;
+                                case 119517:
+                                    Move_Timer = 5300;
+                                    break;
+                                case 119518:
+                                    Move_Timer = 5600;
+                                    break;
+                                case 119519:
+                                    Move_Timer = 6000;
+                                    break;
+                                case 119520:
+                                    Move_Timer = 5000;
+                                    break;
+                                default:
+                                    break;
+                                }
+                            }
+                            break;
+                        case 7:
+                            {
+                                switch (me->GetEntry())
+                                {
+                                case 119511:
+                                case 119517:
+                                case 119518:
+                                    Move_Timer = 7500;
+                                    break;
+                                case 119519:
+                                    Move_Timer = 8000;
+                                    break;
+                                case 119520:
+                                    Move_Timer = 8300;
+                                    break;
+                                default:
+                                    break;
+                                }
+                            }
+                            break;
+                        case 8:
+                            Move_Timer = 3000;
+                            Check_Timer = 500;
+                            CanDie = true;
+                            Move_Point = 35;
+                            break;
+                        default:
+                            break;
+                        }
+
+                        if (Action != 4 && Action < 9)
+                        {
+                            me->GetMotionMaster()->MovePoint(0, DrakePoint[Move_Point], true);
+                            Move_Point++;
+                            Action++;
+                        }
+                    }
+                    else Move_Timer -= diff;
+
+                    if (CanDie)
+                    {
+                        if (Check_Timer <= diff)
+                        {
+                            Creature * twilight_drake = me->FindNearestCreature(55636, 80.0f, true);
+                            if (twilight_drake)
+                            {
+                                twilight_drake->CastSpell(me, 104230, false); // Cast Twilight Breath
+                                CanDie = false;
+                            }
+                            Check_Timer = 500;
+                        }
+                        else Check_Timer -= diff;
+                    }
+                }
+            }
+        }
+
+    };
+};
+
 ///////////////////////////
 /// Time-transit Device ///
 ///////////////////////////
@@ -2481,6 +2795,7 @@ void AddSC_instance_hour_of_twilight()
     new npc_twilight_thug();
     new npc_twilight_ranger();
     new npc_rising_flame_totem();
+    new npc_life_warden_event_drake();
 
     new npc_shadow_borer();
     new npc_faceless_brute();
