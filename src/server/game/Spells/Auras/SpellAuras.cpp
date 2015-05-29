@@ -2038,6 +2038,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             if (target && aurApp->GetBase() && aurApp->GetBase()->GetCaster())
                                 aurApp->GetBase()->GetCaster()->CastSpell(target, 27285, true);
                         }
+                        break;
+                    case 47241: // Metamorphosis
+                        caster->RemoveAura(50589); // Remove Immolation aura
+                        break;
                     default:
                         break;
                 }

@@ -909,6 +909,11 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
             if (spellId == 46968 || spellId == 99610)
                 return false;
             break;
+        case SPELLFAMILY_WARLOCK:
+            // Metamorphosis: Immolation Aura
+            if (spellId == 50589)
+                return true;
+            break;
         case SPELLFAMILY_PRIEST:
             switch (spellId)
             {
