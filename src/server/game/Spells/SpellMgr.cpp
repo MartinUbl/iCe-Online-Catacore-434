@@ -4181,6 +4181,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
             count++;
             break;
+        case 3716: // Torment (Basic Attack - Voidwalker pet)
+            spellInfo->SchoolMask = 32; // Shadow instead of 33 (Normal and Shadow)
+            break;
         case 2643: // Multi-Shot no-target Effect 0 fix.
             spellInfo->EffectImplicitTargetA[0] = TARGET_DST_TARGET_ENEMY;
             count++;
