@@ -180,6 +180,7 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_ECHO_OF_JAINA, DONE);
+                instance->SetData(DATA_ECHO_KILLED, 1);
             }
 
             me->MonsterYell("I understand, now. Farewell, and good luck.", LANG_UNIVERSAL, 0);

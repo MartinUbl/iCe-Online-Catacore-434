@@ -181,6 +181,7 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_ECHO_OF_TYRANDE, DONE);
+                instance->SetData(DATA_ECHO_KILLED, 1);
             }
 
             me->MonsterSay("I can...see the light of the moon...so clearly now. It is...beautiful...", LANG_UNIVERSAL, me->GetGUID(), 150.0f);

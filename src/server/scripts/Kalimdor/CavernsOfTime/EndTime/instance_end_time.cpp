@@ -42,6 +42,7 @@ public:
         uint32 trash_murozond;
         uint32 trash_baine;
         uint32 trash_tyrande;
+        uint32 echo_killed;
 
         uint64 echo_of_sylvanasGuid;
         uint64 echo_of_jainaGuid;
@@ -69,6 +70,7 @@ public:
             echo_of_baineGuid = 0;
             echo_of_tyrandeGuid = 0;
             murozondGuid = 0;
+            echo_killed = 0;
 
             pool_of_moonlight_1_guid = 0;
             pool_of_moonlight_2_guid = 0;
@@ -102,6 +104,7 @@ public:
             saveStream << " " << trash_murozond;
             saveStream << " " << trash_baine;
             saveStream << " " << trash_tyrande;
+            saveStream << " " << echo_killed;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -125,6 +128,7 @@ public:
             loadStream >> trash_murozond;
             loadStream >> trash_baine;
             loadStream >> trash_tyrande;
+            loadStream >> echo_killed;
 
             for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
@@ -400,6 +404,9 @@ public:
             if (DataId == DATA_TRASH_TYRANDE)
                 return trash_tyrande;
 
+            if (DataId == DATA_ECHO_KILLED)
+                return echo_killed;
+
             return 0;
         }
 
@@ -430,6 +437,12 @@ public:
             if (type == DATA_TRASH_TYRANDE)
             {
                 trash_tyrande += data;
+                SaveToDB();
+            }
+
+            if (type == DATA_ECHO_KILLED)
+            {
+                echo_killed += data;
                 SaveToDB();
             }
 
@@ -478,17 +491,6 @@ public:
 #define BAINE              "Teleport to Obsidian Dragonshrine"   // Baine
 #define MUROZOND           "Teleport to Bronze Dragonshrine"     // Murozond
 
-// Quests
-enum Quests
-{
-    SYLVANAS_AND_JAINA         = 158700,
-    BAINE_AND_TYRANDE          = 158701,
-    SYLVANAS_AND_BAINE         = 158702,
-    JAINA_AND_TYRANDE          = 158703,
-    SYLVANAS_AND_TYRANDE       = 158704,
-    JAINA_AND_BAINE            = 158705,
-};
-
 // Spells
 enum Teleport_End_Time
 {
@@ -517,56 +519,48 @@ public:
 
     bool OnGossipHello(Player* pPlayer, GameObject* pGo)
     {
-        // Sylvanas and Jaina
-        if (pPlayer->GetQuestStatus(SYLVANAS_AND_JAINA) == QUEST_STATUS_INCOMPLETE)
+        switch (pGo->GetEntry())
         {
+        case 209438: // Sylvanas Timer transit device spawned after her death
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ENTRANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            break;
+        case 209439: // Sylvanas and Jaina
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ENTRANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, SYLVANAS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, JAINA, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-        }
-        // Baine and Tyrande
-        if (pPlayer->GetQuestStatus(BAINE_AND_TYRANDE) == QUEST_STATUS_INCOMPLETE)
-        {
+            break;
+        case 209440: // Tyrande and Baine
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ENTRANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, TYRANDE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, BAINE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-        }
-        // Sylvanas and Baine
-        if (pPlayer->GetQuestStatus(SYLVANAS_AND_BAINE) == QUEST_STATUS_INCOMPLETE)
-        {
+            break;
+        case 209441: // Sylvanas and Baine
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ENTRANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, SYLVANAS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, BAINE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-        }
-        // Jaina and Tyrande
-        if (pPlayer->GetQuestStatus(JAINA_AND_TYRANDE) == QUEST_STATUS_INCOMPLETE)
-        {
+            break;
+        case 209442: // Jaina and Tyrande
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ENTRANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, JAINA, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, TYRANDE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-        }
-        // Sylvanas and Tyrande
-        if (pPlayer->GetQuestStatus(SYLVANAS_AND_TYRANDE) == QUEST_STATUS_INCOMPLETE)
-        {
+            break;
+        case 209998: // Sylvanas and Tyrande
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ENTRANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, SYLVANAS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, TYRANDE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-        }
-        // Jaina and Baine
-        if (pPlayer->GetQuestStatus(JAINA_AND_BAINE) == QUEST_STATUS_INCOMPLETE)
-        {
+            break;
+        case 210000: // Jaina and Baine
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ENTRANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, JAINA, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, BAINE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+            break;
+        default:
+            break;
         }
-        // Enable port to Murozond if Q for Echoes complete (resets every day)
-        if ((pPlayer->GetQuestStatus(SYLVANAS_AND_JAINA) == QUEST_STATUS_COMPLETE) || (pPlayer->GetQuestStatus(BAINE_AND_TYRANDE) == QUEST_STATUS_COMPLETE)
-            || (pPlayer->GetQuestStatus(SYLVANAS_AND_BAINE) == QUEST_STATUS_COMPLETE) || (pPlayer->GetQuestStatus(JAINA_AND_TYRANDE) == QUEST_STATUS_COMPLETE)
-            || (pPlayer->GetQuestStatus(SYLVANAS_AND_TYRANDE) == QUEST_STATUS_COMPLETE) || (pPlayer->GetQuestStatus(JAINA_AND_BAINE) == QUEST_STATUS_COMPLETE))
-        {
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ENTRANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, MUROZOND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
-        }
+
+        if (InstanceScript * instance = pGo->GetInstanceScript())
+            if (instance->GetData(DATA_ECHO_KILLED) >= 2)
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, MUROZOND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
 
         pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pGo->GetGUID());
         return true;

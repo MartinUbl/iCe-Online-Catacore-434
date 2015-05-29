@@ -38,6 +38,7 @@ enum AdditionalEvents
     DATA_TRASH_MUROZOND    = 11,
     DATA_TRASH_BAINE       = 12,
     DATA_TRASH_TYRANDE     = 13,
+    DATA_ECHO_KILLED       = 14,
 
     TYPE_POOL_OF_MOONLIGHT_1  = 14,
     TYPE_POOL_OF_MOONLIGHT_2  = 15,

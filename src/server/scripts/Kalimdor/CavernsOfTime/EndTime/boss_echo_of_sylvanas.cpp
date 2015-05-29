@@ -204,6 +204,7 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_ECHO_OF_SYLVANAS, DONE);
+                instance->SetData(DATA_ECHO_KILLED, 1);
             }
 
             me->MonsterYell("This... isn't how it's supposed to... end.", LANG_UNIVERSAL, 0);

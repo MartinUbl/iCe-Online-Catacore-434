@@ -182,6 +182,7 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_ECHO_OF_BAINE, DONE);
+                instance->SetData(DATA_ECHO_KILLED, 1);
             }
 
             me->MonsterYell("Where... is this place? What... have I done? Forgive me, my father...", LANG_UNIVERSAL, 0);
