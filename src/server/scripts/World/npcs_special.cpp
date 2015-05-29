@@ -3620,6 +3620,10 @@ public:
             else
                 timer -= diff;
 
+            Unit * owner = me->GetOwner();
+            if (owner && (owner->HasAuraType(SPELL_AURA_MOD_CONFUSE) || owner->HasAuraType(SPELL_AURA_MOD_STUN) || 
+                owner->HasAuraType(SPELL_AURA_MOD_FEAR) || owner->HasAuraType(SPELL_AURA_MOD_SILENCE)))
+                return;
             // Find all the enemies
             std::list<Unit*> targets;
             Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 5.0f);
