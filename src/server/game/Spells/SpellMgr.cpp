@@ -885,6 +885,7 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
             switch (spellId)
             {
                 case 34700: // Allergic Reaction
+                case 84715: // Shockwave - Garrosh Hellscream
                     return false;
                 case 30877: // Tag Murloc
                     return true;
