@@ -257,7 +257,7 @@ public:
             if (Choking_Smoke_Bomb_Timer <= diff)
             {
                 me->MonsterYell("Surprise.", LANG_UNIVERSAL, 0);
-                me->PlayDirectSound(25827, false);
+                me->PlayDirectSound(25827, nullptr);
 
                 me->CastSpell(me, CHOKING_SMOKE_BOMB, false);
                 me->SummonCreature(NPC_CHOKING_SMOKE_BOMB, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 20000);
@@ -420,7 +420,7 @@ public:
                     {
                     case 0:
                         me->MonsterYell("Where do you think you're going, little lizard?", LANG_UNIVERSAL, 0);
-                        me->PlayDirectSound(25818, false);
+                        me->PlayDirectSound(25818, nullptr);
                         Next_Say_Timer = 3500;
                         Say_Text++;
                         break;
