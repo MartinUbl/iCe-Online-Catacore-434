@@ -310,7 +310,7 @@ public:
                             if (distance.size() != 0)
                             {
                                 float minimum = 500; // Player wouldn`t be farther than 500yd from boss
-                                uint64 player_guid;
+                                uint64 player_guid = 0;
                                 for (unsigned int i = 0; i < distance.size(); i++)
                                     if (distance[i].distance < minimum)
                                     {
