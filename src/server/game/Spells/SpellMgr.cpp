@@ -4198,6 +4198,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->CastingTimeIndex = 1;
             count++;
             break;
+        case 52408: // Seaforium Blast
+            // this will cause visual effect properly appear - the trigger lasts for casttime+100 milliseconds
+            spellInfo->CastingTimeIndex = 5; // 2s
+            count++;
+            break;
         case 82661: //Aspect of the Fox
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
             count++;
