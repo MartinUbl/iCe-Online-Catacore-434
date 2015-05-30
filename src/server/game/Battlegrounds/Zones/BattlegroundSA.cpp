@@ -485,9 +485,15 @@ void BattlegroundSA::AddPlayer(Player *plr)
     m_PlayerScores[plr->GetGUID()] = sc;
 }
 
-void BattlegroundSA::RemovePlayer(Player* /*plr*/,uint64 /*guid*/)
+void BattlegroundSA::RemovePlayer(Player* plr,uint64 /*guid*/)
 {
-    //
+    if (plr)
+    {
+        // destroy all seaforium changes
+        int bombcount = plr->GetItemCount(39213, false);
+        if (bombcount > 0)
+            plr->DestroyItemCount(39213, bombcount, true);
+    }
 }
 
 void BattlegroundSA::HandleAreaTrigger(Player * /*Source*/, uint32 /*Trigger*/)
@@ -536,6 +542,11 @@ void BattlegroundSA::TeleportPlayers()
                 plr->ResurrectPlayer(1.0f);
                 plr->SpawnCorpseBones();
             }
+
+            // destroy all seaforium changes
+            int bombcount = plr->GetItemCount(39213, false);
+            if (bombcount > 0)
+                plr->DestroyItemCount(39213, bombcount, true);
 
             plr->ResetAllPowers();
             plr->CombatStopWithPets(true);

@@ -10210,6 +10210,15 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
 
     cMap->Add(pGameObj);
 
+    // spell "Drop Seaforium charge" - this would destroy all bombs carried
+    if (m_spellInfo->Id == 52417 && m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        // destroy all seaforium changes
+        int bombcount = m_caster->ToPlayer()->GetItemCount(39213, false);
+        if (bombcount > 0)
+            m_caster->ToPlayer()->DestroyItemCount(39213, bombcount, true);
+    }
+
     if (uint32 linkedEntry = pGameObj->GetGOInfo()->GetLinkedGameObjectEntry())
     {
         GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(linkedEntry);

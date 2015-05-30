@@ -2930,6 +2930,13 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
+                // Massive Seaforium Charge - Seaforium Blast
+                if (m_spellInfo->Id == 52408)
+                {
+                    radius = GetEffectRadius(i);
+                    targetType = SPELL_TARGETS_ANY;
+                    break;
+                }
                 radius = GetEffectRadius(i);
                 targetType = SPELL_TARGETS_ENEMY;
                 break;
