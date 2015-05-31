@@ -6167,6 +6167,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NO_VALID_TARGETS;
     }
 
+    // Magic Broom (instant mount spell) cannot be cast in battleground (and arena)
+    if (m_spellInfo->Id == 47977 && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->GetMap() && m_caster->ToPlayer()->GetMap()->IsBattlegroundOrArena())
+        return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+
     // Dont let players cast beg spell by themselves ( learned via /run PickupSpell(7267) macro)
     if (m_spellInfo->Id == 7267 && !m_IsTriggeredSpell)
         return SPELL_FAILED_SPELL_UNAVAILABLE;

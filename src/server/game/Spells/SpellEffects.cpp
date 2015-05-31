@@ -7607,7 +7607,10 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (!unitTarget->ToPlayer()->IsKnowHowFlyIn(unitTarget->GetMapId(), unitTarget->GetZoneId()))
                         canFly = false;
                     
-                    if(canFly && v_map == 0 && !unitTarget->ToPlayer()->HasSpell(90267))
+                    if (canFly && v_map == 0 && !unitTarget->ToPlayer()->HasSpell(90267))
+                        canFly = false;
+
+                    if (unitTarget->GetMap() && unitTarget->GetMap()->IsBattlegroundOrArena())
                         canFly = false;
 
                     float x, y, z;
@@ -7619,22 +7622,30 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                     switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
                     {
-                    case 75: unitTarget->CastSpell(unitTarget, 42680, true); break;
-                    case 150: unitTarget->CastSpell(unitTarget, 42683, true); break;
-                    case 225:
+                        case 75:
+                            unitTarget->CastSpell(unitTarget, 42680, true);
+                            break;
+                        case 150:
+                            unitTarget->CastSpell(unitTarget, 42683, true);
+                            break;
+                        case 225:
                         {
                             if (canFly)
                                 unitTarget->CastSpell(unitTarget, 42667, true);
                             else
                                 unitTarget->CastSpell(unitTarget, 42683, true);
-                        }break;
-                    case 300:
+
+                            break;
+                        }
+                        case 300:
                         {
                             if (canFly)
                                 unitTarget->CastSpell(unitTarget, 42668, true);
                             else
                                 unitTarget->CastSpell(unitTarget, 42683, true);
-                        }break;
+
+                            break;
+                        }
                     }
                     return;
                 }
