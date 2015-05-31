@@ -226,6 +226,12 @@ public:
             servantTimer = 26000;
             obedienceTimer = 45000;
             PHASE = PHASE_COMBAT;
+
+            if (pInstance)
+            {
+                pInstance->SetData(DATA_QUEEN_AZSHARA, NOT_STARTED);
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            }
         }
 
         void EnterCombat(Unit * who) override
@@ -237,6 +243,12 @@ public:
             //target->SetStandState(UNIT_STAND_STATE_STAND);
             PlayQuote(me, aggroQuote);
             magusWaveTimer = 12000;
+
+            if (pInstance)
+            {
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                pInstance->SetData(DATA_QUEEN_AZSHARA, IN_PROGRESS);
+            }
         }
 
         //void AttackStart(Unit *) {}
@@ -246,6 +258,12 @@ public:
             PlayQuote(me, wipeQuote);
             RespawnMages();
             ScriptedAI::EnterEvadeMode();
+
+            if (pInstance)
+            {
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                pInstance->SetData(DATA_QUEEN_AZSHARA, NOT_STARTED);
+            }
         }
 
         void KilledUnit(Unit * victim)
@@ -303,6 +321,12 @@ public:
                     // Summon chest
                     if (Player * pPlayer = SelectRandomPlayer(250.0f))
                         pPlayer->SummonGameObject(GO_ROYAL_CHEST, 3464.8f, -5244.4f, 230.0f, 4.55f, 0, 0, 0, 0, 0);
+
+                    if (pInstance)
+                    {
+                        pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                        pInstance->SetData(DATA_QUEEN_AZSHARA, DONE);
+                    }
 
                     // TODO: Again research this
                     if (me->GetMap()->IsHeroic())

@@ -276,6 +276,12 @@ public:
 
             portalCollapsed = false;
 
+            if (pInstance)
+            {
+                pInstance->SetData(DATA_MANNOROTH, NOT_STARTED);
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            }
+
             ScriptedAI::Reset();
         }
 
@@ -353,6 +359,9 @@ public:
             {
                 if (Creature * pTwistingNetherPortal = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_PORTAL_TO_TWISTING_NETHER)))
                     pTwistingNetherPortal->AI()->DoAction(ACTION_START_SUMMON_DEVASTATORS);
+
+                pInstance->SetData(DATA_MANNOROTH, IN_PROGRESS);
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             }
 
             me->InterruptNonMeleeSpells(false);
@@ -369,6 +378,9 @@ public:
                     pTwistingNetherPortal->AI()->DoAction(ACTION_STOP_SUMMON_DEVASTATORS);
 
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GIFT_OF_SARGERAS_INSTANT);
+
+                pInstance->SetData(DATA_MANNOROTH, NOT_STARTED);
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
             if (Creature * pVarothen = ObjectAccessor::GetCreature(*me,pInstance->GetData64(VAROTHEN_ENTRY)))
@@ -391,8 +403,14 @@ public:
         {
             summons.DespawnAll();
 
-            if (canonAchievAllowed && pInstance)
-                pInstance->DoCompleteAchievement(6070); // That's Not Canon!
+            if (pInstance)
+            {
+                pInstance->SetData(DATA_MANNOROTH, DONE);
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+                if (canonAchievAllowed)
+                    pInstance->DoCompleteAchievement(6070); // That's Not Canon!
+            }
 
             ScriptedAI::JustDied(killer);
         }
@@ -711,6 +729,8 @@ public:
         void Reset() override
         {
             magistrikeTimer = urand(5000, 8000);
+            if (pInstance)
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void AttackStart(Unit* victim) override
@@ -725,6 +745,9 @@ public:
         {
             if (victim->GetTypeId() == TYPEID_UNIT && victim->GetOwnerGUID() == 0)
                 return;
+
+            if (pInstance)
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 
             me->SetInCombatWithZone();
             PlaySimpleQuote(me, Varothen::onAggro);
@@ -759,6 +782,8 @@ public:
             // TODO: Research this
             if (pInstance)
             {
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
                 Map::PlayerList const &PlayerList = pInstance->instance->GetPlayers();
                 if (!PlayerList.isEmpty())
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
