@@ -460,6 +460,9 @@ void BattlegroundSA::AddPlayer(Player *plr)
     //create score and add it to map, default values are set in constructor
     BattlegroundSAScore* sc = new BattlegroundSAScore;
 
+    // reset phase mask, somehow the phase does not get updated when joining this BG
+    plr->SetPhaseMask(1, true);
+
     if (!ShipsStarted)
     {
         if (plr->GetTeamId() == Attackers)
