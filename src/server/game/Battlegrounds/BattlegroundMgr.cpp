@@ -1169,6 +1169,8 @@ BattlegroundTypeId BattlegroundMgr::SelectRandomBattleground(uint32 minBracketLe
     {
         bgs.push_back(BATTLEGROUND_TP);
         bgs.push_back(BATTLEGROUND_BG);
+        // Strand of the Ancients is available only to 85's too (but that's custom change)
+        bgs.push_back(BATTLEGROUND_SA);
 
         time_t secs = time(NULL);
         tm* date = localtime(&secs);
