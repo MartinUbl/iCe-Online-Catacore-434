@@ -4809,8 +4809,17 @@ void AuraEffect::HandleAuraTransform(AuraApplication const *aurApp, uint8 mode, 
                 // Polymorph (sheep)
                 if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_MAGE && GetSpellProto()->SpellIconID == 82 && GetSpellProto()->SpellVisual[0] == 12978)
                     if (Unit *caster = GetCaster())
-                        if (caster->HasAura(52648))         // Glyph of the Penguin
+                    {
+                        // Glyph of the Penguin
+                        if (caster->HasAura(52648))
                             model_id = 26452;
+                        // Glyph of Monkey
+                        if (caster->HasAura(57927))
+                        {
+                            caster->CastSpell(caster, 89729, true); // sound effect
+                            model_id = 37710;
+                        }
+                    }
 
                 target->SetDisplayId(model_id);
 
