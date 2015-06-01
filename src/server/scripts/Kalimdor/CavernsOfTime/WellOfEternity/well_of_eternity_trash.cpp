@@ -422,6 +422,58 @@ public:
     };
 };
 
+// Time Transit Device
+#define ENTRANCE                    "Teleport to Entrance."
+#define AZSHARAS_PALACE             "Teleport to Azshara's Palace."
+#define WELL_OF_ETERNITY            "Teleport to Well of Eternity."
+
+class go_time_transit_device_woe : public GameObjectScript
+{
+public:
+    go_time_transit_device_woe() : GameObjectScript("go_time_transit_device_woe") { }
+
+    bool OnGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction)
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        switch (uiSender)
+        {
+            case GOSSIP_SENDER_MAIN:    SendActionMenu(pPlayer, pGo, uiAction); break;
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* pPlayer, GameObject* pGo)
+    {
+        InstanceScript *pInstance = pGo->GetInstanceScript();
+
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ENTRANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        if (pInstance->GetData(DATA_PEROTHARN) == DONE)
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, AZSHARAS_PALACE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        if (pInstance->GetData(DATA_QUEEN_AZSHARA) == DONE)
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, WELL_OF_ETERNITY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+
+        pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pGo->GetGUID());
+        return true;
+    }
+
+    void SendActionMenu(Player* pPlayer, GameObject* /*pGo*/, uint32 uiAction)
+    {
+        switch (uiAction)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 1:
+            pPlayer->CastSpell(pPlayer, 107934, false);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 2:
+            pPlayer->CastSpell(pPlayer, 107979, false);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 3:
+            pPlayer->CastSpell(pPlayer, 107691, false);
+            break;
+        }
+        pPlayer->CLOSE_GOSSIP_MENU();
+    }
+};
+
 class npc_woe_generic : public CreatureScript
 {
 public:
@@ -1818,6 +1870,7 @@ void AddSC_well_of_eternity_trash()
     new npc_enchanted_mistress_woe(); // 54589 + 56579 ?
     // GO SCRIPTS
     new go_fel_crystal_woe();
+    new go_time_transit_device_woe();
     // SPELLSCRIPTS
     new spell_gen_woe_crystal_selector(); // 105018 + 105074 + 105004
     new spell_gen_woe_distract_selector(); // 110121
