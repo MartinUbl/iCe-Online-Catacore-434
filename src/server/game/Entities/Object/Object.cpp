@@ -781,25 +781,36 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                                         break;
                                     }
 
+                        uint32 modelId = m_uint32Values[index];
+
+                        // several spells should send different visuals depending on faction
+                        switch (modelId)
+                        {
+                            case 34997: // Ring of Frost
+                                if (ToUnit()->getFaction() == target->getFaction())
+                                    modelId = 38203;
+                                break;
+                        }
+
                         if (cinfo->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER)
                         {
                             if (target->IsGameMaster())
                             {
                                 if (cinfo->Modelid1)
-                                    *data << cinfo->Modelid1;//Modelid1 is a visible model for gms
+                                    modelId = cinfo->Modelid1;//Modelid1 is a visible model for gms
                                 else
-                                    *data << 17519; // world invisible trigger's model
+                                    modelId = 17519; // world invisible trigger's model
                             }
                             else
                             {
                                 if (cinfo->Modelid2)
-                                    *data << cinfo->Modelid2;//Modelid2 is an invisible model for players
+                                    modelId = cinfo->Modelid2;//Modelid2 is an invisible model for players
                                 else
-                                    *data << 11686; // world invisible trigger's model
+                                    modelId = 11686; // world invisible trigger's model
                             }
                         }
-                        else
-                            *data << m_uint32Values[index];
+
+                        *data << modelId;
                     }
                     else
                         *data << m_uint32Values[index];
@@ -989,6 +1000,56 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                 }
                 else
                     *data << m_uint32Values[index];                // other cases
+            }
+        }
+    }
+    else if (isType(TYPEMASK_DYNAMICOBJECT))
+    {
+        DynamicObject const* dynob = ToDynObject();
+
+        for (uint16 index = 0; index < valCount; ++index)
+        {
+            if (updateMask->GetBit(index))
+            {
+                if (index == DYNAMICOBJECT_BYTES)
+                {
+                    uint32 sendBytes = m_uint32Values[DYNAMICOBJECT_BYTES];
+
+                    // if caster and target teams does not match, we will send different visual
+                    // for the player for several spells
+                    if (dynob->GetCaster() && dynob->GetCaster()->getFaction() != target->getFaction())
+                    {
+                        uint32 visual = sendBytes & 0xFFFFFFF; // cut 28bits
+                        switch (visual)
+                        {
+                            // Flare
+                            case 19814: visual = 20730; break;
+                            // Desecration
+                            case 8506: visual = 20722; break;
+                            // Smoke Bomb
+                            case 16163: visual = 20733; break;
+                            // Consecration
+                            case 20720: visual = 17387; break;
+                            // Frost trap aura
+                            case 3759: visual = 20731; break;
+                            // Power Word: Barrier
+                            case 13210: visual = 20732; break;
+                            // Hand of Gul'Dan
+                            case 18896: visual = 20737; break;
+                            // Fungal Growth
+                            case 19762: visual = 22670; break;
+                        }
+
+                        sendBytes = (sendBytes & 0xFF000000) | visual;
+                    }
+
+                    *data << sendBytes;
+                }
+                else
+                {
+                    // send in current format (float as float, uint32 as uint32)
+                    *data << m_uint32Values[index];
+                }
             }
         }
     }
