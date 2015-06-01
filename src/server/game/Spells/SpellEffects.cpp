@@ -874,7 +874,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 }
                 else if (m_spellInfo->Id == 31117) // Unstable Affliction backfire dmg has been doubled at 4.3.4
                 {
-                    damage *= 2;
+                    apply_direct_bonus = false;
+
+                    const SpellEntry* ua = sSpellStore.LookupEntry(30108);
+                    uint32 basedmg = SpellMgr::CalculateSpellEffectAmount(ua, 1, m_originalCaster);
+
+                    // base damage is taken from UA calculated amount
+                    float tmpdamage = m_originalCaster->SpellDamageBonus(unitTarget, ua, 1, basedmg, DOT) * m_originalCaster->SpellDamagePctDone(unitTarget, ua, DOT);
+                    // damage is multiplied by 9 according to tooltip
+                    damage = tmpdamage * 9;
                 }
                 // Soul Swap
                 else if (m_spellInfo->Id == 86121)
