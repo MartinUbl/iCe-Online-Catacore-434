@@ -697,6 +697,7 @@ void InstanceSaveManager::loadRaidEncounter()
     setBossNumber(36, 6);//DM
     setBossNumber(568, 6);//ZA
     setBossNumber(938, 5); // End Time
+    setBossNumber(939, 3); // Well of Eternity
     setBossNumber(940, 3); // Hour of Twilight
 
     if (!result)
@@ -1168,6 +1169,29 @@ void InstanceSaveManager::loadRaidEncounter()
                     }
                 }
                 setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 939: // Well of Eternity
+            {
+                bossNum = 3;
+                uint32 dataEnc[3];
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch (i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[2]; // Perotharn
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[1]; // Queen of Azshara
+                        break;
+                    case 2:
+                        loadStream >> dataEnc[0]; // Mannoroth
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId, dataEnc, bossNum);
                 break;
             }
             case 940: // Hour Of Twilight

@@ -432,9 +432,10 @@ bool INST_WOE_SCRIPT::PlayersWipedOnMannoroth()
 
 uint32* INST_WOE_SCRIPT::GetCorrUiEncounter()
 {
-    currEnc[0] = m_auiEncounter[DATA_PEROTHARN];
-    currEnc[1] = m_auiEncounter[DATA_QUEEN_AZSHARA];
-    currEnc[2] = m_auiEncounter[DATA_MANNOROTH];
+    currEnc[0] = m_auiEncounter[DATA_MANNOROTH]; // 2
+    currEnc[1] = m_auiEncounter[DATA_QUEEN_AZSHARA]; // 1
+    currEnc[2] = m_auiEncounter[DATA_PEROTHARN]; // 0
+
     sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(), currEnc, MAX_ENCOUNTER);
 
     return NULL;
