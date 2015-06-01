@@ -829,7 +829,13 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                         amount += 30;
                 }
                 else
+                {
                     amount = 5;             // innervate used on another target restores only 5% of maximum mana
+
+                    // Glyph of Innervate - cast 10% mana regen to caster
+                    if (caster->HasAura(54832))
+                        caster->CastSpell(caster, 54833, true);
+                }
 
                 int32 total_ticks = GetTotalTicks();
                 if (total_ticks > 0)
