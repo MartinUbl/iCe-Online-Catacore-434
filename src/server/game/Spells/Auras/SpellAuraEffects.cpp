@@ -3243,8 +3243,9 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                 if (target->ToPlayer()->getClass() != CLASS_DEATH_KNIGHT)
                     return;
 
-                 // timer expired - remove death runes
-                target->ToPlayer()->RemoveRunesByAuraEffect(this);
+                // timer expired out of combat - remove death runes
+                if (!target->ToPlayer()->IsInCombat())
+                    target->ToPlayer()->RemoveRunesByAuraEffect(this);
             }
             break;
         default:
