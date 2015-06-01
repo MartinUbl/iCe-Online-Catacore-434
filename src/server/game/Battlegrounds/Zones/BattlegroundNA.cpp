@@ -42,6 +42,8 @@ BattlegroundNA::BattlegroundNA()
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
     m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_ARENA_FIFTEEN_SECONDS;
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
+
+    m_despawnGatesTimer = 0;
 }
 
 BattlegroundNA::~BattlegroundNA()
@@ -60,6 +62,20 @@ void BattlegroundNA::Update(uint32 diff)
             UpdateArenaWorldState();
             CheckArenaAfterTimerConditions();
         }
+
+        // despawn gates after few seconds
+        if (m_despawnGatesTimer > 0)
+        {
+            if (m_despawnGatesTimer < diff)
+            {
+                m_despawnGatesTimer = 0;
+
+                for (uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_2; ++i)
+                    DelObject(i);
+            }
+            else
+                m_despawnGatesTimer -= diff;
+        }
     } 
 }
 
@@ -73,6 +89,7 @@ void BattlegroundNA::StartingEventOpenDoors()
 {
     for (uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_2; ++i)
         DoorOpen(i);
+    m_despawnGatesTimer = 2000;
 
     for (uint32 i = BG_NA_OBJECT_BUFF_1; i <= BG_NA_OBJECT_BUFF_2; ++i)
         SpawnBGObject(i, 60);

@@ -75,5 +75,8 @@ class BattlegroundNA : public BattlegroundArena
         virtual void FillInitialWorldStates(WorldPacket &d);
         void HandleKillPlayer(Player* player, Player *killer);
         bool GetUnderMapReturnPosition(Player* plr, Position& pos);
+
+    private:
+        uint32 m_despawnGatesTimer;
 };
 #endif
