@@ -5703,7 +5703,7 @@ void Player::RepopAtGraveyard()
 
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
     float depth = zone ? zone->MaxDepth : -500.0f;
-    if ((!IsAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || GetTransport() || GetPositionZ() < depth)
+    if ((!IsAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || (GetTransport() && GetTransport()->ToGenericTransport()) || GetPositionZ() < depth)
     {
         ResurrectPlayer(0.5f);
         SpawnCorpseBones();
