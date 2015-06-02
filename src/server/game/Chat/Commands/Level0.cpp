@@ -319,8 +319,8 @@ bool ChatHandler::HandleSpectatorListCommand(const char* args)
         at1 = sObjectMgr->GetArenaTeamById(itr->second->GetArenaTeamIdForTeam(TEAM_HORDE));
         at2 = sObjectMgr->GetArenaTeamById(itr->second->GetArenaTeamIdForTeam(TEAM_ALLIANCE));
 
-        PSendSysMessage("|cff00ff00%u|r - %uv%u - %u vs. %u", itr->first, itr->second->GetArenaType(), itr->second->GetArenaType(),
-            at1 ? at1->GetTeamRating() : 0, at2 ? at2->GetTeamRating() : 0);
+        PSendSysMessage("|cff00ff00%u|r - %uv%u - %u vs. %u%s", itr->first, itr->second->GetArenaType(), itr->second->GetArenaType(),
+            at1 ? at1->GetTeamRating() : 0, at2 ? at2->GetTeamRating() : 0, itr->second->GetStatus() == STATUS_WAIT_JOIN ? "" : "(in progress)");
     }
 
     return true;

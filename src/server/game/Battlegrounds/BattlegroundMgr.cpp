@@ -870,7 +870,7 @@ void BattlegroundMgr::GetSpectatableArenas(BattlegroundSet* target)
     {
         for (BattlegroundSet::iterator itr = m_Battlegrounds[spectableArenaTypes[i]].begin(); itr != m_Battlegrounds[spectableArenaTypes[i]].end(); ++itr)
         {
-            if (itr->second && itr->second->GetStatus() == STATUS_IN_PROGRESS)
+            if (itr->second && (itr->second->GetStatus() == STATUS_IN_PROGRESS || itr->second->GetStatus() == STATUS_WAIT_JOIN))
                 (*target)[itr->first] = itr->second;
         }
     }
@@ -892,7 +892,7 @@ bool BattlegroundMgr::AddArenaSpectator(Player* pl, uint32 instanceID)
         BattlegroundSet::iterator itr = m_Battlegrounds[spectableArenaTypes[i]].find(instanceID);
         if (itr != m_Battlegrounds[spectableArenaTypes[i]].end())
         {
-            if (itr->second && itr->second->GetStatus() == STATUS_IN_PROGRESS)
+            if (itr->second && (itr->second->GetStatus() == STATUS_IN_PROGRESS || itr->second->GetStatus() == STATUS_WAIT_JOIN))
             {
                 itr->second->AddSpectator(pl);
                 return true;
