@@ -787,7 +787,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                         switch (modelId)
                         {
                             case 34997: // Ring of Frost
-                                if (ToUnit()->getFaction() == target->getFaction())
+                                if (ToUnit()->IsFriendlyTo(target))
                                     modelId = 38203;
                                 break;
                         }
@@ -1017,7 +1017,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
 
                     // if caster and target teams does not match, we will send different visual
                     // for the player for several spells
-                    if (dynob->GetCaster() && dynob->GetCaster()->getFaction() != target->getFaction())
+                    if (dynob->GetCaster() && dynob->GetCaster()->IsHostileTo(target))
                     {
                         uint32 visual = sendBytes & 0xFFFFFFF; // cut 28bits
                         switch (visual)
