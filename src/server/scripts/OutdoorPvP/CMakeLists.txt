@@ -1,5 +1,10 @@
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
+  OutdoorPvP/alterac_valley.cpp
+  OutdoorPvP/boss_balinda.cpp
+  OutdoorPvP/boss_drekthar.cpp
+  OutdoorPvP/boss_galvangar.cpp
+  OutdoorPvP/boss_vanndar.cpp
   OutdoorPvP/OutdoorPvPTF.cpp
   OutdoorPvP/OutdoorPvPSI.cpp
   OutdoorPvP/OutdoorPvPSI.h
