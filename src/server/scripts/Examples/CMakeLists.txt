@@ -1,5 +1,4 @@
-set(scripts_STAT_SRCS
-  ${scripts_STAT_SRCS}
+set(scripts_STAT_SRCS__Examples
   Examples/example_misc.cpp
   Examples/example_gossip_codebox.cpp
   Examples/example_escort.cpp

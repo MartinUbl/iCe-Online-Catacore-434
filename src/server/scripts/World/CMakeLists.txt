@@ -1,5 +1,4 @@
-set(scripts_STAT_SRCS
-  ${scripts_STAT_SRCS}
+set(scripts_STAT_SRCS__World
   World/achievement_scripts.cpp
   World/areatrigger_scripts.cpp
   World/boss_emeriss.cpp
@@ -20,5 +19,7 @@ set(scripts_STAT_SRCS
   World/npcs_special.cpp
   World/npc_spell_click_spells.cpp
 )
+
+source_group(World FILES ${scripts_STAT_SRCS__World})
 
 message("  -> Prepared: World")

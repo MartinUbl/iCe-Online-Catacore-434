@@ -1,8 +1,9 @@
-set(scripts_STAT_SRCS
-  ${scripts_STAT_SRCS}
+set(scripts_STAT_SRCS__Custom
   Custom/events.cpp
   Custom/ice_vanoce.cpp
   Custom/workarounds.cpp
 )
+
+source_group(Custom FILES ${scripts_STAT_SRCS__Custom})
 
 message("  -> Prepared: Custom")

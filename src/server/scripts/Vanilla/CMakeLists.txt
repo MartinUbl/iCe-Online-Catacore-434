@@ -1,0 +1,400 @@
+set(SC_VAN_Cities
+  Vanilla/Cities/darnassus.cpp
+  Vanilla/Cities/exodar.cpp
+  Vanilla/Cities/orgrimmar.cpp
+  Vanilla/Cities/thunder_bluff.cpp
+  Vanilla/Cities/ironforge.cpp
+  Vanilla/Cities/silvermoon_city.cpp
+  Vanilla/Cities/stormwind_city.cpp
+  Vanilla/Cities/undercity.cpp)
+
+source_group(Vanilla\\Cities FILES ${SC_VAN_Cities})
+
+set(SC_VAN_BFD
+  Vanilla/Dungeons/BlackfathomDeeps/blackfathom_deeps.cpp
+  Vanilla/Dungeons/BlackfathomDeeps/blackfathom_deeps.h
+  Vanilla/Dungeons/BlackfathomDeeps/boss_aku_mai.cpp
+  Vanilla/Dungeons/BlackfathomDeeps/boss_baron_aquanis.cpp
+  Vanilla/Dungeons/BlackfathomDeeps/boss_gelihast.cpp
+  Vanilla/Dungeons/BlackfathomDeeps/boss_ghamoo_ra.cpp
+  Vanilla/Dungeons/BlackfathomDeeps/boss_kelris.cpp
+  Vanilla/Dungeons/BlackfathomDeeps/boss_lady_sarevess.cpp
+  Vanilla/Dungeons/BlackfathomDeeps/boss_lorgus_jett.cpp
+  Vanilla/Dungeons/BlackfathomDeeps/boss_old_serrakiss.cpp
+  Vanilla/Dungeons/BlackfathomDeeps/instance_blackfathom_deeps.cpp)
+set(SC_VAN_DM
+  Vanilla/Dungeons/DireMaul/boss_alzzin_the_wildshaper.cpp
+  Vanilla/Dungeons/DireMaul/boss_captain_kromcrush.cpp
+  Vanilla/Dungeons/DireMaul/boss_guard_fengus.cpp
+  Vanilla/Dungeons/DireMaul/boss_guard_moldar.cpp
+  Vanilla/Dungeons/DireMaul/boss_guard_slipkik.cpp
+  Vanilla/Dungeons/DireMaul/boss_hydrospawn.cpp
+  Vanilla/Dungeons/DireMaul/boss_chorush_the_observer.cpp
+  Vanilla/Dungeons/DireMaul/boss_illyanna_ravenoak.cpp
+  Vanilla/Dungeons/DireMaul/boss_immolthar.cpp
+  Vanilla/Dungeons/DireMaul/boss_king_gordok.cpp
+  Vanilla/Dungeons/DireMaul/boss_lethtendris.cpp
+  Vanilla/Dungeons/DireMaul/boss_magister_kalendris.cpp
+  Vanilla/Dungeons/DireMaul/boss_prince_tortheldrin.cpp
+  Vanilla/Dungeons/DireMaul/boss_stomper_kreeg.cpp
+  Vanilla/Dungeons/DireMaul/boss_tendris_warpwood.cpp
+  Vanilla/Dungeons/DireMaul/boss_zevrim_thornhoof.cpp
+  Vanilla/Dungeons/DireMaul/dire_maul.h
+  Vanilla/Dungeons/DireMaul/instance_dire_maul.cpp)
+set(SC_VAN_Mara
+  Vanilla/Dungeons/Maraudon/boss_celebras_the_cursed.cpp
+  Vanilla/Dungeons/Maraudon/boss_landslide.cpp
+  Vanilla/Dungeons/Maraudon/boss_lord_vyletongue.cpp
+  Vanilla/Dungeons/Maraudon/boss_noxxion.cpp
+  Vanilla/Dungeons/Maraudon/boss_princess_theradras.cpp
+  Vanilla/Dungeons/Maraudon/boss_razorlash.cpp
+  Vanilla/Dungeons/Maraudon/boss_rotgrip.cpp
+  Vanilla/Dungeons/Maraudon/boss_tinkerer_gizlock.cpp
+  Vanilla/Dungeons/Maraudon/instance_maraudon.cpp
+  Vanilla/Dungeons/Maraudon/maraudon.h)
+set(SC_VAN_RFC
+  Vanilla/Dungeons/RagefireChasm/boss_adarogg.cpp
+  Vanilla/Dungeons/RagefireChasm/boss_dark_shaman_koranthal.cpp
+  Vanilla/Dungeons/RagefireChasm/boss_lava_guard_gordoth.cpp
+  Vanilla/Dungeons/RagefireChasm/boss_slagmaw.cpp
+  Vanilla/Dungeons/RagefireChasm/instance_ragefire_chasm.cpp
+  Vanilla/Dungeons/RagefireChasm/ragefire_chasm.h)
+set(SC_VAN_RFD
+  Vanilla/Dungeons/RazorfenDowns/boss_amnennar_the_coldbringer.cpp
+  Vanilla/Dungeons/RazorfenDowns/boss_glutton.cpp
+  Vanilla/Dungeons/RazorfenDowns/boss_mordresh_fire_eye.cpp
+  Vanilla/Dungeons/RazorfenDowns/boss_tutenkash.cpp
+  Vanilla/Dungeons/RazorfenDowns/instance_razorfen_downs.cpp
+  Vanilla/Dungeons/RazorfenDowns/razorfen_downs.cpp
+  Vanilla/Dungeons/RazorfenDowns/razorfen_downs.h)
+set(SC_VAN_RFK
+  Vanilla/Dungeons/RazorfenKraul/boss_agathelos_the_raging.cpp
+  Vanilla/Dungeons/RazorfenKraul/boss_aggem_thorncurse.cpp
+  Vanilla/Dungeons/RazorfenKraul/boss_death_speaker_jargba.cpp
+  Vanilla/Dungeons/RazorfenKraul/boss_charlga_razorflank.cpp
+  Vanilla/Dungeons/RazorfenKraul/boss_overlord_ramtusk.cpp
+  Vanilla/Dungeons/RazorfenKraul/boss_roogug.cpp
+  Vanilla/Dungeons/RazorfenKraul/instance_razorfen_kraul.cpp
+  Vanilla/Dungeons/RazorfenKraul/razorfen_kraul.cpp
+  Vanilla/Dungeons/RazorfenKraul/razorfen_kraul.h)
+set(SC_VAN_WC
+  Vanilla/Dungeons/WailingCaverns/boss_kresh.cpp
+  Vanilla/Dungeons/WailingCaverns/boss_lady_anacondra.cpp
+  Vanilla/Dungeons/WailingCaverns/boss_lord_cobrahn.cpp
+  Vanilla/Dungeons/WailingCaverns/boss_lord_pythas.cpp
+  Vanilla/Dungeons/WailingCaverns/boss_lord_serpentis.cpp
+  Vanilla/Dungeons/WailingCaverns/boss_mutanus_the_devourer.cpp
+  Vanilla/Dungeons/WailingCaverns/boss_skum.cpp
+  Vanilla/Dungeons/WailingCaverns/boss_verdan_the_everliving.cpp
+  Vanilla/Dungeons/WailingCaverns/instance_wailing_caverns.cpp
+  Vanilla/Dungeons/WailingCaverns/wailing_caverns.cpp
+  Vanilla/Dungeons/WailingCaverns/wailing_caverns.h)
+set(SC_VAN_ZF
+  Vanilla/Dungeons/Zulfarrak/boss_antusul.cpp
+  Vanilla/Dungeons/Zulfarrak/boss_gahzrilla.cpp
+  Vanilla/Dungeons/Zulfarrak/boss_hydromancer_velratha.cpp
+  Vanilla/Dungeons/Zulfarrak/boss_chief_ukorz_sandscalp.cpp
+  Vanilla/Dungeons/Zulfarrak/boss_nekrum_gutchewer.cpp
+  Vanilla/Dungeons/Zulfarrak/boss_ruuzlu.cpp
+  Vanilla/Dungeons/Zulfarrak/boss_shadowpriest_sezzziz.cpp
+  Vanilla/Dungeons/Zulfarrak/boss_theka_the_martyr.cpp
+  Vanilla/Dungeons/Zulfarrak/boss_witch_doctor_zumrah.cpp
+  Vanilla/Dungeons/Zulfarrak/instance_zulfarrak.cpp
+  Vanilla/Dungeons/Zulfarrak/zulfarrak.cpp
+  Vanilla/Dungeons/Zulfarrak/zulfarrak.h)
+set(SC_VAN_BRD
+  Vanilla/Dungeons/BlackrockDepths/blackrock_depths.cpp
+  Vanilla/Dungeons/BlackrockDepths/blackrock_depths.h
+  Vanilla/Dungeons/BlackrockDepths/boss_ambassador_flamelash.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_anubshiah.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_baelgar.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_emperor_dagran_thaurissan.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_eviscerator.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_fineous_darkvire.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_general_angerforge.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_golem_lord_argelmach.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_gorosh_the_dervish.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_grizzle.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_hedrum_the_creeper.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_high_interrogator_gerstahn.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_high_justice_grimstone.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_houndmaster_grebmar.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_hurley_blackbreath.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_lord_incendius.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_lord_roccor.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_magmus.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_moira_bronzebeard.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_okthor_the_breaker.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_phalanx.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_plugger_spazzring.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_pyromancer_loregrain.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_ribbly_screwspigot.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_the_vault.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_tomb_of_seven.cpp
+  Vanilla/Dungeons/BlackrockDepths/boss_warden_stilgiss_and_verek.cpp
+  Vanilla/Dungeons/BlackrockDepths/instance_blackrock_depths.cpp)
+set(SC_VAN_BRS
+  Vanilla/Dungeons/BlackrockSpire/blackrock_spire.cpp
+  Vanilla/Dungeons/BlackrockSpire/blackrock_spire.h
+  Vanilla/Dungeons/BlackrockSpire/boss_drakkisath.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_gizrul_the_slavener.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_gyth.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_halycon.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_highlord_omokk.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_mother_smolderweb.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_overlord_wyrmthalak.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_pyroguard_emberseer.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_quartermaster_zigris.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_rend_blackhand.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_shadow_hunter_voshgajin.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_the_beast.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_urok_doomhowl.cpp
+  Vanilla/Dungeons/BlackrockSpire/boss_warmaster_voone.cpp
+  Vanilla/Dungeons/BlackrockSpire/instance_blackrock_spire.cpp)
+set(SC_VAN_Gnom
+  Vanilla/Dungeons/Gnomeregan/boss_crowd_pummeler.cpp
+  Vanilla/Dungeons/Gnomeregan/boss_electrocutioner_6000.cpp
+  Vanilla/Dungeons/Gnomeregan/boss_grubbis.cpp
+  Vanilla/Dungeons/Gnomeregan/boss_mekgineer_thermaplugg.cpp
+  Vanilla/Dungeons/Gnomeregan/boss_techbot.cpp
+  Vanilla/Dungeons/Gnomeregan/boss_viscous_fallout.cpp
+  Vanilla/Dungeons/Gnomeregan/gnomeregan.cpp
+  Vanilla/Dungeons/Gnomeregan/gnomeregan.h
+  Vanilla/Dungeons/Gnomeregan/instance_gnomeregan.cpp)
+set(SC_VAN_SM
+  Vanilla/Dungeons/ScarletMonastery/boss_arcanist_doan.cpp
+  Vanilla/Dungeons/ScarletMonastery/boss_azshir_the_sleepless.cpp
+  Vanilla/Dungeons/ScarletMonastery/boss_bloodmage_thalnos.cpp
+  Vanilla/Dungeons/ScarletMonastery/boss_headless_horseman.cpp
+  Vanilla/Dungeons/ScarletMonastery/boss_herod.cpp
+  Vanilla/Dungeons/ScarletMonastery/boss_high_inquisitor_fairbanks.cpp
+  Vanilla/Dungeons/ScarletMonastery/boss_houndmaster_loksey.cpp
+  Vanilla/Dungeons/ScarletMonastery/boss_interrogator_vishas.cpp
+  Vanilla/Dungeons/ScarletMonastery/boss_mograine_and_whitemane.cpp
+  Vanilla/Dungeons/ScarletMonastery/boss_scorn.cpp
+  Vanilla/Dungeons/ScarletMonastery/the_scarlet_enclave_c1.cpp
+  Vanilla/Dungeons/ScarletMonastery/the_scarlet_enclave_c2.cpp
+  Vanilla/Dungeons/ScarletMonastery/the_scarlet_enclave_c5.cpp
+  Vanilla/Dungeons/ScarletMonastery/instance_scarlet_monastery.cpp
+  Vanilla/Dungeons/ScarletMonastery/scarlet_monastery.h
+  Vanilla/Dungeons/ScarletMonastery/the_scarlet_enclave.cpp)
+set(SC_VAN_Scholo
+  Vanilla/Dungeons/Scholomance/boss_darkmaster_gandling.cpp
+  Vanilla/Dungeons/Scholomance/boss_death_knight_darkreaver.cpp
+  Vanilla/Dungeons/Scholomance/boss_doctor_theolen_krastinov.cpp
+  Vanilla/Dungeons/Scholomance/boss_illucia_barov.cpp
+  Vanilla/Dungeons/Scholomance/boss_instructor_malicia.cpp
+  Vanilla/Dungeons/Scholomance/boss_jandice_barov.cpp
+  Vanilla/Dungeons/Scholomance/boss_kormok.cpp
+  Vanilla/Dungeons/Scholomance/boss_lord_alexei_barov.cpp
+  Vanilla/Dungeons/Scholomance/boss_lorekeeper_polkelt.cpp
+  Vanilla/Dungeons/Scholomance/boss_ras_frostwhisper.cpp
+  Vanilla/Dungeons/Scholomance/boss_the_ravenian.cpp
+  Vanilla/Dungeons/Scholomance/boss_vectus.cpp
+  Vanilla/Dungeons/Scholomance/instance_scholomance.cpp
+  Vanilla/Dungeons/Scholomance/scholomance.h)
+set(SC_VAN_Stockade
+  Vanilla/Dungeons/Stockade/boss_hogger.cpp
+  Vanilla/Dungeons/Stockade/boss_lord_overheat.cpp
+  Vanilla/Dungeons/Stockade/boss_randolph_moloch.cpp
+  Vanilla/Dungeons/Stockade/instance_stockade.cpp
+  Vanilla/Dungeons/Stockade/stockade.h)
+set(SC_VAN_Strat
+  Vanilla/Dungeons/Stratholme/boss_baron_rivendare.cpp
+  Vanilla/Dungeons/Stratholme/boss_baroness_anastari.cpp
+  Vanilla/Dungeons/Stratholme/boss_cannon_master_willey.cpp
+  Vanilla/Dungeons/Stratholme/boss_commander_malor.cpp
+  Vanilla/Dungeons/Stratholme/boss_dathrohan_balnazzar.cpp
+  Vanilla/Dungeons/Stratholme/boss_hearthsinger_forresten.cpp
+  Vanilla/Dungeons/Stratholme/boss_instructor_galford.cpp
+  Vanilla/Dungeons/Stratholme/boss_magistrate_barthilas.cpp
+  Vanilla/Dungeons/Stratholme/boss_maleki_the_pallid.cpp
+  Vanilla/Dungeons/Stratholme/boss_nerubenkan.cpp
+  Vanilla/Dungeons/Stratholme/boss_order_of_silver_hand.cpp
+  Vanilla/Dungeons/Stratholme/boss_postmaster_malown.cpp
+  Vanilla/Dungeons/Stratholme/boss_ramstein_the_gorger.cpp
+  Vanilla/Dungeons/Stratholme/boss_the_unforgiven.cpp
+  Vanilla/Dungeons/Stratholme/boss_timmy_the_cruel.cpp
+  Vanilla/Dungeons/Stratholme/instance_stratholme.cpp
+  Vanilla/Dungeons/Stratholme/stratholme.cpp
+  Vanilla/Dungeons/Stratholme/stratholme.h)
+set(SC_VAN_ST
+  Vanilla/Dungeons/SunkenTemple/boss_avatar_of_hakkar.cpp
+  Vanilla/Dungeons/SunkenTemple/boss_jammalan_the_prophet.cpp
+  Vanilla/Dungeons/SunkenTemple/boss_shade_of_eranikus.cpp
+  Vanilla/Dungeons/SunkenTemple/instance_sunken_temple.cpp
+  Vanilla/Dungeons/SunkenTemple/sunken_temple.cpp
+  Vanilla/Dungeons/SunkenTemple/sunken_temple.h)
+set(SC_VAN_UD
+  Vanilla/Dungeons/Uldaman/boss_ancient_stone_keeper.cpp
+  Vanilla/Dungeons/Uldaman/boss_archaedas.cpp
+  Vanilla/Dungeons/Uldaman/boss_baelog.cpp
+  Vanilla/Dungeons/Uldaman/boss_galgann_firehammer.cpp
+  Vanilla/Dungeons/Uldaman/boss_grimlok.cpp
+  Vanilla/Dungeons/Uldaman/boss_ironaya.cpp
+  Vanilla/Dungeons/Uldaman/boss_obsidian_sentinel.cpp
+  Vanilla/Dungeons/Uldaman/boss_revelosh.cpp
+  Vanilla/Dungeons/Uldaman/instance_uldaman.cpp
+  Vanilla/Dungeons/Uldaman/uldaman.cpp
+  Vanilla/Dungeons/Uldaman/uldaman.h)
+
+set(SC_VAN_Dungeons
+    ${SC_VAN_BFD}
+    ${SC_VAN_DM}
+    ${SC_VAN_Mara}
+    ${SC_VAN_RFC}
+    ${SC_VAN_RFD}
+    ${SC_VAN_RFK}
+    ${SC_VAN_WC}
+    ${SC_VAN_ZF}
+    ${SC_VAN_BRD}
+    ${SC_VAN_BRS}
+    ${SC_VAN_Gnom}
+    ${SC_VAN_SM}
+    ${SC_VAN_Scholo}
+    ${SC_VAN_Stockade}
+    ${SC_VAN_Strat}
+    ${SC_VAN_ST}
+    ${SC_VAN_UD}
+)
+
+source_group(Vanilla\\Dungeons\\BlackfathomDepths FILES ${SC_VAN_BFD})
+source_group(Vanilla\\Dungeons\\DireMaul FILES ${SC_VAN_DM})
+source_group(Vanilla\\Dungeons\\Maraudon FILES ${SC_VAN_Mara})
+source_group(Vanilla\\Dungeons\\RagefireChasm FILES ${SC_VAN_RFC})
+source_group(Vanilla\\Dungeons\\RazorfenDowns FILES ${SC_VAN_RFD})
+source_group(Vanilla\\Dungeons\\RazorfenKraul FILES ${SC_VAN_RFK})
+source_group(Vanilla\\Dungeons\\WailingCaverns FILES ${SC_VAN_WC})
+source_group(Vanilla\\Dungeons\\ZulFarrak FILES ${SC_VAN_ZF})
+source_group(Vanilla\\Dungeons\\BlackrockDepths FILES ${SC_VAN_BRD})
+source_group(Vanilla\\Dungeons\\BlackrockSpire FILES ${SC_VAN_BRS})
+source_group(Vanilla\\Dungeons\\Gnomeregan FILES ${SC_VAN_Gnom})
+source_group(Vanilla\\Dungeons\\ScarletMonastery FILES ${SC_VAN_SM})
+source_group(Vanilla\\Dungeons\\Scholomance FILES ${SC_VAN_Scholo})
+source_group(Vanilla\\Dungeons\\Stockade FILES ${SC_VAN_Stockade})
+source_group(Vanilla\\Dungeons\\Stratholme FILES ${SC_VAN_Strat})
+source_group(Vanilla\\Dungeons\\SunkenTemple FILES ${SC_VAN_ST})
+source_group(Vanilla\\Dungeons\\Uldaman FILES ${SC_VAN_UD})
+
+set(SC_VAN_Locations
+  Vanilla/Locations/ashenvale.cpp
+  Vanilla/Locations/azshara.cpp
+  Vanilla/Locations/azuremyst_isle.cpp
+  Vanilla/Locations/bloodmyst_isle.cpp
+  Vanilla/Locations/boss_azuregos.cpp
+  Vanilla/Locations/darkshore.cpp
+  Vanilla/Locations/desolace.cpp
+  Vanilla/Locations/durotar.cpp
+  Vanilla/Locations/dustwallow_marsh.cpp
+  Vanilla/Locations/felwood.cpp
+  Vanilla/Locations/feralas.cpp
+  Vanilla/Locations/moonglade.cpp
+  Vanilla/Locations/mulgore.cpp
+  Vanilla/Locations/silithus.cpp
+  Vanilla/Locations/stonetalon_mountains.cpp
+  Vanilla/Locations/tanaris.cpp
+  Vanilla/Locations/teldrassil.cpp
+  Vanilla/Locations/the_barrens.cpp
+  Vanilla/Locations/thousand_needles.cpp
+  Vanilla/Locations/ungoro_crater.cpp
+  Vanilla/Locations/winterspring.cpp
+  Vanilla/Locations/arathi_highlands.cpp
+  Vanilla/Locations/badlands.cpp
+  Vanilla/Locations/blasted_lands.cpp
+  Vanilla/Locations/boss_kruul.cpp
+  Vanilla/Locations/burning_steppes.cpp
+  Vanilla/Locations/deadwind_pass.cpp
+  Vanilla/Locations/deeprun_tram.cpp
+  Vanilla/Locations/dun_morogh.cpp
+  Vanilla/Locations/duskwood.cpp
+  Vanilla/Locations/eastern_plaguelands.cpp
+  Vanilla/Locations/elwynn_forest.cpp
+  Vanilla/Locations/eversong_woods.cpp
+  Vanilla/Locations/ghostlands.cpp
+  Vanilla/Locations/hillsbrad_foothills.cpp
+  Vanilla/Locations/loch_modan.cpp
+  Vanilla/Locations/plaguelands.cpp
+  Vanilla/Locations/redridge_mountains.cpp
+  Vanilla/Locations/ruins_of_gilneas.cpp
+  Vanilla/Locations/searing_gorge.cpp
+  Vanilla/Locations/silverpine_forest.cpp
+  Vanilla/Locations/stranglethorn_vale.cpp
+  Vanilla/Locations/swamp_of_sorrows.cpp
+  Vanilla/Locations/the_cape_of_stranglethorn.cpp
+  Vanilla/Locations/the_hinterlands.cpp
+  Vanilla/Locations/tirisfal_glades.cpp
+  Vanilla/Locations/western_plaguelands.cpp
+  Vanilla/Locations/westfall.cpp
+  Vanilla/Locations/wetlands.cpp)
+
+source_group(Vanilla\\Locations\\ FILES ${SC_VAN_Locations})
+
+set(SC_VAN_AQR
+  Vanilla/Raids/RuinsOfAhnQiraj/boss_ayamiss.cpp
+  Vanilla/Raids/RuinsOfAhnQiraj/boss_buru.cpp
+  Vanilla/Raids/RuinsOfAhnQiraj/boss_kurinnaxx.cpp
+  Vanilla/Raids/RuinsOfAhnQiraj/boss_moam.cpp
+  Vanilla/Raids/RuinsOfAhnQiraj/boss_ossirian.cpp
+  Vanilla/Raids/RuinsOfAhnQiraj/boss_rajaxx.cpp
+  Vanilla/Raids/RuinsOfAhnQiraj/instance_ruins_of_ahnqiraj.cpp
+  Vanilla/Raids/RuinsOfAhnQiraj/ruins_of_ahnqiraj.h)
+set(SC_VAN_AQT
+  Vanilla/Raids/TempleOfAhnQiraj/boss_bug_trio.cpp
+  Vanilla/Raids/TempleOfAhnQiraj/boss_cthun.cpp
+  Vanilla/Raids/TempleOfAhnQiraj/boss_fankriss.cpp
+  Vanilla/Raids/TempleOfAhnQiraj/boss_huhuran.cpp
+  Vanilla/Raids/TempleOfAhnQiraj/boss_ouro.cpp
+  Vanilla/Raids/TempleOfAhnQiraj/boss_battleguard_sartura.cpp
+  Vanilla/Raids/TempleOfAhnQiraj/boss_skeram.cpp
+  Vanilla/Raids/TempleOfAhnQiraj/boss_twinemperors.cpp
+  Vanilla/Raids/TempleOfAhnQiraj/boss_viscidus.cpp
+  Vanilla/Raids/TempleOfAhnQiraj/instance_temple_of_ahnqiraj.cpp
+  Vanilla/Raids/TempleOfAhnQiraj/mob_anubisath_sentinel.cpp
+  Vanilla/Raids/TempleOfAhnQiraj/temple_of_ahnqiraj.h)
+set(SC_VAN_BWL
+  Vanilla/Raids/BlackwingLair/blackwing_lair.h
+  Vanilla/Raids/BlackwingLair/boss_broodlord_lashlayer.cpp
+  Vanilla/Raids/BlackwingLair/boss_ebonroc.cpp
+  Vanilla/Raids/BlackwingLair/boss_firemaw.cpp
+  Vanilla/Raids/BlackwingLair/boss_flamegor.cpp
+  Vanilla/Raids/BlackwingLair/boss_chromaggus.cpp
+  Vanilla/Raids/BlackwingLair/boss_nefarian.cpp
+  Vanilla/Raids/BlackwingLair/boss_razorgore.cpp
+  Vanilla/Raids/BlackwingLair/boss_vaelastrasz.cpp
+  Vanilla/Raids/BlackwingLair/boss_victor_nefarius.cpp
+  Vanilla/Raids/BlackwingLair/instance_blackwing_lair.cpp)
+set(SC_VAN_MC
+  Vanilla/Raids/MoltenCore/boss_baron_geddon.cpp
+  Vanilla/Raids/MoltenCore/boss_garr.cpp
+  Vanilla/Raids/MoltenCore/boss_gehennas.cpp
+  Vanilla/Raids/MoltenCore/boss_golemagg.cpp
+  Vanilla/Raids/MoltenCore/boss_lucifron.cpp
+  Vanilla/Raids/MoltenCore/boss_magmadar.cpp
+  Vanilla/Raids/MoltenCore/boss_majordomo_executus.cpp
+  Vanilla/Raids/MoltenCore/boss_ragnaros.cpp
+  Vanilla/Raids/MoltenCore/boss_shazzrah.cpp
+  Vanilla/Raids/MoltenCore/boss_sulfuron_harbinger.cpp
+  Vanilla/Raids/MoltenCore/instance_molten_core.cpp
+  Vanilla/Raids/MoltenCore/molten_core.cpp
+  Vanilla/Raids/MoltenCore/molten_core.h)
+
+set(SC_VAN_Raids
+    ${SC_VAN_AQR}
+    ${SC_VAN_AQT}
+    ${SC_VAN_BWL}
+    ${SC_VAN_MC}
+)
+
+source_group(Vanilla\\Raids\\RuinsOfAhnQiraj FILES ${SC_VAN_AQR})
+source_group(Vanilla\\Raids\\TempleOfAhnQiraj FILES ${SC_VAN_AQT})
+source_group(Vanilla\\Raids\\BlackwingLair FILES ${SC_VAN_BWL})
+source_group(Vanilla\\Raids\\MoltenCore FILES ${SC_VAN_MC})
+
+set(scripts_STAT_SRCS__Vanilla
+    ${SC_VAN_Cities}
+    ${SC_VAN_Dungeons}
+    ${SC_VAN_Locations}
+    ${SC_VAN_Raids}
+)
+
+message("  -> Prepared: Kalimdor")

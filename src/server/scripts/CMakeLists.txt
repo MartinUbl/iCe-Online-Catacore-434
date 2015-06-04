@@ -15,34 +15,40 @@ if( USE_SCRIPTPCH )
   )
 endif()
 
+# We just prepare empty PCH list
+set(scripts_STAT_SRCS__PCH
+    ${scripts_STAT_SRCS__PCH})
+
 if( USE_SCRIPTPCH AND MSVC )
-  set(scripts_STAT_SRCS
+  # Fill PCH list with valid precompiled headers, if we want to build with PCH
+  set(scripts_STAT_SRCS__PCH
     PrecompiledHeaders/ScriptPCH.cpp
     PrecompiledHeaders/ScriptPCH.h
   )
+  # Also define extra source group for VS
+  source_group(PrecompiledHeaders FILES ${scripts_STAT_SRCS__PCH})
 endif()
 
 message(STATUS "SCRIPT PREPARATIONS")
-include(Spells/CMakeLists.txt)
 
-include(Examples/CMakeLists.txt)
-
-set(scripts_STAT_SRCS
-  ${scripts_STAT_SRCS}
+# Prepare ScriptedAI files group
+set(scripts_STAT_SRCS__ScriptedAI
   ../game/AI/ScriptedAI/ScriptedEscortAI.cpp
   ../game/AI/ScriptedAI/ScriptedCreature.cpp
   ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
   ../game/AI/ScriptedAI/ScriptedGuardAI.cpp
-  ../game/AI/ScriptedAI/ScriptedSimpleAI.cpp
-)
+  ../game/AI/ScriptedAI/ScriptedSimpleAI.cpp)    
 
+# Spells and Examples are included even when building without scripts
+include(Spells/CMakeLists.txt)
+include(Examples/CMakeLists.txt)
+# If building with scripts, include all subdirectory lists
 if(SCRIPTS)
   include(Cataclysm/CMakeLists.txt)
   include(Custom/CMakeLists.txt)
-  include(OutdoorPvP/CMakeLists.txt)
+  include(PvP/CMakeLists.txt)
   include(TheBurningCrusade/CMakeLists.txt)
-  include(Vanilla/EasternKingdoms/CMakeLists.txt)
-  include(Vanilla/Kalimdor/CMakeLists.txt)
+  include(Vanilla/CMakeLists.txt)
   include(World/CMakeLists.txt)
   include(WrathOfTheLichKing/CMakeLists.txt)
 endif()
@@ -153,6 +159,32 @@ include_directories(
 
 if( WIN32 )
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Zm500")
+endif()
+
+# Define implicit source groups (present even when building without scripts)
+source_group(ScriptedAI FILES ${scripts_STAT_SRCS__ScriptedAI})
+source_group(Examples FILES ${scripts_STAT_SRCS__Examples})
+source_group(Spells FILES ${scripts_STAT_SRCS__Spells})
+set(scripts_STAT_SRCS
+    ${scripts_STAT_SRCS}
+    ${scripts_STAT_SRCS__ScriptedAI}
+    ${scripts_STAT_SRCS__Examples}
+    ${scripts_STAT_SRCS__Spells}
+    ${scripts_STAT_SRCS__PCH})
+
+# If building with scripts, include also appropriate files
+if(SCRIPTS)
+  # Include all subdirectory file listings
+  # They also defined hierarchy (source_group)
+  set(scripts_STAT_SRCS
+      ${scripts_STAT_SRCS}
+      ${scripts_STAT_SRCS__PvP}
+      ${scripts_STAT_SRCS__Vanilla}
+      ${scripts_STAT_SRCS__TheBurningCrusade}
+      ${scripts_STAT_SRCS__WrathOfTheLichKing}
+      ${scripts_STAT_SRCS__Cataclysm}
+      ${scripts_STAT_SRCS__Custom}
+      ${scripts_STAT_SRCS__World})
 endif()
 
 add_library(scripts STATIC ${scripts_STAT_SRCS})

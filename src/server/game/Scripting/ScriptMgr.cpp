@@ -1299,6 +1299,84 @@ void ScriptMgr::OnGroupDisband(Group* group)
     FOREACH_SCRIPT(GroupScript)->OnDisband(group);
 }
 
+template<class TScript>
+void ScriptMgr::ScriptRegistry<TScript>::AddScript(TScript* const script)
+{
+    ASSERT(script);
+
+    // See if the script is using the same memory as another script. If this happens, it means that
+    // someone forgot to allocate new memory for a script.
+    for (ScriptMapIterator it = ScriptPointerList.begin(); it != ScriptPointerList.end(); ++it)
+    {
+        if (it->second == script)
+        {
+            sLog->outError("Script '%s' has same memory pointer as '%s'.",
+                script->GetName().c_str(), it->second->GetName().c_str());
+
+            return;
+        }
+    }
+
+    if (script->IsDatabaseBound())
+    {
+        // Get an ID for the script. An ID only exists if it's a script that is assigned in the database
+        // through a script name (or similar).
+        uint32 id = GetScriptId(script->GetName().c_str());
+        if (id)
+        {
+            // Try to find an existing script.
+            bool existing = false;
+            for (ScriptMapIterator it = ScriptPointerList.begin(); it != ScriptPointerList.end(); ++it)
+            {
+                // If the script names match...
+                if (it->second->GetName() == script->GetName())
+                {
+                    // ... It exists.
+                    existing = true;
+                    break;
+                }
+            }
+
+            // If the script isn't assigned -> assign it!
+            if (!existing)
+            {
+                ScriptPointerList[id] = script;
+                sScriptMgr->IncrementScriptCount();
+            }
+            else
+            {
+                // If the script is already assigned -> delete it!
+                sLog->outError("Script '%s' already assigned with the same script name, so the script can't work.",
+                    script->GetName().c_str());
+
+                ASSERT(false); // Error that should be fixed ASAP.
+            }
+        }
+        else
+        {
+            // The script uses a script name from database, but isn't assigned to anything.
+            if (script->GetName().find("example") == std::string::npos && script->GetName().find("smart") == std::string::npos)
+                sLog->outErrorDb("Script named '%s' does not have a script name assigned in database.",
+                script->GetName().c_str());
+        }
+    }
+    else
+    {
+        // We're dealing with a code-only script; just add it.
+        ScriptPointerList[_scriptIdCounter++] = script;
+        sScriptMgr->IncrementScriptCount();
+    }
+}
+
+template<class TScript>
+TScript* ScriptMgr::ScriptRegistry<TScript>::GetScriptById(uint32 id)
+{
+    ScriptMapIterator it = ScriptPointerList.find(id);
+    if (it != ScriptPointerList.end())
+        return it->second;
+    return NULL;
+}
+
 SpellScriptLoader::SpellScriptLoader(const char* name)
     : ScriptObject(name)
 {
