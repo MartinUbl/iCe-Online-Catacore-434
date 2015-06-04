@@ -90,18 +90,18 @@ set(SC_VAN_WC
   Vanilla/Dungeons/WailingCaverns/wailing_caverns.cpp
   Vanilla/Dungeons/WailingCaverns/wailing_caverns.h)
 set(SC_VAN_ZF
-  Vanilla/Dungeons/Zulfarrak/boss_antusul.cpp
-  Vanilla/Dungeons/Zulfarrak/boss_gahzrilla.cpp
-  Vanilla/Dungeons/Zulfarrak/boss_hydromancer_velratha.cpp
-  Vanilla/Dungeons/Zulfarrak/boss_chief_ukorz_sandscalp.cpp
-  Vanilla/Dungeons/Zulfarrak/boss_nekrum_gutchewer.cpp
-  Vanilla/Dungeons/Zulfarrak/boss_ruuzlu.cpp
-  Vanilla/Dungeons/Zulfarrak/boss_shadowpriest_sezzziz.cpp
-  Vanilla/Dungeons/Zulfarrak/boss_theka_the_martyr.cpp
-  Vanilla/Dungeons/Zulfarrak/boss_witch_doctor_zumrah.cpp
-  Vanilla/Dungeons/Zulfarrak/instance_zulfarrak.cpp
-  Vanilla/Dungeons/Zulfarrak/zulfarrak.cpp
-  Vanilla/Dungeons/Zulfarrak/zulfarrak.h)
+  Vanilla/Dungeons/ZulFarrak/boss_antusul.cpp
+  Vanilla/Dungeons/ZulFarrak/boss_gahzrilla.cpp
+  Vanilla/Dungeons/ZulFarrak/boss_hydromancer_velratha.cpp
+  Vanilla/Dungeons/ZulFarrak/boss_chief_ukorz_sandscalp.cpp
+  Vanilla/Dungeons/ZulFarrak/boss_nekrum_gutchewer.cpp
+  Vanilla/Dungeons/ZulFarrak/boss_ruuzlu.cpp
+  Vanilla/Dungeons/ZulFarrak/boss_shadowpriest_sezzziz.cpp
+  Vanilla/Dungeons/ZulFarrak/boss_theka_the_martyr.cpp
+  Vanilla/Dungeons/ZulFarrak/boss_witch_doctor_zumrah.cpp
+  Vanilla/Dungeons/ZulFarrak/instance_zulfarrak.cpp
+  Vanilla/Dungeons/ZulFarrak/zulfarrak.cpp
+  Vanilla/Dungeons/ZulFarrak/zulfarrak.h)
 set(SC_VAN_BRD
   Vanilla/Dungeons/BlackrockDepths/blackrock_depths.cpp
   Vanilla/Dungeons/BlackrockDepths/blackrock_depths.h
