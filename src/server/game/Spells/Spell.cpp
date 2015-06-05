@@ -7188,9 +7188,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (bg->GetStatus() != STATUS_IN_PROGRESS)
                         return SPELL_FAILED_TRY_AGAIN;
 
+                // Disabled, but left there for future developers:
+                // http://wow.gamepedia.com/Charge (5.6.2015) - "It is possible to Charge mid-air, while jumping, falling or suffering knockback."
+
                 /* not while falling (exclude triggered spells - they are probably casted by another player like Death Grip while jumping) */
-                if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && !IsTriggered() && m_spellInfo->Id != 6544)
-                    return SPELL_FAILED_FALLING;
+                //if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && !IsTriggered() && m_spellInfo->Id != 6544)
+                //    return SPELL_FAILED_FALLING;
 
                 /* exclude flat ground for charge when not in BG */
                 if (!m_caster->ToPlayer()->InBattleground()) {
@@ -7199,8 +7202,17 @@ SpellCastResult Spell::CheckCast(bool strict)
                         break;
                 }
 
+                /* if the spell has custom target (Heroic Leap, ..), proceed to flat ground test */
+                if (m_spellInfo->EffectImplicitTargetA[i] != TARGET_DEST_DEST)
+                    break;
+
                 /* Ignore next triggered jump like checks if spell was triggered*/
                 if (IsTriggered())
+                    break;
+
+                float zdelta = m_caster->GetPositionZ() - dpos->GetPositionZ();
+                /* automatically allow jumps up to 2y above and any lower level (so everything under player is allowed) */
+                if (zdelta > -2.0f)
                     break;
 
                 /* destination must stand on flat ground (in players map) */
