@@ -67,7 +67,7 @@ namespace MMAP
 #ifdef _WIN32
         return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS);
 #else
-        return ((mapId == 530) && sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS));
+        return ((mapId == 530 || mapId == 939) && sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS));
 #endif
         //return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS) && g_mmapDisabledIds->find(mapId) == g_mmapDisabledIds->end();
     }
