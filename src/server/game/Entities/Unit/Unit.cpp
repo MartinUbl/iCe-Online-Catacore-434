@@ -1853,7 +1853,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage, SpellEnt
     return (newdamage > 1) ? newdamage : 1;
 }
 
-uint32 Unit::CalcSpellResistance(Unit* victim, SpellSchoolMask schoolMask, SpellEntry const* spellInfo) const
+uint32 Unit::CalcSpellResistance(Unit* victim, SpellSchoolMask schoolMask, SpellEntry const* spellInfo, bool exact) const
 {
     // Magic damage, check for resists
     if (!(schoolMask & SPELL_SCHOOL_MASK_SPELL))
@@ -1897,6 +1897,9 @@ uint32 Unit::CalcSpellResistance(Unit* victim, SpellSchoolMask schoolMask, Spell
 
     if (victimResistance <= 0)
         return 0;
+
+    if (exact)
+        return victimResistance;
 
     float averageResist = float(victimResistance) / float(victimResistance + resistanceConstant);
 
@@ -2949,6 +2952,24 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
    // Roll chance
     if (rand < tmp)
         return SPELL_MISS_RESIST;
+
+    // Chance of fully resisting spell that does not deal damage
+    bool isDirectDamaging = false;
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+        if (spell->Effect[i] == SPELL_EFFECT_SCHOOL_DAMAGE)
+            isDirectDamaging = true;
+
+    // non-direct damaging spells have chance to be fully resisted
+    if (!isDirectDamaging)
+    {
+        SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
+        // 32.66 is let's say "percent cap" of chance at 285 resistance (hard resistance cap)
+        // CalcSpellResistance with exact=true returns resistance with subtracted spell penetration
+        float res_chance = std::min(float(CalcSpellResistance(pVictim, schoolMask, spell, true)), 285.0f) * 32.66f / 285.0f;
+
+        if (roll_chance_f(res_chance))
+            return SPELL_MISS_RESIST;
+    }
 
     // cast by caster in front of victim
     if (pVictim->HasInArc(M_PI, this) || pVictim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
