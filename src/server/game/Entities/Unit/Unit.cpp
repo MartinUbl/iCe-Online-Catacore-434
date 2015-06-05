@@ -16003,7 +16003,7 @@ DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
     return DIMINISHING_LEVEL_1;
 }
 
-void Unit::IncrDiminishing(DiminishingGroup group)
+void Unit::IncrDiminishing(DiminishingGroup group, bool triggered)
 {
     // Checking for existing in the table
     for (Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
@@ -16015,6 +16015,29 @@ void Unit::IncrDiminishing(DiminishingGroup group)
         return;
     }
     m_Diminishing.push_back(DiminishingReturn(group,getMSTime(),DIMINISHING_LEVEL_2));
+
+    if (!triggered)
+    {
+        switch (group)
+        {
+            case DIMINISHING_SHARED_DEEPFREEZE:
+                IncrDiminishing(DIMINISHING_CONTROL_STUN, true);
+                // no break on purpose
+            case DIMINISHING_DISORIENT:
+                IncrDiminishing(DIMINISHING_SHARED_RINGOFFROST, true);
+                break;
+
+            case DIMINISHING_SHARED_RINGOFFROST:
+                IncrDiminishing(DIMINISHING_DISORIENT, true);
+                // no break on purpose
+            case DIMINISHING_CONTROL_STUN:
+                IncrDiminishing(DIMINISHING_SHARED_DEEPFREEZE, true);
+                break;
+
+            default:
+                break;
+        }
+    }
 }
 
 float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, Unit *caster, DiminishingLevels Level, int32 limitduration)

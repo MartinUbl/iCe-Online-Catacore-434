@@ -2921,6 +2921,9 @@ enum DiminishingGroup
     DIMINISHING_DEATHCOIL,                                  // Death Coil Diminish only with another Death Coil
     // Druid Specific
     DIMINISHING_CYCLONE,                                    // From 2.3.0
+    // Mage Specific
+    DIMINISHING_SHARED_RINGOFFROST,                         // Ring of Frost shares category with disorient and deepfreeze
+    DIMINISHING_SHARED_DEEPFREEZE,
     // Shared Class Specific
     DIMINISHING_DISARM,                                     // From 2.3.0
     DIMINISHING_SILENCE,                                    // From 2.3.0

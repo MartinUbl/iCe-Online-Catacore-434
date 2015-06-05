@@ -3062,7 +3062,10 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_CONTROL_ROOT;
             // Ring of Frost
             if (spellproto->Id == 82691)
-                return DIMINISHING_DISORIENT;
+                return DIMINISHING_SHARED_RINGOFFROST; //return DIMINISHING_DISORIENT;
+            // Deep Freeze
+            if (spellproto->Id == 44572)
+                return DIMINISHING_SHARED_DEEPFREEZE;
             // Slow
             if (spellproto->Id == 31589)
                 return DIMINISHING_LIMITONLY;
@@ -3321,6 +3324,8 @@ bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
         case DIMINISHING_CYCLONE:
         case DIMINISHING_BANISH:
         case DIMINISHING_DISORIENT_SPECIAL:
+        case DIMINISHING_SHARED_RINGOFFROST:
+        case DIMINISHING_SHARED_DEEPFREEZE:
         case DIMINISHING_LIMITONLY:
             return true;
         default:
@@ -3359,6 +3364,8 @@ DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
         case DIMINISHING_FREEZE_SLEEP:
         case DIMINISHING_BANISH:
         case DIMINISHING_DISORIENT_SPECIAL:
+        case DIMINISHING_SHARED_RINGOFFROST:
+        case DIMINISHING_SHARED_DEEPFREEZE:
         case DIMINISHING_KNOCKOUT:
             return DRTYPE_PLAYER;
         default:
