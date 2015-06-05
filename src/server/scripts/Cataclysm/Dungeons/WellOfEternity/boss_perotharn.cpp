@@ -398,6 +398,9 @@ public:
             Summons.DespawnAll();
             PlayQuote(me,onDeathQuote);
 
+            if (GameObject * pDoor = me->FindNearestGameObject(GO_SMALL_FIREWALL_DOOR,250.0f))
+                pDoor->Delete();
+
             if (pInstance)
             {
                 CAST_WOE_INSTANCE(pInstance)->UnRegisterIllidanVictim(me->GetGUID());
@@ -408,23 +411,6 @@ public:
                 {
                     pIllidan->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_DEFEATED_STAIRS_WP, afterPerotharnDeathWP[0],true,false);
                     pIllidan->AI()->DoAction(ACTION_AFTER_PEROTHARN_DEATH);
-                }
-            }
-
-            // TODO: Research what is this for
-            if (me->GetMap()->IsHeroic())
-            {
-                if (!me->GetMap()->GetPlayers().isEmpty())
-                {
-                    for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
-                    {
-                        if (!i->getSource())
-                            continue;
-
-                        i->getSource()->KilledMonsterCredit(58239,0);
-                        i->getSource()->KilledMonsterCredit(58240,0);
-                        i->getSource()->KilledMonsterCredit(58241,0);
-                    }
                 }
             }
         }

@@ -221,17 +221,36 @@ void INST_WOE_SCRIPT::TurnOffConnectors(uint32 connEntry, Creature * source)
 
 void INST_WOE_SCRIPT::CrystalDestroyed(uint32 crystalXCoord)
 {
+    uint32 portalQuestCreditEntry = 0;
+
     switch (crystalXCoord)
     {
         case FIRST_CRYSTAL_X_COORD:
+            portalQuestCreditEntry = PORTAL_01_KILL_CREDIT;
             crystals[0] = CRYSTAL_INACTIVE;
             break;
         case SECOND_CRYSTAL_X_COORD:
+            portalQuestCreditEntry = PORTAL_02_KILL_CREDIT;
             crystals[1] = CRYSTAL_INACTIVE;
             break;
         case THIRD_CRYSTAL_X_COORD:
+            portalQuestCreditEntry = PORTAL_03_KILL_CREDIT;
             crystals[2] = CRYSTAL_INACTIVE;
             break;
+        default:
+            break;
+    }
+
+    if (Map * map = this->instance)
+    {
+        for (Map::PlayerList::const_iterator i = map->GetPlayers().begin(); i != map->GetPlayers().end(); ++i)
+        {
+            Player * player = i->getSource();
+            if (player && player->GetQuestStatus(QUEST_IN_UNENDING_NUMBERS) == QUEST_STATUS_INCOMPLETE)
+            {
+                player->KilledMonsterCredit(portalQuestCreditEntry, 0);
+            }
+        }
     }
 }
 

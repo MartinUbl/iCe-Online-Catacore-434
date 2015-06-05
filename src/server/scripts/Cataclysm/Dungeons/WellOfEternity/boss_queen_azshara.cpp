@@ -328,17 +328,14 @@ public:
                         pInstance->SetData(DATA_QUEEN_AZSHARA, DONE);
                     }
 
-                    // TODO: Again research this
-                    if (me->GetMap()->IsHeroic())
+                    if (Map * map = me->GetMap())
                     {
-                        if (!me->GetMap()->GetPlayers().isEmpty())
+                        for (Map::PlayerList::const_iterator i = map->GetPlayers().begin(); i != map->GetPlayers().end(); ++i)
                         {
-                            for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
+                            Player * player = i->getSource();
+                            if (player && player->GetQuestStatus(QUEST_THE_VAINGLORIOUS) == QUEST_STATUS_INCOMPLETE)
                             {
-                                if (!i->getSource())
-                                    continue;
-
-                                i->getSource()->KilledMonsterCredit(me->GetEntry(),0);
+                                player->KilledMonsterCredit(me->GetEntry(), 0);
                             }
                         }
                     }
@@ -863,7 +860,8 @@ public:
             // Summon and carry captain Varothen
             if (Creature * pCaptain = me->SummonCreature(ENTRY_CAPTAIN_VAROTHEN, 0, 0, 0))
             {
-                pCaptain->EnterVehicle(me, -1);
+                pCaptain->EnterVehicle(me, 0);
+
                 pCaptain->SetReactState(REACT_PASSIVE);
                 pCaptain->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 pCaptain->ForcedDespawn(60000);
@@ -999,6 +997,22 @@ public:
 
             lullabyTimer = urand(2000, 5000);
             parfumeTimer = urand(4000, 6000);
+        }
+
+        void JustDied(Unit*) override
+        {
+            if (Map * map = me->GetMap())
+            {
+                for (Map::PlayerList::const_iterator i = map->GetPlayers().begin(); i != map->GetPlayers().end(); ++i)
+                {
+                    Player * player = i->getSource();
+                    if (player && player->GetQuestStatus(QUEST_DOCUMENTING_THE_TIMEWAYS) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        player->CastSpell(me, SPELL_ARCHIVAL_HANDMAIDEN_CHANNEL, true);
+                        me->CastSpell(player, SPELL_ARCHIVAL_HANDMAIDEN_CREDIT, true);
+                    }
+                }
+            }
         }
 
         void MovementInform(uint32 type, uint32 id) override

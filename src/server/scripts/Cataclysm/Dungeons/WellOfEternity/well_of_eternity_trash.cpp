@@ -110,7 +110,7 @@ namespace Illidan
         {26105, "Destroy the portal energy focus!" },
         {26104, "Smash the crystal. We need to move." }
     };
-    static const SimpleQuote onLeaving = {26055, "Were leaving, stay close."};
+    static const SimpleQuote onLeaving = {26055, "We're leaving, stay close."};
 
     const char * GOSSIP_ITEM_ILLIDAN_1 = "I am ready to be hidden by your shadowcloak.";
     const char * GOSSIP_ITEM_ILLIDAN_2 = "Let's go!";
@@ -153,7 +153,7 @@ public:
             canMoveToNextPoint = false;
             me->SetWalk(true);
             me->SetSpeed(MOVE_WALK, 1.28571f, true);
-            me->ForcedDespawn(5 * MINUTE * IN_MILLISECONDS); // default
+            me->ForcedDespawn(2 * MINUTE * IN_MILLISECONDS); // default
         }
 
         InstanceScript * pInstance;
@@ -244,6 +244,11 @@ public:
             waitTimer = MAX_TIMER;
             guardMoveTimer = MAX_TIMER;
             distractionTimer = 10000;
+        }
+
+        void EnterCombat(Unit*) override
+        {
+            me->ForcedDespawn(2 * MINUTE * IN_MILLISECONDS);
         }
 
         void EnterEvadeMode()  override
@@ -633,6 +638,19 @@ public:
                 {
                     if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
                         pIllidan->AI()->DoAction(ACTION_ILLIDAN_DELAY_MOVE);
+
+                    if (Map * map = me->GetMap())
+                    {
+                        for (Map::PlayerList::const_iterator i = map->GetPlayers().begin(); i != map->GetPlayers().end(); ++i)
+                        {
+                            Player * player = i->getSource();
+                            if (player && player->GetQuestStatus(QUEST_DOCUMENTING_THE_TIMEWAYS) == QUEST_STATUS_INCOMPLETE)
+                            {
+                                player->CastSpell(me,SPELL_ARCHIVAL_DEMON_CHANNEL,true);
+                                me->CastSpell(player,SPELL_ARCHIVAL_DEMON_CREDIT,true);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -1317,8 +1335,11 @@ namespace Illidan
                 return;
             }
 
-            uint32 id = uint32(CAST_WOE_INSTANCE(pInstance)->GetIllidanMoveStep()) + 1;
-            me->GetMotionMaster()->MovePoint(id, illidanPos[id],true);
+            if (player->IsGameMaster())
+            {
+                uint32 id = uint32(CAST_WOE_INSTANCE(pInstance)->GetIllidanMoveStep()) + 1;
+                me->GetMotionMaster()->MovePoint(id, illidanPos[id], true);
+            }
         }
 
         void UpdateAI(const uint32 diff) override
@@ -1601,7 +1622,7 @@ namespace Illidan
                     pAI->HandleVehicle(true);
                     if (pAI->pInstance)
                     {
-                        pAI->pInstance->DoUpdateWorldState(WORLD_STATE_DEMONS_IN_COURTYARD, 1); // lets see how it looks like
+                        //pAI->pInstance->DoUpdateWorldState(WORLD_STATE_DEMONS_IN_COURTYARD, 1); // lets see how it looks like
                         pAI->pInstance->DoAddAuraOnPlayers(NULL, SPELL_SHADOW_CLOAK_TRIGGERER);
                     }
 

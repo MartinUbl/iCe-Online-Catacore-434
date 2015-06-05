@@ -553,6 +553,18 @@ public:
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GIFT_OF_SARGERAS_INSTANT);
                 }
 
+                if (Map * map = me->GetMap())
+                {
+                    for (Map::PlayerList::const_iterator i = map->GetPlayers().begin(); i != map->GetPlayers().end(); ++i)
+                    {
+                        Player * player = i->getSource();
+                        if (player && player->GetQuestStatus(QUEST_THE_PATH_TO_THE_DRAGON_SOUL) == QUEST_STATUS_INCOMPLETE)
+                        {
+                            player->KilledMonsterCredit(me->GetEntry(), 0);
+                        }
+                    }
+                }
+
                 jumpTimer = MAX_TIMER;
             }
             else jumpTimer -= diff;
@@ -762,12 +774,6 @@ public:
             PlaySimpleQuote(me, Varothen::onKill[urand(0, MAX_KILL_QUOTES - 1)]);
         }
 
-        void SpellHit(Unit* who, const SpellEntry* spellInfo) override
-        {
-            if (spellInfo->Id == SPELL_ARCHIVED_VAROTHEN_1)
-                me->CastSpell(who, SPELL_ARCHIVED_VAROTHEN_2, true); // kill credit effect
-        }
-
         void JustDied(Unit*) override
         {
             PlaySimpleQuote(me, Varothen::onDeath, false);
@@ -779,17 +785,22 @@ public:
             if (Creature* pMannoroth = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MANNOROTH)))
                 pMannoroth->AI()->DoAction(ACTION_VAROTHEN_DIED);
 
-            // TODO: Research this
             if (pInstance)
             {
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
-                Map::PlayerList const &PlayerList = pInstance->instance->GetPlayers();
-                if (!PlayerList.isEmpty())
-                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                        if (Player* pPlayer = i->getSource())
-                            if (me->GetDistance(pPlayer) <= 50.0f && pPlayer->GetQuestStatus(QUEST_DOCUMENTING_THE_TIMEWAYS) == QUEST_STATUS_INCOMPLETE)
-                                pPlayer->CastSpell(me, SPELL_ARCHIVED_VAROTHEN_1, true);
+                if (Map * map = me->GetMap())
+                {
+                    for (Map::PlayerList::const_iterator i = map->GetPlayers().begin(); i != map->GetPlayers().end(); ++i)
+                    {
+                        Player * player = i->getSource();
+                        if (player && player->GetQuestStatus(QUEST_DOCUMENTING_THE_TIMEWAYS) == QUEST_STATUS_INCOMPLETE)
+                        {
+                            player->CastSpell(me, SPELL_ARCHIVAL_VAROTHEN_CHANNEL, true);
+                            me->CastSpell(player, SPELL_ARCHIVAL_VAROTHEN_CREDIT, true);
+                        }
+                    }
+                }
             }
         }
 
