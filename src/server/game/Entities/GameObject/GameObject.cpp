@@ -477,8 +477,14 @@ void GameObject::Update(uint32 diff)
 
                         m_cooldownTime = time(NULL) + 4;        // 4 seconds
 
-                        if (owner)  // || goInfo->trap.charges == 1)
+                        if (owner)// || goInfo->trap.charges == 1)
                             SetLootState(GO_JUST_DEACTIVATED);
+                        // Shadow Sight objects from arena (special case)
+                        else if (goInfo->id == 184663 || goInfo->id == 184664)
+                        {
+                            SetRespawnTime(SHADOWSIGHT_RESPAWN_TIME); // 90s respawn time
+                            SetLootState(GO_JUST_DEACTIVATED);
+                        }
 
                         if (IsBattlegroundTrap && ok->GetTypeId() == TYPEID_PLAYER)
                         {

@@ -119,6 +119,7 @@ enum BattlegroundTimeIntervals
     RESPAWN_ONE_DAY                 = 86400,                // secs
     RESPAWN_IMMEDIATELY             = 0,                    // secs
     BUFF_RESPAWN_TIME               = 180,                  // secs
+    SHADOWSIGHT_RESPAWN_TIME        = 90,                   // secs
     BATTLEGROUND_COUNTDOWN_MAX      = 120,                  // secs
     ARENA_COUNTDOWN_MAX             = 60,                   // secs
     ARENA_CHECK_UNDER_MAP_TIME      = 8,                    // secs
