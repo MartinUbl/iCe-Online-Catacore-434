@@ -51,6 +51,7 @@ class AuraApplication
         uint8 m_slot;                                   // Aura slot on unit
         uint8 m_flags;                                  // Aura info flag
         uint8 m_effectsToApply;                         // Used only at spell hit to determine which effect should be applied
+        uint32 m_applySlot;                             // Aura apply slot - to determine order of application
         AuraRemoveMode m_removeMode:8;                  // Store info for know remove aura reason
         bool m_needClientUpdate:1;
 
@@ -67,6 +68,8 @@ class AuraApplication
         uint8 GetSlot() const { return m_slot; }
         uint8 GetFlags() const { return m_flags; }
         uint8 GetEffectMask() const { return m_flags & (AFLAG_EFF_INDEX_0 | AFLAG_EFF_INDEX_1 | AFLAG_EFF_INDEX_2); }
+        uint32 GetApplySlot() const { return m_applySlot; }
+        void SetApplySlot(uint32 slot) { m_applySlot = slot; }
         bool HasEffect(uint8 effect) const { ASSERT(effect < MAX_SPELL_EFFECTS);  return m_flags & (1<<effect); }
         bool IsPositive() const { return m_flags & AFLAG_POSITIVE; }
         bool IsNegative() const { return m_flags & AFLAG_NEGATIVE; }

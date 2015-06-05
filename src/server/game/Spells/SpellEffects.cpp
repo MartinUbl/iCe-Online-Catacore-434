@@ -5941,7 +5941,8 @@ void Spell::EffectLearnSpell(SpellEffIndex effIndex)
 }
 
 typedef std::list< std::pair<uint32, uint64> > DispelList;
-typedef std::list< std::pair<Aura *, uint8> > DispelChargesList;
+typedef std::pair<AuraApplication *, uint8> DispelChargePair;
+typedef std::list< DispelChargePair > DispelChargesList;
 void Spell::EffectDispel(SpellEffIndex effIndex)
 {
     if (!unitTarget)
@@ -6007,9 +6008,18 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
             bool dispel_charges = aura->GetSpellProto()->AttributesEx7 & SPELL_ATTR7_DISPEL_CHARGES;
             uint8 charges = dispel_charges ? aura->GetCharges() : aura->GetStackAmount();
             if (charges > 0)
-                dispel_list.push_back(std::make_pair(aura, charges));
+                dispel_list.push_back(std::make_pair(aurApp, charges));
         }
     }
+
+    // Sort auras by their application order, to remove newest
+    struct {
+        bool operator()(DispelChargePair a, DispelChargePair b)
+        {
+            return a.first->GetApplySlot() > b.first->GetApplySlot();
+        }
+    } applySlotLess;
+    dispel_list.sort(applySlotLess);
 
     if (dispel_list.empty())
         return;
@@ -6017,17 +6027,22 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     // Ok if exist some buffs for dispel try dispel it
     uint32 failCount = 0;
     DispelList success_list;
+    Aura* currAura;
     WorldPacket dataFail(SMSG_DISPEL_FAILED, 8+8+4+4+damage*4);
     // dispel N = damage buffs (or while exist buffs for dispel)
     for (int32 count = 0; count < damage && !dispel_list.empty();)
     {
         // Random select buff for dispel
         DispelChargesList::iterator itr = dispel_list.begin();
-        std::advance(itr, urand(0, dispel_list.size() - 1));
+
+        if (!itr->first || !itr->first->GetBase())
+            continue;
+
+        currAura = itr->first->GetBase();
 
         bool success = false;
         // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."
-        if (!GetDispelChance(itr->first->GetCaster(), unitTarget, itr->first->GetId(), !unitTarget->IsFriendlyTo(m_caster), &success))
+        if (!GetDispelChance(currAura->GetCaster(), unitTarget, currAura->GetId(), !unitTarget->IsFriendlyTo(m_caster), &success))
         {
             dispel_list.erase(itr);
             continue;
@@ -6036,7 +6051,7 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
         {
             if (success)
             {
-                success_list.push_back(std::make_pair(itr->first->GetId(), itr->first->GetCasterGUID()));
+                success_list.push_back(std::make_pair(currAura->GetId(), currAura->GetCasterGUID()));
                 --itr->second;
                 if (itr->second <= 0)
                     dispel_list.erase(itr);
@@ -6051,7 +6066,7 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
                     dataFail << uint32(m_spellInfo->Id);                // dispel spell id
                 }
                 ++failCount;
-                dataFail << uint32(itr->first->GetId());                         // Spell Id
+                dataFail << uint32(currAura->GetId());                         // Spell Id
             }
             ++count;
         }
@@ -10374,9 +10389,18 @@ void Spell::EffectStealBeneficialBuff(SpellEffIndex effIndex)
             bool dispel_charges = aura->GetSpellProto()->AttributesEx7 & SPELL_ATTR7_DISPEL_CHARGES;
             uint8 charges = dispel_charges ? aura->GetCharges() : aura->GetStackAmount();
             if (charges > 0)
-                steal_list.push_back(std::make_pair(aura, charges));
+                steal_list.push_back(std::make_pair(aurApp, charges));
         }
     }
+
+    // Sort auras by their application order, to remove newest
+    struct {
+        bool operator()(DispelChargePair a, DispelChargePair b)
+        {
+            return a.first->GetApplySlot() > b.first->GetApplySlot();
+        }
+    } applySlotLess;
+    steal_list.sort(applySlotLess);
 
     if (steal_list.empty())
         return;
@@ -10384,17 +10408,22 @@ void Spell::EffectStealBeneficialBuff(SpellEffIndex effIndex)
     // Ok if exist some buffs for dispel try dispel it
     uint32 failCount = 0;
     DispelList success_list;
+    Aura* currAura;
     WorldPacket dataFail(SMSG_DISPEL_FAILED, 8+8+4+4+damage*4);
     // dispel N = damage buffs (or while exist buffs for dispel)
     for (int32 count = 0; count < damage && !steal_list.empty();)
     {
         // Random select buff for dispel
         DispelChargesList::iterator itr = steal_list.begin();
-        std::advance(itr, urand(0, steal_list.size() - 1));
+
+        if (!itr->first || !itr->first->GetBase())
+            continue;
+
+        currAura = itr->first->GetBase();
 
         bool success = false;
         // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."
-        if (!GetDispelChance(itr->first->GetCaster(), unitTarget, itr->first->GetId(), !unitTarget->IsFriendlyTo(m_caster), &success))
+        if (!GetDispelChance(currAura->GetCaster(), unitTarget, currAura->GetId(), !unitTarget->IsFriendlyTo(m_caster), &success))
         {
             steal_list.erase(itr);
             continue;
@@ -10403,7 +10432,7 @@ void Spell::EffectStealBeneficialBuff(SpellEffIndex effIndex)
         {
             if (success)
             {
-                success_list.push_back(std::make_pair(itr->first->GetId(), itr->first->GetCasterGUID()));
+                success_list.push_back(std::make_pair(currAura->GetId(), currAura->GetCasterGUID()));
                 --itr->second;
                 if (itr->second <= 0)
                     steal_list.erase(itr);
@@ -10418,7 +10447,7 @@ void Spell::EffectStealBeneficialBuff(SpellEffIndex effIndex)
                     dataFail << uint32(m_spellInfo->Id);                // dispel spell id
                 }
                 ++failCount;
-                dataFail << uint32(itr->first->GetId());                         // Spell Id
+                dataFail << uint32(currAura->GetId());                         // Spell Id
             }
             ++count;
         }

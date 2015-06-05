@@ -18153,6 +18153,34 @@ bool Unit::InitTamedPet(Pet * pet, uint8 level, uint32 spell_id)
     return true;
 }
 
+void Unit::RecountAuraApplySlots()
+{
+    uint32 minimal = UINT_MAX;
+
+    // find all visible auras
+    Unit::VisibleAuraMap const * visibleAuras = GetVisibleAuras();
+    // iterate through them
+    Unit::VisibleAuraMap::const_iterator itr;
+    // find minimal apply slot
+    for (itr = visibleAuras->find(0); itr != visibleAuras->end(); ++itr)
+    {
+        if (itr->second->GetApplySlot() > 0 && minimal > itr->second->GetApplySlot())
+            minimal = itr->second->GetApplySlot();
+    }
+
+    // if no such thing, as minimal apply slot (no auras to recount), return
+    if (minimal == UINT_MAX)
+        return;
+
+    // we will decrease apply slot by "minimal-1"
+    minimal -= 1;
+
+    // all visible auras should be recounted
+    for (itr = visibleAuras->find(0); itr != visibleAuras->end(); ++itr)
+        if (itr->second->GetApplySlot() > 0)
+            itr->second->SetApplySlot(itr->second->GetApplySlot() - minimal);
+}
+
 bool Unit::CanReachByPath(Unit const* target) const
 {
     if (!IsInWorld() || !target || !target->IsInWorld())

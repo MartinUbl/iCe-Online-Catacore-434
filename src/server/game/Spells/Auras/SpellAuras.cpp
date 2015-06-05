@@ -47,10 +47,18 @@ m_effectsToApply(effMask), m_removeMode(AURA_REMOVE_NONE), m_needClientUpdate(fa
 {
     ASSERT(GetTarget() && GetBase());
 
+    m_applySlot = 0;
+
     if (GetBase()->CanBeSentToClient())
     {
         // Try find slot for aura
         uint8 slot = MAX_AURAS;
+        uint32 applySlot = 0;
+
+        Unit::VisibleAuraMap const * visibleAuras = GetTarget()->GetVisibleAuras();
+        // lookup for free slots in units visibleAuras
+        Unit::VisibleAuraMap::const_iterator itr;
+
         // Lookup for auras already applied from spell
         if (AuraApplication * foundAura = GetTarget()->GetAuraApplication(GetBase()->GetId(), GetBase()->GetCasterGUID(), GetBase()->GetCastItemGUID()))
         {
@@ -59,9 +67,8 @@ m_effectsToApply(effMask), m_removeMode(AURA_REMOVE_NONE), m_needClientUpdate(fa
         }
         else
         {
-            Unit::VisibleAuraMap const * visibleAuras = GetTarget()->GetVisibleAuras();
             // lookup for free slots in units visibleAuras
-            Unit::VisibleAuraMap::const_iterator itr = visibleAuras->find(0);
+            itr = visibleAuras->find(0);
             for (uint32 freeSlot = 0; freeSlot < MAX_AURAS; ++itr , ++freeSlot)
             {
                 if (itr == visibleAuras->end() || itr->first != freeSlot)
@@ -72,10 +79,33 @@ m_effectsToApply(effMask), m_removeMode(AURA_REMOVE_NONE), m_needClientUpdate(fa
             }
         }
 
+        // lookup for free slots in units visibleAuras
+        for (itr = visibleAuras->find(0); itr != visibleAuras->end(); ++itr)
+        {
+            if (itr->second->GetApplySlot() > applySlot)
+                applySlot = itr->second->GetApplySlot();
+        }
+        applySlot += 1;
+
+        // if applySlot exceedes some limit (lets say 50000), perform recount (so the numbering would fill the holes, etc.)
+        if (applySlot > 50000)
+        {
+            GetTarget()->RecountAuraApplySlots();
+
+            // look again
+            for (itr = visibleAuras->find(0); itr != visibleAuras->end(); ++itr)
+            {
+                if (itr->second->GetApplySlot() > applySlot)
+                    applySlot = itr->second->GetApplySlot();
+            }
+            applySlot += 1;
+        }
+
         // Register Visible Aura
         if (slot < MAX_AURAS)
         {
             m_slot = slot;
+            m_applySlot = applySlot;
             GetTarget()->SetVisibleAura(slot, this);
             SetNeedClientUpdate();
             sLog->outDebug("Aura: %u Effect: %d put to unit visible auras slot: %u", GetBase()->GetId(), GetEffectMask(), slot);
