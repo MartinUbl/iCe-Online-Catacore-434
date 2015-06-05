@@ -458,7 +458,10 @@ bool Vehicle::AddPassenger(WorldObject *obj, int8 seatId, bool byAura)
             unit->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
-    unit->UpdateObjectVisibility(false);
+    if (obj->GetTypeId() == TYPEID_UNIT)
+        unit->DestroyForNearbyPlayers();
+
+    unit->UpdateObjectVisibility(true);
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
         sScriptMgr->OnAddPassenger(this, unit, seatId);
