@@ -1093,6 +1093,7 @@ void AddSC_chat_log();
 void AddSC_custom_events();
 void AddSC_workarounds();
 void AddSC_ice_vanoce();
+void AddSC_soulwell_transfer();
 
 // World Bosses
 void AddSC_boss_kruul();
@@ -2064,11 +2065,10 @@ void AddBattlegroundScripts()
 void AddCustomScripts()
 {
 #ifdef SCRIPTS
-
     // custom
     AddSC_custom_events();
     AddSC_workarounds();
     AddSC_ice_vanoce();
-
+    AddSC_soulwell_transfer();
 #endif
 }
