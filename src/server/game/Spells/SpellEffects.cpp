@@ -7218,6 +7218,12 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
         case 61895:
             m_damage += (m_damage * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 25) / 100;
             break;
+        case 102260: // WoE Eternal champion damage
+            m_damage = urand(15000,16000);
+            break;
+        case 102257:
+            m_damage = urand(12000,14000);
+            break;
     }
 
     // Mostly meteor like spells (divided damage to targets)

@@ -446,7 +446,13 @@ public:
             if (introStep < 5 && introTimer <= diff)
             {
                 if (introStep < 3)
-                    PlayQuote(me,introQuotes[introStep]);
+                {
+                    if (introStep == 2)
+                        if (Creature * pLegionDemon = ObjectAccessor::GetCreature(*me, felGuardGUID))
+                            pLegionDemon->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+
+                    PlayQuote(me, introQuotes[introStep]);
+                }
                 else
                 {
                     if (introStep == 4)
@@ -933,6 +939,105 @@ public:
     };
 };
 
+class npc_legion_spawn_controller_woe : public CreatureScript
+{
+public:
+    npc_legion_spawn_controller_woe() : CreatureScript("npc_legion_spawn_controller_woe") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_legion_spawn_controller_woeAI(creature);
+    }
+
+    struct npc_legion_spawn_controller_woeAI : public ScriptedAI
+    {
+        npc_legion_spawn_controller_woeAI(Creature* creature) : ScriptedAI(creature)
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+            me->SetReactState(REACT_PASSIVE);
+            me->setFaction(35);
+            legionSummonTimer = 1000;
+            pInstance = me->GetInstanceScript();
+        }
+
+        DemonWave waveCounter = WAVE_ONE;
+        InstanceScript * pInstance;
+        uint32 legionSummonTimer;
+
+        void SummonAndInitDemon(Creature * summoner, Position summonPos, DemonDirection dir, DemonWave wave, Position movePos, WayPointStep wpID)
+        {
+            Creature * pDemon = nullptr;
+
+            // Dont summon other demons if demon portal is closing -> cause crystals were destroyed
+            if (CAST_WOE_INSTANCE(pInstance)->crystals[dir] == CRYSTAL_INACTIVE)
+                return;
+
+            pDemon = summoner->SummonCreature(LEGION_PORTAL_DEMON, summonPos);
+
+            if (pDemon)
+            {
+                pDemon->AI()->SetData(DEMON_DATA_DIRECTION, dir);
+                pDemon->AI()->SetData(DEMON_DATA_WAVE, wave);
+                pDemon->GetMotionMaster()->MovePoint(wpID, movePos, true);
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (!pInstance)
+                return;
+
+            if (legionSummonTimer <= diff)
+            {
+                if (Creature* pPerotharn = Unit::GetCreature(*me, pInstance->GetData64(DATA_PEROTHARN)))
+                {
+                    if (pPerotharn->isDead() || CAST_WOE_INSTANCE(pInstance)->crystalsRemaining == 0)
+                        return; //  be carefull
+
+                    switch (waveCounter)
+                    {
+                        case WAVE_ONE: // Going to mid position (LEFT/RIGHT)
+                        {
+                            SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_LEFT],
+                                DIRECTION_LEFT, waveCounter, midPositions[DIRECTION_LEFT], WP_MID);
+
+                            SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_RIGHT],
+                                DIRECTION_RIGHT, waveCounter, midPositions[DIRECTION_RIGHT], WP_MID);
+
+                            waveCounter = WAVE_TWO;
+                            break;
+                        }
+                        case WAVE_TWO: // Going to farther mid position (LEFT/RIGHT)
+                        {
+                            SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_LEFT],
+                                DIRECTION_LEFT, waveCounter, midPositions2[DIRECTION_LEFT], WP_MID);
+
+                            SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_RIGHT],
+                                DIRECTION_RIGHT, waveCounter, midPositions2[DIRECTION_RIGHT], WP_MID);
+
+                            waveCounter = WAVE_THREE;
+                            break;
+                        }
+                        case WAVE_THREE: // Going straight till end (END)
+                        {
+                            SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_LEFT],
+                                DIRECTION_STRAIGHT, waveCounter, middleEndPositions[DIRECTION_LEFT], WP_MIDDLE_END);
+
+                            SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_RIGHT],
+                                DIRECTION_STRAIGHT, waveCounter, middleEndPositions[DIRECTION_RIGHT], WP_MIDDLE_END);
+
+                            waveCounter = WAVE_ONE;
+                            break;
+                        }
+                    }
+                }
+                legionSummonTimer = 1500;
+            }
+            else legionSummonTimer -= diff;
+        }
+    };
+};
+
 class spell_perotharn_punishing_flames_dmg : public SpellScriptLoader
 {
 public:
@@ -982,6 +1087,7 @@ void AddSC_boss_perotharn()
     new npc_hunting_summoner_woe(); // 56248
     new npc_hunting_puffer_woe(); // 56182
     new npc_eye_of_perotharn_woe(); // 55868
+    new npc_legion_spawn_controller_woe(); // 54516
 
     new spell_perotharn_punishing_flames_dmg(); // 107536 
 }

@@ -4876,6 +4876,7 @@ void SpellMgr::LoadSpellCustomAttr()
             //spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
             break;
         case 108759: // Evil Dragon Soul Beam (Deathwing)
+        case 108809: // Evil Dragon Soul Beam (Old God)
         case 104961: // Fel Drain
         case 105041: // Nether tear
         case 107900: // Demonic Warding

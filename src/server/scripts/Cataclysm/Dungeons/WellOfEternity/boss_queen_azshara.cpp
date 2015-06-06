@@ -995,8 +995,8 @@ public:
             if (!isTempSummon)
                 me->CastSpell(me, SPELL_PIERCING_THORNS, true);
 
-            lullabyTimer = urand(2000, 5000);
-            parfumeTimer = urand(4000, 6000);
+            lullabyTimer = urand(5000, 10000);
+            parfumeTimer = urand(1000, 7000);
         }
 
         void JustDied(Unit*) override
@@ -1037,15 +1037,18 @@ public:
                 if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f, true))
                     me->CastSpell(target, SPELL_SWEET_LULLABY_SLEEP, true);
 
-                lullabyTimer = 10000;
+                lullabyTimer = urand(20000,30000);
             }
             else lullabyTimer -= diff;
 
             if (parfumeTimer <= diff)
             {
-                if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f, true))
-                    me->CastSpell(target, SPELL_CHOKING_PARFUME, false);
-                parfumeTimer = urand(6000,8000);
+                if (!me->IsNonMeleeSpellCasted(false))
+                {
+                    if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f, true))
+                        me->CastSpell(target, SPELL_CHOKING_PARFUME, false);
+                    parfumeTimer = urand(6000, 8000);
+                }
             }
             else parfumeTimer -= diff;
 

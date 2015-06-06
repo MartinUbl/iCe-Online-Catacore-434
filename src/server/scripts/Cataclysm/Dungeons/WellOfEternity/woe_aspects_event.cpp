@@ -146,6 +146,7 @@ public:
         {
             summonDemonsTimer = 2000;
             pInstance = me->GetInstanceScript();
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
             me->CastSpell(me, SPELL_THE_DRAGON_SOUL_COSMETIC, true);
             eventStarted = false;
             firstDrakeArrived = false;

@@ -20,9 +20,6 @@
 
 #define INST_WOE_SCRIPT instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript
 
-#define CRYSTAL_ACTIVE (0)
-#define CRYSTAL_INACTIVE (1)
-
 void INST_WOE_SCRIPT::Initialize()
 {
     demonPulseDone = false;
@@ -37,7 +34,6 @@ void INST_WOE_SCRIPT::Initialize()
     tyrandePreludeGUID = 0;
     portalToTwistingNetherGUID = 0;
 
-    legionTimer = 2000;
     waveCounter = WAVE_ONE;
 
     crystalsRemaining = MAX_CRYSTALS;
@@ -336,76 +332,9 @@ Creature * INST_WOE_SCRIPT::GetGuardianByDirection(uint32 direction)
     return NULL;
 }
 
-void INST_WOE_SCRIPT::SummonAndInitDemon(Creature * summoner,Position summonPos, DemonDirection dir, DemonWave wave, Position movePos, WayPointStep wpID)
-{
-    Creature * pDemon = NULL;
-
-    // Dont summon other demons if demon portal is closing -> cause crystals were destroyed
-    if (crystals[dir] == CRYSTAL_INACTIVE)
-        return;
-
-    pDemon = summoner->SummonCreature(LEGION_PORTAL_DEMON, summonPos);
-
-    if (pDemon)
-    {
-        pDemon->AI()->SetData(DEMON_DATA_DIRECTION, dir);
-        pDemon->AI()->SetData(DEMON_DATA_WAVE, wave);
-        pDemon->GetMotionMaster()->MovePoint(wpID, movePos,true);
-    }
-}
-
 void INST_WOE_SCRIPT::Update(uint32 diff)
 {
-    if (!instance->HavePlayers())
-        return;
 
-    if (legionTimer <= diff)
-    {
-        if (Creature * pPerotharn = this->instance->GetCreature(perotharnGUID))
-        {
-            if (pPerotharn->isDead() || crystalsRemaining == 0)
-                return; //  be carefull
-
-            switch (waveCounter)
-            {
-                case WAVE_ONE: // Going to mid position (LEFT/RIGHT)
-                {
-                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_LEFT],
-                                       DIRECTION_LEFT, waveCounter, midPositions[DIRECTION_LEFT], WP_MID);
-
-                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_RIGHT],
-                                       DIRECTION_RIGHT, waveCounter, midPositions[DIRECTION_RIGHT], WP_MID);
-
-                    waveCounter = WAVE_TWO;
-                    break;
-                }
-                case WAVE_TWO: // Going to farther mid position (LEFT/RIGHT)
-                {
-                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_LEFT],
-                                       DIRECTION_LEFT, waveCounter, midPositions2[DIRECTION_LEFT], WP_MID);
-
-                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_RIGHT],
-                                       DIRECTION_RIGHT, waveCounter, midPositions2[DIRECTION_RIGHT], WP_MID);
-
-                    waveCounter = WAVE_THREE;
-                    break;
-                }
-                case WAVE_THREE: // Going straight till end (END)
-                {
-                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_LEFT],
-                                       DIRECTION_STRAIGHT, waveCounter, frontEndPositions[DIRECTION_LEFT], WP_END);
-
-                    SummonAndInitDemon(pPerotharn, legionDemonSpawnPositions[DIRECTION_RIGHT],
-                                       DIRECTION_STRAIGHT, waveCounter, frontEndPositions[DIRECTION_RIGHT], WP_END);
-
-                    waveCounter = WAVE_ONE;
-                    break;
-                }
-            }
-        }
-        legionTimer = 1500;
-    }
-    else legionTimer -= diff;
 }
 
 void INST_WOE_SCRIPT::CallDoomGuardsForHelp(Unit * victim)

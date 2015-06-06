@@ -150,6 +150,7 @@ public:
         Legion_demon_WoEAI(Creature* creature) : ScriptedAI(creature)
         {
             pInstance = me->GetInstanceScript();
+            canProceedToEnd = false;
             canMoveToNextPoint = false;
             me->SetWalk(true);
             me->SetSpeed(MOVE_WALK, 1.28571f, true);
@@ -163,6 +164,7 @@ public:
         uint32 distractionTimer;
         uint32 guardMoveTimer;
         uint32 waitTimer;
+        bool canProceedToEnd;
 
         void CheckPortalStatus()
         {
@@ -233,6 +235,7 @@ public:
                 }
                 case DIRECTION_STRAIGHT: // Just go straight till end
                 {
+                    canProceedToEnd = true;
                     break;
                 }
             }
@@ -281,6 +284,15 @@ public:
                 distractionTimer = 500;
             }
             else distractionTimer -= diff;
+
+            if (canProceedToEnd)
+            {
+                canProceedToEnd = false;
+                if (direction == DIRECTION_LEFT)
+                    me->GetMotionMaster()->MovePoint(WP_END, frontEndPositions[DIRECTION_RIGHT], true);
+                else
+                    me->GetMotionMaster()->MovePoint(WP_END, frontEndPositions[DIRECTION_RIGHT], true);
+            }
 
             if (canMoveToNextPoint)
             {
@@ -1058,36 +1070,6 @@ public:
 
 };
 
-// BASIC TEMPLATE FOR CREATURE SCRIPTS
-/*class Legion_demon_WoE : public CreatureScript
-{
-public:
-    Legion_demon_WoE() : CreatureScript("Legion_demon_WoE") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new Legion_demon_WoEAI(creature);
-    }
-
-    struct Legion_demon_WoEAI : public ScriptedAI
-    {
-        Legion_demon_WoEAI(Creature* creature) : ScriptedAI(creature)
-        {
-            pInstance = me->GetInstanceScript();
-        }
-
-        InstanceScript * pInstance;
-
-        void Reset() override
-        {
-        }
-
-        void UpdateAI(const uint32 diff) override
-        {
-        }
-    };
-};*/
-
 namespace Illidan
 {
     static const SimpleQuote afterPerotharnDeathQuote[2] = // used all
@@ -1739,8 +1721,8 @@ public:
 
         void Reset() override
         {
-            bladeTimer = urand(2000, 4000);
-            strikeTimer = urand(8000, 10000);
+            bladeTimer = urand(2000, 6000);
+            strikeTimer = urand(4000, 10000);
         }
 
         void UpdateAI(const uint32 diff) override
@@ -1750,6 +1732,7 @@ public:
 
             if (bladeTimer <= diff)
             {
+                //TODO: Fix weapon damage
                 me->CastSpell(me->GetVictim(),SPELL_QUEENS_BLADE , true);
                 bladeTimer = urand(9000,12000);
             }
@@ -1757,6 +1740,7 @@ public:
 
             if (strikeTimer <= diff)
             {
+                //TODO: Fix weapon damage
                 me->CastSpell(me, SPELL_SHIMMERING_STRIKE_AOE, true);
                 strikeTimer = urand(4000,5000);
             }

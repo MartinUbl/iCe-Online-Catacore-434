@@ -32,7 +32,6 @@
 #define ESCAPE_Z 194.35f
 
 // These three enmus taken from https://github.com/WoWSource/WoWSource434/blob/master/src/server/scripts/Kalimdor/CavernsOfTime/WellOfEternity/well_of_eternity.h
-// TODO: Make research and implement this
 
 enum GameObjectIds
 {
@@ -50,13 +49,6 @@ enum QuestIds
     QUEST_THE_PATH_TO_THE_DRAGON_SOUL   = 30101
 };
 
-enum QuestKillCreditEntries
-{
-    PORTAL_01_KILL_CREDIT   = 58239,
-    PORTAL_02_KILL_CREDIT   = 58240,
-    PORTAL_03_KILL_CREDIT   = 58241
-};
-
 enum QuestSpells
 {
     SPELL_ARCHIVAL_DEMON_CHANNEL        = 109265,
@@ -65,6 +57,13 @@ enum QuestSpells
     SPELL_ARCHIVAL_HANDMAIDEN_CREDIT    = 109271,
     SPELL_ARCHIVAL_VAROTHEN_CHANNEL     = 109273,
     SPELL_ARCHIVAL_VAROTHEN_CREDIT      = 109274
+};
+
+enum QuestKillCreditEntries
+{
+    PORTAL_01_KILL_CREDIT = 58239,
+    PORTAL_02_KILL_CREDIT = 58240,
+    PORTAL_03_KILL_CREDIT = 58241
 };
 
 enum EncounterData
@@ -330,31 +329,38 @@ enum DemonWave
 enum WayPointStep
 {
     WP_MID = 0,
+    WP_MIDDLE_END,
     WP_END
 };
 
 static const Position legionDemonSpawnPositions[2] =
 {
-    {3443.17f,-5067.00f, 213.6f, 2.12f},     //LEFT
-    {3450.60f,-5064.36f, 213.6f, 2.12f},     //RIGHT
+    {3443.17f,-5067.00f, 213.6f, 2.12f},        //LEFT
+    {3450.60f,-5064.36f, 213.6f, 2.12f},        //RIGHT
 };
 
 static const Position midPositions[2] =
 {
-    {3334.4f,-4896.5f, 181.1f, 2.12f},     //LEFT
-    {3341.1f,-4892.4f, 181.1f, 2.12f},     //RIGHT
+    {3334.4f,-4896.5f, 181.1f, 2.12f},          //LEFT
+    {3341.1f,-4892.4f, 181.1f, 2.12f},          //RIGHT
 };
 
 static const Position midPositions2[2] =
 {
-    {3329.98f,-4892.0f, 181.1f, 2.12f},     //LEFT
-    {3337.96f,-4886.74f, 181.1f, 2.12f},    //RIGHT
+    {3329.98f,-4892.0f, 181.1f, 2.12f},         //LEFT
+    {3337.96f,-4886.74f, 181.1f, 2.12f},        //RIGHT
+};
+
+static const Position middleEndPositions[2] =
+{
+    { 3366.44f, -4945.25f, 181.08f, 2.0f },     //LEFT
+    { 3372.53f, -4940.98f, 181.08f, 2.0f },     //RIGHT
 };
 
 static const Position frontEndPositions[2] =
 {
-    {3286.0f,-4821.0f, 181.5f, 2.12f},     //LEFT
-    {3290.0f,-4818.0f, 181.5f, 2.12f},     //RIGHT
+    {3286.0f,-4821.0f, 181.5f, 2.12f},          //LEFT
+    {3290.0f,-4818.0f, 181.5f, 2.12f},          //RIGHT
 };
 
 #define PORTAL_Z (COURTYARD_Z + 0.7f)
@@ -439,6 +445,9 @@ const Position tyrandeVarothenPos = {3284.0f, -5693.0f, 15.37f,6.1f};
 // Tyrande combat position
 const Position tyrandeCombatPos = {3308.0f, -5695.0f, 15.5f,5.6f};
 
+#define CRYSTAL_ACTIVE (0)
+#define CRYSTAL_INACTIVE (1)
+
 class instance_well_of_eternity : public InstanceMapScript
 {
 public:
@@ -449,7 +458,6 @@ public:
         instance_well_of_eternity_InstanceMapScript(Map *pMap) : InstanceScript(pMap), MapScript(939) { Initialize(); }
 
         private:
-        uint32 legionTimer;
         DemonWave waveCounter;
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
@@ -478,17 +486,15 @@ public:
         // Mannoroth intro
         std::list<uint64> doomguards;
 
-        uint32 crystals[MAX_CRYSTALS];
         IllidanSteps illidanStep;
 
         bool IsIlidanCurrentWPReached(uint64 victimGUID);
-        void SummonAndInitDemon(Creature * summoner, Position summonPos, DemonDirection dir, DemonWave wave, Position movePos, WayPointStep wpID);
-        void Initialize();
-        void Update(uint32 diff);
-        std::string GetSaveData();
-        void Load(const char* chrIn);
-        void OnCreatureCreate(Creature* pCreature, bool add);
-        void OnGameObjectCreate(GameObject* go, bool add);
+        void Initialize() override;
+        void Update(uint32 diff) override;
+        std::string GetSaveData() override;
+        void Load(const char* chrIn) override;
+        void OnCreatureCreate(Creature* pCreature, bool add) override;
+        void OnGameObjectCreate(GameObject* go, bool add) override;
         virtual uint32* GetCorrUiEncounter();
 
         // Only this works ?
@@ -503,12 +509,13 @@ public:
         public:
             //  Fuck it -> public
             uint32 crystalsRemaining;
+            uint32 crystals[MAX_CRYSTALS];
             bool demonPulseDone;
             bool abyssalSlained;
 
-            uint32 GetData(uint32 DataId);
-            void SetData(uint32 type, uint32 data);
-            uint64 GetData64(uint32 type);
+            uint32 GetData(uint32 DataId) override;
+            void SetData(uint32 type, uint32 data) override;
+            uint64 GetData64(uint32 type) override;
 
             // Custom WoE methods
             void RegisterIllidanVictim(uint64 victimGUID);
