@@ -466,10 +466,13 @@ bool Vehicle::AddPassenger(Unit *passenger, int8 seatId, bool byAura)
             passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
+    // This is actually hack, if we are summoning creature and we immediately put them on vehicle, they will not appear on them visually
+    // But you will dont see parabolic movement on jumping to vehicle, creature passenger will just appear on it
+    // TODO: Find correct solution, maybe send some movement update packet, right after summon
     if (passenger->GetTypeId() == TYPEID_UNIT)
         passenger->DestroyForNearbyPlayers();
 
-    passenger->UpdateObjectVisibility(true);
+    passenger->UpdateObjectVisibility(false);
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
         sScriptMgr->OnAddPassenger(this, passenger, seatId);
