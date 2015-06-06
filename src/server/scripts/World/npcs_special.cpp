@@ -3563,34 +3563,34 @@ public:
 
         void InitializeAI()
         {
-        ScriptedAI::InitializeAI();
-        Unit * owner = me->GetOwner();
-        if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
-            return;
+            ScriptedAI::InitializeAI();
+            Unit * owner = me->GetOwner();
+            if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+                return;
 
-        me->SetReactState(REACT_PASSIVE);
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
             // Remove other ring spawned by the player
             {
-            CellPair pair(Trinity::ComputeCellPair(owner->GetPositionX(), owner->GetPositionY()));
-            Cell cell(pair);
-            cell.data.Part.reserved = ALL_DISTRICT;
-            cell.SetNoCreate();
+                CellPair pair(Trinity::ComputeCellPair(owner->GetPositionX(), owner->GetPositionY()));
+                Cell cell(pair);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
 
-            std::list<Creature*> templist;
-            Trinity::AllCreaturesOfEntryInGrid check(owner, me->GetEntry());
-            Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInGrid> searcher(owner, templist, check);
+                std::list<Creature*> templist;
+                Trinity::AllCreaturesOfEntryInGrid check(owner, me->GetEntry());
+                Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInGrid> searcher(owner, templist, check);
 
-            TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInGrid>, GridTypeMapContainer> visitor(searcher);
-            cell.Visit(pair, visitor, *(owner->GetMap()));
+                TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInGrid>, GridTypeMapContainer> visitor(searcher);
+                cell.Visit(pair, visitor, *(owner->GetMap()));
 
-            if (!templist.empty())
-                for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
-                    if ((*itr)->GetOwner() == me->GetOwner() && *itr != me)
-                        (*itr)->DisappearAndDie();
-                        templist.clear();
+                if (!templist.empty())
+                    for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
+                        if ((*itr)->GetOwner() == me->GetOwner() && *itr != me)
+                            (*itr)->DisappearAndDie();
+                            templist.clear();
             }
         }
 
@@ -3601,7 +3601,8 @@ public:
             if (who->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE) || who->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE))
                 return;
 
-            if (who->IsAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691)/*<= target already frozen*/ && !who->HasAura(91264)/*<= target is immune*/ && me->IsWithinLOSInMap(who) && Isready)
+            if (who->IsAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691)/*<= target already frozen*/ && !who->HasAura(91264)/*<= target is immune*/
+                && !who->IsDiminishingReturnImmuneToSpell(82691, false) && me->IsWithinLOSInMap(who) && Isready)
                 me->CastSpell(who, 82691, true);
         }
 

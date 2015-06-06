@@ -13885,6 +13885,23 @@ bool Unit::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) con
     return false;
 }
 
+bool Unit::IsDiminishingReturnImmuneToSpell(uint32 spellId, bool triggered)
+{
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    return IsDiminishingReturnImmuneToSpell(spellInfo, triggered);
+}
+
+bool Unit::IsDiminishingReturnImmuneToSpell(SpellEntry const* spellInfo, bool triggered)
+{
+    DiminishingGroup gr = GetDiminishingReturnsGroupForSpell(spellInfo, triggered);
+    return IsDiminishingReturnImmune(gr);
+}
+
+bool Unit::IsDiminishingReturnImmune(DiminishingGroup group)
+{
+    return (GetDiminishing(group) == GetDiminishingReturnsMaxLevel(group));
+}
+
 bool Unit::IsDamageToThreatSpell(SpellEntry const * spellInfo) const
 {
     if (!spellInfo)
@@ -16005,27 +16022,28 @@ DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
 
 void Unit::IncrDiminishing(DiminishingGroup group, bool triggered)
 {
-    bool found = false;
+    int foundCount = 0;
     // Checking for existing in the table
     for (Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
     {
         if (i->DRGroup != group)
             continue;
-        if (getMSTimeDiff(i->hitTime, getMSTime()) > 15000)
-            i->hitCount = DIMINISHING_LEVEL_1;
+
+        foundCount = i->hitCount;
+
+        if (triggered && getMSTimeDiff(i->hitTime, getMSTime()) > 15000)
+        {
+            i->hitCount = DIMINISHING_LEVEL_2;
+            foundCount = DIMINISHING_LEVEL_1;
+        }
         else if (int32(i->hitCount) < GetDiminishingReturnsMaxLevel(group))
             i->hitCount += 1;
-
-        if (triggered)
-            i->hitTime = getMSTime();
-
-        found = true;
         break;
     }
-    if (!found)
+    if (foundCount == 0)
         m_Diminishing.push_back(DiminishingReturn(group, getMSTime(), DIMINISHING_LEVEL_2));
 
-    if (!triggered)
+    if (!triggered && foundCount < GetDiminishingReturnsMaxLevel(group))
     {
         switch (group)
         {
@@ -16109,7 +16127,7 @@ float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, 
     return mod;
 }
 
-void Unit::ApplyDiminishingAura(DiminishingGroup group, bool apply)
+void Unit::ApplyDiminishingAura(DiminishingGroup group, bool apply, bool triggered)
 {
     // Checking for existing in the table
     for (Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
@@ -16126,7 +16144,31 @@ void Unit::ApplyDiminishingAura(DiminishingGroup group, bool apply)
             if (i->stack == 0)
                 i->hitTime = getMSTime();
         }
+
         break;
+    }
+
+    if (!triggered)
+    {
+        switch (group)
+        {
+            case DIMINISHING_SHARED_DEEPFREEZE:
+                ApplyDiminishingAura(DIMINISHING_CONTROL_STUN, apply, true);
+                // no break on purpose
+            case DIMINISHING_DISORIENT:
+                ApplyDiminishingAura(DIMINISHING_SHARED_RINGOFFROST, apply, true);
+                break;
+
+            case DIMINISHING_SHARED_RINGOFFROST:
+                ApplyDiminishingAura(DIMINISHING_DISORIENT, apply, true);
+                // no break on purpose
+            case DIMINISHING_CONTROL_STUN:
+                ApplyDiminishingAura(DIMINISHING_SHARED_DEEPFREEZE, apply, true);
+                break;
+
+            default:
+                break;
+        }
     }
 }
 

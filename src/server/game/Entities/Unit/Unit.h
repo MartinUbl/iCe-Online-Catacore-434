@@ -1182,7 +1182,7 @@ class Unit : public WorldObject
         DiminishingLevels GetDiminishing(DiminishingGroup  group);
         void IncrDiminishing(DiminishingGroup group, bool triggered = false);
         float ApplyDiminishingToDuration(DiminishingGroup  group, int32 &duration,Unit* caster, DiminishingLevels Level, int32 limitduration);
-        void ApplyDiminishingAura(DiminishingGroup  group, bool apply);
+        void ApplyDiminishingAura(DiminishingGroup  group, bool apply, bool triggered = false);
         void ClearDiminishings() { m_Diminishing.clear(); }
 
         //target dependent range checks
@@ -2015,6 +2015,9 @@ class Unit : public WorldObject
         bool IsImmunedToDamage(SpellSchoolMask meleeSchoolMask);
         bool IsImmunedToDamage(SpellEntry const* spellInfo);
         virtual bool IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) const;
+        bool IsDiminishingReturnImmuneToSpell(uint32 spellId, bool triggered = false);
+        bool IsDiminishingReturnImmuneToSpell(SpellEntry const* spellInfo, bool triggered = false);
+        bool IsDiminishingReturnImmune(DiminishingGroup group);
                                                             // redefined in Creature
         uint32 CalcNotIgnoreDamageRedunction(uint32 damage, SpellSchoolMask damageSchoolMask);
         static bool IsDamageReducedByArmor(SpellSchoolMask damageSchoolMask, SpellEntry const *spellInfo = NULL, uint8 effIndex = MAX_SPELL_EFFECTS);
