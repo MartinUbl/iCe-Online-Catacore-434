@@ -16005,16 +16005,25 @@ DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
 
 void Unit::IncrDiminishing(DiminishingGroup group, bool triggered)
 {
+    bool found = false;
     // Checking for existing in the table
     for (Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
     {
         if (i->DRGroup != group)
             continue;
-        if (int32(i->hitCount) < GetDiminishingReturnsMaxLevel(group))
+        if (getMSTimeDiff(i->hitTime, getMSTime()) > 15000)
+            i->hitCount = DIMINISHING_LEVEL_1;
+        else if (int32(i->hitCount) < GetDiminishingReturnsMaxLevel(group))
             i->hitCount += 1;
-        return;
+
+        if (triggered)
+            i->hitTime = getMSTime();
+
+        found = true;
+        break;
     }
-    m_Diminishing.push_back(DiminishingReturn(group,getMSTime(),DIMINISHING_LEVEL_2));
+    if (!found)
+        m_Diminishing.push_back(DiminishingReturn(group, getMSTime(), DIMINISHING_LEVEL_2));
 
     if (!triggered)
     {
