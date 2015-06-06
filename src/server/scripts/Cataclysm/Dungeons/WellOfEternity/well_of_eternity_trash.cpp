@@ -1194,7 +1194,7 @@ namespace Illidan
             {
                 playerSpotted = true;
                 me->SetHomePosition(illidanPos[ILLIDAN_FIRST_STEP]);
-                me->GetMotionMaster()->MovePoint(0, illidanPos[ILLIDAN_FIRST_STEP],true);
+                me->GetMotionMaster()->MovePoint(0, illidanPos[ILLIDAN_FIRST_STEP],false);
                 PlayQuote(me, introQuotes[0]);
             }
         }
