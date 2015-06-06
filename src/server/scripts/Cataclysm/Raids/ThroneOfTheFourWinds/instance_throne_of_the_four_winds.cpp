@@ -450,8 +450,6 @@ public:
                 for(Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
                     if(Player* player = itr->getSource())
                     {
-                        if(!player->IsAlive())
-                            continue;
                         // teleport player if under critical Z
                         if(m_auiEncounter[TYPE_CONCLAVE] == DONE)
                         {
