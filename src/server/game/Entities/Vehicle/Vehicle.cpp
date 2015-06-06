@@ -356,11 +356,19 @@ void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion)
     }
 }
 
-bool Vehicle::AddPassenger(WorldObject *obj, int8 seatId, bool byAura)
-{
-    Unit* unit = (Unit*)obj;
+/**
+* @fn bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
+*
+* @brief Attempts to add a passenger to the vehicle on 'seatId'.
+*
+* @param seatId        Identifier for the seat. Value of -1 indicates the next available seat.
+*
+* @return true if it succeeds, false if it fails.
+*/
 
-    if (unit->GetVehicle() != this)
+bool Vehicle::AddPassenger(Unit *passenger, int8 seatId, bool byAura)
+{
+    if (passenger->GetVehicle() != this)
         return false;
 
     SeatMap::iterator seat;
@@ -385,9 +393,9 @@ bool Vehicle::AddPassenger(WorldObject *obj, int8 seatId, bool byAura)
         ASSERT(!seat->second.passenger);
     }
 
-    sLog->outDebug("Unit %s enter vehicle entry %u id %u dbguid %u seat %d", unit->GetName(), me->GetEntry(), m_vehicleInfo->m_ID, me->GetGUIDLow(), (int32)seat->first);
+    sLog->outDebug("Unit %s enter vehicle entry %u id %u dbguid %u seat %d", passenger->GetName(), me->GetEntry(), m_vehicleInfo->m_ID, me->GetGUIDLow(), (int32)seat->first);
 
-    seat->second.passenger = unit;
+    seat->second.passenger = passenger;
     if (seat->second.seatInfo->IsUsableByPlayer())
     {
         ASSERT(m_usableSeatNum);
@@ -402,28 +410,28 @@ bool Vehicle::AddPassenger(WorldObject *obj, int8 seatId, bool byAura)
     }
 
     if (seat->second.seatInfo->m_flags && !(seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING))
-        unit->AddUnitState(UNIT_STATE_ON_VEHICLE);
+        passenger->AddUnitState(UNIT_STATE_ON_VEHICLE);
 
     VehicleSeatEntry const *veSeat = seat->second.seatInfo;
-    unit->m_movementInfo.t_pos.m_positionX = veSeat->m_attachmentOffsetX;
-    unit->m_movementInfo.t_pos.m_positionY = veSeat->m_attachmentOffsetY;
-    unit->m_movementInfo.t_pos.m_positionZ = veSeat->m_attachmentOffsetZ;
-    unit->m_movementInfo.t_pos.m_orientation = 0;
-    unit->m_movementInfo.t_time = 0; // 1 for player
-    unit->m_movementInfo.t_seat = seat->first;
-    unit->m_movementInfo.t_guid = me->GetGUID();
-    unit->m_movementInfo.t_vehicleId = m_vehicleInfo->m_ID;
+    passenger->m_movementInfo.t_pos.m_positionX = veSeat->m_attachmentOffsetX;
+    passenger->m_movementInfo.t_pos.m_positionY = veSeat->m_attachmentOffsetY;
+    passenger->m_movementInfo.t_pos.m_positionZ = veSeat->m_attachmentOffsetZ;
+    passenger->m_movementInfo.t_pos.m_orientation = 0;
+    passenger->m_movementInfo.t_time = 0; // 1 for player
+    passenger->m_movementInfo.t_seat = seat->first;
+    passenger->m_movementInfo.t_guid = me->GetGUID();
+    passenger->m_movementInfo.t_vehicleId = m_vehicleInfo->m_ID;
 
     if (me->GetTypeId() == TYPEID_UNIT
-        && unit->GetTypeId() == TYPEID_PLAYER
+        && passenger->GetTypeId() == TYPEID_PLAYER
         && seat->first == 0 && seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
     {
-        if (!me->SetCharmedBy(unit, CHARM_TYPE_VEHICLE))
+        if (!me->SetCharmedBy(passenger, CHARM_TYPE_VEHICLE))
             ASSERT(false);
 
         if (VehicleScalingInfo const *scalingInfo = sObjectMgr->GetVehicleScalingInfo(m_vehicleInfo->m_ID))
         {
-            Player *plr = unit->ToPlayer();
+            Player *plr = passenger->ToPlayer();
             float averageItemLevel = plr->GetAverageItemLevel();
             if (averageItemLevel < scalingInfo->baseItemLevel)
                 averageItemLevel = scalingInfo->baseItemLevel;
@@ -437,7 +445,7 @@ bool Vehicle::AddPassenger(WorldObject *obj, int8 seatId, bool byAura)
 
     if (me->IsInWorld())
     {
-        Movement::MoveSplineInit init(unit);
+        Movement::MoveSplineInit init(passenger);
         init.DisableTransportPathTransformations();
         init.MoveTo(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ);
         init.SetFacing(0.0f);
@@ -447,7 +455,7 @@ bool Vehicle::AddPassenger(WorldObject *obj, int8 seatId, bool byAura)
         if (me->GetTypeId() == TYPEID_UNIT)
         {
             if (me->ToCreature()->IsAIEnabled)
-                me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, true);
+                me->ToCreature()->AI()->PassengerBoarded(passenger, seat->first, true);
 
             // update all passenger's positions
             // spline system will relocate passengers automatically
@@ -455,16 +463,16 @@ bool Vehicle::AddPassenger(WorldObject *obj, int8 seatId, bool byAura)
         }
 
         if (seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE)
-            unit->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
-    if (obj->GetTypeId() == TYPEID_UNIT)
-        unit->DestroyForNearbyPlayers();
+    if (passenger->GetTypeId() == TYPEID_UNIT)
+        passenger->DestroyForNearbyPlayers();
 
-    unit->UpdateObjectVisibility(true);
+    passenger->UpdateObjectVisibility(true);
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
-        sScriptMgr->OnAddPassenger(this, unit, seatId);
+        sScriptMgr->OnAddPassenger(this, passenger, seatId);
 
     return true;
 }
