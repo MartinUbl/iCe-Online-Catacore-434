@@ -25,10 +25,11 @@
 #include <memory>
 #include <utility>
 #include <set>
-
-#include <boost/optional.hpp>
+#include <functional>
 
 #include "Util.h"
+
+#define TASKSCHEDULER_NOGROUP UINT_MAX
 
 class TaskContextInstance;
 
@@ -70,19 +71,19 @@ class TaskScheduler
 
         timepoint_t _end;
         duration_t _duration;
-        boost::optional<group_t> _group;
+        group_t _group;
         repeated_t _repeated;
         task_handler_t _task;
 
     public:
         // All Argument construct
-        Task(timepoint_t const& end, duration_t const& duration, boost::optional<group_t> const& group,
+        Task(timepoint_t const& end, duration_t const& duration, group_t const& group,
             repeated_t const repeated, task_handler_t const& task)
                 : _end(end), _duration(duration), _group(group), _repeated(repeated), _task(task) { }
 
         // Minimal Argument construct
         Task(timepoint_t const& end, duration_t const& duration, task_handler_t const& task)
-            : _end(end), _duration(duration), _group(boost::none), _repeated(0), _task(task) { }
+            : _end(end), _duration(duration), _group(TASKSCHEDULER_NOGROUP), _repeated(0), _task(task) { }
 
         // Copy construct
         Task(Task const&) = delete;

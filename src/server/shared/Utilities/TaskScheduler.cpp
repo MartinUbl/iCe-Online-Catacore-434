@@ -162,7 +162,7 @@ TaskContextInstance& TaskContextInstance::SetGroup(TaskScheduler::group_t const 
 
 TaskContextInstance& TaskContextInstance::ClearGroup()
 {
-    _task->_group = boost::none;
+    _task->_group = TASKSCHEDULER_NOGROUP;
     return *this;
 }
 
