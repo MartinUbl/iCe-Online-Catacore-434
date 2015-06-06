@@ -16031,7 +16031,7 @@ void Unit::IncrDiminishing(DiminishingGroup group, bool triggered)
 
         foundCount = i->hitCount;
 
-        if (triggered && getMSTimeDiff(i->hitTime, getMSTime()) > 15000)
+        if (i->stack == 0 && getMSTimeDiff(i->hitTime, getMSTime()) > 15000)
         {
             i->hitCount = DIMINISHING_LEVEL_2;
             foundCount = DIMINISHING_LEVEL_1;
