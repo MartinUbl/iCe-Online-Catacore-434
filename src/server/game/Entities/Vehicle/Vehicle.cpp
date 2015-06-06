@@ -357,17 +357,23 @@ void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion)
 }
 
 /**
-* @fn bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
+* @fn bool Vehicle::AddPassenger(Unit* _passenger, int8 seatId)
 *
 * @brief Attempts to add a passenger to the vehicle on 'seatId'.
 *
-* @param seatId        Identifier for the seat. Value of -1 indicates the next available seat.
+* @param seatId Identifier for the seat. Value of -1 indicates the next available seat.
 *
 * @return true if it succeeds, false if it fails.
 */
 
-bool Vehicle::AddPassenger(Unit *passenger, int8 seatId, bool byAura)
+bool Vehicle::AddPassenger(WorldObject * _passenger, int8 seatId, bool byAura)
 {
+    // Only units can be passengers on Vehicle
+    if (_passenger->ToUnit() == nullptr)
+        return false;
+
+    Unit * passenger = _passenger->ToUnit();
+
     if (passenger->GetVehicle() != this)
         return false;
 
