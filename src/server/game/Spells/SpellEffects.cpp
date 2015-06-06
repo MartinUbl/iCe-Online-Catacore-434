@@ -1131,6 +1131,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Ferocious Bite
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags[0] & 0x000800000) && m_spellInfo->SpellVisual[0] == 6587)
                 {
+                    // T12 4P Set Bonus
+                    if (m_caster->HasAura(99009))
+                    {
+                        if (roll_chance_i(m_caster->ToPlayer()->GetComboPoints() * 20)) // 20 % chance per combo point
+                        {
+                            if (Aura * berserk = m_caster->GetAura(50334)) // Berserk
+                                berserk->SetDuration(berserk->GetDuration() + 2000);
+                        }
+                    }
                     // converts each extra point of energy into ($f1+$AP/410) additional damage
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     // energy after using FB
@@ -4096,6 +4105,20 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                 m_caster->RemoveAurasByType(SPELL_AURA_MOD_STUN);
                 m_caster->CastSpell(m_caster,63896,true);
             }
+            break;
+        }
+        case SPELLFAMILY_DRUID:
+        {
+            // T12 P4 Set Bonus - Rip 1079, Savage Roar 52610, Maim 22570
+            if (m_spellInfo->Id == 1079 || m_spellInfo->Id == 52610 || m_spellInfo->Id == 22570)
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->HasAura(99009)) // T12 P4 Set Bonus
+                {
+                    if (roll_chance_i(m_caster->ToPlayer()->GetComboPoints() * 20)) // 20 % chance per combo point
+                    {
+                        if (Aura * berserk = m_caster->GetAura(50334)) // Berserk
+                            berserk->SetDuration(berserk->GetDuration() + 2000);
+                    }
+                }
             break;
         }
 
