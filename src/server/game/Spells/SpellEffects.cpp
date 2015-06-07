@@ -6990,6 +6990,14 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                         totalDamagePercentMod *= 1.07f;
                 }
             }
+            // Fury Swipes
+            else if (m_spellInfo->Id == 80861)
+            {
+                if (m_caster->HasAura(52610)) // If player has Savage Roar 
+                {
+                    totalDamagePercentMod *= 1.80f; // 80% dmg increase
+                }
+            }
             // Ravage! (Stampede)
             else if (m_spellInfo->Id == 81170)
             {
