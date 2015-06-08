@@ -4688,6 +4688,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->excludeCasterAuraSpell = 95809; // Insanity
             count++;
             break;
+        case 45204: // Clone Me!
+            spellInfo->Effect[2] = 0;
+            break;
 
 /****************------- HOUR OF TWILIGHT 5 MAN DUNGEON -------********************/
         // Asira Dawnslayer
