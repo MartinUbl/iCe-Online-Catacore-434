@@ -5721,7 +5721,8 @@ void AuraEffect::HandleModConfuse(AuraApplication const *aurApp, uint8 mode, boo
     {
         if (caster && caster->ToPlayer()
             && caster->HasAura(56375) // Glyph of Polymorph
-            && m_spellProto->Id == 118) // Polymorph
+            && m_spellProto->GetSpellFamilyName() == SPELLFAMILY_MAGE
+            && (m_spellProto->SpellFamilyFlags[0] & 0x01000000)) // All variants of Polymorph
         {
             if (target)
             {
