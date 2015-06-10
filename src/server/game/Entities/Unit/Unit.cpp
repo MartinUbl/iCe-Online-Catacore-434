@@ -7019,9 +7019,14 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 }
                 case 99001: // Druid T12 Feral 2P Bonus
                 {
-                    if(procSpell->SpellIconID == 2312 || procSpell->Id == 6807 || procSpell->Id == 5221  ) // Mangle, Maul, Shred
+                    // Mangle, Maul, Shred
+                    if(procSpell->SpellIconID == 2312 || procSpell->Id == 6807 || procSpell->Id == 5221  )
                     {
-                        CastCustomSpell(99002, SPELLVALUE_BASE_POINT0,damage * 0.05, pVictim, true); // Fiery Claws + 10 % dmg as fire dot, but 5% per tick ( 2 ticks )
+                        basepoints0 = damage * 0.1; // 10%
+                        triggered_spell_id = 99002; // Fiery Claws
+
+                        basepoints0 = basepoints0 / 2;
+                        basepoints0 += pVictim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE, EFFECT_0);
                         break;
                     }
                     else return (false);

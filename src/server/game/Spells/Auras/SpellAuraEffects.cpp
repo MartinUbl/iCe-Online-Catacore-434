@@ -2065,7 +2065,6 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
                 switch (m_spellProto->Id)
                 {
-                    case 99002: //Fiery Claws
                     case 99173: //Burning Wounds
                     case 99092: //Flames of the Faithful
                         countRemainingPeriodicDamage = true;
