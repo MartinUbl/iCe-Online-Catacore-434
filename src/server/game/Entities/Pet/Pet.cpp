@@ -2015,6 +2015,7 @@ void Pet::LearnPetPassives()
             CastSpell(this, 63623, true);
             break;
         case 510:   // Water Elemental
+        case 27829: // Gargoyle
             CastSpell(this, 65220, true);
             break;
         default:
