@@ -17,7 +17,6 @@
 */
 
 #include "gamePCH.h"
-#include "Cell.h"
 #include "Common.h"
 #include "Transport.h"
 #include "MapManager.h"
@@ -380,7 +379,10 @@ void Transport::UpdatePosition(float x, float y, float z, float o)
     posX = GetPositionX();
     posY = GetPositionY();
 
-    if (Cell(x, y).DiffGrid(Cell(posX, posY)))
+    Cell srcCell(posX, posY);
+    Cell dstCell(x, y);
+
+    if (dstCell.DiffGrid(srcCell))
         UpdateModelPosition(x, y, z, true);
     else
         UpdateModelPosition(x, y, z, false);
@@ -397,7 +399,7 @@ void Transport::UpdatePosition(float x, float y, float z, float o)
     */
     if (_staticPassengers.empty() && newActive) // 1. and 2.
         LoadStaticPassengers();
-    else if (!_staticPassengers.empty() && !newActive && Cell(x, y).DiffGrid(Cell(posX, posY))) // 3.
+    else if (!_staticPassengers.empty() && !newActive && dstCell.DiffGrid(srcCell)) // 3.
         UnloadStaticPassengers();
     else
         UpdatePassengerPositions(_staticPassengers);
