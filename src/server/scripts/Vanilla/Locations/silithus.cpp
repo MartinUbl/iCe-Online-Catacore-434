@@ -978,7 +978,7 @@ public:
             //uint8 KaldoreiSoldierCount = 0;
             //uint8 AnubisathConquerorCount = 0;
             //uint8 QirajiWaspCount = 0;
-            for (uint8 i = 0; i < 67; ++i)
+            for (uint8 i = 0; i < sizeof(SpawnLocation)/sizeof(Location); ++i)
             {
                 Creature* Spawn = NULL;
                 float X = SpawnLocation[locIndex + i].x;
