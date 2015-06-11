@@ -18,6 +18,7 @@
 
 #include "gamePCH.h"
 #include "Common.h"
+#include "CellImpl.h"
 #include "Transport.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
