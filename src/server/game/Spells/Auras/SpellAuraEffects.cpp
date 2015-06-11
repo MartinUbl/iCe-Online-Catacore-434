@@ -985,6 +985,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         {
             break;
         }
+        case SPELL_AURA_MOD_RESISTANCE:
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
         {
             if (caster)
@@ -1006,6 +1007,15 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                     case 20043: // Aspect of the Wild
                     case 8185: // Elemental Resistance
                     case 79106: // Shadow Protection
+                        amount = resist;
+                        break;
+                    case 97618: // Seasoned Winds: Fire
+                    case 97619: // Seasoned Winds: Frost
+                    case 97620: // Seasoned Winds: Nature
+                    case 97621: // Seasoned Winds: Arcane
+                    case 97622: // Seasoned Winds: Shadow
+                        if (caster->HasAura(16086)) // Seasoned Winds rank 1 should give only half amount of resist
+                            resist /= 2;
                         amount = resist;
                         break;
                     case 79060: // Mark of the Wild

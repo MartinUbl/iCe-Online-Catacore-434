@@ -7343,6 +7343,47 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                         if(m_originalCaster->ToPlayer() && m_originalCaster->HasAura(56805))
                             m_originalCaster->ToPlayer()->ModifySpellCooldown(1766,-6000,true);
                         break;
+                    case 57994: // Wind Shear
+                        if (m_originalCaster->HasAura(16086) || m_originalCaster->HasAura(16544))
+                        {
+                            uint32 spell_Id;
+                            int school = curSpellInfo->SchoolMask;
+                            switch (school)
+                            {
+                            case 4: // Fire
+                                spell_Id = 97618; // Seasoned Winds: Fire
+                                break;
+                            case 8: // Nature
+                                spell_Id = 97620; // Seasoned Winds: Nature
+                                break;
+                            case 16: // Frost
+                                spell_Id = 97619; // Seasoned Winds: Frost
+                                break;
+                            case 20: // Frost / Fire (Frostfire Bolt)
+                                spell_Id = 97619; // Seasoned Winds: Frost
+                                m_originalCaster->CastSpell(m_originalCaster, 97619, true); // Seasoned Winds: Fire
+                                break;
+                            case 32: // Shadow
+                                spell_Id = 97622; // Seasoned Winds: Shadow
+                                break;
+                            case 48: // Shadow / Frost (Mind Spike)
+                                spell_Id = 97622; // Seasoned Winds: Shadow
+                                m_originalCaster->CastSpell(m_originalCaster, 97619, true); // Seasoned Winds: Frost
+                                break;
+                            case 64: // Arcane
+                                spell_Id = 97621; // Seasoned Winds: Arcane
+                                break;
+                            case 72: // Arcane / Nature (Starsurge)
+                                spell_Id = 97621; // Seasoned Winds: Arcane
+                                m_originalCaster->CastSpell(m_originalCaster, 97620, true); // Seasoned Winds: Nature
+                                break;
+                            default:
+                                break;
+                            }
+                            // Cast correct magic resistance buff
+                            m_originalCaster->CastSpell(m_originalCaster, spell_Id, true);
+                        }
+                        break;
                 }
             }
         }
