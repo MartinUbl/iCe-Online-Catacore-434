@@ -844,6 +844,14 @@ void Spell::SelectSpellTargets()
             if ((*itr).effectMask & (1 << EFFECT_2))
                 targetCount++;
 
+        if (targetCount > 0)
+        {
+            // Divine Purpose talent 1/2
+            if ((m_caster->HasAura(85117) && roll_chance_i(7)) ||
+                m_caster->HasAura(86172) && roll_chance_i(14))
+                m_caster->CastSpell(m_caster, 90174, true); // Divine Purpose
+        }
+
         // if didn't hit more than 4 targets, do not energize
         if (targetCount < 4)
         {
