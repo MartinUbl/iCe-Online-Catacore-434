@@ -1989,26 +1989,31 @@ public:
         npc_ebon_gargoyleAI(Creature *c) : CasterAI(c) {}
 
         uint32 despawnTimer;
+        uint32 fly_awayTimer;
+        uint32 fix_checkTimer;
+        Unit * owner = me->GetOwner();
 
         void InitializeAI()
         {
             CasterAI::InitializeAI();
-            Unit * owner = me->GetOwner();
             if (!owner)
                 return;
             // Not needed to be despawned now
             despawnTimer = 0;
-            // Find victim of Summon Gargoyle spell
-            std::list<Unit*> targets;
-            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 30);
-            Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-            me->VisitNearbyObject(30, searcher);
-            for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-                if ((*iter)->GetAura(49206,owner->GetGUID()))
-                {
-                    me->Attack((*iter),false);
-                    break;
-                }
+            fly_awayTimer = 26000;
+            fix_checkTimer = 0;
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        bool OwnerHasDifferentVictim(Unit * owner)
+        {
+            if (!owner->GetUInt64Value(UNIT_FIELD_TARGET) || !me->GetVictim())
+                return true;
+
+            if (owner->GetUInt64Value(UNIT_FIELD_TARGET) != me->GetVictim()->GetGUID())
+                return true;
+
+            return false;
         }
 
         // Fly away when dismissed
@@ -2017,16 +2022,15 @@ public:
             if (spell->Id != 50515 || !me->IsAlive())
                 return;
 
-            Unit *owner = me->GetOwner();
-
             if (!owner || owner != source)
                 return;
 
             // Stop Fighting
             me->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE, true);
             // Sanctuary
+            me->InterruptNonMeleeSpells(false, 0, true);
             me->CastSpell(me, 54661, true);
-            me->SetReactState(REACT_PASSIVE);
+            me->SetReactState(REACT_ASSIST);
 
             // Fly Away
             me->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY|MOVEMENTFLAG_ASCENDING|MOVEMENTFLAG_FLYING);
@@ -2042,8 +2046,64 @@ public:
             despawnTimer = 4 * IN_MILLISECONDS;
         }
 
+        void AttackAnotherTarget()
+        {
+            if (Unit * next_target = owner->GetVictim())
+                if (!next_target->HasAuraType(SPELL_AURA_MOD_CONFUSE))
+                {
+                    me->SetReactState(REACT_ASSIST);
+                    me->Attack(owner->GetVictim(), false);
+                }
+        }
+
         void UpdateAI(const uint32 diff)
         {
+            if (fix_checkTimer <= diff)
+            {
+                if (Unit * target = me->GetVictim())
+                {
+                    if (!target->HasAura(49206))
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 30);
+                        Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(30, searcher);
+                        for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
+                            if ((*iter)->GetAura(49206, owner->GetGUID()))
+                            {
+                                me->getThreatManager().clearReferences();
+                                me->AddThreat((*iter), 90000.0f);
+                                me->Attack((*iter), false);
+                                break;
+                            }
+                    }
+
+                    if (target->HasAuraType(SPELL_AURA_MOD_CONFUSE))
+                    {
+                        me->AttackStop();
+                        me->InterruptNonMeleeSpells(false, 0, true);
+                        me->SetReactState(REACT_PASSIVE);
+                        if (OwnerHasDifferentVictim(owner))
+                        {
+                            AttackAnotherTarget();
+                            AttackStart(owner->GetVictim());
+                        }
+                    }
+                }
+                else
+                    AttackAnotherTarget();
+
+                fix_checkTimer = 500;
+            }
+            else fix_checkTimer -= diff;
+
+            if (fly_awayTimer <= diff)
+            {
+                Unit *owner = me->GetOwner();
+                owner->CastSpell(me, 50515, true);
+            }
+            else fly_awayTimer -= diff;
+
             if (despawnTimer > 0)
             {
                 if (despawnTimer > diff)
