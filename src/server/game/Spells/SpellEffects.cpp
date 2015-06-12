@@ -11052,7 +11052,7 @@ void Spell::EffectCastButtons(SpellEffIndex effIndex)
 
         uint32 cost = CalculatePowerCost(spellInfo, m_caster, GetSpellSchoolMask(spellInfo));
 
-        if (m_caster->GetPower(POWER_MANA) < cost)
+        if (m_caster->GetPower(POWER_MANA) < (int32)cost)
             break;
 
         m_caster->CastSpell(unitTarget, spell_id, true);

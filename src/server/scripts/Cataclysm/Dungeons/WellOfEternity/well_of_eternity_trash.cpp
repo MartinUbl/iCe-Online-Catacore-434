@@ -837,7 +837,7 @@ public:
 
                     const SpellEntry * spellProto = GetSpellStore()->LookupEntry(SPELL_ARCANE_ANNIHILATION);
                     uint32 manaCost = CalculatePowerCost(spellProto, me, GetSpellSchoolMask(spellProto));
-                    if (manaCost >= me->GetPower(POWER_MANA) && !me->IsNonMeleeSpellCasted(false))
+                    if ((int32)manaCost >= me->GetPower(POWER_MANA) && !me->IsNonMeleeSpellCasted(false))
                     {
                         me->CastSpell(me, SPELL_INFINITE_MANA, false);
                         arcaneTimer = 5500;

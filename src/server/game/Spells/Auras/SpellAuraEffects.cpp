@@ -2722,7 +2722,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (target->GetMaxPower(power) == 0)
                 return;
 
-            if (GetBase()->GetDuration() == -1 && target->GetPower(power) == target->GetMaxPower(power))
+            if (GetBase()->GetDuration() == -1 && target->GetPower(power) == (int32)target->GetMaxPower(power))
                 return;
 
             uint32 amount = m_amount * target->GetMaxPower(power) /100;
@@ -2765,7 +2765,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (target->GetMaxPower(power) == 0)
                 return;
 
-            if (GetBase()->GetDuration() == -1 && target->GetPower(power) == target->GetMaxPower(power))
+            if (GetBase()->GetDuration() == -1 && target->GetPower(power) == (int32)target->GetMaxPower(power))
                 return;
 
             uint32 amount = m_amount;

@@ -1801,7 +1801,7 @@ SpellEntry const *Creature::reachWithSpellAttack(Unit *pVictim)
         }
         if (bcontinue) continue;
 
-        if (spellInfo->manaCost > GetPower(POWER_MANA))
+        if ((int32)spellInfo->manaCost > GetPower(POWER_MANA))
             continue;
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
         float range = GetSpellMaxRangeForHostile(srange);
@@ -1847,7 +1847,7 @@ SpellEntry const *Creature::reachWithSpellCure(Unit *pVictim)
         }
         if (bcontinue) continue;
 
-        if (spellInfo->manaCost > GetPower(POWER_MANA))
+        if ((int32)spellInfo->manaCost > GetPower(POWER_MANA))
             continue;
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
         float range = GetSpellMaxRangeForFriend(srange);

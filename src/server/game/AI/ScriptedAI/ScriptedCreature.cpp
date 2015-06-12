@@ -339,7 +339,7 @@ bool ScriptedAI::CanCast(Unit* pTarget, SpellEntry const* pSpell, bool bTriggere
         return false;
 
     //Check for power
-    if (!bTriggered && me->GetPower((Powers)pSpell->powerType) < pSpell->manaCost)
+    if (!bTriggered && me->GetPower((Powers)pSpell->powerType) < (int32)pSpell->manaCost)
         return false;
 
     SpellRangeEntry const* pTempRange = GetSpellRangeStore()->LookupEntry(pSpell->rangeIndex);

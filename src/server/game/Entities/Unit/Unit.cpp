@@ -16555,7 +16555,7 @@ void Unit::SetPower(Powers power, int32 val)
         return;
 
     // Return if power which we want to set is already set
-    if (GetPower(power) == uint32(val))
+    if (GetPower(power) == val)
         return;
 
     // Special case for eclipse power (druid system)

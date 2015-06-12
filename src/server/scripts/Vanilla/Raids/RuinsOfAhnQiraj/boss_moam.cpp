@@ -122,7 +122,7 @@ public:
                     return;
 
                 //If we are 100%MANA cast Arcane Erruption
-                if (me->GetPower(POWER_MANA) == me->GetMaxPower(POWER_MANA))
+                if (me->GetPower(POWER_MANA) == (int32)me->GetMaxPower(POWER_MANA))
                 {
                     DoCast(me->GetVictim(), SPELL_ARCANEERUPTION);
                     DoScriptText(EMOTE_MANA_FULL, me);

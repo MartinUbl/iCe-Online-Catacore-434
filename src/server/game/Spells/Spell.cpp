@@ -848,7 +848,7 @@ void Spell::SelectSpellTargets()
         {
             // Divine Purpose talent 1/2
             if ((m_caster->HasAura(85117) && roll_chance_i(7)) ||
-                m_caster->HasAura(86172) && roll_chance_i(14))
+                (m_caster->HasAura(86172) && roll_chance_i(14)))
                 m_caster->CastSpell(m_caster, 90174, true); // Divine Purpose
         }
 
@@ -7942,7 +7942,7 @@ SpellCastResult Spell::CheckItems()
                     }
 
                     Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
-                    if (m_targets.getUnitTarget()->GetPower(power) == m_targets.getUnitTarget()->GetMaxPower(power))
+                    if (m_targets.getUnitTarget()->GetPower(power) == (int32)m_targets.getUnitTarget()->GetMaxPower(power))
                     {
                         failReason = SPELL_FAILED_ALREADY_AT_FULL_POWER;
                         continue;
