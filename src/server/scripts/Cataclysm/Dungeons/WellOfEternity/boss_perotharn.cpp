@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "well_of_eternity.h"
 #include "ScriptPCH.h"
+#include "well_of_eternity.h"
 #include "MapManager.h"
 
 #define CAST_WOE_INSTANCE(i)     (dynamic_cast<instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript*>(i))

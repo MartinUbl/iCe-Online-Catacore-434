@@ -143,7 +143,7 @@ void Totem::InitSummon()
         CastSpell(this, 98017, true);
 }
 
-void Totem::UnSummon()
+void Totem::UnSummon(uint32 unsummonTime)
 {
     CombatStop();
     RemoveAurasDueToSpell(GetSpell());

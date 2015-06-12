@@ -4720,7 +4720,7 @@ public:
 
             Player * p = Player::GetPlayer(*me,playerGUID);
 
-            if (p == NULL || p->IsInWorld() == false || p->GetGroup() == false)
+            if (p == NULL || p->IsInWorld() == false || p->GetGroup() == nullptr)
                 return;
 
             spellId = me->GetUInt32Value(UNIT_CREATED_BY_SPELL);

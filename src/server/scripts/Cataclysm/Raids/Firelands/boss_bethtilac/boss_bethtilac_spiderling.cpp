@@ -80,9 +80,6 @@ void load_mob_Spiderling()
 //////////////////////////////////////////////////////////////////////////
 // implementation of Cinderweb Spiderling
 
-
-static const uint32 MOVE_CHASE = 1;
-
 enum SpiderlingEvents
 {
     MOVE_CHECK = 0

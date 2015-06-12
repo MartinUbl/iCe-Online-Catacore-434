@@ -66,11 +66,11 @@ public:
             Hound_Timer = 8000;
         }
 
-        void EnterCombat(Unit * /*who*/)
+        void EnterCombat(Unit* /*who*/)
         {
         }
 
-        void KilledUnit()
+        void KilledUnit(Unit* /*who*/)
         {
             // When a player, pet or totem gets killed, Lord Kazzak casts this spell to instantly regenerate 70,000 health.
             DoCast(me, SPELL_CAPTURESOUL);

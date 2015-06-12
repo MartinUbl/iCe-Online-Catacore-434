@@ -369,6 +369,8 @@ public:
             cre->GetMap()->CreatureRelocation(cre, fX, fY, fZ, pCreatureTarget->GetOrientation());
             cre->MonsterMoveWithSpeed(fX, fY, fZ, 0);
         }
+
+        return false;
     };
 
 };

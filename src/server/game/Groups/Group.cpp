@@ -500,8 +500,7 @@ void Group::ChangeLeader(const uint64 &guid)
 
 void Group::Disband(bool hideDestroy /* = false */)
 {
-    if (this)
-        this->RemoveAllMarkers(this->GetLeaderGUID());
+    this->RemoveAllMarkers(this->GetLeaderGUID());
 
     sScriptMgr->OnGroupDisband(this);
 

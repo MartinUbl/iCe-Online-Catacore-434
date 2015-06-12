@@ -239,7 +239,11 @@ class Pet : public Guardian
         DeclinedName *m_declinedname;
 
     private:
-        void SaveToDB(uint32, uint8)                        // overwrited of Creature::SaveToDB     - don't must be called
+        void SaveToDB()
+        {
+            ASSERT(false);
+        }
+        void SaveToDB(uint32, uint8, uint32)                // overwrited of Creature::SaveToDB     - don't must be called
         {
             ASSERT(false);
         }

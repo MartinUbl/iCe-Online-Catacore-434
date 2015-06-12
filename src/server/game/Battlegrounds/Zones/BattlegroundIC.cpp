@@ -74,7 +74,7 @@ void BattlegroundIC::HandlePlayerResurrect(Player* player)
 		player->CastSpell(player,SPELL_OIL_REFINERY,true);
 }
 
-void BattlegroundIC::DoAction(uint32 action, uint64 var)
+void BattlegroundIC::DoAction(uint32 action, const uint64& var)
 {
 	if (action != ACTION_TELEPORT_PLAYER_TO_TRANSPORT)
 		return;

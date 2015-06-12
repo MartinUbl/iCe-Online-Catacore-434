@@ -275,6 +275,7 @@ static const Yells Phase3[3]= // DONE
     {24522, "Your judgement has come!"},
 };
 
+/*
 static const Yells Phase4[5]= // DONE
 {
     {24528, "Too soon..."},
@@ -283,6 +284,7 @@ static const Yells Phase4[5]= // DONE
     {25427, "Arrggh, outsiders - this is not your realm!"},
     {24526, "When I finish this, your pathetic mortal world will burn with my vengeance!"},
 };
+*/
 
 static const Yells RandomKill[3]= // DONE
 {
@@ -3015,7 +3017,7 @@ public:
             ScriptedAI::EnterEvadeMode();
         }
 
-        void JustDied()
+        void JustDied(Unit* /*killer*/)
         {
             DestroyWalls();
         }

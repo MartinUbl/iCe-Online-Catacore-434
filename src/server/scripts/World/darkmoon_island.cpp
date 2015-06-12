@@ -1,9 +1,11 @@
 /**
  * Darkmoon island scripts
  *
- * Copyright (c) iCe Online, 2006-2013
+ * Copyright (c) iCe Online, 2006-2015
  *
  **/
+
+#include "ScriptPCH.h"
 
 enum DarkmoonQuests
 {

@@ -430,8 +430,7 @@ public:
                             if(pUnit->HasAura(SPELL_TWILIGHT_EVOLUTION)) // Player is charmed
                                 break;
 
-                            float ang = angle - me->GetAngle(pUnit->GetPositionX(), pUnit->GetPositionY());
-                            ang < 0 ? ang = -ang : ang = ang;
+                            float ang = std::abs(angle - me->GetAngle(pUnit->GetPositionX(), pUnit->GetPositionY()));
                             if(me->GetDistance(pUnit) < 3.00f // Player is near enough
                                 && ang < (3.14f / 6.00f)) // Player stands in the way of the beam
                             {

@@ -428,7 +428,6 @@ class spell_dru_tranquility : public SpellScriptLoader
 
                 targets.clear(); // Clean final target list
 
-                std::vector<Record>::const_iterator itr = temp_targets.begin();
                 uint8 counter = 0;
                 const uint8 max_targets = 5; // Tranquility should affect only 5 targets with lowest HP
 

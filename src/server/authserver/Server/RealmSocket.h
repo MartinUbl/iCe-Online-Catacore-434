@@ -64,7 +64,7 @@ class RealmSocket : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
 
         virtual int open(void *);
 
-        virtual int close(int);
+        virtual int close(u_long);
 
         virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
         virtual int handle_output(ACE_HANDLE = ACE_INVALID_HANDLE);

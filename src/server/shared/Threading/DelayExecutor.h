@@ -27,7 +27,7 @@
 #include <ace/Activation_Queue.h>
 #include <ace/Method_Request.h>
 
-class DelayExecutor : protected ACE_Task_Base
+class DelayExecutor
 {
     public:
 
@@ -51,6 +51,7 @@ class DelayExecutor : protected ACE_Task_Base
         ACE_Activation_Queue queue_;
         ACE_Method_Request* pre_svc_hook_;
         ACE_Method_Request* post_svc_hook_;
+        ACE_Task_Base task_base;
         bool activated_;
 
         void activated(bool s);

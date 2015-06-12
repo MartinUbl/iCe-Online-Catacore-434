@@ -856,7 +856,7 @@ void Map::ScriptsProcess()
                     break;
                 }
 
-                Creature* cTarget;
+                Creature* cTarget = nullptr;
                 if (source) //using grid searcher
                 {
                     WorldObject* wSource = dynamic_cast <WorldObject*> (source);

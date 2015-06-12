@@ -653,12 +653,12 @@ public:
         bool SomeoneInRange(void)
         {
             if (!pInstance)
-                return NULL;
+                return false;
 
             Map::PlayerList const& plList = pInstance->instance->GetPlayers();
 
             if (plList.isEmpty())
-                return NULL;
+                return false;
 
             for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
             {

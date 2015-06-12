@@ -391,22 +391,22 @@ void BattlegroundEY::HandleAreaTrigger(Player *Source, uint32 Trigger)
         case TR_BLOOD_ELF_POINT:
             if (m_PointState[BLOOD_ELF] == EY_POINT_UNDER_CONTROL && m_PointOwnedByTeam[BLOOD_ELF] == Source->GetBGTeam())
                 if (m_FlagState && GetFlagPickerGUID() == Source->GetGUID())
-                    EventPlayerCapturedFlag(Source, BG_EY_OBJECT_FLAG_BLOOD_ELF);
+                    EventPlayerCapturedPointFlag(Source, BG_EY_OBJECT_FLAG_BLOOD_ELF);
             break;
         case TR_FEL_REAVER_POINT:
             if (m_PointState[FEL_REAVER] == EY_POINT_UNDER_CONTROL && m_PointOwnedByTeam[FEL_REAVER] == Source->GetBGTeam())
                 if (m_FlagState && GetFlagPickerGUID() == Source->GetGUID())
-                    EventPlayerCapturedFlag(Source, BG_EY_OBJECT_FLAG_FEL_REAVER);
+                    EventPlayerCapturedPointFlag(Source, BG_EY_OBJECT_FLAG_FEL_REAVER);
             break;
         case TR_MAGE_TOWER_POINT:
             if (m_PointState[MAGE_TOWER] == EY_POINT_UNDER_CONTROL && m_PointOwnedByTeam[MAGE_TOWER] == Source->GetBGTeam())
                 if (m_FlagState && GetFlagPickerGUID() == Source->GetGUID())
-                    EventPlayerCapturedFlag(Source, BG_EY_OBJECT_FLAG_MAGE_TOWER);
+                    EventPlayerCapturedPointFlag(Source, BG_EY_OBJECT_FLAG_MAGE_TOWER);
             break;
         case TR_DRAENEI_RUINS_POINT:
             if (m_PointState[DRAENEI_RUINS] == EY_POINT_UNDER_CONTROL && m_PointOwnedByTeam[DRAENEI_RUINS] == Source->GetBGTeam())
                 if (m_FlagState && GetFlagPickerGUID() == Source->GetGUID())
-                    EventPlayerCapturedFlag(Source, BG_EY_OBJECT_FLAG_DRAENEI_RUINS);
+                    EventPlayerCapturedPointFlag(Source, BG_EY_OBJECT_FLAG_DRAENEI_RUINS);
             break;
         case 4512:
         case 4515:
@@ -776,7 +776,7 @@ void BattlegroundEY::EventTeamCapturedPoint(Player *Source, uint32 Point)
     }
 }
 
-void BattlegroundEY::EventPlayerCapturedFlag(Player *Source, uint32 BgObjectType)
+void BattlegroundEY::EventPlayerCapturedPointFlag(Player *Source, uint32 BgObjectType)
 {
     if (GetStatus() != STATUS_IN_PROGRESS || GetFlagPickerGUID() != Source->GetGUID())
         return;

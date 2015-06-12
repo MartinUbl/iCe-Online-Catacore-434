@@ -630,7 +630,7 @@ public:
     void SetDetached(bool x = true);
     /** Check detached flag.
         \return true if the socket runs in its own thread. */
-    const bool IsDetached() const;
+    bool IsDetached() const;
     /** Order this socket to start its own thread and call OnDetached
         when ready for operation. */
     bool Detach();

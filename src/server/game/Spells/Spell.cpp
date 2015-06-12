@@ -1865,11 +1865,15 @@ void Spell::DoTriggersOnSpellHit(Unit *unit)
     if (m_customAttr & SPELL_ATTR0_CU_LINK_HIT)
     {
         if (const std::vector<int32> *spell_triggered = sSpellMgr->GetSpellLinked(m_spellInfo->Id + SPELL_LINK_HIT))
+        {
             for (std::vector<int32>::const_iterator i = spell_triggered->begin(); i != spell_triggered->end(); ++i)
+            {
                 if (*i < 0)
                     unit->RemoveAurasDueToSpell(-(*i));
                 else
                     unit->CastSpell(unit, *i, true, 0, 0, m_caster->GetGUID());
+            }
+        }
     }
 }
 

@@ -159,7 +159,7 @@ public:
            }
         }
 
-        void OnCreatureCreate(Creature* pCreature)
+        void OnCreatureCreate(Creature* pCreature, bool /*add*/)
         {
             switch(pCreature->GetEntry())
             {
@@ -209,7 +209,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* pGo)
+        void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
         {
             switch(pGo->GetEntry())
             {

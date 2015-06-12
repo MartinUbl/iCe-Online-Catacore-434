@@ -892,7 +892,7 @@ public:
 
 	void FillInitialWorldStates(WorldPacket& data);
 
-	virtual void DoAction(uint32 action, uint64 var);
+	virtual void DoAction(uint32 action, const uint64& var);
 
 	virtual void HandlePlayerResurrect(Player* player);
 

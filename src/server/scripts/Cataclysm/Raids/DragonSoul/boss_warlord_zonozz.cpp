@@ -283,7 +283,7 @@ public:
             }
         }
 
-        void JustDied()
+        void JustDied(Unit* /*who*/)
         {
             PlayQuote(deathQuote.soundId, deathQuote.text);
             summons.DespawnAll();
@@ -713,7 +713,7 @@ public:
                 bossGUID = pSummoner->GetGUID();
         }
 
-        void JustDied()
+        void JustDied(Unit* /*killer*/)
         {
         }
 
@@ -779,7 +779,7 @@ public:
                 bossGUID = pSummoner->GetGUID();
         }
 
-        void JustDied()
+        void JustDied(Unit* /*killer*/)
         {
         }
 

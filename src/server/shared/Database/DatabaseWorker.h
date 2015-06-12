@@ -35,7 +35,7 @@ class DatabaseWorker : public ACE_Task_Base
 
         ///- Inherited from ACE_Task_Base
         int svc();
-        int activate();
+        int activateWorker();
         int wait() { return ACE_Task_Base::wait(); }
 
     private:

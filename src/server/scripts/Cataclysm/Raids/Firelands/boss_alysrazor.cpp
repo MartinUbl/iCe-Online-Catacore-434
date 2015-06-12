@@ -2093,9 +2093,6 @@ class npc_Blazing_Talon_Clawshaper : public CreatureScript
                 if (ElfForm && !FlyAway)
                     DoMeleeAttackIfReady();
             }
-
-        private:
-            InstanceScript* _instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const

@@ -16,7 +16,7 @@
  */
 
 #ifndef INSTANCE_ENDTIME_H
-#define INSTANCE_TIME_H
+#define INSTANCE_ENDTIME_H
 
 enum Encounters
 {
@@ -46,4 +46,5 @@ enum AdditionalEvents
     TYPE_POOL_OF_MOONLIGHT_4  = 17,
     TYPE_POOL_OF_MOONLIGHT_5  = 18,
 };
+
 #endif
