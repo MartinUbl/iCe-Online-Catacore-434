@@ -7346,7 +7346,7 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                     case 57994: // Wind Shear
                         if (m_originalCaster->HasAura(16086) || m_originalCaster->HasAura(16544))
                         {
-                            uint32 spell_Id;
+                            uint32 spell_Id = 0;
                             int school = curSpellInfo->SchoolMask;
                             switch (school)
                             {
@@ -7381,7 +7381,8 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                                 break;
                             }
                             // Cast correct magic resistance buff
-                            m_originalCaster->CastSpell(m_originalCaster, spell_Id, true);
+                            if (spell_Id != 0)
+                                m_originalCaster->CastSpell(m_originalCaster, spell_Id, true);
                         }
                         break;
                 }
