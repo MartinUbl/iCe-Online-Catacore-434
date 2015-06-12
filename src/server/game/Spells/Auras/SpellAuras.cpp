@@ -1011,7 +1011,7 @@ bool Aura::CanBeSaved() const
 bool Aura::CanBeSentToClient() const
 {
     return !IsPassive() || HasAreaAuraEffect(GetSpellProto()) || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE) || HasEffectType(SPELL_AURA_WALK_AND_CAST)
-        || HasEffectType(SPELL_AURA_MOD_ACTION_BUTTON) || HasEffectType(SPELL_AURA_MOD_ACTION_BUTTON_2);
+        || HasEffectType(SPELL_AURA_MOD_ACTION_BUTTON) || HasEffectType(SPELL_AURA_MOD_ACTION_BUTTON_2) || GetSpellProto()->Id == 37826;
 }
 
 void Aura::UnregisterSingleTarget()
@@ -1355,12 +1355,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     {
                         if (!caster)
                             break;
-
-                        // Mark that, we casted SoC with Soulburn buff
-                        if (AuraEffect * aurEff = caster->GetAuraEffect(86664, EFFECT_0))
-                            aurEff->SetScriptedAmount(1);
-
-                        caster->RemoveAura(74434);
+                        // Soulburn
+                        if (caster->HasAura(74434))
+                        {
+                            // Mark that, we casted SoC with Soulburn buff
+                            caster->CastSpell(target, 37826, true);
+                        }
+                        caster->RemoveAura(74434); // Remove Soulburn
                     }
                     break;
                 }

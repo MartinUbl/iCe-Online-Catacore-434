@@ -4197,6 +4197,14 @@ void SpellMgr::LoadSpellCustomAttr()
         case 3716: // Torment (Basic Attack - Voidwalker pet)
             spellInfo->SchoolMask = 32; // Shadow instead of 33 (Normal and Shadow)
             break;
+        case 37826: // Seed of Corruption - Soulburn Check
+            spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->DurationIndex = 9; // 30 s
+            spellInfo->SpellVisual[0] = 0;
+            count++;
+            break;
         case 2643: // Multi-Shot no-target Effect 0 fix.
             spellInfo->EffectImplicitTargetA[0] = TARGET_DST_TARGET_ENEMY;
             count++;

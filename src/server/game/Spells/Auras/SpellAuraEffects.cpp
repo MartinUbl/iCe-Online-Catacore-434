@@ -1820,6 +1820,32 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                             caster->RemoveAura(74434); // Soulburn buff
                         }
                         break;
+                    case 27243: // Seed of Corruption
+                        {
+                            if (AuraEffect * aurEff = target->GetAuraEffect(27243, EFFECT_1))
+                            {
+                                aurEff->SetAmount(aurEff->GetAmount() - m_damage);
+
+                                if (!target->HasAura(37826))
+                                    break;
+
+                                if (caster->ToPlayer()->GetActiveTalentBranchSpec() != SPEC_WARLOCK_AFFLICTION)
+                                    break;
+
+                                if (aurEff->GetAmount() <= 0)
+                                {
+                                    // Gain 1 soul shard
+                                    caster->CastSpell(caster, 87388, true);
+                                    caster->MonsterSay("Soulshard Yay", LANG_UNIVERSAL, 0);
+
+                                    caster->CastSpell(target, 27285, true);
+
+                                    target->RemoveAura(37826);
+                                    break;
+                                }
+                            }
+                        }
+                        break;
                     /*  Shooting Stars proc handled here, because from some mystical reason this talent ignore any
                         changes in HandleProcTriggerSpellor or records in spell_proc_event
                         If someone wil find reason why, I'll give him a cookie !!!
