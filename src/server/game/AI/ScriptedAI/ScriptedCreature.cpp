@@ -296,7 +296,7 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, uint32 uiSchool, uint32
             continue;
 
         //Continue if we don't have the mana to actually cast this spell
-        if (pTempSpell->manaCost > me->GetPower((Powers)pTempSpell->powerType))
+        if ((int32)pTempSpell->manaCost > me->GetPower((Powers)pTempSpell->powerType))
             continue;
 
         //Get the Range
