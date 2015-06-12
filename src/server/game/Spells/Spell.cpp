@@ -1544,94 +1544,121 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
         bool EclipseLeft = m_caster->ToPlayer()->IsEclipseDriverLeft();
         switch(m_spellInfo->Id)
         {
-            case 8921: // Moonfire - solar energy
-                if(!EclipseLeft)
+            // Moonfire - Lunar / Solar energy under Lunar Shower effect
+            case 8921:
                 {
-                    if(!m_caster->HasAura(81006) && !m_caster->HasAura(81191) && !m_caster->HasAura(81192) ) // only under effect of Lunar shower
-                        break;
-
-                    int32 bp0 = 8;
-                    m_caster->ModifyPower(POWER_ECLIPSE, bp0);
-                }
-                else
-                {
-                    if (!m_caster->HasAura(81006) && !m_caster->HasAura(81191) && !m_caster->HasAura(81192)) // only under effect of Lunar shower
-                        break;
-
-                    // (Hotfix) - Moonfire will now generate Lunar Energy when crossing from Solar to Lunar on the Eclipse bar.
-                    int32 bp0 = -8;
-                    m_caster->ModifyPower(POWER_ECLIPSE, bp0);
+                    // If player is under lunar shower effekt
+                    if (m_caster->HasAura(81006) || m_caster->HasAura(81191) || m_caster->HasAura(81192))
+                    {
+                        int32 change = 0;
+                        // If player is after eclipse reset and under lunar shower effect 
+                        // his first Moonfire under lunar shower should be towards lunar eclipse
+                        if (!m_caster->HasAura(67483) && !m_caster->HasAura(67484))
+                        {
+                            if (m_caster->GetPower(POWER_ECLIPSE) <= 0)
+                                change = -8;
+                            else
+                                change = 8;
+                        }
+                        // If player is moving towards Solar eclipse
+                        else if (!EclipseLeft)
+                            change = 8;
+                        // If player is moving towards Lunar eclipse
+                        else
+                            // (Hotfix) - Moonfire will now generate Lunar Energy when crossing from Solar to Lunar on the Eclipse bar.
+                            change = -8;
+                        // Modify energy
+                        if (change != 0)
+                            m_caster->ModifyPower(POWER_ECLIPSE, change);
+                    }
                 }
                 break;
 
-            case 93402: // Sunfire - lunar energy
-                if(EclipseLeft)
+            // Sunfire - Lunar energy
+            case 93402:
+                // If player is under lunar shower effekt
+                if (m_caster->HasAura(81006) || m_caster->HasAura(81191) || m_caster->HasAura(81192))
                 {
-                    if(!m_caster->HasAura(81006) && !m_caster->HasAura(81191) && !m_caster->HasAura(81192) ) // only under effect of Lunar shower
-                        break;
-
-                    int32 bp0 = -8;
-                    m_caster->ModifyPower(POWER_ECLIPSE, bp0);
+                    // If we are moving towards lunar eclipse
+                    if (EclipseLeft)
+                    {
+                        int32 bp0 = -8;
+                        m_caster->ModifyPower(POWER_ECLIPSE, bp0);
+                    }
                 }
                 break;
 
-            //Wrath - Lunar energy
+            // Wrath - Lunar energy
             case 5176:
-                if(EclipseLeft)
+                // Decrease energy towards lunar eclipse only when moving towards lunar eclipse or after eclipse reset
+                if (EclipseLeft || (!m_caster->HasAura(67483) && !m_caster->HasAura(67484)))
                 {
-                    int32 bp0 = -13;
+                    int32 bp0 = -13; // Wrath's base amount of energy
 
                     // T12 Balance 4P Bonus ( While not in an Eclipse state your Wrath generates 3 additional Lunar Energy )
                     if (m_caster->HasAura(99049) && !m_caster->HasAura(48517) && !m_caster->HasAura(48518)) 
                         bp0 -= 3;
 
-                    m_caster->ModifyPower(POWER_ECLIPSE,bp0);
-
-                    if (!m_caster->ToPlayer()->IsEclipseDriverLeft())
-                        break;
-                    // talent Euphoria - generate 2x eclipse
+                    // Talent Euphoria generates the same amount of energy again as a bonus
                     if (!m_caster->HasAura(48518) && !m_caster->HasAura(48517) &&
                         ((m_caster->HasAura(81062) && roll_chance_i(24))
                         || (m_caster->HasAura(81061) && roll_chance_i(12))))
                     {
-                        // Doesn't work as intended, leave alone and modify manually
-                        //m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
-                        m_caster->ModifyPower(POWER_ECLIPSE, bp0);
+                        // Gain doubled amount of base enrgy
+                        m_caster->ModifyPower(POWER_ECLIPSE, 2*bp0);
                     }
+                    else // Gain base amount of energy
+                        m_caster->ModifyPower(POWER_ECLIPSE, bp0);
+
                 }
                 break;
-            //Starfire - solar energy
+
+            // Starfire - Solar energy
             case 2912:
-                if(!EclipseLeft)
+                // Increase energy towards solar eclipse only when moving towards solar eclipse or after eclipse reset
+                if (!EclipseLeft || (!m_caster->HasAura(67483) && !m_caster->HasAura(67484)))
                 {
-                    int32 bp0 = 20;
+                    int32 bp0 = 20; // Starfire's base amount of energy
 
                     // T12 Balance 4P Bonus ( While not in an Eclipse state your Starfire generates 5 additional Solar Energy )
                     if (m_caster->HasAura(99049) && !m_caster->HasAura(48517) && !m_caster->HasAura(48518))
                         bp0 += 5;
 
-                    m_caster->ModifyPower(POWER_ECLIPSE, bp0);
-
-                    if (m_caster->ToPlayer()->IsEclipseDriverLeft())
-                        break;
-                    // talent Euphoria - generate 2x eclipse
-
+                    // Talent Euphoria generates the same amount of energy again as a bonus
                     if (!m_caster->HasAura(48518) && !m_caster->HasAura(48517) &&
                         ((m_caster->HasAura(81062) && roll_chance_i(24))
                         || (m_caster->HasAura(81061) && roll_chance_i(12))))
                     {
-                        // Doesn't work as intended, leave alone and modify manually
-                        //m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
-                        m_caster->ModifyPower(POWER_ECLIPSE, bp0);
+                        // Gain doubled amount of base energy
+                        m_caster->ModifyPower(POWER_ECLIPSE, 2*bp0);
                     }
+                    else // Gain base amount of energy
+                        m_caster->ModifyPower(POWER_ECLIPSE, bp0);
                 }
                 break;
-            //Starsurge
+
+            // Starsurge - Lunar or Solar energy
             case 78674:
-                if(EclipseLeft)
-                    m_caster->ModifyPower(POWER_ECLIPSE,-15);
-                else
-                    m_caster->ModifyPower(POWER_ECLIPSE, 15);
+                // Add amount of energy
+                int32 change = 0;
+                // If we are after eclipse reset Starsurge should be able to move energy both ways
+                // depends if player is closer to lunar or solar eclipse, if he has 0 energy it moves towards solar
+                if (!m_caster->HasAura(67483) && !m_caster->HasAura(67484))
+                {
+                    if (m_caster->GetPower(POWER_ECLIPSE) >= 0)
+                        change = 15;
+                    else
+                        change = -15;
+                }
+                // If player is moving towards lunar eclipse decrease our energy
+                else if (EclipseLeft)
+                    change = -15;
+                // If player is moving towards solar eclipse increase our energy
+                else 
+                    change = 15;
+                // Finally modify energy
+                if (change != 0)
+                    m_caster->ModifyPower(POWER_ECLIPSE, change);
                 break;
         }
     }

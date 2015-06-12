@@ -479,7 +479,9 @@ Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achie
 
     m_lastBattlegroundTypeId = 0;
 
-    m_eclipseDriverLeft = false;
+    // After login player has set eclipse Driver towards Lunar Eclipse <-
+    // this is because  of that fucking PvP bonus, everything will be easier this way
+    m_eclipseDriverLeft = true;
 
     // group is initialized in the reference constructor
     SetGroupInvite(NULL);
@@ -2735,7 +2737,7 @@ void Player::ResetAllPowers()
 
     // Also clear paladin's holy power and druid's eclipse power to avoid overpowered combos
     SetPower(POWER_HOLY_POWER, 0);
-    SetPower(POWER_ECLIPSE, 0);
+    ClearEclipseState();
 }
 
 Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
@@ -5181,6 +5183,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
         SetPower(POWER_MANA, uint32(GetMaxPower(POWER_MANA)*restore_percent));
         SetPower(POWER_RAGE, 0);
         SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
+        ClearEclipseState();
     }
 
     // trigger update zone for alive state zone updates
@@ -5263,6 +5266,7 @@ void Player::KillPlayer()
         i_motionMaster.MoveFall();
 
     SetRooted(true);
+    ClearEclipseState();
 
     StopMirrorTimers();                                     //disable timers(bars)
 
@@ -6992,7 +6996,7 @@ void Player::RemoveSpecializationAuras(void)
             //hardly set eclipse power to zero
             uint32 powerIndex = sObjectMgr->GetPowerIndexByClass(POWER_ECLIPSE, getClass());
             if (powerIndex != MAX_POWERS)
-                SetUInt32Value(UNIT_FIELD_POWER1 + powerIndex, 0);
+                SetInt32Value(UNIT_FIELD_POWER1 + powerIndex, 0);
         }
         break;
         case CLASS_HUNTER:
@@ -23597,6 +23601,8 @@ void Player::LeaveBattleground(bool teleportToEntryPoint, bool CastDeserter)
     RemoveAurasDueToSpell(74411); // Battleground dampening
     RemoveAurasDueToSpell(74410); // Arena dampening
 
+    ClearEclipseState();
+
     // Dismount player before teleport from BG -> prevent stacking of multiple mounted auras
     if (IsMounted())
         RemoveAurasByType(SPELL_AURA_MOUNTED);
@@ -26858,19 +26864,23 @@ bool Player::IsInEclipse()
     return HasAura(48517) || HasAura(48518);
 }
 
-void Player::TurnEclipseDriver(bool left)
+void Player::TurnEclipseDriverLeft(bool left)
 {
     m_eclipseDriverLeft = left;
 
-    if(left)
+    // Don`t remove/switch markers on TurnEclipseDriverLeft if player has none of them
+    if (HasAura(67483) || HasAura(67484))
     {
-        RemoveAurasDueToSpell(67483);
-        CastSpell(this,67484,true);
-    }
-    else
-    {
-        RemoveAurasDueToSpell(67484);
-        CastSpell(this,67483,true);
+        if (left)
+        {
+            RemoveAurasDueToSpell(67483);
+            CastSpell(this, 67484, true);
+        }
+        else
+        {
+            RemoveAurasDueToSpell(67484);
+            CastSpell(this, 67483, true);
+        }
     }
 }
 
@@ -26879,8 +26889,13 @@ void Player::ClearEclipseState()
     // clear power
     SetPower(POWER_ECLIPSE,0);
 
-    // we are moving to solar eclipse
-    TurnEclipseDriver(false);
+    // Player should not have neither of < or > mark when we reset eclipse state
+    // this causes <> effect and that is what we need
+    RemoveAurasDueToSpell(67483);
+    RemoveAurasDueToSpell(67484);
+
+    //Turn Eclipse driver towards Lunar eclipse after reset
+    TurnEclipseDriverLeft(true);
 
     // remove all eclipse spells
     RemoveAurasDueToSpell(48517);
@@ -26889,7 +26904,7 @@ void Player::ClearEclipseState()
     // and hardly set eclipse power to zero
     uint32 powerIndex = sObjectMgr->GetPowerIndexByClass(POWER_ECLIPSE, getClass());
     if (powerIndex != MAX_POWERS)
-        SetUInt32Value(UNIT_FIELD_POWER1 + powerIndex, 0);
+        SetInt32Value(UNIT_FIELD_POWER1 + powerIndex, 0);
 }
 
 uint32 Player::CalculateTalentsPoints() const

@@ -2655,7 +2655,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             sLog->outDetail("PeriodicTick: %u (TypeId: %u) power leech of %u (TypeId: %u) for %u dmg inflicted by %u",
                 GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), target->GetGUIDLow(), target->GetTypeId(), damage, GetId());
 
-            int32 drain_amount = target->GetPower(power) > damage ? damage : target->GetPower(power);
+            int32 drain_amount = target->GetPower(power) > int32(damage) ? int32(damage) : target->GetPower(power);
 
             target->ModifyPower(power, -drain_amount);
 
@@ -4515,7 +4515,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
                             target->CastSpell(target, 17057, true);
                         default:
                         {
-                            uint32 newEnergy = std::min(target->GetPower(POWER_ENERGY), FurorChance);
+                            int32 newEnergy = int32(std::min(uint32(target->GetPower(POWER_ENERGY)), FurorChance));
                             target->SetPower(POWER_ENERGY, newEnergy);
                         }
                         break;
@@ -4607,7 +4607,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
             case FORM_DEFENSIVESTANCE:
             case FORM_BERSERKERSTANCE:
             {
-                uint32 Rage_val = 0;
+                int32 Rage_val = 0;
                 // Defensive Tactics
                 if (form == FORM_DEFENSIVESTANCE)
                 {

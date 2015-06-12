@@ -7152,6 +7152,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 46832:
                 {
                     Player *caster = ToPlayer();
+                    // If caster is in eclipse don't add any energy
                     if (!caster || caster->IsInEclipse())
                         break;
                     if (caster->HasSpellCooldown(95746))
@@ -7159,7 +7160,20 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     if (caster->GetActiveTalentBranchSpec() != SPEC_DRUID_BALANCE)
                         break;
                     caster->AddSpellAndCategoryCooldowns(sSpellStore.LookupEntry(95746), 0);
-                    int32 change = caster->IsEclipseDriverLeft() ? -13 : 20;
+
+                    // Energy change amount
+                    int32 change;
+                    // If player is after eclipse reset add lunar or solar energy
+                    // which one is depending on to which eclipse is player closer
+                    if (!caster->HasAura(67483) && !caster->HasAura(67484))
+                    {
+                        if (caster->GetPower(POWER_ECLIPSE) <= 0) // If player is closer to lunar eclipse
+                            change = -13;
+                        else // If player is closer to solar eclipse
+                            change = 20;
+                    }
+                    else // If plaer already at least once reached eclipse we need to follow the rules
+                        change = caster->IsEclipseDriverLeft() ? -13 : 20;
                     caster->ModifyPower(POWER_ECLIPSE, change);
                     return true;
                 }
@@ -16516,13 +16530,13 @@ void Unit::SetMaxHealth(uint32 val)
         SetHealth(val);
 }
 
-uint32 Unit::GetPower(Powers power) const
+int32 Unit::GetPower(Powers power) const
 {
     uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
         return 0;
 
-    return GetUInt32Value(UNIT_FIELD_POWER1 + powerIndex);
+    return GetInt32Value(UNIT_FIELD_POWER1 + powerIndex);
 }
 
 uint32 Unit::GetMaxPower(Powers power) const
@@ -16540,6 +16554,7 @@ void Unit::SetPower(Powers power, int32 val)
     if (powerIndex == MAX_POWERS)
         return;
 
+    // Return if power which we want to set is already set
     if (GetPower(power) == uint32(val))
         return;
 
@@ -16553,31 +16568,29 @@ void Unit::SetPower(Powers power, int32 val)
             val = -100;
 
         // The visual part
-        int32 actualPower = (int32)GetPower(POWER_ECLIPSE);
-        int32 deltaPower = abs(val-actualPower);
-        int32 realModify = 0;
-        if(val > actualPower)
-        {
-            realModify = deltaPower;
-            ToPlayer()->TurnEclipseDriver(false);
-        }
-        else
-        {
-            realModify = -deltaPower;
-            ToPlayer()->TurnEclipseDriver(true);
-        }
+        int32 actualPower = GetPower(POWER_ECLIPSE); // Soucasna power pred modifikaci
 
-        SendEnergizeSpellLog(this,89265,realModify,POWER_ECLIPSE);
+        if (actualPower == 0)
+            ToPlayer()->MonsterSay("Pover je nula", LANG_UNIVERSAL, ToPlayer()->GetGUID());
+        if (val < actualPower)
+            ToPlayer()->MonsterSay("Odebiram Power", LANG_UNIVERSAL, ToPlayer()->GetGUID());
+        if (val > actualPower)
+            ToPlayer()->MonsterSay("Pridavam Power", LANG_UNIVERSAL, ToPlayer()->GetGUID());
+
+        int32 deltaPower = (val-actualPower); // Zmena power je nova hodnota - soucasna power rozdil
+
+        SendEnergizeSpellLog(this,89265,deltaPower,POWER_ECLIPSE);
         // end of visual part
 
-        // function part
-        // little hack (convert value < 0 to uint32), because stats are all defined as unsigned
-        SetUInt32Value(UNIT_FIELD_POWER1 + powerIndex, (uint32)val);
+        // function part -> nastaveni nove hodnoty power
+        SetInt32Value(UNIT_FIELD_POWER1 + powerIndex, val);
+
         if(val >= 100 && !HasAura(48517))
         {
-            //run solar eclipse
-            CastSpell(this, 48517, true);
-            ToPlayer()->TurnEclipseDriver(true);
+            // Run Solar Eclipse
+            CastSpell(this, 67484, true); // Add marker to the left
+            CastSpell(this, 48517, true); // Add Solar Eclipse buff
+            ToPlayer()->TurnEclipseDriverLeft(true);
 
             if (HasAura(16880) || HasAura(61345) || HasAura(61346)) // If player has Nature's Grace talent
                 RemoveAura(93432); // Remove Cooldown marker
@@ -16594,9 +16607,10 @@ void Unit::SetPower(Powers power, int32 val)
         }
         else if(val <= -100 && !HasAura(48518))
         {
-            //run lunar eclipse
-            CastSpell(this, 48518, true);
-            ToPlayer()->TurnEclipseDriver(false);
+            // Run Lunar Eclipse
+            CastSpell(this, 67483, true); // Add marker to the right
+            CastSpell(this, 48518, true); // Add Lunar Eclipse buff
+            ToPlayer()->TurnEclipseDriverLeft(false);
 
             if (HasAura(16880) || HasAura(61345) || HasAura(61346)) // If player has Nature's Grace talent
                 RemoveAura(93432); // Remove Cooldown marker
@@ -16613,12 +16627,12 @@ void Unit::SetPower(Powers power, int32 val)
         }
         else if(val >= 0 && !ToPlayer()->IsEclipseDriverLeft() && HasAura(48518))
         {
-            //cancel lunar eclipse
+            // Cancel Lunar Eclipse
             RemoveAurasDueToSpell(48518);
         }
         else if(val <= 0 && ToPlayer()->IsEclipseDriverLeft() && HasAura(48517))
         {
-            //cancel solar eclipse
+            // Cancel Solar Eclipse
             RemoveAurasDueToSpell(48517);
         }
 

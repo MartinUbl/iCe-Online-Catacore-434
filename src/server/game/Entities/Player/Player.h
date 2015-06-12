@@ -2070,7 +2070,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool IsInEclipse();
         bool IsEclipseDriverLeft() { return m_eclipseDriverLeft; };
-        void TurnEclipseDriver(bool left);
+        void TurnEclipseDriverLeft(bool left);
         void ClearEclipseState();
 
         void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage);
