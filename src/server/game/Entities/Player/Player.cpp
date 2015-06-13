@@ -480,7 +480,7 @@ Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achie
     m_lastBattlegroundTypeId = 0;
 
     // After login player has set eclipse Driver towards Lunar Eclipse <-
-    // this is because  of that fucking PvP bonus, everything will be easier this way
+    // this is because of PvP tier 11 bonus, everything will be easier this way
     m_eclipseDriverLeft = true;
 
     // group is initialized in the reference constructor

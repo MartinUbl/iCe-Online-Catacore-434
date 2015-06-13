@@ -1825,10 +1825,10 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                             if (AuraEffect * aurEff = target->GetAuraEffect(27243, EFFECT_1))
                             {
                                 aurEff->SetAmount(aurEff->GetAmount() - m_damage);
-
+                                // Check "Soulburn check" aura
                                 if (!target->HasAura(37826))
                                     break;
-
+                                // Check talent spec
                                 if (caster->ToPlayer()->GetActiveTalentBranchSpec() != SPEC_WARLOCK_AFFLICTION)
                                     break;
 
@@ -1836,10 +1836,9 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                                 {
                                     // Gain 1 soul shard
                                     caster->CastSpell(caster, 87388, true);
-                                    caster->MonsterSay("Soulshard Yay", LANG_UNIVERSAL, 0);
-
+                                    // Cast explosion effect
                                     caster->CastSpell(target, 27285, true);
-
+                                    // Remove "Soulburn check" aura
                                     target->RemoveAura(37826);
                                     break;
                                 }

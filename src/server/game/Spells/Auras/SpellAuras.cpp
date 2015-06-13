@@ -1011,7 +1011,7 @@ bool Aura::CanBeSaved() const
 bool Aura::CanBeSentToClient() const
 {
     return !IsPassive() || HasAreaAuraEffect(GetSpellProto()) || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE) || HasEffectType(SPELL_AURA_WALK_AND_CAST)
-        || HasEffectType(SPELL_AURA_MOD_ACTION_BUTTON) || HasEffectType(SPELL_AURA_MOD_ACTION_BUTTON_2) || GetSpellProto()->Id == 37826;
+        || HasEffectType(SPELL_AURA_MOD_ACTION_BUTTON) || HasEffectType(SPELL_AURA_MOD_ACTION_BUTTON_2);
 }
 
 void Aura::UnregisterSingleTarget()

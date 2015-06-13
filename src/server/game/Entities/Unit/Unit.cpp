@@ -16568,21 +16568,13 @@ void Unit::SetPower(Powers power, int32 val)
             val = -100;
 
         // The visual part
-        int32 actualPower = GetPower(POWER_ECLIPSE); // Soucasna power pred modifikaci
-
-        if (actualPower == 0)
-            ToPlayer()->MonsterSay("Pover je nula", LANG_UNIVERSAL, ToPlayer()->GetGUID());
-        if (val < actualPower)
-            ToPlayer()->MonsterSay("Odebiram Power", LANG_UNIVERSAL, ToPlayer()->GetGUID());
-        if (val > actualPower)
-            ToPlayer()->MonsterSay("Pridavam Power", LANG_UNIVERSAL, ToPlayer()->GetGUID());
-
-        int32 deltaPower = (val-actualPower); // Zmena power je nova hodnota - soucasna power rozdil
+        int32 actualPower = GetPower(POWER_ECLIPSE); // Current power before modification
+        int32 deltaPower = (val-actualPower);
 
         SendEnergizeSpellLog(this,89265,deltaPower,POWER_ECLIPSE);
         // end of visual part
 
-        // function part -> nastaveni nove hodnoty power
+        // function part
         SetInt32Value(UNIT_FIELD_POWER1 + powerIndex, val);
 
         if(val >= 100 && !HasAura(48517))
