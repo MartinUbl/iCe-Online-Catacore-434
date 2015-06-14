@@ -7191,7 +7191,15 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_targets.HasDst())
                     dpos = dynamic_cast<Position*>(&m_targets.m_dstPos);
                 else if (m_targets.getUnitTarget())
+                {
                     dpos = dynamic_cast<Position*>(m_targets.getUnitTarget());
+                    if (Unit* tu = m_targets.getUnitTarget())
+                    {
+                        // Antipersonnel Cannon cannot be charged or jumped to
+                        if (tu->GetEntry() == 27894)
+                            return SPELL_FAILED_BAD_TARGETS;
+                    }
+                }
                 else if (m_targets.getGOTarget())
                     dpos = dynamic_cast<Position*>(m_targets.getGOTarget());
                 else
