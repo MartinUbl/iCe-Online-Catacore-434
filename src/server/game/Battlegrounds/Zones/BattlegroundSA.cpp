@@ -146,7 +146,7 @@ bool BattlegroundSA::ResetObjs()
             return false;
 
         // add several immunities to guns - i.e. charge and jump effects should not be permitted
-        if (i >= BG_SA_GUN_1 && i <= BG_SA_GUN_10)
+        if (/*i >= BG_SA_GUN_1 && */i <= BG_SA_GUN_10)
         {
             cr->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_CHARGE, true);
             cr->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_CHARGE_DEST, true);
