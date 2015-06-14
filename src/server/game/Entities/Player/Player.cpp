@@ -2288,7 +2288,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             }
 
             // remove arena spell coldowns/buffs now to also remove pet's cooldowns before it's temporarily unsummoned
-            if (mEntry->IsBattlegroundOrArena())
+            if (mEntry->IsBattlegroundOrArena() && GetSpectatorInstanceId() == 0)
             {
                 RemoveArenaSpellCooldowns(true);
                 RemoveArenaAuras(false,mEntry->IsBattleArena());
