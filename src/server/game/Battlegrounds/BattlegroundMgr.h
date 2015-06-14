@@ -76,7 +76,7 @@ class BattlegroundMgr
 
         void GetSpectatableArenas(BattlegroundSet *target);
         bool AddArenaSpectator(Player* pl, uint32 instanceId);
-        void RemoveArenaSpectator(Player* pl);
+        void RemoveArenaSpectator(Player* pl, bool teleport = true);
 
         void CreateInitialBattlegrounds();
         void DeleteAllBattlegrounds();

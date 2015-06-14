@@ -2249,7 +2249,7 @@ void Battleground::AddSpectator(Player* pl)
     }
 }
 
-void Battleground::RemoveSpectator(Player* pl)
+void Battleground::RemoveSpectator(Player* pl, bool teleport)
 {
     if (m_Players.find(pl->GetGUID()) == m_Players.end())
     {
@@ -2260,7 +2260,7 @@ void Battleground::RemoveSpectator(Player* pl)
         pl->ClearUnitState(UNIT_STATE_CANNOT_AUTOATTACK);
         pl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
 
-        RemovePlayerAtLeave(pl->GetGUID(), true, true);
+        RemovePlayerAtLeave(pl->GetGUID(), teleport, true);
         pl->ResummonPetTemporaryUnSummonedIfAny();
 
         if (m_Spectators.find(pl->GetGUID()) != m_Spectators.end())

@@ -1676,6 +1676,10 @@ void Player::Update(uint32 p_time)
     {
         if (m_spectatorJoinTime <= (uint32) time(NULL))
         {
+            m_spectatorJoinTime = 1; // flag for "just being transported"
+            // used just when adding spectator to queue, nowhere else, so
+            // this is safe
+
             if (!sBattlegroundMgr->AddArenaSpectator(this, m_spectatorInstanceId))
                 m_spectatorInstanceId = 0;
 
@@ -2104,6 +2108,13 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // don't let gm level > 1 either
     if (!InBattleground() && mEntry->IsBattlegroundOrArena())
         return false;
+
+    // is in arena as spectator, and tries to teleport out
+    if (GetSpectatorInstanceId() > 0 && GetSpectatorJoinTime() == 0) // time should be == 1 when teleporting into arena as spectator
+    {
+        // this should drop isolated flags and so on
+        sBattlegroundMgr->RemoveArenaSpectator(this);
+    }
 
     GetAntiHackServant()->DeleteData();
 

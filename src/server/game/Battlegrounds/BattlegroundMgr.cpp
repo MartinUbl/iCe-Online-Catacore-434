@@ -909,7 +909,7 @@ bool BattlegroundMgr::AddArenaSpectator(Player* pl, uint32 instanceID)
     return false;
 }
 
-void BattlegroundMgr::RemoveArenaSpectator(Player* pl)
+void BattlegroundMgr::RemoveArenaSpectator(Player* pl, bool teleport)
 {
     if (!pl)
         return;
@@ -927,7 +927,7 @@ void BattlegroundMgr::RemoveArenaSpectator(Player* pl)
         {
             if (itr->second)
             {
-                itr->second->RemoveSpectator(pl);
+                itr->second->RemoveSpectator(pl, teleport);
                 pl->SetSpectatorData(0, 0);
                 return;
             }
