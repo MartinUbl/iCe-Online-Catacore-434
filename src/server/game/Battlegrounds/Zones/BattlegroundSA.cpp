@@ -138,10 +138,21 @@ bool BattlegroundSA::ResetObjs()
     // By capturing GYs.
     for (uint8 i = 0; i < BG_SA_NPC_SPARKLIGHT; i++)
     {
-        if (!AddCreature(BG_SA_NpcEntries[i], i, (Attackers == TEAM_ALLIANCE ? TEAM_HORDE : TEAM_ALLIANCE),
-              BG_SA_NpcSpawnlocs[i][0],BG_SA_NpcSpawnlocs[i][1],
-              BG_SA_NpcSpawnlocs[i][2],BG_SA_NpcSpawnlocs[i][3],600))
-        return false;
+        Creature* cr = AddCreature(BG_SA_NpcEntries[i], i, (Attackers == TEAM_ALLIANCE ? TEAM_HORDE : TEAM_ALLIANCE),
+            BG_SA_NpcSpawnlocs[i][0], BG_SA_NpcSpawnlocs[i][1],
+            BG_SA_NpcSpawnlocs[i][2], BG_SA_NpcSpawnlocs[i][3], 600);
+
+        if (!cr)
+            return false;
+
+        // add several immunities to guns - i.e. charge and jump effects should not be permitted
+        if (i >= BG_SA_GUN_1 && i <= BG_SA_GUN_10)
+        {
+            cr->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_CHARGE, true);
+            cr->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_CHARGE_DEST, true);
+            cr->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_JUMP, true);
+            cr->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_JUMP_DEST, true);
+        }
     }
 
     OverrideGunFaction();
