@@ -274,6 +274,14 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             return;
     }
 
+    // when in arena, disallow public say/yell/textemote
+    if (GetPlayer()->GetSpectatorInstanceId() > 0 && (type == CHAT_MSG_SAY || type == CHAT_MSG_YELL || type == CHAT_MSG_TEXT_EMOTE))
+    {
+        recv_data.rfinish();
+        SendNotification("You can't speak loudly when in spectator mode!");
+        return;
+    }
+
     // no language for AFK and DND messages
     if(type == CHAT_MSG_AFK)
     {
