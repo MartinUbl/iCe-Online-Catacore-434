@@ -67,12 +67,12 @@ public:
             Hp = false;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
         }
 
-        void KilledUnit(Unit* /*who*/)
+        void KilledUnit()
         {
             DoScriptText(SAY_KILL, me);
         }

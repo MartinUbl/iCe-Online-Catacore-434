@@ -252,7 +252,7 @@ public:
                 me->SetVisibility(VISIBILITY_ON);
         }
 
-        void SummonedCreatureDies(Creature* c, Unit* /*killer*/)
+        void SummonedCreatureDies(Creature* c)
         {
             if (c && c->GetEntry() == CREATURE_NEFARIAN)
                 me->ForcedDespawn();

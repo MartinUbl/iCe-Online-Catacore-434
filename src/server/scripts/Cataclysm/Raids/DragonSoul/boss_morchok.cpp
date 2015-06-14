@@ -28,7 +28,6 @@ struct Quotes
     const char * text;
 };
 
-/*
 static const Quotes firstIntroQuotes[6] = 
 {
     { 26282, "No mortal shall turn me from my task!" }, // Morchok
@@ -47,7 +46,6 @@ static const Quotes secondIntroQuotes[5] =
     { 26534, "The siege must be broken! Wyrmrest Accord, defend the line!" }, // Lord Afrasastrasz
     { 26272, " I will turn this tower to rubble and scatter it across the wastes." }, // Morchok
 };
-*/
 
 static const Quotes aggroQuote = { 26268, "You seek to halt an avalanche. I will bury you." };
  
@@ -289,7 +287,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*who*/)
+        void JustDied()
         {
             uint32 randInt = urand(0, 1);
             PlayAndYell(deathQuotes[randInt].soundId, deathQuotes[randInt].text);

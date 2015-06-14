@@ -54,7 +54,7 @@ int DelayExecutor::deactivate()
 
     activated(false);
     queue_.queue()->deactivate();
-    task_base.wait();
+    wait();
 
     return 0;
 }
@@ -100,7 +100,7 @@ int DelayExecutor::activate(int num_threads, ACE_Method_Request* pre_svc_hook, A
 
     queue_.queue()->activate();
 
-    if (task_base.activate(THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED, num_threads) == -1)
+    if (ACE_Task_Base::activate(THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED, num_threads) == -1)
         return -1;
 
     activated(true);

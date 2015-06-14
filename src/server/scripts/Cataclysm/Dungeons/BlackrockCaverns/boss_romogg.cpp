@@ -214,7 +214,7 @@ public:
                 float x,y,z;
                 for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
                 {
-                    me->GetNearPoint2D(x, y, 2.0f, frand(0,6.28f));
+                    me->GetNearPoint2D(x,y,2.0f,urand(0,6.28f));
                     z = itr->getSource()->GetPositionZ();
                     itr->getSource()->NearTeleportTo(x,y,z,itr->getSource()->GetOrientation());
                 }

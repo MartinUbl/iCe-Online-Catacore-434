@@ -54,7 +54,6 @@ enum eShadowmourne
     SPELL_THIRST_QUENCHED                   = 72154,
 };
 
-/*
 static const uint32 vampireAuras[3][MAX_DIFFICULTY] =
 {
     {70867, 71473, 71532, 71533},
@@ -68,7 +67,6 @@ static const uint32 vampireAuras[3][MAX_DIFFICULTY] =
 
 static const Position centerPos = {4595.7090f, 2769.4190f, 400.6368f, 0.0000f};
 static const Position airPos    = {4595.7090f, 2769.4190f, 422.3893f, 0.0000f};
-*/
 
 void AddSC_boss_blood_queen_lanathel()
 {

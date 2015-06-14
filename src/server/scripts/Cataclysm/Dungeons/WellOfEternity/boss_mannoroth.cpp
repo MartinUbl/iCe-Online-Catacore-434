@@ -173,9 +173,10 @@ enum spells
 #define MINOR_CACHE_OF_ASPECTS 209541
 
 const Position cachePos = {3356.0f,-5748.0f,15.22f,2.6f};
-//const Position greenPortalPos = {3344.0f, -5702.0f, 13.4f,4.1f};
+const Position greenPortalPos = {3344.0f, -5702.0f, 13.4f,4.1f};
 const Position debilitatorPos1 = {3294.0f, -5689.0f, 14.7f,5.9f};
 const Position debilitatorPos2 = {3322.0f, -5701.0f, 15.8f,2.7f};
+
 
 const Position demonsPortalPos = { 3382.0f, -5704.0f, 12.0f, 3.8f };
 

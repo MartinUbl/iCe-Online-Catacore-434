@@ -689,7 +689,7 @@ public:
                 pInstance->DoCompleteAchievement(ACHIEVEMENT_CHOOSE_BRUNDIR);
                 pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65195);
                 if (me->GetPositionZ() > 428)
-                    me->GetMotionMaster()->MoveFall();
+                    me->GetMotionMaster()->MoveFall(427.28f);
             }
             else me->SetLootRecipient(NULL);
 

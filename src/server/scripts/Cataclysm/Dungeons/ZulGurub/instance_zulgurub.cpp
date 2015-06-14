@@ -63,7 +63,7 @@ class instance_zulgurub : public InstanceMapScript
                 return false;
             }
 
-            void OnCreatureCreate(Creature* pCreature, bool /*add*/)
+            void OnCreatureCreate(Creature* pCreature)
             {
                 switch(pCreature->GetEntry())
                 {

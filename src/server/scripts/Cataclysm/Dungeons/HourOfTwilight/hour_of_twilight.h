@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INSTANCE_HOUROFTWILIGHT_H
-#define INSTANCE_HOUROFTWILIGHT_H
+#ifndef INSTANCE_ENDTIME_H
+#define INSTANCE_TIME_H
 
 enum Encounters
 {

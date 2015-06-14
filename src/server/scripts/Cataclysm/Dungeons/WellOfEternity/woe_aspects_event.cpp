@@ -79,7 +79,7 @@ QUOTE_EVENTS quoteEvents [MAX_QUOTES] =
 {
     {11000, ENTRY_BRONZE_DRAKE_VEHICLE, "Sister, look! The artifact is surrounded by an aura of darkness!", 26031},
     {11000, ENTRY_BRONZE_DRAKE_VEHICLE, "The aspects!", 26033},
-    {19000, ENTRY_ALEXSTRASZA_ASPECT, "Come sisters, it is time to end this. We will cleanse the Dragon Soul of the Old Gods' dark influence!", 26508},
+    {19000, ENTRY_ALEXSTRASZA_ASPECT, "Come sisters, it is time to end this. We will cleanse the Dragon Soul of the Old Gods‘ dark influence!", 26508},
     {10000, ENTRY_YSERA_ASPECT, "It is too powerful!", 26150},
     {5000, ENTRY_NELTHARION_ASPECT, "How DARE you touch my creation?! It is mine...mine...MINE!", 26107},
     {7000, ENTRY_ALEXSTRASZA_ASPECT, "Neltharion! What have you done? You have doomed us all to the madness of the Old Gods!", 26509},

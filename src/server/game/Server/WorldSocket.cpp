@@ -313,7 +313,7 @@ int WorldSocket::open (void *a)
     return 0;
 }
 
-int WorldSocket::close (u_long)
+int WorldSocket::close (int)
 {
     shutdown();
 

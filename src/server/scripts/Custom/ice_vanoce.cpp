@@ -53,7 +53,7 @@ public:
                     me->SummonCreature(NPC_SOB, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000);
                     break;
                 case 24:
-                    me->MonsterSay("Dekuji ti tady uz to zvladnu sam",0,0);
+                    me->MonsterSay("Dekuji ti tady už to zvladnu sam",0,0);
                     if (pPlayer)
                     {
                         pPlayer->KilledMonsterCredit(500013,0);
@@ -157,7 +157,7 @@ public:
            player->SummonCreature(500003,-5432.0361f,1180.1640f,409.8187f,0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,4000);
            if (player)
            {
-               player->GetSession()->GetPlayer()->MonsterSay("Ksakra kam me to poslal",LANG_UNIVERSAL,0 );
+               player->GetSession()->GetPlayer()->MonsterSay("Ksakra kam mì to poslal",LANG_UNIVERSAL,0 );
            }
            return true;
         }

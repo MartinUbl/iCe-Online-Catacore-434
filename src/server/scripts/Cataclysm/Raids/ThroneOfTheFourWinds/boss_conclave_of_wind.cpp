@@ -280,7 +280,7 @@ public:
                 if(me->GetDistance(victim) > 60.0f)
                 {
                     // select someone else on next cycle
-                    me->getThreatManager().modifyThreatPercent(victim, -99);
+                    me->getThreatManager().modifyThreatPercent(victim, -99.99f);
                     me->RemoveAurasByType(SPELL_AURA_MOD_TAUNT, victim->GetGUID());
                 }
                 // target is on our platform
@@ -676,10 +676,10 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
                 }
                 else if (m_ability_phase > 2 && m_ability_phase < 13) // spin around the platform
                 {
-                    float o = me->GetOrientation() - 0.175f;
+                    float o = me->GetOrientation();
                     // 120deg over 6sec
-                    while (o < 0)
-                        o += 6.28f;
+                    o -= 0.175f;
+                    (o < 0) ? o += 6.28f : o = o;
 
                     // one-shot
                     me->SetOrientation(o);

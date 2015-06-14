@@ -498,16 +498,13 @@ public:
         virtual uint32* GetCorrUiEncounter();
 
         // Only this works ?
-        void OnPlayerEnter(Player* p) override
+        void OnPlayerEnter(Player * p) override
         {
             if (p->getGender() == GENDER_MALE)
                 p->CastSpell(p, NIGH_ELF_ILLUSION_MALE, true);
             else
                 p->CastSpell(p, NIGH_ELF_ILLUSION_FEMALE, true);
         }
-        // present to resolve ambigous inheritance (both parents have OnPlayerEnter method,
-        // but with different count and type of arguments
-        void OnPlayerEnter(InstanceMap* m, Player* p) override { MapScript::OnPlayerEnter(m, p); };
 
         public:
             //  Fuck it -> public

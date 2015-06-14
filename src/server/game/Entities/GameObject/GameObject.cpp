@@ -2151,7 +2151,7 @@ void GameObject::SetTransportState(GOState state, uint32 stopFrame /*= 0*/, uint
     }
     else
     {
-        if ((uint32)state < (uint32)(GO_STATE_TRANSPORT_STOPPED + MAX_GO_STATE_TRANSPORT_STOP_FRAMES) && stopFrame < m_goValue->Transport.StopFrames->size())
+        if (state < GO_STATE_TRANSPORT_STOPPED + MAX_GO_STATE_TRANSPORT_STOP_FRAMES && stopFrame < m_goValue->Transport.StopFrames->size())
         {
             if (m_goValue->Transport.StopFrames->size() > 0)
             {

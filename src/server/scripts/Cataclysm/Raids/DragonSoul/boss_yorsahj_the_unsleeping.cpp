@@ -301,7 +301,7 @@ public:
             PlayQuoteAndWhisper(me, killQuotes[randPos].soundId, killQuotes[randPos].facelessText, killQuotes[randPos].whisperText);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied()
         {
             summons.DespawnAll();
             PlayQuoteAndWhisper(me, deathQuote.soundId, deathQuote.facelessText, deathQuote.whisperText);

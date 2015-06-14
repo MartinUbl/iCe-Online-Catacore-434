@@ -248,7 +248,7 @@ public:
                     Summoned2->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     DragonList.push_back(Summoned2);
                     if (!IsHeroic())
-                        if (instance->GetData(DATA_STORM_RIDER) != 1)
+                        if (!instance->GetData(DATA_STORM_RIDER) == 1)
                             {
                                 Summoned2->AddAura(SPELL_UNRESPONSIVE, Summoned2);
                                 Summoned2->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -259,7 +259,7 @@ public:
                     Summoned3->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     DragonList.push_back(Summoned3);
                     if (!IsHeroic())
-                        if (instance->GetData(DATA_NETHER_SCION) != 1)
+                        if (!instance->GetData(DATA_NETHER_SCION) == 1)
                             {
                                 Summoned3->AddAura(SPELL_UNRESPONSIVE, Summoned3);
                                 Summoned3->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -270,7 +270,7 @@ public:
                     Summoned4->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     DragonList.push_back(Summoned4);
                     if (!IsHeroic())
-                        if (instance->GetData(DATA_THE_SLATE_DRAGON) != 1)
+                        if (!instance->GetData(DATA_THE_SLATE_DRAGON) == 1)
                             {
                                 Summoned4->AddAura(SPELL_UNRESPONSIVE, Summoned4);
                                 Summoned4->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -281,7 +281,7 @@ public:
                     Summoned5->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     DragonList.push_back(Summoned5);
                     if (!IsHeroic())
-                        if (instance->GetData(DATA_THE_TIME_WARDEN) != 1)
+                        if (!instance->GetData(DATA_THE_TIME_WARDEN) == 1)
                             {
                                 Summoned5->AddAura(SPELL_UNRESPONSIVE, Summoned5);
                                 Summoned5->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -627,7 +627,7 @@ public:
 
             for(uint8 i=0; i<5 ; i++)
                 {
-                    if (Creature* Summoned = me->SummonCreature(NPC_SPIKE, ChainPositions[Dragon][i].GetPositionX(), ChainPositions[Dragon][i].GetPositionY(), ChainPositions[Dragon][i].GetPositionZ(), frand(0, 6.28f), TEMPSUMMON_MANUAL_DESPAWN))
+                    if (Creature* Summoned = me->SummonCreature(NPC_SPIKE, ChainPositions[Dragon][i].GetPositionX(), ChainPositions[Dragon][i].GetPositionY(), ChainPositions[Dragon][i].GetPositionZ(), urand(0,6.28), TEMPSUMMON_MANUAL_DESPAWN))
                     {
                         Summoned->CastSpell(me, SPELL_SPIKE_VISUAL, true);
                         Summoned->CastSpell(me, SPELL_CHAINS, true);

@@ -851,11 +851,6 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
 
             break;
         }
-        default:
-        {
-            // do nothing
-            break;
-        }
     }
 }
 
@@ -892,12 +887,20 @@ void CreatureEventAI::Reset()
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
     {
         CreatureEventAI_Event const& event = (*i).Event;
-        // Reset all out of combat timers
-        if (event.event_type == EVENT_T_TIMER_OOC)
+        switch (event.event_type)
         {
-            if ((*i).UpdateRepeatTimer(me,event.timer.initialMin,event.timer.initialMax))
-                (*i).Enabled = true;
-            break;
+            //Reset all out of combat timers
+            case EVENT_T_TIMER_OOC:
+            {
+                if ((*i).UpdateRepeatTimer(me,event.timer.initialMin,event.timer.initialMax))
+                    (*i).Enabled = true;
+                break;
+            }
+            //default:
+            //TODO: enable below code line / verify this is correct to enable events previously disabled (ex. aggro yell), instead of enable this in void EnterCombat()
+            //(*i).Enabled = true;
+            //(*i).Time = 0;
+            //break;
         }
     }
 }
@@ -1117,8 +1120,6 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                             if (me->IsInMap(me->GetVictim()))
                                 if (me->IsInRange(me->GetVictim(),(float)(*i).Event.range.minDist,(float)(*i).Event.range.maxDist))
                                     ProcessEvent(*i);
-                        break;
-                    default:
                         break;
                 }
             }

@@ -1103,6 +1103,7 @@ struct CharmInfo
         CommandStates   m_CommandState;
         //ReactStates     m_reactState;
         uint32          m_petnumber;
+        bool            m_barInit;
 
         //for restoration after charmed
         ReactStates     m_oldReactState;

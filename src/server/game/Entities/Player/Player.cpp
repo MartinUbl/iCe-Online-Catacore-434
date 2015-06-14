@@ -3450,7 +3450,7 @@ void Player::RemoveMail(uint32 id)
 
 void Player::RemoveMarkerForPlayer(Player * raidLeader)
 {
-    if (!raidLeader || !raidLeader->IsInWorld())
+    if (!raidLeader || !raidLeader->IsInWorld() || !this)
         return;
 
     if (this->GetMapId() != raidLeader->GetMapId() || GetExactDist2d(raidLeader) > 80.0f)
@@ -5902,7 +5902,7 @@ void Player::UpdateDefense()
 
 void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply)
 {
-    if (modGroup >= BASEMOD_END || (uint32)modType >= MOD_END)
+    if (modGroup >= BASEMOD_END || modType >= MOD_END)
     {
         sLog->outError("ERROR in HandleBaseModValue(): non existed BaseModGroup of wrong BaseModType!");
         return;
@@ -5939,7 +5939,7 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
 
 float Player::GetBaseModValue(BaseModGroup modGroup, BaseModType modType) const
 {
-    if (modGroup >= BASEMOD_END || (uint32)modType > MOD_END)
+    if (modGroup >= BASEMOD_END || modType > MOD_END)
     {
         sLog->outError("trial to access non existed BaseModGroup or wrong BaseModType!");
         return 0.0f;
@@ -16218,7 +16218,7 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
         // Give player also 15-30 guild reputation (based on quest level)
         if (pQuest->GetQuestLevel() != 0 && (XP > 0 || pQuest->IsDailyOrWeeklyOrMonthly()))
         {
-            int32 rep_val = 15+int32((fabs(float(pQuest->GetQuestLevel()))/85.0f)*15.0f);
+            int32 rep_val = 15+int32((abs(float(pQuest->GetQuestLevel()))/85.0f)*15.0f);
             if (rep_val < 0)
                 rep_val = -rep_val;
             if (rep_val > 30)

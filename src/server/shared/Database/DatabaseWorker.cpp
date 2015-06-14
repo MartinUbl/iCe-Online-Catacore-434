@@ -31,7 +31,7 @@ m_queue(new_queue),
 m_conn(con)
 {
     /// Assign thread to task
-    activateWorker();
+    activate();
 }
 
 int DatabaseWorker::svc()
@@ -56,7 +56,7 @@ int DatabaseWorker::svc()
     return 0;
 }
 
-int DatabaseWorker::activateWorker()
+int DatabaseWorker::activate()
 {
     /* THR_DETACHED:
     Create an asynchronous thread. The exit status of the thread would not be available to any other threads.

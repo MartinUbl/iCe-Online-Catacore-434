@@ -98,6 +98,9 @@ public:
     /** Returns IPPROTO_TCP or IPPROTO_SCTP */
     virtual int Protocol() = 0;
 
+protected:
+    StreamSocket(const StreamSocket& ) {} // copy constructor
+
 private:
     StreamSocket& operator=(const StreamSocket& ) { return *this; } // assignment operator
 

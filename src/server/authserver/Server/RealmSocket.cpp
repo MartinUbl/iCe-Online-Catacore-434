@@ -96,7 +96,7 @@ int RealmSocket::open(void * arg)
     return 0;
 }
 
-int RealmSocket::close(u_long)
+int RealmSocket::close(int)
 {
     shutdown();
 

@@ -3439,6 +3439,8 @@ void Unit::SetCurrentCastedSpell(Spell * pSpell)
 
 void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool withInstant)
 {
+    ASSERT(spellType < CURRENT_MAX_SPELL);
+
     //sLog->outDebug("Interrupt spell for unit %u.", GetEntry());
     Spell *spell = m_currentSpells[spellType];
     if (spell
@@ -5349,9 +5351,7 @@ GameObject* Unit::GetGameObject(uint32 spellId) const
 
 void Unit::AddGameObject(GameObject* gameObj)
 {
-    if (!gameObj || gameObj->GetOwnerGUID() != 0)
-        return;
-
+    if (!gameObj || !gameObj->GetOwnerGUID() == 0) return;
     m_gameObj.push_back(gameObj);
     gameObj->SetOwnerGUID(GetGUID());
 
@@ -5367,8 +5367,7 @@ void Unit::AddGameObject(GameObject* gameObj)
 
 void Unit::RemoveGameObject(GameObject* gameObj, bool del)
 {
-    if (!gameObj || gameObj->GetOwnerGUID() != GetGUID())
-        return;
+    if (!gameObj || !gameObj->GetOwnerGUID() == GetGUID()) return;
 
     gameObj->SetOwnerGUID(0);
 
@@ -9198,7 +9197,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                     case 40336:
                     {
                         // On successful melee or ranged attack gain $29471s1 mana and if possible drain $27526s1 mana from the target.
-                        if (this->IsAlive())
+                        if (this && this->IsAlive())
                             CastSpell(this, 29471, true, castItem, triggeredByAura);
                         if (pVictim && pVictim->IsAlive())
                             CastSpell(pVictim, 27526, true, castItem, triggeredByAura);
@@ -16898,7 +16897,7 @@ void Unit::DeleteCharmInfo()
 }
 
 CharmInfo::CharmInfo(Unit* unit)
-: m_unit(unit), m_CommandState(COMMAND_FOLLOW), m_petnumber(0),
+: m_unit(unit), m_CommandState(COMMAND_FOLLOW), m_petnumber(0), m_barInit(false),
   m_isCommandAttack(false), m_isAtStay(false), m_isFollowing(false), m_isReturning(false)
 {
     for (uint8 i = 0; i < MAX_SPELL_CHARM; ++i)
@@ -20630,7 +20629,7 @@ void Unit::ChangeSeat(int8 seatId, bool next, bool byAura)
 
 void Unit::ExitVehicle()
 {
-    if (!m_vehicle)
+    if (!m_vehicle || !this)
         return;
 
     Unit *vehicleBase = m_vehicle->GetBase();

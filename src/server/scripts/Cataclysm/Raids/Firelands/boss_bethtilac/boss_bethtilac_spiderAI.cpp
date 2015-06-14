@@ -241,7 +241,8 @@ void SpiderAI::MoveInLineOfSight(Unit *who)
         {
             if (creature->GetEntry() == NPC_CINDERWEB_SPIDERLING)
             {
-                if (creature->GetExactDist(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()) < GetSpellMaxRange(SPELL_CONSUME, false))
+                if (creature->GetExactDist(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()
+                    < GetSpellMaxRange(SPELL_CONSUME, false)))
                 {
                     me->CastSpell(creature, SPELL_CONSUME, false);
                     AddTimer(CHECK_CONSUME, 1200, false);   // check for another spiderling in range after eating this one

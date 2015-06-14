@@ -1678,7 +1678,7 @@ public:
                 pInstance->SetData(DATA_MOVEMENT_PROGRESS, 1);
         }
 
-        void EnterCombat(Unit* /*who*/) { }
+        void EnterCombat() { }
 
         void UpdateAI(const uint32 diff)
         {

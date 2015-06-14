@@ -135,6 +135,7 @@ uint32 m_auiSpellSummonWeapon[]=
 };
 
 const float CAPERNIAN_DISTANCE          = 20.0f;            //she casts away from the target
+const float KAEL_VISIBLE_RANGE          = 50.0f;
 
 const float afGravityPos[3]             = {795.0f, 0.0f, 70.0f};
 
@@ -429,7 +430,7 @@ class boss_kaelthas : public CreatureScript
                     StartEvent();
             }
 
-            void KilledUnit(Unit* /*victim*/)
+            void KilledUnit()
             {
                 DoScriptText(RAND(SAY_SLAY1,SAY_SLAY2,SAY_SLAY3), me);
             }

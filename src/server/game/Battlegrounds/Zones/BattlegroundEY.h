@@ -373,7 +373,7 @@ class BattlegroundEY : public Battleground
         /* achievement req. */
         bool IsAllNodesConrolledByTeam(uint32 team) const;
     private:
-        void EventPlayerCapturedPointFlag(Player *Source, uint32 BgObjectType);
+        void EventPlayerCapturedFlag(Player *Source, uint32 BgObjectType);
         void EventTeamCapturedPoint(Player *Source, uint32 Point);
         void EventTeamLostPoint(Player *Source, uint32 Point);
         void UpdatePointsCount(uint32 Team);

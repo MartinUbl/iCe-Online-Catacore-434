@@ -1146,18 +1146,13 @@ public:
             pInstance->SetData(m_flag, IN_PROGRESS);
             MovementStarted = true;
             m_direction = ((float)pInstance->GetData(DATA_ORB_DIRECTION)/1000 + m_delta);
-
-            if (m_direction > 2.0f*M_PI)
-                m_direction = m_direction - 2.0f*M_PI;
-
+            if (m_direction > 2.0f*M_PI) m_direction = m_direction - 2.0f*M_PI;
             if ((focus = me->GetMap()->GetCreature(pInstance->GetData64(NPC_ORB_ROTATION_FOCUS))) != NULL)
-            {
                 focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
-                me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MovePoint(id, x, y, me->GetPositionZ());
-            }
-            else
-                me->ForcedDespawn();
+                else me->ForcedDespawn();
+//        sLog->outDebug("EventMGR: creature %u go to move point %u ",me->GetEntry(),id);
+            me->GetMotionMaster()->Clear();
+            me->GetMotionMaster()->MovePoint(id, x, y,  me->GetPositionZ());
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -1256,14 +1251,11 @@ public:
                 float m_direction = ((float)pInstance->GetData(DATA_ORB_DIRECTION)/1000.0f + M_PI - M_PI/32.0f);
                 if (m_direction > 2.0f*M_PI) m_direction = m_direction - 2.0f*M_PI;
                 if (Creature* focus = me->GetMap()->GetCreature(pInstance->GetData64(NPC_ORB_ROTATION_FOCUS)))
-                {
                     focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
-                    me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MovePoint(1, x, y, me->GetPositionZ());
-                    MovementStarted = true;
-                }
-                else
-                    me->ForcedDespawn();
+                else me->ForcedDespawn();
+                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MovePoint(1, x, y,  me->GetPositionZ());
+                MovementStarted = true;
             }
 
         }
