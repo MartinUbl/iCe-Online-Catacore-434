@@ -562,6 +562,10 @@ void BattlegroundSA::TeleportPlayers()
             if (bombcount > 0)
                 plr->DestroyItemCount(39213, bombcount, true);
 
+            // remove any auras before teleporting - i.e. stun would cause inability to
+            // land on ship for unknown reason
+            plr->RemoveArenaAuras(false, true);
+
             plr->ResetAllPowers();
             plr->CombatStopWithPets(true);
 
