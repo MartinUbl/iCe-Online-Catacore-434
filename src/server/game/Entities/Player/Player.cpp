@@ -23772,6 +23772,9 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
             // except they're in stealth/invisibility/..
             if (u->m_invisibilityMask || u->GetVisibility() == VISIBILITY_OFF || u->GetVisibility() == VISIBILITY_GROUP_STEALTH)
                 return false;
+            // or the arena has not started yet
+            if (u->ToPlayer()->GetBattleground() && u->ToPlayer()->GetBattleground()->GetStatus() == STATUS_WAIT_JOIN)
+                return false;
             return true;
         }
     }
