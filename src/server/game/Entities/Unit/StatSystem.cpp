@@ -1433,10 +1433,9 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     {
         if (IsHunterPet())                      //hunter pets benefit from owner's attack power
         {
-            // pre-Cata it used to be 0.22f coefficient for bonusAP and 0.425f for bonus damage
-            // now hunter pets damage scales equally with hunter
-            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
-            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK)));
+            // 42.5% of hunter attack power - www.warcrafthuntersunion.com/2010/09/hunter-pet-scaling-in-cataclysm/
+            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.425;
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.425));
         }
         else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
         {
