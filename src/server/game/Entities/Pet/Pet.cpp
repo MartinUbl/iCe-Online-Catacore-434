@@ -969,6 +969,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         }
         case HUNTER_PET:
         {
+            int32 base_hp = 0;
+            if (m_owner->getLevel() >= 80)
+                SetCreateHealth(uint32(5846 + 26628.0f*(m_owner->getLevel() - 80) / 5.0f)); // base hp at lvl 85 should be 32474
+
             SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32(sObjectMgr->GetXPForLevel(petlevel)*PET_XP_FACTOR));
             //these formula may not be correct; however, it is designed to be close to what it should be
             //this makes dps 0.5 of pets level
@@ -2025,7 +2029,7 @@ void Pet::LearnPetPassives()
                 int bp0 = -90;
                 CastCustomSpell(this, 62137, &bp0, 0, 0, true);
             }
-            if (IsHunterPet())
+            if (getPetType() == HUNTER_PET)
                 CastSpell(this, 65220, true);
             break;
         }
