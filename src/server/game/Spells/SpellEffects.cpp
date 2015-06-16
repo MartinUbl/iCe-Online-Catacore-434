@@ -5046,6 +5046,13 @@ void Spell::EffectCreateItem2(SpellEffIndex effIndex)
     if (item_id)
         DoCreateItem(effIndex, item_id);
 
+    // Fortune Cookie - Food spell
+    if (m_spellInfo->Id == 87604)
+    {
+        // Cast "Deck of Trades" to create random fortune card
+        player->CastSpell(player, 84193, true);
+    }
+
     // special case: fake item replaced by generate using spell_loot_template
     if (IsLootCraftingSpell(m_spellInfo))
     {
