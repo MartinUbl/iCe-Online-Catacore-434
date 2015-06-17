@@ -5389,6 +5389,22 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
         target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
 
         uint32 creatureEntry = GetMiscValue();
+        uint32 mount_type = GetMiscValueB();
+
+        // Unsummon pet when mounting other type of mount then grounding
+        if (mount_type != 230 && mount_type != 225)
+        {
+            Pet* pet = plr->GetPet();
+            if (pet)
+            {
+                Battleground *bg = plr->GetBattleground();
+                // don't unsummon pet in arena but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
+                if (bg && bg->isArena())
+                    pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                else
+                    plr->UnsummonPetTemporaryIfAny();
+            }
+        }
 
         // Festive Holiday Mount
         if (target->HasAura(62061))
