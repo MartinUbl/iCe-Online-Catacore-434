@@ -119,7 +119,8 @@ void TotemAI::AttackStart(Unit *)
 bool TotemAI::CheckCurrentTarget(Unit* victim)
 {
     return victim && victim->isTargetableForAttack() && me->IsWithinDistInMap(victim, m_maxRange)
-        && !me->IsFriendlyTo(victim) && victim->isVisibleForOrDetect(me, false);
+        && !me->IsFriendlyTo(victim) && victim->isVisibleForOrDetect(me, false) 
+        && !victim->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE);
 }
 
 Unit* TotemAI::UpdateTarget()
