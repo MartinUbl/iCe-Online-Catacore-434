@@ -105,6 +105,8 @@ void PetAI::UpdateAI(const uint32 diff)
             return;
         }
         targetHasCC = _CheckTargetCC(me->GetVictim());
+        if (targetHasCC)
+            return;
 
         // if in assist state and owner is player
         if (me->HasReactState(REACT_ASSIST) && owner->GetTypeId() == TYPEID_PLAYER)
@@ -337,6 +339,8 @@ void PetAI::AttackStart(Unit *target)
         return;
 
     targetHasCC = _CheckTargetCC(target);
+    if (targetHasCC)
+        return;
 
     DoAttack(target, true);
 }
@@ -508,7 +512,7 @@ bool PetAI::_CanAttack(Unit *target)
 
 bool PetAI::_CheckTargetCC(Unit *target)
 {
-    if (me->GetCharmerOrOwnerGUID() && target->HasNegativeAuraWithAttribute(SPELL_ATTR0_BREAKABLE_BY_DAMAGE, me->GetCharmerOrOwnerGUID()))
+    if (target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) || target->HasStealthAura())
         return true;
 
     return false;

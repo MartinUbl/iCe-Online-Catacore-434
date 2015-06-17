@@ -1733,6 +1733,14 @@ public:
             if (!UpdateVictim())
                 return;
 
+            Unit * target = me->GetVictim();
+            if (target && target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) ||
+                target->HasStealthAura())
+            {
+                EnterEvadeMode();
+                return;
+            }
+
             if (SpellTimer <= diff)
             {
                 if (IsViper) //Viper
@@ -1919,27 +1927,64 @@ public:
             return false;
         }
 
+        void AttackAnotherTarget()
+        {
+            if (Unit * next_target = owner->GetVictim())
+                if (!next_target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE))
+                {
+                    me->SetReactState(REACT_ASSIST);
+                    me->Attack(owner->GetVictim(), false);
+                }
+        }
+
         void UpdateAI(const uint32 diff)
         {
             // Custom updatevictim routine
             if (!owner)
                 return;
 
+            // If owner is casting polymorph interrupt cast, we don`t want to break owner`s CC
+            if (owner->FindCurrentSpellBySpellId(118))
+            {
+                me->InterruptNonMeleeSpells(false, NULL, true);
+                return;
+            }
+
             if (OwnerHasDifferentVictim(owner))
             {
                 Unit *victim = Unit::GetUnit(*me,owner->GetUInt64Value(UNIT_FIELD_TARGET));
-                if (victim && me->canSeeOrDetect(victim, false) && victim->IsAlive() && victim->IsHostileTo(me) && me->canAttack(victim))
+                if (victim && me->canSeeOrDetect(victim, false) && victim->IsAlive() && victim->IsHostileTo(me) && me->canAttack(victim) &&
+                    !victim->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) && !victim->HasStealthAura())
                 {
                     me->getThreatManager().clearReferences();
                     me->AddThreat(victim,90000.0f);
-                    me->Attack(victim, true);
+                    me->Attack(victim, false);
                 }
+            }
+            else
+            {
                 if (!me->GetVictim())
                 {
-                    if (me->IsInCombat())
-                        me->AI()->EnterEvadeMode();
-                    return;
+                    Unit* victim = owner->GetVictim();
+                    if (victim && victim->IsAlive())
+                        me->Attack(victim, false);
                 }
+            }
+
+            if (!me->GetVictim())
+            {
+                if (me->IsInCombat())
+                    me->AI()->EnterEvadeMode();
+                return;
+            }
+
+            Unit * target = me->GetVictim();
+            if (target && target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) ||
+                target->HasStealthAura() && !OwnerHasDifferentVictim(owner))
+            {
+                me->InterruptNonMeleeSpells(false, NULL, true);
+                AttackAnotherTarget();
+                return;
             }
 
             if (!me->HasUnitState(UNIT_STATE_CASTING))
@@ -2049,7 +2094,7 @@ public:
         void AttackAnotherTarget()
         {
             if (Unit * next_target = owner->GetVictim())
-                if (!next_target->HasAuraType(SPELL_AURA_MOD_CONFUSE))
+                if (!next_target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE))
                 {
                     me->SetReactState(REACT_ASSIST);
                     me->Attack(owner->GetVictim(), false);
@@ -2078,7 +2123,7 @@ public:
                             }
                     }
 
-                    if (target->HasAuraType(SPELL_AURA_MOD_CONFUSE))
+                    if (target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) || target->HasStealthAura())
                     {
                         me->AttackStop();
                         me->InterruptNonMeleeSpells(false, 0, true);
@@ -2190,7 +2235,7 @@ public:
                 {
                     me->getThreatManager().clearReferences();
                     me->AddThreat(victim,90000.0f);
-                    me->Attack(victim, true);
+                    me->Attack(victim, false);
                 }
                 if (!me->GetVictim())
                 {
@@ -3283,33 +3328,60 @@ public:
             me->CastSpell(me, 86703, true);
         }
 
+        bool OwnerHasDifferentVictim(Unit * pOwner)
+        {
+            if (!pOwner->GetUInt64Value(UNIT_FIELD_TARGET) || !me->GetVictim())
+                return true;
+
+            if (pOwner->GetUInt64Value(UNIT_FIELD_TARGET) != me->GetVictim()->GetGUID())
+                return true;
+
+            return false;
+        }
+
+        void AttackAnotherTarget()
+        {
+            if (Unit * next_target = pOwner->GetVictim())
+                if (!next_target->HasAuraType(SPELL_AURA_MOD_CONFUSE))
+                {
+                    me->SetReactState(REACT_ASSIST);
+                    me->Attack(pOwner->GetVictim(), false);
+                }
+        }
+
         void UpdateAI(const uint32 /*diff*/)
         {
-            if(UpdateVictim())
-            {
-                if (me->isAttackReady())
-                {
-                    if (me->IsWithinMeleeRange(me->GetVictim()))
-                    {
-                        me->AttackerStateUpdate(me->GetVictim());
-                        me->resetAttackTimer();
+            if (!UpdateVictim())
+                return;
 
-                        if(pOwner) // Add charge of Ancient Power to the Owner on dealing damage
+            if (me->isAttackReady())
+            {
+                Unit * target = me->GetVictim();
+                if (target && target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) ||
+                    target->HasStealthAura())
+                    AttackAnotherTarget();
+                    return;
+
+                if (me->IsWithinMeleeRange(me->GetVictim()))
+                {
+                    me->AttackerStateUpdate(me->GetVictim());
+                    me->resetAttackTimer();
+
+                    if(pOwner) // Add charge of Ancient Power to the Owner on dealing damage
+                    {
+                        if(Aura* aura = pOwner->GetAura(86700))
                         {
-                            if(Aura* aura = pOwner->GetAura(86700))
+                            aura->RefreshDuration();
+                            uint8 charges = aura->GetCharges();
+                            if(charges < 20)
                             {
-                                aura->RefreshDuration();
-                                uint8 charges = aura->GetCharges();
-                                if(charges < 20)
-                                {
-                                    if(charges < 1)
-                                        ++charges;
-                                    aura->SetCharges(++charges);
-                                    aura->SetStackAmount(charges);
-                                }
+                                if(charges < 1)
+                                    ++charges;
+                                aura->SetCharges(++charges);
+                                aura->SetStackAmount(charges);
                             }
-                            else pOwner->CastSpell(pOwner, 86700, true);
                         }
+                        else pOwner->CastSpell(pOwner, 86700, true);
                     }
                 }
             }
