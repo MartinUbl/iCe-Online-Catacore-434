@@ -5392,7 +5392,7 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
         uint32 mount_type = GetMiscValueB();
 
         // Unsummon pet when mounting other type of mount then grounding
-        if (mount_type != 230 && mount_type != 225)
+        if (plr && mount_type != 230 && mount_type != 225)
         {
             Pet* pet = plr->GetPet();
             if (pet)
