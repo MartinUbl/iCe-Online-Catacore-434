@@ -14611,6 +14611,11 @@ void Unit::ClearInCombat()
         // Remove Visaual effect of Flame Druid Aura when leaving combat
         if (ToPlayer()->HasAura(99244))
             ToPlayer()->CastSpell(ToPlayer(), 768, true);
+        // reset Blood Rites or Reaping periodic timer (to drop death runes after full periodic timer duration)
+        if (Aura* aur = ToPlayer()->GetAura(50034)) // Blood Rites
+            aur->GetEffect(0)->ResetPeriodic(true);
+        if (Aura* aur = ToPlayer()->GetAura(56835)) // Reaping
+            aur->GetEffect(0)->ResetPeriodic(true);
         this->ToPlayer()->UpdatePotionCooldown();
     }
 
