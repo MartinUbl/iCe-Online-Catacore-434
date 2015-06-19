@@ -1015,9 +1015,13 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                 {
                     uint32 sendBytes = m_uint32Values[DYNAMICOBJECT_BYTES];
 
+                    Unit* owner = dynob->GetCaster();
+                    if (owner)
+                        owner = owner->GetCharmerOrOwnerOrSelf();
+
                     // if caster and target teams does not match, we will send different visual
                     // for the player for several spells
-                    if (dynob->GetCaster() && dynob->GetCaster()->IsHostileTo(target))
+                    if (owner && owner->IsHostileTo(target))
                     {
                         uint32 visual = sendBytes & 0xFFFFFFF; // cut 28bits
                         switch (visual)
@@ -2340,6 +2344,15 @@ void WorldObject::SendMessageToSetInRange(WorldPacket *data, float dist, bool /*
 void WorldObject::SendMessageToSet(WorldPacket *data, Player const* skipped_rcvr)
 {
     Trinity::MessageDistDeliverer notifier(this, data, GetMap()->GetVisibilityDistance(), false, skipped_rcvr);
+    VisitNearbyWorldObject(GetMap()->GetVisibilityDistance(), notifier);
+}
+
+void WorldObject::SendMessageToSetByStanding(WorldPacket *data_friendly, WorldPacket *data_hostile)
+{
+    if (GetTypeId() != TYPEID_UNIT && GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Trinity::MessageDistFactionDeliverer notifier(ToUnit(), data_hostile, data_friendly, GetMap()->GetVisibilityDistance());
     VisitNearbyWorldObject(GetMap()->GetVisibilityDistance(), notifier);
 }
 

@@ -152,6 +152,38 @@ namespace Trinity
         }
     };
 
+    struct MessageDistFactionDeliverer
+    {
+        Unit *i_source;
+        WorldPacket *i_message_hostile;
+        WorldPacket *i_message_friendly;
+        uint32 i_phaseMask;
+        float i_distSq;
+        uint32 team;
+        Player const* skipped_receiver;
+        MessageDistFactionDeliverer(Unit *src, WorldPacket *msg_hostile, WorldPacket *msg_friendly, float dist, bool own_team_only = false, Player const* skipped = NULL)
+            : i_source(src), i_message_hostile(msg_hostile), i_message_friendly(msg_friendly), i_phaseMask(src->GetPhaseMask()), i_distSq(dist * dist)
+            , team((own_team_only && src->GetTypeId() == TYPEID_PLAYER) ? ((Player*)src)->GetTeam() : 0)
+            , skipped_receiver(skipped)
+        {
+        }
+        void Visit(PlayerMapType &m);
+        void Visit(CreatureMapType &m);
+        void Visit(DynamicObjectMapType &m);
+        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+
+        void SendPacket(Player* plr)
+        {
+            if (WorldSession* session = plr->GetSession())
+            {
+                if (i_source->IsHostileTo(plr))
+                    session->SendPacket(i_message_hostile);
+                else
+                    session->SendPacket(i_message_friendly);
+            }
+        }
+    };
+
     struct ObjectUpdater
     {
         uint32 i_timeDiff;

@@ -833,6 +833,7 @@ class WorldObject : public Object, public WorldLocation
         virtual void SendMessageToSet(WorldPacket *data, bool self);
         virtual void SendMessageToSetInRange(WorldPacket *data, float dist, bool self);
         virtual void SendMessageToSet(WorldPacket *data, Player const* skipped_rcvr);
+        virtual void SendMessageToSetByStanding(WorldPacket *data_friendly, WorldPacket *data_hostile);
 
         void MonsterSay(const char* text, uint32 language, uint64 TargetGuid, float customRadius = 0.0f);
         void MonsterYell(const char* text, uint32 language, uint64 TargetGuid, float customRadius = 0.0f);

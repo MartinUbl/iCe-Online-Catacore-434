@@ -1239,7 +1239,9 @@ class Unit : public WorldObject
         void SendMeleeAttackStop(Unit* victim);
         void SendMeleeAttackStart(Unit* pVictim);
 
-        void SendPlaySpellVisualKit(uint32 id, uint32 unkParam, uint32 unkParam2);
+        void BuildPlaySpellVisualKit(WorldPacket* data, uint32 id, uint32 unkParam = 0, uint32 unkParam2 = 0);
+        void SendPlaySpellVisualKit(uint32 id, uint32 unkParam = 0, uint32 unkParam2 = 0);
+        void SendPlaySpellVisualKitFactioned(uint32 id_friendly, uint32 id_hostile);
 
         bool IsVisionObscured(Unit* pVictim);
 

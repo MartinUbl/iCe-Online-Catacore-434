@@ -205,6 +205,9 @@ public:
     }
 };
 
+#define CONSECRATION_KIT_FRIENDLY 20251
+#define CONSECRATION_KIT_ENEMY 16272
+
 class npc_pal_consecration: public CreatureScript
 {
 public:
@@ -212,10 +215,13 @@ public:
 
     struct consecrationAI: public Scripted_NoMovementAI
     {
+        bool visualSent = false;
+
         consecrationAI(Creature* c): Scripted_NoMovementAI(c)
         {
             // Dummy visual
-            me->CastSpell(me,81298,true);
+            // now sent by caster as spell visual kit in UpdateAI
+            //me->CastSpell(me,81298,true);
             ticktimer = 1000;
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
@@ -235,6 +241,12 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
+            if (!visualSent && me->GetOwner())
+            {
+                visualSent = true;
+                me->GetOwner()->SendPlaySpellVisualKitFactioned(CONSECRATION_KIT_FRIENDLY, CONSECRATION_KIT_ENEMY);
+            }
+
             if(ticktimer <= diff)
             {
                 Unit* creator = me->GetOwner();
