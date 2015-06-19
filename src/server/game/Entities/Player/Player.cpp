@@ -2113,7 +2113,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (GetSpectatorInstanceId() > 0 && GetSpectatorJoinTime() == 0) // time should be == 1 when teleporting into arena as spectator
     {
         // this should drop isolated flags and so on
-        sBattlegroundMgr->RemoveArenaSpectator(this);
+        sBattlegroundMgr->RemoveArenaSpectator(this, false);
     }
 
     GetAntiHackServant()->DeleteData();
