@@ -625,10 +625,12 @@ public:
             if (!me->IsMushroom())
             {
                 if (Unit * target = me->GetVictim())
+                {
                     if (!target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE))
                         DoMeleeAttackIfReady();
                     else if (target->HasStealthAura())
                         EnterEvadeMode();
+                }
             }
         }
     };

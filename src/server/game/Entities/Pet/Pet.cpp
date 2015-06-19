@@ -969,7 +969,6 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         }
         case HUNTER_PET:
         {
-            int32 base_hp = 0;
             if (m_owner->getLevel() >= 80)
                 SetCreateHealth(uint32(5846 + 26628.0f*(m_owner->getLevel() - 80) / 5.0f)); // base hp at lvl 85 should be 32474
 
