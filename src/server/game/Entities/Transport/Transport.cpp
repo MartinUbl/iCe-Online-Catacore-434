@@ -187,6 +187,11 @@ void Transport::Update(uint32 diff)
         if (IsMoving())
         {
             float t = CalculateSegmentPos(float(timer) * 0.001f);
+            // "time" interval should never be outside of <0;1> bounds
+            if (t < 0)
+                t = 0;
+            else if (t > 1.0f)
+                t = 1.0f;
             G3D::Vector3 pos, dir;
             _currentFrame->Spline->evaluate_percent(_currentFrame->Index, t, pos);
             //_currentFrame->Spline->evaluate_derivative(_currentFrame->Index, t, dir);
