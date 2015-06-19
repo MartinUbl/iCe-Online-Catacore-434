@@ -2266,6 +2266,7 @@ void Battleground::RemoveSpectator(Player* pl, bool teleport)
         if (m_Spectators.find(pl->GetGUID()) != m_Spectators.end())
             m_Spectators.erase(pl->GetGUID());
     }
+    pl->SetSpectatorData(0, 0);
 }
 
 void Battleground::RemoveSpectator(uint64 guid)

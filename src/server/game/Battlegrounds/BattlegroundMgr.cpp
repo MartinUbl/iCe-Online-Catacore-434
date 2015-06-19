@@ -928,7 +928,6 @@ void BattlegroundMgr::RemoveArenaSpectator(Player* pl, bool teleport)
             if (itr->second)
             {
                 itr->second->RemoveSpectator(pl, teleport);
-                pl->SetSpectatorData(0, 0);
                 return;
             }
         }
