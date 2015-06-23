@@ -1980,7 +1980,7 @@ public:
 
             Unit * target = me->GetVictim();
             if (target && (target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) ||
-                target->HasStealthAura() && !OwnerHasDifferentVictim(owner)))
+                target->HasStealthAura()) && !OwnerHasDifferentVictim(owner))
             {
                 me->InterruptNonMeleeSpells(false, 0, true);
                 AttackAnotherTarget();
