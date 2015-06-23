@@ -3357,10 +3357,12 @@ public:
             if (me->isAttackReady())
             {
                 Unit * target = me->GetVictim();
-                if (target && target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) ||
-                    target->HasStealthAura())
+                if (target && target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE)
+                    || target->HasStealthAura())
+                {
                     AttackAnotherTarget();
                     return;
+                }
 
                 if (me->IsWithinMeleeRange(me->GetVictim()))
                 {
