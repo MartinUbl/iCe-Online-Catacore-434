@@ -1734,8 +1734,8 @@ public:
                 return;
 
             Unit * target = me->GetVictim();
-            if (target && target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) ||
-                target->HasStealthAura())
+            if (target && (target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) ||
+                target->HasStealthAura()))
             {
                 EnterEvadeMode();
                 return;
@@ -1946,7 +1946,7 @@ public:
             // If owner is casting polymorph interrupt cast, we don`t want to break owner`s CC
             if (owner->FindCurrentSpellBySpellId(118))
             {
-                me->InterruptNonMeleeSpells(false, NULL, true);
+                me->InterruptNonMeleeSpells(false, 0, true);
                 return;
             }
 
@@ -1979,10 +1979,10 @@ public:
             }
 
             Unit * target = me->GetVictim();
-            if (target && target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) ||
-                target->HasStealthAura() && !OwnerHasDifferentVictim(owner))
+            if (target && (target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) ||
+                target->HasStealthAura() && !OwnerHasDifferentVictim(owner)))
             {
-                me->InterruptNonMeleeSpells(false, NULL, true);
+                me->InterruptNonMeleeSpells(false, 0, true);
                 AttackAnotherTarget();
                 return;
             }
@@ -3357,8 +3357,8 @@ public:
             if (me->isAttackReady())
             {
                 Unit * target = me->GetVictim();
-                if (target && target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE)
-                    || target->HasStealthAura())
+                if (target && (target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE)
+                    || target->HasStealthAura()))
                 {
                     AttackAnotherTarget();
                     return;
