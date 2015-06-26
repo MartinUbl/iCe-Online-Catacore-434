@@ -61,7 +61,7 @@ class BattlegroundMgr
         void SendAreaSpiritHealerQueryOpcode(Player *pl, Battleground *bg, const uint64& guid);
 
         /* Battlegrounds */
-        void Update3v3ArenaInfo();
+        void UpdateArenaQueueInfo();
         Battleground* GetBattlegroundThroughClientInstance(uint32 instanceId, BattlegroundTypeId bgTypeId);
         Battleground* GetBattleground(uint32 InstanceID, BattlegroundTypeId bgTypeId); //there must be uint32 because MAX_BATTLEGROUND_TYPE_ID means unknown
 
@@ -116,6 +116,9 @@ class BattlegroundMgr
         BattlegroundTypeId GetRatedBattlegroundType();
         uint32 GetRatedBattlegroundSize();
 
+        uint32 GetQueuedArenaTeamCount(ArenaSlot slot) { return m_teamsInQueue[slot]; }
+        uint32 GetArenaTeamInArenaCount(ArenaSlot slot) { return m_teamsInArena[slot]; }
+
         static bool IsArenaType(BattlegroundTypeId bgTypeId);
         static bool IsBattlegroundType(BattlegroundTypeId bgTypeId) { return !BattlegroundMgr::IsArenaType(bgTypeId); }
         static BattlegroundQueueTypeId BGQueueTypeId(BattlegroundTypeId bgTypeId, uint8 arenaType);
@@ -148,6 +151,9 @@ private:
         uint32 m_ratedBgWeek;
         uint32 m_ratedBgNextWeek;
         uint32 m_ratedBgWeekCheckTimer;
+
+        uint32 m_teamsInQueue[3];
+        uint32 m_teamsInArena[3];
 
         // random number generators
         MTRand m_ArenaGenerator, m_RandomBGGenerator;

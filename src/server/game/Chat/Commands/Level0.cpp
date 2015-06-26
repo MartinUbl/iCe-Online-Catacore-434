@@ -35,6 +35,7 @@
 #include "SpellAuras.h"
 #include "BattlegroundMgr.h"
 #include "ArenaTeam.h"
+#include "PvpAnnouncer.h"
 
 // Here only due to size of this file - quick Edit and continue build
 bool ChatHandler::HandleTestCommand(const char* args)
@@ -221,6 +222,44 @@ bool ChatHandler::HandleDismountCommand(const char* /*args*/)
 
     m_session->GetPlayer()->Unmount();
     m_session->GetPlayer()->RemoveAurasByType(SPELL_AURA_MOUNTED);
+    return true;
+}
+
+bool ChatHandler::HandlePvpMessageCommand(const char* args)
+{
+    Player* player = m_session->GetPlayer();
+
+    if (!player)
+        return false;
+
+    if (args == NULL || strlen(args) <= 1)
+    {
+        if (sPvPAnnouncer->IsPlayerListed(player))
+            SendSysMessage("You are subscribed to PvP channel. To leave, use |cff00ff00.pvpmessage off|r");
+        else
+            SendSysMessage("You are NOT subscribed to PvP channel. To join, use |cff00ff00.pvpmessage on|r");
+        return true;
+    }
+
+    if (strcmp(args, "off") == 0)
+    {
+        if (sPvPAnnouncer->IsPlayerListed(player))
+            sPvPAnnouncer->RemovePlayer(player);
+        else
+            SendSysMessage("You are NOT subscribed to PvP channel.");
+    }
+    else if (strcmp(args, "on") == 0)
+    {
+        if (!sPvPAnnouncer->IsPlayerListed(player))
+            sPvPAnnouncer->AddPlayer(player);
+        else
+            SendSysMessage("You are already subscribed to PvP channel.");
+    }
+    else
+    {
+        SendSysMessage("Invalid subcommand, use |cff00ff00.pvpmessage on|r to join, or |cff00ff00.pvpmessage off|r to leave");
+    }
+
     return true;
 }
 

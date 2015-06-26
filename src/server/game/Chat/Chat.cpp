@@ -828,6 +828,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "distance",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleGetDistanceCommand>,         "", NULL },
         { "recall",         SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleRecallCommand>,              "", NULL },
         { "save",           SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleSaveCommand>,                "", NULL },
+        { "pvpmessage",     SEC_PLAYER,         false, OldHandler<&ChatHandler::HandlePvpMessageCommand>,          "", NULL },
         { "disarena",       SEC_PLAYER,         true,  OldHandler<&ChatHandler::HandleDisableArenaAnnounceCommand>,"", NULL },
         
         { "autosave",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleAutosaveCommand>,            "", NULL },

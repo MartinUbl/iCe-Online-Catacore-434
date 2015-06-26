@@ -241,12 +241,54 @@ enum ScoreType
     SCORE_PERSONAL_RATING_CHANGE = 21,
 };
 
+enum ArenaSlot
+{
+    ARENA_SLOT_NONE         = -1,
+    ARENA_SLOT_2v2          = 0,
+    ARENA_SLOT_3v3          = 1,
+    ARENA_SLOT_5v5          = 2,
+    ARENA_SLOT_MAX          = 3
+};
+
 enum ArenaType
 {
+    ARENA_TYPE_NONE         = -1,
     ARENA_TYPE_2v2          = 2,
     ARENA_TYPE_3v3          = 3,
     ARENA_TYPE_5v5          = 5
 };
+
+static ArenaType ArenaTypeForSlot(uint8 slot)
+{
+    switch (slot)
+    {
+        case ARENA_SLOT_2v2:
+            return ARENA_TYPE_2v2;
+        case ARENA_SLOT_3v3:
+            return ARENA_TYPE_3v3;
+        case ARENA_SLOT_5v5:
+            return ARENA_TYPE_5v5;
+        case ARENA_SLOT_NONE:
+        default:
+            return ARENA_TYPE_NONE;
+    }
+}
+
+static ArenaSlot ArenaSlotForType(uint8 type)
+{
+    switch (type)
+    {
+        case ARENA_TYPE_2v2:
+            return ARENA_SLOT_2v2;
+        case ARENA_TYPE_3v3:
+            return ARENA_SLOT_3v3;
+        case ARENA_TYPE_5v5:
+            return ARENA_SLOT_5v5;
+        case ARENA_TYPE_NONE:
+        default:
+            return ARENA_SLOT_NONE;
+    }
+}
 
 enum BattlegroundType
 {

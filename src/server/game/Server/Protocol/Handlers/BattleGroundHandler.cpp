@@ -41,6 +41,7 @@
 #include "Object.h"
 #include "Opcodes.h"
 #include "DisableMgr.h"
+#include "PvpAnnouncer.h"
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket & recv_data)
 {
@@ -1165,6 +1166,8 @@ void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)
         avgRating = group->GetAverageBattlegroundRating();
         GroupQueueInfoPtr groupQueueInfo = queue.AddGroup(_player, group, bgTypeId, bracketEntry, arenaType, true, true, avgRating, avgRating);
         avgTime = queue.GetAverageQueueWaitTime(groupQueueInfo, bracketEntry->GetBracketId());
+
+        sPvPAnnouncer->Announce(PVPANNOUNCE_BATTLEGROUND_RATED_TEAM_JOINED, BATTLEGROUND_TYPE_NONE, 0, avgRating);
     }
 
     for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())

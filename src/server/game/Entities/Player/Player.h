@@ -609,7 +609,8 @@ enum PlayerExtraFlags
     
     // other states
     PLAYER_EXTRA_PVP_DEATH          = 0x0100,               // store PvP death status until corpse creating.
-    PLAYER_EXTRA_WORGEN_FORM        = 0x0200                // Player is in worgen form.
+    PLAYER_EXTRA_WORGEN_FORM        = 0x0200,               // Player is in worgen form.
+    PLAYER_EXTRA_PVPANNOUNCER       = 0x0400                // has subscribed to pvp announcer messages
 };
 
 // 2^n values
@@ -923,6 +924,7 @@ enum PlayerDelayedOperations
     DELAYED_BG_MOUNT_RESTORE        = 0x08,                     ///< Flag to restore mount state after teleport from BG
     DELAYED_BG_TAXI_RESTORE         = 0x10,                     ///< Flag to restore taxi state after teleport from BG
     DELAYED_GROUP_MARKER_UPDATE     = 0x20,                     ///< Group need to get update packet for raid markers after teleport or login
+    DELAYED_PVPANNOUNCE_JOIN        = 0x40,                     ///< PvP announcer join is done after login and world entering, but using flags from load time
     DELAYED_END
 };
 
@@ -1259,6 +1261,7 @@ class Player : public Unit, public GridObject<Player>
         void SetHas310Flyer(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_HAS_310_FLYER; else m_ExtraFlags &= ~PLAYER_EXTRA_HAS_310_FLYER; }
         void SetSendFlyPacket(bool apply);
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
+        void SetPvPAnnouncerFlag(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVPANNOUNCER; else m_ExtraFlags &= ~PLAYER_EXTRA_PVPANNOUNCER; }
 
         void GiveXP(uint32 xp, Unit* victim, float group_rate=1.0f);
         void GiveLevel(uint8 level);

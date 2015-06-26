@@ -39,6 +39,36 @@ enum BattlefieldIDs
     BATTLEFIELD_BATTLEID_TB                      = 21,      // Tol Barad
 };
 
+static const char* GetBattlefieldName(BattlefieldIDs bfId)
+{
+    switch (bfId)
+    {
+        case BATTLEFIELD_BATTLEID_WG:
+            return "Wintergrasp";
+        case BATTLEFIELD_BATTLEID_TB:
+            return "Tol Barad";
+        default:
+            break;
+    }
+
+    return nullptr;
+}
+
+static uint8 GetBattlefieldMinLevel(BattlefieldIDs bfId)
+{
+    switch (bfId)
+    {
+        case BATTLEFIELD_BATTLEID_WG:
+            return 75;
+        case BATTLEFIELD_BATTLEID_TB:
+            return 80;
+        default:
+            break;
+    }
+
+    return 0;
+}
+
 enum BattlefieldObjectiveStates
 {
     BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL = 0,
@@ -335,6 +365,7 @@ class Battlefield:public ZoneScript
 protected:
     uint64 StalkerGuid;
     uint32 m_Timer;                                         // Global timer for event
+    bool m_timerAnnounced;
     bool m_enable;
     bool m_BattlefieldActive;
     TeamId m_DefenderTeam;

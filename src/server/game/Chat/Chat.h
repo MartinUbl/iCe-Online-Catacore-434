@@ -567,6 +567,7 @@ class ChatHandler
         bool HandleUnstuckCommand(const char* args);
         bool HandleDismountCommand(const char* args);
         bool HandleSaveCommand(const char* args);
+        bool HandlePvpMessageCommand(const char* args);
         bool HandlePetResetCommand(const char* args);
 
         bool HandleAutosaveCommand(const char* args);

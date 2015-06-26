@@ -85,6 +85,7 @@
 #include "TicketMgr.h"
 #include "CalendarMgr.h"
 #include "ChannelMgr.h"
+#include "PvpAnnouncer.h"
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -106,10 +107,6 @@ int32 World::m_visibility_notify_periodInBGArenas   = DEFAULT_VISIBILITY_NOTIFY_
 /// World constructor
 World::World()
 {
-    numOf3v3TeamsInQueue = 0;
-    numOf3v3TeamsInArena = 0;
-    m_messageTimer =  60 * IN_MILLISECONDS;
-    messageCounter = 0;
     m_playerLimit = 0;
     m_allowedSecurityLevel = SEC_PLAYER;
     m_allowMovement = true;
@@ -2007,24 +2004,6 @@ void World::Update(uint32 diff)
         }
     }
 
-    if (m_messageTimer <= diff)
-    {
-        sBattlegroundMgr->Update3v3ArenaInfo();
-        messageCounter++;
-        if (numOf3v3TeamsInQueue || numOf3v3TeamsInArena) // Only if some teams in queue or inside arena
-        {
-            char buff[100];
-            sprintf(buff,"Current teams inside 3v3 arenas : %d . In Queue : %d",numOf3v3TeamsInQueue, numOf3v3TeamsInArena);
-
-            if (messageCounter % 5 == 0) // Every 5 minute
-                SendWorldTextToChannel("krcma",LANG_SYSTEMMESSAGE, buff);
-
-            SendWorldTextToChannel("pvp",LANG_SYSTEMMESSAGE, buff);
-        }
-        m_messageTimer = 60 * IN_MILLISECONDS;
-    }
-    else m_messageTimer -= diff;
-
     ///- Update the different timers
     for (int i = 0; i < WUPDATE_COUNT; ++i)
     {
@@ -2140,6 +2119,9 @@ void World::Update(uint32 diff)
 
     sLFGMgr->Update(diff);
     RecordTimeDiff("UpdateLFGMgr");
+
+    sPvPAnnouncer->Update(diff);
+    RecordTimeDiff("PvPAnnouncer");
 
     // execute callbacks from sql queries that were queued recently
     ProcessQueryCallbacks();
@@ -2934,12 +2916,6 @@ void World::UpdateMaxSessionCounters()
 {
     m_maxActiveSessionCount = std::max(m_maxActiveSessionCount,uint32(m_sessions.size()-m_QueuedPlayer.size()));
     m_maxQueuedSessionCount = std::max(m_maxQueuedSessionCount,uint32(m_QueuedPlayer.size()));
-}
-
-void World::SetPvPArenaInfo(uint32 numOf3v3TeamsInQueue, uint32 numOf3v3TeamsInArena)
-{
-    this->numOf3v3TeamsInQueue = numOf3v3TeamsInQueue;
-    this->numOf3v3TeamsInArena = numOf3v3TeamsInArena;
 }
 
 void World::ProcessStartEvent()

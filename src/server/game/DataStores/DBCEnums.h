@@ -39,6 +39,20 @@
 enum BattlegroundBracketId                                  // bracketId for level ranges
 {
     BG_BRACKET_ID_FIRST          = 0,
+    BG_BRACKET_ID_1              = 1,
+    BG_BRACKET_ID_2              = 2,
+    BG_BRACKET_ID_3              = 3,
+    BG_BRACKET_ID_4              = 4,
+    BG_BRACKET_ID_5              = 5,
+    BG_BRACKET_ID_6              = 6,
+    BG_BRACKET_ID_7              = 7,
+    BG_BRACKET_ID_8              = 8,
+    BG_BRACKET_ID_9              = 9,
+    BG_BRACKET_ID_10             = 10,
+    BG_BRACKET_ID_11             = 11,
+    BG_BRACKET_ID_12             = 12,
+    BG_BRACKET_ID_13             = 13,
+    BG_BRACKET_ID_14             = 14,
     BG_BRACKET_ID_LAST           = 15
 };
 

@@ -80,6 +80,7 @@
 #include "Guild.h"
 #include "TicketMgr.h"
 #include "InstanceScript.h"
+#include "PvpAnnouncer.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -705,6 +706,8 @@ Player::~Player ()
 {
     // it must be unloaded already in PlayerLogout and accessed only for loggined player
     //m_social = NULL;
+
+    sPvPAnnouncer->RemovePlayer(this, true);
 
     // Note: buy back item already deleted from DB when player was saved
     for (uint8 i = 0; i < PLAYER_SLOTS_COUNT; ++i)
@@ -2447,6 +2450,9 @@ void Player::ProcessDelayedOperations()
             ContinueTaxiFlight();
         }
     }
+
+    if (m_DelayedOperations & DELAYED_PVPANNOUNCE_JOIN)
+        sPvPAnnouncer->AddPlayer(this);
 
     //we have executed ALL delayed ops, so clear the flag
     m_DelayedOperations = 0;
@@ -18485,7 +18491,12 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     //TODO: find why the player is not in worgen form at login with this code.
     //if(extraflags & PLAYER_EXTRA_WORGEN_FORM)
     //    SetInWorgenForm(IN_WORGEN_FORM);
-    
+
+    // if player subscribed to pvp announcer messages, subscribe him at login too
+    // (AddPlayer method in delayed join process will set announcer extraflag)
+    if (extraflags & PLAYER_EXTRA_PVPANNOUNCER)
+        ScheduleDelayedOperation(DELAYED_PVPANNOUNCE_JOIN);
+
     _LoadDeclinedNames(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES));
 
     m_achievementMgr.CheckAllAchievementCriteria();
@@ -24503,6 +24514,8 @@ void Player::SendInitialPacketsAfterAddToMap()
     }
     else if (GetRaidDifficulty() != GetStoredRaidDifficulty())
         SendRaidDifficulty(GetGroup() != NULL);
+
+    ProcessDelayedOperations();
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()

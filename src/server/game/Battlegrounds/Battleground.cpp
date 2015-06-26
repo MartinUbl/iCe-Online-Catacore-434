@@ -41,6 +41,7 @@
 #include "SpellAuraEffects.h"
 #include "Util.h"
 #include "DynamicTransport.h"
+#include "PvpAnnouncer.h"
 
 namespace Trinity
 {
@@ -1304,6 +1305,9 @@ void Battleground::StartBattleground(uint8 twink)
     sBattlegroundMgr->AddBattleground(GetInstanceID(), GetTypeID(), this);
     if (m_IsRated)
         sLog->outArena("Arena match type: %u for Team1Id: %u - Team2Id: %u started.", m_ArenaType, m_ArenaTeamIds[BG_TEAM_ALLIANCE], m_ArenaTeamIds[BG_TEAM_HORDE]);
+
+    if (!m_IsRated && !m_IsWargame)
+        sPvPAnnouncer->Announce(PVPANNOUNCE_BATTLEGROUND_STARTED, GetTypeID(true), m_ArenaType, GetMinLevel(), GetMaxLevel());
 }
 
 void Battleground::AddPlayer(Player* plr)

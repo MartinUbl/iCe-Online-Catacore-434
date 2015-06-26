@@ -33,6 +33,7 @@
 #include "CellImpl.h"
 #include "CreatureTextMgr.h"
 #include "DynamicTransport.h"
+#include "PvpAnnouncer.h"
 
 #include "Group.h"
 
@@ -41,6 +42,7 @@ Battlefield::Battlefield()
     m_Timer                    = 0;
     m_enable                   = true;
     m_BattlefieldActive        = false;
+    m_timerAnnounced           = false;
     m_DefenderTeam             = TEAM_NEUTRAL;
 
     m_TypeId                   = 0;
@@ -149,6 +151,15 @@ bool Battlefield::Update(uint32 diff)
     }
     else
         m_Timer -= diff;
+
+    if (!IsWarTime() && !m_timerAnnounced)
+    {
+        if (m_Timer <= 30 * MINUTE * IN_MILLISECONDS)
+        {
+            m_timerAnnounced = true;
+            sPvPAnnouncer->Announce(PVPANNOUNCE_BATTLEFIELD_IN_30MINS, BATTLEGROUND_TYPE_NONE, 0, GetBattleId());
+        }
+    }
 
     //Some times before battle start invite player to queue
     if (!m_StartGrouping && m_Timer <= m_StartGroupingTimer)
@@ -392,6 +403,8 @@ void Battlefield::StartBattle()
 
     PlaySoundToAll(BF_START);
 
+    sPvPAnnouncer->Announce(PVPANNOUNCE_BATTLEFIELD_STARTED, BATTLEGROUND_TYPE_NONE, 0, GetBattleId());
+
     OnBattleStart();
 }
 
@@ -413,6 +426,7 @@ void Battlefield::EndBattle(bool endbytimer)
 
     // reset bf timer
     m_Timer = m_NoWarBattleTime;
+    m_timerAnnounced = false;
     SendInitWorldStatesToAll();
 }
 
