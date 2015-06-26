@@ -18,6 +18,7 @@
 #include "well_of_eternity.h"
 #include "ScriptPCH.h"
 #include "MapManager.h"
+#include "TaskScheduler.h"
 
 #define CAST_WOE_INSTANCE(i)     (dynamic_cast<instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript*>(i))
 
@@ -206,6 +207,8 @@ public:
                 pGuard->AI()->SetData(DATA_SET_GUARDIAN_LANE, WAVE_THREE);
         }
 
+        TaskScheduler scheduler;
+
         InstanceScript* pInstance;
         SummonList Summons;
         GoSummonList goList;
@@ -237,6 +240,8 @@ public:
 
         void Reset() override
         {
+            scheduler.CancelAll();
+
             seekStep = 0;
             phase = PHASE_ONE;
             canMoveToNextPoint = false;
@@ -249,7 +254,7 @@ public:
                 pInstance->SetData(DATA_PEROTHARN, NOT_STARTED);
             }
 
-            felFlamesTimer = 5000;
+            felFlamesTimer = 4000;
             felDecayTimer = 8000;
             aggroTimer = MAX_TIMER;
             seekTimer = MAX_TIMER;
@@ -273,7 +278,6 @@ public:
             {
                 seekTimer = 4005;
                 phase = PHASE_HIDE_AND_SEEK;
-                // TODO: set fel flame + fel decay timers ...
                 me->InterruptNonMeleeSpells(false);
                 PlayQuote(me,essenceQuotes[0]);
                 me->CastSpell(me, SPELL_DRAIN_ESSENCE, false); // pacify + damage
@@ -292,11 +296,12 @@ public:
 
                 freeIllidanTimer = 3500;
 
+                felFlamesTimer = 18000;
+                felDecayTimer = 23000;
+
                 me->RemoveAllAuras();
                 me->CastSpell(me, SPELL_CORRUPTING_TOUCH, true);
-                me->GetMotionMaster()->Clear(false);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                me->GetMotionMaster()->MoveChase(me->GetVictim());
                 phase = PHASE_ONE;
             }
         }
@@ -329,7 +334,7 @@ public:
 
         void EnterCombat(Unit * /*who*/) override
         {
-            me->CastSpell(me, SPELL_PUNISHING_FLAMES, true);
+            me->AddAura(SPELL_PUNISHING_FLAMES,me);
             HandleFireWallCircle(true);
 
             DespawnNearbyCreaturesWithEntry(me, GUARDIAN_DEMON_ENTRY);
@@ -437,6 +442,8 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
+            scheduler.Update(diff);
+
             if (canMoveToNextPoint)
             {
                 canMoveToNextPoint = false;
@@ -447,9 +454,14 @@ public:
             {
                 if (introStep < 3)
                 {
-                    if (introStep == 2)
-                        if (Creature * pLegionDemon = ObjectAccessor::GetCreature(*me, felGuardGUID))
-                            pLegionDemon->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+                    if (introStep == 1)
+                    {
+                        scheduler.Schedule(Seconds(3), [this](TaskContext context)
+                        {
+                            if (Creature * pLegionDemon = ObjectAccessor::GetCreature(*me, felGuardGUID))
+                                pLegionDemon->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+                        });
+                    }
 
                     PlayQuote(me, introQuotes[introStep]);
                 }
@@ -551,7 +563,10 @@ public:
                         {
                             PlayQuote(pIllidan,essenceQuotes[3]); // Return to the shadows.
                             pIllidan->CastSpell(pIllidan, SPELL_ILLIADAN_MEDITATION, true);
+
                             // trigger shadows on players again ...
+                            if (pInstance)
+                                pInstance->DoAddAuraOnPlayers(nullptr, 103004);
                         }
                         seekStep++;
                         seekTimer = 4000;
@@ -580,7 +595,7 @@ public:
 
             // PHASE_ONE STUFF FROM HERE
 
-            // Fel Flame
+            // Fel Flames
             if (felFlamesTimer <= diff)
             {
                 if (!me->IsNonMeleeSpellCasted(false))
@@ -599,10 +614,8 @@ public:
                 {
                     if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
                         me->CastSpell(target, SPELL_FEL_DECAY, false);
-                    felFlamesTimer = 8400;
+                    felDecayTimer = 15000;
                 }
-
-                felDecayTimer = 10000;
             }
             else felDecayTimer -= diff;
 
@@ -654,10 +667,10 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
             instance = creature->GetInstanceScript();
 
-            if (instance) // Fel flames is summoned via missile, so it spawns with delay and we dont want them in second phase
-            if (Creature* pPerotharn = Unit::GetCreature(*me, instance->GetData64(DATA_PEROTHARN)))
-            if (pPerotharn->AI()->GetData(DATA_GET_PEROTHARN_PHASE) == 1)
-                me->ForcedDespawn();
+            if (instance) // Fel flames is summoned via missile, so it spawns with delay and we don't want them in second phase or in out of combat
+                if (Creature* pPerotharn = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PEROTHARN)))
+                    if (pPerotharn->AI()->GetData(DATA_GET_PEROTHARN_PHASE) == 1 || instance->GetData(DATA_PEROTHARN) != IN_PROGRESS)
+                        me->ForcedDespawn();
 
             me->CastSpell(me, SPELL_FEL_FLAMES_PERIODIC, true);
         }
@@ -722,13 +735,10 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
         }
 
-        void SetSearchingAngles(float angle_from, float angle_to)
+        void SetSearchingAngle(float myOrientation)
         {
-            startAngle = angle_from;
-            endAngle = angle_to;
-
-            if (endAngle > startAngle)
-                std::swap(startAngle, endAngle);
+            startAngle = myOrientation - (M_PI / 8.0f);
+            endAngle = myOrientation + (M_PI / 8.0f);
 
             moveTimer = 100;
         }
@@ -749,15 +759,13 @@ public:
             float distance = frand(25.0f, 62.0f);
             if (firstMove)
             {
-                distance = frand(50.0f, 62.0f);
+                distance = frand(60.0f, 62.0f);
                 firstMove = false;
             }
 
-            float angle = MapManager::NormalizeOrientation(frand(startAngle, endAngle));
-            // This is very special case, if angle is from 0.5 to 5.5 -> this means angle was rounded via normalization
-            // and we really want rand angle from <5.5,0.0X> but that is not supported from PRNG
-            if (endAngle > 5.5f)
-                endAngle = frand(5.5f, 2 * M_PI);
+            float angle = frand(startAngle, endAngle);
+            angle = MapManager::NormalizeOrientation(angle);
+
             float x = MIDDLE_X +cos(angle) * distance;
             float y = MIDDLE_Y +sin(angle) * distance;
             float z = me->GetPositionZ();
@@ -774,7 +782,7 @@ public:
 
         void EnterCombat(Unit * who) override
         {
-            if (pInstance == NULL || who->GetTypeId() != TYPEID_PLAYER)
+            if (pInstance == nullptr || who->GetTypeId() != TYPEID_PLAYER)
                 return;
 
             if (Creature * pPerotharn = ObjectAccessor::GetCreature(*me,pInstance->GetData64(DATA_PEROTHARN)))
@@ -831,7 +839,6 @@ public:
         uint32 eyeQuoteTimer;
         uint32 summonCounter;
 
-        //std::vector<uint32> positions = {0,1,2,3,4,5,6,7}; -> not working on my compiler for now ( MS VS u sux)
         std::vector<uint32> positions;
 
         void Reset() override
@@ -922,7 +929,7 @@ public:
             if (summonEyeTimer <= diff)
             {
                 float ori = me->GetOrientation();
-                Creature * pEye = NULL;
+                Creature * pEye = nullptr;
 
                 if (Creature * pPerotharn = ObjectAccessor::GetCreature(*me,pInstance->GetData64(DATA_PEROTHARN)))
                     pEye = pPerotharn->SummonCreature(ENTRY_EYE_OF_PEROTHARN, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), ori);
@@ -930,7 +937,7 @@ public:
                 if (pEye)
                 {
                     if (npc_eye_of_perotharn_woe::npc_eye_of_perotharn_woeAI* pAI = (npc_eye_of_perotharn_woe::npc_eye_of_perotharn_woeAI*)(pEye->GetAI()))
-                        pAI->SetSearchingAngles(ori, MapManager::NormalizeOrientation(ori + M_PI /4));
+                        pAI->SetSearchingAngle(ori);
                 }
                 summonEyeTimer = 8000;
             }
@@ -1064,12 +1071,12 @@ public:
     private:
         class DistanceCheck
         {
-        public:
-        DistanceCheck() {}
+            public:
+            DistanceCheck() {}
 
             bool operator()(WorldObject* obj)
             {
-                return (!obj->ToUnit() || obj->GetDistance(MIDDLE_X,MIDDLE_X,MIDDLE_Z) < 80.0f);
+                return (obj->GetDistance(MIDDLE_X,MIDDLE_X,MIDDLE_Z) < 80.0f);
             }
         };
     };

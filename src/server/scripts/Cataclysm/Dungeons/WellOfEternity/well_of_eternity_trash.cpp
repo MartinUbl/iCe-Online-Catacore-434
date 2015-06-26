@@ -646,7 +646,7 @@ public:
                 if (GameObject * pGo = me->FindNearestGameObject(FIREWALL_ENTRY, 200.0f))
                     pGo->Delete();
 
-                if (me->ToTempSummon() == NULL && pInstance)
+                if (me->ToTempSummon() == nullptr && pInstance)
                 {
                     if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
                         pIllidan->AI()->DoAction(ACTION_ILLIDAN_DELAY_MOVE);
@@ -1192,7 +1192,10 @@ namespace Illidan
             else if (action == ACTION_ILLIDAN_CREATE_VEHICLE)
                 HandleVehicle(true);
             else  if (action == ACTION_AFTER_PEROTHARN_DEATH)
+            {
+                HandleVehicle(false);
                 sayDelayTimer = 3000;
+            }
         }
 
         void MovementInform(uint32 type, uint32 wpID) override
@@ -1314,6 +1317,9 @@ namespace Illidan
             {
                 me->GetMotionMaster()->MovePoint(ILLIDAN_PEROTHARN_STEP, illidanPos[ILLIDAN_PEROTHARN_STEP],true);
                 CAST_WOE_INSTANCE(pInstance)->crystalsRemaining = 0;
+                gossipDone = true;
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                 return;
             }
 

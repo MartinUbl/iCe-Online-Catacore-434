@@ -7338,6 +7338,13 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                 ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
                 unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
 
+                // AI interrupt inform hook
+                if (unitTarget->GetTypeId() == TYPEID_UNIT)
+                {
+                    if (unitTarget->ToCreature()->IsAIEnabled)
+                        unitTarget->ToCreature()->AI()->SpellCastInterrupted(curSpellInfo);
+                }
+
                 switch(m_spellInfo->Id)
                 {
                     case 6552://Rude interruption

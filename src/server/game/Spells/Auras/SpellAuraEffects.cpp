@@ -42,6 +42,7 @@
 #include "CellImpl.h"
 #include "ScriptMgr.h"
 #include "WeatherMgr.h"
+#include "InstanceScript.h"
 
 class Aura;
 //
@@ -3322,7 +3323,11 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                 {
                     case 103004: // Shadowcloak (Well of Eternity)
                     {
-                        if (!caster || caster->IsInCombat() || caster->GetMapId() != 939) // only in WoE and only if out of combat
+                        if (!caster || !caster->GetInstanceScript())
+                            break;
+
+                        // Only out of combat, but allow while perotharn encounter is active
+                        if (caster->IsInCombat() && caster->GetInstanceScript()->GetData(0) != IN_PROGRESS) // Perotharn
                             break;
 
                         #define PLAYER_SHADOWCLOAK_STALKER      (55154)

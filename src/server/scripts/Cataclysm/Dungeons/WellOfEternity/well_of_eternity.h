@@ -528,6 +528,7 @@ public:
             void CrystalDestroyed(uint32 crystalXCoord);
             bool IsPortalClosing(DemonDirection dir);
             Creature * GetGuardianByDirection(uint32 direction);
+            void RemoveShadowCloakFromPlayers();
 
             // Mannoroth stuff
             void CallDoomGuardsForHelp(Unit * victim);

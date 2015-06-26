@@ -162,6 +162,8 @@ void INST_WOE_SCRIPT::SetData(uint32 type, uint32 data)
 
     if (data == DONE)
     {
+        RemoveShadowCloakFromPlayers(); // Do it for sure every time player defeat a boss
+
         std::ostringstream saveStream;
         saveStream << m_auiEncounter[0];
         for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
@@ -376,6 +378,18 @@ bool INST_WOE_SCRIPT::PlayersWipedOnMannoroth()
     }
 
     return invalidPlayersCount == playersCount;
+}
+
+void INST_WOE_SCRIPT::RemoveShadowCloakFromPlayers()
+{
+    // What about vehicle stlaker on players ?
+    DoRemoveAurasDueToSpellOnPlayers(102994);
+    DoRemoveAurasDueToSpellOnPlayers(103004);
+    DoRemoveAurasDueToSpellOnPlayers(103020);
+
+    // Remove it also from Illidan
+    if (Creature* pIllidan = ObjectAccessor::GetObjectInMap(illidanGUID, this->instance, (Creature*)NULL))
+        pIllidan->AI()->DoAction(ACTION_ILLIDAN_REMOVE_VEHICLE);
 }
 
 uint32* INST_WOE_SCRIPT::GetCorrUiEncounter()

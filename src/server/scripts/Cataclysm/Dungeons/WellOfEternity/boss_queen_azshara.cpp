@@ -232,6 +232,7 @@ public:
                 pInstance->SetData(DATA_QUEEN_AZSHARA, NOT_STARTED);
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
+            me->CastSpell(me, 93324, true); // Force cosmetic stand state in combat
         }
 
         void EnterCombat(Unit * who) override
@@ -504,7 +505,7 @@ public:
             {
                 if (!me->IsNonMeleeSpellCasted(false))
                 {
-                    //me->CastSpell(me, SPELL_SERVANT_OF_THE_QUEEN, false);
+                    me->CastSpell(me, SPELL_SERVANT_OF_THE_QUEEN, false);
                     servantTimer = 58000;
                 }
             }
@@ -730,7 +731,7 @@ public:
                         {
                             if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 28.0f, true))
                             {
-                                // Remember these things, they are used needed in spellscript
+                                // Remember these things, they are needed in spellscript
                                 flameAngle = me->GetAngle(target);
                                 me->GetPosition(x, y);
                                 me->CastSpell(target, SPELL_COLDFLAME_DUMMY_CAST, false); // everything else should handle spellscript
