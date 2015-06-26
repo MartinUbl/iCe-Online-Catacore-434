@@ -4881,7 +4881,6 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
             break;
         case 102478: // Ice Fling
-        case 102334:
             spellInfo->MaxAffectedTargets = 1;
             break;
         case 102334: // Servant of the Queen
