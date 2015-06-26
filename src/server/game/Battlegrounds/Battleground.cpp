@@ -586,7 +586,7 @@ inline void Battleground::_ProcessJoin(uint32 diff)
 
                     /* teleport player to team start point if too far */
                     /* exclude AV and SA - sometimes causes trouble */
-                    if (GetTypeID() != BATTLEGROUND_AV && GetTypeID() != BATTLEGROUND_SA)
+                    if (GetTypeID(true) != BATTLEGROUND_AV && GetTypeID(true) != BATTLEGROUND_SA)
                     {
                         float sx, sy, sz, so;
                         GetTeamStartLoc(plr->GetBGTeam(), sx, sy, sz, so);
