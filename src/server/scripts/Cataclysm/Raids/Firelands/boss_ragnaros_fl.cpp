@@ -522,8 +522,6 @@ public:
                 else
                     unit->SetVisible(true);
             }
-            else
-                unit->SetVisible(true);
         }
 
         void ReceiveEmote(Player* pPlayer, uint32 text_emote) // This is only for testing purpose ( for GMs only )
