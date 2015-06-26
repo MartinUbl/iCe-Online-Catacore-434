@@ -37,6 +37,36 @@
 
 #include "Group.h"
 
+const char* GetBattlefieldName(BattlefieldIDs bfId)
+{
+    switch (bfId)
+    {
+        case BATTLEFIELD_BATTLEID_WG:
+            return "Wintergrasp";
+        case BATTLEFIELD_BATTLEID_TB:
+            return "Tol Barad";
+        default:
+            break;
+    }
+
+    return nullptr;
+}
+
+uint8 GetBattlefieldMinLevel(BattlefieldIDs bfId)
+{
+    switch (bfId)
+    {
+        case BATTLEFIELD_BATTLEID_WG:
+            return 75;
+        case BATTLEFIELD_BATTLEID_TB:
+            return 80;
+        default:
+            break;
+    }
+
+    return 0;
+}
+
 Battlefield::Battlefield()
 {
     m_Timer                    = 0;

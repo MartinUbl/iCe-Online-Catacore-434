@@ -258,35 +258,8 @@ enum ArenaType
     ARENA_TYPE_5v5          = 5
 };
 
-static ArenaType ArenaTypeForSlot(uint8 slot)
-{
-    switch (slot)
-    {
-        case ARENA_SLOT_2v2:
-            return ARENA_TYPE_2v2;
-        case ARENA_SLOT_3v3:
-            return ARENA_TYPE_3v3;
-        case ARENA_SLOT_5v5:
-            return ARENA_TYPE_5v5;
-        default:
-            return ARENA_TYPE_NONE;
-    }
-}
-
-static ArenaSlot ArenaSlotForType(uint8 type)
-{
-    switch (type)
-    {
-        case ARENA_TYPE_2v2:
-            return ARENA_SLOT_2v2;
-        case ARENA_TYPE_3v3:
-            return ARENA_SLOT_3v3;
-        case ARENA_TYPE_5v5:
-            return ARENA_SLOT_5v5;
-        default:
-            return ARENA_SLOT_NONE;
-    }
-}
+ArenaType ArenaTypeForSlot(uint8 slot);
+ArenaSlot ArenaSlotForType(uint8 type);
 
 enum BattlegroundType
 {

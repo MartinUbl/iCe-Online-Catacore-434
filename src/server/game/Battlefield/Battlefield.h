@@ -39,35 +39,8 @@ enum BattlefieldIDs
     BATTLEFIELD_BATTLEID_TB                      = 21,      // Tol Barad
 };
 
-static const char* GetBattlefieldName(BattlefieldIDs bfId)
-{
-    switch (bfId)
-    {
-        case BATTLEFIELD_BATTLEID_WG:
-            return "Wintergrasp";
-        case BATTLEFIELD_BATTLEID_TB:
-            return "Tol Barad";
-        default:
-            break;
-    }
-
-    return nullptr;
-}
-
-static uint8 GetBattlefieldMinLevel(BattlefieldIDs bfId)
-{
-    switch (bfId)
-    {
-        case BATTLEFIELD_BATTLEID_WG:
-            return 75;
-        case BATTLEFIELD_BATTLEID_TB:
-            return 80;
-        default:
-            break;
-    }
-
-    return 0;
-}
+const char* GetBattlefieldName(BattlefieldIDs bfId);
+uint8 GetBattlefieldMinLevel(BattlefieldIDs bfId);
 
 enum BattlefieldObjectiveStates
 {
