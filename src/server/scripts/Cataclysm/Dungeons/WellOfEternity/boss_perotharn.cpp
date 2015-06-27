@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
 #include "well_of_eternity.h"
+#include "ScriptPCH.h"
 #include "MapManager.h"
 #include "TaskScheduler.h"
 
@@ -207,7 +207,7 @@ public:
                 pGuard->AI()->SetData(DATA_SET_GUARDIAN_LANE, WAVE_THREE);
         }
 
-        //TaskScheduler scheduler;
+        TaskScheduler scheduler;
 
         InstanceScript* pInstance;
         SummonList Summons;
@@ -240,7 +240,7 @@ public:
 
         void Reset() override
         {
-            //scheduler.CancelAll();
+            scheduler.CancelAll();
 
             seekStep = 0;
             phase = PHASE_ONE;
@@ -442,7 +442,7 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
-            //scheduler.Update(diff);
+            scheduler.Update(diff);
 
             if (canMoveToNextPoint)
             {
@@ -456,11 +456,11 @@ public:
                 {
                     if (introStep == 1)
                     {
-                        /*scheduler.Schedule(Seconds(3), [this](TaskContext context)
+                        scheduler.Schedule(Seconds(3), [this](TaskContext context)
                         {
                             if (Creature * pLegionDemon = ObjectAccessor::GetCreature(*me, felGuardGUID))
                                 pLegionDemon->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
-                        });*/
+                        });
                     }
 
                     PlayQuote(me, introQuotes[introStep]);
