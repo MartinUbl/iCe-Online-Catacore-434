@@ -148,7 +148,7 @@ enum actions
 
 #define GO_ROYAL_CHEST 210025
 
-static int magusEntries[MAX_MAGES] = {ENTRY_FROST_MAGUS,ENTRY_ARCANE_MAGUS,ENTRY_FIRE_MAGUS,ENTRY_FROST_MAGUS,ENTRY_FIRE_MAGUS,ENTRY_ARCANE_MAGUS};
+static uint32 magusEntries[MAX_MAGES] = {ENTRY_FROST_MAGUS,ENTRY_ARCANE_MAGUS,ENTRY_FIRE_MAGUS,ENTRY_FROST_MAGUS,ENTRY_FIRE_MAGUS,ENTRY_ARCANE_MAGUS};
 
 class boss_queen_azshara_woe : public CreatureScript
 {
@@ -239,9 +239,6 @@ public:
         {
             ScriptedAI::EnterCombat(who);
             me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
-            me->ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
-            me->ClearUnitState(UNIT_STATE_ATTACK_PLAYER);
-            //target->SetStandState(UNIT_STAND_STATE_STAND);
             PlayQuote(me, aggroQuote);
             magusWaveTimer = 12000;
 
@@ -505,7 +502,28 @@ public:
             {
                 if (!me->IsNonMeleeSpellCasted(false))
                 {
-                    me->CastSpell(me, SPELL_SERVANT_OF_THE_QUEEN, false);
+                    // If we found player without SPELL_SERVANT_OF_THE_QUEEN aura -> cast it
+                    Unit * player = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_SERVANT_OF_THE_QUEEN);
+
+                    if (player != nullptr && pInstance->instance->GetPlayersCountExceptGMs() > 1)
+                        me->CastSpell(me, SPELL_SERVANT_OF_THE_QUEEN, false);
+                    else
+                    {
+                        // If we did'nt find any valid player -> remove vehicle kit and kill players
+                        pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SERVANT_OF_THE_QUEEN);
+
+                        Map::PlayerList const& lPlayers = pInstance->instance->GetPlayers();
+
+                        if (!lPlayers.isEmpty())
+                        {
+                            for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                                if (Player *pPlayer = itr->getSource())
+                                {
+                                    if (pPlayer->GetDistance(me) <= 100.0f && !pPlayer->IsGameMaster())
+                                        me->Kill(pPlayer);
+                                }
+                        }
+                    }
                     servantTimer = 58000;
                 }
             }
@@ -1176,9 +1194,9 @@ public:
             player->RemoveAura(SPELL_PUPPET_STRING_HOVER);
         }
 
-        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
-            PreventDefaultAction();
+            //PreventDefaultAction();
 
             Unit* player = GetTarget();
             if (!player)
@@ -1192,7 +1210,7 @@ public:
             {
                 if (Creature * pHand = pQueen->SummonCreature(ENTRY_HAND_OF_THE_QUEEN,player->GetPositionX(),player->GetPositionY(),player->GetPositionZ(),0.0f))
                 {
-                    player->AddAura(SPELL_PUPPET_STRING_HOVER, player);
+                    pHand->AddAura(SPELL_PUPPET_STRING_HOVER, pHand);
                     pHand->setFaction(14); // for sure
                     pHand->EnterVehicle(veh,0); // Must be explicit 0, if -1 emu will fuck us up
                     pHand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
@@ -1202,14 +1220,41 @@ public:
 
         void Register()
         {
-            OnEffectApply += AuraEffectApplyFn(spell_gen_servant_of_the_queen_AuraScript::OnApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectRemove +=AuraEffectRemoveFn(spell_gen_servant_of_the_queen_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_gen_servant_of_the_queen_AuraScript::OnApply, EFFECT_2, SPELL_AURA_DAMAGE_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_gen_servant_of_the_queen_AuraScript::OnRemove, EFFECT_2, SPELL_AURA_DAMAGE_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
     AuraScript* GetAuraScript() const
     {
         return new spell_gen_servant_of_the_queen_AuraScript();
+    }
+};
+
+class spell_gen_total_obedience : public SpellScriptLoader
+{
+public:
+    spell_gen_total_obedience() : SpellScriptLoader("spell_gen_total_obedience") { }
+
+    class spell_gen_total_obedience_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_total_obedience_AuraScript);
+
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            Unit * target = GetTarget();
+            target->Kill(target); // Silently kill self
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_gen_total_obedience_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_gen_total_obedience_AuraScript();
     }
 };
 
@@ -1224,4 +1269,5 @@ void AddSC_boss_queen_azshara()
     new spell_gen_total_obedience_woe(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (103241, 'spell_gen_total_obedience_woe');
     new spell_gen_servant_of_the_queen(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (102334, 'spell_gen_servant_of_the_queen');
     new spell_gen_coldflame_woe(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (102465, 'spell_gen_coldflame_woe');
+    new spell_gen_total_obedience(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (103241, 'spell_gen_total_obedience');
 }

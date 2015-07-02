@@ -4885,7 +4885,13 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 102334: // Servant of the Queen
             spellInfo->MaxAffectedTargets = 1;
+            spellInfo->excludeTargetAuraSpell = i;
             //spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
+            break;
+        case 103241:
+            spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
+            spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
+            spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_DUMMY;
             break;
         case 108759: // Evil Dragon Soul Beam (Deathwing)
         case 108809: // Evil Dragon Soul Beam (Old God)

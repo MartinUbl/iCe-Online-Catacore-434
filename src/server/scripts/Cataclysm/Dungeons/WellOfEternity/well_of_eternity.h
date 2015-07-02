@@ -497,13 +497,15 @@ public:
         void OnGameObjectCreate(GameObject* go, bool add) override;
         virtual uint32* GetCorrUiEncounter();
 
-        // Only this works ?
-        void OnPlayerEnter(Player * p) override
+        void OnPlayerEnter(Player * player) override
         {
-            if (p->getGender() == GENDER_MALE)
-                p->CastSpell(p, NIGH_ELF_ILLUSION_MALE, true);
+            if (player->getClass() == CLASS_DRUID) // Layering of SPELL_AURA_TRANSFORM is little fucked up, so turn morph for druids for now
+                return;
+
+            if (player->getGender() == GENDER_MALE)
+                player->CastSpell(player, NIGH_ELF_ILLUSION_MALE, true);
             else
-                p->CastSpell(p, NIGH_ELF_ILLUSION_FEMALE, true);
+                player->CastSpell(player, NIGH_ELF_ILLUSION_FEMALE, true);
         }
 
         public:
