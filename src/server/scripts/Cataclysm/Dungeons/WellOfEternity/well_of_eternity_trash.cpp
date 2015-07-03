@@ -1005,7 +1005,7 @@ class spell_gen_woe_distract_selector : public SpellScriptLoader
                 unitList.clear();
                 std::list<Creature*> crystals;
                 GetCreatureListWithEntryInGrid(crystals, GetCaster(), DISTRACION_STALKER_ENTRY, 100.0f);
-                unitList.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
+                crystals.sort(Trinity::ObjectDistanceOrderPred(GetCaster(),false));
 
                 for (std::list<Creature*>::const_iterator itr = crystals.begin(); itr != crystals.end(); ++itr)
                     if (!(*itr)->HasAura(SPELL_DISTRACTION_AURA))
@@ -1083,7 +1083,7 @@ namespace Illidan
         SPELL_ILLIDAN_GREEN_ARROW = 105924,
         SPELL_SHADOW_CLOAK_ILLIDAN = 105915,    // good one ?
         SPELL_SHADOW_CLOAK_CIRCLE = 102951,      // visual circle
-        SPELL_DISTRACT_MISSILE_AURA = 110100,
+        SPELL_WALL_OF_SHADOW = 104400, // Wall of Shadow
 
         // Shadow system on players
         SPELL_SHADOW_WALK_STEALTH = 102994, // stealth + speed + SPELL_AURA_SET_VEHICLE_ID -> misc value 1763)
@@ -1113,7 +1113,6 @@ namespace Illidan
             {
                 me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                me->CastSpell(me, SPELL_ILLIDAN_GREEN_ARROW, true);
                 me->CastSpell(me, SPELL_SHADOW_CLOAK_ILLIDAN, true);
             }
             else
@@ -1429,10 +1428,13 @@ namespace Illidan
                         break;
                     }
                     case ILLIDAN_DISTRACT_STEP:
-                        me->CastSpell(me, SPELL_DISTRACT_MISSILE_AURA, true);
+                    {
+                        if (Creature * pStalker = me->FindNearestCreature(DISTRACION_STALKER_ENTRY,100.0f,true))
+                            me->CastSpell(pStalker, SPELL_WALL_OF_SHADOW, false);
                         specialAction = SPECIAL_ACTION_MOVE_TO_DEFFENDERS;
                         eventTimer = 12000;
                         break;
+                    }
                     case ILLIDAN_FIRST_PACK_STEP:
                         waitingTimer = 8000; // say quote after 8 seconds
                         break;
@@ -1570,7 +1572,8 @@ namespace Illidan
                     if (Unit * stalker = me->SummonCreature(ILLIDAN_SHADOWCLOAK_VEHICLE_ENTRY,me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0))
                     {
                         stalker->EnterVehicle(me,0);
-                        stalker->AddAura(102951, stalker); // add visual circle aura
+                        stalker->CastSpell(stalker, SPELL_ILLIDAN_GREEN_ARROW, true);
+                        stalker->AddAura(SPELL_SHADOW_CLOAK_CIRCLE, stalker); // add visual circle aura
                         stalker->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE); // for sure
                     }
                 }
@@ -1578,7 +1581,7 @@ namespace Illidan
             else
             {
                 Creature* vehPassenger = me->GetVehicleCreatureBase();
-                if (vehPassenger == NULL)
+                if (vehPassenger == nullptr)
                     vehPassenger = me->FindNearestCreature(ILLIDAN_SHADOWCLOAK_VEHICLE_ENTRY, 10.0f, true);
 
                 if (vehPassenger)
@@ -1738,7 +1741,7 @@ public:
 
             if (bladeTimer <= diff)
             {
-                //TODO: Fix weapon damage
+                //TODO: Correctly fix weapon damage
                 me->CastSpell(me->GetVictim(),SPELL_QUEENS_BLADE , true);
                 bladeTimer = urand(9000,12000);
             }
@@ -1746,7 +1749,7 @@ public:
 
             if (strikeTimer <= diff)
             {
-                //TODO: Fix weapon damage
+                //TODO: Correctly fix weapon damage
                 me->CastSpell(me, SPELL_SHIMMERING_STRIKE_AOE, true);
                 strikeTimer = urand(4000,5000);
             }

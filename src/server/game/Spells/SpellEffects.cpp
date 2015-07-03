@@ -7257,6 +7257,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             m_damage += (m_damage * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 25) / 100;
             break;
         case 102260: // WoE Eternal champion damage
+        case 102468: // Blades of Ice (Frost magus of Queen Azshara)
             m_damage = urand(15000,16000);
             break;
         case 102257:

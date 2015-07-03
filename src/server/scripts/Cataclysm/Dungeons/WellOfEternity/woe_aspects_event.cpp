@@ -102,7 +102,8 @@ enum spells
     SPELL_DRAGOUN_SOUL_COSMETIC_CHARGED = 110489,
     SPELL_TIME_TELEPORT_DUMMY_EFFECT = 107493,
     SPELL_FLYING_ANIM_KIT_AURA = 98723,
-    SPELL_DRAGON_SOUL_EXPLOSION =108826
+    SPELL_DRAGON_SOUL_EXPLOSION = 108826,
+    SPELL_DRAGON_SOUL_BEAM_COSMETIC = 102919
 };
 
 enum beamSpells
@@ -124,10 +125,10 @@ static void GetLinePoint(float &x, float &y, float distance, float angle)
     y = y + sin(angle)*distance;
 }
 
-#define YSERA_SPAWN_ANGLE 4.0f
-#define ALEX_SPAWN_ANGLE 4.8f
-#define SORI_SPAWN_ANGLE 3.4f
-#define ASPECT_SPAWN_DISTANCE 180.0f
+#define YSERA_SPAWN_ANGLE 3.6f
+#define ALEX_SPAWN_ANGLE 4.3f
+#define SORI_SPAWN_ANGLE 2.7f
+#define ASPECT_SPAWN_DISTANCE 165.0f
 #define ASPECT_ARRIVE_DISTANCE 130.0f
 
 class npc_the_dragon_soul_woe : public CreatureScript
@@ -148,12 +149,16 @@ public:
             pInstance = me->GetInstanceScript();
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
             me->CastSpell(me, SPELL_THE_DRAGON_SOUL_COSMETIC, true);
+
+            if (Creature * pTwistingNetherPortal = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_PORTAL_TO_TWISTING_NETHER)))
+                me->CastSpell(pTwistingNetherPortal,SPELL_DRAGON_SOUL_BEAM_COSMETIC,false);
+
             eventStarted = false;
             firstDrakeArrived = false;
             quoteStep = 0;
         }
 
-        void JustSummoned(Creature* summon)
+        void JustSummoned(Creature* summon) override
         {
             switch (summon->GetEntry())
             {
@@ -589,9 +594,7 @@ public:
             }
         }
 
-        void Reset() override
-        {
-        }
+        void Reset() override { }
 
         void MovementInform(uint32 type, uint32 id) override
         {
@@ -722,37 +725,6 @@ class spell_gen_dragon_soul_explosion : public SpellScriptLoader
             return new spell_gen_dragon_soul_explosion_SpellScript();
         }
 };
-
-// BASIC TEMPLATE FOR CREATURE SCRIPTS
-/*class Legion_demon_WoE : public CreatureScript
-{
-public:
-    Legion_demon_WoE() : CreatureScript("Legion_demon_WoE") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new Legion_demon_WoEAI(creature);
-    }
-
-    struct Legion_demon_WoEAI : public ScriptedAI
-    {
-        Legion_demon_WoEAI(Creature* creature) : ScriptedAI(creature)
-        {
-            pInstance = me->GetInstanceScript();
-        }
-
-        InstanceScript * pInstance;
-
-        void Reset() override
-        {
-        }
-
-        void UpdateAI(const uint32 diff) override
-        {
-        }
-    };
-};*/
-
 
 void AddSC_woe_aspects_event()
 {

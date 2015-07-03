@@ -4889,6 +4889,7 @@ void SpellMgr::LoadSpellCustomAttr()
             //spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
             break;
         case 103241:
+            spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
             spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
             spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
             spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_DUMMY;
@@ -4900,6 +4901,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 107900: // Demonic Warding
         case 104818: // Varothen magic blade
         case 104817: // Varothen magic blade triggered
+        case 102919: // Dragon Soul Cosmetic Beam
+        case 104400: // Wall of shadow
         {
             if (i == 104818)
                 spellInfo->EffectTriggerSpell[EFFECT_0] = 0;

@@ -26,7 +26,8 @@ enum spells
     SPELL_TOTAL_OBEDIENCE_STUN = 110096, // Target Aura Spell (102334) Servant of the Queen -> (can't do that yet) !!!
     SPELL_PUPPET_STRING_HOVER = 102312,
     SPELL_PUPPET_CROSS_VISUAL = 102310,
-    SPELL_SHADOWBAT_COSMETIC = 103714
+    SPELL_SHADOWBAT_COSMETIC = 103714,
+    SPELL_STAND_STATE_COSMETIC = 93324 // force stand state during combat (workaround)
 };
 
 enum channelSpells
@@ -216,7 +217,6 @@ public:
         {
             wasTotalObedienceCasted = false;
             interruptCounter = 0;
-            me->CastSpell(me, SPELL_SHROUD_OF_LUMINOSITY, true);
             magusWave = 0;
             magusReleaseTimer = MAX_TIMER;
             magusWaveTimer = 12000;
@@ -232,12 +232,12 @@ public:
                 pInstance->SetData(DATA_QUEEN_AZSHARA, NOT_STARTED);
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
-            me->CastSpell(me, 93324, true); // Force cosmetic stand state in combat
+            me->CastSpell(me, SPELL_STAND_STATE_COSMETIC, true);
         }
 
         void EnterCombat(Unit * who) override
         {
-            ScriptedAI::EnterCombat(who);
+            me->SetInCombatWithZone();
             me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
             PlayQuote(me, aggroQuote);
             magusWaveTimer = 12000;
@@ -249,18 +249,39 @@ public:
             }
         }
 
-        //void AttackStart(Unit *) {}
-
         void EnterEvadeMode() override
         {
             PlayQuote(me, wipeQuote);
             RespawnMages();
-            ScriptedAI::EnterEvadeMode();
 
             if (pInstance)
             {
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 pInstance->SetData(DATA_QUEEN_AZSHARA, NOT_STARTED);
+            }
+
+            Map::PlayerList const& lPlayers = pInstance->instance->GetPlayers();
+
+            if (!lPlayers.isEmpty())
+            {
+                for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                    if (Player *pPlayer = itr->getSource())
+                    {
+                        if (pPlayer->HasAura(SPELL_SERVANT_OF_THE_QUEEN))
+                        {
+                            if (Vehicle * veh = pPlayer->GetVehicleKit())
+                                if (Unit * passenger = veh->GetPassenger(0))
+                                    if (passenger->GetTypeId() == TYPEID_UNIT)
+                                    {
+                                        passenger->ExitVehicle();
+                                        passenger->Kill(passenger);
+                                        passenger->ToCreature()->ForcedDespawn(2000);
+                                    }
+
+                            pPlayer->RemoveAura(SPELL_SERVANT_OF_THE_QUEEN);
+                            me->Kill(pPlayer);
+                        }
+                    }
             }
         }
 
@@ -270,11 +291,6 @@ public:
             {
                 PlayQuote(me, killQuotes[urand(0,2)]);
             }
-        }
-
-        void MoveInLineOfSight(Unit * who) override
-        {
-            ScriptedAI::MoveInLineOfSight(who);
         }
 
         void SummonMaidens()
@@ -455,6 +471,9 @@ public:
             if (!UpdateVictim())
                 return;
 
+            if (!me->HasAura(SPELL_STAND_STATE_COSMETIC) && !me->IsNonMeleeSpellCasted(false))
+                me->CastSpell(me, SPELL_STAND_STATE_COSMETIC, true);
+
             if (magusWaveTimer <= diff)
             {
                 if (++magusWave >= MAX_MAGUS_WAVES)
@@ -505,8 +524,12 @@ public:
                     // If we found player without SPELL_SERVANT_OF_THE_QUEEN aura -> cast it
                     Unit * player = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_SERVANT_OF_THE_QUEEN);
 
-                    if (player != nullptr && pInstance->instance->GetPlayersCountExceptGMs() > 1)
+                    uint32 combatPlayers = me->getThreatManager().getThreatList().size();
+
+                    if (player != nullptr && combatPlayers > 1)
+                    {
                         me->CastSpell(me, SPELL_SERVANT_OF_THE_QUEEN, false);
+                    }
                     else
                     {
                         // If we did'nt find any valid player -> remove vehicle kit and kill players
@@ -514,7 +537,7 @@ public:
 
                         Map::PlayerList const& lPlayers = pInstance->instance->GetPlayers();
 
-                        if (!lPlayers.isEmpty())
+                        if (!lPlayers.isEmpty() && combatPlayers > 1)
                         {
                             for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
                                 if (Player *pPlayer = itr->getSource())
@@ -533,6 +556,7 @@ public:
             {
                 me->MonsterTextEmote("Queen Azshara begins to transform everybody into puppets! You must interrupt her!", 0, true);
                 PlayQuote(me, puppetTurn[urand(0,1)]);
+                me->RemoveAura(SPELL_STAND_STATE_COSMETIC);
                 me->CastSpell(me, SPELL_TOTAL_OBEDIENCE_CHARM, false); // 10 second cast time
                 obedienceTimer = 73000;
             }
@@ -548,7 +572,7 @@ enum magusSpells
     SPELL_COLDFLAME_DUMMY_CAST = 102465, // add periodic dummy aura after cast
     SPELL_COLDFLAME_PERSISTENT_AURA_DMG = 102466, // aoe persistence damage 4s (x,y,z)
     SPELL_BLADES_OF_ICE_CHARGE = 102467,
-    SPELL_BLADES_OF_ICE_MISSILE = 102468, // missile weapon damage 
+    SPELL_BLADES_OF_ICE_MISSILE = 102468, // //TODO: Correctly fix weapon damage
 
     /*FIRE MAGUS*/
     SPELL_FIREBALL = 102265,
@@ -1145,7 +1169,7 @@ public:
         void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             Unit* target = GetTarget();
-            if (target == NULL)
+            if (target == nullptr)
                 return;
 
             target->AddAura(SPELL_PUPPET_STRING_HOVER, target);
@@ -1155,12 +1179,9 @@ public:
             {
                 target->AddAura(SPELL_PUPPET_STRING_HOVER, target);
                 pHand->setFaction(35); // for sure
-                pHand->EnterVehicle(veh,0); // Must be explicit 0, if -1 emu will fuck us up
+                pHand->EnterVehicle(veh,0);
                 pHand->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             }
-
-            if (Aura * a = target->AddAura(SPELL_TOTAL_OBEDIENCE_STUN, target))
-                a->SetDuration(20000);
         }
 
         void Register()

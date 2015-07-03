@@ -419,9 +419,6 @@ public:
         npc_malfurion_mannoroth_woeAI(Creature* creature) : ScriptedAI(creature)
         {
             me->CastSpell(me, SPELL_NATURE_CHANNELING, false);
-
-            if (Creature * pNozdormu = me->FindNearestCreature(ENTRY_NOZDORMU_PRELUDE, 250.0f, true))
-                pNozdormu->CastSpell(pNozdormu, SPELL_TIME_SHIFT, true);
         }
     };
 };
