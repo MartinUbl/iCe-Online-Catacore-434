@@ -544,7 +544,7 @@ public:
             lane = 0;
 
             if (entry == GUARDIAN_DEMON_ENTRY)
-                me->CastSpell(me, 90766, true); // Hovering Anim State
+                me->CastSpell(me, 90766, true); // Flying anim state
 
             firstWP = true;
             canMoveToPoint = false;
@@ -1254,7 +1254,7 @@ namespace Illidan
                     break;
                 case ILLIDAN_WAIT_SECOND_PORTAL_STEP:
                     PlayQuote(me, escortQuotes[5]);
-                    eventTimer = 32000;
+                    eventTimer = 32000; // THis shouldnt be fixed time, but should properly "scale" when second demon guard will pass through portal
                     break;
                 case ILLIDAN_BEFORE_STAIRS_STEP:
                     PlayQuote(me, escortQuotes[6]);
@@ -1504,6 +1504,7 @@ namespace Illidan
                         break;
                     case ILLIDAN_RUNAWAY_WP:
                         me->SetVisible(false);
+                        HandleVehicle(false);
                         me->Kill(me);
                         break;
                     default:
@@ -1589,7 +1590,7 @@ namespace Illidan
                     vehPassenger->Kill(vehPassenger);
                     vehPassenger->ForcedDespawn();
                 }
-                me->RemoveAura(SPELL_SHADOW_WALK_ILLIDAN_KIT);
+                me->RemoveAllAuras(); // Remove vehicle kit and all auras :)
             }
         }
 

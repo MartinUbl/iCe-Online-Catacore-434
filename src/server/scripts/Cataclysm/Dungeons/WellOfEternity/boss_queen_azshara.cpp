@@ -195,7 +195,7 @@ public:
         std::vector<uint64> magesGUIDs;
         InstanceScript * pInstance;
         bool encounterComplete;
-        bool wasTotalObedienceCasted;
+        bool totalObedienceInterrupted;
         uint32 interruptCounter;
 
         // Magus stuff
@@ -208,6 +208,7 @@ public:
         // Combat Timers
         uint32 servantTimer;
         uint32 obedienceTimer;
+        uint32 obedienceCheckTimer;
         // After combat timers
         uint32 dialogTimer;
         // Phasing
@@ -215,10 +216,11 @@ public:
 
         void Reset() override
         {
-            wasTotalObedienceCasted = false;
+            totalObedienceInterrupted = false;
             interruptCounter = 0;
             magusWave = 0;
             magusReleaseTimer = MAX_TIMER;
+            obedienceCheckTimer = MAX_TIMER;
             magusWaveTimer = 12000;
             magusPeriodicSummonTimer = magusWaveTimer + 60000;
             magusRemaining = MAX_MAGES;
@@ -247,6 +249,7 @@ public:
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 pInstance->SetData(DATA_QUEEN_AZSHARA, IN_PROGRESS);
             }
+            ScriptedAI::EnterCombat(who);
         }
 
         void EnterEvadeMode() override
@@ -283,6 +286,7 @@ public:
                         }
                     }
             }
+            ScriptedAI::EnterEvadeMode();
         }
 
         void KilledUnit(Unit * victim)
@@ -315,6 +319,8 @@ public:
         {
             if (spell->Id != SPELL_TOTAL_OBEDIENCE_CHARM)
                 return;
+
+            totalObedienceInterrupted = true;
 
             if (interruptCounter < 3)
                 PlayQuote(me, interruptQuotes[interruptCounter++]);
@@ -368,15 +374,6 @@ public:
                     // Prepare for post encounter dialog
                     dialogTimer = 7000;
                 }
-            }
-        }
-
-        void SpellHitTarget(Unit* target, const SpellEntry* spell)
-        {
-            if (spell->Id == SPELL_TOTAL_OBEDIENCE_CHARM && wasTotalObedienceCasted == false)
-            {
-                wasTotalObedienceCasted = true;
-                PlayQuote(me, puppetDanceQuote);
             }
         }
 
@@ -528,7 +525,17 @@ public:
 
                     if (player != nullptr && combatPlayers > 1)
                     {
-                        me->CastSpell(me, SPELL_SERVANT_OF_THE_QUEEN, false);
+                        me->AddAura(SPELL_SERVANT_OF_THE_QUEEN, player);
+
+                        if (Vehicle * veh = player->GetVehicleKit())
+                        {
+                            if (Creature * pHand = me->SummonCreature(ENTRY_HAND_OF_THE_QUEEN, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0.0f))
+                            {
+                                pHand->setFaction(me->getFaction());
+                                pHand->EnterVehicle(veh, 0);
+                                pHand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                            }
+                        }
                     }
                     else
                     {
@@ -558,9 +565,36 @@ public:
                 PlayQuote(me, puppetTurn[urand(0,1)]);
                 me->RemoveAura(SPELL_STAND_STATE_COSMETIC);
                 me->CastSpell(me, SPELL_TOTAL_OBEDIENCE_CHARM, false); // 10 second cast time
+                totalObedienceInterrupted = false;
+                obedienceCheckTimer = 10000;
                 obedienceTimer = 73000;
             }
             else obedienceTimer -= diff;
+
+            if (obedienceCheckTimer <= diff)
+            {
+                if (totalObedienceInterrupted)
+                {
+                    totalObedienceInterrupted = false;
+                    PlayQuote(me, puppetDanceQuote);
+
+                    // TODO: This is workaround, maybe find better solution in future
+                    Map::PlayerList const& lPlayers = pInstance->instance->GetPlayers();
+
+                    if (!lPlayers.isEmpty())
+                    {
+                        for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                            if (Player *pPlayer = itr->getSource())
+                            {
+                                if (!pPlayer->IsGameMaster())
+                                    me->Kill(pPlayer);
+                            }
+                    }
+                }
+
+                obedienceCheckTimer = MAX_TIMER;
+            }
+            else obedienceCheckTimer -= diff;
         }
     };
 };
@@ -1147,56 +1181,6 @@ class spell_gen_coldflame_woe : public SpellScriptLoader
         }
 };
 
-class spell_gen_total_obedience_woe : public SpellScriptLoader
-{
-public:
-    spell_gen_total_obedience_woe() : SpellScriptLoader("spell_gen_total_obedience_woe") { }
-
-    class spell_gen_total_obedience_woe_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_gen_total_obedience_woe_AuraScript);
-
-        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* owner = GetOwner()->ToPlayer();
-            if (!owner)
-                return;
-
-            owner->RemoveAura(SPELL_PUPPET_STRING_HOVER);
-            owner->Kill(owner);
-        }
-
-        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* target = GetTarget();
-            if (target == nullptr)
-                return;
-
-            target->AddAura(SPELL_PUPPET_STRING_HOVER, target);
-
-            if (Vehicle * veh = target->GetVehicleKit())
-            if (Creature * pHand = target->SummonCreature(ENTRY_HAND_OF_THE_QUEEN,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000))
-            {
-                target->AddAura(SPELL_PUPPET_STRING_HOVER, target);
-                pHand->setFaction(35); // for sure
-                pHand->EnterVehicle(veh,0);
-                pHand->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-            }
-        }
-
-        void Register()
-        {
-            OnEffectApply += AuraEffectApplyFn(spell_gen_total_obedience_woe_AuraScript::OnApply, EFFECT_2, SPELL_AURA_SCHOOL_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectRemove +=AuraEffectRemoveFn(spell_gen_total_obedience_woe_AuraScript::OnRemove, EFFECT_2, SPELL_AURA_SCHOOL_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_gen_total_obedience_woe_AuraScript();
-    }
-};
-
 class spell_gen_servant_of_the_queen : public SpellScriptLoader
 {
 public:
@@ -1215,15 +1199,15 @@ public:
             player->RemoveAura(SPELL_PUPPET_STRING_HOVER);
         }
 
-        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            //PreventDefaultAction();
-
             Unit* player = GetTarget();
             if (!player)
                 return;
 
-            Creature * pQueen = player->FindNearestCreature(ENTRY_QUEEN_AZSHARA, 250.0f, true);
+            player->AddAura(SPELL_PUPPET_STRING_HOVER, player);
+
+            /*Creature * pQueen = player->FindNearestCreature(ENTRY_QUEEN_AZSHARA, 250.0f, true);
             if (!pQueen)
                 return;
 
@@ -1236,46 +1220,19 @@ public:
                     pHand->EnterVehicle(veh,0); // Must be explicit 0, if -1 emu will fuck us up
                     pHand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 }
-            }
+            }*/
         }
 
         void Register()
         {
-            OnEffectApply += AuraEffectApplyFn(spell_gen_servant_of_the_queen_AuraScript::OnApply, EFFECT_2, SPELL_AURA_DAMAGE_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectRemove += AuraEffectRemoveFn(spell_gen_servant_of_the_queen_AuraScript::OnRemove, EFFECT_2, SPELL_AURA_DAMAGE_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_gen_servant_of_the_queen_AuraScript::OnApply, EFFECT_0, SPELL_AURA_SET_VEHICLE_ID, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_gen_servant_of_the_queen_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SET_VEHICLE_ID, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
     AuraScript* GetAuraScript() const
     {
         return new spell_gen_servant_of_the_queen_AuraScript();
-    }
-};
-
-class spell_gen_total_obedience : public SpellScriptLoader
-{
-public:
-    spell_gen_total_obedience() : SpellScriptLoader("spell_gen_total_obedience") { }
-
-    class spell_gen_total_obedience_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_gen_total_obedience_AuraScript);
-
-        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-        {
-            Unit * target = GetTarget();
-            target->Kill(target); // Silently kill self
-        }
-
-        void Register()
-        {
-            OnEffectApply += AuraEffectApplyFn(spell_gen_total_obedience_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_gen_total_obedience_AuraScript();
     }
 };
 
@@ -1287,8 +1244,6 @@ void AddSC_boss_queen_azshara()
     new npc_royal_handmaiden_woe(); // 54645
     new npc_arcane_bomb_woe(); // 54639
 
-    new spell_gen_total_obedience_woe(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (103241, 'spell_gen_total_obedience_woe');
     new spell_gen_servant_of_the_queen(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (102334, 'spell_gen_servant_of_the_queen');
     new spell_gen_coldflame_woe(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (102465, 'spell_gen_coldflame_woe');
-    new spell_gen_total_obedience(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (103241, 'spell_gen_total_obedience');
 }

@@ -4867,7 +4867,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
         case 103004: // Shadowcloak
             spellInfo->EffectAmplitude[EFFECT_1] = 1000; // prenerfed
-            spellInfo->procFlags = 0;
             break;
         case 102994: // Shadowcloak (stealth + vehicle kit)
             spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_DUMMY; // we don't really need real stealth
@@ -4885,7 +4884,7 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 102334: // Servant of the Queen
             spellInfo->MaxAffectedTargets = 1;
-            spellInfo->excludeTargetAuraSpell = i;
+            //spellInfo->excludeTargetAuraSpell = i;
             //spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
             break;
         case 103241:

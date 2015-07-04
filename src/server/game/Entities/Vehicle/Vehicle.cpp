@@ -475,7 +475,7 @@ bool Vehicle::AddPassenger(WorldObject * _passenger, int8 seatId, bool byAura)
     // This is actually hack, if we are summoning creature and we immediately put them on vehicle, they will not appear on them visually
     // But you will dont see parabolic movement on jumping to vehicle, creature passenger will just appear on it
     // TODO: Find correct solution, maybe send some movement update packet, right after summon
-    if (passenger->GetTypeId() == TYPEID_UNIT)
+    if (passenger->GetTypeId() == TYPEID_UNIT && passenger->GetEntry() != 54853)
         passenger->DestroyForNearbyPlayers();
 
     passenger->UpdateObjectVisibility(false);

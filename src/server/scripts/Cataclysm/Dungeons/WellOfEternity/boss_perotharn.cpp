@@ -288,7 +288,7 @@ public:
                 me->RemoveAura(SPELL_CAMOUFLAGE);
                 aggroTimer = 4500;
             }
-            else if (action == ACTION_HIDE_AND_SEKK_END)
+            else if (action == ACTION_HIDE_AND_SEEK_FAILED || action == ACTION_HIDE_AND_SEEK_COMPLETED)
             {
                 Summons.DespawnEntry(ENTRY_EYE_OF_PEROTHARN);
                 Summons.DespawnEntry(ENTRY_HUNTING_SUMMONER);
@@ -303,6 +303,12 @@ public:
                 me->CastSpell(me, SPELL_CORRUPTING_TOUCH, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                 phase = PHASE_ONE;
+            }
+            // No else if !!!
+            if (action == ACTION_HIDE_AND_SEEK_COMPLETED) // Players avoid eyes successufully
+            {
+                me->GetMotionMaster()->Clear(false);
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
             }
         }
 
@@ -343,11 +349,15 @@ public:
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             PlayQuote(me,aggroQuotes[0]);
             DoAction(ACTION_ILLIADAN_AGGRO);
+
             if (pInstance)
             {
                 CAST_WOE_INSTANCE(pInstance)->RegisterIllidanVictim(me->GetGUID());
                 pInstance->SetData(DATA_PEROTHARN, IN_PROGRESS);
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
+                if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
+                    pIllidan->AI()->DoAction(ACTION_ILLIDAN_REMOVE_VEHICLE);
             }
         }
 
@@ -371,12 +381,6 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             ScriptedAI::EnterEvadeMode();
 
-            if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN, 200.0f, true))
-            {
-                pIllidan->AI()->DoAction(ACTION_ILLIDAN_REMOVE_VEHICLE);
-                pIllidan->RemoveAllAuras();
-            }
-
             Summons.DespawnEntry(ENTRY_EYE_OF_PEROTHARN);
             Summons.DespawnEntry(ENTRY_HUNTING_SUMMONER);
             Summons.DespawnEntry(ENTRY_HUNTING_CIRCLE_PUFFER);
@@ -386,6 +390,9 @@ public:
                 CAST_WOE_INSTANCE(pInstance)->UnRegisterIllidanVictim(me->GetGUID());
                 pInstance->SetData(DATA_PEROTHARN, NOT_STARTED);
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+                if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
+                    pIllidan->AI()->DoAction(ACTION_ILLIDAN_REMOVE_VEHICLE);
             }
         }
 
@@ -456,6 +463,9 @@ public:
                 {
                     if (introStep == 1)
                     {
+                        if (Creature * pLegionDemon = ObjectAccessor::GetCreature(*me, felGuardGUID))
+                            pLegionDemon->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+
                         /*scheduler.Schedule(Seconds(3), [this](TaskContext context)
                         {
                             if (Creature * pLegionDemon = ObjectAccessor::GetCreature(*me, felGuardGUID))
@@ -503,11 +513,8 @@ public:
                 {
                     // Remove stealth auras
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(102994); // TODO: is this safe ? -> we should kill vehicle ...
-                    if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN, 200.0f, true))
-                    {
+                    if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
                         pIllidan->AI()->DoAction(ACTION_ILLIDAN_REMOVE_VEHICLE); // Need to first properly remove vehicle passenger and destroy vehicle kit
-                        pIllidan->RemoveAllAuras();
-                    }
                 }
                 me->setFaction(14);
                 me->SetReactState(REACT_AGGRESSIVE);
@@ -621,10 +628,9 @@ public:
 
             if (freeIllidanTimer <= diff)
             {
-                if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN, 200.0f, true))
+                if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
                 {
                     pIllidan->AI()->DoAction(ACTION_ILLIDAN_REMOVE_VEHICLE);
-                    pIllidan->RemoveAllAuras();
                     PlayQuote(pIllidan, eyesQuotes[4]);
                 }
                 freeIllidanTimer = MAX_TIMER;
@@ -787,7 +793,7 @@ public:
 
             if (Creature * pPerotharn = ObjectAccessor::GetCreature(*me,pInstance->GetData64(DATA_PEROTHARN)))
             {
-                pPerotharn->AI()->DoAction(ACTION_HIDE_AND_SEKK_END);
+                pPerotharn->AI()->DoAction(ACTION_HIDE_AND_SEEK_FAILED);
                 who->CastSpell(pPerotharn, SPELL_ATTACK_ME_PEROTHARN, true); // Taunt Perotharn
                 pPerotharn->GetMotionMaster()->Clear(false);
                 pPerotharn->GetMotionMaster()->MoveChase(who);
@@ -859,7 +865,7 @@ public:
                 {
                     PlayQuote(pPerotharn, eyesQuotes[5]); // Lazy eye quote
                     pInstance->DoCompleteAchievement(6127); // Lazy eye achiev
-                    pPerotharn->AI()->DoAction(ACTION_HIDE_AND_SEKK_END); // this should despawn us also ...
+                    pPerotharn->AI()->DoAction(ACTION_HIDE_AND_SEEK_COMPLETED); // this should despawn us also ...
                 }
                 return;
             }
