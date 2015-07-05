@@ -235,6 +235,9 @@ public:
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
             me->CastSpell(me, SPELL_STAND_STATE_COSMETIC, true);
+
+            if (!me->HasAura(SPELL_SHROUD_OF_LUMINOSITY))
+                me->CastSpell(me, SPELL_SHROUD_OF_LUMINOSITY, true);
         }
 
         void EnterCombat(Unit * who) override
@@ -573,9 +576,8 @@ public:
 
             if (obedienceCheckTimer <= diff)
             {
-                if (totalObedienceInterrupted)
+                if (totalObedienceInterrupted == false)
                 {
-                    totalObedienceInterrupted = false;
                     PlayQuote(me, puppetDanceQuote);
 
                     // TODO: This is workaround, maybe find better solution in future
@@ -908,6 +910,32 @@ public:
 };
 
 
+class npc_hand_of_the_queen_woe : public CreatureScript
+{
+public:
+    npc_hand_of_the_queen_woe() : CreatureScript("npc_hand_of_the_queen_woe") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_hand_of_the_queen_woeAI(creature);
+    }
+
+    struct npc_hand_of_the_queen_woeAI : public ScriptedAI
+    {
+        npc_hand_of_the_queen_woeAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void JustDied(Unit *) override
+        {
+            if (Unit * vehBase = me->GetVehicleBase())
+            {
+                vehBase->RemoveAurasByType(SPELL_AURA_AOE_CHARM); // Drop Servant of the Queen aura from player
+            }
+            me->ForcedDespawn(10000);
+        }
+    };
+};
+
+
 enum shadowbatWP
 {
     WP_GROUND,
@@ -1206,21 +1234,6 @@ public:
                 return;
 
             player->AddAura(SPELL_PUPPET_STRING_HOVER, player);
-
-            /*Creature * pQueen = player->FindNearestCreature(ENTRY_QUEEN_AZSHARA, 250.0f, true);
-            if (!pQueen)
-                return;
-
-            if (Vehicle * veh = player->GetVehicleKit())
-            {
-                if (Creature * pHand = pQueen->SummonCreature(ENTRY_HAND_OF_THE_QUEEN,player->GetPositionX(),player->GetPositionY(),player->GetPositionZ(),0.0f))
-                {
-                    pHand->AddAura(SPELL_PUPPET_STRING_HOVER, pHand);
-                    pHand->setFaction(14); // for sure
-                    pHand->EnterVehicle(veh,0); // Must be explicit 0, if -1 emu will fuck us up
-                    pHand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                }
-            }*/
         }
 
         void Register()
@@ -1243,6 +1256,7 @@ void AddSC_boss_queen_azshara()
     new npc_queen_shadowbat_woe(); // 57117
     new npc_royal_handmaiden_woe(); // 54645
     new npc_arcane_bomb_woe(); // 54639
+    new npc_hand_of_the_queen_woe(); // 54728
 
     new spell_gen_servant_of_the_queen(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (102334, 'spell_gen_servant_of_the_queen');
     new spell_gen_coldflame_woe(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (102465, 'spell_gen_coldflame_woe');
