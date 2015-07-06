@@ -534,6 +534,7 @@ public:
                         {
                             if (Creature * pHand = me->SummonCreature(ENTRY_HAND_OF_THE_QUEEN, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0.0f))
                             {
+                                pHand->AI()->SetGUID(player->GetGUID());
                                 pHand->setFaction(me->getFaction());
                                 pHand->EnterVehicle(veh, 0);
                                 pHand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
@@ -552,6 +553,10 @@ public:
                             for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
                                 if (Player *pPlayer = itr->getSource())
                                 {
+                                    if (Vehicle * pVeh = pPlayer->GetVehicleKit())
+                                        if (Creature * pPassenger = (Creature*)pVeh->GetPassenger(0))
+                                            pPassenger->Kill(pPassenger);
+
                                     if (pPlayer->GetDistance(me) <= 100.0f && !pPlayer->IsGameMaster())
                                         me->Kill(pPlayer);
                                 }
@@ -588,6 +593,10 @@ public:
                         for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
                             if (Player *pPlayer = itr->getSource())
                             {
+                                if (Vehicle * pVeh = pPlayer->GetVehicleKit())
+                                    if (Creature * pPassenger = (Creature*)pVeh->GetPassenger(0))
+                                        pPassenger->Kill(pPassenger);
+
                                 if (!pPlayer->IsGameMaster())
                                     me->Kill(pPlayer);
                             }
@@ -924,11 +933,20 @@ public:
     {
         npc_hand_of_the_queen_woeAI(Creature* creature) : ScriptedAI(creature) {}
 
+        uint64 playerVehicleGUID = 0;
+
+        void SetGUID(const uint64& guid, int32 /*type*/) override
+        {
+            playerVehicleGUID = guid;
+        }
+
         void JustDied(Unit *) override
         {
-            if (Unit * vehBase = me->GetVehicleBase())
+            me->MonsterYell("JustDied",0,0);
+            if (Player * plVehicle = ObjectAccessor::GetPlayer(*me, playerVehicleGUID))
             {
-                vehBase->RemoveAurasByType(SPELL_AURA_AOE_CHARM); // Drop Servant of the Queen aura from player
+                me->MonsterYell("Vehicle base cleared", 0, 0);
+                plVehicle->RemoveAurasByType(SPELL_AURA_AOE_CHARM); // Drop Servant of the Queen aura from player
             }
             me->ForcedDespawn(10000);
         }
