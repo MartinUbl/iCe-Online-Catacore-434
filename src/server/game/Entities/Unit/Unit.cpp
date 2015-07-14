@@ -9178,6 +9178,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                                 this->MonsterYell("ARC PROC",0,0);
                             }
                         }
+                        break;
                     }
                     case 64568:             // Blood Reserve
                     {
