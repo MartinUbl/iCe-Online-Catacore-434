@@ -5361,7 +5361,7 @@ void Unit::AddGameObject(GameObject* gameObj)
 
 void Unit::RemoveGameObject(GameObject* gameObj, bool del)
 {
-    if (!gameObj || !gameObj->GetOwnerGUID() == GetGUID()) return;
+    if (!gameObj || gameObj->GetOwnerGUID() != GetGUID()) return;
 
     gameObj->SetOwnerGUID(0);
 
