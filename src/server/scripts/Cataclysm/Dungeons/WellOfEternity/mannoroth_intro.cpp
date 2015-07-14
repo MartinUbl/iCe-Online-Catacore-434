@@ -654,9 +654,12 @@ public:
 
         void JustDied(Unit *) override
         {
+            if (me->ToTempSummon() == nullptr)
+                return;
+
             if (CAST_WOE_INSTANCE(pInst)->abyssalSlained == false)
             {
-                //Abyssal killed -> move to next pos + start precombat quotes
+                // Abyssal killed -> move to next pos + start precombat quotes
                 if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, 100.0f, true))
                 {
                     pIllidan->GetMotionMaster()->MovePoint(1, illidanHighGuardPos, true, true);

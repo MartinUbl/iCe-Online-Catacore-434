@@ -65,7 +65,7 @@ static const Position magesPos[MAX_MAGES] =
     {3427.60f,-5272.47f, 229.94f, 3.94f}
 };
 
-static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = true)
+static void PlayQuote(Creature * source, SimpleQuote quote, bool yell = true)
 {
     source->PlayDirectSound(quote.soundID);
 
@@ -77,19 +77,19 @@ static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = true)
 
 static const SimpleQuote aggroQuote = { 26013, "Ah, welcome. You are here to join us in the coming celebration? No? A pity." };
 
-static const SimpleQuote firstMagus[2] =
+static const SimpleQuote firstMagiWaveQuotes[2] =
 {
     { 26027, "I have no time for such diversions. Keepers of Eternity, will you stand for your queen?" },
     { 26045, "I pray that the Light of a Thousand Moons will grant me this honor." }
 };
 
-static const SimpleQuote secondMagus[2] =
+static const SimpleQuote secondMagiWaveQuotes[2] =
 {
     { 26028, "Still these strangers would oppose your queen's will. Who will stop them?" },
     { 26046, "Yes, Light of Lights! My life is yours!" }
 };
 
-static const SimpleQuote thirdMagus[2] =
+static const SimpleQuote thirdMagiWaveQuotes[2] =
 {
     { 26029, "I beseech of you, my beloved subjects: Put an end to these miscreants." },
     { 26047, "The Flower of Life calls upon me. I WILL NOT fail you, my Queen." }
@@ -145,6 +145,7 @@ enum actions
     ACTION_CALL_MAGUS,
     ACTION_RELEASE_MAGUS,
     ACTION_MAGUS_DIED,
+    ACTION_PLAY_MAGUS_QUOTE
 };
 
 #define GO_ROYAL_CHEST 210025
@@ -200,11 +201,9 @@ public:
 
         // Magus stuff
         uint32 magusWave;
-        uint32 magusReleaseTimer;
-        uint32 magusWaveTimer;
-        uint32 magusPeriodicSummonTimer;
         uint32 magusRemaining;
-        uint32 magesToCall;
+        uint32 magusSummonTimer;
+
         // Combat Timers
         uint32 servantTimer;
         uint32 obedienceTimer;
@@ -219,12 +218,9 @@ public:
             totalObedienceInterrupted = false;
             interruptCounter = 0;
             magusWave = 0;
-            magusReleaseTimer = MAX_TIMER;
             obedienceCheckTimer = MAX_TIMER;
-            magusWaveTimer = 12000;
-            magusPeriodicSummonTimer = magusWaveTimer + 60000;
+            magusSummonTimer = 12000;
             magusRemaining = MAX_MAGES;
-            magesToCall = 1;
             servantTimer = 26000;
             obedienceTimer = 45000;
             PHASE = PHASE_COMBAT;
@@ -245,7 +241,7 @@ public:
             me->SetInCombatWithZone();
             me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
             PlayQuote(me, aggroQuote);
-            magusWaveTimer = 12000;
+            magusSummonTimer = 12000;
 
             if (pInstance)
             {
@@ -333,10 +329,21 @@ public:
         {
             if (action == ACTION_MAGUS_DIED)
             {
-                magesToCall++;
-                magusWaveTimer = 1;
+                --magusRemaining;
 
-                magusRemaining--;
+                if (magusRemaining % 2 != 0)
+                    return;
+
+                if (magusRemaining == 4 && magusWave <= MAGUS_WAVE_FIRST)
+                {
+                    magusSummonTimer = 1;
+                }
+                else if (magusRemaining == 2 && magusWave <= MAGUS_WAVE_SECOND)
+                {
+                    magusSummonTimer = 1;
+                }
+                else
+                    magusSummonTimer = 1;
 
                 if (magusRemaining == 0)
                 {
@@ -380,25 +387,25 @@ public:
             }
         }
 
-        void PlayMagusWaveQuote(uint32 magusWave)
+        void PlayMagiCallQuote()
         {
             switch (magusWave)
             {
                 case MAGUS_WAVE_FIRST:
-                    PlayQuote(me, firstMagus[0]);
+                    PlayQuote(me, firstMagiWaveQuotes[0]);
                     break;
                 case MAGUS_WAVE_SECOND:
-                    PlayQuote(me, secondMagus[0]);
+                    PlayQuote(me, secondMagiWaveQuotes[0]);
                     break;
                 case MAGUS_WAVE_THIRD:
-                    PlayQuote(me, thirdMagus[0]);
+                    PlayQuote(me, thirdMagiWaveQuotes[0]);
                     break;
             }
         }
 
-        void ReleaseMages(uint32 _magusWave)
+        void CallMagiWave(uint32 _magusWave)
         {
-            uint32 index1,index2;
+            uint32 index1 = 0 , index2 = 0;
 
             switch (_magusWave)
             {
@@ -414,10 +421,8 @@ public:
                     index1 = 0;
                     index2 = 5;
                     break;
-                default: // Should never happen
-                    index1 = 0;
-                    index2 = 1;
-                    break;
+                default:
+                    return;
             }
 
             Creature * pMagus1 = ObjectAccessor::GetCreature(*me, magesGUIDs[index1]);
@@ -428,22 +433,13 @@ public:
                 pMagus1->AI()->DoAction(ACTION_CALL_MAGUS);
                 pMagus2->AI()->DoAction(ACTION_CALL_MAGUS);
 
-                switch (magusWave)
-                {
-                    case MAGUS_WAVE_FIRST:
-                        PlayQuote(pMagus1, firstMagus[1]);
-                        break;
-                    case MAGUS_WAVE_SECOND:
-                        PlayQuote(pMagus1, secondMagus[1]);
-                        break;
-                    case MAGUS_WAVE_THIRD:
-                        PlayQuote(pMagus1, thirdMagus[1]);
-                        break;
-                }
+                Creature * pMagus = urand(0, 1) ? pMagus1 : pMagus2;
+
+                pMagus->AI()->SetData(ACTION_PLAY_MAGUS_QUOTE, magusWave);
             }
         }
 
-        void MovementInform(uint32 type, uint32 id)
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -474,47 +470,20 @@ public:
             if (!me->HasAura(SPELL_STAND_STATE_COSMETIC) && !me->IsNonMeleeSpellCasted(false))
                 me->CastSpell(me, SPELL_STAND_STATE_COSMETIC, true);
 
-            if (magusWaveTimer <= diff)
+            if (magusSummonTimer <= diff)
             {
                 if (++magusWave >= MAX_MAGUS_WAVES)
                 {
-                    magusWaveTimer = MAX_TIMER;
+                    magusSummonTimer = MAX_TIMER;
                     return;
                 }
 
-                magusPeriodicSummonTimer = 60000;
+                PlayMagiCallQuote();
+                CallMagiWave(magusWave); // Release them in 10 seconds
 
-                if (magesToCall == 1)
-                    PlayMagusWaveQuote(magusWave);
-
-                magusReleaseTimer = 5000;
-                magusWaveTimer = MAX_TIMER;
+                magusSummonTimer = 60000;
             }
-            else magusWaveTimer -= diff;
-
-            if (magusReleaseTimer <= diff)
-            {
-                uint32 _magesToSummon = magesToCall;
-                for (uint32 i = 0; i < _magesToSummon; i++)
-                {
-                    ReleaseMages(magusWave - i);
-                    magesToCall--;
-                }
-                magusReleaseTimer = MAX_TIMER;
-            }
-            else magusReleaseTimer -= diff;
-
-            if (magusPeriodicSummonTimer <= diff)
-            {
-                if (++magusWave >= MAX_MAGUS_WAVES)
-                {
-                    magusPeriodicSummonTimer = MAX_TIMER;
-                    return;
-                }
-                ReleaseMages(magusWave);
-                magusPeriodicSummonTimer = 60000;
-            }
-            else magusPeriodicSummonTimer -= diff;
+            else magusSummonTimer -= diff;
 
             // COMBAT TIMERS
             if (servantTimer <= diff)
@@ -670,6 +639,10 @@ public:
         InstanceScript * pInstance;
         uint32 entry;
 
+        uint32 magusQuoteTimer;
+        uint32 combatTimer;
+        uint32 magusWave;
+
         // FIRE TIMERS
         uint32 fireballTimer;
         uint32 blastWaveTimer;
@@ -700,6 +673,9 @@ public:
             //Arcane
             arcaneShockTimer = 8000;
             arcaneBombTimer = 2000;
+
+            magusQuoteTimer = combatTimer = MAX_TIMER;
+            magusWave = 0;
         }
 
         void EnterEvadeMode() override
@@ -723,19 +699,20 @@ public:
                 pQueen->AI()->KilledUnit(victim);
         }
 
+        void SetData(uint32 action, uint32 data) override
+        {
+            if (action == ACTION_PLAY_MAGUS_QUOTE)
+            {
+                magusQuoteTimer = 8000;
+                magusWave = data;
+            }
+        }
+
         void DoAction(const int32 action) override
         {
             if (action == ACTION_CALL_MAGUS)
             {
-                me->SetReactState(REACT_AGGRESSIVE);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->InterruptNonMeleeSpells(false);
-                me->SetInCombatWithZone();
-                if (Unit * player = SelectTarget(SELECT_TARGET_RANDOM,0,200.0f,true))
-                {
-                    me->AddThreat(player, 0.1f);
-                    me->AI()->AttackStart(player);
-                }
+                combatTimer = 10000;
             }
         }
 
@@ -745,12 +722,50 @@ public:
                 pQueen->AI()->DoAction(ACTION_MAGUS_DIED);
         }
 
-        //void MoveInLineOfSight(Unit * who) override {} 
-
         void UpdateAI(const uint32 diff) override
         {
             if (!pInstance)
                 return;
+
+            if (magusQuoteTimer <= diff)
+            {
+                switch (magusWave)
+                {
+                    case MAGUS_WAVE_FIRST:
+                        PlayQuote(me, firstMagiWaveQuotes[1]);
+                        break;
+                    case MAGUS_WAVE_SECOND:
+                        PlayQuote(me, secondMagiWaveQuotes[1]);
+                        break;
+                    case MAGUS_WAVE_THIRD:
+                        PlayQuote(me, thirdMagiWaveQuotes[1]);
+                        break;
+                }
+                magusQuoteTimer = MAX_TIMER;
+            }
+            else magusQuoteTimer -= diff;
+
+            if (combatTimer <= diff)
+            {
+                if (pInstance->GetData(DATA_QUEEN_AZSHARA) != IN_PROGRESS)
+                {
+                    combatTimer = MAX_TIMER;
+                    return;
+                }
+
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->InterruptNonMeleeSpells(false);
+                me->SetInCombatWithZone();
+                if (Unit * player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                {
+                    me->AddThreat(player, 0.1f);
+                    me->AI()->AttackStart(player);
+                }
+                combatTimer = MAX_TIMER;
+            }
+            else combatTimer -= diff;
+
 
             if (!UpdateVictim())
                 return;
@@ -942,12 +957,8 @@ public:
 
         void JustDied(Unit *) override
         {
-            me->MonsterYell("JustDied",0,0);
             if (Player * plVehicle = ObjectAccessor::GetPlayer(*me, playerVehicleGUID))
-            {
-                me->MonsterYell("Vehicle base cleared", 0, 0);
                 plVehicle->RemoveAurasByType(SPELL_AURA_AOE_CHARM); // Drop Servant of the Queen aura from player
-            }
             me->ForcedDespawn(10000);
         }
     };

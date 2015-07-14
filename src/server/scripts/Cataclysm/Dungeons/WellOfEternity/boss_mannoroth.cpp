@@ -122,12 +122,13 @@ enum entries
 {
     ENTRY_VARTOHEN_MAGIC_BLADE = 55837,
     ENTRY_PORTAL_TO_TWISTING_NETHER = 56087,
-    ENTRY_MANNOROTH_VEHICLE_RIDER = 55420 // definitely not correct one, but meh ...
+    ENTRY_MANNOROTH_VEHICLE_RIDER = 55420, // definitely not correct one, but meh ...
+    ENTRY_CHROMIE_MANNOROTH = 57913
 };
 
 enum spells
 {
-    SPELL_PORTAL_TO_TWISTING_NETHER = 102920, // freaking long cast tine -> just for anim :)
+    SPELL_PORTAL_TO_TWISTING_NETHER = 102920, // freaking long cast time -> just for anim :)
     SPELL_NETHER_TEAR               = 105041, // TARGET_UNIT_NEARBY_ENTRY -> dummy aura missile
 
     SPELL_FIRESTORM_CHANNEL         = 103888, // summon 55502 triggers ...
@@ -203,8 +204,7 @@ enum bladeSpells
 
 enum mannorothEncounterActions
 {
-    ACTION_VAROTHEN_DIED = 1111,
-    ACTION_TYRANDE_DEBILITATOR_DIED,
+    ACTION_TYRANDE_DEBILITATOR_DIED = 1111,
     ACTION_START_SUMMON_DEVASTATORS,
     ACTION_STOP_SUMMON_DEVASTATORS
 };
@@ -229,6 +229,8 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->SetFloatValue(UNIT_FIELD_COMBATREACH, 30.0f);
             me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 10.0f);
+
+            me->SummonCreature(ENTRY_ABYSSAL_DOOMBRINGER,3274.0f,-5703.0f,16.4f,6.08f);
         }
 
         SummonList summons;
@@ -247,11 +249,15 @@ public:
         uint32 phase3QuoteTimer;
         uint32 phase3QuoteCounter;
 
+        uint32 magistrikeCDTimer;
+
         bool infernoCasted;
         bool canonAchievAllowed;
         bool reached75pct;
 
         bool portalCollapsed;
+
+        bool canProcMagistirke;
 
         void Reset() override
         {
@@ -259,6 +265,10 @@ public:
 
             reached75pct = false;
             canonAchievAllowed = false;
+            canProcMagistirke = true;
+
+            magistrikeCDTimer = 5000;
+
             achievTimer = 1000;
 
             wipeCheckTimer = 5000;
@@ -304,7 +314,7 @@ public:
                     if (Creature * vehiclePassenger = me->SummonCreature(ENTRY_MANNOROTH_VEHICLE_RIDER, 0, 0, 0))
                     {
                         vehiclePassenger->EnterVehicle(veh,i);
-                        vehiclePassenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                        vehiclePassenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     }
                 }
             }
@@ -319,11 +329,9 @@ public:
             if (type == EFFECT_MOTION_TYPE && id == 0)
             {
                 if (Creature * pTwistingNetherPortal = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_PORTAL_TO_TWISTING_NETHER)))
-                {
-                    pTwistingNetherPortal->AI()->DoAction(ACTION_STOP_SUMMON_DEVASTATORS);
                     pTwistingNetherPortal->RemoveAura(SPELL_DEMON_PORTAL_PULL_VISUAL_PERIODIC);
-                }
 
+                me->SetVisible(false);
                 me->Kill(me);
             }
         }
@@ -417,10 +425,16 @@ public:
 
         void DoAction(const int32 action) override
         {
-            if (action == ACTION_VAROTHEN_DIED)
+            if (action == 0) // called from Unit::HandleProcTriggerSpell
             {
-                // Nothing special ?
+                canProcMagistirke = false;
+                magistrikeCDTimer = 5000;
             }
+        }
+
+        uint32 GetData(uint32 type) override
+        {
+            return canProcMagistirke == true ? 1 : 0;
         }
 
         void KilledUnit(Unit * victim) override
@@ -472,7 +486,7 @@ public:
                 damage = 0;
         }
 
-        void OnPortalCollapse() // Called when HP are at 1
+        void OnPortalCollapse() // Called when HP are at 25% and Mannoroth portal will be pulling all demons to portal
         {
             if (!pInstance)
                 return;
@@ -502,6 +516,8 @@ public:
 
             if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(ENTRY_ILLIDAN_PRELUDE)))
             {
+                // Summon chromie for quest
+                pIllidan->SummonCreature(ENTRY_CHROMIE_MANNOROTH, 3358.52f, -5796.51f, 18.82f, 2.21547f);
                 pIllidan->AI()->DoAction(ACTION_MANNOROTH_FIGHT_ENDED);
             }
 
@@ -520,6 +536,7 @@ public:
 
             if (Creature * pTwistingNetherPortal = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_PORTAL_TO_TWISTING_NETHER)))
             {
+                pTwistingNetherPortal->AI()->DoAction(ACTION_STOP_SUMMON_DEVASTATORS);
                 pTwistingNetherPortal->CastSpell(pTwistingNetherPortal, SPELL_DEMON_PORTAL_PULL_VISUAL_PERIODIC,true);
             }
         }
@@ -528,6 +545,13 @@ public:
         {
             if (!UpdateVictim() || pInstance == nullptr)
                 return;
+
+            if (magistrikeCDTimer <= diff)
+            {
+                canProcMagistirke = true;
+                magistrikeCDTimer = MAX_TIMER;
+            }
+            else magistrikeCDTimer -= diff;
 
             if (jumpTimer <= diff)
             {
@@ -549,7 +573,7 @@ public:
                                                                     cachePos.GetOrientation(),
                                                                     0,0,0,0,0);
 
-                   // Clear gift of sargeras
+                    // Clear gift of sargeras
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GIFT_OF_SARGERAS_INSTANT);
                 }
 
@@ -781,9 +805,6 @@ public:
             Position pos;
             me->GetNearPosition(pos, 8.0f, me->GetOrientation());
             me->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(),SPELL_VAROTHE_BLADE_SUMMON,true);
-
-            if (Creature* pMannoroth = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MANNOROTH)))
-                pMannoroth->AI()->DoAction(ACTION_VAROTHEN_DIED);
 
             if (pInstance)
             {

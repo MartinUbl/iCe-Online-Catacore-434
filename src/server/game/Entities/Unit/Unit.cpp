@@ -5838,10 +5838,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     // Proc only from heals
                     if((procFlag & PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS) || (procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS))
                     {
-                        if (Unit * caster = triggeredByAura->GetCaster())
+                        Unit * caster = triggeredByAura->GetCaster();
+
+                        if (pVictim && caster)
                         {
-                            int32 bp0 = (damage / 2) + 1; // Deal half damage from heal to healer
-                            caster->CastCustomSpell(caster, 108128, &bp0, 0, 0, true); // Fel Surge
+                            int32 bp0 = damage; // Deal 100% of damage from heal to healer
+                            caster->CastCustomSpell(pVictim, 108128, &bp0, 0, 0, true); // Fel Surge
                         }
                     }
                     break;
@@ -9157,6 +9159,25 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                             ambusher->SetDuration(stacks * 1000);
 
                         break;
+                    }
+                    case 104820: //Embedded Blade (Mannoroth)
+                    {
+                        // pVictim == player
+                        // this == mannoroth
+
+                        this->MonsterYell("PROC CHECK", 0, 0);
+
+                        if (this->GetTypeId() == TYPEID_UNIT && pVictim->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            this->MonsterYell("SHOULD PROC", 0, 0);
+
+                            if (this->ToCreature()->AI()->GetData(0) == 1) // Can proc
+                            {
+                                this->ToCreature()->AI()->DoAction(0); // set CD
+                                pVictim->CastSpell(this, 105523, true);
+                                this->MonsterYell("ARC PROC",0,0);
+                            }
+                        }
                     }
                     case 64568:             // Blood Reserve
                     {

@@ -4902,6 +4902,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 104817: // Varothen magic blade triggered
         case 102919: // Dragon Soul Cosmetic Beam
         case 104400: // Wall of shadow
+        case 105523: // Magistrike Arc
         {
             if (i == 104818)
                 spellInfo->EffectTriggerSpell[EFFECT_0] = 0;
@@ -4920,7 +4921,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectAmplitude[EFFECT_0] = 150; // prenerfed ?
             break;
         case 103889: // Fel Firestorm summon
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_70_YARDS;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_70_YARDS;
+            break;
+        case 104820:
+            spellInfo->EffectTriggerSpell[EFFECT_0] = 0;
             break;
 
 /********************-------- WELL OF ETERNITY END -----------********************/

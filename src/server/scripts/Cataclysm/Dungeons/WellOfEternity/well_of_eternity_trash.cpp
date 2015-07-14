@@ -1188,8 +1188,6 @@ namespace Illidan
                 orderTimer = 6000;
             else if (action == ACTION_ILLIDAN_REMOVE_VEHICLE)
                 HandleVehicle(false);
-            else if (action == ACTION_ILLIDAN_CREATE_VEHICLE)
-                HandleVehicle(true);
             else  if (action == ACTION_AFTER_PEROTHARN_DEATH)
             {
                 HandleVehicle(false);
@@ -1308,7 +1306,7 @@ namespace Illidan
         }
 
         /*
-            TODO: Remove this after TESTING !!!
+            TODO: Shortcut for testing, only for GMs
         */
         void ReceiveEmote(Player* player, uint32 uiTextEmote) override
         {
@@ -1549,7 +1547,8 @@ namespace Illidan
                     }
                     else
                     {
-                        HandleVehicle(true);
+                        if (pInstance->GetData(DATA_PEROTHARN) != DONE)
+                            HandleVehicle(true);
                     }
 
                 }
@@ -1581,15 +1580,12 @@ namespace Illidan
             }
             else
             {
-                Creature* vehPassenger = me->GetVehicleCreatureBase();
-                if (vehPassenger == nullptr)
-                    vehPassenger = me->FindNearestCreature(ILLIDAN_SHADOWCLOAK_VEHICLE_ENTRY, 10.0f, true);
-
-                if (vehPassenger)
-                {
-                    vehPassenger->Kill(vehPassenger);
-                    vehPassenger->ForcedDespawn();
-                }
+                if (Vehicle * vehicle = me->GetVehicleKit())
+                    if (Creature * passenger = (Creature *)vehicle->GetPassenger(0))
+                    {
+                        passenger->Kill(passenger);
+                        passenger->ForcedDespawn();
+                    }
                 me->RemoveAllAuras(); // Remove vehicle kit and all auras :)
             }
         }
