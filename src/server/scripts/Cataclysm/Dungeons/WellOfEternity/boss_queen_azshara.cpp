@@ -206,6 +206,7 @@ public:
 
         // Combat Timers
         uint32 servantTimer;
+        uint32 handCheckTimer;
         uint32 obedienceTimer;
         uint32 obedienceCheckTimer;
         // After combat timers
@@ -215,6 +216,7 @@ public:
 
         void Reset() override
         {
+            handCheckTimer = 1000;
             totalObedienceInterrupted = false;
             interruptCounter = 0;
             magusWave = 0;
@@ -342,8 +344,6 @@ public:
                 {
                     magusSummonTimer = 1;
                 }
-                else
-                    magusSummonTimer = 1;
 
                 if (magusRemaining == 0)
                 {
@@ -448,6 +448,20 @@ public:
                 PlayQuote(me, leavingQuotes[1]);
         }
 
+        void BoardHandOfTheQueenOnPlayer(Unit * player)
+        {
+            if (Vehicle * veh = player->GetVehicleKit())
+            {
+                if (Creature * pHand = me->SummonCreature(ENTRY_HAND_OF_THE_QUEEN, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0.0f))
+                {
+                    pHand->AI()->SetGUID(player->GetGUID());
+                    pHand->setFaction(me->getFaction());
+                    pHand->EnterVehicle(veh, 0);
+                    pHand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                }
+            }
+        }
+
         void UpdateAI(const uint32 diff) override
         {
             if (!pInstance)
@@ -469,6 +483,33 @@ public:
 
             if (!me->HasAura(SPELL_STAND_STATE_COSMETIC) && !me->IsNonMeleeSpellCasted(false))
                 me->CastSpell(me, SPELL_STAND_STATE_COSMETIC, true);
+
+            // Sometimes hand do not appear above player (it is not summoned cause some thread stuff ???
+            // vehicle kit is not always created at that time, check if we have vehicleKit and retry again
+            if (handCheckTimer <= diff)
+            {
+                Map::PlayerList const& listPlayers = pInstance->instance->GetPlayers();
+
+                if (!listPlayers.isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator itr = listPlayers.begin(); itr != listPlayers.end(); ++itr)
+                        if (Player *pPlayer = itr->getSource())
+                        {
+                            Vehicle * vehicleKit = nullptr;
+                            Unit * passenger = nullptr;
+
+                            vehicleKit = pPlayer->GetVehicleKit();
+                            if (vehicleKit)
+                                passenger = vehicleKit->GetPassenger(0);
+
+                            // retry again if not passenger boarded
+                            if (vehicleKit && passenger == nullptr)
+                                BoardHandOfTheQueenOnPlayer(pPlayer);
+                        }
+                }
+                handCheckTimer = 1000;
+            }
+            else handCheckTimer -= diff;
 
             if (magusSummonTimer <= diff)
             {
@@ -498,17 +539,7 @@ public:
                     if (player != nullptr && combatPlayers > 1)
                     {
                         me->AddAura(SPELL_SERVANT_OF_THE_QUEEN, player);
-
-                        if (Vehicle * veh = player->GetVehicleKit())
-                        {
-                            if (Creature * pHand = me->SummonCreature(ENTRY_HAND_OF_THE_QUEEN, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0.0f))
-                            {
-                                pHand->AI()->SetGUID(player->GetGUID());
-                                pHand->setFaction(me->getFaction());
-                                pHand->EnterVehicle(veh, 0);
-                                pHand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                            }
-                        }
+                        BoardHandOfTheQueenOnPlayer(player);
                     }
                     else
                     {

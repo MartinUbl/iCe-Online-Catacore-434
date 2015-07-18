@@ -518,6 +518,7 @@ public:
 
         uint32 entry;
         InstanceScript * pInstance;
+        uint64 wallGUID = 0;
 
         // guardian demon
         uint32 gripTimer;
@@ -595,7 +596,8 @@ public:
         {
             if (spell->Id == SPELL_SUMMON_FIREWALL_DUMMY)
             {
-                me->SummonGameObject(FIREWALL_ENTRY, 3193.9f, -4931.0f, 189.6f, 1.1f, 0, 0, 0, 0, 0);
+                if (GameObject * pGoWall = me->SummonGameObject(FIREWALL_ENTRY, 3193.9f, -4931.0f, 189.6f, 1.1f, 0, 0, 0, 0, 0))
+                    wallGUID = pGoWall->GetGUID();
 
                 if (GameObject * pGo = me->FindNearestGameObject(GO_INVISIBLE_FIREWALL_DOOR, 200.0f))
                     pGo->Delete();
@@ -643,7 +645,7 @@ public:
         {
             if (entry == LEGION_DEMON_ENTRY)
             {
-                if (GameObject * pGo = me->FindNearestGameObject(FIREWALL_ENTRY, 200.0f))
+                if (GameObject * pGo = ObjectAccessor::GetGameObject(*me, wallGUID))
                     pGo->Delete();
 
                 if (me->ToTempSummon() == nullptr && pInstance)

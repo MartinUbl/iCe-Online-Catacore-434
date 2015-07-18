@@ -9164,18 +9164,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                     {
                         // pVictim == player
                         // this == mannoroth
-
-                        this->MonsterYell("PROC CHECK", 0, 0);
-
-                        if (this->GetTypeId() == TYPEID_UNIT && pVictim->GetTypeId() == TYPEID_PLAYER)
+                        if (GetTypeId() == TYPEID_UNIT && pVictim->GetTypeId() == TYPEID_PLAYER)
                         {
-                            this->MonsterYell("SHOULD PROC", 0, 0);
-
-                            if (this->ToCreature()->AI()->GetData(0) == 1) // Can proc
+                            if (ToCreature()->AI()->GetData(0) == 1) // Can proc
                             {
-                                this->ToCreature()->AI()->DoAction(0); // set CD
+                                ToCreature()->AI()->DoAction(0); // set CD
                                 pVictim->CastSpell(this, 105523, true);
-                                this->MonsterYell("ARC PROC",0,0);
                             }
                         }
                         break;

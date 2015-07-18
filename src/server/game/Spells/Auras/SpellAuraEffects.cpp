@@ -3345,7 +3345,8 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                             }
                         }
 
-                        triggerSpellId = 103020; // continue stack dummy aura
+                        if (caster->GetInstanceScript()->GetData(0) != IN_PROGRESS)
+                            triggerSpellId = 103020; // continue stack dummy aura
                         break;
                     }
                     // Thaumaturgy Channel
