@@ -47,7 +47,8 @@ struct soulwell_item_inventory_record
 struct soulwell_spell_transfer_record
 {
     uint32 spell;
-    // ?
+    bool active;
+    bool disabled;
 };
 
 struct soulwell_achievement_progress_record
@@ -422,11 +423,56 @@ public:
 
         void LoadSpellsStage()
         {
-            //
+            Field *f;
+            QueryResult res;
+
+            // select all spells
+            res = CharacterDatabase.PQuery("SELECT spell, active, disabled FROM " SOULWELL_CHAR_DB ".character_spell WHERE guid = %u", soulwellGUID);
+            soulwell_spell_transfer_record* rec;
+            if (res)
+            {
+                uint64 guid;
+                do
+                {
+                    f = res->Fetch();
+                    if (!f)
+                        break;
+
+                    // there are only few fields we are fancy when looking for bags
+                    rec = new soulwell_spell_transfer_record;
+                    rec->spell = f[0].GetUInt32();
+                    rec->active = f[1].GetBool();
+                    rec->disabled = f[2].GetBool();
+
+                    spells.push_back(rec);
+
+                } while (res->NextRow());
+            }
+
+            // set spells iterator to point at the beginning of list
+            spellsItr = spells.begin();
+            transferPhase = SWT_SPELLS;
         }
         void ProceedSpellsStage()
         {
-            //
+            int procCount = 0;
+            soulwell_spell_transfer_record* sp;
+            while (spellsItr != spells.end() && (procCount++) < SOULWELL_TRANSFER_BATCH_SIZE)
+            {
+                sp = *spellsItr;
+
+                // is "learning" attribute correct?
+                lockedPlayer->AddSpell(sp->spell, sp->active, true, false, sp->disabled);
+
+                delete sp;
+                ++spellsItr;
+            }
+
+            if (spellsItr == spells.end())
+            {
+                LoadAchievementsStage();
+                spells.clear();
+            }
         }
 
         void LoadAchievementsStage()
