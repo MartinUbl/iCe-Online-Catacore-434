@@ -28,12 +28,20 @@ struct soulwell_item_transfer_record
     uint64 creatorGuid;
     uint32 count;
     uint32 duration;
-    uint32 charges;
+    uint32 charges[MAX_ITEM_PROTO_SPELLS];
     uint32 flags;
     uint32 randomPropertyId;
-    uint32 enchantments[MAX_ENCHANTMENT_SLOT];
+    uint32 enchantments[MAX_ENCHANTMENT_SLOT*3];
     uint32 durability;
     std::string text;
+
+    uint64 guid;
+};
+
+struct soulwell_item_inventory_record
+{
+    uint64 bag;
+    uint32 slot;
 };
 
 struct soulwell_spell_transfer_record
@@ -77,6 +85,13 @@ struct soulwell_reputation_record
     uint32 flags;
 };
 
+#define SOULWELL_TRANSFER_TICK_TIMER 1000
+#define SOULWELL_TRANSFER_BATCH_SIZE 100
+#define SOULWELL_TRANSFER_TICK_SAVE_COUNT 5
+
+#define SOULWELL_AUTH_DB "soulwell_auth"
+#define SOULWELL_CHAR_DB "soulwell_char"
+
 class soulwell_transfer_npc : public CreatureScript
 {
 public:
@@ -103,8 +118,12 @@ public:
     struct soulwell_transfer_npcAI : public ScriptedAI
     {
         uint64 lockedPlayerGUID;
+        Player* lockedPlayer; /* DO NOT use without retrieving pointer in UpdateAI (player may be offline, etc.) */
+        uint32 soulwellGUID;
         bool loadingPhase;
         uint32 transferPhase = 0;
+        uint32 transferTimer = 0;
+        uint32 transferTicks;
 
         std::string username;
         std::string password;
@@ -112,6 +131,7 @@ public:
 
         soulwell_basic_record basicInfo;
         std::list<soulwell_item_transfer_record*> items;
+        std::map<uint64, soulwell_item_inventory_record*> itemInventory;
         std::list<soulwell_spell_transfer_record*> spells;
         std::list<soulwell_achievement_progress_record*> achievementProgress;
         std::list<soulwell_achievement_record*> achievements;
@@ -132,6 +152,7 @@ public:
             lockedPlayerGUID = 0;
             loadingPhase = true;
             transferPhase = SWT_NONE;
+            transferTicks = 0;
 
             memset(&basicInfo, 0, sizeof(soulwell_basic_record));
 
@@ -147,7 +168,7 @@ public:
 
         bool LoadSoulwellCharacter()
         {
-            QueryResult res = CharacterDatabase.PQuery("SELECT id FROM soulwell_auth.account WHERE username = '%s' AND sha_pass_hash = SHA1(CONCAT(UPPER('%s'), ':', UPPER('%s')))", username.c_str(), username.c_str(), password.c_str());
+            QueryResult res = CharacterDatabase.PQuery("SELECT id FROM " SOULWELL_AUTH_DB ".account WHERE username = '%s' AND sha_pass_hash = SHA1(CONCAT(UPPER('%s'), ':', UPPER('%s')))", username.c_str(), username.c_str(), password.c_str());
             if (!res)
                 return false;
 
@@ -157,7 +178,7 @@ public:
 
             basicInfo.originalAccountId = f[0].GetUInt32();
 
-            res = CharacterDatabase.PQuery("SELECT level, race, class, money, totaltime, leveltime, speccount, knownTitles FROM soulwell_char.characters WHERE account = %u AND name = '%s'", basicInfo.originalAccountId, charactername.c_str());
+            res = CharacterDatabase.PQuery("SELECT level, race, class, money, totaltime, leveltime, speccount, knownTitles, guid FROM " SOULWELL_CHAR_DB ".characters WHERE account = %u AND name = '%s'", basicInfo.originalAccountId, charactername.c_str());
             if (!res)
                 return false;
 
@@ -174,6 +195,7 @@ public:
             basicInfo.speccount = f[6].GetUInt8();
 
             const char* knownTitles = f[7].GetCString();
+            soulwellGUID = f[8].GetUInt32();
 
             Tokens tokens(knownTitles, ' ', KNOWN_TITLES_SIZE * 2);
 
@@ -199,14 +221,303 @@ public:
             if (dest->getClass() != basicInfo.pclass)
                 return false;
 
-            // TODO: load everything needed to be transfered
+            // basic info is already gathered, so start basic phase
+            transferPhase = SWT_BASIC;
+            transferTimer = SOULWELL_TRANSFER_TICK_TIMER;
+            transferTicks = 0;
 
             return true;
         }
 
-        void UpdateAI(const uint32 diff)
+        void ProceedBasicStage()
+        {
+            // transfer all basic stuff
+            lockedPlayer->GiveLevel(basicInfo.level);
+            lockedPlayer->ModifyMoney(basicInfo.money);
+            lockedPlayer->m_Played_time[PLAYED_TIME_TOTAL] = basicInfo.totaltime;
+            lockedPlayer->m_Played_time[PLAYED_TIME_LEVEL] = basicInfo.leveltime;
+            lockedPlayer->SetSpecsCount(basicInfo.speccount);
+            for (uint32 i = 0; i < KNOWN_TITLES_SIZE * 2; ++i)
+                lockedPlayer->SetUInt32Value(PLAYER__FIELD_KNOWN_TITLES + i, basicInfo.knownTitles[i]);
+
+            lockedPlayer->SaveToDB();
+
+            // load next stage
+            LoadItemsStage();
+        }
+
+        void LoadItemsStage()
+        {
+            Field *f;
+            QueryResult res;
+
+            // at first, select inventory to decide, where to put which item
+            res = CharacterDatabase.PQuery("SELECT bag, slot, item FROM " SOULWELL_CHAR_DB ".character_inventory WHERE guid = %u", soulwellGUID);
+            soulwell_item_inventory_record* rec;
+            if (res)
+            {
+                uint64 guid;
+                do
+                {
+                    f = res->Fetch();
+                    if (!f)
+                        break;
+
+                    // there are only few fields we are fancy when looking for bags
+                    rec = new soulwell_item_inventory_record;
+                    guid = f[2].GetUInt64();
+
+                    rec->bag = f[0].GetUInt64();
+                    rec->slot = f[1].GetUInt32();
+
+                    itemInventory[guid] = rec;
+
+                } while (res->NextRow());
+            }
+
+            // select bags
+            res = CharacterDatabase.PQuery("SELECT itemEntry, count, creatorGuid, flags, guid FROM " SOULWELL_CHAR_DB ".item_instance WHERE guid IN (SELECT bag FROM " SOULWELL_CHAR_DB ".character_inventory WHERE guid = %u AND bag != 0)", soulwellGUID);
+            soulwell_item_transfer_record* itm;
+
+            if (res)
+            {
+                do
+                {
+                    f = res->Fetch();
+                    if (!f)
+                        break;
+
+                    // there are only few fields we are fancy when looking for bags
+                    itm = new soulwell_item_transfer_record;
+                    itm->id = f[0].GetUInt32();
+                    itm->count = f[1].GetUInt32();
+                    itm->creatorGuid = f[2].GetUInt32();
+                    itm->flags = f[3].GetUInt32();
+                    itm->guid = f[4].GetUInt64();
+
+                    items.push_back(itm);
+
+                } while (res->NextRow());
+            }
+
+            // select other items
+            res = CharacterDatabase.PQuery("SELECT itemEntry, creatorGuid, count, duration, charges, flags, randomPropertyId, enchantments, durability, text, guid FROM " SOULWELL_CHAR_DB ".item_instance WHERE guid IN (SELECT item FROM " SOULWELL_CHAR_DB ".character_inventory WHERE guid = %u) AND guid NOT IN (SELECT bag FROM " SOULWELL_CHAR_DB ".character_inventory WHERE guid = %u)", soulwellGUID);
+
+            if (res)
+            {
+                do
+                {
+                    f = res->Fetch();
+                    if (!f)
+                        break;
+
+                    itm = new soulwell_item_transfer_record;
+                    itm->id = f[0].GetUInt32();
+                    itm->creatorGuid = f[1].GetUInt32();
+                    itm->count = f[2].GetUInt32();
+                    itm->duration = f[3].GetUInt32();
+
+                    // parse charges string
+                    std::string chargesStr = f[4].GetCString();
+                    Tokens tk(chargesStr, ' ', MAX_ITEM_PROTO_SPELLS);
+                    for (int i = 0; i < MAX_ITEM_PROTO_SPELLS && i < tk.size(); i++)
+                        itm->charges[i] = atol(tk[i]);
+
+                    itm->flags = f[5].GetUInt32();
+                    itm->randomPropertyId = f[6].GetUInt32();
+
+                    // parse enchantments string
+                    std::string enchStr = f[7].GetCString();
+                    Tokens tke(enchStr, ' ');
+                    for (int i = 0; i < MAX_ENCHANTMENT_SLOT*3 && i < tke.size(); i++)
+                        itm->enchantments[i] = atol(tke[i]);
+
+                    itm->durability = f[8].GetUInt32();
+
+                    itm->text = f[9].GetCString();
+
+                    itm->guid = f[10].GetUInt64();
+
+                    items.push_back(itm);
+
+                } while (res->NextRow());
+            }
+
+            // set items iterator to point at the beginning of list
+            itemsItr = items.begin();
+            transferPhase = SWT_ITEMS;
+        }
+        void ProceedItemsStage()
+        {
+            int procCount = 0;
+            soulwell_item_transfer_record* it;
+            ItemPosCountVec dest;
+            uint32 nosp;
+            while (itemsItr != items.end() && (procCount++) < SOULWELL_TRANSFER_BATCH_SIZE)
+            {
+                // select item from list
+                it = *itemsItr;
+
+                uint8 msg = lockedPlayer->CanStoreNewItem(itemInventory[it->guid]->bag, itemInventory[it->guid]->slot, dest, it->id, it->count, &nosp);
+                if (msg == EQUIP_ERR_OK)
+                {
+                    Item* nitem = lockedPlayer->StoreNewItem(dest, it->id, false, it->randomPropertyId);
+
+                    ItemPrototype const* proto = nitem->GetProto();
+
+                    if (it->creatorGuid)
+                        nitem->SetUInt64Value(ITEM_FIELD_CREATOR, MAKE_NEW_GUID(it->creatorGuid, 0, HIGHGUID_PLAYER));
+
+                    if (it->duration)
+                        nitem->SetUInt32Value(ITEM_FIELD_DURATION, it->duration);
+
+                    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+                        nitem->SetSpellCharges(i, it->charges[i]);
+
+                    nitem->SetUInt32Value(ITEM_FIELD_FLAGS, it->flags);
+                    if (nitem->IsSoulBound() && proto->Bonding == NO_BIND)
+                        nitem->ApplyModFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_SOULBOUND, false);
+
+                    for (int slot = 0; slot < MAX_ENCHANTMENT_SLOT; slot++)
+                    {
+                        if (it->enchantments[slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET] == 0)
+                            continue;
+
+                        nitem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET, it->enchantments[slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET]);
+                        nitem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET, it->enchantments[slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET]);
+                        nitem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET, it->enchantments[slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET]);
+                    }
+
+                    if (nitem->GetItemRandomPropertyId() < 0)
+                        nitem->UpdateItemSuffixFactor();
+
+                    if (it->durability)
+                        nitem->SetUInt32Value(ITEM_FIELD_DURABILITY, it->durability);
+
+                    if (it->text.length() > 0)
+                        nitem->SetText(it->text);
+                }
+                else
+                {
+                    // TODO: log message!
+                    continue;
+                }
+
+                // delete item transfer record (not list record! that would come later)
+                delete it;
+                // and move to next item in list
+                ++itemsItr;
+            }
+
+            if (itemsItr == items.end())
+            {
+                LoadSpellsStage();
+                items.clear();
+
+                for (auto iter = itemInventory.begin(); iter != itemInventory.end(); ++iter)
+                    delete iter->second;
+                itemInventory.clear();
+            }
+        }
+
+        void LoadSpellsStage()
         {
             //
+        }
+        void ProceedSpellsStage()
+        {
+            //
+        }
+
+        void LoadAchievementsStage()
+        {
+            //
+        }
+        void ProceedAchievementsStage()
+        {
+        }
+
+        void LoadCurrencyStage()
+        {
+            //
+        }
+        void ProceedCurrencyStage()
+        {
+            //
+        }
+
+        void LoadSkillsStage()
+        {
+            //
+        }
+        void ProceedSkillsStage()
+        {
+            //
+        }
+
+        void LoadReputationStage()
+        {
+            //
+        }
+        void ProceedReputationStage()
+        {
+            //
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            // no phase, or we've ended - do nothing
+            if (transferPhase == SWT_NONE || transferPhase == SWT_END)
+                return;
+
+            // transfer is done in batches
+            if (transferTimer > diff)
+            {
+                transferTimer -= diff;
+                return;
+            }
+            transferTimer = SOULWELL_TRANSFER_TICK_TIMER;
+            transferTicks++;
+
+            Player* dest = Player::GetPlayer(*me, lockedPlayerGUID);
+            if (!dest)
+            {
+                transferPhase = SWT_NONE;
+                return;
+            }
+            lockedPlayer = dest;
+
+            switch (transferPhase)
+            {
+                case SWT_BASIC:
+                    ProceedBasicStage();
+                    break;
+                case SWT_ITEMS:
+                    ProceedItemsStage();
+                    break;
+                case SWT_SPELLS:
+                    ProceedSpellsStage();
+                    break;
+                case SWT_ACHIEVEMENTS:
+                    ProceedAchievementsStage();
+                    break;
+                case SWT_CURRENCY:
+                    ProceedCurrencyStage();
+                    break;
+                case SWT_SKILLS:
+                    ProceedSkillsStage();
+                    break;
+                case SWT_REPUTATION:
+                    ProceedReputationStage();
+                    break;
+            }
+
+            // every N ticks save player to DB
+            if ((transferTicks % SOULWELL_TRANSFER_TICK_SAVE_COUNT) == 0)
+            {
+                // save to DB
+                lockedPlayer->SaveToDB();
+            }
         }
     };
 
