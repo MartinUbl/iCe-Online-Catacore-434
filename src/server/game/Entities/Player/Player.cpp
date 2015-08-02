@@ -12008,6 +12008,25 @@ void Player::SetCurrencyWeekCount(uint32 id, CurrencySource src, uint32 count)
     itr->second.weekCap[src] = 0;
 }
 
+void Player::SetCurrencySeasonCount(uint32 id, uint32 count)
+{
+    PlayerCurrenciesMap::iterator itr = m_currencies.find(id);
+    if (itr != m_currencies.end())
+    {
+        itr->second.seasonCount = count;
+        return;
+    }
+
+    // If the player don't have this type of currency yet, create a new record
+    PlayerCurrency cur;
+    cur.state = PLAYERCURRENCY_NEW;
+    cur.totalCount = 0;
+    m_currencies[id] = cur;
+    itr = m_currencies.find(id);
+
+    itr->second.seasonCount = count;
+}
+
 void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ignoreweekcap, bool ignorebonuses)
 {
     if (!count)

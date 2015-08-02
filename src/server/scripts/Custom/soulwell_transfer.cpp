@@ -226,6 +226,7 @@ public:
             transferPhase = SWT_BASIC;
             transferTimer = SOULWELL_TRANSFER_TICK_TIMER;
             transferTicks = 0;
+            ChatHandler(lockedPlayer).SendSysMessage("Starting basic stage...");
 
             return true;
         }
@@ -251,6 +252,8 @@ public:
         {
             Field *f;
             QueryResult res;
+
+            ChatHandler(lockedPlayer).SendSysMessage("Starting items stage...");
 
             // at first, select inventory to decide, where to put which item
             res = CharacterDatabase.PQuery("SELECT bag, slot, item FROM " SOULWELL_CHAR_DB ".character_inventory WHERE guid = %u", soulwellGUID);
@@ -426,6 +429,8 @@ public:
             Field *f;
             QueryResult res;
 
+            ChatHandler(lockedPlayer).SendSysMessage("Starting spells stage...");
+
             // select all spells
             res = CharacterDatabase.PQuery("SELECT spell, active, disabled FROM " SOULWELL_CHAR_DB ".character_spell WHERE guid = %u", soulwellGUID);
             soulwell_spell_transfer_record* rec;
@@ -477,7 +482,10 @@ public:
 
         void LoadAchievementsStage()
         {
-            //
+            // TODO: whole achievements stage !!!
+            ChatHandler(lockedPlayer).SendSysMessage("Starting achievements stage...");
+
+            LoadCurrencyStage();
         }
         void ProceedAchievementsStage()
         {
@@ -485,29 +493,201 @@ public:
 
         void LoadCurrencyStage()
         {
-            //
+            Field *f;
+            QueryResult res;
+
+            ChatHandler(lockedPlayer).SendSysMessage("Starting currency stage...");
+
+            // select all spells
+            res = CharacterDatabase.PQuery("SELECT currency, total_count, week_count, season_count FROM " SOULWELL_CHAR_DB ".character_currency WHERE guid = %u", soulwellGUID);
+            soulwell_currency_record* rec;
+            if (res)
+            {
+                uint64 guid;
+                do
+                {
+                    f = res->Fetch();
+                    if (!f)
+                        break;
+
+                    // there are only few fields we are fancy when looking for bags
+                    rec = new soulwell_currency_record;
+                    rec->currency = f[0].GetUInt32();
+                    rec->count = f[1].GetUInt32();
+                    rec->weekcount = f[2].GetUInt32();
+                    rec->seasoncount = f[3].GetUInt32();
+
+                    currency.push_back(rec);
+
+                } while (res->NextRow());
+            }
+
+            // set spells iterator to point at the beginning of list
+            currencyItr = currency.begin();
+            transferPhase = SWT_CURRENCY;
         }
         void ProceedCurrencyStage()
         {
-            //
+            int procCount = 0;
+            soulwell_currency_record* cu;
+            while (currencyItr != currency.end() && (procCount++) < SOULWELL_TRANSFER_BATCH_SIZE)
+            {
+                cu = *currencyItr;
+
+                lockedPlayer->SetCurrency(cu->currency, cu->count);
+                lockedPlayer->SetCurrencyWeekCount(cu->currency, CURRENCY_SOURCE_ALL, cu->weekcount);
+                lockedPlayer->SetCurrencySeasonCount(cu->currency, cu->seasoncount);
+
+                delete cu;
+                ++currencyItr;
+            }
+
+            if (currencyItr == currency.end())
+            {
+                LoadSkillsStage();
+                currency.clear();
+            }
         }
 
         void LoadSkillsStage()
         {
-            //
+            Field *f;
+            QueryResult res;
+
+            ChatHandler(lockedPlayer).SendSysMessage("Starting skills stage...");
+
+            // select all spells
+            res = CharacterDatabase.PQuery("SELECT skill, value, max FROM " SOULWELL_CHAR_DB ".character_skills WHERE guid = %u", soulwellGUID);
+            soulwell_skill_record* rec;
+            if (res)
+            {
+                uint64 guid;
+                do
+                {
+                    f = res->Fetch();
+                    if (!f)
+                        break;
+
+                    // there are only few fields we are fancy when looking for bags
+                    rec = new soulwell_skill_record;
+                    rec->skillId = f[0].GetUInt32();
+                    rec->value = f[1].GetUInt32();
+                    rec->max = f[2].GetUInt32();
+
+                    skills.push_back(rec);
+
+                } while (res->NextRow());
+            }
+
+            // set spells iterator to point at the beginning of list
+            skillsItr = skills.begin();
+            transferPhase = SWT_SKILLS;
         }
         void ProceedSkillsStage()
         {
-            //
+            int procCount = 0;
+            soulwell_skill_record* sr;
+            uint32 step;
+            while (skillsItr != skills.end() && (procCount++) < SOULWELL_TRANSFER_BATCH_SIZE)
+            {
+                sr = *skillsItr;
+
+                SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(sr->skillId);
+                step = 0;
+                if (pSkill->categoryId == SKILL_CATEGORY_SECONDARY || pSkill->categoryId == SKILL_CATEGORY_PROFESSION)
+                    step = sr->max / 75;
+
+                lockedPlayer->SetSkill(sr->skillId, step, sr->value, sr->max);
+
+                delete sr;
+                ++skillsItr;
+            }
+
+            if (skillsItr == skills.end())
+            {
+                LoadReputationStage();
+                skills.clear();
+            }
         }
 
         void LoadReputationStage()
         {
-            //
+            Field *f;
+            QueryResult res;
+
+            ChatHandler(lockedPlayer).SendSysMessage("Starting reputation stage...");
+
+            // select all spells
+            res = CharacterDatabase.PQuery("SELECT faction, standing, flags FROM " SOULWELL_CHAR_DB ".character_reputation WHERE guid = %u", soulwellGUID);
+            soulwell_reputation_record* rec;
+            if (res)
+            {
+                uint64 guid;
+                do
+                {
+                    f = res->Fetch();
+                    if (!f)
+                        break;
+
+                    // there are only few fields we are fancy when looking for bags
+                    rec = new soulwell_reputation_record;
+                    rec->factionId = f[0].GetUInt32();
+                    rec->standing = f[1].GetUInt32();
+                    rec->flags = f[2].GetUInt32();
+
+                    reputation.push_back(rec);
+
+                } while (res->NextRow());
+            }
+
+            // set spells iterator to point at the beginning of list
+            reputationItr = reputation.begin();
+            transferPhase = SWT_REPUTATION;
         }
         void ProceedReputationStage()
         {
-            //
+            int procCount = 0;
+            soulwell_reputation_record* sr;
+            uint32 step;
+            while (reputationItr != reputation.end() && (procCount++) < SOULWELL_TRANSFER_BATCH_SIZE)
+            {
+                sr = *reputationItr;
+
+                FactionEntry const* fe = sFactionStore.LookupEntry(sr->factionId);
+
+                lockedPlayer->SetReputation(sr->factionId, sr->standing);
+
+                if (sr->flags & FACTION_FLAG_VISIBLE)
+                    lockedPlayer->GetReputationMgr().SetVisible(fe);
+
+                if (sr->flags & FACTION_FLAG_INACTIVE)
+                    lockedPlayer->GetReputationMgr().SetInactive(fe->reputationListID, true);              // have internal checks for visibility requirement
+
+                if (sr->flags & FACTION_FLAG_AT_WAR)
+                    lockedPlayer->GetReputationMgr().SetAtWar(fe->reputationListID, true);
+
+                delete sr;
+                ++reputationItr;
+            }
+
+            if (reputationItr == reputation.end())
+            {
+                FinishTransfer();
+                reputation.clear();
+            }
+        }
+
+        void FinishTransfer()
+        {
+            ChatHandler(lockedPlayer).SendSysMessage("Finishing transfer...");
+
+            lockedPlayer->SaveToDB();
+
+            lockedPlayer->SetRooted(true);
+
+            ChatHandler(lockedPlayer).SendSysMessage("You now have to log out and then back in. Please, check if everything's fine, and report all bugs to authorities.");
+
+            transferPhase = SWT_END;
         }
 
         void UpdateAI(const uint32 diff)
