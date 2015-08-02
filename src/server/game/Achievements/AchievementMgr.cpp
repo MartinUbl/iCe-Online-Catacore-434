@@ -575,6 +575,31 @@ void AchievementMgr::SaveToDB(SQLTransaction& trans)
     }
 }
 
+void AchievementMgr::SetCompletedAchievement(uint32 achievementId, time_t date)
+{
+    if (!sAchievementStore.LookupEntry(achievementId))
+        return;
+
+    CompletedAchievementData& ca = m_completedAchievements[achievementId];
+    ca.date = date;
+    ca.changed = true;
+
+    if (AchievementEntry const* pAchievement = sAchievementStore.LookupEntry(achievementId))
+        achievementPoints += pAchievement->points;
+}
+
+void AchievementMgr::SetCriteriaCounter(uint32 criteriaId, uint64 counter, time_t date)
+{
+    AchievementCriteriaEntry const* criteria = sAchievementCriteriaStore.LookupEntry(criteriaId);
+    if (!criteria)
+        return;
+
+    CriteriaProgress& progress = m_criteriaProgress[criteriaId];
+    progress.counter = counter;
+    progress.date = date;
+    progress.changed = true;
+}
+
 void AchievementMgr::LoadFromDB(PreparedQueryResult achievementResult, PreparedQueryResult criteriaResult)
 {
     if (achievementResult)

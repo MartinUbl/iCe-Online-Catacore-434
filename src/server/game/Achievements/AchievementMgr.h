@@ -280,6 +280,9 @@ class AchievementMgr
         CriteriaProgress* GetCriteriaProgress(AchievementCriteriaEntry const* entry);
         CompletedAchievementMap const& GetCompletedAchievementMap() { return m_completedAchievements; };
         bool IsCompletedCriteria(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement);
+
+        void SetCompletedAchievement(uint32 achievementId, time_t date);
+        void SetCriteriaCounter(uint32 criteriaId, uint64 counter, time_t date);
     private:
         void SendAchievementEarned(AchievementEntry const* achievement);
         void SendCriteriaUpdate(AchievementCriteriaEntry const* entry, CriteriaProgress const* progress, uint32 timeElapsed, bool timedCompleted);

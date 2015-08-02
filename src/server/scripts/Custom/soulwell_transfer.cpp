@@ -55,13 +55,13 @@ struct soulwell_achievement_progress_record
 {
     uint32 criteriaId;
     uint32 counter;
-    uint32 date;
+    time_t date;
 };
 
 struct soulwell_achievement_record
 {
     uint32 achievementId;
-    uint32 date;
+    time_t date;
 };
 
 struct soulwell_currency_record
@@ -482,13 +482,89 @@ public:
 
         void LoadAchievementsStage()
         {
-            // TODO: whole achievements stage !!!
+            Field *f;
+            QueryResult res;
+
             ChatHandler(lockedPlayer).SendSysMessage("Starting achievements stage...");
 
-            LoadCurrencyStage();
+            // select all achievements
+            res = CharacterDatabase.PQuery("SELECT achievement, date FROM " SOULWELL_CHAR_DB ".character_achievement WHERE guid = %u", soulwellGUID);
+            soulwell_achievement_record* rec;
+            if (res)
+            {
+                uint64 guid;
+                do
+                {
+                    f = res->Fetch();
+                    if (!f)
+                        break;
+
+                    rec = new soulwell_achievement_record;
+                    rec->achievementId = f[0].GetUInt32();
+                    rec->date = f[1].GetUInt64();
+
+                    achievements.push_back(rec);
+
+                } while (res->NextRow());
+            }
+
+            // select all achievement progress
+            res = CharacterDatabase.PQuery("SELECT criteria, counter, date FROM " SOULWELL_CHAR_DB ".character_achievement_progress WHERE guid = %u", soulwellGUID);
+            soulwell_achievement_progress_record* prec;
+            if (res)
+            {
+                uint64 guid;
+                do
+                {
+                    f = res->Fetch();
+                    if (!f)
+                        break;
+
+                    prec = new soulwell_achievement_progress_record;
+                    prec->criteriaId = f[0].GetUInt32();
+                    prec->counter = f[1].GetUInt32();
+                    prec->date = f[2].GetUInt64();
+
+                    achievementProgress.push_back(prec);
+
+                } while (res->NextRow());
+            }
+
+            achievementsItr = achievements.begin();
+            achievementProgressItr = achievementProgress.begin();
+            transferPhase = SWT_ACHIEVEMENTS;
         }
         void ProceedAchievementsStage()
         {
+            int procCount = 0;
+            soulwell_achievement_record* ar;
+            while (achievementsItr != achievements.end() && (procCount++) < SOULWELL_TRANSFER_BATCH_SIZE)
+            {
+                ar = *achievementsItr;
+
+                lockedPlayer->GetAchievementMgr().SetCompletedAchievement(ar->achievementId, ar->date);
+
+                delete ar;
+                ++achievementsItr;
+            }
+
+            soulwell_achievement_progress_record* apr;
+            while (achievementProgressItr != achievementProgress.end() && (procCount++) < SOULWELL_TRANSFER_BATCH_SIZE)
+            {
+                apr = *achievementProgressItr;
+
+                lockedPlayer->GetAchievementMgr().SetCriteriaCounter(apr->criteriaId, apr->counter, apr->date);
+
+                delete ar;
+                ++achievementProgressItr;
+            }
+
+            if (achievementsItr == achievements.end() && achievementProgressItr == achievementProgress.end())
+            {
+                LoadCurrencyStage();
+                achievements.clear();
+                achievementProgress.clear();
+            }
         }
 
         void LoadCurrencyStage()
@@ -498,7 +574,7 @@ public:
 
             ChatHandler(lockedPlayer).SendSysMessage("Starting currency stage...");
 
-            // select all spells
+            // select all currencies
             res = CharacterDatabase.PQuery("SELECT currency, total_count, week_count, season_count FROM " SOULWELL_CHAR_DB ".character_currency WHERE guid = %u", soulwellGUID);
             soulwell_currency_record* rec;
             if (res)
@@ -510,7 +586,6 @@ public:
                     if (!f)
                         break;
 
-                    // there are only few fields we are fancy when looking for bags
                     rec = new soulwell_currency_record;
                     rec->currency = f[0].GetUInt32();
                     rec->count = f[1].GetUInt32();
@@ -522,7 +597,6 @@ public:
                 } while (res->NextRow());
             }
 
-            // set spells iterator to point at the beginning of list
             currencyItr = currency.begin();
             transferPhase = SWT_CURRENCY;
         }
@@ -556,7 +630,6 @@ public:
 
             ChatHandler(lockedPlayer).SendSysMessage("Starting skills stage...");
 
-            // select all spells
             res = CharacterDatabase.PQuery("SELECT skill, value, max FROM " SOULWELL_CHAR_DB ".character_skills WHERE guid = %u", soulwellGUID);
             soulwell_skill_record* rec;
             if (res)
@@ -568,7 +641,6 @@ public:
                     if (!f)
                         break;
 
-                    // there are only few fields we are fancy when looking for bags
                     rec = new soulwell_skill_record;
                     rec->skillId = f[0].GetUInt32();
                     rec->value = f[1].GetUInt32();
@@ -579,7 +651,6 @@ public:
                 } while (res->NextRow());
             }
 
-            // set spells iterator to point at the beginning of list
             skillsItr = skills.begin();
             transferPhase = SWT_SKILLS;
         }
@@ -617,7 +688,6 @@ public:
 
             ChatHandler(lockedPlayer).SendSysMessage("Starting reputation stage...");
 
-            // select all spells
             res = CharacterDatabase.PQuery("SELECT faction, standing, flags FROM " SOULWELL_CHAR_DB ".character_reputation WHERE guid = %u", soulwellGUID);
             soulwell_reputation_record* rec;
             if (res)
@@ -629,7 +699,6 @@ public:
                     if (!f)
                         break;
 
-                    // there are only few fields we are fancy when looking for bags
                     rec = new soulwell_reputation_record;
                     rec->factionId = f[0].GetUInt32();
                     rec->standing = f[1].GetUInt32();
@@ -640,7 +709,6 @@ public:
                 } while (res->NextRow());
             }
 
-            // set spells iterator to point at the beginning of list
             reputationItr = reputation.begin();
             transferPhase = SWT_REPUTATION;
         }
@@ -661,7 +729,7 @@ public:
                     lockedPlayer->GetReputationMgr().SetVisible(fe);
 
                 if (sr->flags & FACTION_FLAG_INACTIVE)
-                    lockedPlayer->GetReputationMgr().SetInactive(fe->reputationListID, true);              // have internal checks for visibility requirement
+                    lockedPlayer->GetReputationMgr().SetInactive(fe->reputationListID, true);
 
                 if (sr->flags & FACTION_FLAG_AT_WAR)
                     lockedPlayer->GetReputationMgr().SetAtWar(fe->reputationListID, true);
