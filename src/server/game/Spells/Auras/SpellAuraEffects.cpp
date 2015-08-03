@@ -822,6 +822,8 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             // Innervate
             case 29166:
                 {
+                if (!caster)
+                    break;
                 if (caster == owner)
                 {
                     if (caster->HasAura(33597))  // Dreamstate rank1
