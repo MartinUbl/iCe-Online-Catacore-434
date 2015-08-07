@@ -18,7 +18,7 @@
 #include "ScriptPCH.h"
 #include "baradin_hold.h"
 
-#define ENCOUNTERS 2
+#define ENCOUNTERS 3
 
 class instance_baradin_hold: public InstanceMapScript
 {
@@ -39,15 +39,16 @@ public:
 
         uint64 uiArgaloth;
         uint64 uiOccuthar;
+        uint64 uiAlizabal;
  
         void Initialize()
         {
             uiArgaloth = 0;
             uiOccuthar = 0;
+            uiAlizabal = 0;
             for(uint8 i=0; i < ENCOUNTERS; ++i)
                 uiEncounter[i] = NOT_STARTED;
             GetCorrUiEncounter();
-            
         }
 
 
@@ -61,6 +62,9 @@ public:
                 case BOSS_OCCUTHAR:
                     uiOccuthar = pCreature->GetGUID();
                     break;
+                case BOSS_ALIZABAL:
+                    uiAlizabal = pCreature->GetGUID();
+                    break;
             }
         }
 
@@ -72,6 +76,8 @@ public:
                     return uiArgaloth;
                 case DATA_OCCUTHAR:
                     return uiOccuthar;
+                case DATA_ALIZABAL:
+                    return uiAlizabal;
             }
             return 0;
         }
@@ -85,6 +91,9 @@ public:
                     break;
                 case DATA_OCCUTHAR:
                     uiEncounter[1] = data;
+                    break;
+                case DATA_ALIZABAL:
+                    uiEncounter[2] = data;
                     break;
             }
 
@@ -101,7 +110,7 @@ public:
 
             std::string str_data;
             std::ostringstream saveStream;
-            saveStream << "B H" << uiEncounter[0] << " " << uiEncounter[1];
+            saveStream << "B H" << " " << uiEncounter[0] << " " << uiEncounter[1] << " " << uiEncounter[2];
             str_data = saveStream.str();
 
             OUT_SAVE_INST_DATA_COMPLETE;
@@ -119,15 +128,16 @@ public:
             OUT_LOAD_INST_DATA(in);
 
             char dataHead1, dataHead2;
-            uint16 data0, data1;
+            uint16 data0, data1, data2;
 
             std::istringstream loadStream(in);
-            loadStream >> dataHead1 >> dataHead2 >> data0 >> data1;
+            loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2;
 
             if (dataHead1 == 'B' && dataHead2 == 'H')
             {
                 uiEncounter[0] = data0;
                 uiEncounter[1] = data1;
+                uiEncounter[2] = data2;
                        
                 for(uint8 i=0; i < ENCOUNTERS; ++i)
                     if (uiEncounter[i] == IN_PROGRESS)
@@ -142,6 +152,7 @@ public:
         {
             currEnc[0]=uiEncounter[1];//Argaloth
             currEnc[1]=uiEncounter[0];//Occuthar
+            currEnc[2]=uiEncounter[2];//Alizabal
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,ENCOUNTERS);
             return NULL;
         }

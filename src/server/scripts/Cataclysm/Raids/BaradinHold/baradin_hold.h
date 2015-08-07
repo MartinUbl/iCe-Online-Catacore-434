@@ -22,18 +22,21 @@ enum CreatureIds
 {
     BOSS_ARGALOTH  = 47120,
     BOSS_OCCUTHAR  = 52363,
+    BOSS_ALIZABAL  = 55869,
 };
 
 enum Data
 {
     DATA_ARGALOTH_EVENT,
     DATA_OCCUTHAR_EVENT,
+    DATA_ALIZABAL_EVENT,
 };
 
 enum Data64
 {
     DATA_ARGALOTH,
     DATA_OCCUTHAR,
+    DATA_ALIZABAL,
 };
 
 #endif

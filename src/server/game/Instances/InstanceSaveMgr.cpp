@@ -682,7 +682,7 @@ void InstanceSaveManager::loadRaidEncounter()
     /*Set boss numbers for all needed maps*/
     setBossNumber(671, 5); //BoT
     setBossNumber(669, 6); //BwD
-    setBossNumber(757, 2); //BH
+    setBossNumber(757, 3); //BH
     setBossNumber(754, 2); //ToFW
     setBossNumber(720, 7); //Firelands
 
@@ -783,8 +783,8 @@ void InstanceSaveManager::loadRaidEncounter()
             }
             case 757://Baradin Hold
             {
-                bossNum=2;
-                uint32 dataEnc[2];
+                bossNum=3;
+                uint32 dataEnc[3];
                 std::istringstream loadStream(data);
                 loadStream >> DummyReadCh >>DummyReadCh;
                 for (uint8 i = 0; i < bossNum; i++)
@@ -796,6 +796,9 @@ void InstanceSaveManager::loadRaidEncounter()
                         break;
                     case 1:
                         loadStream >> dataEnc[0];//Occuthar
+                        break;
+                    case 2:
+                        loadStream >> dataEnc[2];//Alizabal
                         break;
                     }
                 }

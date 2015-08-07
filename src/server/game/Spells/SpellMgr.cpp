@@ -4560,6 +4560,17 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
+        case 105784: // Alizabal: Blade Dance
+            spellInfo->Effect[0] = 0;
+            break;
+        case 105828:
+            spellInfo->DurationIndex = 387; // 16s
+            break;
+        case 105069:
+        case 108094:
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+            count++;
+            break;
         case 97358: // Gaping Wound + difficulty entries
         case 97357:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
