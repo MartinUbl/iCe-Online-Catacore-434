@@ -1876,7 +1876,7 @@ void LFGMgr::TeleportPlayer(Player* plr, bool out, bool fromOpcode /*= false*/)
                     z = itr->second.GetPositionZ();
                     orientation = itr->second.GetOrientation();
                 }
-                else if (AreaTrigger const* at = sObjectMgr->GetMapEntranceTrigger(dungeon->map))
+                else if (AreaTriggerStruct const* at = sObjectMgr->GetMapEntranceTrigger(dungeon->map))
                 {
                     mapid = at->target_mapId;
                     x = at->target_X;

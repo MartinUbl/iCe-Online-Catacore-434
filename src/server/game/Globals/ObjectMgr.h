@@ -403,7 +403,7 @@ struct SpellClickInfo
 typedef std::multimap<uint32, SpellClickInfo> SpellClickInfoMap;
 typedef std::pair<SpellClickInfoMap::const_iterator,SpellClickInfoMap::const_iterator> SpellClickInfoMapBounds;
 
-struct AreaTrigger
+struct AreaTriggerStruct
 {
     uint32 target_mapId;
     float  target_X;
@@ -684,7 +684,7 @@ class ObjectMgr
 
         typedef std::unordered_map<uint32, Quest*> QuestMap;
 
-        typedef std::unordered_map<uint32, AreaTrigger> AreaTriggerMap;
+        typedef std::unordered_map<uint32, AreaTriggerStruct> AreaTriggerMap;
 
         typedef std::unordered_map<uint32, uint32> AreaTriggerScriptMap;
 
@@ -860,7 +860,7 @@ class ObjectMgr
         void LoadGraveyardZones();
         GraveYardData const* FindGraveYardData(uint32 id, uint32 zone);
 
-        AreaTrigger const* GetAreaTrigger(uint32 trigger) const
+        AreaTriggerStruct const* GetAreaTrigger(uint32 trigger) const
         {
             AreaTriggerMap::const_iterator itr = mAreaTriggers.find(trigger);
             if (itr != mAreaTriggers.end())
@@ -876,8 +876,8 @@ class ObjectMgr
             return NULL;
         }
 
-        AreaTrigger const* GetGoBackTrigger(uint32 Map) const;
-        AreaTrigger const* GetMapEntranceTrigger(uint32 Map) const;
+        AreaTriggerStruct const* GetGoBackTrigger(uint32 Map) const;
+        AreaTriggerStruct const* GetMapEntranceTrigger(uint32 Map) const;
 
         bool IsFlatGround(Map *tmap, float x, float y, float z);
 

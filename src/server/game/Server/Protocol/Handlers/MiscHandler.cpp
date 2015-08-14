@@ -923,7 +923,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
 
     // NULL if all values default (non teleport trigger)
-    AreaTrigger const* at = sObjectMgr->GetAreaTrigger(Trigger_ID);
+    AreaTriggerStruct const* at = sObjectMgr->GetAreaTrigger(Trigger_ID);
     if (!at)
         return;
 
