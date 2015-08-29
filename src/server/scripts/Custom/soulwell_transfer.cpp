@@ -436,7 +436,6 @@ public:
             soulwell_spell_transfer_record* rec;
             if (res)
             {
-                uint64 guid;
                 do
                 {
                     f = res->Fetch();
@@ -492,7 +491,6 @@ public:
             soulwell_achievement_record* rec;
             if (res)
             {
-                uint64 guid;
                 do
                 {
                     f = res->Fetch();
@@ -513,7 +511,6 @@ public:
             soulwell_achievement_progress_record* prec;
             if (res)
             {
-                uint64 guid;
                 do
                 {
                     f = res->Fetch();
@@ -579,7 +576,6 @@ public:
             soulwell_currency_record* rec;
             if (res)
             {
-                uint64 guid;
                 do
                 {
                     f = res->Fetch();
@@ -600,6 +596,7 @@ public:
             currencyItr = currency.begin();
             transferPhase = SWT_CURRENCY;
         }
+
         void ProceedCurrencyStage()
         {
             int procCount = 0;
@@ -634,7 +631,6 @@ public:
             soulwell_skill_record* rec;
             if (res)
             {
-                uint64 guid;
                 do
                 {
                     f = res->Fetch();
@@ -692,7 +688,6 @@ public:
             soulwell_reputation_record* rec;
             if (res)
             {
-                uint64 guid;
                 do
                 {
                     f = res->Fetch();
@@ -716,7 +711,6 @@ public:
         {
             int procCount = 0;
             soulwell_reputation_record* sr;
-            uint32 step;
             while (reputationItr != reputation.end() && (procCount++) < SOULWELL_TRANSFER_BATCH_SIZE)
             {
                 sr = *reputationItr;
