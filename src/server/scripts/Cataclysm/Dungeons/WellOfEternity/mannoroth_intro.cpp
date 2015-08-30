@@ -182,10 +182,9 @@ public:
                 encounterStartTimer = 4000;
                 me->CastSpell(me, SPELL_AURA_OF_IMMOLATION, false);
             }
-            else if (id == 2) // Arrived before varothen pos
+            else if (id == PRELUDES_WP_ON_ENCOUNTER_FAIL)
             {
-                encounterStartTimer = 4000;
-                me->CastSpell(me, SPELL_AURA_OF_IMMOLATION, false);
+                me->SetFacingTo(illidanVarothenPos.m_orientation);
             }
         }
 
@@ -213,8 +212,8 @@ public:
             {
                 me->DeleteThreatList();
                 me->RemoveAllAuras();
-                me->GetMotionMaster()->MoveTargetedHome();
-                ScriptedAI::EnterEvadeMode();
+                me->GetMotionMaster()->MovePoint(PRELUDES_WP_ON_ENCOUNTER_FAIL, illidanVarothenPos, true, true);
+                canAttackMannoroth = false;
             }
             else if (action == ACTION_MANNOROTH_FIGHT_ENDED)
             {
@@ -225,14 +224,15 @@ public:
 
                 canAttackMannoroth = false;
             }
-        }
-
-        void EnterEvadeMode() override
-        {
-            me->DeleteThreatList();
-            me->RemoveAllAuras();
-            //me->GetMotionMaster()->MoveTargetedHome();
-            ScriptedAI::EnterEvadeMode();
+            else if (action == ACTION_ILLIDAN_START_COMBAT_AFTER_WIPE)
+            {
+                //encounterStartTimer = 1;
+                me->CastSpell(me, SPELL_DEMONIC_SIGHT_DODGE, true);
+                canAttackMannoroth = true; // Allow usage of combat abilities
+                darkLanceTimer = 2000;
+                tauntTimer = 6000;
+                encounterStartTimer = MAX_TIMER;
+            }
         }
 
         void ReceiveEmote(Player* pPlayer, uint32 emote) // TESTING PURPOSE ONLY
@@ -351,21 +351,13 @@ public:
 
             if (encounterStartTimer <= diff)
             {
-                if (Creature * pMannoroth = me->FindNearestCreature(MANNOROTH_ENTRY, 250.0f, true))
-                {
-                    pMannoroth->SetReactState(REACT_AGGRESSIVE);
-                    pMannoroth->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    pMannoroth->SetInCombatWithZone();
-                    me->GetMotionMaster()->MoveChase(pMannoroth);
-                    pMannoroth->AddThreat(me, 900000.0f); // is this safe and correct ? check factions ...
-                    me->AddThreat(pMannoroth, 900000.0f); // dont attack varothen or somone else
-                }
                 if (Creature * pVarothen = me->FindNearestCreature(VAROTHEN_ENTRY, 250.0f, true))
                 {
                     pVarothen->SetReactState(REACT_AGGRESSIVE);
                     pVarothen->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     pVarothen->SetInCombatWithZone();
                 }
+
                 me->CastSpell(me, SPELL_DEMONIC_SIGHT_DODGE, true);
                 canAttackMannoroth = true; // Allow usage of combat abilities
                 darkLanceTimer = 2000;

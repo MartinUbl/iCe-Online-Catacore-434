@@ -393,10 +393,17 @@ public:
 
             if (Creature * pVarothen = ObjectAccessor::GetCreature(*me,pInstance->GetData64(VAROTHEN_ENTRY)))
             {
-                pVarothen->setDeathState(JUST_ALIVED);
-                pVarothen->SetFullHealth();
-                pVarothen->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
-                pVarothen->GetMotionMaster()->MoveTargetedHome();
+                if (pVarothen->isDead())
+                {
+                    pVarothen->setDeathState(JUST_ALIVED);
+                    pVarothen->SetFullHealth();
+                    pVarothen->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
+                    pVarothen->GetMotionMaster()->MoveTargetedHome();
+                }
+                else
+                {
+                    pVarothen->AI()->EnterEvadeMode(); // TODO: Why we must force it, something to do with overrided AttackStart + EnterCombat ?
+                }
             }
             ScriptedAI::EnterEvadeMode();
 
@@ -463,7 +470,7 @@ public:
             {
                 portalCollapsed = true;
                 OnPortalCollapse();
-                return; // just for end of encounter testing, first chcek 25 % hp condition
+                return; // just for end of encounter testing, first check 25 % hp condition
             }
 
             if (infernoCasted == false && me->HealthBelowPctDamaged(51, damage))
@@ -675,7 +682,6 @@ public:
                                 break;
                             case 6:
                                 PlayQuoteEvent(talker, phase3[phase3QuoteCounter], false);
-                                pInstance->DoAddAuraOnPlayers(nullptr,SPELL_GIFT_OF_SARGERAS_INSTANT);
                                 break;
                             default:
                                 break;
@@ -769,6 +775,14 @@ public:
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
+        void EnterEvadeMode() override
+        {
+            if (pInstance)
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
         void AttackStart(Unit* victim) override
         {
             if (victim->GetTypeId() == TYPEID_UNIT && victim->GetOwnerGUID() == 0)
@@ -784,6 +798,29 @@ public:
 
             if (pInstance)
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
+            if (Creature * pMannoroth = me->FindNearestCreature(MANNOROTH_ENTRY, 250.0f, true))
+            {
+                pMannoroth->SetReactState(REACT_AGGRESSIVE);
+                pMannoroth->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                pMannoroth->SetInCombatWithZone();
+                me->GetMotionMaster()->MoveChase(pMannoroth);
+                pMannoroth->AddThreat(me, 900000.0f); // is this safe and correct ? check factions ...
+                me->AddThreat(pMannoroth, 900000.0f); // dont attack varothen or somone else
+            }
+
+            if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE, 250.0f, true))
+            {
+                pTyrande->AI()->DoAction(ACTION_TYRANDE_START_COMBAT_AFTER_WIPE);
+            }
+
+            if (Creature* pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, 250.0f, true))
+            {
+                pIllidan->AI()->DoAction(ACTION_ILLIDAN_START_COMBAT_AFTER_WIPE);
+            }
+
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
             me->SetInCombatWithZone();
             PlaySimpleQuote(me, Varothen::onAggro);
@@ -944,15 +981,19 @@ public:
             attacked = false;
         }
 
-        void MovementInform(uint32 uiType, uint32 wpID) override
+        void MovementInform(uint32 uiType, uint32 id) override
         {
             if (uiType != POINT_MOTION_TYPE)
                 return;
 
-            if (wpID == TYRANDE_PORTAL_CASTNG_WP)
+            if (id == TYRANDE_PORTAL_CASTNG_WP)
             {
                 PlaySimpleQuote(me, Tyrande::onOutOfArrows,false );
                 me->CastSpell(me,SPELL_HAND_OF_ELUNE,false);
+            }
+            else if (id == PRELUDES_WP_ON_ENCOUNTER_FAIL)
+            {
+                me->SetFacingTo(tyrandeVarothenPos.m_orientation);
             }
         }
 
@@ -973,12 +1014,16 @@ public:
                 me->GetMotionMaster()->MovePoint(2, tyrandeVarothenPos, true, true);
                 moveToCombatPosTimer = 6000;
             }
+            else if (action == ACTION_TYRANDE_START_COMBAT_AFTER_WIPE)
+            {
+                moveToCombatPosTimer = 6000;
+            }
             else if (action == ACTION_MANNOROTH_ENCOUNTER_FAILED)
             {
                 debilitatorDied = 0;
                 debilitated = false;
                 me->AI()->EnterEvadeMode();
-                me->GetMotionMaster()->MoveTargetedHome();
+                me->GetMotionMaster()->MovePoint(PRELUDES_WP_ON_ENCOUNTER_FAIL, tyrandeVarothenPos, true, true);
             }
             else if (action == ACTION_MANNOROTH_FIGHT_ENDED)
             {
@@ -1584,7 +1629,7 @@ public:
 
             Trinity::AnyUnitInObjectRangeCheck u_check(caster, 250.0f);
             Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(caster, unitList, u_check);
-            caster->VisitNearbyObject(250.0f, searcher);
+            caster->VisitNearbyObject(300.0f, searcher);
 
             for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); itr++)
             {
@@ -1668,6 +1713,36 @@ public:
     }
 };
 
+class spell_gen_gift_of_sargeras_woe : public SpellScriptLoader
+{
+public:
+    spell_gen_gift_of_sargeras_woe() : SpellScriptLoader("spell_gen_gift_of_sargeras_woe") { }
+
+    class spell_gen_gift_of_sargeras_woe_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_gift_of_sargeras_woe_AuraScript);
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* pIllidan = GetTarget();
+            if (!pIllidan || pIllidan->GetInstanceScript() == nullptr)
+                return
+
+            pIllidan->GetInstanceScript()->DoAddAuraOnPlayers(nullptr, SPELL_GIFT_OF_SARGERAS_INSTANT);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_gen_gift_of_sargeras_woe_AuraScript::OnApply, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_gen_gift_of_sargeras_woe_AuraScript();
+    }
+};
+
 void AddSC_boss_mannoroth()
 {
     new boss_mannoroth_woe();
@@ -1687,6 +1762,7 @@ void AddSC_boss_mannoroth()
     new spell_inferno_mannoroth(); // 105145
     new spell_tyrande_lunar_shot(); // 104688
     new spell_tyrande_wrath_of_elune(); // 105073, 105075
+    new spell_gen_gift_of_sargeras_woe(); // 104998
 }
 
 // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104625, 'spell_nether_portal_woe');
@@ -1696,3 +1772,4 @@ void AddSC_boss_mannoroth()
 // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104688, 'spell_tyrande_lunar_shot');
 // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (105073, 'spell_tyrande_wrath_of_elune');
 // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (105075, 'spell_tyrande_wrath_of_elune');
+// INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104998, 'spell_gen_gift_of_sargeras_woe');

@@ -372,7 +372,7 @@ bool INST_WOE_SCRIPT::PlayersWipedOnMannoroth()
         Player* pPlayer = itr->getSource();
         if(pPlayer && pMannoroth)
         {
-            if (pPlayer->isDead() || pMannoroth->GetExactDist2d(pPlayer) > 120.0f)
+            if (pPlayer->isDead() || pPlayer->IsGameMaster() || pMannoroth->GetExactDist2d(pPlayer) > 120.0f)
                 invalidPlayersCount++;
         }
     }
