@@ -1125,6 +1125,9 @@ class ObjectMgr
 
         CreatureBaseStats const* GetCreatureBaseStats(uint8 level, uint8 unitClass);
 
+        uint32 FlushCreatureGuidMap();
+        uint32 FlushGameObjectGuidMap();
+
         void SetHighestGuids();
         uint32 GenerateLowGuid(HighGuid guidhigh);
         uint32 GenerateLowGuidForUnit(bool temporary);

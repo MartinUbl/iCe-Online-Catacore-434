@@ -639,6 +639,9 @@ class ChatHandler
         bool HandleBanankyCommandBlist(const char* args);
         bool HandleBanankyCommandModify(const char* args);
 
+        // Guidspace commands
+        bool HandleGuidspaceFlush(const char* args);
+
         // GM ticket command handlers
         bool HandleGMTicketListCommand(const char* args);
         bool HandleGMTicketListOnlineCommand(const char* args);

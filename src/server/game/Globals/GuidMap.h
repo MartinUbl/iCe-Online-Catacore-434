@@ -16,9 +16,11 @@ class GuidMap
 
         void SetBit(long long index);
         long long UseEmpty();
+        bool GetBit(long long index);
 
     private:
         inline void set_bit(unsigned long *arr, long long idx);
+        inline bool get_bit(unsigned long *arr, long long idx);
         long long find_empty(unsigned long *arr, unsigned long arrsize);
         int addslice();
 

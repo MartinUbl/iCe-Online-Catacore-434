@@ -6625,6 +6625,48 @@ bool ObjectMgr::IsFlatGround(Map *tmap, float x, float y, float z)
     return true;
 }
 
+uint32 ObjectMgr::FlushCreatureGuidMap()
+{
+    QueryResult result = WorldDatabase.Query("SELECT guid FROM creature");
+    uint32 mguid;
+    uint32 counter = 0;
+    if (result)
+    {
+        do
+        {
+            mguid = (*result)[0].GetUInt32();
+            if (!m_creatureGuidMap.GetBit(mguid))
+            {
+                m_creatureGuidMap.SetBit(mguid);
+                counter++;
+            }
+        } while (result->NextRow());
+    }
+
+    return counter;
+}
+
+uint32 ObjectMgr::FlushGameObjectGuidMap()
+{
+    QueryResult result = WorldDatabase.Query("SELECT guid FROM gameobject");
+    uint32 mguid;
+    uint32 counter = 0;
+    if (result)
+    {
+        do
+        {
+            mguid = (*result)[0].GetUInt32();
+            if (!m_goGuidMap.GetBit(mguid))
+            {
+                m_goGuidMap.SetBit(mguid);
+                counter++;
+            }
+        } while (result->NextRow());
+    }
+
+    return counter;
+}
+
 void ObjectMgr::SetHighestGuids()
 {
     QueryResult result = CharacterDatabase.Query("SELECT guid FROM characters");

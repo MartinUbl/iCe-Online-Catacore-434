@@ -759,6 +759,11 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                                "",  NULL }
     };
 
+    static ChatCommand guidspaceCommandTable[] =
+    {
+        { "flush",          SEC_ADMINISTRATOR,  true, OldHandler<&ChatHandler::HandleGuidspaceFlush>,       "",  NULL}
+    };
+
     static ChatCommand commandTable[] =
     {
         { "account",        SEC_PLAYER,         true,  NULL,                                           "", accountCommandTable  },
@@ -790,6 +795,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spectator",      SEC_PLAYER,         false, NULL,                                           "", spectatorCommandTable},
 
         { "channel",        SEC_ADMINISTRATOR,  true, NULL,                                            "", channelCommandTable  },
+        { "guidspace",      SEC_ADMINISTRATOR,  true, NULL,                                            "", guidspaceCommandTable},
 
         { "pet",            SEC_GAMEMASTER,     false, NULL,                                           "", petCommandTable },
         { "loadpath",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleReloadAllPaths>,             "", NULL },

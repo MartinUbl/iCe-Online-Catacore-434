@@ -68,6 +68,21 @@
 #include "SmartAI.h"
 #include "ScriptDatabase.h"
 
+bool ChatHandler::HandleGuidspaceFlush(const char* args)
+{
+    uint32 cnt;
+
+    PSendSysMessage("Performing flush on creature GUID space...");
+    cnt = sObjectMgr->FlushCreatureGuidMap();
+    PSendSysMessage("Done, %u new guids reserved", cnt);
+
+    PSendSysMessage("Performing flush on gameobject GUID space...");
+    cnt = sObjectMgr->FlushGameObjectGuidMap();
+    PSendSysMessage("Done, %u new guids reserved", cnt);
+
+    return true;
+}
+
 //reload commands
 bool ChatHandler::HandleReloadAllCommand(const char*)
 {

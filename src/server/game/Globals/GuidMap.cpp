@@ -16,6 +16,11 @@ inline void GuidMap::set_bit(unsigned long *arr, long long idx)
     arr[idx/UL_BITS] |= ((unsigned long)1<<(idx%UL_BITS));
 }
 
+inline bool GuidMap::get_bit(unsigned long *arr, long long idx)
+{
+    return (arr[idx/UL_BITS] & ((unsigned long)1<<(idx%UL_BITS)));
+}
+
 long long GuidMap::find_empty(unsigned long *arr, unsigned long arrsize)
 {
     unsigned long i, j;
@@ -118,6 +123,21 @@ void GuidMap::SetBit(long long index)
         addslice();
 
     set_bit(this->slices[slice_offset], index);
+}
+
+bool GuidMap::GetBit(long long index)
+{
+    unsigned long slice_offset;
+
+    slice_offset = index / (this->slice_size*UL_BITS);
+    index = index % (this->slice_size*UL_BITS);
+
+    /* if slice_offset outreaches allocated slices, it means the space is
+       not enough wide to contain this bit, so its not used */
+    if (slice_offset + 1 > this->slice_cnt)
+        return false;
+
+    return get_bit(this->slices[slice_offset], index);
 }
 
 long long GuidMap::UseEmpty()
