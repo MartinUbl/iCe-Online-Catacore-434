@@ -799,22 +799,26 @@ public:
             if (pInstance)
                 pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 
-            if (Creature * pMannoroth = me->FindNearestCreature(MANNOROTH_ENTRY, 250.0f, true))
+            Creature * pMannoroth = me->FindNearestCreature(MANNOROTH_ENTRY, 250.0f, true);
+            Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, 250.0f, true);
+            Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE, 250.0f, true);
+
+            if (pMannoroth && pIllidan)
             {
                 pMannoroth->SetReactState(REACT_AGGRESSIVE);
                 pMannoroth->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 pMannoroth->SetInCombatWithZone();
-                me->GetMotionMaster()->MoveChase(pMannoroth);
-                pMannoroth->AddThreat(me, 900000.0f); // is this safe and correct ? check factions ...
-                me->AddThreat(pMannoroth, 900000.0f); // dont attack varothen or somone else
+                pIllidan->GetMotionMaster()->MoveChase(pMannoroth);
+                pMannoroth->AddThreat(pIllidan, 900000.0f); // is this safe and correct ? check factions ...
+                pIllidan->AddThreat(pMannoroth, 900000.0f); // dont attack varothen or somone else
             }
 
-            if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE, 250.0f, true))
+            if (pTyrande)
             {
                 pTyrande->AI()->DoAction(ACTION_TYRANDE_START_COMBAT_AFTER_WIPE);
             }
 
-            if (Creature* pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, 250.0f, true))
+            if (pIllidan)
             {
                 pIllidan->AI()->DoAction(ACTION_ILLIDAN_START_COMBAT_AFTER_WIPE);
             }
@@ -1722,13 +1726,13 @@ public:
     {
         PrepareAuraScript(spell_gen_gift_of_sargeras_woe_AuraScript);
 
-        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
-            Unit* pIllidan = GetTarget();
-            if (!pIllidan || pIllidan->GetInstanceScript() == nullptr)
-                return
+            Unit* caster = aurEff->GetCaster();
+            if (!caster || !caster->GetInstanceScript())
+                return;
 
-            pIllidan->GetInstanceScript()->DoAddAuraOnPlayers(nullptr, SPELL_GIFT_OF_SARGERAS_INSTANT);
+            caster->GetInstanceScript()->DoAddAuraOnPlayers(nullptr, SPELL_GIFT_OF_SARGERAS_INSTANT);
         }
 
         void Register()
