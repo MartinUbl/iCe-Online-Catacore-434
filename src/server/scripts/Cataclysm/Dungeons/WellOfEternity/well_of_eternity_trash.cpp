@@ -527,7 +527,6 @@ public:
         uint32 lane;
         bool portalClosed;
         bool firstWP;
-        bool textSaid;
         // legion demon
         bool canMoveToPoint;
         uint32 leapTimer;
@@ -549,7 +548,6 @@ public:
 
             firstWP = true;
             canMoveToPoint = false;
-            textSaid = false;
             gripTimer = 4000;
             leapTimer = 4000;
             strikeTimer = 5000;
@@ -714,9 +712,8 @@ public:
 
                 if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
                 {
-                    if (textSaid == false)
+                    if (entry == CORRUPTED_ARCANIST_ENTRY)
                     {
-                        textSaid = true;
                         PlayQuote(pIllidan, Illidan::onAggro[urand(0, 2)]);
                     }
                 }
@@ -1254,7 +1251,7 @@ namespace Illidan
                     break;
                 case ILLIDAN_WAIT_SECOND_PORTAL_STEP:
                     PlayQuote(me, escortQuotes[5]);
-                    eventTimer = 32000; // THis shouldnt be fixed time, but should properly "scale" when second demon guard will pass through portal
+                    eventTimer = 50000; // This shouldnt be fixed time, but should properly "scale" when second demon guard will pass through portal
                     break;
                 case ILLIDAN_BEFORE_STAIRS_STEP:
                     PlayQuote(me, escortQuotes[6]);
@@ -1272,7 +1269,7 @@ namespace Illidan
                 case ILLIDAN_BACK_STEP_2:
                 {
                     PlayQuote(me, escortQuotes[9]);
-                    eventTimer = 6000;
+                    eventTimer = 10000;
                     break;
                 }
                 case ILLIDAN_TOO_EASY_STEP:

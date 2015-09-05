@@ -226,7 +226,6 @@ public:
             }
             else if (action == ACTION_ILLIDAN_START_COMBAT_AFTER_WIPE)
             {
-                //encounterStartTimer = 1;
                 me->CastSpell(me, SPELL_DEMONIC_SIGHT_DODGE, true);
                 canAttackMannoroth = true; // Allow usage of combat abilities
                 darkLanceTimer = 2000;

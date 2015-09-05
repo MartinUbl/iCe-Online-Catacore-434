@@ -945,7 +945,7 @@ public:
                     if (npc_eye_of_perotharn_woe::npc_eye_of_perotharn_woeAI* pAI = (npc_eye_of_perotharn_woe::npc_eye_of_perotharn_woeAI*)(pEye->GetAI()))
                         pAI->SetSearchingAngle(ori);
                 }
-                summonEyeTimer = 8000;
+                summonEyeTimer = 6000;
             }
             else summonEyeTimer -= diff;
         }

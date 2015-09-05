@@ -4879,13 +4879,14 @@ void SpellMgr::LoadSpellCustomAttr()
         case 105544: // Fel Decay
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
             break;
-        case 102478: // Ice Fling
-            spellInfo->MaxAffectedTargets = 1;
+        case 102466: // Coldflame (once again bad dbc data from Blizzard)
+            spellInfo->EffectBasePoints[EFFECT_0] = 20000;
+            spellInfo->EffectBasePoints[EFFECT_1] = 20000;
+            spellInfo->EffectValueMultiplier[EFFECT_1] = 20000;
             break;
+        case 102478: // Ice Fling
         case 102334: // Servant of the Queen
             spellInfo->MaxAffectedTargets = 1;
-            //spellInfo->excludeTargetAuraSpell = i;
-            //spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
             break;
         case 103241:
             spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
@@ -4923,7 +4924,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 103889: // Fel Firestorm summon
             spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_70_YARDS;
             break;
-        case 104820:
+        case 104820: // Embedded Blade
             spellInfo->EffectTriggerSpell[EFFECT_0] = 0;
             break;
 

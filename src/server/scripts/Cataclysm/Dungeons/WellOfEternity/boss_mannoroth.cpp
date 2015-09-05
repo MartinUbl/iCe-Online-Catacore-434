@@ -1642,8 +1642,7 @@ public:
 
                 if (unit && unit->GetTypeId() == TYPEID_UNIT) // only creatures
                 {
-                    if (unit->IsAlive() && unit->GetOwnerGUID() == 0) // only live and no pets
-                    if (unit->GetCreatureType() == CREATURE_TYPE_DEMON) // only demons
+                    if (unit->IsAlive() && unit->GetCreatureType() == CREATURE_TYPE_DEMON && !unit->ToPet()) // gather all alive demons
                     {
                         if (entry != MANNOROTH_ENTRY && entry != ENTRY_MANNOROTH_VEHICLE_RIDER && entry != LEGION_PORTAL_DEMON)
                         {
@@ -1658,6 +1657,7 @@ public:
                     }
                 }
             }
+
             // Add mannoroth vehicle riders
             if (Creature * pMannoroth = caster->FindNearestCreature(MANNOROTH_ENTRY, 250.0f, true))
             {

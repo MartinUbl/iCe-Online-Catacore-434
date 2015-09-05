@@ -150,7 +150,7 @@ enum actions
 
 #define GO_ROYAL_CHEST 210025
 
-static uint32 magusEntries[MAX_MAGES] = {ENTRY_FROST_MAGUS,ENTRY_ARCANE_MAGUS,ENTRY_FIRE_MAGUS,ENTRY_FROST_MAGUS,ENTRY_FIRE_MAGUS,ENTRY_ARCANE_MAGUS};
+static uint32 magusEntries[MAX_MAGES] = { ENTRY_FROST_MAGUS, ENTRY_ARCANE_MAGUS, ENTRY_FIRE_MAGUS, ENTRY_FROST_MAGUS, ENTRY_FIRE_MAGUS, ENTRY_ARCANE_MAGUS };
 
 class boss_queen_azshara_woe : public CreatureScript
 {
@@ -216,7 +216,7 @@ public:
 
         void Reset() override
         {
-            handCheckTimer = 1000;
+            handCheckTimer = MAX_TIMER;
             totalObedienceInterrupted = false;
             interruptCounter = 0;
             magusWave = 0;
@@ -484,8 +484,7 @@ public:
             if (!me->HasAura(SPELL_STAND_STATE_COSMETIC) && !me->IsNonMeleeSpellCasted(false))
                 me->CastSpell(me, SPELL_STAND_STATE_COSMETIC, true);
 
-            // Sometimes hand do not appear above player (it is not summoned cause some thread stuff ???
-            // vehicle kit is not always created at that time, check if we have vehicleKit and retry again
+            // Sometimes hand do not appear above player, try to send delayed update
             if (handCheckTimer <= diff)
             {
                 Map::PlayerList const& listPlayers = pInstance->instance->GetPlayers();
@@ -502,12 +501,17 @@ public:
                             if (vehicleKit)
                                 passenger = vehicleKit->GetPassenger(0);
 
-                            // retry again if not passenger boarded
-                            if (vehicleKit && passenger == nullptr)
-                                BoardHandOfTheQueenOnPlayer(pPlayer);
+                            // Try to send heartbeat messagse and update object visibility for hand of the queen
+                            if (passenger)
+                            {
+                                WorldPacket data;
+                                passenger->BuildHeartBeatMsg(&data);
+                                passenger->SendMessageToSet(&data, false);
+                                passenger->UpdateObjectVisibility(false);
+                            }
                         }
                 }
-                handCheckTimer = 1000;
+                handCheckTimer = MAX_TIMER;
             }
             else handCheckTimer -= diff;
 
@@ -540,6 +544,7 @@ public:
                     {
                         me->AddAura(SPELL_SERVANT_OF_THE_QUEEN, player);
                         BoardHandOfTheQueenOnPlayer(player);
+                        handCheckTimer = 1000;
                     }
                     else
                     {
