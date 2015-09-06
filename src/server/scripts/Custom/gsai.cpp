@@ -1,5 +1,6 @@
 #include "ScriptPCH.h"
 #include "GScript\GSCommands.h"
+#include "GScript\GSMgr.h"
 
 class GS_CreatureScript : public CreatureScript
 {
@@ -23,11 +24,24 @@ class GS_CreatureScript : public CreatureScript
             // waiting flags
             uint32 wait_flags;
 
+            // script ID when in combat
+            int m_combatScriptId = -1;
+            // script ID when not in combat
+            int m_outOfCombatScriptId = -1;
+
+            // current type of script being executed
+            GScriptType m_currentScriptType = GS_TYPE_NONE;
+
             // flag for disabling melee combat
             bool disable_melee;
 
             // state flag for movement
             bool is_moving;
+            // state flag for locked script change
+            bool is_script_locked;
+
+            // lock for update
+            bool is_updating_lock;
 
             // stored faction in case of faction change
             uint32 stored_faction = 0;
@@ -41,6 +55,8 @@ class GS_CreatureScript : public CreatureScript
             {
                 my_commands = nullptr;
 
+                sGSMgr->RegisterAI(this);
+
                 GS_LoadMyScript();
 
                 // ordinary reset
@@ -48,50 +64,70 @@ class GS_CreatureScript : public CreatureScript
                 is_waiting = false;
                 disable_melee = false;
                 is_moving = false;
+                is_updating_lock = false;
+                is_script_locked = false;
+            }
+
+            void DoAction(const int32 action) override
+            {
+                if (action == GSAI_SIGNAL_UNHOOK)
+                {
+                    // while any other thread is inside UpdateAI, wait to leave
+                    while (is_updating_lock)
+                        ;
+                    my_commands = nullptr;
+                    com_counter = 0;
+                }
+                else if (action == GSAI_SIGNAL_REHOOK)
+                {
+                    GS_LoadMyScript();
+                    ResetState();
+
+                    if (m_currentScriptType == GS_TYPE_COMBAT && m_combatScriptId >= 0)
+                        my_commands = sGSMgr->GetScript(m_combatScriptId);
+                    else if (m_currentScriptType == GS_TYPE_OUT_OF_COMBAT && m_outOfCombatScriptId >= 0)
+                        my_commands = sGSMgr->GetScript(m_outOfCombatScriptId);
+                }
+                else
+                    ScriptedAI::DoAction(action);
             }
 
             void GS_LoadMyScript()
             {
-                if (my_commands)
-                {
-                    for (auto itr = my_commands->begin(); itr != my_commands->end(); ++itr)
-                        delete *itr;
-                    delete my_commands;
-                }
-                my_commands = nullptr;
-
                 // select everything for this creature from database
-                QueryResult res = ScriptDatabase.PQuery("SELECT script_type, script FROM creature_gscript WHERE creature_entry = %u", me->GetEntry());
+                QueryResult res = ScriptDatabase.PQuery("SELECT script_type, script_type_param, script_id FROM creature_gscript WHERE creature_entry = %u", me->GetEntry());
 
-                // retrieve string to be parsed
-                std::vector<std::string> toparse;
                 if (res)
                 {
-                    Field* f = res->Fetch();
-                    if (f)
+                    Field* f;
+                    do
                     {
-                        // cut the input string by lines
+                        f = res->Fetch();
 
-                        std::stringstream ss(f[1].GetCString());
-                        std::string to;
+                        switch (f[0].GetUInt16())
+                        {
+                            case GS_TYPE_COMBAT:
+                                m_combatScriptId = f[2].GetInt32();
+                                break;
+                            case GS_TYPE_OUT_OF_COMBAT:
+                                m_outOfCombatScriptId = f[2].GetInt32();
+                                break;
+                            case GS_TYPE_GOSSIP_SELECT:
+                                // NYI
+                                break;
+                            case GS_TYPE_QUEST_ACCEPT:
+                                // NYI
+                                break;
+                            default:
+                            case GS_TYPE_NONE:
+                                break;
+                        }
 
-                        while (std::getline(ss, to, '\n'))
-                            toparse.push_back(std::string(to));
-                    }
-                }
-
-                // if there was something at input...
-                if (toparse.size() > 0)
-                {
-                    // ...parse script into tokens...
-                    CommandProtoVector* cpv = gscr_parseInput(toparse);
-                    // ...and if succeeded, analyze command sequence and build command vector
-                    if (cpv)
-                        my_commands = gscr_analyseSequence(cpv);
+                    } while (res->NextRow());
                 }
             }
 
-            void Reset()
+            void ResetState()
             {
                 // reset command counter, waiting and melee disable flags
                 com_counter = 0;
@@ -109,6 +145,58 @@ class GS_CreatureScript : public CreatureScript
                     me->DeMorph();
                     stored_modelid = 0;
                 }
+            }
+
+            void Reset() override
+            {
+                ResetState();
+
+                if (!is_script_locked)
+                {
+                    if (m_currentScriptType != GS_TYPE_OUT_OF_COMBAT && m_outOfCombatScriptId >= 0)
+                    {
+                        my_commands = sGSMgr->GetScript(m_outOfCombatScriptId);
+                        m_currentScriptType = GS_TYPE_OUT_OF_COMBAT;
+                    }
+                    else
+                        m_currentScriptType = GS_TYPE_NONE;
+                }
+
+                ScriptedAI::Reset();
+            }
+
+            void EnterEvadeMode() override
+            {
+                if (!is_script_locked)
+                {
+                    m_currentScriptType = GS_TYPE_NONE;
+                    if (m_outOfCombatScriptId >= 0)
+                    {
+                        my_commands = sGSMgr->GetScript(m_outOfCombatScriptId);
+                        m_currentScriptType = GS_TYPE_OUT_OF_COMBAT;
+                    }
+                }
+
+                ScriptedAI::EnterEvadeMode();
+            }
+
+            void EnterCombat(Unit* who) override
+            {
+                com_counter = 0;
+                is_waiting = false;
+                disable_melee = false;
+                is_moving = false;
+                if (!is_script_locked)
+                {
+                    m_currentScriptType = GS_TYPE_NONE;
+                    if (m_combatScriptId >= 0)
+                    {
+                        my_commands = sGSMgr->GetScript(m_combatScriptId);
+                        m_currentScriptType = GS_TYPE_COMBAT;
+                    }
+                }
+
+                ScriptedAI::EnterCombat(who);
             }
 
             void GS_SetTimer(int timer, uint32 time)
@@ -254,21 +342,49 @@ class GS_CreatureScript : public CreatureScript
                 return false;
             }
 
-            void MovementInform(uint32 type, uint32 id)
+            void MovementInform(uint32 type, uint32 id) override
             {
                 if (id == 100)
                     is_moving = false;
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(const uint32 diff) override
             {
+                is_updating_lock = true;
+
+                //UpdateVictim();
+                // the block below modifies behaviour of UpdateVictim
+                if (me->IsInCombat())
+                {
+                    if (!me->HasReactState(REACT_PASSIVE))
+                    {
+                        if (Unit *victim = me->SelectVictim(false))
+                            AttackStart(victim);
+                    }
+                    if (me->getThreatManager().isThreatListEmpty() && !is_script_locked)
+                    {
+                        EnterEvadeMode();
+                    }
+                }
+
                 // do not proceed script, if not in combat, and the script has not yet started/has already finished
-                if (!me->IsInCombat() && (com_counter == 0 || com_counter == my_commands->size()))
+                if (m_currentScriptType == GS_TYPE_COMBAT && !me->IsInCombat() && (com_counter == 0 || com_counter == my_commands->size()))
+                {
+                    // if the script has been locked, and we reached end, there's no point in holding lock anymore
+                    is_script_locked = false;
+
+                    is_updating_lock = false;
                     return;
+                }
 
                 if (!my_commands || com_counter == my_commands->size())
                 {
-                    DoMeleeAttackIfReady();
+                    // when no commands specified, or we just ended script block, there's no point in holding lock anymore
+                    is_script_locked = false;
+
+                    is_updating_lock = false;
+                    if (me->GetVictim())
+                        DoMeleeAttackIfReady();
                     return;
                 }
 
@@ -322,6 +438,7 @@ class GS_CreatureScript : public CreatureScript
                     case GSCR_COMBATSTOP:
                         disable_melee = true;
                         me->AttackStop();
+                        me->getThreatManager().clearReferences();
                         me->SetStandState(UNIT_STAND_STATE_STAND);
                         break;
                     case GSCR_FACTION:
@@ -402,6 +519,12 @@ class GS_CreatureScript : public CreatureScript
                         else if (curr->params.c_waitfor.eventtype == GSET_NONE)
                             is_waiting = false;
                         break;
+                    case GSCR_LOCK:
+                        is_script_locked = true;
+                        break;
+                    case GSCR_UNLOCK:
+                        is_script_locked = false;
+                        break;
                     default:
                     case GSCR_NONE:
                         break;
@@ -415,6 +538,8 @@ class GS_CreatureScript : public CreatureScript
                 // proceed melee attack
                 if (!disable_melee && (!is_waiting || (wait_flags & GSWF_MELEE_ATTACK)))
                     DoMeleeAttackIfReady();
+
+                is_updating_lock = false;
             }
         };
 

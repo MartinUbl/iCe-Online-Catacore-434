@@ -666,7 +666,7 @@ class Creature : public Unit, public GridObject<Creature>
         CreatureGroup *GetFormation() {return m_formation;}
         void SetFormation(CreatureGroup *formation) {m_formation = formation;}
 
-        Unit *SelectVictim();
+        Unit *SelectVictim(bool evadeOnFail = true);
         void SetDeadByDefault (bool death_state) {m_isDeadByDefault = death_state;}
 
         void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }

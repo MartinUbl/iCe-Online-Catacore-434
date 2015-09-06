@@ -67,6 +67,7 @@
 #include "CreatureTextMgr.h"
 #include "SmartAI.h"
 #include "ScriptDatabase.h"
+#include "GScript\GSMgr.h"
 
 bool ChatHandler::HandleGuidspaceFlush(const char* args)
 {
@@ -912,6 +913,17 @@ bool ChatHandler::HandleReloadGossipScriptsCommand(const char* arg)
 
     if (*arg != 'a')
         SendGlobalGMSysMessage("DB table `gossip_scripts` reloaded.");
+
+    return true;
+}
+
+bool ChatHandler::HandleReloadGScriptsCommand(const char* arg)
+{
+    SendGlobalGMSysMessage("Reloading G-Scripts");
+
+    sGSMgr->LoadScripts();
+
+    SendGlobalGMSysMessage("G-Scripts reloaded.");
 
     return true;
 }

@@ -429,6 +429,7 @@ class ChatHandler
         bool HandleReloadGossipMenuCommand(const char* args);
         bool HandleReloadGossipMenuOptionCommand(const char* args);
         bool HandleReloadGossipScriptsCommand(const char* args);
+        bool HandleReloadGScriptsCommand(const char* args);
         bool HandleReloadGOQuestRelationsCommand(const char* args);
         bool HandleReloadGOQuestInvRelationsCommand(const char* args);
         bool HandleReloadItemEnchantementsCommand(const char* args);

@@ -507,17 +507,33 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 CLEANUP_AND_THROW("invalid event specifier for instruction WAITFOR");
 
             break;
+        // lock / unlock instruction - locks or unlocks script change
+        // Syntax: lock
+        //         unlock
+        case GSCR_LOCK:
+        case GSCR_UNLOCK:
+            if (src->parameters.size() != 0)
+                CLEANUP_AND_THROW("invalid parameter count for instruction LOCK / UNLOCK - do not supply parameters");
+            break;
     }
 
     return ret;
 }
 
 // analyzes sequence of command prototypes and parses lines of input to output CommandVector
-CommandVector* gscr_analyseSequence(CommandProtoVector* input)
+CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
 {
     CommandVector* cv = new CommandVector;
     gs_command* tmp;
     size_t i;
+
+    gscr_label_offset_map.clear();
+    gscr_gotos_list.clear();
+    gscr_timer_map.clear();
+    gscr_last_timer_id = -1;
+
+    while (!gscr_if_stack.empty())
+        gscr_if_stack.pop();
 
     try
     {
@@ -540,7 +556,7 @@ CommandVector* gscr_analyseSequence(CommandProtoVector* input)
     }
     catch (std::exception& e)
     {
-        sLog->outError("GSAI Exception: %s", e.what());
+        sLog->outError("GSAI ID %u Exception: %s", scriptId, e.what());
         delete cv;
         cv = nullptr;
     }

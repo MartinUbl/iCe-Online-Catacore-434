@@ -21,7 +21,7 @@ typedef std::vector<gs_command*> CommandVector;
 // parse input lines into command prototype vector
 CommandProtoVector* gscr_parseInput(std::vector<std::string> &lines);
 // parse command prototypes into command vector to be executed
-CommandVector* gscr_analyseSequence(CommandProtoVector* input);
+CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId);
 
 // types of available commands
 enum gs_command_type
@@ -47,6 +47,8 @@ enum gs_command_type
     GSCR_RUN = 18,
     GSCR_TELEPORT = 19,
     GSCR_WAITFOR = 20,
+    GSCR_LOCK = 21,
+    GSCR_UNLOCK = 22,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -71,7 +73,9 @@ static std::string gscr_identifiers[] = {
     "walk",
     "run",
     "teleport",
-    "waitfor"
+    "waitfor",
+    "lock",
+    "unlock",
 };
 
 // flag for wait instruction

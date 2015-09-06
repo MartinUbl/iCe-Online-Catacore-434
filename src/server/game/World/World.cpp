@@ -70,6 +70,7 @@
 #include "CreatureGroups.h"
 #include "Transport.h"
 #include "TransportMgr.h"
+#include "GScript\GSMgr.h"
 
 #include "ScriptMgr.h"
 #include "AddonMgr.h"
@@ -1773,6 +1774,9 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("Loading SmartAI scripts...");
     sSmartScriptMgr->LoadSmartAIFromDB();
+
+    sLog->outString("Loading G-Script scripts...");
+    sGSMgr->LoadScripts();
 
     sLog->outString("Loading Calendar data...");
     sCalendarMgr->LoadFromDB();
