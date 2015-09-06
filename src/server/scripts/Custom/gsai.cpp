@@ -49,7 +49,7 @@ class GS_CreatureScript : public CreatureScript
             uint32 stored_modelid = 0;
 
             // map of all timers
-            std::map<int, uint32> timer_map;
+            std::map<int, int32> timer_map;
 
             GS_ScriptedAI(Creature* cr) : ScriptedAI(cr)
             {
@@ -159,7 +159,10 @@ class GS_CreatureScript : public CreatureScript
                         m_currentScriptType = GS_TYPE_OUT_OF_COMBAT;
                     }
                     else
+                    {
+                        my_commands = nullptr;
                         m_currentScriptType = GS_TYPE_NONE;
+                    }
                 }
 
                 ScriptedAI::Reset();
@@ -169,6 +172,7 @@ class GS_CreatureScript : public CreatureScript
             {
                 if (!is_script_locked)
                 {
+                    my_commands = nullptr;
                     m_currentScriptType = GS_TYPE_NONE;
                     if (m_outOfCombatScriptId >= 0)
                     {
@@ -188,6 +192,7 @@ class GS_CreatureScript : public CreatureScript
                 is_moving = false;
                 if (!is_script_locked)
                 {
+                    my_commands = nullptr;
                     m_currentScriptType = GS_TYPE_NONE;
                     if (m_combatScriptId >= 0)
                     {

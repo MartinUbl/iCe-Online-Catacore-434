@@ -235,6 +235,9 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
 
     switch (ret->type)
     {
+        default:
+        case GSCR_NONE:
+            break;
         // label instruction - just store to map
         // Syntax: label <name>
         case GSCR_LABEL:
