@@ -67,7 +67,7 @@
 #include "CreatureTextMgr.h"
 #include "SmartAI.h"
 #include "ScriptDatabase.h"
-#include "GScript\GSMgr.h"
+#include "GSMgr.h"
 
 bool ChatHandler::HandleGuidspaceFlush(const char* args)
 {

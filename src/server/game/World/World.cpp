@@ -70,7 +70,7 @@
 #include "CreatureGroups.h"
 #include "Transport.h"
 #include "TransportMgr.h"
-#include "GScript\GSMgr.h"
+#include "GSMgr.h"
 
 #include "ScriptMgr.h"
 #include "AddonMgr.h"

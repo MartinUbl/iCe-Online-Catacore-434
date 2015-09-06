@@ -1,6 +1,6 @@
 #include "ScriptPCH.h"
-#include "GScript\GSCommands.h"
-#include "GScript\GSMgr.h"
+#include "GSCommands.h"
+#include "GSMgr.h"
 
 class GS_CreatureScript : public CreatureScript
 {

@@ -237,6 +237,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Quests
   ${CMAKE_CURRENT_SOURCE_DIR}/Reputation
   ${CMAKE_CURRENT_SOURCE_DIR}/Scripting
+  ${CMAKE_CURRENT_SOURCE_DIR}/Scripting/GScript
   ${CMAKE_CURRENT_SOURCE_DIR}/Server/Protocol
   ${CMAKE_CURRENT_SOURCE_DIR}/Server/Protocol/Handlers
   ${CMAKE_CURRENT_SOURCE_DIR}/Server
