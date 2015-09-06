@@ -428,7 +428,7 @@ struct CONNECTOR_INFO
     }
 };
 
-#define NIGH_ELF_ILLUSION_MALE 108465 
+#define NIGH_ELF_ILLUSION_MALE 108465
 #define NIGH_ELF_ILLUSION_FEMALE 108466
 
 // Path from forest to Mannoroth (shore path)

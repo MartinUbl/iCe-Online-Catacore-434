@@ -206,7 +206,6 @@ public:
 
         // Combat Timers
         uint32 servantTimer;
-        uint32 handCheckTimer;
         uint32 obedienceTimer;
         uint32 obedienceCheckTimer;
         // After combat timers
@@ -216,7 +215,6 @@ public:
 
         void Reset() override
         {
-            handCheckTimer = MAX_TIMER;
             totalObedienceInterrupted = false;
             interruptCounter = 0;
             magusWave = 0;
@@ -251,6 +249,35 @@ public:
                 pInstance->SetData(DATA_QUEEN_AZSHARA, IN_PROGRESS);
             }
             ScriptedAI::EnterCombat(who);
+
+            // THIS IS MUST
+            // WE NEED TO REMOVE VEHICLE KIT AURAS + REMOVE ANY PASSENGERS IF WE FIND SOME
+            // OTHERWISE HAND OF THE QUEEN WILL NOT BOARD TO PLAYER
+            Map::PlayerList const& lPlayers = pInstance->instance->GetPlayers();
+
+            if (!lPlayers.isEmpty())
+            {
+                for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                    if (Player *pPlayer = itr->getSource())
+                    {
+                        Vehicle * veh = pPlayer->GetVehicleKit();
+                        if (veh)
+                            veh->RemoveAllPassengers();
+                        pPlayer->RemoveAurasByType(SPELL_AURA_SET_VEHICLE_ID);
+                    }
+            }
+
+            // IF EVERYTHING ELSE FAILS, TRY HARDER WAY
+            #define PLAYER_SHADOWCLOAK_STALKER      (55154)
+            std::list<Creature*> vehicleStalkers;
+            GetCreatureListWithEntryInGrid(vehicleStalkers, me, PLAYER_SHADOWCLOAK_STALKER, 250.0f);
+            for (std::list<Creature*>::const_iterator itr = vehicleStalkers.begin(); itr != vehicleStalkers.end(); ++itr)
+            {
+                if (Creature * vehStalker = *itr)
+                {
+                    vehStalker->Kill(vehStalker);
+                }
+            }
         }
 
         void EnterEvadeMode() override
@@ -484,37 +511,6 @@ public:
             if (!me->HasAura(SPELL_STAND_STATE_COSMETIC) && !me->IsNonMeleeSpellCasted(false))
                 me->CastSpell(me, SPELL_STAND_STATE_COSMETIC, true);
 
-            // Sometimes hand do not appear above player, try to send delayed update
-            if (handCheckTimer <= diff)
-            {
-                Map::PlayerList const& listPlayers = pInstance->instance->GetPlayers();
-
-                if (!listPlayers.isEmpty())
-                {
-                    for (Map::PlayerList::const_iterator itr = listPlayers.begin(); itr != listPlayers.end(); ++itr)
-                        if (Player *pPlayer = itr->getSource())
-                        {
-                            Vehicle * vehicleKit = nullptr;
-                            Unit * passenger = nullptr;
-
-                            vehicleKit = pPlayer->GetVehicleKit();
-                            if (vehicleKit)
-                                passenger = vehicleKit->GetPassenger(0);
-
-                            // Try to send heartbeat messagse and update object visibility for hand of the queen
-                            if (passenger)
-                            {
-                                WorldPacket data;
-                                passenger->BuildHeartBeatMsg(&data);
-                                passenger->SendMessageToSet(&data, false);
-                                passenger->UpdateObjectVisibility(false);
-                            }
-                        }
-                }
-                handCheckTimer = MAX_TIMER;
-            }
-            else handCheckTimer -= diff;
-
             if (magusSummonTimer <= diff)
             {
                 if (++magusWave >= MAX_MAGUS_WAVES)
@@ -544,7 +540,6 @@ public:
                     {
                         me->AddAura(SPELL_SERVANT_OF_THE_QUEEN, player);
                         BoardHandOfTheQueenOnPlayer(player);
-                        handCheckTimer = 1000;
                     }
                     else
                     {
@@ -833,7 +828,7 @@ public:
                         {
                             me->CastSpell(me, SPELL_BLAST_WAVE, false);
                             fireballTimer = 500;
-                            blastWaveTimer = urand(10000, 15000);
+                            blastWaveTimer = urand(20000, 25000);
                         }
                     }
                     else blastWaveTimer -= diff;
@@ -1246,7 +1241,7 @@ class spell_gen_coldflame_woe : public SpellScriptLoader
 
                 if (npc_enchanted_magus_woe::npc_enchanted_magus_woeAI* pAI = (npc_enchanted_magus_woe::npc_enchanted_magus_woeAI*)(magus->GetAI()))
                 {
-                    radius += 4.0f;
+                    radius += 4.5f;
                     float angle = pAI->flameAngle;
                     float x = pAI->x + cos(angle)*radius;
                     float y = pAI->y + sin(angle)*radius;

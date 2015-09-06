@@ -4865,8 +4865,12 @@ void SpellMgr::LoadSpellCustomAttr()
 
 /********************-------- WELL OF ETERNITY START ---------********************/
 
+        case 108465: // Night Elf Illusion
+        case 108466:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+            break;
         case 103004: // Shadowcloak
-            spellInfo->EffectAmplitude[EFFECT_1] = 1000; // prenerfed
+            spellInfo->EffectAmplitude[EFFECT_1] = 1000;
             break;
         case 102994: // Shadowcloak (stealth + vehicle kit)
             spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_DUMMY; // we don't really need real stealth
@@ -4880,9 +4884,12 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
             break;
         case 102466: // Coldflame (once again bad dbc data from Blizzard)
-            spellInfo->EffectBasePoints[EFFECT_0] = 20000;
+            spellInfo->EffectBasePoints[EFFECT_0] = 40000;
             spellInfo->EffectBasePoints[EFFECT_1] = 20000;
             spellInfo->EffectValueMultiplier[EFFECT_1] = 20000;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_1_YARD;
+            spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_1_YARD;
+            spellInfo->EffectRadiusIndex[EFFECT_2] = EFFECT_RADIUS_1_YARD;
             break;
         case 102478: // Ice Fling
         case 102334: // Servant of the Queen

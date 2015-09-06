@@ -2780,14 +2780,9 @@ void InstanceMap::InitVisibilityDistance()
     // Allow some explicit visibility distances for instance maps (should be less than SIZE_OF_GRIDS ?)
     switch (GetId())
     {
-        // Well Of Eternity
-        case 939:
-            m_VisibleDistance = 500.0f;
-            break;
-        // Throne of the Four Winds
-        case 754:
-        // Strand of the Ancients
-        case 607:
+        case 939:   // Well Of Eternity
+        case 754:   // Throne of the Four Winds
+        case 607:   // Strand of the Ancients
             m_VisibleDistance = SIZE_OF_GRIDS - 1.0f;
             break;
         default:

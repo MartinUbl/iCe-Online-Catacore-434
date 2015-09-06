@@ -375,6 +375,15 @@ public:
             ScriptedAI::AttackStart(victim);
         }
 
+        void DamageTaken(Unit* pAttacker, uint32& damage) override
+        {
+            if (phase == PHASE_HIDE_AND_SEEK)
+                return;
+
+            if (pAttacker->HasAura(102994))
+                pAttacker->RemoveAura(102994); // drop vehicle kit
+        }
+
         void EnterEvadeMode() override
         {
             HandleFireWallCircle(false);
