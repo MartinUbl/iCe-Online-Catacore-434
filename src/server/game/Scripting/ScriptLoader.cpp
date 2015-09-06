@@ -1094,6 +1094,7 @@ void AddSC_custom_events();
 void AddSC_workarounds();
 void AddSC_ice_vanoce();
 void AddSC_soulwell_transfer();
+void AddSC_GSAI();
 
 // World Bosses
 void AddSC_boss_kruul();
@@ -2070,5 +2071,6 @@ void AddCustomScripts()
     AddSC_workarounds();
     AddSC_ice_vanoce();
     AddSC_soulwell_transfer();
+    AddSC_GSAI();
 #endif
 }
