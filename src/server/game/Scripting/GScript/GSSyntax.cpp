@@ -39,7 +39,7 @@ class SyntaxErrorException : public std::exception
             msgstr = std::string("SyntaxErrorException: ") + std::string(message);
         }
 
-        SyntaxErrorException(std::string& message)
+        SyntaxErrorException(std::string message)
         {
             msgstr = std::string("SyntaxErrorException: ") + message;
         }
