@@ -229,7 +229,7 @@ class GS_CreatureScript : public CreatureScript
                     // passed or suspended - do not update
                     if ((*itr).second <= 0)
                         continue;
-                    if ((*itr).second < diff)
+                    if ((*itr).second < (int)diff)
                         (*itr).second = 0;
                     else
                         (*itr).second -= diff;

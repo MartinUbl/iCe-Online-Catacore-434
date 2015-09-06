@@ -9,7 +9,7 @@ std::string getStringFromRange(char* str, int begin, int end)
 
 void gs_command_proto::addParameter(std::string par)
 {
-    if (par.at(0) == '"' && par.at(par.size() - 1) == '"')
+    if (par.size() >= 2 && par.at(0) == '"' && par.at(par.size() - 1) == '"')
         parameters.push_back(par.substr(1, par.size() - 2));
     else
         parameters.push_back(par);
@@ -73,11 +73,11 @@ CommandProtoVector* gscr_parseInput(std::vector<std::string>& lines)
 
         // if the last character wasn't space/tab, and we ended by regular line break, parse
         // additional parameter from the rest of string
-        if (endbybreak && lastpos != i - 1)
+        if (endbybreak && lastpos != i - 1 && lastpos != i)
         {
             if (instr)
                 tmp->addParameter(getStringFromRange(line, lastpos, i));
-            else if (lastpos != i)
+            else
             {
                 tmp->instruction = getStringFromRange(line, lastpos, i);
                 instr = true;
