@@ -4530,6 +4530,28 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_SRC;
             break;
+        // Hagara the Stormbringer
+        case 105466: // Lightning Storm Cosmetic
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            break;
+        case 109315: // Icicle
+            spellInfo->Effect[0] = 0;
+            spellInfo->DurationIndex = 35; // 4s
+            break;
+        case 105465: // Lightning Storm
+        case 108568:
+        case 110893:
+        case 110892:
+            spellInfo->Effect[0] = 0;
+            spellInfo->excludeTargetAuraSpell = 105367; // Lightning Conduit
+            count++;
+            break;
+        case 109325: // Frostflake
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
+            break;
 /*************************        DRAGON SOUL END        *****************************/
 
         case 88691: //Marked for Death Tracking

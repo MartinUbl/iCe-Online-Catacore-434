@@ -14,3 +14,21 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifndef INSTANCE_DRAGONSOUL_H
+#define INSTANCE_DRAGONSOUL_H
+
+enum Encounters
+{
+    // Bosses
+    TYPE_BOSS_MORCHOK                   = 0,
+    TYPE_BOSS_YORSAHJ                   = 1,
+    TYPE_BOSS_ZONOZZ                    = 2,
+    TYPE_BOSS_HAGARA                    = 3,
+    TYPE_BOSS_ULTRAXION                 = 4,
+    TYPE_BOSS_BLACKHORN                 = 5,
+    TYPE_BOSS_SPINE_OF_DEATHWING        = 6,
+    TYPE_BOSS_MADNESS_OF_DEATHWING      = 7,
+    MAX_ENCOUNTER                       = 8,
+};
+#endif
