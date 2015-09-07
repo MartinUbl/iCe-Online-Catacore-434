@@ -3357,8 +3357,10 @@ public:
             if (me->isAttackReady())
             {
                 Unit * target = me->GetVictim();
-                if (target && (target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE)
-                    || target->HasStealthAura()))
+                if (target && target->HasStealthAura())
+                    EnterEvadeMode();
+
+                if (target && target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE))
                 {
                     AttackAnotherTarget();
                     return;
