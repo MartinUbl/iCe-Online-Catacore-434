@@ -58,7 +58,7 @@ bool PetAI::_needToStop()
     if (me->IsCharmed() && me->GetVictim() == me->GetCharmer())
         return true;
 
-    if (_CheckTargetCC(me->GetVictim()) && !targetHasCC)
+    if (_CheckTargetCC(me->GetVictim()) && !targetHasCC && !me->GetVictim()->HasAura(6358) /*Seduction is only exception*/)
         return true;
 
     return !me->canAttack(me->GetVictim());
