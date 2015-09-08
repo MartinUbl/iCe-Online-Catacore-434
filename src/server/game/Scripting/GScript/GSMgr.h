@@ -31,6 +31,7 @@ class GSMgr
     public:
         void LoadScripts();
         void RegisterAI(ScriptedAI* src);
+        void UnregisterAI(ScriptedAI* src);
         CommandVector* GetScript(int id);
 
     private:

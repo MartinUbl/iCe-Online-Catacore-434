@@ -73,7 +73,7 @@ CommandProtoVector* gscr_parseInput(std::vector<std::string>& lines)
 
         // if the last character wasn't space/tab, and we ended by regular line break, parse
         // additional parameter from the rest of string
-        if (endbybreak && lastpos != i - 1 && lastpos != i)
+        if (endbybreak && lastpos != i)
         {
             if (instr)
                 tmp->addParameter(getStringFromRange(line, lastpos, i));

@@ -47,6 +47,10 @@ class GS_CreatureScript : public CreatureScript
             uint32 stored_faction = 0;
             // stored model id in case of morph
             uint32 stored_modelid = 0;
+            // stored scale value
+            float stored_scale = -1.0f;
+            // stored react state
+            uint8 stored_react = 99;
 
             // map of all timers
             std::map<int, int32> timer_map;
@@ -66,6 +70,11 @@ class GS_CreatureScript : public CreatureScript
                 is_moving = false;
                 is_updating_lock = false;
                 is_script_locked = false;
+            }
+
+            ~GS_ScriptedAI()
+            {
+                sGSMgr->UnregisterAI(this);
             }
 
             void DoAction(const int32 action) override
@@ -145,15 +154,25 @@ class GS_CreatureScript : public CreatureScript
                     me->DeMorph();
                     stored_modelid = 0;
                 }
+                if (stored_scale > 0.0f)
+                {
+                    me->SetFloatValue(OBJECT_FIELD_SCALE_X, stored_scale);
+                    stored_scale = -1.0f;
+                }
+                if (stored_react < 99)
+                {
+                    me->SetReactState((ReactStates)stored_react);
+                    stored_react = 99;
+                }
             }
 
             void Reset() override
             {
                 ResetState();
 
-                if (!is_script_locked)
+                if (!is_script_locked && m_currentScriptType != GS_TYPE_OUT_OF_COMBAT)
                 {
-                    if (m_currentScriptType != GS_TYPE_OUT_OF_COMBAT && m_outOfCombatScriptId >= 0)
+                    if (m_outOfCombatScriptId >= 0)
                     {
                         my_commands = sGSMgr->GetScript(m_outOfCombatScriptId);
                         m_currentScriptType = GS_TYPE_OUT_OF_COMBAT;
@@ -464,6 +483,8 @@ class GS_CreatureScript : public CreatureScript
                         }
                         break;
                     case GSCR_REACT:
+                        if (stored_react >= 99)
+                            stored_react = (uint8)me->GetReactState();
                         me->SetReactState(curr->params.c_react.reactstate);
                         break;
                     case GSCR_KILL:
@@ -529,6 +550,36 @@ class GS_CreatureScript : public CreatureScript
                         break;
                     case GSCR_UNLOCK:
                         is_script_locked = false;
+                        break;
+                    case GSCR_SCALE:
+                        if (!curr->params.c_scale.restore)
+                        {
+                            if (stored_scale < 0.0f)
+                                stored_scale = me->GetFloatValue(OBJECT_FIELD_SCALE_X);
+
+                            me->SetFloatValue(OBJECT_FIELD_SCALE_X, curr->params.c_scale.scale);
+                        }
+                        else
+                        {
+                            if (stored_scale > 0.0f)
+                            {
+                                me->SetFloatValue(OBJECT_FIELD_SCALE_X, stored_scale);
+                                stored_scale = -1.0f;
+                            }
+                        }
+                    case GSCR_FLAGS:
+                        if (curr->params.c_flags.op == GSFO_ADD)
+                            me->SetFlag(curr->params.c_flags.field, curr->params.c_flags.value);
+                        else if (curr->params.c_flags.op == GSFO_REMOVE)
+                            me->RemoveFlag(curr->params.c_flags.field, curr->params.c_flags.value);
+                        else if (curr->params.c_flags.op == GSFO_SET)
+                            me->SetUInt32Value(curr->params.c_flags.field, curr->params.c_flags.value);
+                        break;
+                    case GSCR_IMMUNITY:
+                        if (curr->params.c_immunity.op == GSFO_ADD)
+                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, curr->params.c_immunity.mask, true);
+                        else if (curr->params.c_immunity.op == GSFO_REMOVE)
+                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, curr->params.c_immunity.mask, false);
                         break;
                     default:
                     case GSCR_NONE:

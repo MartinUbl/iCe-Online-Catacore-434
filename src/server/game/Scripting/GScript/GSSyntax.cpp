@@ -53,6 +53,24 @@ class SyntaxErrorException : public std::exception
 // attempts to parse string to int, and returns true/false of success/fail
 static bool tryStrToInt(int& dest, const char* src)
 {
+    // parsing hexadecimal number
+    if (strlen(src) > 2 && src[0] == '0' && src[1] == 'x')
+    {
+        // validate hexa-numeric input
+        for (int i = 0; src[i] != '\0'; i++)
+        {
+            if ((src[i] < '0' || src[i] > '9') && (src[i] < 'a' || src[i] > 'f') && (src[i] < 'A' || src[i] > 'F'))
+                return false;
+        }
+
+        char* endptr;
+        dest = strtol(src+2, &endptr, 16);
+        if (endptr == src+2)
+            return false;
+
+        return true;
+    }
+
     // validate numeric input
     for (int i = 0; src[i] != '\0'; i++)
     {
@@ -86,6 +104,51 @@ static bool tryStrToFloat(float& dest, const char* src)
         return false;
 
     return true;
+}
+
+static bool tryRecognizeFlag(int& target, uint32 field, std::string& str)
+{
+    gs_recognized_string* arr = nullptr;
+    int count = 0;
+
+    if (field == UNIT_FIELD_FLAGS)
+    {
+        arr = gs_recognized_unit_flags;
+        count = sizeof(gs_recognized_unit_flags) / sizeof(gs_recognized_string);
+    }
+    else if (field == UNIT_FIELD_FLAGS_2)
+    {
+        arr = gs_recognized_unit_flags_2;
+        count = sizeof(gs_recognized_unit_flags_2) / sizeof(gs_recognized_string);
+    }
+    else if (field == UNIT_NPC_FLAGS)
+    {
+        arr = gs_recognized_npc_flags;
+        count = sizeof(gs_recognized_npc_flags) / sizeof(gs_recognized_string);
+    }
+    else if (field == UNIT_DYNAMIC_FLAGS)
+    {
+        arr = gs_recognized_unit_dynamic_flags;
+        count = sizeof(gs_recognized_unit_dynamic_flags) / sizeof(gs_recognized_string);
+    }
+    else if (field == UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE)
+    {
+        arr = gs_recognized_mechanic_immunity;
+        count = sizeof(gs_recognized_mechanic_immunity) / sizeof(gs_recognized_string);
+    }
+    else
+        return false;
+
+    for (int i = 0; i < count; i++)
+    {
+        if (str == arr[i].str)
+        {
+            target = (int)(arr[i].value);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // parses operator from input string
@@ -517,6 +580,83 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         case GSCR_UNLOCK:
             if (src->parameters.size() != 0)
                 CLEANUP_AND_THROW("invalid parameter count for instruction LOCK / UNLOCK - do not supply parameters");
+            break;
+        // scale instruction - changes scale of NPC
+        // Syntax: scale <scale value>
+        case GSCR_SCALE:
+            if (src->parameters.size() != 1)
+                CLEANUP_AND_THROW("invalid parameter count for instruction SCALE - use 1 parameter");
+
+            ret->params.c_scale.restore = false;
+            if (src->parameters[0] == "restore")
+            {
+                ret->params.c_scale.restore = true;
+                ret->params.c_scale.scale = 0.0f;
+            }
+            else if (!tryStrToFloat(ret->params.c_scale.scale, src->parameters[0].c_str()))
+                CLEANUP_AND_THROW("invalid scale value for command SCALE");
+
+            break;
+        // flags instruction - sets/adds/removes flag
+        // Syntax: flags <field identifier> add <flag or name>
+        //         flags <field identifier> remove <flag or name>
+        //         flags <field identifier> set <flag or name>
+        case GSCR_FLAGS:
+            if (src->parameters.size() < 3)
+                CLEANUP_AND_THROW("too few parameters for instruction FLAGS");
+            if (src->parameters.size() > 3)
+                CLEANUP_AND_THROW("too many parameters for instruction FLAGS");
+
+            if (src->parameters[1] == "add")
+                ret->params.c_flags.op = GSFO_ADD;
+            else if (src->parameters[1] == "remove")
+                ret->params.c_flags.op = GSFO_REMOVE;
+            else if (src->parameters[1] == "set")
+                ret->params.c_flags.op = GSFO_SET;
+            else
+                CLEANUP_AND_THROW("invalid operation for instruction FLAGS");
+
+            if (src->parameters[0] == "unit_flags")
+                ret->params.c_flags.field = UNIT_FIELD_FLAGS;
+            else if (src->parameters[0] == "unit_flags2")
+                ret->params.c_flags.field = UNIT_FIELD_FLAGS_2;
+            else if (src->parameters[0] == "dynamic_flags")
+                ret->params.c_flags.field = UNIT_DYNAMIC_FLAGS;
+            else if (src->parameters[0] == "npc_flags")
+                ret->params.c_flags.field = UNIT_NPC_FLAGS;
+            else
+                CLEANUP_AND_THROW("unknown flags identifier for instruction FLAGS");
+
+            if (!tryStrToInt(ret->params.c_flags.value, src->parameters[2].c_str()))
+            {
+                if (!tryRecognizeFlag(ret->params.c_flags.value, ret->params.c_flags.field, src->parameters[2]))
+                    CLEANUP_AND_THROW("could not recognize flag name / identifier in FLAGS instruction");
+            }
+
+            break;
+        // immunity instruction - change immunity mask of owner
+        // Syntax: immunity add <flag or name>
+        //         immunity remove <flag or name>
+        //         immunity set <flag or name>
+        case GSCR_IMMUNITY:
+            if (src->parameters.size() < 2)
+                CLEANUP_AND_THROW("too few parameters for instruction IMMUNITY");
+            if (src->parameters.size() > 2)
+                CLEANUP_AND_THROW("too many parameters for instruction IMMUNITY");
+
+            if (src->parameters[0] == "add")
+                ret->params.c_immunity.op = GSFO_ADD;
+            else if (src->parameters[0] == "remove")
+                ret->params.c_immunity.op = GSFO_REMOVE;
+            else
+                CLEANUP_AND_THROW("invalid operation for instruction IMMUNITY, use add or remove");
+
+            if (!tryStrToInt(ret->params.c_immunity.mask, src->parameters[1].c_str()))
+            {
+                if (!tryRecognizeFlag(ret->params.c_immunity.mask, UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE /* dummy, just to not be in conflict */, src->parameters[1]))
+                    CLEANUP_AND_THROW("could not recognize flag name / identifier in IMMUNITY instruction");
+            }
+
             break;
     }
 

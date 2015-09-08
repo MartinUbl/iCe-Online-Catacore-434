@@ -49,6 +49,9 @@ enum gs_command_type
     GSCR_WAITFOR = 20,
     GSCR_LOCK = 21,
     GSCR_UNLOCK = 22,
+    GSCR_SCALE = 23,
+    GSCR_FLAGS = 24,
+    GSCR_IMMUNITY = 25,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -76,6 +79,101 @@ static std::string gscr_identifiers[] = {
     "waitfor",
     "lock",
     "unlock",
+    "scale",
+    "flags",
+    "immunity",
+};
+
+enum gs_flag_operation
+{
+    GSFO_NONE = 0,
+    GSFO_ADD = 1,               // add flag to current using OR instruction
+    GSFO_REMOVE = 2,            // remove flag from current using AND on negated current and flag
+    GSFO_SET = 3                // sets new value regardless of what was there previously
+};
+
+// structure for recognized values
+struct gs_recognized_string
+{
+    const char* str;
+    uint32 value;
+};
+
+static gs_recognized_string gs_recognized_npc_flags[] = {
+    { "gossip", UNIT_NPC_FLAG_GOSSIP },
+    { "questgiver", UNIT_NPC_FLAG_QUESTGIVER },
+    { "trainer", UNIT_NPC_FLAG_TRAINER },
+    { "trainer_class", UNIT_NPC_FLAG_TRAINER_CLASS },
+    { "trainer_profession", UNIT_NPC_FLAG_TRAINER_PROFESSION },
+    { "vendor", UNIT_NPC_FLAG_VENDOR },
+    { "repair", UNIT_NPC_FLAG_REPAIR },
+    { "flightmaster", UNIT_NPC_FLAG_FLIGHTMASTER },
+    { "innkeeper", UNIT_NPC_FLAG_INNKEEPER },
+    { "banker", UNIT_NPC_FLAG_BANKER },
+    { "auctioneer", UNIT_NPC_FLAG_AUCTIONEER },
+    { "spellclick", UNIT_NPC_FLAG_SPELLCLICK }
+};
+
+static gs_recognized_string gs_recognized_unit_flags[] = {
+    { "not_attackable", UNIT_FLAG_NON_ATTACKABLE },
+    { "disable_move", UNIT_FLAG_DISABLE_MOVE },
+    { "pvp_attackable", UNIT_FLAG_PVP_ATTACKABLE },
+    { "ooc_not_attackable", UNIT_FLAG_OOC_NOT_ATTACKABLE },
+    { "pvp", UNIT_FLAG_PVP },
+    { "silenced", UNIT_FLAG_SILENCED },
+    { "pacified", UNIT_FLAG_PACIFIED },
+    { "stunned", UNIT_FLAG_STUNNED },
+    { "not_selectable", UNIT_FLAG_NOT_SELECTABLE },
+    { "skinnable", UNIT_FLAG_SKINNABLE }
+};
+
+static gs_recognized_string gs_recognized_unit_flags_2[] = {
+    { "feign_death", UNIT_FLAG2_FEIGN_DEATH }
+};
+
+static gs_recognized_string gs_recognized_unit_dynamic_flags[] = {
+    { "lootable", UNIT_DYNFLAG_LOOTABLE },
+    { "track_unit", UNIT_DYNFLAG_TRACK_UNIT },
+    { "tapped", UNIT_DYNFLAG_TAPPED },
+    { "tapped_by_player", UNIT_DYNFLAG_TAPPED_BY_PLAYER },
+    { "specialinfo", UNIT_DYNFLAG_SPECIALINFO },
+    { "dead", UNIT_DYNFLAG_DEAD },
+    { "refer_a_friend", UNIT_DYNFLAG_REFER_A_FRIEND },
+    { "tapped_by_all", UNIT_DYNFLAG_TAPPED_BY_ALL_THREAT_LIST }
+};
+
+static gs_recognized_string gs_recognized_mechanic_immunity[] = {
+    { "charm", MECHANIC_CHARM },
+    { "disorient", MECHANIC_DISORIENTED },
+    { "disarm", MECHANIC_DISARM },
+    { "distract", MECHANIC_DISTRACT },
+    { "fear", MECHANIC_FEAR },
+    { "grip", MECHANIC_GRIP },
+    { "root", MECHANIC_ROOT },
+    { "pacify", MECHANIC_PACIFY },
+    { "silence", MECHANIC_SILENCE },
+    { "sleep", MECHANIC_SLEEP },
+    { "snare", MECHANIC_SNARE },
+    { "stun", MECHANIC_STUN },
+    { "freeze", MECHANIC_FREEZE },
+    { "knockout", MECHANIC_KNOCKOUT },
+    { "bleed", MECHANIC_BLEED },
+    { "bandage", MECHANIC_BANDAGE },
+    { "polymorph", MECHANIC_POLYMORPH },
+    { "banish", MECHANIC_BANISH },
+    { "shield", MECHANIC_SHIELD },
+    { "shackle", MECHANIC_SHACKLE },
+    { "mount", MECHANIC_MOUNT },
+    { "infected", MECHANIC_INFECTED },
+    { "turn", MECHANIC_TURN },
+    { "horror", MECHANIC_HORROR },
+    { "invulnerability", MECHANIC_INVULNERABILITY },
+    { "interrupt", MECHANIC_INTERRUPT },
+    { "daze", MECHANIC_DAZE },
+    { "discovery", MECHANIC_DISCOVERY },
+    { "immuneshield", MECHANIC_IMMUNE_SHIELD },
+    { "sap", MECHANIC_SAPPED },
+    { "enrage", MECHANIC_ENRAGED },
 };
 
 // flag for wait instruction
@@ -152,9 +250,9 @@ struct gs_specifier
     // parses input string into specifier structure
     static gs_specifier parse(const char* str);
     // creates empty specifier object prefilled with specified values
-    static gs_specifier make_default_subject(gs_subject_type stype, gs_subject_parameter sparam = GSSP_NONE) { return { stype, sparam, 0 }; };
+    static gs_specifier make_default_subject(gs_subject_type stype, gs_subject_parameter sparam = GSSP_NONE) { return{ stype, sparam, 0 }; };
     // creates empty specifier object prefilled with specified value
-    static gs_specifier make_default_value(int value) { return { GSST_NONE, GSSP_NONE, value }; };
+    static gs_specifier make_default_value(int value) { return{ GSST_NONE, GSSP_NONE, value }; };
 };
 
 // command structure
@@ -238,6 +336,25 @@ struct gs_command
         {
             gs_event_type eventtype;
         } c_waitfor;
+
+        struct
+        {
+            bool restore;
+            float scale;
+        } c_scale;
+
+        struct
+        {
+            uint32 field;
+            gs_flag_operation op;
+            int value;
+        } c_flags;
+
+        struct
+        {
+            gs_flag_operation op;
+            int mask;
+        } c_immunity;
 
     } params;
 

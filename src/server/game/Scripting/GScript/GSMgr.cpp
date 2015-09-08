@@ -83,6 +83,12 @@ void GSMgr::RegisterAI(ScriptedAI* src)
     m_registeredAIs.insert(src);
 }
 
+void GSMgr::UnregisterAI(ScriptedAI* src)
+{
+    if (m_registeredAIs.find(src) != m_registeredAIs.end())
+        m_registeredAIs.erase(src);
+}
+
 CommandVector* GSMgr::GetScript(int id)
 {
     if (m_loadedScripts.find(id) == m_loadedScripts.end())
