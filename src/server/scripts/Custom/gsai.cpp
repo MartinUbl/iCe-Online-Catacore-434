@@ -28,6 +28,8 @@ class GS_CreatureScript : public CreatureScript
             int m_combatScriptId = -1;
             // script ID when not in combat
             int m_outOfCombatScriptId = -1;
+            // script IDs for gossip options
+            int m_gossipSelectScripts[10];
 
             // current type of script being executed
             GScriptType m_currentScriptType = GS_TYPE_NONE;
@@ -55,9 +57,13 @@ class GS_CreatureScript : public CreatureScript
             // map of all timers
             std::map<int, int32> timer_map;
 
+            Player* m_scriptInvoker = nullptr;
+
             GS_ScriptedAI(Creature* cr) : ScriptedAI(cr)
             {
                 my_commands = nullptr;
+                for (int i = 0; i < 10; i++)
+                    m_gossipSelectScripts[i] = -1;
 
                 sGSMgr->RegisterAI(this);
 
@@ -101,6 +107,21 @@ class GS_CreatureScript : public CreatureScript
                     ScriptedAI::DoAction(action);
             }
 
+            void sGossipSelect(Player* player, uint32 sender, uint32 action)
+            {
+                player->CLOSE_GOSSIP_MENU();
+                if (m_currentScriptType == GS_TYPE_NONE || m_currentScriptType == GS_TYPE_OUT_OF_COMBAT)
+                {
+                    if (m_gossipSelectScripts[action] >= 0)
+                    {
+                        ResetState();
+                        m_scriptInvoker = player;
+                        my_commands = sGSMgr->GetScript(m_gossipSelectScripts[action]);
+                        m_currentScriptType = GS_TYPE_GOSSIP_SELECT;
+                    }
+                }
+            }
+
             void GS_LoadMyScript()
             {
                 // select everything for this creature from database
@@ -113,16 +134,21 @@ class GS_CreatureScript : public CreatureScript
                     {
                         f = res->Fetch();
 
-                        switch (f[0].GetUInt16())
+                        uint16 type = f[0].GetUInt16();
+                        int32 scriptId = f[2].GetInt32();
+                        int32 scriptParam = f[1].GetInt32();
+
+                        switch (type)
                         {
                             case GS_TYPE_COMBAT:
-                                m_combatScriptId = f[2].GetInt32();
+                                m_combatScriptId = scriptId;
                                 break;
                             case GS_TYPE_OUT_OF_COMBAT:
-                                m_outOfCombatScriptId = f[2].GetInt32();
+                                m_outOfCombatScriptId = scriptId;
                                 break;
                             case GS_TYPE_GOSSIP_SELECT:
-                                // NYI
+                                if (scriptParam >= 0 && scriptParam <= 9)
+                                    m_gossipSelectScripts[scriptParam] = scriptId;
                                 break;
                             case GS_TYPE_QUEST_ACCEPT:
                                 // NYI
@@ -143,6 +169,7 @@ class GS_CreatureScript : public CreatureScript
                 is_waiting = false;
                 disable_melee = false;
                 is_moving = false;
+                m_scriptInvoker = nullptr;
 
                 if (stored_faction)
                 {
@@ -201,6 +228,8 @@ class GS_CreatureScript : public CreatureScript
             {
                 if (!is_script_locked)
                 {
+                    ResetState();
+
                     my_commands = nullptr;
                     m_currentScriptType = GS_TYPE_NONE;
                     if (m_outOfCombatScriptId >= 0)
@@ -303,6 +332,9 @@ class GS_CreatureScript : public CreatureScript
                             itr++;
                         return (*itr)->getTarget();
                     }
+                    // script invoker (active during gossip select, quest accept, etc.)
+                    case GSST_INVOKER:
+                        return m_scriptInvoker;
                     // other non-handled cases - returns null as it's invalid in this context
                     default:
                     case GSST_STATE:
@@ -444,6 +476,11 @@ class GS_CreatureScript : public CreatureScript
                     is_updating_lock = false;
                     if (me->GetVictim())
                         DoMeleeAttackIfReady();
+
+                    // gossip script has passed to end
+                    if (m_currentScriptType == GS_TYPE_GOSSIP_SELECT)
+                        EnterEvadeMode();
+
                     return;
                 }
 

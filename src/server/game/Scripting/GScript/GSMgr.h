@@ -18,7 +18,7 @@ enum GScriptType
 enum GSAISignals
 {
     GSAI_SIGNAL_UNHOOK = 1,
-    GSAI_SIGNAL_REHOOK = 2
+    GSAI_SIGNAL_REHOOK = 2,
 };
 
 class GSMgr

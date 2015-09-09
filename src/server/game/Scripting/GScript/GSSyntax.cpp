@@ -345,6 +345,8 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_type = GSST_CHANCE;
             else if (subid == "timer")
                 rr.subject_type = GSST_TIMER;
+            else if (subid == "invoker")
+                rr.subject_type = GSST_INVOKER;
             else if (subid == "ready")
             {
                 rr.subject_type = GSST_STATE;
