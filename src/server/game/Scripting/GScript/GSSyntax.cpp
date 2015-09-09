@@ -4,6 +4,113 @@
 #include <stack>
 #include <map>
 
+static gs_recognized_string gs_recognized_npc_flags[] = {
+    { "gossip", UNIT_NPC_FLAG_GOSSIP },
+    { "questgiver", UNIT_NPC_FLAG_QUESTGIVER },
+    { "trainer", UNIT_NPC_FLAG_TRAINER },
+    { "trainer_class", UNIT_NPC_FLAG_TRAINER_CLASS },
+    { "trainer_profession", UNIT_NPC_FLAG_TRAINER_PROFESSION },
+    { "vendor", UNIT_NPC_FLAG_VENDOR },
+    { "repair", UNIT_NPC_FLAG_REPAIR },
+    { "flightmaster", UNIT_NPC_FLAG_FLIGHTMASTER },
+    { "innkeeper", UNIT_NPC_FLAG_INNKEEPER },
+    { "banker", UNIT_NPC_FLAG_BANKER },
+    { "auctioneer", UNIT_NPC_FLAG_AUCTIONEER },
+    { "spellclick", UNIT_NPC_FLAG_SPELLCLICK }
+};
+
+static gs_recognized_string gs_recognized_unit_flags[] = {
+    { "not_attackable", UNIT_FLAG_NON_ATTACKABLE },
+    { "disable_move", UNIT_FLAG_DISABLE_MOVE },
+    { "pvp_attackable", UNIT_FLAG_PVP_ATTACKABLE },
+    { "ooc_not_attackable", UNIT_FLAG_OOC_NOT_ATTACKABLE },
+    { "pvp", UNIT_FLAG_PVP },
+    { "silenced", UNIT_FLAG_SILENCED },
+    { "pacified", UNIT_FLAG_PACIFIED },
+    { "stunned", UNIT_FLAG_STUNNED },
+    { "not_selectable", UNIT_FLAG_NOT_SELECTABLE },
+    { "skinnable", UNIT_FLAG_SKINNABLE }
+};
+
+static gs_recognized_string gs_recognized_unit_flags_2[] = {
+    { "feign_death", UNIT_FLAG2_FEIGN_DEATH }
+};
+
+static gs_recognized_string gs_recognized_unit_dynamic_flags[] = {
+    { "lootable", UNIT_DYNFLAG_LOOTABLE },
+    { "track_unit", UNIT_DYNFLAG_TRACK_UNIT },
+    { "tapped", UNIT_DYNFLAG_TAPPED },
+    { "tapped_by_player", UNIT_DYNFLAG_TAPPED_BY_PLAYER },
+    { "specialinfo", UNIT_DYNFLAG_SPECIALINFO },
+    { "dead", UNIT_DYNFLAG_DEAD },
+    { "refer_a_friend", UNIT_DYNFLAG_REFER_A_FRIEND },
+    { "tapped_by_all", UNIT_DYNFLAG_TAPPED_BY_ALL_THREAT_LIST }
+};
+
+static gs_recognized_string gs_recognized_mechanic_immunity[] = {
+    { "charm", MECHANIC_CHARM },
+    { "disorient", MECHANIC_DISORIENTED },
+    { "disarm", MECHANIC_DISARM },
+    { "distract", MECHANIC_DISTRACT },
+    { "fear", MECHANIC_FEAR },
+    { "grip", MECHANIC_GRIP },
+    { "root", MECHANIC_ROOT },
+    { "pacify", MECHANIC_PACIFY },
+    { "silence", MECHANIC_SILENCE },
+    { "sleep", MECHANIC_SLEEP },
+    { "snare", MECHANIC_SNARE },
+    { "stun", MECHANIC_STUN },
+    { "freeze", MECHANIC_FREEZE },
+    { "knockout", MECHANIC_KNOCKOUT },
+    { "bleed", MECHANIC_BLEED },
+    { "bandage", MECHANIC_BANDAGE },
+    { "polymorph", MECHANIC_POLYMORPH },
+    { "banish", MECHANIC_BANISH },
+    { "shield", MECHANIC_SHIELD },
+    { "shackle", MECHANIC_SHACKLE },
+    { "mount", MECHANIC_MOUNT },
+    { "infected", MECHANIC_INFECTED },
+    { "turn", MECHANIC_TURN },
+    { "horror", MECHANIC_HORROR },
+    { "invulnerability", MECHANIC_INVULNERABILITY },
+    { "interrupt", MECHANIC_INTERRUPT },
+    { "daze", MECHANIC_DAZE },
+    { "discovery", MECHANIC_DISCOVERY },
+    { "immuneshield", MECHANIC_IMMUNE_SHIELD },
+    { "sap", MECHANIC_SAPPED },
+    { "enrage", MECHANIC_ENRAGED },
+};
+
+static gs_recognized_string gs_recognized_movetype[] = {
+    { "walk", MOVE_WALK },
+    { "run", MOVE_RUN },
+    { "swim", MOVE_SWIM },
+    { "flight", MOVE_FLIGHT }
+};
+
+static gs_recognized_string gs_recognized_emote[] = {
+    { "wave", EMOTE_ONESHOT_WAVE },
+    { "dance", EMOTE_STATE_DANCE },
+    { "point", EMOTE_ONESHOT_POINT },
+    { "cheer", EMOTE_ONESHOT_CHEER },
+    { "bow", EMOTE_ONESHOT_BOW },
+    { "question", EMOTE_ONESHOT_QUESTION },
+    { "exclamation", EMOTE_ONESHOT_EXCLAMATION },
+    { "laugh", EMOTE_ONESHOT_LAUGH },
+    { "sleep", EMOTE_STATE_SLEEP },
+    { "sit", EMOTE_STATE_SIT },
+    { "rude", EMOTE_ONESHOT_RUDE },
+    { "roar", EMOTE_ONESHOT_ROAR },
+    { "kneel", EMOTE_ONESHOT_KNEEL },
+    { "kiss", EMOTE_ONESHOT_KISS },
+    { "cry", EMOTE_ONESHOT_CRY },
+    { "chicken", EMOTE_ONESHOT_CHICKEN },
+    { "beg", EMOTE_ONESHOT_BEG },
+    { "applaud", EMOTE_ONESHOT_APPLAUD },
+    { "shout", EMOTE_ONESHOT_SHOUT },
+    { "shy", EMOTE_ONESHOT_SHY },
+};
+
 // string comparator for map
 struct StrCompare : public std::binary_function<const char*, const char*, bool>
 {
@@ -136,6 +243,16 @@ static bool tryRecognizeFlag(int& target, uint32 field, std::string& str)
         arr = gs_recognized_mechanic_immunity;
         count = sizeof(gs_recognized_mechanic_immunity) / sizeof(gs_recognized_string);
     }
+    else if (field == UNIT_FIELD_HOVERHEIGHT)
+    {
+        arr = gs_recognized_movetype;
+        count = sizeof(gs_recognized_movetype) / sizeof(gs_recognized_string);
+    }
+    else if (field == UNIT_NPC_EMOTESTATE)
+    {
+        arr = gs_recognized_emote;
+        count = sizeof(gs_recognized_emote) / sizeof(gs_recognized_string);
+    }
     else
         return false;
 
@@ -220,6 +337,8 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_type = GSST_TARGET;
             else if (subid == "random")
                 rr.subject_type = GSST_RANDOM;
+            else if (subid == "random_notank")
+                rr.subject_type = GSST_RANDOM_NOTANK;
             else if (subid == "implicit")
                 rr.subject_type = GSST_IMPLICIT;
             else if (subid == "chance")
@@ -269,6 +388,14 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_parameter = GSSP_FACTION;
             else if (parid == "level")
                 rr.subject_parameter = GSSP_LEVEL;
+            else if (parid == "combat")
+                rr.subject_parameter = GSSP_COMBAT;
+            else if (parid == "mana")
+                rr.subject_parameter = GSSP_MANA;
+            else if (parid == "mana_pct")
+                rr.subject_parameter = GSSP_MANA_PCT;
+            else if (parid == "distance")
+                rr.subject_parameter = GSSP_DISTANCE;
         }
     }
 
@@ -657,6 +784,121 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                     CLEANUP_AND_THROW("could not recognize flag name / identifier in IMMUNITY instruction");
             }
 
+            break;
+        // emote instruction - plays emote on subject
+        // Syntax: emote <emote id> [<subject>]
+        case GSCR_EMOTE:
+            if (src->parameters.size() < 1)
+                CLEANUP_AND_THROW("too few parameters for instruction EMOTE");
+            if (src->parameters.size() > 2)
+                CLEANUP_AND_THROW("too many parameters for instruction EMOTE");
+
+            if (!tryStrToInt(ret->params.c_emote.emote_id, src->parameters[0].c_str()))
+            {
+                if (!tryRecognizeFlag(ret->params.c_emote.emote_id, UNIT_NPC_EMOTESTATE, src->parameters[0]))
+                    CLEANUP_AND_THROW("could not recognize emote name / identifier in EMOTE instruction");
+            }
+
+            if (src->parameters.size() == 2)
+                ret->params.c_emote.subject = gs_specifier::parse(src->parameters[1].c_str());
+            else
+                ret->params.c_emote.subject.subject_type = GSST_ME;
+
+            break;
+        // movie instruction - plays movie to subject
+        // Syntax: movie <movie id> <subject>
+        case GSCR_MOVIE:
+            if (src->parameters.size() < 2)
+                CLEANUP_AND_THROW("too few parameters for instruction MOVIE");
+            if (src->parameters.size() > 2)
+                CLEANUP_AND_THROW("too many parameters for instruction MOVIE");
+
+            if (!tryStrToInt(ret->params.c_movie.movie_id, src->parameters[0].c_str()))
+                CLEANUP_AND_THROW("could not recognize movie identifier in MOVIE instruction");
+
+            ret->params.c_movie.subject = gs_specifier::parse(src->parameters[1].c_str());
+
+            break;
+        // aura instruction - adds/removes aura to subject
+        // Syntax: aura add <spell id> [<subject>]
+        //         aura remove <spell id> [<subject>]
+        case GSCR_AURA:
+            if (src->parameters.size() < 2)
+                CLEANUP_AND_THROW("too few parameters for instruction AURA");
+            if (src->parameters.size() > 3)
+                CLEANUP_AND_THROW("too many parameters for instruction AURA");
+
+            if (src->parameters[0] == "add")
+                ret->params.c_aura.op = GSFO_ADD;
+            else if (src->parameters[0] == "remove")
+                ret->params.c_aura.op = GSFO_REMOVE;
+            else
+                CLEANUP_AND_THROW("invalid operation for instruction AURA, use add or remove");
+
+            if (!tryStrToInt(ret->params.c_aura.aura_id, src->parameters[1].c_str()))
+                CLEANUP_AND_THROW("invalid aura identifier in AURA instruction");
+
+            if (src->parameters.size() == 3)
+                ret->params.c_aura.subject = gs_specifier::parse(src->parameters[2].c_str());
+            else
+                ret->params.c_aura.subject.subject_type = GSST_ME;
+
+            break;
+        // speed instruction - sets movement speed of specified move type
+        // Syntax: speed <movetype> <value>
+        case GSCR_SPEED:
+            if (src->parameters.size() < 2)
+                CLEANUP_AND_THROW("too few parameters for instruction SPEED");
+            if (src->parameters.size() > 2)
+                CLEANUP_AND_THROW("too many parameters for instruction SPEED");
+
+            if (!tryStrToInt(ret->params.c_speed.movetype, src->parameters[0].c_str()))
+            {
+                if (!tryRecognizeFlag(ret->params.c_speed.movetype, UNIT_FIELD_HOVERHEIGHT /* dummy, to avoid conflict */, src->parameters[0]))
+                    CLEANUP_AND_THROW("could not recognize move type name / identifier in SPEED instruction");
+            }
+
+            if (!tryStrToFloat(ret->params.c_speed.speed, src->parameters[1].c_str()))
+                CLEANUP_AND_THROW("invalid speed specified for SPEED instruction");
+
+            break;
+        // move instruction - sets implicit move type
+        // Syntax: move <movetype>
+        case GSCR_MOVE:
+            if (src->parameters.size() < 1)
+                CLEANUP_AND_THROW("too few parameters for instruction MOVE");
+            if (src->parameters.size() > 1)
+                CLEANUP_AND_THROW("too many parameters for instruction MOVE");
+
+            if (src->parameters[0] == "idle")
+            {
+                ret->params.c_move.movetype = -1;
+            }
+            else
+            {
+                if (!tryStrToInt(ret->params.c_move.movetype, src->parameters[0].c_str()))
+                {
+                    if (!tryRecognizeFlag(ret->params.c_move.movetype, UNIT_FIELD_HOVERHEIGHT /* dummy, to avoid conflict */, src->parameters[0]))
+                        CLEANUP_AND_THROW("could not recognize move type name / identifier in MOVE instruction");
+                }
+            }
+
+            break;
+        // mount instruction - sets mounted state for script owner
+        // Syntax: mount <display id>
+        case GSCR_MOUNT:
+            if (src->parameters.size() < 1)
+                CLEANUP_AND_THROW("too few parameters for instruction MOUNT");
+            if (src->parameters.size() > 1)
+                CLEANUP_AND_THROW("too many parameters for instruction MOUNT");
+            if (!tryStrToInt(ret->params.c_mount.mount_model_id, src->parameters[0].c_str()))
+                CLEANUP_AND_THROW("invalid non-numeric parameter for instruction MOUNT");
+            break;
+        // unmount instruction - dismounts script owner from mount
+        // Syntax: unmount
+        case GSCR_UNMOUNT:
+            if (src->parameters.size() != 0)
+                CLEANUP_AND_THROW("invalid parameter count for instruction UNMOUNT - do not supply parameters");
             break;
     }
 

@@ -164,6 +164,16 @@ class GS_CreatureScript : public CreatureScript
                     me->SetReactState((ReactStates)stored_react);
                     stored_react = 99;
                 }
+
+                me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+
+                me->Unmount();
+                me->LoadCreaturesAddon(true);
+
+                me->UpdateEntry(me->GetEntry());
+
+                me->GetMotionMaster()->MovementExpired(true);
+                me->GetMotionMaster()->Clear();
             }
 
             void Reset() override
@@ -279,8 +289,23 @@ class GS_CreatureScript : public CreatureScript
                             itr++;
                         return (*itr)->getTarget();
                     }
+                    // random target from threat list excluding tank
+                    case GSST_RANDOM_NOTANK:
+                    {
+                        if (me->getThreatManager().getThreatList().size() <= 1)
+                            return me->GetVictim();
+
+                        // get iterator
+                        std::list<HostileReference*>::iterator itr = me->getThreatManager().getThreatList().begin();
+                        // and advance by random value + 1
+                        int32 rr = urand(1, me->getThreatManager().getThreatList().size() - 1);
+                        while (rr > 0)
+                            itr++;
+                        return (*itr)->getTarget();
+                    }
                     // other non-handled cases - returns null as it's invalid in this context
                     default:
+                    case GSST_STATE:
                     case GSST_CHANCE:
                     case GSST_NONE:
                         break;
@@ -307,16 +332,26 @@ class GS_CreatureScript : public CreatureScript
 
                 bool isVictim = (spec.subject_type == GSST_TARGET && me->GetVictim());
 
+                Unit* subject = isVictim ? me->GetVictim() : me;
+
                 switch (spec.subject_parameter)
                 {
                     case GSSP_HEALTH:
-                        return isVictim ? me->GetVictim()->GetHealth() : me->GetHealth();
+                        return subject->GetHealth();
                     case GSSP_HEALTH_PCT:
-                        return isVictim ? (int32)me->GetVictim()->GetHealthPct() : (int32)me->GetHealthPct();
+                        return (int32)subject->GetHealthPct();
                     case GSSP_FACTION:
-                        return isVictim ? me->GetVictim()->getFaction() : me->getFaction();
+                        return subject->getFaction();
                     case GSSP_LEVEL:
-                        return isVictim ? me->GetVictim()->getLevel() : me->getLevel();
+                        return subject->getLevel();
+                    case GSSP_COMBAT:
+                        return subject->IsInCombat() ? 1 : 0;
+                    case GSSP_MANA:
+                        return subject->GetPower(POWER_MANA);
+                    case GSSP_MANA_PCT:
+                        return (subject->GetMaxPower(POWER_MANA) > 0) ? (int32)(100.0f* (float)subject->GetPower(POWER_MANA) / (float)subject->GetMaxPower(POWER_MANA)) : 0;
+                    case GSSP_DISTANCE:
+                        return me->GetDistance(subject);
                     default:
                     case GSSP_NONE:
                         break;
@@ -455,7 +490,7 @@ class GS_CreatureScript : public CreatureScript
                         me->MonsterYell(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, 0);
                         break;
                     case GSCR_IF:
-                        // if script does not meed condition passed in, move to endif offset
+                        // if script does not meet condition passed in, move to endif offset
                         if (!GS_Meets(curr))
                             com_counter = curr->params.c_if.endif_offset;
                         break;
@@ -463,7 +498,6 @@ class GS_CreatureScript : public CreatureScript
                         disable_melee = true;
                         me->AttackStop();
                         me->getThreatManager().clearReferences();
-                        me->SetStandState(UNIT_STAND_STATE_STAND);
                         break;
                     case GSCR_FACTION:
                         // if the faction is larger than 0, that means set faction to specified value
@@ -580,6 +614,62 @@ class GS_CreatureScript : public CreatureScript
                             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, curr->params.c_immunity.mask, true);
                         else if (curr->params.c_immunity.op == GSFO_REMOVE)
                             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, curr->params.c_immunity.mask, false);
+                        break;
+                    case GSCR_EMOTE:
+                        if (Unit* source = GS_SelectTarget(curr->params.c_emote.subject))
+                            source->HandleEmoteCommand(curr->params.c_emote.emote_id);
+                        break;
+                    case GSCR_MOVIE:
+                        if (Unit* source = GS_SelectTarget(curr->params.c_emote.subject))
+                            if (Player* pl = source->ToPlayer())
+                                pl->SendMovieStart((uint32)curr->params.c_movie.movie_id);
+                        break;
+                    case GSCR_AURA:
+                        if (Unit* source = GS_SelectTarget(curr->params.c_aura.subject))
+                        {
+                            if (curr->params.c_aura.op == GSFO_ADD)
+                                source->AddAura(curr->params.c_aura.aura_id, source);
+                            else if (curr->params.c_aura.op == GSFO_REMOVE)
+                                source->RemoveAurasDueToSpell(curr->params.c_aura.aura_id);
+                        }
+                        break;
+                    case GSCR_SPEED:
+                        if (curr->params.c_speed.movetype >= 0 && curr->params.c_speed.movetype <= MAX_MOVE_TYPE)
+                            me->SetSpeed((UnitMoveType)curr->params.c_speed.movetype, curr->params.c_speed.speed, true);
+                        break;
+                    case GSCR_MOVE:
+                        if (curr->params.c_move.movetype < 0)
+                        {
+                            me->GetMotionMaster()->MovementExpired();
+                            me->GetMotionMaster()->MoveIdle();
+                            me->StopMoving();
+
+                            me->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                            me->SetOrientation(me->GetOrientation());
+                            me->SendMovementFlagUpdate();
+                        }
+                        else
+                        {
+                            // if we are idling right now, start moving (if possible)
+                            if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
+                            {
+                                me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                                me->GetMotionMaster()->MovementExpired(true);
+                                if (me->GetVictim())
+                                    me->GetMotionMaster()->MoveChase(me->GetVictim());
+                            }
+
+                            if (curr->params.c_move.movetype == MOVE_RUN)
+                                me->SetWalk(false);
+                            if (curr->params.c_move.movetype == MOVE_WALK)
+                                me->SetWalk(true);
+                        }
+                        break;
+                    case GSCR_MOUNT:
+                        me->Mount(curr->params.c_mount.mount_model_id);
+                        break;
+                    case GSCR_UNMOUNT:
+                        me->Unmount();
                         break;
                     default:
                     case GSCR_NONE:

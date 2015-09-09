@@ -52,6 +52,13 @@ enum gs_command_type
     GSCR_SCALE = 23,
     GSCR_FLAGS = 24,
     GSCR_IMMUNITY = 25,
+    GSCR_EMOTE = 26,
+    GSCR_MOVIE = 27,
+    GSCR_AURA = 28,
+    GSCR_SPEED = 29,
+    GSCR_MOVE = 30,
+    GSCR_MOUNT = 31,
+    GSCR_UNMOUNT = 32,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -82,6 +89,13 @@ static std::string gscr_identifiers[] = {
     "scale",
     "flags",
     "immunity",
+    "emote",
+    "movie",
+    "aura",
+    "speed",
+    "move",
+    "mount",
+    "unmount",
 };
 
 enum gs_flag_operation
@@ -97,83 +111,6 @@ struct gs_recognized_string
 {
     const char* str;
     uint32 value;
-};
-
-static gs_recognized_string gs_recognized_npc_flags[] = {
-    { "gossip", UNIT_NPC_FLAG_GOSSIP },
-    { "questgiver", UNIT_NPC_FLAG_QUESTGIVER },
-    { "trainer", UNIT_NPC_FLAG_TRAINER },
-    { "trainer_class", UNIT_NPC_FLAG_TRAINER_CLASS },
-    { "trainer_profession", UNIT_NPC_FLAG_TRAINER_PROFESSION },
-    { "vendor", UNIT_NPC_FLAG_VENDOR },
-    { "repair", UNIT_NPC_FLAG_REPAIR },
-    { "flightmaster", UNIT_NPC_FLAG_FLIGHTMASTER },
-    { "innkeeper", UNIT_NPC_FLAG_INNKEEPER },
-    { "banker", UNIT_NPC_FLAG_BANKER },
-    { "auctioneer", UNIT_NPC_FLAG_AUCTIONEER },
-    { "spellclick", UNIT_NPC_FLAG_SPELLCLICK }
-};
-
-static gs_recognized_string gs_recognized_unit_flags[] = {
-    { "not_attackable", UNIT_FLAG_NON_ATTACKABLE },
-    { "disable_move", UNIT_FLAG_DISABLE_MOVE },
-    { "pvp_attackable", UNIT_FLAG_PVP_ATTACKABLE },
-    { "ooc_not_attackable", UNIT_FLAG_OOC_NOT_ATTACKABLE },
-    { "pvp", UNIT_FLAG_PVP },
-    { "silenced", UNIT_FLAG_SILENCED },
-    { "pacified", UNIT_FLAG_PACIFIED },
-    { "stunned", UNIT_FLAG_STUNNED },
-    { "not_selectable", UNIT_FLAG_NOT_SELECTABLE },
-    { "skinnable", UNIT_FLAG_SKINNABLE }
-};
-
-static gs_recognized_string gs_recognized_unit_flags_2[] = {
-    { "feign_death", UNIT_FLAG2_FEIGN_DEATH }
-};
-
-static gs_recognized_string gs_recognized_unit_dynamic_flags[] = {
-    { "lootable", UNIT_DYNFLAG_LOOTABLE },
-    { "track_unit", UNIT_DYNFLAG_TRACK_UNIT },
-    { "tapped", UNIT_DYNFLAG_TAPPED },
-    { "tapped_by_player", UNIT_DYNFLAG_TAPPED_BY_PLAYER },
-    { "specialinfo", UNIT_DYNFLAG_SPECIALINFO },
-    { "dead", UNIT_DYNFLAG_DEAD },
-    { "refer_a_friend", UNIT_DYNFLAG_REFER_A_FRIEND },
-    { "tapped_by_all", UNIT_DYNFLAG_TAPPED_BY_ALL_THREAT_LIST }
-};
-
-static gs_recognized_string gs_recognized_mechanic_immunity[] = {
-    { "charm", MECHANIC_CHARM },
-    { "disorient", MECHANIC_DISORIENTED },
-    { "disarm", MECHANIC_DISARM },
-    { "distract", MECHANIC_DISTRACT },
-    { "fear", MECHANIC_FEAR },
-    { "grip", MECHANIC_GRIP },
-    { "root", MECHANIC_ROOT },
-    { "pacify", MECHANIC_PACIFY },
-    { "silence", MECHANIC_SILENCE },
-    { "sleep", MECHANIC_SLEEP },
-    { "snare", MECHANIC_SNARE },
-    { "stun", MECHANIC_STUN },
-    { "freeze", MECHANIC_FREEZE },
-    { "knockout", MECHANIC_KNOCKOUT },
-    { "bleed", MECHANIC_BLEED },
-    { "bandage", MECHANIC_BANDAGE },
-    { "polymorph", MECHANIC_POLYMORPH },
-    { "banish", MECHANIC_BANISH },
-    { "shield", MECHANIC_SHIELD },
-    { "shackle", MECHANIC_SHACKLE },
-    { "mount", MECHANIC_MOUNT },
-    { "infected", MECHANIC_INFECTED },
-    { "turn", MECHANIC_TURN },
-    { "horror", MECHANIC_HORROR },
-    { "invulnerability", MECHANIC_INVULNERABILITY },
-    { "interrupt", MECHANIC_INTERRUPT },
-    { "daze", MECHANIC_DAZE },
-    { "discovery", MECHANIC_DISCOVERY },
-    { "immuneshield", MECHANIC_IMMUNE_SHIELD },
-    { "sap", MECHANIC_SAPPED },
-    { "enrage", MECHANIC_ENRAGED },
 };
 
 // flag for wait instruction
@@ -209,6 +146,7 @@ enum gs_subject_type
     GSST_CHANCE = 5,            // "chance" parameter i.e. for IF instruction
     GSST_TIMER = 6,             // timer stored, i.e. for IF instruction
     GSST_STATE = 7,             // constant state (i.e. for timer - ready)
+    GSST_RANDOM_NOTANK = 8,     // random target without current target
 };
 
 // type of subject parameter in specifier
@@ -221,6 +159,10 @@ enum gs_subject_parameter
     GSSP_LEVEL = 4,             // subject level
     GSSP_IDENTIFIER = 5,        // subject identifier, i.e. timer.name_of_timer
     GSSP_STATE_VALUE = 6,       // subject state value, i.e. ready (for timer), etc.
+    GSSP_COMBAT = 7,            // subject combat state (0 = ooc, 1 = combat)
+    GSSP_MANA = 8,              // subject mana value
+    GSSP_MANA_PCT = 9,          // subject mana percentage
+    GSSP_DISTANCE = 10,         // subject distance from "me"
 };
 
 // type of operator used in expression
@@ -355,6 +297,41 @@ struct gs_command
             gs_flag_operation op;
             int mask;
         } c_immunity;
+
+        struct
+        {
+            int emote_id;
+            gs_specifier subject;
+        } c_emote;
+
+        struct
+        {
+            int movie_id;
+            gs_specifier subject;
+        } c_movie;
+
+        struct
+        {
+            gs_flag_operation op;
+            int aura_id;
+            gs_specifier subject;
+        } c_aura;
+
+        struct
+        {
+            int movetype;
+            float speed;
+        } c_speed;
+
+        struct
+        {
+            int movetype; // -1 for idle
+        } c_move;
+
+        struct
+        {
+            int mount_model_id;
+        } c_mount;
 
     } params;
 
