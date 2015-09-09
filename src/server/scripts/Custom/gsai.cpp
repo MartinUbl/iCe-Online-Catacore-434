@@ -11,6 +11,12 @@ class GS_CreatureScript : public CreatureScript
             //
         }
 
+        struct GS_QuestScriptRecord
+        {
+            int acceptScriptId;
+            int completeScriptId;
+        };
+
         struct GS_ScriptedAI : public ScriptedAI
         {
             // vector of commands to be executed
@@ -30,6 +36,8 @@ class GS_CreatureScript : public CreatureScript
             int m_outOfCombatScriptId = -1;
             // script IDs for gossip options
             int m_gossipSelectScripts[10];
+            // map of script IDs for quests
+            std::map<uint32, GS_QuestScriptRecord> m_questScripts;
 
             // current type of script being executed
             GScriptType m_currentScriptType = GS_TYPE_NONE;
@@ -110,7 +118,7 @@ class GS_CreatureScript : public CreatureScript
             void sGossipSelect(Player* player, uint32 sender, uint32 action)
             {
                 player->CLOSE_GOSSIP_MENU();
-                if (m_currentScriptType == GS_TYPE_NONE || m_currentScriptType == GS_TYPE_OUT_OF_COMBAT)
+                if (m_currentScriptType != GS_TYPE_COMBAT)
                 {
                     if (m_gossipSelectScripts[action] >= 0)
                     {
@@ -118,6 +126,36 @@ class GS_CreatureScript : public CreatureScript
                         m_scriptInvoker = player;
                         my_commands = sGSMgr->GetScript(m_gossipSelectScripts[action]);
                         m_currentScriptType = GS_TYPE_GOSSIP_SELECT;
+                    }
+                }
+            }
+
+            void sQuestAccept(Player* player, Quest const* quest)
+            {
+                if (m_currentScriptType != GS_TYPE_COMBAT)
+                {
+                    uint32 questId = quest->GetQuestId();
+                    if (m_questScripts.find(questId) != m_questScripts.end() && m_questScripts[questId].acceptScriptId >= 0)
+                    {
+                        ResetState();
+                        m_scriptInvoker = player;
+                        my_commands = sGSMgr->GetScript(m_questScripts[questId].acceptScriptId);
+                        m_currentScriptType = GS_TYPE_QUEST_ACCEPT;
+                    }
+                }
+            }
+
+            void sQuestComplete(Player* player, Quest const* quest)
+            {
+                if (m_currentScriptType != GS_TYPE_COMBAT)
+                {
+                    uint32 questId = quest->GetQuestId();
+                    if (m_questScripts.find(questId) != m_questScripts.end() && m_questScripts[questId].completeScriptId >= 0)
+                    {
+                        ResetState();
+                        m_scriptInvoker = player;
+                        my_commands = sGSMgr->GetScript(m_questScripts[questId].completeScriptId);
+                        m_currentScriptType = GS_TYPE_QUEST_COMPLETE;
                     }
                 }
             }
@@ -151,7 +189,14 @@ class GS_CreatureScript : public CreatureScript
                                     m_gossipSelectScripts[scriptParam] = scriptId;
                                 break;
                             case GS_TYPE_QUEST_ACCEPT:
-                                // NYI
+                                if (m_questScripts.find(scriptParam) == m_questScripts.end())
+                                    m_questScripts[scriptParam] = GS_QuestScriptRecord();
+                                m_questScripts[scriptParam].acceptScriptId = scriptId;
+                                break;
+                            case GS_TYPE_QUEST_COMPLETE:
+                                if (m_questScripts.find(scriptParam) == m_questScripts.end())
+                                    m_questScripts[scriptParam] = GS_QuestScriptRecord();
+                                m_questScripts[scriptParam].completeScriptId = scriptId;
                                 break;
                             default:
                             case GS_TYPE_NONE:
@@ -477,8 +522,8 @@ class GS_CreatureScript : public CreatureScript
                     if (me->GetVictim())
                         DoMeleeAttackIfReady();
 
-                    // gossip script has passed to end
-                    if (m_currentScriptType == GS_TYPE_GOSSIP_SELECT)
+                    // gossip/quest accept/quest complete script has passed to end
+                    if (m_currentScriptType == GS_TYPE_GOSSIP_SELECT || m_currentScriptType == GS_TYPE_QUEST_ACCEPT || m_currentScriptType == GS_TYPE_QUEST_COMPLETE)
                         EnterEvadeMode();
 
                     return;
@@ -707,6 +752,17 @@ class GS_CreatureScript : public CreatureScript
                         break;
                     case GSCR_UNMOUNT:
                         me->Unmount();
+                        break;
+                    case GSCR_QUEST:
+                        if (m_scriptInvoker && m_scriptInvoker->IsInWorld())
+                        {
+                            if (curr->params.c_quest.op == GSQO_COMPLETE)
+                                m_scriptInvoker->CompleteQuest(curr->params.c_quest.quest_id);
+                            else if (curr->params.c_quest.op == GSQO_FAIL)
+                                m_scriptInvoker->FailQuest(curr->params.c_quest.quest_id);
+                            else if (curr->params.c_quest.op == GSQO_PROGRESS)
+                                m_scriptInvoker->AddQuestObjectiveProgress(curr->params.c_quest.quest_id, curr->params.c_quest.objective_index, curr->params.c_quest.value);
+                        }
                         break;
                     default:
                     case GSCR_NONE:

@@ -902,6 +902,51 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             if (src->parameters.size() != 0)
                 CLEANUP_AND_THROW("invalid parameter count for instruction UNMOUNT - do not supply parameters");
             break;
+        // quest instruction - manipulates with quest state and objectives
+        // Syntax: quest complete <quest id>
+        //         quest failed <quest id>
+        //         quest progress <quest id> <objective> <add value>
+        case GSCR_QUEST:
+            if (src->parameters.size() < 2)
+                CLEANUP_AND_THROW("too few parameters for instruction QUEST");
+            if (src->parameters.size() > 4)
+                CLEANUP_AND_THROW("too many parameters for instruction QUEST");
+
+            ret->params.c_quest.op = GSQO_NONE;
+            if (src->parameters[0] == "complete")
+                ret->params.c_quest.op = GSQO_COMPLETE;
+            else if (src->parameters[0] == "failed")
+                ret->params.c_quest.op = GSQO_FAIL;
+            else if (src->parameters[0] == "progress")
+            {
+                ret->params.c_quest.op = GSQO_PROGRESS;
+                if (src->parameters.size() < 3)
+                    CLEANUP_AND_THROW("missing objective parameter for instruction QUEST, operation PROGRESS");
+            }
+            else
+                CLEANUP_AND_THROW("invalid quest operation for instruction QUEST");
+
+            if (!tryStrToInt(ret->params.c_quest.quest_id, src->parameters[1].c_str()))
+                CLEANUP_AND_THROW("non-numeric questId supplied for instruction QUEST");
+
+            if (ret->params.c_quest.op == GSQO_PROGRESS)
+            {
+                if (!tryStrToInt(ret->params.c_quest.objective_index, src->parameters[2].c_str()))
+                    CLEANUP_AND_THROW("non-numeric objective id supplied for instruction QUEST");
+
+                if (ret->params.c_quest.objective_index < 0 || ret->params.c_quest.objective_index > 3)
+                    CLEANUP_AND_THROW("objective index is out of 0..3 range for instruction QUEST");
+
+                ret->params.c_quest.value = 1;
+
+                if (src->parameters.size() == 4)
+                {
+                    if (!tryStrToInt(ret->params.c_quest.value, src->parameters[3].c_str()))
+                        CLEANUP_AND_THROW("non-numeric parameter supplied as value for instruction QUEST");
+                }
+            }
+
+            break;
     }
 
     return ret;

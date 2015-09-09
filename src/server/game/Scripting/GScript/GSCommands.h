@@ -59,6 +59,7 @@ enum gs_command_type
     GSCR_MOVE = 30,
     GSCR_MOUNT = 31,
     GSCR_UNMOUNT = 32,
+    GSCR_QUEST = 33,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -96,6 +97,15 @@ static std::string gscr_identifiers[] = {
     "move",
     "mount",
     "unmount",
+    "quest",
+};
+
+enum gs_quest_operation
+{
+    GSQO_NONE = 0,              // no operation
+    GSQO_COMPLETE = 1,          // complete whole quest
+    GSQO_FAIL = 2,              // fail quest (i.e. escort quest, where someone dies, etc.)
+    GSQO_PROGRESS = 3           // move progress of quest objective
 };
 
 enum gs_flag_operation
@@ -333,6 +343,14 @@ struct gs_command
         {
             int mount_model_id;
         } c_mount;
+
+        struct
+        {
+            gs_quest_operation op;
+            int quest_id;
+            int objective_index;
+            int value;
+        } c_quest;
 
     } params;
 

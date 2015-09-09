@@ -1629,6 +1629,8 @@ class Player : public Unit, public GridObject<Player>
         void KilledMonsterCredit(uint32 entry, uint64 guid);
         void CastedCreatureOrGO(uint32 entry, uint64 guid, uint32 spell_id);
         void TalkedToCreature(uint32 entry, uint64 guid);
+        void AddQuestObjectiveProgress(uint32 quest_id, uint8 objective_index, uint16 addvalue);
+        uint32 GetQuestObjectiveProgress(uint32 quest_id, uint8 objective_index);
         void MoneyChanged(uint32 value);
         void ReputationChanged(FactionEntry const* factionEntry);
         void ReputationChanged2(FactionEntry const* factionEntry);

@@ -16377,6 +16377,9 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
                     CastSpell(this,itr->second->spellId,true);
     }
 
+    if (questGiver && questGiver->GetTypeId() == TYPEID_UNIT)
+        (questGiver->ToCreature())->AI()->sQuestComplete(this, pQuest);
+
     //lets remove flag for delayed teleports
     SetCanDelayTeleport(false);
 }
@@ -17341,6 +17344,49 @@ void Player::TalkedToCreature(uint32 entry, uint64 guid)
             }
         }
     }
+}
+
+void Player::AddQuestObjectiveProgress(uint32 quest_id, uint8 objective_index, uint16 addvalue)
+{
+    uint32 slot = FindQuestSlot(quest_id);
+    if (slot == MAX_QUEST_LOG_SIZE)
+        return;
+
+    Quest const* qInfo = sObjectMgr->GetQuestTemplate(quest_id);
+    if (!qInfo)
+        return;
+
+    QuestStatusData& q_status = mQuestStatus[quest_id];
+
+    if (q_status.m_status == QUEST_STATUS_INCOMPLETE)
+    {
+        uint32 reqCount = qInfo->ReqCreatureOrGOCount[objective_index];
+        uint16 curCount = q_status.m_creatureOrGOcount[objective_index];
+        if (curCount < reqCount)
+        {
+            q_status.m_creatureOrGOcount[objective_index] = curCount + addvalue;
+            if (q_status.uState != QUEST_NEW)
+                q_status.uState = QUEST_CHANGED;
+
+            SendQuestUpdateAddCreatureOrGo(qInfo, 0, objective_index, curCount, addvalue);
+        }
+
+        if (CanCompleteQuest(quest_id))
+            CompleteQuest(quest_id);
+    }
+}
+
+uint32 Player::GetQuestObjectiveProgress(uint32 quest_id, uint8 objective_index)
+{
+    uint32 slot = FindQuestSlot(quest_id);
+    if (slot == MAX_QUEST_LOG_SIZE)
+        return 0;
+
+    Quest const* qInfo = sObjectMgr->GetQuestTemplate(quest_id);
+    if (!qInfo)
+        return 0;
+
+    return mQuestStatus[quest_id].m_creatureOrGOcount[objective_index];
 }
 
 void Player::MoneyChanged(uint32 count)

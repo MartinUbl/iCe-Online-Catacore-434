@@ -12,7 +12,8 @@ enum GScriptType
     GS_TYPE_COMBAT = 1,
     GS_TYPE_OUT_OF_COMBAT = 2,
     GS_TYPE_GOSSIP_SELECT = 3,
-    GS_TYPE_QUEST_ACCEPT = 4
+    GS_TYPE_QUEST_ACCEPT = 4,
+    GS_TYPE_QUEST_COMPLETE = 5
 };
 
 enum GSAISignals
