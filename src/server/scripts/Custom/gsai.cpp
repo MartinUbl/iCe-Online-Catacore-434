@@ -173,7 +173,7 @@ class GS_CreatureScript : public CreatureScript
                 me->UpdateEntry(me->GetEntry());
 
                 me->GetMotionMaster()->MovementExpired(true);
-                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MoveTargetedHome();
             }
 
             void Reset() override
