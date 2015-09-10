@@ -66,6 +66,9 @@ class GS_CreatureScript : public CreatureScript
             std::map<int, int32> timer_map;
 
             Player* m_scriptInvoker = nullptr;
+            Player* m_inheritedScriptInvoker = nullptr;
+
+            Unit* m_parentUnit = nullptr;
 
             GS_ScriptedAI(Creature* cr) : ScriptedAI(cr)
             {
@@ -158,6 +161,16 @@ class GS_CreatureScript : public CreatureScript
                         m_currentScriptType = GS_TYPE_QUEST_COMPLETE;
                     }
                 }
+            }
+
+            void SetInheritedInvoker(Player* pl)
+            {
+                m_inheritedScriptInvoker = pl;
+            }
+
+            void SetParentUnit(Unit* parent)
+            {
+                m_parentUnit = parent;
             }
 
             void GS_LoadMyScript()
@@ -379,7 +392,9 @@ class GS_CreatureScript : public CreatureScript
                     }
                     // script invoker (active during gossip select, quest accept, etc.)
                     case GSST_INVOKER:
-                        return m_scriptInvoker;
+                        return m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                    case GSST_PARENT:
+                        return m_parentUnit ? m_parentUnit : me;
                     // other non-handled cases - returns null as it's invalid in this context
                     default:
                     case GSST_STATE:
@@ -407,9 +422,10 @@ class GS_CreatureScript : public CreatureScript
                 // there are only two meaningful subject types: me and target,
                 // any other target is not so valuable here
 
-                bool isVictim = (spec.subject_type == GSST_TARGET && me->GetVictim());
-
-                Unit* subject = isVictim ? me->GetVictim() : me;
+                Unit* subject = GS_SelectTarget(spec);
+                // fallback to "me" if the target has not been found
+                if (!subject)
+                    subject = me;
 
                 switch (spec.subject_parameter)
                 {
@@ -482,6 +498,22 @@ class GS_CreatureScript : public CreatureScript
             {
                 if (id == 100)
                     is_moving = false;
+            }
+
+            void JustSummoned(Creature* summoned) override
+            {
+                // only if script ID matches (if we have this AI, and it has its ID, then if the
+                // summoned creature has the same ID, that means, it has the same AI as well)
+                if (summoned->GetScriptId() == me->GetScriptId())
+                {
+                    GS_ScriptedAI* targetAI = ((GS_ScriptedAI*)summoned->AI());
+                    // set summoned creature invoker same like ours invoker
+                    if (m_scriptInvoker)
+                        targetAI->SetInheritedInvoker(m_scriptInvoker);
+
+                    // set me as parent of summoned unit
+                    targetAI->SetParentUnit(me);
+                }
             }
 
             void UpdateAI(const uint32 diff) override

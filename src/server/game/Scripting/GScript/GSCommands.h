@@ -158,6 +158,7 @@ enum gs_subject_type
     GSST_STATE = 7,             // constant state (i.e. for timer - ready)
     GSST_RANDOM_NOTANK = 8,     // random target without current target
     GSST_INVOKER = 9,           // script invoker (gossip script, quest accept, etc.)
+    GSST_PARENT = 10,           // parent unit (of summoned creature)
 };
 
 // type of subject parameter in specifier
