@@ -796,6 +796,9 @@ class GS_CreatureScript : public CreatureScript
                                 m_scriptInvoker->AddQuestObjectiveProgress(curr->params.c_quest.quest_id, curr->params.c_quest.objective_index, curr->params.c_quest.value);
                         }
                         break;
+                    case GSCR_DESPAWN:
+                        me->DespawnOrUnsummon();
+                        break;
                     default:
                     case GSCR_NONE:
                         break;

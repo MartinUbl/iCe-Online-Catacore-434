@@ -60,6 +60,7 @@ enum gs_command_type
     GSCR_MOUNT = 31,
     GSCR_UNMOUNT = 32,
     GSCR_QUEST = 33,
+    GSCR_DESPAWN = 34,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -98,6 +99,7 @@ static std::string gscr_identifiers[] = {
     "mount",
     "unmount",
     "quest",
+    "despawn",
 };
 
 enum gs_quest_operation

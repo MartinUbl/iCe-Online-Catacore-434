@@ -949,6 +949,12 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             }
 
             break;
+        // unmount instruction - dismounts script owner from mount
+        // Syntax: unmount
+        case GSCR_DESPAWN:
+            if (src->parameters.size() != 0)
+                CLEANUP_AND_THROW("invalid parameter count for instruction DESPAWN - do not supply parameters");
+            break;
     }
 
     return ret;
