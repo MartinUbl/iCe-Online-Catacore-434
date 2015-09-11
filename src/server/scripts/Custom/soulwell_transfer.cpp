@@ -324,7 +324,7 @@ public:
                     // parse charges string
                     std::string chargesStr = f[4].GetCString();
                     Tokens tk(chargesStr, ' ', MAX_ITEM_PROTO_SPELLS);
-                    for (int i = 0; i < MAX_ITEM_PROTO_SPELLS && i < tk.size(); i++)
+                    for (uint32 i = 0; i < MAX_ITEM_PROTO_SPELLS && i < tk.size(); i++)
                         itm->charges[i] = atol(tk[i]);
 
                     itm->flags = f[5].GetUInt32();
@@ -333,7 +333,7 @@ public:
                     // parse enchantments string
                     std::string enchStr = f[7].GetCString();
                     Tokens tke(enchStr, ' ');
-                    for (int i = 0; i < MAX_ENCHANTMENT_SLOT*3 && i < tke.size(); i++)
+                    for (uint32 i = 0; i < MAX_ENCHANTMENT_SLOT * 3 && i < tke.size(); i++)
                         itm->enchantments[i] = atol(tke[i]);
 
                     itm->durability = f[8].GetUInt32();
@@ -552,7 +552,7 @@ public:
 
                 lockedPlayer->GetAchievementMgr().SetCriteriaCounter(apr->criteriaId, apr->counter, apr->date);
 
-                delete ar;
+                delete apr;
                 ++achievementProgressItr;
             }
 
