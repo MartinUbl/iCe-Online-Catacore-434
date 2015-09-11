@@ -118,7 +118,7 @@ class GS_CreatureScript : public CreatureScript
                 // we can compare only numeric values - any other is considered false
                 return false;
             }
-            GS_Variable& operator+=(GS_Variable &sec)
+            GS_Variable& operator+=(const GS_Variable &sec)
             {
                 if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
                     value.asInteger += sec.value.asInteger;
@@ -136,7 +136,7 @@ class GS_CreatureScript : public CreatureScript
 
                 return *this;
             }
-            GS_Variable& operator-=(GS_Variable &sec)
+            GS_Variable& operator-=(const GS_Variable &sec)
             {
                 if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
                     value.asInteger -= sec.value.asInteger;
@@ -154,7 +154,7 @@ class GS_CreatureScript : public CreatureScript
 
                 return *this;
             }
-            GS_Variable& operator*=(GS_Variable &sec)
+            GS_Variable& operator*=(const GS_Variable &sec)
             {
                 if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
                     value.asInteger *= sec.value.asInteger;
@@ -172,7 +172,7 @@ class GS_CreatureScript : public CreatureScript
 
                 return *this;
             }
-            GS_Variable& operator/=(GS_Variable &sec)
+            GS_Variable& operator/=(const GS_Variable &sec)
             {
                 // this may not be exactly what we would expect, but this performs float division,
                 // when at least one parameter is of floating type. Otherwise performs integer
@@ -195,7 +195,7 @@ class GS_CreatureScript : public CreatureScript
                 return *this;
             }
             // result of modulo compount assignment is always integer
-            GS_Variable& operator%=(GS_Variable &sec)
+            GS_Variable& operator%=(const GS_Variable &sec)
             {
                 if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
                     value.asInteger %= sec.value.asInteger;
@@ -212,7 +212,7 @@ class GS_CreatureScript : public CreatureScript
                 else if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
                     value.asInteger = value.asInteger % ((int32)sec.value.asFloat);
                 else
-                    sLog->outError("GSAI: compount operator %= tried to work with non-numeric values");
+                    sLog->outError("GSAI: compount operator %%= tried to work with non-numeric values");
 
                 return *this;
             }
