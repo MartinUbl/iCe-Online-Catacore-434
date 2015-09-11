@@ -17,6 +17,207 @@ class GS_CreatureScript : public CreatureScript
             int completeScriptId;
         };
 
+        enum GS_VariableType
+        {
+            GSVTYPE_INTEGER = 0,
+            GSVTYPE_FLOAT = 1,
+            GSVTYPE_UNIT = 2
+        };
+
+        struct GS_Variable
+        {
+            union
+            {
+                int32 asInteger;
+                float asFloat;
+                Unit* asUnitPointer;
+            } value;
+
+            GS_VariableType type;
+
+            GS_Variable() { value.asInteger = 0; type = GSVTYPE_INTEGER; };
+            GS_Variable(int32 nvalue) { value.asInteger = nvalue; type = GSVTYPE_INTEGER; };
+            GS_Variable(float nvalue) { value.asFloat = nvalue; type = GSVTYPE_FLOAT; };
+            GS_Variable(Unit* nvalue) { value.asUnitPointer = nvalue; type = GSVTYPE_UNIT; };
+
+            bool operator==(GS_Variable &sec)
+            {
+                // since they are both same types, we may afford that
+                if (type == sec.type)
+                    return value.asInteger == sec.value.asInteger;
+                return false;
+            }
+            bool operator!=(GS_Variable &sec)
+            {
+                // since they are both same types, we may afford that
+                if (type == sec.type)
+                    return value.asInteger != sec.value.asInteger;
+                return true;
+            }
+            bool operator>(GS_Variable &sec)
+            {
+                // same type case
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
+                    return value.asInteger > sec.value.asInteger;
+                if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_FLOAT)
+                    return value.asFloat > sec.value.asFloat;
+                // different type case
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
+                    return (float)(value.asInteger) > sec.value.asFloat;
+                if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_INTEGER)
+                    return value.asFloat > (float)(sec.value.asInteger);
+
+                // we can compare only numeric values - any other is considered false
+                return false;
+            }
+            bool operator>=(GS_Variable &sec)
+            {
+                // same type case
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
+                    return value.asInteger >= sec.value.asInteger;
+                if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_FLOAT)
+                    return value.asFloat >= sec.value.asFloat;
+                // different type case
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
+                    return (float)(value.asInteger) >= sec.value.asFloat;
+                if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_INTEGER)
+                    return value.asFloat >= (float)(sec.value.asInteger);
+
+                // we can compare only numeric values - any other is considered false
+                return false;
+            }
+            bool operator<(GS_Variable &sec)
+            {
+                // same type case
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
+                    return value.asInteger < sec.value.asInteger;
+                if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_FLOAT)
+                    return value.asFloat < sec.value.asFloat;
+                // different type case
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
+                    return (float)(value.asInteger) < sec.value.asFloat;
+                if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_INTEGER)
+                    return value.asFloat < (float)(sec.value.asInteger);
+
+                // we can compare only numeric values - any other is considered false
+                return false;
+            }
+            bool operator<=(GS_Variable &sec)
+            {
+                // same type case
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
+                    return value.asInteger <= sec.value.asInteger;
+                if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_FLOAT)
+                    return value.asFloat <= sec.value.asFloat;
+                // different type case
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
+                    return (float)(value.asInteger) <= sec.value.asFloat;
+                if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_INTEGER)
+                    return value.asFloat <= (float)(sec.value.asInteger);
+
+                // we can compare only numeric values - any other is considered false
+                return false;
+            }
+            GS_Variable& operator+=(GS_Variable &sec)
+            {
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
+                    value.asInteger += sec.value.asInteger;
+                else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_FLOAT)
+                    value.asFloat += sec.value.asFloat;
+                else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_INTEGER)
+                    value.asFloat += sec.value.asInteger;
+                else if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
+                {
+                    value.asFloat = ((float)value.asInteger) + sec.value.asFloat;
+                    type = GSVTYPE_FLOAT;
+                }
+                else
+                    sLog->outError("GSAI: compount operator += tried to work with non-numeric values");
+
+                return *this;
+            }
+            GS_Variable& operator-=(GS_Variable &sec)
+            {
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
+                    value.asInteger -= sec.value.asInteger;
+                else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_FLOAT)
+                    value.asFloat -= sec.value.asFloat;
+                else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_INTEGER)
+                    value.asFloat -= sec.value.asInteger;
+                else if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
+                {
+                    value.asFloat = ((float)value.asInteger) - sec.value.asFloat;
+                    type = GSVTYPE_FLOAT;
+                }
+                else
+                    sLog->outError("GSAI: compount operator -= tried to work with non-numeric values");
+
+                return *this;
+            }
+            GS_Variable& operator*=(GS_Variable &sec)
+            {
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
+                    value.asInteger *= sec.value.asInteger;
+                else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_FLOAT)
+                    value.asFloat *= sec.value.asFloat;
+                else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_INTEGER)
+                    value.asFloat *= sec.value.asInteger;
+                else if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
+                {
+                    value.asFloat = ((float)value.asInteger) * sec.value.asFloat;
+                    type = GSVTYPE_FLOAT;
+                }
+                else
+                    sLog->outError("GSAI: compount operator *= tried to work with non-numeric values");
+
+                return *this;
+            }
+            GS_Variable& operator/=(GS_Variable &sec)
+            {
+                // this may not be exactly what we would expect, but this performs float division,
+                // when at least one parameter is of floating type. Otherwise performs integer
+                // division
+
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
+                    value.asInteger /= sec.value.asInteger;
+                else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_FLOAT)
+                    value.asFloat /= sec.value.asFloat;
+                else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_INTEGER)
+                    value.asFloat /= (float)sec.value.asInteger;
+                else if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
+                {
+                    value.asFloat = ((float)value.asInteger) / sec.value.asFloat;
+                    type = GSVTYPE_FLOAT;
+                }
+                else
+                    sLog->outError("GSAI: compount operator /= tried to work with non-numeric values");
+
+                return *this;
+            }
+            // result of modulo compount assignment is always integer
+            GS_Variable& operator%=(GS_Variable &sec)
+            {
+                if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_INTEGER)
+                    value.asInteger %= sec.value.asInteger;
+                else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_FLOAT)
+                {
+                    value.asInteger = ((int32)value.asFloat) % ((int32)sec.value.asFloat);
+                    type = GSVTYPE_INTEGER;
+                }
+                else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_INTEGER)
+                {
+                    value.asInteger = ((int32)value.asFloat) % sec.value.asInteger;
+                    type = GSVTYPE_INTEGER;
+                }
+                else if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
+                    value.asInteger = value.asInteger % ((int32)sec.value.asFloat);
+                else
+                    sLog->outError("GSAI: compount operator %= tried to work with non-numeric values");
+
+                return *this;
+            }
+        };
+
         struct GS_ScriptedAI : public ScriptedAI
         {
             // vector of commands to be executed
@@ -64,6 +265,8 @@ class GS_CreatureScript : public CreatureScript
 
             // map of all timers
             std::map<int, int32> timer_map;
+            // map of all variables
+            std::map<int, GS_Variable> variable_map;
 
             Player* m_scriptInvoker = nullptr;
             Player* m_inheritedScriptInvoker = nullptr;
@@ -229,6 +432,9 @@ class GS_CreatureScript : public CreatureScript
                 is_moving = false;
                 m_scriptInvoker = nullptr;
 
+                timer_map.clear();
+                variable_map.clear();
+
                 if (stored_faction)
                 {
                     me->setFaction(stored_faction);
@@ -393,8 +599,18 @@ class GS_CreatureScript : public CreatureScript
                     // script invoker (active during gossip select, quest accept, etc.)
                     case GSST_INVOKER:
                         return m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                    // parent (summoner)
                     case GSST_PARENT:
                         return m_parentUnit ? m_parentUnit : me;
+                    // may be also variable value, if the variable points to unit
+                    case GSST_VARIABLE_VALUE:
+                        if (variable_map.find(spec.value) != variable_map.end())
+                        {
+                            GS_Variable var = variable_map[spec.value];
+                            if (var.type == GSVTYPE_UNIT)
+                                return var.value.asUnitPointer;
+                        }
+                        return nullptr;
                     // other non-handled cases - returns null as it's invalid in this context
                     default:
                     case GSST_STATE:
@@ -407,17 +623,26 @@ class GS_CreatureScript : public CreatureScript
             }
 
             // retrieves numeric value using specifier supplied
-            int32 GS_GetValueFromSpecifier(gs_specifier& spec)
+            GS_Variable GS_GetValueFromSpecifier(gs_specifier& spec)
             {
+                // variable has priority before anything else, due to its genericity
+                if (spec.subject_type == GSST_VARIABLE_VALUE)
+                {
+                    if (variable_map.find(spec.value) == variable_map.end())
+                        variable_map[spec.value] = GS_Variable((int32)0);
+
+                    return variable_map[spec.value];
+                }
+
                 // if type and parameter were not specified, return one-value
-                if (spec.subject_type == GSST_NONE || spec.subject_parameter == GSSP_NONE)
-                    return spec.value;
+                if (spec.subject_type == GSST_NONE)
+                    return GS_Variable(spec.isFloat ? (int32)spec.flValue : spec.value);
 
                 if (spec.subject_type == GSST_TIMER && spec.subject_parameter == GSSP_IDENTIFIER)
-                    return GS_GetTimerState(spec.value);
+                    return GS_Variable(GS_GetTimerState(spec.value));
 
                 if (spec.subject_type == GSST_STATE && spec.subject_parameter == GSSP_STATE_VALUE)
-                    return spec.value;
+                    return GS_Variable((int32)spec.value);
 
                 // there are only two meaningful subject types: me and target,
                 // any other target is not so valuable here
@@ -430,28 +655,29 @@ class GS_CreatureScript : public CreatureScript
                 switch (spec.subject_parameter)
                 {
                     case GSSP_HEALTH:
-                        return subject->GetHealth();
+                        return GS_Variable((int32)subject->GetHealth());
                     case GSSP_HEALTH_PCT:
-                        return (int32)subject->GetHealthPct();
+                        return GS_Variable(subject->GetHealthPct());
                     case GSSP_FACTION:
-                        return subject->getFaction();
+                        return GS_Variable((int32)subject->getFaction());
                     case GSSP_LEVEL:
-                        return subject->getLevel();
+                        return GS_Variable((int32)subject->getLevel());
                     case GSSP_COMBAT:
-                        return subject->IsInCombat() ? 1 : 0;
+                        return GS_Variable((int32)(subject->IsInCombat() ? 1 : 0));
                     case GSSP_MANA:
-                        return subject->GetPower(POWER_MANA);
+                        return GS_Variable((int32)subject->GetPower(POWER_MANA));
                     case GSSP_MANA_PCT:
-                        return (subject->GetMaxPower(POWER_MANA) > 0) ? (int32)(100.0f* (float)subject->GetPower(POWER_MANA) / (float)subject->GetMaxPower(POWER_MANA)) : 0;
+                        return GS_Variable((subject->GetMaxPower(POWER_MANA) > 0) ? (100.0f* (float)subject->GetPower(POWER_MANA) / (float)subject->GetMaxPower(POWER_MANA)) : 0);
                     case GSSP_DISTANCE:
-                        return me->GetDistance(subject);
-                    default:
+                        return GS_Variable(me->GetDistance(subject));
                     case GSSP_NONE:
+                        return GS_Variable(subject);
+                    default:
                         break;
                 }
 
                 // fallback to value if no match
-                return spec.value;
+                return GS_Variable(spec.isFloat ? spec.flValue : (int32)spec.value);
             }
 
             bool GS_Meets(gs_condition &cond)
@@ -467,8 +693,8 @@ class GS_CreatureScript : public CreatureScript
 
                 // from now, we support just 3 parameter condition (lefthand, operator, righthand)
                 // so get those two values, and then apply operator
-                int32 lefthand = GS_GetValueFromSpecifier(cond.source);
-                int32 righthand = GS_GetValueFromSpecifier(cond.dest);
+                GS_Variable lefthand = GS_GetValueFromSpecifier(cond.source);
+                GS_Variable righthand = GS_GetValueFromSpecifier(cond.dest);
 
                 switch (cond.op)
                 {
@@ -817,6 +1043,59 @@ class GS_CreatureScript : public CreatureScript
                     case GSCR_DESPAWN:
                         me->DespawnOrUnsummon();
                         break;
+                    case GSCR_VAR:
+                    {
+                        auto itr = variable_map.find(curr->params.c_var.variable);
+                        if (itr == variable_map.end())
+                        {
+                            variable_map[curr->params.c_var.variable] = GS_Variable();
+                            itr = variable_map.find(curr->params.c_var.variable);
+                        }
+
+                        GS_Variable working = GS_GetValueFromSpecifier(curr->params.c_var.spec);
+
+                        if (curr->params.c_var.op == GSNOP_ASSIGN)
+                            itr->second = working;
+                        else if (curr->params.c_var.op == GSNOP_ADD)
+                            itr->second += working;
+                        else if (curr->params.c_var.op == GSNOP_SUBTRACT)
+                            itr->second -= working;
+                        else if (curr->params.c_var.op == GSNOP_MULTIPLY)
+                            itr->second *= working;
+                        else if (curr->params.c_var.op == GSNOP_DIVIDE)
+                        {
+                            // change type of our variable to floating point number instead of integer
+                            if (itr->second.type == GSVTYPE_INTEGER)
+                            {
+                                itr->second.value.asFloat = (float)itr->second.value.asInteger;
+                                itr->second.type = GSVTYPE_FLOAT;
+                            }
+                            itr->second /= working;
+                        }
+                        else if (curr->params.c_var.op == GSNOP_DIVIDE_INT)
+                        {
+                            // change both types to integer, to be sure we do integer division
+                            if (itr->second.type == GSVTYPE_FLOAT)
+                            {
+                                itr->second.value.asInteger = (int32)itr->second.value.asFloat;
+                                itr->second.type = GSVTYPE_INTEGER;
+                            }
+                            if (working.type == GSVTYPE_FLOAT)
+                            {
+                                working.value.asInteger = (int32)working.value.asFloat;
+                                working.type = GSVTYPE_INTEGER;
+                            }
+                            itr->second /= working;
+                        }
+                        else if (curr->params.c_var.op == GSNOP_MODULO)
+                            itr->second %= working;
+                        else if (curr->params.c_var.op == GSNOP_INCREMENT)
+                            itr->second += GS_Variable((int32)1);
+                        else if (curr->params.c_var.op == GSNOP_DECREMENT)
+                            itr->second -= GS_Variable((int32)1);
+
+                        break;
+                    }
                     default:
                     case GSCR_NONE:
                         break;

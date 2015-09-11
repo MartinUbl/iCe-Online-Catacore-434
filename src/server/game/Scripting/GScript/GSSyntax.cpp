@@ -133,8 +133,12 @@ std::stack<gs_command*> gscr_repeat_stack;
 std::stack<gs_command*> gscr_while_stack;
 // map of identifiers for timers
 std::map<const char*, int, StrCompare> gscr_timer_map;
+// map of identifiers for variables
+std::map<const char*, int, StrCompare> gscr_variable_map;
 // last id assigned to timer (will be incremented before assigning)
 int gscr_last_timer_id = -1;
+// last id assigned to variable
+int gscr_last_variable_id = -1;
 
 #define CLEANUP_AND_THROW(s) { delete ret; throw SyntaxErrorException(s); }
 
@@ -185,7 +189,7 @@ static bool tryStrToInt(int& dest, const char* src)
     // validate numeric input
     for (int i = 0; src[i] != '\0'; i++)
     {
-        if (src[i] < '0' || src[i] > '9')
+        if ((src[i] != '-' && (src[i] < '0' || src[i] > '9')) || (src[i] == '-' && i != 0))
             return false;
     }
 
@@ -314,13 +318,28 @@ gs_specifier gs_specifier::parse(const char* str)
     rr.subject_type = GSST_NONE;
     rr.subject_parameter = GSSP_NONE;
     rr.value = 0;
+    rr.flValue = 0.0f;
+    rr.isFloat = false;
 
     // numeric value - recognized by first character
-    if (str[0] >= '0' && str[0] <= '9')
+    if ((str[0] >= '0' && str[0] <= '9') || (str[0] == '-' && str[1] >= '0' && str[1] <= '9'))
     {
         // return success only when valid integer was supplied, otherwise carry on parsing
         if (tryStrToInt(rr.value, str))
             return rr;
+    }
+
+    // variable name - recognized by first character
+    if (str[0] == '$')
+    {
+        std::string varname = std::string(str + 1);
+        auto itr = gscr_variable_map.find(varname.c_str());
+        if (itr == gscr_variable_map.end())
+            return rr;
+
+        rr.value = (*itr).second;
+        rr.subject_type = GSST_VARIABLE_VALUE;
+        return rr;
     }
 
     int lastpos = 0;
@@ -1044,6 +1063,50 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             ret->params.c_endwhile.while_offset = matching->params.c_while.my_offset;
             break;
         }
+        // var instruction - working with variables
+        // Syntax: var <operation> <variable name> [<value to work with>]
+        case GSCR_VAR:
+        {
+            if (src->parameters.size() < 2)
+                CLEANUP_AND_THROW("too few parameters for VAR instruction");
+
+            std::string operation = src->parameters[0];
+            if (operation == "set")
+                ret->params.c_var.op = GSNOP_ASSIGN;
+            else if (operation == "add")
+                ret->params.c_var.op = GSNOP_ADD;
+            else if (operation == "sub")
+                ret->params.c_var.op = GSNOP_SUBTRACT;
+            else if (operation == "mul")
+                ret->params.c_var.op = GSNOP_MULTIPLY;
+            else if (operation == "div")
+                ret->params.c_var.op = GSNOP_DIVIDE;
+            else if (operation == "ndiv")
+                ret->params.c_var.op = GSNOP_DIVIDE_INT;
+            else if (operation == "mod")
+                ret->params.c_var.op = GSNOP_MODULO;
+            else if (operation == "inc")
+                ret->params.c_var.op = GSNOP_INCREMENT;
+            else if (operation == "dec")
+                ret->params.c_var.op = GSNOP_DECREMENT;
+            else
+                CLEANUP_AND_THROW("invalid operation for VAR instruction");
+
+            if (gscr_variable_map.find(src->parameters[1].c_str()) == gscr_variable_map.end())
+                gscr_variable_map[src->parameters[1].c_str()] = ++gscr_last_variable_id;
+
+            ret->params.c_var.variable = gscr_variable_map[src->parameters[1].c_str()];
+
+            if (ret->params.c_var.op != GSNOP_INCREMENT && ret->params.c_var.op != GSNOP_DECREMENT)
+            {
+                if (src->parameters.size() != 3)
+                    CLEANUP_AND_THROW("not enough parameters for instruction VAR");
+
+                ret->params.c_var.spec = gs_specifier::parse(src->parameters[2].c_str());
+            }
+
+            break;
+        }
     }
 
     return ret;
@@ -1059,7 +1122,9 @@ CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
     gscr_label_offset_map.clear();
     gscr_gotos_list.clear();
     gscr_timer_map.clear();
+    gscr_variable_map.clear();
     gscr_last_timer_id = -1;
+    gscr_last_variable_id = -1;
 
     while (!gscr_if_stack.empty())
         gscr_if_stack.pop();

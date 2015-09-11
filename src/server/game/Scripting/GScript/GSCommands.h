@@ -65,6 +65,7 @@ enum gs_command_type
     GSCR_UNTIL = 36,
     GSCR_WHILE = 37,
     GSCR_ENDWHILE = 38,
+    GSCR_VAR = 39,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -108,6 +109,7 @@ static std::string gscr_identifiers[] = {
     "until",
     "while",
     "endwhile",
+    "var",
 };
 
 enum gs_quest_operation
@@ -169,6 +171,7 @@ enum gs_subject_type
     GSST_RANDOM_NOTANK = 8,     // random target without current target
     GSST_INVOKER = 9,           // script invoker (gossip script, quest accept, etc.)
     GSST_PARENT = 10,           // parent unit (of summoned creature)
+    GSST_VARIABLE_VALUE = 11,   // value of variable declared
 };
 
 // type of subject parameter in specifier
@@ -185,6 +188,20 @@ enum gs_subject_parameter
     GSSP_MANA = 8,              // subject mana value
     GSSP_MANA_PCT = 9,          // subject mana percentage
     GSSP_DISTANCE = 10,         // subject distance from "me"
+};
+
+enum gs_numeric_operatror
+{
+    GSNOP_NONE = 0,
+    GSNOP_ASSIGN = 1,           // assign value to variable
+    GSNOP_ADD = 2,              // add value to variable
+    GSNOP_SUBTRACT = 3,         // subtract from variable
+    GSNOP_MULTIPLY = 4,         // multiply variable
+    GSNOP_DIVIDE = 5,           // divide variable value (float)
+    GSNOP_DIVIDE_INT = 6,       // divide variable value (integer)
+    GSNOP_MODULO = 7,           // assigns modulo of specified value
+    GSNOP_INCREMENT = 8,        // increments value (integer, float)
+    GSNOP_DECREMENT = 9,        // decrements value (integer, float)
 };
 
 // type of operator used in expression
@@ -210,13 +227,17 @@ struct gs_specifier
     gs_subject_parameter subject_parameter;
     // one-value stored
     int value;
+    // floating point representation of value
+    float flValue;
+
+    bool isFloat;
 
     // parses input string into specifier structure
     static gs_specifier parse(const char* str);
     // creates empty specifier object prefilled with specified values
-    static gs_specifier make_default_subject(gs_subject_type stype, gs_subject_parameter sparam = GSSP_NONE) { return{ stype, sparam, 0 }; };
+    static gs_specifier make_default_subject(gs_subject_type stype, gs_subject_parameter sparam = GSSP_NONE) { return{ stype, sparam, 0, 0.0f, false }; };
     // creates empty specifier object prefilled with specified value
-    static gs_specifier make_default_value(int value) { return{ GSST_NONE, GSSP_NONE, value }; };
+    static gs_specifier make_default_value(int value) { return{ GSST_NONE, GSSP_NONE, value, 0.0f, false }; };
 };
 
 // condition structure - consists of two subjects and one operator
@@ -390,6 +411,14 @@ struct gs_command
         {
             int while_offset;
         } c_endwhile;
+
+        struct
+        {
+            gs_numeric_operatror op;
+            int variable;
+
+            gs_specifier spec;
+        } c_var;
 
     } params;
 
