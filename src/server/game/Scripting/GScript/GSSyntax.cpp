@@ -127,6 +127,10 @@ std::map<const char*, int, StrCompare> gscr_label_offset_map;
 std::list<std::pair<gs_command*, const char*> > gscr_gotos_list;
 // stack of IF commands (to match appropriate ENDIF)
 std::stack<gs_command*> gscr_if_stack;
+// stack of REPEAT commands (to match appropriate UNTIL)
+std::stack<gs_command*> gscr_repeat_stack;
+// stack of WHILE commands (to match appropriate ENDWHILE)
+std::stack<gs_command*> gscr_while_stack;
 // map of identifiers for timers
 std::map<const char*, int, StrCompare> gscr_timer_map;
 // last id assigned to timer (will be incremented before assigning)
@@ -527,15 +531,15 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 CLEANUP_AND_THROW("too few parameters for instruction IF");
 
             // parse source specifier
-            ret->params.c_if.source = gs_specifier::parse(src->parameters[0].c_str());
+            ret->params.c_if.condition.source = gs_specifier::parse(src->parameters[0].c_str());
             // if the instruction has more parameters than one..
             if (src->parameters.size() > 1)
             {
                 // .. it has to be 3, otherwise it's considered error
                 if (src->parameters.size() == 3)
                 {
-                    ret->params.c_if.op = gs_parse_operator(src->parameters[1]);
-                    ret->params.c_if.dest = gs_specifier::parse(src->parameters[2].c_str());
+                    ret->params.c_if.condition.op = gs_parse_operator(src->parameters[1]);
+                    ret->params.c_if.condition.dest = gs_specifier::parse(src->parameters[2].c_str());
                 }
                 else
                     CLEANUP_AND_THROW("invalid IF statement, use subject, or subject + operator + subject");
@@ -955,6 +959,91 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             if (src->parameters.size() != 0)
                 CLEANUP_AND_THROW("invalid parameter count for instruction DESPAWN - do not supply parameters");
             break;
+        // repeat instruction - standard control sequence; needs to be closed by until
+        // Syntax: repeat
+        case GSCR_REPEAT:
+            if (src->parameters.size() != 0)
+                CLEANUP_AND_THROW("too many parameters for instruction REPEAT");
+
+            ret->params.c_repeat.offset = offset;
+
+            gscr_repeat_stack.push(ret);
+            break;
+        // until instruction - just pops latest REPEAT from stack and sets its offset there; also declares condition
+        // Syntax: until <subject> <operator> <subject>
+        case GSCR_UNTIL:
+        {
+            if (gscr_repeat_stack.empty())
+                CLEANUP_AND_THROW("invalid UNTIL - no matching REPEAT");
+
+            if (src->parameters.size() == 0)
+                CLEANUP_AND_THROW("too few parameters for instruction UNTIL");
+
+            // parse source specifier
+            ret->params.c_until.condition.source = gs_specifier::parse(src->parameters[0].c_str());
+            // if the instruction has more parameters than one..
+            if (src->parameters.size() > 1)
+            {
+                // .. it has to be 3, otherwise it's considered error
+                if (src->parameters.size() == 3)
+                {
+                    ret->params.c_until.condition.op = gs_parse_operator(src->parameters[1]);
+                    ret->params.c_until.condition.dest = gs_specifier::parse(src->parameters[2].c_str());
+                }
+                else
+                    CLEANUP_AND_THROW("invalid UNTIL condition statement, use subject, or subject + operator + subject");
+            }
+
+            // pop matching REPEAT from if-stack
+            gs_command* matching = gscr_repeat_stack.top();
+            gscr_repeat_stack.pop();
+
+            // sets offset of this instruction (for possible jumping) to the repeat statement command
+            ret->params.c_until.repeat_offset = matching->params.c_repeat.offset;
+            break;
+        }
+        // while instruction - standard control sequence; needs to be closed by endwhile
+        // Syntax: while <specifier> [<operator> <specifier>]
+        case GSCR_WHILE:
+            if (src->parameters.size() == 0)
+                CLEANUP_AND_THROW("too few parameters for instruction WHILE");
+
+            // parse source specifier
+            ret->params.c_while.condition.source = gs_specifier::parse(src->parameters[0].c_str());
+            // if the instruction has more parameters than one..
+            if (src->parameters.size() > 1)
+            {
+                // .. it has to be 3, otherwise it's considered error
+                if (src->parameters.size() == 3)
+                {
+                    ret->params.c_while.condition.op = gs_parse_operator(src->parameters[1]);
+                    ret->params.c_while.condition.dest = gs_specifier::parse(src->parameters[2].c_str());
+                }
+                else
+                    CLEANUP_AND_THROW("invalid WHILE statement, use subject, or subject + operator + subject");
+            }
+
+            ret->params.c_while.my_offset = offset;
+
+            gscr_while_stack.push(ret);
+
+            break;
+        // endwhile instruction - just pops latest WHILE from stack and sets its offset there
+        // Syntax: endwhile
+        case GSCR_ENDWHILE:
+        {
+            if (gscr_while_stack.empty())
+                CLEANUP_AND_THROW("invalid ENDWHILE - no matching WHILE");
+
+            // pop matching IF from if-stack
+            gs_command* matching = gscr_while_stack.top();
+            gscr_while_stack.pop();
+
+            // sets offset of this instruction (for possible jumping) to the if statement command
+            matching->params.c_while.endwhile_offset = offset;
+            ret->params.c_endwhile.while_offset = matching->params.c_while.my_offset;
+            break;
+        }
     }
 
     return ret;
@@ -974,6 +1063,10 @@ CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
 
     while (!gscr_if_stack.empty())
         gscr_if_stack.pop();
+    while (!gscr_repeat_stack.empty())
+        gscr_repeat_stack.pop();
+    while (!gscr_while_stack.empty())
+        gscr_while_stack.pop();
 
     try
     {

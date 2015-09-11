@@ -454,23 +454,23 @@ class GS_CreatureScript : public CreatureScript
                 return spec.value;
             }
 
-            bool GS_Meets(gs_command* ifcmd)
+            bool GS_Meets(gs_condition &cond)
             {
                 // chance is different, non-generic case
-                if (ifcmd->params.c_if.source.subject_type == GSST_CHANCE)
+                if (cond.source.subject_type == GSST_CHANCE)
                 {
-                    if (ifcmd->params.c_if.op == GSOP_OF && ifcmd->params.c_if.dest.value > 0)
-                        return urand(0, 100) < (uint32)ifcmd->params.c_if.dest.value;
+                    if (cond.op == GSOP_OF && cond.dest.value > 0)
+                        return urand(0, 100) < (uint32)cond.dest.value;
                     else
                         return false;
                 }
 
                 // from now, we support just 3 parameter condition (lefthand, operator, righthand)
                 // so get those two values, and then apply operator
-                int32 lefthand = GS_GetValueFromSpecifier(ifcmd->params.c_if.source);
-                int32 righthand = GS_GetValueFromSpecifier(ifcmd->params.c_if.dest);
+                int32 lefthand = GS_GetValueFromSpecifier(cond.source);
+                int32 righthand = GS_GetValueFromSpecifier(cond.dest);
 
-                switch (ifcmd->params.c_if.op)
+                switch (cond.op)
                 {
                     case GSOP_EQUALS:
                     case GSOP_IS:
@@ -518,6 +518,8 @@ class GS_CreatureScript : public CreatureScript
 
             void UpdateAI(const uint32 diff) override
             {
+                bool lock_move_counter = false;
+
                 is_updating_lock = true;
 
                 //UpdateVictim();
@@ -569,6 +571,7 @@ class GS_CreatureScript : public CreatureScript
                 {
                     case GSCR_LABEL:    // these instructions just marks current offset
                     case GSCR_ENDIF:
+                    case GSCR_REPEAT:
                         break;
                     case GSCR_GOTO:
                         com_counter = curr->params.c_goto_label.instruction_offset;
@@ -605,8 +608,23 @@ class GS_CreatureScript : public CreatureScript
                         break;
                     case GSCR_IF:
                         // if script does not meet condition passed in, move to endif offset
-                        if (!GS_Meets(curr))
+                        if (!GS_Meets(curr->params.c_if.condition))
                             com_counter = curr->params.c_if.endif_offset;
+                        break;
+                    case GSCR_WHILE:
+                        // if script does not meet condition passed in, move to endwhile offset
+                        if (!GS_Meets(curr->params.c_while.condition))
+                            com_counter = curr->params.c_while.endwhile_offset;
+                        break;
+                    case GSCR_ENDWHILE:
+                        com_counter = curr->params.c_endwhile.while_offset;
+                        // this avoids moving to next instruction after switch command (just this method call pass)
+                        lock_move_counter = true;
+                        break;
+                    case GSCR_UNTIL:
+                        // if script does not meet condition passed in, move to repeat offset
+                        if (!GS_Meets(curr->params.c_until.condition))
+                            com_counter = curr->params.c_until.repeat_offset;
                         break;
                     case GSCR_COMBATSTOP:
                         disable_melee = true;
@@ -805,7 +823,7 @@ class GS_CreatureScript : public CreatureScript
                 }
 
                 // if not explicitly waiting, move counter to next instruction
-                if (!is_waiting)
+                if (!is_waiting && !lock_move_counter)
                     com_counter++;
 
                 // if not explicitly disabled melee attack, and is not waiting or has appropriate flag to attack during waiting,

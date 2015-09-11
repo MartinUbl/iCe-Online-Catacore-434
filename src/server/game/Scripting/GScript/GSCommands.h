@@ -61,6 +61,10 @@ enum gs_command_type
     GSCR_UNMOUNT = 32,
     GSCR_QUEST = 33,
     GSCR_DESPAWN = 34,
+    GSCR_REPEAT = 35,
+    GSCR_UNTIL = 36,
+    GSCR_WHILE = 37,
+    GSCR_ENDWHILE = 38,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -100,6 +104,10 @@ static std::string gscr_identifiers[] = {
     "unmount",
     "quest",
     "despawn",
+    "repeat",
+    "until",
+    "while",
+    "endwhile",
 };
 
 enum gs_quest_operation
@@ -211,6 +219,14 @@ struct gs_specifier
     static gs_specifier make_default_value(int value) { return{ GSST_NONE, GSSP_NONE, value }; };
 };
 
+// condition structure - consists of two subjects and one operator
+struct gs_condition
+{
+    gs_specifier source;
+    gs_specifier_operator op;
+    gs_specifier dest;
+};
+
 // command structure
 struct gs_command
 {
@@ -244,10 +260,7 @@ struct gs_command
 
         struct
         {
-            gs_specifier source;
-            gs_specifier_operator op;
-            gs_specifier dest;
-
+            gs_condition condition;
             int endif_offset;
         } c_if;
 
@@ -354,6 +367,29 @@ struct gs_command
             int objective_index;
             int value;
         } c_quest;
+
+        struct
+        {
+            gs_condition condition;
+            int repeat_offset;
+        } c_until;
+
+        struct
+        {
+            int offset;
+        } c_repeat;
+
+        struct
+        {
+            gs_condition condition;
+            int endwhile_offset;
+            int my_offset;
+        } c_while;
+
+        struct
+        {
+            int while_offset;
+        } c_endwhile;
 
     } params;
 
