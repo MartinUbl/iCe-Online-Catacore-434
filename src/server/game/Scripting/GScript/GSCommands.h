@@ -67,6 +67,8 @@ enum gs_command_type
     GSCR_ENDWHILE = 38,
     GSCR_VAR = 39,
     GSCR_SOUND = 40,
+    GSCR_WHEN = 41,
+    GSCR_ENDWHEN = 42,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -111,6 +113,9 @@ static std::string gscr_identifiers[] = {
     "while",
     "endwhile",
     "var",
+    "sound",
+    "when",
+    "endwhen",
 };
 
 enum gs_quest_operation
@@ -431,6 +436,12 @@ struct gs_command
             gs_specifier sound_id;
             gs_specifier target;
         } c_sound;
+
+        struct
+        {
+            gs_condition condition;
+            int endwhen_offset;
+        } c_when;
 
     } params;
 

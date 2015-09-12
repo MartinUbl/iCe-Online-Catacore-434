@@ -127,6 +127,8 @@ std::map<const char*, int, StrCompare> gscr_label_offset_map;
 std::list<std::pair<gs_command*, const char*> > gscr_gotos_list;
 // stack of IF commands (to match appropriate ENDIF)
 std::stack<gs_command*> gscr_if_stack;
+// stack of WHEN commands (to match appropriate ENDWHEN)
+std::stack<gs_command*> gscr_when_stack;
 // stack of REPEAT commands (to match appropriate UNTIL)
 std::stack<gs_command*> gscr_repeat_stack;
 // stack of WHILE commands (to match appropriate ENDWHILE)
@@ -1125,6 +1127,45 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             else
                 ret->params.c_sound.target.subject_type = GSST_NONE;
             break;
+        // when instruction - standard control sequence, but entered just once; needs to be closed by endwhen
+        // Syntax: when <specifier> [<operator> <specifier>]
+        case GSCR_WHEN:
+            if (src->parameters.size() == 0)
+                CLEANUP_AND_THROW("too few parameters for instruction WHEN");
+
+            // parse source specifier
+            ret->params.c_when.condition.source = gs_specifier::parse(src->parameters[0].c_str());
+            // if the instruction has more parameters than one..
+            if (src->parameters.size() > 1)
+            {
+                // .. it has to be 3, otherwise it's considered error
+                if (src->parameters.size() == 3)
+                {
+                    ret->params.c_when.condition.op = gs_parse_operator(src->parameters[1]);
+                    ret->params.c_when.condition.dest = gs_specifier::parse(src->parameters[2].c_str());
+                }
+                else
+                    CLEANUP_AND_THROW("invalid WHEN statement, use subject, or subject + operator + subject");
+            }
+
+            gscr_when_stack.push(ret);
+
+            break;
+        // endwhen instruction - just pops latest WHEN from stack and sets its offset there
+        // Syntax: endwhen
+        case GSCR_ENDWHEN:
+        {
+            if (gscr_when_stack.empty())
+                CLEANUP_AND_THROW("invalid ENDWHEN - no matching WHEN");
+
+            // pop matching WHEN from if-stack
+            gs_command* matching = gscr_when_stack.top();
+            gscr_when_stack.pop();
+
+            // sets offset of this instruction (for possible jumping) to the when statement command
+            matching->params.c_when.endwhen_offset = offset;
+            break;
+        }
     }
 
     return ret;
@@ -1146,6 +1187,8 @@ CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
 
     while (!gscr_if_stack.empty())
         gscr_if_stack.pop();
+    while (!gscr_when_stack.empty())
+        gscr_when_stack.pop();
     while (!gscr_repeat_stack.empty())
         gscr_repeat_stack.pop();
     while (!gscr_while_stack.empty())

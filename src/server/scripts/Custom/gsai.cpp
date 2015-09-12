@@ -287,6 +287,8 @@ class GS_CreatureScript : public CreatureScript
             std::map<int, int32> timer_map;
             // map of all variables
             std::map<int, GS_Variable> variable_map;
+            // set of all passed WHEN's offsets in script
+            std::set<int> when_set;
 
             Player* m_scriptInvoker = nullptr;
             Player* m_inheritedScriptInvoker = nullptr;
@@ -454,6 +456,7 @@ class GS_CreatureScript : public CreatureScript
 
                 timer_map.clear();
                 variable_map.clear();
+                when_set.clear();
 
                 if (stored_faction)
                 {
@@ -826,6 +829,7 @@ class GS_CreatureScript : public CreatureScript
                     case GSCR_LABEL:    // these instructions just marks current offset
                     case GSCR_ENDIF:
                     case GSCR_REPEAT:
+                    case GSCR_ENDWHEN:
                         break;
                     case GSCR_GOTO:
                         com_counter = curr->params.c_goto_label.instruction_offset;
@@ -864,6 +868,14 @@ class GS_CreatureScript : public CreatureScript
                         // if script does not meet condition passed in, move to endif offset
                         if (!GS_Meets(curr->params.c_if.condition))
                             com_counter = curr->params.c_if.endif_offset;
+                        break;
+                    case GSCR_WHEN:
+                        // if we already passed this when (condition was at least once true), or if the condition is not true,
+                        // move to endwhen; otherwise pass to condition body and insert WHEN offset to set, to avoid passing again
+                        if (when_set.find(com_counter) != when_set.end() || !GS_Meets(curr->params.c_when.condition))
+                            com_counter = curr->params.c_when.endwhen_offset;
+                        else
+                            when_set.insert(com_counter);
                         break;
                     case GSCR_WHILE:
                         // if script does not meet condition passed in, move to endwhile offset
