@@ -402,7 +402,7 @@ gs_specifier gs_specifier::parse(const char* str)
             subject = true;
             lastpos = i;
         }
-        // otherwise zero terminator signs that we jusr parsed the rest of the string, which is parameter
+        // otherwise zero terminator signs that we just parsed the rest of the string, which is parameter
         else if (str[i] == '\0')
         {
             std::string parid = std::string(str).substr(lastpos + 1, i - lastpos);

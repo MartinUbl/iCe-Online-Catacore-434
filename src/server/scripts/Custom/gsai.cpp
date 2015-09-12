@@ -33,6 +33,7 @@ class GS_CreatureScript : public CreatureScript
                 Unit* asUnitPointer;
             } value;
 
+            // performs conversion to integer, if available (float, int)
             int32 toInteger()
             {
                 if (type == GSVTYPE_INTEGER)
@@ -43,6 +44,7 @@ class GS_CreatureScript : public CreatureScript
                     return 0;
             };
 
+            // performs conversion to float, if available (float, int)
             float toFloat()
             {
                 if (type == GSVTYPE_INTEGER)
@@ -152,7 +154,7 @@ class GS_CreatureScript : public CreatureScript
                     type = GSVTYPE_FLOAT;
                 }
                 else
-                    sLog->outError("GSAI: compount operator += tried to work with non-numeric values");
+                    sLog->outError("GSAI: compound operator += tried to work with non-numeric values");
 
                 return *this;
             }
@@ -170,7 +172,7 @@ class GS_CreatureScript : public CreatureScript
                     type = GSVTYPE_FLOAT;
                 }
                 else
-                    sLog->outError("GSAI: compount operator -= tried to work with non-numeric values");
+                    sLog->outError("GSAI: compound operator -= tried to work with non-numeric values");
 
                 return *this;
             }
@@ -188,7 +190,7 @@ class GS_CreatureScript : public CreatureScript
                     type = GSVTYPE_FLOAT;
                 }
                 else
-                    sLog->outError("GSAI: compount operator *= tried to work with non-numeric values");
+                    sLog->outError("GSAI: compound operator *= tried to work with non-numeric values");
 
                 return *this;
             }
@@ -210,7 +212,7 @@ class GS_CreatureScript : public CreatureScript
                     type = GSVTYPE_FLOAT;
                 }
                 else
-                    sLog->outError("GSAI: compount operator /= tried to work with non-numeric values");
+                    sLog->outError("GSAI: compound operator /= tried to work with non-numeric values");
 
                 return *this;
             }
@@ -232,7 +234,7 @@ class GS_CreatureScript : public CreatureScript
                 else if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
                     value.asInteger = value.asInteger % ((int32)sec.value.asFloat);
                 else
-                    sLog->outError("GSAI: compount operator %%= tried to work with non-numeric values");
+                    sLog->outError("GSAI: compound operator %%= tried to work with non-numeric values");
 
                 return *this;
             }
@@ -846,7 +848,7 @@ class GS_CreatureScript : public CreatureScript
                             else
                                 wait_timer -= diff;
                         }
-                        else // just stubled upon wait instruction
+                        else // just stumbled upon wait instruction
                         {
                             // set waiting flag and store waiting parameters
                             is_waiting = true;
