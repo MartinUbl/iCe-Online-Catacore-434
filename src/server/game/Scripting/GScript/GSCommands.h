@@ -227,7 +227,7 @@ struct gs_specifier
     // type of subject parameter
     gs_subject_parameter subject_parameter;
     // one-value stored
-    int value;
+    int32 value;
     // floating point representation of value
     float flValue;
 
@@ -238,7 +238,8 @@ struct gs_specifier
     // creates empty specifier object prefilled with specified values
     static gs_specifier make_default_subject(gs_subject_type stype, gs_subject_parameter sparam = GSSP_NONE) { return{ stype, sparam, 0, 0.0f, false }; };
     // creates empty specifier object prefilled with specified value
-    static gs_specifier make_default_value(int value) { return{ GSST_NONE, GSSP_NONE, value, 0.0f, false }; };
+    static gs_specifier make_default_value(int32 value) { return{ GSST_NONE, GSSP_NONE, value, 0.0f, false }; };
+    static gs_specifier make_default_float_value(float value) { return{ GSST_NONE, GSSP_NONE, 0, value, true }; };
 };
 
 // condition structure - consists of two subjects and one operator
@@ -264,13 +265,13 @@ struct gs_command
 
         struct
         {
-            int delay;
+            gs_specifier delay;
             unsigned int flags;
         } c_wait;
 
         struct
         {
-            int spell;
+            gs_specifier spell;
             gs_specifier target_type;
             bool triggered;
         } c_cast;
@@ -288,7 +289,7 @@ struct gs_command
 
         struct
         {
-            int faction;
+            gs_specifier faction;
         } c_faction;
 
         struct
@@ -304,23 +305,23 @@ struct gs_command
         struct
         {
             int timer_id;
-            int value;
+            gs_specifier value;
         } c_timer;
 
         struct
         {
-            int morph_id;
+            gs_specifier morph_id;
         } c_morph;
 
         struct
         {
-            int creature_entry;
-            float x, y, z;
+            gs_specifier creature_entry;
+            gs_specifier x, y, z;
         } c_summon;
 
         struct
         {
-            float x, y, z;
+            gs_specifier x, y, z;
         } c_walk_run_teleport;
 
         struct
@@ -331,7 +332,7 @@ struct gs_command
         struct
         {
             bool restore;
-            float scale;
+            gs_specifier scale;
         } c_scale;
 
         struct
@@ -349,27 +350,27 @@ struct gs_command
 
         struct
         {
-            int emote_id;
+            gs_specifier emote_id;
             gs_specifier subject;
         } c_emote;
 
         struct
         {
-            int movie_id;
+            gs_specifier movie_id;
             gs_specifier subject;
         } c_movie;
 
         struct
         {
             gs_flag_operation op;
-            int aura_id;
+            gs_specifier aura_id;
             gs_specifier subject;
         } c_aura;
 
         struct
         {
             int movetype;
-            float speed;
+            gs_specifier speed;
         } c_speed;
 
         struct
@@ -379,15 +380,15 @@ struct gs_command
 
         struct
         {
-            int mount_model_id;
+            gs_specifier mount_model_id;
         } c_mount;
 
         struct
         {
             gs_quest_operation op;
-            int quest_id;
-            int objective_index;
-            int value;
+            gs_specifier quest_id;
+            gs_specifier objective_index;
+            gs_specifier value;
         } c_quest;
 
         struct
@@ -423,7 +424,7 @@ struct gs_command
 
         struct
         {
-            int sound_id;
+            gs_specifier sound_id;
             gs_specifier target;
         } c_sound;
 

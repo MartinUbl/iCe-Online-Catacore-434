@@ -327,6 +327,12 @@ gs_specifier gs_specifier::parse(const char* str)
         // return success only when valid integer was supplied, otherwise carry on parsing
         if (tryStrToInt(rr.value, str))
             return rr;
+        // next, try float
+        if (tryStrToFloat(rr.flValue, str))
+        {
+            rr.isFloat = true;
+            return rr;
+        }
     }
 
     // variable name - recognized by first character
@@ -484,8 +490,8 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         case GSCR_WAIT:
             if (src->parameters.size() == 0)
                 CLEANUP_AND_THROW("too few parameters for instruction WAIT");
-            if (!tryStrToInt(ret->params.c_wait.delay, src->parameters[0].c_str()))
-                CLEANUP_AND_THROW("invalid parameter 1 (delay) for WAIT");
+
+            ret->params.c_wait.delay = gs_specifier::parse(src->parameters[0].c_str());
 
             ret->params.c_wait.flags = 0;
             // any more parameters are considered wait flags
@@ -509,8 +515,8 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 CLEANUP_AND_THROW("too few parameters for instruction CAST");
             if (src->parameters.size() > 3)
                 CLEANUP_AND_THROW("too many parameters for instruction CAST");
-            if (!tryStrToInt(ret->params.c_cast.spell, src->parameters[0].c_str()))
-                CLEANUP_AND_THROW("invalid parameter 1 (spellId) for CAST");
+
+            ret->params.c_cast.spell = gs_specifier::parse(src->parameters[0].c_str());
 
             // by default the spell is not triggered
             ret->params.c_cast.triggered = false;
@@ -599,10 +605,11 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
 
             // restore faction
             if (src->parameters[0] == "restore")
-                ret->params.c_faction.faction = 0;
+                ret->params.c_faction.faction = gs_specifier::make_default_value(0);
             // or set faction
-            else if (!tryStrToInt(ret->params.c_faction.faction, src->parameters[0].c_str()))
-                CLEANUP_AND_THROW("invalid non-numeric faction specifier for command FACTION");
+            else
+                ret->params.c_faction.faction = gs_specifier::parse(src->parameters[0].c_str());
+
             break;
         // react instruction - sets react state of creature
         // Syntax: react <react state string>
@@ -645,8 +652,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             if (src->parameters[1] != "set")
                 CLEANUP_AND_THROW("invalid operation in instruction TIMER");
 
-            if (!tryStrToInt(ret->params.c_timer.value, src->parameters[2].c_str()))
-                CLEANUP_AND_THROW("invalid time value parameter for instruction TIMER");
+            ret->params.c_timer.value = gs_specifier::parse(src->parameters[2].c_str());
 
             if (gscr_timer_map.find(timname.c_str()) == gscr_timer_map.end())
                 gscr_timer_map[timname.c_str()] = (++gscr_last_timer_id);
@@ -666,10 +672,11 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
 
             // restore morph
             if (src->parameters[0] == "restore")
-                ret->params.c_morph.morph_id = 0;
+                ret->params.c_morph.morph_id = gs_specifier::make_default_value(0);
             // or set morph
-            else if (!tryStrToInt(ret->params.c_morph.morph_id, src->parameters[0].c_str()))
-                CLEANUP_AND_THROW("invalid non-numeric faction specifier for command MORPH");
+            else
+                ret->params.c_morph.morph_id = gs_specifier::parse(src->parameters[0].c_str());
+
             break;
         // summon instruction - summons NPC at position
         // Syntax: summon <entry>
@@ -680,20 +687,19 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             if (src->parameters.size() != 1 && src->parameters.size() != 4)
                 CLEANUP_AND_THROW("invalid parameter count for instruction SUMMON - use 1 or 4 params");
 
-            if (!tryStrToInt(ret->params.c_summon.creature_entry, src->parameters[0].c_str()))
-                CLEANUP_AND_THROW("invalid creature entry identifier for instruction SUMMON");
+            ret->params.c_summon.creature_entry = gs_specifier::parse(src->parameters[0].c_str());
 
-            ret->params.c_summon.x = 0;
-            ret->params.c_summon.y = 0;
-            ret->params.c_summon.z = 0;
             if (src->parameters.size() == 4)
             {
-                if (!tryStrToFloat(ret->params.c_summon.x, src->parameters[1].c_str()))
-                    CLEANUP_AND_THROW("invalid X position specifier for instruction SUMMON");
-                if (!tryStrToFloat(ret->params.c_summon.y, src->parameters[2].c_str()))
-                    CLEANUP_AND_THROW("invalid Y position specifier for instruction SUMMON");
-                if (!tryStrToFloat(ret->params.c_summon.z, src->parameters[3].c_str()))
-                    CLEANUP_AND_THROW("invalid Z position specifier for instruction SUMMON");
+                ret->params.c_summon.x = gs_specifier::parse(src->parameters[1].c_str());
+                ret->params.c_summon.y = gs_specifier::parse(src->parameters[2].c_str());
+                ret->params.c_summon.z = gs_specifier::parse(src->parameters[3].c_str());
+            }
+            else
+            {
+                ret->params.c_summon.x = gs_specifier::make_default_float_value(0.0f);
+                ret->params.c_summon.y = gs_specifier::make_default_float_value(0.0f);
+                ret->params.c_summon.z = gs_specifier::make_default_float_value(0.0f);
             }
             break;
         // walk, run and teleport instructions - move to destination position with specified type
@@ -704,14 +710,11 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         case GSCR_RUN:
         case GSCR_TELEPORT:
             if (src->parameters.size() != 3)
-                CLEANUP_AND_THROW("invalid parameter count for instruction SUMMON - use 3 params");
+                CLEANUP_AND_THROW("invalid parameter count for instruction WALK / RUN / TELEPORT - use 3 params");
 
-            if (!tryStrToFloat(ret->params.c_walk_run_teleport.x, src->parameters[0].c_str()))
-                CLEANUP_AND_THROW("invalid X position specifier for instruction WALK/RUN/TELEPORT");
-            if (!tryStrToFloat(ret->params.c_walk_run_teleport.y, src->parameters[1].c_str()))
-                CLEANUP_AND_THROW("invalid Y position specifier for instruction WALK/RUN/TELEPORT");
-            if (!tryStrToFloat(ret->params.c_walk_run_teleport.z, src->parameters[2].c_str()))
-                CLEANUP_AND_THROW("invalid Z position specifier for instruction SUMMON");
+            ret->params.c_walk_run_teleport.x = gs_specifier::parse(src->parameters[0].c_str());
+            ret->params.c_walk_run_teleport.y = gs_specifier::parse(src->parameters[1].c_str());
+            ret->params.c_walk_run_teleport.z = gs_specifier::parse(src->parameters[2].c_str());
             break;
         // waitfor instruction - waits for event to occur
         // Syntax: waitfor <event type>
@@ -745,10 +748,10 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             if (src->parameters[0] == "restore")
             {
                 ret->params.c_scale.restore = true;
-                ret->params.c_scale.scale = 0.0f;
+                ret->params.c_scale.scale = gs_specifier::make_default_float_value(0.0f);
             }
-            else if (!tryStrToFloat(ret->params.c_scale.scale, src->parameters[0].c_str()))
-                CLEANUP_AND_THROW("invalid scale value for command SCALE");
+            else
+                ret->params.c_scale.scale = gs_specifier::parse(src->parameters[0].c_str());
 
             break;
         // flags instruction - sets/adds/removes flag
@@ -815,16 +818,17 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         // emote instruction - plays emote on subject
         // Syntax: emote <emote id> [<subject>]
         case GSCR_EMOTE:
+        {
             if (src->parameters.size() < 1)
                 CLEANUP_AND_THROW("too few parameters for instruction EMOTE");
             if (src->parameters.size() > 2)
                 CLEANUP_AND_THROW("too many parameters for instruction EMOTE");
 
-            if (!tryStrToInt(ret->params.c_emote.emote_id, src->parameters[0].c_str()))
-            {
-                if (!tryRecognizeFlag(ret->params.c_emote.emote_id, UNIT_NPC_EMOTESTATE, src->parameters[0]))
-                    CLEANUP_AND_THROW("could not recognize emote name / identifier in EMOTE instruction");
-            }
+            int32 emote;
+            if (!tryRecognizeFlag(emote, UNIT_NPC_EMOTESTATE, src->parameters[0]))
+                ret->params.c_emote.emote_id = gs_specifier::parse(src->parameters[0].c_str());
+            else
+                ret->params.c_emote.emote_id = gs_specifier::make_default_value(emote);
 
             if (src->parameters.size() == 2)
                 ret->params.c_emote.subject = gs_specifier::parse(src->parameters[1].c_str());
@@ -832,6 +836,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 ret->params.c_emote.subject.subject_type = GSST_ME;
 
             break;
+        }
         // movie instruction - plays movie to subject
         // Syntax: movie <movie id> <subject>
         case GSCR_MOVIE:
@@ -840,9 +845,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             if (src->parameters.size() > 2)
                 CLEANUP_AND_THROW("too many parameters for instruction MOVIE");
 
-            if (!tryStrToInt(ret->params.c_movie.movie_id, src->parameters[0].c_str()))
-                CLEANUP_AND_THROW("could not recognize movie identifier in MOVIE instruction");
-
+            ret->params.c_movie.movie_id = gs_specifier::parse(src->parameters[0].c_str());
             ret->params.c_movie.subject = gs_specifier::parse(src->parameters[1].c_str());
 
             break;
@@ -862,8 +865,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             else
                 CLEANUP_AND_THROW("invalid operation for instruction AURA, use add or remove");
 
-            if (!tryStrToInt(ret->params.c_aura.aura_id, src->parameters[1].c_str()))
-                CLEANUP_AND_THROW("invalid aura identifier in AURA instruction");
+            ret->params.c_aura.aura_id = gs_specifier::parse(src->parameters[1].c_str());
 
             if (src->parameters.size() == 3)
                 ret->params.c_aura.subject = gs_specifier::parse(src->parameters[2].c_str());
@@ -885,8 +887,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                     CLEANUP_AND_THROW("could not recognize move type name / identifier in SPEED instruction");
             }
 
-            if (!tryStrToFloat(ret->params.c_speed.speed, src->parameters[1].c_str()))
-                CLEANUP_AND_THROW("invalid speed specified for SPEED instruction");
+            ret->params.c_speed.speed = gs_specifier::parse(src->parameters[1].c_str());
 
             break;
         // move instruction - sets implicit move type
@@ -918,8 +919,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 CLEANUP_AND_THROW("too few parameters for instruction MOUNT");
             if (src->parameters.size() > 1)
                 CLEANUP_AND_THROW("too many parameters for instruction MOUNT");
-            if (!tryStrToInt(ret->params.c_mount.mount_model_id, src->parameters[0].c_str()))
-                CLEANUP_AND_THROW("invalid non-numeric parameter for instruction MOUNT");
+            ret->params.c_mount.mount_model_id = gs_specifier::parse(src->parameters[0].c_str());
             break;
         // unmount instruction - dismounts script owner from mount
         // Syntax: unmount
@@ -951,24 +951,19 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             else
                 CLEANUP_AND_THROW("invalid quest operation for instruction QUEST");
 
-            if (!tryStrToInt(ret->params.c_quest.quest_id, src->parameters[1].c_str()))
-                CLEANUP_AND_THROW("non-numeric questId supplied for instruction QUEST");
+            ret->params.c_quest.quest_id = gs_specifier::parse(src->parameters[1].c_str());
 
             if (ret->params.c_quest.op == GSQO_PROGRESS)
             {
-                if (!tryStrToInt(ret->params.c_quest.objective_index, src->parameters[2].c_str()))
-                    CLEANUP_AND_THROW("non-numeric objective id supplied for instruction QUEST");
+                ret->params.c_quest.objective_index = gs_specifier::parse(src->parameters[2].c_str());
 
-                if (ret->params.c_quest.objective_index < 0 || ret->params.c_quest.objective_index > 3)
+                if (ret->params.c_quest.objective_index.value < 0 || ret->params.c_quest.objective_index.value > 3)
                     CLEANUP_AND_THROW("objective index is out of 0..3 range for instruction QUEST");
 
-                ret->params.c_quest.value = 1;
+                ret->params.c_quest.value = gs_specifier::make_default_value(1);
 
                 if (src->parameters.size() == 4)
-                {
-                    if (!tryStrToInt(ret->params.c_quest.value, src->parameters[3].c_str()))
-                        CLEANUP_AND_THROW("non-numeric parameter supplied as value for instruction QUEST");
-                }
+                    ret->params.c_quest.value = gs_specifier::parse(src->parameters[3].c_str());
             }
 
             break;
@@ -1115,8 +1110,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             if (src->parameters.size() > 2)
                 CLEANUP_AND_THROW("too many parameters for instruction SOUND");
 
-            if (!tryStrToInt(ret->params.c_sound.sound_id, src->parameters[0].c_str()))
-                CLEANUP_AND_THROW("could not recognize sound identifier in SOUND instruction");
+            ret->params.c_sound.sound_id = gs_specifier::parse(src->parameters[0].c_str());
 
             if (src->parameters.size() == 2)
                 ret->params.c_sound.target = gs_specifier::parse(src->parameters[1].c_str());

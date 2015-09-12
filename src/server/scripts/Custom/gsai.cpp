@@ -33,6 +33,26 @@ class GS_CreatureScript : public CreatureScript
                 Unit* asUnitPointer;
             } value;
 
+            int32 toInteger()
+            {
+                if (type == GSVTYPE_INTEGER)
+                    return value.asInteger;
+                if (type == GSVTYPE_FLOAT)
+                    return (int32)value.asFloat;
+                else
+                    return 0;
+            };
+
+            float toFloat()
+            {
+                if (type == GSVTYPE_INTEGER)
+                    return (float)value.asInteger;
+                if (type == GSVTYPE_FLOAT)
+                    return value.asFloat;
+                else
+                    return 0.0f;
+            };
+
             GS_VariableType type;
 
             GS_Variable() { value.asInteger = 0; type = GSVTYPE_INTEGER; };
@@ -816,14 +836,14 @@ class GS_CreatureScript : public CreatureScript
                         {
                             // set waiting flag and store waiting parameters
                             is_waiting = true;
-                            wait_timer = curr->params.c_wait.delay;
+                            wait_timer = GS_GetValueFromSpecifier(curr->params.c_wait.delay).toInteger();
                             wait_flags = curr->params.c_wait.flags;
                         }
                         break;
                     case GSCR_CAST:
                     {
                         Unit* target = GS_SelectTarget(curr->params.c_cast.target_type);
-                        me->CastSpell(target, curr->params.c_cast.spell, curr->params.c_cast.triggered);
+                        me->CastSpell(target, GS_GetValueFromSpecifier(curr->params.c_cast.spell).toInteger(), curr->params.c_cast.triggered);
                         break;
                     }
                     case GSCR_SAY:
@@ -859,12 +879,12 @@ class GS_CreatureScript : public CreatureScript
                         break;
                     case GSCR_FACTION:
                         // if the faction is larger than 0, that means set faction to specified value
-                        if (curr->params.c_faction.faction > 0)
+                        if (curr->params.c_faction.faction.value > 0)
                         {
                             // store original faction, if not stored yet
                             if (stored_faction == 0)
                                 stored_faction = me->getFaction();
-                            me->setFaction(curr->params.c_faction.faction);
+                            me->setFaction(GS_GetValueFromSpecifier(curr->params.c_faction.faction).toInteger());
                         }
                         // or if we are about to restore original faction and we already stored that value
                         else if (stored_faction != 0)
@@ -888,14 +908,14 @@ class GS_CreatureScript : public CreatureScript
                         me->Attack(me->GetVictim(), true);
                         break;
                     case GSCR_TIMER:
-                        GS_SetTimer(curr->params.c_timer.timer_id, curr->params.c_timer.value);
+                        GS_SetTimer(curr->params.c_timer.timer_id, GS_GetValueFromSpecifier(curr->params.c_timer.value).toInteger());
                         break;
                     case GSCR_MORPH:
-                        if (curr->params.c_morph.morph_id > 0)
+                        if (curr->params.c_morph.morph_id.value > 0)
                         {
                             if (stored_modelid == 0)
                                 stored_modelid = me->GetDisplayId();
-                            me->SetDisplayId(curr->params.c_morph.morph_id);
+                            me->SetDisplayId(GS_GetValueFromSpecifier(curr->params.c_morph.morph_id).toInteger());
                         }
                         else if (stored_modelid > 0)
                         {
@@ -904,28 +924,39 @@ class GS_CreatureScript : public CreatureScript
                         }
                     case GSCR_SUMMON:
                     {
-                        float x = curr->params.c_summon.x;
-                        float y = curr->params.c_summon.y;
-                        float z = curr->params.c_summon.z;
+                        float x = GS_GetValueFromSpecifier(curr->params.c_summon.x).toFloat();
+                        float y = GS_GetValueFromSpecifier(curr->params.c_summon.y).toFloat();
+                        float z = GS_GetValueFromSpecifier(curr->params.c_summon.z).toFloat();
                         float o = me->GetOrientation();
                         if (x == 0 && y == 0 && z == 0)
                             me->GetPosition(x, y, z, o);
 
-                        me->SummonCreature(curr->params.c_summon.creature_entry, x, y, z, o, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
+                        me->SummonCreature(GS_GetValueFromSpecifier(curr->params.c_summon.creature_entry).toInteger(), x, y, z, o, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
                         break;
                     }
                     case GSCR_WALK:
                         me->SetWalk(true);
                         is_moving = true;
-                        me->GetMotionMaster()->MovePoint(100, curr->params.c_walk_run_teleport.x, curr->params.c_walk_run_teleport.y, curr->params.c_walk_run_teleport.z, true);
+                        me->GetMotionMaster()->MovePoint(100,
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.x).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.y).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.z).toFloat(),
+                            true);
                         break;
                     case GSCR_RUN:
                         me->SetWalk(false);
                         is_moving = true;
-                        me->GetMotionMaster()->MovePoint(100, curr->params.c_walk_run_teleport.x, curr->params.c_walk_run_teleport.y, curr->params.c_walk_run_teleport.z, true);
+                        me->GetMotionMaster()->MovePoint(100,
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.x).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.y).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.z).toFloat(),
+                            true);
                         break;
                     case GSCR_TELEPORT:
-                        me->NearTeleportTo(curr->params.c_walk_run_teleport.x, curr->params.c_walk_run_teleport.y, curr->params.c_walk_run_teleport.z, me->GetOrientation());
+                        me->NearTeleportTo(GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.x).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.y).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.z).toFloat(),
+                            me->GetOrientation());
                         break;
                     case GSCR_WAITFOR:
                         is_waiting = true;
@@ -949,7 +980,7 @@ class GS_CreatureScript : public CreatureScript
                             if (stored_scale < 0.0f)
                                 stored_scale = me->GetFloatValue(OBJECT_FIELD_SCALE_X);
 
-                            me->SetFloatValue(OBJECT_FIELD_SCALE_X, curr->params.c_scale.scale);
+                            me->SetFloatValue(OBJECT_FIELD_SCALE_X, GS_GetValueFromSpecifier(curr->params.c_scale.scale).toFloat());
                         }
                         else
                         {
@@ -975,25 +1006,25 @@ class GS_CreatureScript : public CreatureScript
                         break;
                     case GSCR_EMOTE:
                         if (Unit* source = GS_SelectTarget(curr->params.c_emote.subject))
-                            source->HandleEmoteCommand(curr->params.c_emote.emote_id);
+                            source->HandleEmoteCommand(GS_GetValueFromSpecifier(curr->params.c_emote.emote_id).toInteger());
                         break;
                     case GSCR_MOVIE:
                         if (Unit* source = GS_SelectTarget(curr->params.c_emote.subject))
                             if (Player* pl = source->ToPlayer())
-                                pl->SendMovieStart((uint32)curr->params.c_movie.movie_id);
+                                pl->SendMovieStart(GS_GetValueFromSpecifier(curr->params.c_movie.movie_id).toInteger());
                         break;
                     case GSCR_AURA:
                         if (Unit* source = GS_SelectTarget(curr->params.c_aura.subject))
                         {
                             if (curr->params.c_aura.op == GSFO_ADD)
-                                source->AddAura(curr->params.c_aura.aura_id, source);
+                                source->AddAura(GS_GetValueFromSpecifier(curr->params.c_aura.aura_id).toInteger(), source);
                             else if (curr->params.c_aura.op == GSFO_REMOVE)
-                                source->RemoveAurasDueToSpell(curr->params.c_aura.aura_id);
+                                source->RemoveAurasDueToSpell(GS_GetValueFromSpecifier(curr->params.c_aura.aura_id).toInteger());
                         }
                         break;
                     case GSCR_SPEED:
                         if (curr->params.c_speed.movetype >= 0 && curr->params.c_speed.movetype <= MAX_MOVE_TYPE)
-                            me->SetSpeed((UnitMoveType)curr->params.c_speed.movetype, curr->params.c_speed.speed, true);
+                            me->SetSpeed((UnitMoveType)curr->params.c_speed.movetype, GS_GetValueFromSpecifier(curr->params.c_speed.speed).toFloat(), true);
                         break;
                     case GSCR_MOVE:
                         if (curr->params.c_move.movetype < 0)
@@ -1024,7 +1055,7 @@ class GS_CreatureScript : public CreatureScript
                         }
                         break;
                     case GSCR_MOUNT:
-                        me->Mount(curr->params.c_mount.mount_model_id);
+                        me->Mount(GS_GetValueFromSpecifier(curr->params.c_mount.mount_model_id).toInteger());
                         break;
                     case GSCR_UNMOUNT:
                         me->Unmount();
@@ -1033,11 +1064,11 @@ class GS_CreatureScript : public CreatureScript
                         if (m_scriptInvoker && m_scriptInvoker->IsInWorld())
                         {
                             if (curr->params.c_quest.op == GSQO_COMPLETE)
-                                m_scriptInvoker->CompleteQuest(curr->params.c_quest.quest_id);
+                                m_scriptInvoker->CompleteQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
                             else if (curr->params.c_quest.op == GSQO_FAIL)
-                                m_scriptInvoker->FailQuest(curr->params.c_quest.quest_id);
+                                m_scriptInvoker->FailQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
                             else if (curr->params.c_quest.op == GSQO_PROGRESS)
-                                m_scriptInvoker->AddQuestObjectiveProgress(curr->params.c_quest.quest_id, curr->params.c_quest.objective_index, curr->params.c_quest.value);
+                                m_scriptInvoker->AddQuestObjectiveProgress(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.objective_index).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.value).toInteger());
                         }
                         break;
                     case GSCR_DESPAWN:
@@ -1099,7 +1130,7 @@ class GS_CreatureScript : public CreatureScript
                     case GSCR_SOUND:
                     {
                         Unit* target = GS_SelectTarget(curr->params.c_sound.target);
-                        me->PlayDirectSound(curr->params.c_sound.sound_id, target->ToPlayer());
+                        me->PlayDirectSound(GS_GetValueFromSpecifier(curr->params.c_sound.sound_id).toInteger(), target->ToPlayer());
                         break;
                     }
                     default:
