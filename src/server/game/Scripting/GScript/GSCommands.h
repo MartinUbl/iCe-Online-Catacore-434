@@ -189,6 +189,10 @@ enum gs_subject_parameter
     GSSP_MANA = 8,              // subject mana value
     GSSP_MANA_PCT = 9,          // subject mana percentage
     GSSP_DISTANCE = 10,         // subject distance from "me"
+    GSSP_POS_X = 11,            // subject position X
+    GSSP_POS_Y = 12,            // subject position Y
+    GSSP_POS_Z = 13,            // subject position Z
+    GSSP_ORIENTATION = 14,      // subject orientation
 };
 
 enum gs_numeric_operatror

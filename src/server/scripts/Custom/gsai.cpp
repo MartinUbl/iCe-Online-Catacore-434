@@ -690,6 +690,14 @@ class GS_CreatureScript : public CreatureScript
                         return GS_Variable((subject->GetMaxPower(POWER_MANA) > 0) ? (100.0f* (float)subject->GetPower(POWER_MANA) / (float)subject->GetMaxPower(POWER_MANA)) : 0);
                     case GSSP_DISTANCE:
                         return GS_Variable(me->GetDistance(subject));
+                    case GSSP_POS_X:
+                        return GS_Variable(subject->GetPositionX());
+                    case GSSP_POS_Y:
+                        return GS_Variable(subject->GetPositionY());
+                    case GSSP_POS_Z:
+                        return GS_Variable(subject->GetPositionZ());
+                    case GSSP_ORIENTATION:
+                        return GS_Variable(subject->GetOrientation());
                     case GSSP_NONE:
                         return GS_Variable(subject);
                     default:

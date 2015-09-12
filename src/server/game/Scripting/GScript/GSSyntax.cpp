@@ -429,6 +429,14 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_parameter = GSSP_MANA_PCT;
             else if (parid == "distance")
                 rr.subject_parameter = GSSP_DISTANCE;
+            else if (parid == "position_x")
+                rr.subject_parameter = GSSP_POS_X;
+            else if (parid == "position_y")
+                rr.subject_parameter = GSSP_POS_Y;
+            else if (parid == "position_z")
+                rr.subject_parameter = GSSP_POS_Z;
+            else if (parid == "orientation")
+                rr.subject_parameter = GSSP_ORIENTATION;
         }
     }
 
