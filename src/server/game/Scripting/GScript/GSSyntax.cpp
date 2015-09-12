@@ -439,6 +439,8 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_parameter = GSSP_POS_Z;
             else if (parid == "orientation")
                 rr.subject_parameter = GSSP_ORIENTATION;
+            else if (parid == "alive")
+                rr.subject_parameter = GSSP_ALIVE;
         }
     }
 
@@ -552,11 +554,18 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         //         yell "Hello universe!"
         case GSCR_SAY:
         case GSCR_YELL:
-            if (src->parameters.size() != 1)
+            if (src->parameters.size() < 1)
                 CLEANUP_AND_THROW("too few parameters for instruction SAY/YELL");
+            if (src->parameters.size() > 2)
+                CLEANUP_AND_THROW("too many parameters for instruction SAY/YELL");
 
             // store string to be said / yelled
             ret->params.c_say_yell.tosay = src->parameters[0].c_str();
+            // store sound ID if supplied
+            if (src->parameters.size() == 2)
+                ret->params.c_say_yell.sound_id = gs_specifier::parse(src->parameters[1].c_str());
+            else
+                ret->params.c_say_yell.sound_id = gs_specifier::make_default_value(0);
 
             break;
         // if instruction - standard control sequence; needs to be closed by endif

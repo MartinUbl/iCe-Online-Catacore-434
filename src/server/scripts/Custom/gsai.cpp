@@ -701,6 +701,8 @@ class GS_CreatureScript : public CreatureScript
                         return GS_Variable(subject->GetPositionZ());
                     case GSSP_ORIENTATION:
                         return GS_Variable(subject->GetOrientation());
+                    case GSSP_ALIVE:
+                        return GS_Variable((int32)(subject->IsAlive() ? 1 : 0));
                     case GSSP_NONE:
                         return GS_Variable(subject);
                     default:
@@ -859,11 +861,21 @@ class GS_CreatureScript : public CreatureScript
                         break;
                     }
                     case GSCR_SAY:
+                    {
                         me->MonsterSay(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, 0);
+                        int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
+                        if (sound > 0)
+                            me->PlayDirectSound(sound);
                         break;
+                    }
                     case GSCR_YELL:
+                    {
                         me->MonsterYell(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, 0);
+                        int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
+                        if (sound > 0)
+                            me->PlayDirectSound(sound);
                         break;
+                    }
                     case GSCR_IF:
                         // if script does not meet condition passed in, move to endif offset
                         if (!GS_Meets(curr->params.c_if.condition))

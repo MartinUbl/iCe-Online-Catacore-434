@@ -198,6 +198,7 @@ enum gs_subject_parameter
     GSSP_POS_Y = 12,            // subject position Y
     GSSP_POS_Z = 13,            // subject position Z
     GSSP_ORIENTATION = 14,      // subject orientation
+    GSSP_ALIVE = 15,            // subject alive state
 };
 
 enum gs_numeric_operatror
@@ -288,6 +289,7 @@ struct gs_command
         struct
         {
             const char* tosay;
+            gs_specifier sound_id;
         } c_say_yell;
 
         struct
