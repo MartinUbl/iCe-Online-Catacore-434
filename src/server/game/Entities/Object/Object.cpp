@@ -2710,6 +2710,15 @@ Creature* WorldObject::SummonTrigger(float x, float y, float z, float ang, uint3
     return summon;
 }
 
+Player* WorldObject::FindNearestPlayer(float range, bool alive)
+{
+    Player *pl = NULL;
+    Trinity::NearestPlayerWithLiveStateInObjectRangeCheck checker(*this, alive, range);
+    Trinity::PlayerLastSearcher<Trinity::NearestPlayerWithLiveStateInObjectRangeCheck> searcher(this, pl, checker);
+    VisitNearbyObject(range, searcher);
+    return pl;
+}
+
 Creature* WorldObject::FindNearestCreature(uint32 entry, float range, bool alive)
 {
     Creature *creature = NULL;

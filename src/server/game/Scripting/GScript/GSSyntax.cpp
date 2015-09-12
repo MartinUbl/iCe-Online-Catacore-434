@@ -358,7 +358,7 @@ gs_specifier gs_specifier::parse(const char* str)
     for (i = 0; i <= strlen(str); i++)
     {
         // dot character marks end of subject part, as well, as zero terminator when no subject specified
-        if ((str[i] == '.' || str[i] == '\0') && !subject)
+        if ((str[i] == '.' || str[i] == '\0' || str[i] == '(') && !subject)
         {
             // decide about specifier target type
             std::string subid = std::string(str).substr(0, i);
@@ -380,6 +380,12 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_type = GSST_INVOKER;
             else if (subid == "parent")
                 rr.subject_type = GSST_PARENT;
+            else if (subid == "closest_creature")
+                rr.subject_type = GSST_CLOSEST_CREATURE;
+            else if (subid == "closest_player")
+                rr.subject_type = GSST_CLOSEST_PLAYER;
+            else if (subid == "last_summon")
+                rr.subject_type = GSST_LAST_SUMMON;
             else if (subid == "ready")
             {
                 rr.subject_type = GSST_STATE;
@@ -397,6 +403,18 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_type = GSST_STATE;
                 rr.subject_parameter = GSSP_STATE_VALUE;
                 rr.value = GSSV_SUSPENDED;
+            }
+
+            if (str[i] == '(')
+            {
+                lastpos = i;
+                // find the end of parenthesis part
+                while (str[i] != ')' && str[i] != '\0')
+                    i++;
+                std::string subpar = std::string(str).substr(lastpos + 1, i);
+
+                if (rr.subject_type == GSST_CLOSEST_CREATURE)
+                    tryStrToInt(rr.value, subpar.c_str());
             }
 
             subject = true;
@@ -1175,6 +1193,21 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             matching->params.c_when.endwhen_offset = offset;
             break;
         }
+        // talk instruction - says something from creature_text table assigned with current NPC
+        // Syntax: talk <group id> [<target>]
+        case GSCR_TALK:
+            if (src->parameters.size() < 1)
+                CLEANUP_AND_THROW("too few parameters for instruction TALK");
+            if (src->parameters.size() > 2)
+                CLEANUP_AND_THROW("too many parameters for instruction TALK");
+
+            ret->params.c_talk.talk_group_id = gs_specifier::parse(src->parameters[0].c_str());
+
+            if (src->parameters.size() == 2)
+                ret->params.c_talk.talk_target = gs_specifier::parse(src->parameters[1].c_str());
+            else
+                ret->params.c_talk.talk_target.subject_type = GSST_NONE;
+            break;
     }
 
     return ret;

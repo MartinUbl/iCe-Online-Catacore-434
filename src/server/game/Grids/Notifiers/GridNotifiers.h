@@ -468,6 +468,21 @@ namespace Trinity
     };
 
     template<class Check>
+    struct PlayerLastSearcher
+    {
+        uint32 i_phaseMask;
+        Player* &i_object;
+        Check & i_check;
+
+        PlayerLastSearcher(WorldObject const* searcher, Player* & result, Check & check)
+            : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check) {}
+
+        void Visit(PlayerMapType &m);
+
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+    };
+
+    template<class Check>
     struct PlayerListSearcher
     {
         uint32 i_phaseMask;
@@ -1133,28 +1148,53 @@ namespace Trinity
     // Success at unit in range, range update for next check (this can be use with CreatureLastSearcher to find nearest creature)
     class NearestCreatureEntryWithLiveStateInObjectRangeCheck
     {
-        public:
-            NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject const& obj, uint32 entry, bool alive, float range)
-                : i_obj(obj), i_entry(entry), i_alive(alive), i_range(range) {}
+    public:
+        NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject const& obj, uint32 entry, bool alive, float range)
+            : i_obj(obj), i_entry(entry), i_alive(alive), i_range(range) {}
 
-            bool operator()(Creature* u)
+        bool operator()(Creature* u)
+        {
+            if (u->GetEntry() == i_entry && u->IsAlive() == i_alive && i_obj.IsWithinDistInMap(u, i_range))
             {
-                if (u->GetEntry() == i_entry && u->IsAlive() == i_alive && i_obj.IsWithinDistInMap(u, i_range))
-                {
-                    i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
-                    return true;
-                }
-                return false;
+                i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
+                return true;
             }
-            float GetLastRange() const { return i_range; }
-        private:
-            WorldObject const& i_obj;
-            uint32 i_entry;
-            bool   i_alive;
-            float  i_range;
+            return false;
+        }
+        float GetLastRange() const { return i_range; }
+    private:
+        WorldObject const& i_obj;
+        uint32 i_entry;
+        bool   i_alive;
+        float  i_range;
 
-            // prevent clone this object
-            NearestCreatureEntryWithLiveStateInObjectRangeCheck(NearestCreatureEntryWithLiveStateInObjectRangeCheck const&);
+        // prevent clone this object
+        NearestCreatureEntryWithLiveStateInObjectRangeCheck(NearestCreatureEntryWithLiveStateInObjectRangeCheck const&);
+    };
+
+    class NearestPlayerWithLiveStateInObjectRangeCheck
+    {
+    public:
+        NearestPlayerWithLiveStateInObjectRangeCheck(WorldObject const& obj, bool alive, float range)
+            : i_obj(obj), i_alive(alive), i_range(range) {}
+
+        bool operator()(Player* u)
+        {
+            if (u->IsAlive() == i_alive && i_obj.IsWithinDistInMap(u, i_range))
+            {
+                i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
+                return true;
+            }
+            return false;
+        }
+        float GetLastRange() const { return i_range; }
+    private:
+        WorldObject const& i_obj;
+        bool   i_alive;
+        float  i_range;
+
+        // prevent clone this object
+        NearestPlayerWithLiveStateInObjectRangeCheck(NearestPlayerWithLiveStateInObjectRangeCheck const&);
     };
 
     class AnyPlayerInObjectRangeCheck

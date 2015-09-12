@@ -1,6 +1,7 @@
 #include "ScriptPCH.h"
 #include "GSCommands.h"
 #include "GSMgr.h"
+#include "CreatureTextMgr.h"
 
 class GS_CreatureScript : public CreatureScript
 {
@@ -296,6 +297,7 @@ class GS_CreatureScript : public CreatureScript
             Player* m_inheritedScriptInvoker = nullptr;
 
             Unit* m_parentUnit = nullptr;
+            Unit* m_lastSummonedUnit = nullptr;
 
             GS_ScriptedAI(Creature* cr) : ScriptedAI(cr)
             {
@@ -314,6 +316,7 @@ class GS_CreatureScript : public CreatureScript
                 is_moving = false;
                 is_updating_lock = false;
                 is_script_locked = false;
+                m_lastSummonedUnit = nullptr;
             }
 
             ~GS_ScriptedAI()
@@ -455,6 +458,7 @@ class GS_CreatureScript : public CreatureScript
                 disable_melee = false;
                 is_moving = false;
                 m_scriptInvoker = nullptr;
+                m_lastSummonedUnit = nullptr;
 
                 timer_map.clear();
                 variable_map.clear();
@@ -627,6 +631,12 @@ class GS_CreatureScript : public CreatureScript
                     // parent (summoner)
                     case GSST_PARENT:
                         return m_parentUnit ? m_parentUnit : me;
+                    case GSST_CLOSEST_CREATURE:
+                        return GetClosestCreatureWithEntry(me, spec.value, 300.0f, true);
+                    case GSST_CLOSEST_PLAYER:
+                        return me->FindNearestPlayer(300.0f, true);
+                    case GSST_LAST_SUMMON:
+                        return m_lastSummonedUnit;
                     // may be also variable value, if the variable points to unit
                     case GSST_VARIABLE_VALUE:
                         if (variable_map.find(spec.value) != variable_map.end())
@@ -774,6 +784,22 @@ class GS_CreatureScript : public CreatureScript
 
                     // set me as parent of summoned unit
                     targetAI->SetParentUnit(me);
+                }
+
+                m_lastSummonedUnit = summoned;
+            }
+
+            void SummonedCreatureDespawn(Creature* summoned) override
+            {
+                if (m_lastSummonedUnit == summoned)
+                    m_lastSummonedUnit = nullptr;
+
+                // go through every variable, and check, if it's unit pointer, and if it points to our summoned creature
+                // if yes, purge the pointer to avoid having dangling pointers in variables
+                for (auto itr = variable_map.begin(); itr != variable_map.end(); ++itr)
+                {
+                    if (itr->second.type == GSVTYPE_UNIT && itr->second.value.asUnitPointer == summoned)
+                        itr->second.value.asUnitPointer = nullptr;
                 }
             }
 
@@ -1165,6 +1191,12 @@ class GS_CreatureScript : public CreatureScript
                     {
                         Unit* target = GS_SelectTarget(curr->params.c_sound.target);
                         me->PlayDirectSound(GS_GetValueFromSpecifier(curr->params.c_sound.sound_id).toInteger(), target->ToPlayer());
+                        break;
+                    }
+                    case GSCR_TALK:
+                    {
+                        Unit* target = GS_SelectTarget(curr->params.c_talk.talk_target);
+                        sCreatureTextMgr->SendChat(me, GS_GetValueFromSpecifier(curr->params.c_talk.talk_group_id).toInteger(), target ? target->GetGUID() : 0);
                         break;
                     }
                     default:

@@ -375,6 +375,19 @@ void Trinity::CreatureListSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
+void Trinity::PlayerLastSearcher<Check>::Visit(PlayerMapType &m)
+{
+    for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+    {
+        if (!itr->getSource()->InSamePhase(i_phaseMask))
+            continue;
+
+        if (i_check(itr->getSource()))
+            i_object = itr->getSource();
+    }
+}
+
+template<class Check>
 void Trinity::PlayerListSearcher<Check>::Visit(PlayerMapType &m)
 {
     for (PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)

@@ -69,6 +69,7 @@ enum gs_command_type
     GSCR_SOUND = 40,
     GSCR_WHEN = 41,
     GSCR_ENDWHEN = 42,
+    GSCR_TALK = 43,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -116,6 +117,7 @@ static std::string gscr_identifiers[] = {
     "sound",
     "when",
     "endwhen",
+    "talk",
 };
 
 enum gs_quest_operation
@@ -178,6 +180,9 @@ enum gs_subject_type
     GSST_INVOKER = 9,           // script invoker (gossip script, quest accept, etc.)
     GSST_PARENT = 10,           // parent unit (of summoned creature)
     GSST_VARIABLE_VALUE = 11,   // value of variable declared
+    GSST_CLOSEST_CREATURE = 12, // closest creature - expects parameter in round parenthesis
+    GSST_CLOSEST_PLAYER = 13,   // closest player
+    GSST_LAST_SUMMON = 14,      // last summoned unit
 };
 
 // type of subject parameter in specifier
@@ -444,6 +449,12 @@ struct gs_command
             gs_condition condition;
             int endwhen_offset;
         } c_when;
+
+        struct
+        {
+            gs_specifier talk_group_id;
+            gs_specifier talk_target;
+        } c_talk;
 
     } params;
 
