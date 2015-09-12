@@ -1096,6 +1096,12 @@ class GS_CreatureScript : public CreatureScript
 
                         break;
                     }
+                    case GSCR_SOUND:
+                    {
+                        Unit* target = GS_SelectTarget(curr->params.c_sound.target);
+                        me->PlayDirectSound(curr->params.c_sound.sound_id, target->ToPlayer());
+                        break;
+                    }
                     default:
                     case GSCR_NONE:
                         break;

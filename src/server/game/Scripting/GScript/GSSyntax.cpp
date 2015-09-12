@@ -1107,6 +1107,22 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
 
             break;
         }
+        // sound instruction - plays sound directly to player, or to environment
+        // Syntax: sound <sound id> [<target>]
+        case GSCR_SOUND:
+            if (src->parameters.size() < 1)
+                CLEANUP_AND_THROW("too few parameters for instruction SOUND");
+            if (src->parameters.size() > 2)
+                CLEANUP_AND_THROW("too many parameters for instruction SOUND");
+
+            if (!tryStrToInt(ret->params.c_sound.sound_id, src->parameters[0].c_str()))
+                CLEANUP_AND_THROW("could not recognize sound identifier in SOUND instruction");
+
+            if (src->parameters.size() == 2)
+                ret->params.c_sound.target = gs_specifier::parse(src->parameters[1].c_str());
+            else
+                ret->params.c_sound.target.subject_type = GSST_NONE;
+            break;
     }
 
     return ret;

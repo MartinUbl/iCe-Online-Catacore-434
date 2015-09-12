@@ -66,6 +66,7 @@ enum gs_command_type
     GSCR_WHILE = 37,
     GSCR_ENDWHILE = 38,
     GSCR_VAR = 39,
+    GSCR_SOUND = 40,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -419,6 +420,12 @@ struct gs_command
 
             gs_specifier spec;
         } c_var;
+
+        struct
+        {
+            int sound_id;
+            gs_specifier target;
+        } c_sound;
 
     } params;
 
