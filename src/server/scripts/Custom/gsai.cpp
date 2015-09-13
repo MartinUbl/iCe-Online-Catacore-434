@@ -264,6 +264,8 @@ class GS_CreatureScript : public CreatureScript
             int m_vehicleEnterScriptId = -1;
             // map of script IDs for quests
             std::map<uint32, GS_QuestScriptRecord> m_questScripts;
+            // map of script IDs for spellcasts received
+            std::map<int32, int32> m_spellReceivedScripts;
 
             // current type of script being executed
             GScriptType m_currentScriptType = GS_TYPE_NONE;
@@ -346,6 +348,23 @@ class GS_CreatureScript : public CreatureScript
                     else if (m_currentScriptType == GS_TYPE_OUT_OF_COMBAT && m_outOfCombatScriptId >= 0)
                         my_commands = sGSMgr->GetScript(m_outOfCombatScriptId);
                 }
+                else if (action == GSAI_SIGNAL_INVOKER_FROM_CREATOR)
+                {
+                    Unit* creator = sObjectAccessor->GetUnit(*me, me->GetCreatorGUID());
+                    if (creator)
+                        m_scriptInvoker = creator;
+                }
+                else if (action == GSAI_SIGNAL_INVOKER_FROM_OWNER)
+                {
+                    Unit* creator = sObjectAccessor->GetUnit(*me, me->GetOwnerGUID());
+                    if (creator)
+                        m_scriptInvoker = creator;
+                }
+                else if (action == GSAI_SIGNAL_INVOKER_FROM_SUMMONER)
+                {
+                    if (me->ToTempSummon())
+                        m_scriptInvoker = me->ToTempSummon()->GetSummoner();
+                }
                 else
                     ScriptedAI::DoAction(action);
             }
@@ -395,7 +414,7 @@ class GS_CreatureScript : public CreatureScript
                 }
             }
 
-            void PassengerBoarded(Unit* who, int8 seatId, bool apply)
+            void PassengerBoarded(Unit* who, int8 seatId, bool apply) override
             {
                 if (m_currentScriptType != GS_TYPE_COMBAT && m_currentScriptType != GS_TYPE_VEHICLE_ENTER && apply)
                 {
@@ -416,6 +435,23 @@ class GS_CreatureScript : public CreatureScript
                 }
             }
 
+            void SpellHit(Unit* who, const SpellEntry* spell) override
+            {
+                if (m_spellReceivedScripts.find(spell->Id) != m_spellReceivedScripts.end())
+                {
+                    if (m_currentScriptType != GS_TYPE_COMBAT)
+                    {
+                        if (m_spellReceivedScripts[spell->Id] >= 0)
+                        {
+                            ResetState();
+                            m_scriptInvoker = who;
+                            my_commands = sGSMgr->GetScript(m_spellReceivedScripts[spell->Id]);
+                            m_currentScriptType = GS_TYPE_SPELL_RECEIVED;
+                        }
+                    }
+                }
+            }
+
             void SetInheritedInvoker(Unit* pl)
             {
                 m_inheritedScriptInvoker = pl;
@@ -428,6 +464,8 @@ class GS_CreatureScript : public CreatureScript
 
             void GS_LoadMyScript()
             {
+                m_spellReceivedScripts.clear();
+
                 // select everything for this creature from database
                 QueryResult res = ScriptDatabase.PQuery("SELECT script_type, script_type_param, script_id FROM creature_gscript WHERE creature_entry = %u", me->GetEntry());
 
@@ -467,6 +505,8 @@ class GS_CreatureScript : public CreatureScript
                             case GS_TYPE_VEHICLE_ENTER:
                                 m_vehicleEnterScriptId = scriptId;
                                 break;
+                            case GS_TYPE_SPELL_RECEIVED:
+                                m_spellReceivedScripts[scriptParam] = scriptId;
                             default:
                             case GS_TYPE_NONE:
                                 break;
@@ -877,7 +917,8 @@ class GS_CreatureScript : public CreatureScript
                         DoMeleeAttackIfReady();
 
                     // gossip/quest accept/quest complete script has passed to end
-                    if (m_currentScriptType == GS_TYPE_GOSSIP_SELECT || m_currentScriptType == GS_TYPE_QUEST_ACCEPT || m_currentScriptType == GS_TYPE_QUEST_COMPLETE)
+                    if (m_currentScriptType == GS_TYPE_GOSSIP_SELECT || m_currentScriptType == GS_TYPE_QUEST_ACCEPT || m_currentScriptType == GS_TYPE_QUEST_COMPLETE
+                        || m_currentScriptType == GS_TYPE_VEHICLE_ENTER || m_currentScriptType == GS_TYPE_SPELL_RECEIVED)
                         EnterEvadeMode();
 
                     return;

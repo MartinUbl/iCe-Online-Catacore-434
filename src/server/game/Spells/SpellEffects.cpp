@@ -75,6 +75,7 @@
 #include "MoveSpline.h"
 #include "PathGenerator.h"
 #include "DynamicTransport.h"
+#include "GSMgr.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -5901,6 +5902,13 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                             summon->SetOwnerGUID(m_originalCaster->GetGUID());
                             summon->setFaction(m_originalCaster->getFaction());
                             summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+                            if (summon->GetScriptName() == "gscript")
+                                summon->AI()->DoAction(GSAI_SIGNAL_INVOKER_FROM_OWNER);
+                        }
+                        else
+                        {
+                            if (summon->GetScriptName() == "gscript")
+                                summon->AI()->DoAction(GSAI_SIGNAL_INVOKER_FROM_SUMMONER);
                         }
                         ExecuteLogEffectSummonObject(effIndex, summon);
 
@@ -5943,6 +5951,9 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
         summon->SetCreatorGUID(m_originalCaster->GetGUID());
         ExecuteLogEffectSummonObject(effIndex, summon);
+
+        if (summon->GetScriptName() == "gscript")
+            summon->AI()->DoAction(GSAI_SIGNAL_INVOKER_FROM_CREATOR);
 
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
             m_caster->ToPlayer()->AddSummonToMap(entry, summon->GetGUID(),time(NULL));
