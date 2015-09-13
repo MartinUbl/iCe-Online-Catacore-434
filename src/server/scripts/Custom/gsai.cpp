@@ -671,7 +671,7 @@ class GS_CreatureScript : public CreatureScript
 
                 // if type and parameter were not specified, return one-value
                 if (spec.subject_type == GSST_NONE)
-                    return GS_Variable(spec.isFloat ? (int32)spec.flValue : spec.value);
+                    return GS_Variable(spec.isFloat ? (float)spec.flValue : (int32)spec.value);
 
                 if (spec.subject_type == GSST_TIMER && spec.subject_parameter == GSSP_IDENTIFIER)
                     return GS_Variable(GS_GetTimerState(spec.value));
@@ -997,7 +997,11 @@ class GS_CreatureScript : public CreatureScript
                             if (x == 0 && y == 0 && z == 0)
                                 source->GetPosition(x, y, z, o);
 
-                            source->SummonCreature(GS_GetValueFromSpecifier(curr->params.c_summon.creature_entry).toInteger(), x, y, z, o, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
+                            TempSummonType sumtype = TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT;
+                            if (curr->params.c_summon.nodespawn)
+                                sumtype = TEMPSUMMON_MANUAL_DESPAWN;
+
+                            source->SummonCreature(GS_GetValueFromSpecifier(curr->params.c_summon.creature_entry).toInteger(), x, y, z, o, sumtype, 15000);
                             break;
                         }
                         case GSCR_WALK:
@@ -1207,6 +1211,20 @@ class GS_CreatureScript : public CreatureScript
                             {
                                 Unit* target = GS_SelectTarget(curr->params.c_talk.talk_target);
                                 sCreatureTextMgr->SendChat(source->ToCreature(), GS_GetValueFromSpecifier(curr->params.c_talk.talk_group_id).toInteger(), target ? target->GetGUID() : 0);
+                            }
+                            break;
+                        }
+                        case GSCR_TURN:
+                        {
+                            GS_Variable turnpar = GS_GetValueFromSpecifier(curr->params.c_turn.amount);
+                            if (curr->params.c_turn.relative && (turnpar.type == GSVTYPE_INTEGER || turnpar.type == GSVTYPE_FLOAT))
+                                source->SetFacingTo(source->GetOrientation() + turnpar.toFloat());
+                            else
+                            {
+                                if (turnpar.type == GSVTYPE_UNIT)
+                                    source->SetFacingToObject(turnpar.value.asUnitPointer);
+                                else
+                                    source->SetFacingTo(turnpar.toFloat());
                             }
                             break;
                         }

@@ -735,16 +735,23 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         case GSCR_SUMMON:
             if (src->parameters.size() == 0)
                 CLEANUP_AND_THROW("too few parameters for instruction SUMMON");
-            if (src->parameters.size() != 1 && src->parameters.size() != 4)
-                CLEANUP_AND_THROW("invalid parameter count for instruction SUMMON - use 1 or 4 params");
+            if (src->parameters.size() != 1 && src->parameters.size() != 4 && src->parameters.size() != 5)
+                CLEANUP_AND_THROW("invalid parameter count for instruction SUMMON - use 1, 4 or 5 params");
 
             ret->params.c_summon.creature_entry = gs_specifier::parse(src->parameters[0].c_str());
+            ret->params.c_summon.nodespawn = false;
 
-            if (src->parameters.size() == 4)
+            if (src->parameters.size() >= 4)
             {
                 ret->params.c_summon.x = gs_specifier::parse(src->parameters[1].c_str());
                 ret->params.c_summon.y = gs_specifier::parse(src->parameters[2].c_str());
                 ret->params.c_summon.z = gs_specifier::parse(src->parameters[3].c_str());
+
+                if (src->parameters.size() == 5)
+                {
+                    if (src->parameters[4] == "nodespawn")
+                        ret->params.c_summon.nodespawn = true;
+                }
             }
             else
             {
@@ -1227,6 +1234,29 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 ret->params.c_talk.talk_target = gs_specifier::parse(src->parameters[1].c_str());
             else
                 ret->params.c_talk.talk_target.subject_type = GSST_NONE;
+            break;
+        // turn instruction - changes orientation of script owner
+        // Syntax: turn <orientation or unit>
+        //         turn by <relative orientation>
+        case GSCR_TURN:
+            if (src->parameters.size() < 1)
+                CLEANUP_AND_THROW("too few parameters for instruction TURN");
+            if (src->parameters.size() > 2)
+                CLEANUP_AND_THROW("too many parameters for instruction TURN");
+
+            if (src->parameters.size() == 2 && src->parameters[0] == "by")
+            {
+                ret->params.c_turn.relative = true;
+                ret->params.c_turn.amount = gs_specifier::parse(src->parameters[1].c_str());
+            }
+            else if (src->parameters.size() == 1)
+            {
+                ret->params.c_turn.relative = false;
+                ret->params.c_turn.amount = gs_specifier::parse(src->parameters[0].c_str());
+            }
+            else
+                CLEANUP_AND_THROW("invalid parameters for instruction TURN");
+
             break;
     }
 

@@ -70,6 +70,7 @@ enum gs_command_type
     GSCR_WHEN = 41,
     GSCR_ENDWHEN = 42,
     GSCR_TALK = 43,
+    GSCR_TURN = 44,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -118,6 +119,7 @@ static std::string gscr_identifiers[] = {
     "when",
     "endwhen",
     "talk",
+    "turn",
 };
 
 enum gs_quest_operation
@@ -335,6 +337,7 @@ struct gs_command
         {
             gs_specifier creature_entry;
             gs_specifier x, y, z;
+            bool nodespawn;
         } c_summon;
 
         struct
@@ -462,6 +465,12 @@ struct gs_command
             gs_specifier talk_group_id;
             gs_specifier talk_target;
         } c_talk;
+
+        struct
+        {
+            gs_specifier amount;
+            bool relative;
+        } c_turn;
 
     } params;
 
