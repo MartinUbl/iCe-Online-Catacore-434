@@ -17,13 +17,14 @@
 
 #include "ScriptPCH.h"
 #include "well_of_eternity.h"
+#include "TaskScheduler.h"
 
 #define MAX_KILL_QUOTES 3
- 
+
 namespace Mannoroth
 {
     SimpleQuote onAggro = {26478, "Come, Stormrage, and I will show you what happens to those that betray the lord of the Legion!"}; // DONE
-    SimpleQuote onSummonDebilitators = {26488, "[Demonic] Amanare maev il azgalada zila ashj ashj zila enkil!"}; // should be in Demonic
+    SimpleQuote onSummonDebilitators = {26488, "Amanare maev il azgalada zila ashj ashj zila enkil!"}; // should be in Demonic
     SimpleQuote onSacrificeVarothen = {26483, "Your blood is MINE, elf!"}; // [That's Not Canon!] achievement
     SimpleQuote onBladeHit = {26482, "Rrraaaghhh!"};
     SimpleQuote onDefeated = {26479, "No... no! This victory will not be ripped from my grasp! I will not return to him in failure! I will not be torn from this pitiful world! No... NOOOOOOOO!!"};
@@ -36,7 +37,7 @@ namespace Mannoroth
         {26487, "Useless!"}
     };
 }
- 
+
 namespace Varothen
 {
     SimpleQuote onAggro = {26134, "For you, Azshara!"}; // DONE
@@ -49,13 +50,14 @@ namespace Varothen
         {26140, "In Azshara's name!"}
     };
 }
- 
+
 namespace Illidan
 {
     SimpleQuote onBladeThrow = {26095,"The sword has pierced his infernal armor! Strike him down!"};
     SimpleQuote stillConnected = {26099, "He is still connected to the well somehow! Focus your attacks on Mannoroth, we must disrupt his concentration!" };
+    SimpleQuote demonicQuote = { 0, "Revos ill ok mordanas archim maz naztheros! Archim xi ante maz-re mishun le nagas!"};
 }
- 
+
 namespace Tyrande
 {
     SimpleQuote onAggro = {25997, "I will handle the demons. Elune, guide my arrows!"}; // say
@@ -76,24 +78,6 @@ QUOTE_EVENTS phase3[MAX_PHASE3_QUOTES] =
     {10000, ENTRY_ILLIDAN_PRELUDE, "I will be the savior of our people! I WILL FULFILL MY DESTINY!", 26098},
     {1000, ENTRY_TYRANDE_PRELUDE, "No! Illidan!", 0 }, // TODO: sound id
     {MAX_TIMER, ENTRY_ILLIDAN_PRELUDE, "[Demonic] Revos ill ok mordanas archim maz naztheros! Archim xi ante maz-re mishun le nagas!", 26097} // demonic
-};
- 
-#define MAX_OUTRO_QUOTES 12
- 
-QUOTE_EVENTS outro[MAX_OUTRO_QUOTES] =
-{
-    {4000, ENTRY_ILLIDAN_PRELUDE, "The artifact!", 26059}, // doladit timing
-    {10000, ENTRY_NOZDORMU_PRELUDE, "The Dragon Soul is safe once again. Quickly, into the time portal before this world sunders!", 0}, // nozdormu entry, doladit timing
-    {2000, ENTRY_TYRANDE_PRELUDE, "Malfurion...", 25989},
-    {5000, ENTRY_MALFURION_PRELUDE, "Hush, Tyrande. Where is Illidan?", 26490},
-    {10000, ENTRY_TYRANDE_PRELUDE, "By the very edge...", 25990},
-    {6000, ENTRY_ILLIDAN_PRELUDE, "Brother, a timely arrival...", 26060},
-    {5000, ENTRY_MALFURION_PRELUDE, "Illidan! The well is out of control!", 26491},
-    {30000, ENTRY_ILLIDAN_PRELUDE, "Aye. It's been twisted and turned by too many spells. The fuss we - especially you - made with the portal was too much! The same spell that sent the Burning Legion back to their foul realm now works on the well! It's devouring itself and taking its surroundings with it! Fascinating, isn't it?", 26061},
-    {11000, ENTRY_MALFURION_PRELUDE, "Not if we're caught up in it! Why weren't you running! What have you been doing with your hand in the Well?", 26492},
-    {11000, ENTRY_ILLIDAN_PRELUDE, "If you've a way out of here, we should probably use it! I've tried casting myself and Tyrande out of here, but the well is too much in flux!", 26062},
-    {7000, ENTRY_MALFURION_PRELUDE, "This way!", 26493},
-    {MAX_TIMER, ENTRY_TYRANDE_PRELUDE, "I do not know who you are, but I thank you. Without your aid, our world would be... I do not wish to think about it. Moon goddess light your path.", 25991}
 };
 
 #define CAST_WOE_INSTANCE(i)     (dynamic_cast<instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript*>(i))
@@ -122,8 +106,7 @@ enum entries
 {
     ENTRY_VARTOHEN_MAGIC_BLADE = 55837,
     ENTRY_PORTAL_TO_TWISTING_NETHER = 56087,
-    ENTRY_MANNOROTH_VEHICLE_RIDER = 55420, // definitely not correct one, but meh ...
-    ENTRY_CHROMIE_MANNOROTH = 57913
+    ENTRY_MANNOROTH_VEHICLE_RIDER = 55420 // definitely not correct one, but meh ...
 };
 
 enum spells
@@ -233,6 +216,8 @@ public:
             me->SummonCreature(ENTRY_ABYSSAL_DOOMBRINGER,3274.0f,-5703.0f,16.4f,6.08f);
         }
 
+        TaskScheduler scheduler;
+
         SummonList summons;
         InstanceScript * pInstance;
         uint32 wipeCheckTimer;
@@ -261,6 +246,8 @@ public:
 
         void Reset() override
         {
+            scheduler.CancelAll();
+
             m_focusGUID = 0;
 
             reached75pct = false;
@@ -314,7 +301,7 @@ public:
                     if (Creature * vehiclePassenger = me->SummonCreature(ENTRY_MANNOROTH_VEHICLE_RIDER, 0, 0, 0))
                     {
                         vehiclePassenger->EnterVehicle(veh,i);
-                        vehiclePassenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        vehiclePassenger->SendMovementFlagUpdate();
                     }
                 }
             }
@@ -382,9 +369,6 @@ public:
         {
             if (pInstance)
             {
-                if (Creature * pTwistingNetherPortal = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_PORTAL_TO_TWISTING_NETHER)))
-                    pTwistingNetherPortal->AI()->DoAction(ACTION_STOP_SUMMON_DEVASTATORS);
-
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GIFT_OF_SARGERAS_INSTANT);
 
                 pInstance->SetData(DATA_MANNOROTH, NOT_STARTED);
@@ -478,6 +462,11 @@ public:
                 infernoCasted = true;
                 me->CastSpell(me, SPELL_INFERNO, false);
 
+                scheduler.Schedule(Seconds(14), [this](TaskContext /*context*/)
+                {
+                    me->MonsterTextEmote("Infernals rain from the sky!", 0, true, 250.0f);
+                });
+
                 if (Creature * pTyrande = ObjectAccessor::GetCreature(*me, pInstance->GetData64(ENTRY_TYRANDE_PRELUDE)))
                 {
                     pTyrande->AI()->DoAction(ACTION_TYRANDE_PREPARE_WRATH_OF_ELUNE);
@@ -523,8 +512,9 @@ public:
 
             if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(ENTRY_ILLIDAN_PRELUDE)))
             {
-                // Summon chromie for quest
-                pIllidan->SummonCreature(ENTRY_CHROMIE_MANNOROTH, 3358.52f, -5796.51f, 18.82f, 2.21547f);
+                // Summon chromie and alurmi for quests
+                pIllidan->SummonCreature(ENTRY_CHROMIE_MANNOROTH, 3355.09f, -5739.86f, 15.00f, 1.94f);
+                pIllidan->SummonCreature(ENTRY_ALURMI_MANNOROTH, 3344.89f, -5749.56f, 14.71f, 2.45f);
                 pIllidan->AI()->DoAction(ACTION_MANNOROTH_FIGHT_ENDED);
             }
 
@@ -541,6 +531,15 @@ public:
             if (Creature * pNetherPortal = me->FindNearestCreature(DEMON_PORTAL_SUMMONER,250.0f,true))
                 pNetherPortal->ForcedDespawn();
 
+            if (Creature * pMalfurion = ObjectAccessor::GetCreature(*me, pInstance->GetData64(ENTRY_MALFURION_PRELUDE)))
+            {
+                pMalfurion->InterruptNonMeleeSpells(false);
+                pMalfurion->RemoveAllAuras();
+                pMalfurion->SetVisible(false);
+                pMalfurion->NearTeleportTo(3295.7f,-5697.83f,15.84f,6.13f);
+                pMalfurion->AI()->DoAction(ACTION_MALFURION_START_OUTRO);
+            }
+
             if (Creature * pTwistingNetherPortal = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_PORTAL_TO_TWISTING_NETHER)))
             {
                 pTwistingNetherPortal->AI()->DoAction(ACTION_STOP_SUMMON_DEVASTATORS);
@@ -550,6 +549,8 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
+            scheduler.Update(diff);
+
             if (!UpdateVictim() || pInstance == nullptr)
                 return;
 
@@ -610,6 +611,13 @@ public:
             if (debilitatorSpawnTimer <= diff)
             {
                 PlaySimpleQuote(me, Mannoroth::onSummonDebilitators);
+
+                scheduler.Schedule(Seconds(10), [this](TaskContext /*context*/)
+                {
+                    if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE,250.0f,true))
+                        pTyrande->AI()->DoAction(SPELL_DEBILITATING_FLAY);
+                });
+
                 me->SummonCreature(ENTRY_DDREADLORD_DEBILITATOR, debilitatorPos1);
                 me->SummonCreature(ENTRY_DDREADLORD_DEBILITATOR, debilitatorPos2);
 
@@ -626,6 +634,7 @@ public:
                     reached75pct = true;
                     if (Creature * pNetherPortal = me->SummonCreature(DEMON_PORTAL_SUMMONER, demonsPortalPos))
                         me->CastSpell(pNetherPortal, SPELL_NETHER_TEAR, false);
+                    me->MonsterTextEmote("A massive demonic portal opens nearby! ", 0, true, 250.0f);
                 }
             }
 
@@ -669,6 +678,14 @@ public:
                                 break;
                             case 2:
                                 talker->CastSpell(talker, SPELL_GIFT_OF_SARGERAS, false); // 30 s cast time
+                                scheduler.Schedule(Seconds(25), [this](TaskContext context)
+                                {
+                                    if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, 100.0f, true))
+                                    {
+                                        pIllidan->MonsterYell(Illidan::demonicQuote.text, LANG_DEMONIC, 0);
+                                        pIllidan->PlayDirectSound(26097);
+                                    }
+                                });
                                 PlayQuoteEvent(talker, phase3[phase3QuoteCounter], true);
                                 break;
                             case 3:
@@ -843,6 +860,8 @@ public:
         {
             PlaySimpleQuote(me, Varothen::onDeath, false);
 
+            me->MonsterTextEmote("Varo'then's magical sword falls to the ground!", 0, true, 250.0f);
+
             Position pos;
             me->GetNearPosition(pos, 8.0f, me->GetOrientation());
             me->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(),SPELL_VAROTHE_BLADE_SUMMON,true);
@@ -967,22 +986,23 @@ public:
             moveToCombatPosTimer = MAX_TIMER;
             me->SetReactState(REACT_PASSIVE);
             debilitatorDied = 0;
-            debilitated = false;
-            wrathOfEluneTimer = MAX_TIMER;
+            pInstance = me->GetInstanceScript();
         }
 
+        TaskScheduler scheduler;
+        InstanceScript * pInstance;
         uint32 lunarShotTimer;
         uint32 moveToCombatPosTimer;
         uint32 debilitatorDied;
-        uint32 wrathOfEluneTimer;
+        bool tyrandeCollapsed;
 
-
-        bool debilitated;
         bool attacked;
 
         void Reset() override
         {
+            tyrandeCollapsed = false;
             attacked = false;
+            scheduler.CancelAll();
         }
 
         void MovementInform(uint32 uiType, uint32 id) override
@@ -995,14 +1015,44 @@ public:
                 PlaySimpleQuote(me, Tyrande::onOutOfArrows,false );
                 me->CastSpell(me,SPELL_HAND_OF_ELUNE,false);
             }
+            else if (id == PATH_POINT_TREE)
+            {
+                scheduler.Schedule(Milliseconds(200), [this](TaskContext /*context*/)
+                {
+                    me->GetMotionMaster()->MovePoint(PATH_POINT1_WP, pathStartPos, false);
+                });
+            }
             else if (id == PRELUDES_WP_ON_ENCOUNTER_FAIL)
             {
                 me->SetFacingTo(tyrandeVarothenPos.m_orientation);
+            }
+            else if (id == TYRANDE_PORTAL_CASTNG_WP)
+            {
+                me->SetFacingTo(5.7f);
+            }
+            else if (id == PRELUDES_WP_KNEEL_POINT)
+            {
+                me->CastSpell(me, SPELL_KNEEL_ANIM_KIT, true);
+            }
+            else if (id == PRELUDES_WP_RUNAWAY_1)
+            {
+                scheduler.Schedule(Seconds(1), [this](TaskContext /*context*/)
+                {
+                    me->GetMotionMaster()->MovePoint(PRELUDES_WP_RUNAWAY_2, preludesOutroPositions[1].GetPositionX(), preludesOutroPositions[1].GetPositionY(), preludesOutroPositions[1].GetPositionZ(), true, true);
+                });
+            }
+            else if (id == PRELUDES_WP_RUNAWAY_2)
+            {
+                me->SetVisible(false);
+                me->Kill(me);
             }
         }
 
         void DoAction(const int32 action) override
         {
+            if (!pInstance)
+                return;
+
             if (action == ACTION_TYRANDE_DEBILITATOR_DIED)
             {
                 if (++debilitatorDied == 2)
@@ -1010,13 +1060,23 @@ public:
                     me->RemoveAura(SPELL_BLESSING_OF_ELUNE);
                     PlaySimpleQuote(me, Tyrande::onRelieved);
                     me->MonsterTextEmote("Tyrande can hold her own once again!", 0, true, 250.0f);
-                    me->GetMotionMaster()->MovePoint(TYRANDE_PORTAL_CASTNG_WP, 3324.0f, -5707.0f, 16.3f, false, false);
+                    me->GetMotionMaster()->MovePoint(TYRANDE_PORTAL_CASTNG_WP, 3322.8f, -5708.0f, 16.38f, false, false);
+
+                    if (Creature * pTwistingNetherPortal = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_PORTAL_TO_TWISTING_NETHER)))
+                        pTwistingNetherPortal->AI()->DoAction(ACTION_STOP_SUMMON_DEVASTATORS);
                 }
             }
             else if (action == ACTION_TYRANDE_MOVE_TO_VAROTHEN)
             {
                 me->GetMotionMaster()->MovePoint(2, tyrandeVarothenPos, true, true);
                 moveToCombatPosTimer = 6000;
+            }
+            else if (action == SPELL_DEBILITATING_FLAY)
+            {
+                me->InterruptNonMeleeSpells(false);
+                me->AddAura(SPELL_BLESSING_OF_ELUNE, me);
+                PlaySimpleQuote(me, Tyrande::onOverhelmed);
+                me->MonsterTextEmote("Tyrande is overwhelmed! Use the Blessing of Elune to drive the demons back!", 0, true, 250.0f);
             }
             else if (action == ACTION_TYRANDE_START_COMBAT_AFTER_WIPE)
             {
@@ -1025,29 +1085,44 @@ public:
             else if (action == ACTION_MANNOROTH_ENCOUNTER_FAILED)
             {
                 debilitatorDied = 0;
-                debilitated = false;
+                me->RemoveAllAuras();
                 me->AI()->EnterEvadeMode();
                 me->GetMotionMaster()->MovePoint(PRELUDES_WP_ON_ENCOUNTER_FAIL, tyrandeVarothenPos, true, true);
             }
             else if (action == ACTION_MANNOROTH_FIGHT_ENDED)
             {
+                scheduler.CancelGroup(1);
                 me->InterruptNonMeleeSpells(false);
                 me->RemoveAllAuras();
+                PlaySimpleQuote(me, Tyrande::onPortalCollapsing,false);
+                me->GetMotionMaster()->MovePoint(PRELUDES_WP_KNEEL_POINT, tyrandeKneelPos);
             }
             else if (action == ACTION_TYRANDE_PREPARE_WRATH_OF_ELUNE)
             {
-                wrathOfEluneTimer = 14000 + 5000 + 8000;
+                scheduler.Schedule(Seconds(27), 1, [this](TaskContext /*context*/)
+                {
+                    CastElunesWrath();
+                    tyrandeCollapsed = true;
+                    me->MonsterTextEmote("Tyrande collapses! The light of Elune winks out!", 0, true, 250.0f);
+                    me->CastSpell(me, 89196, true); // Dead anim kit
+                });
             }
-        }
-
-        void SpellHitTarget(Unit* pTarget, const SpellEntry* spell) override
-        {
-            if (spell->Id == SPELL_DEBILITATING_FLAY && debilitated == false)
+            else if (action == ACTION_TYRANDE_LEAVING_QUOTE)
             {
-                me->CastSpell(me, SPELL_BLESSING_OF_ELUNE,false);
-                debilitated = true;
-                PlaySimpleQuote(me, Tyrande::onOverhelmed);
-                me->MonsterTextEmote("Tyrande is overwhelmed! Use the Blessing of Elune to drive the demons back!", 0, true, 250.0f);
+                scheduler.Schedule(Seconds(2), [this](TaskContext /*context*/)
+                {
+                    me->RemoveAllAuras();
+                    me->MonsterSay("I do not know who you are, but I thank you. Without your aid, our world would be... I do not wish to think about it. Moon goddess light your path.", LANG_UNIVERSAL, 0);
+                    me->PlayDirectSound(25991);
+                })
+                .Schedule(Seconds(12), [this](TaskContext /*context*/)
+                {
+                    me->CastSpell(me, SPELL_HAND_OF_ELUNE_DUMMY_AURA_BLESSING,false);
+                })
+                .Schedule(Seconds(18), [this](TaskContext /*context*/)
+                {
+                    me->GetMotionMaster()->MovePoint(PRELUDES_WP_RUNAWAY_1, preludesOutroPositions[0].GetPositionX(), preludesOutroPositions[0].GetPositionY(), preludesOutroPositions[0].GetPositionZ(), true, true);
+                });
             }
         }
 
@@ -1062,7 +1137,6 @@ public:
                 GetCreatureListWithEntryInGrid(lesserDemons, me, creatures[i], 55.0f);
                 for (std::list<Creature*>::iterator itr = lesserDemons.begin(); itr != lesserDemons.end(); ++itr)
                     me->CastSpell((*itr),SPELL_ELUNES_WRATH,true);
-                    // maybe use custom BP ?
             }
         }
 
@@ -1072,16 +1146,19 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
+            if (!pInstance)
+                return;
+
+            scheduler.Update(diff);
+
             if (me->HasAura(SPELL_DEBILITATING_FLAY))
                 return;
 
-            if (wrathOfEluneTimer <= diff)
+            if (tyrandeCollapsed)
             {
-                CastElunesWrath();
-                wrathOfEluneTimer = MAX_TIMER;
+                // No more help
+                return;
             }
-            else wrathOfEluneTimer -= diff;
-
 
             if (lunarShotTimer <= diff)
             {
@@ -1199,6 +1276,8 @@ public:
     };
 };
 
+#define DELAY_PORTAL_TIMER (8000) // 6 s cast + 2s missile hit travelling
+
 class npc_demon_portal_summoner : public CreatureScript
 {
 public:
@@ -1213,7 +1292,11 @@ public:
     {
         npc_demon_portal_summonerAI(Creature* creature) : ScriptedAI(creature)
         {
-            me->AddAura(SPELL_NETHER_TEAR, me);
+            scheduler.Schedule(Milliseconds(DELAY_PORTAL_TIMER), [this](TaskContext context)
+            {
+                me->AddAura(SPELL_NETHER_TEAR, me);
+            });
+
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
@@ -1222,14 +1305,17 @@ public:
         uint32 felhoundTimer;
         uint32 felGuardTimer;
         uint32 devastatorTimer;
+        TaskScheduler scheduler;
 
         uint64 mannorothGUID;
+        bool felguardQuote = false;
+        bool devastatorQuote = false;
 
         void Reset() override
         {
-            felhoundTimer = 1000;
-            felGuardTimer = 2000;
-            devastatorTimer = 3000;
+            felhoundTimer = 1000 + DELAY_PORTAL_TIMER;
+            felGuardTimer = 2000 + DELAY_PORTAL_TIMER;
+            devastatorTimer = 3000 + DELAY_PORTAL_TIMER;
             mannorothGUID = 0;
 
             if(Creature * pMannoroth = me->FindNearestCreature(MANNOROTH_ENTRY, 250.0f, true))
@@ -1238,6 +1324,8 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
+            scheduler.Update(diff);
+
             if (felhoundTimer <= diff)
             {
                 if (Creature * pMannoroth = ObjectAccessor::GetObjectInMap(mannorothGUID, me->GetMap(), (Creature*)NULL))
@@ -1254,7 +1342,14 @@ public:
                 if (Creature * pMannoroth = ObjectAccessor::GetObjectInMap(mannorothGUID, me->GetMap(), (Creature*)NULL))
                 {
                     if (pMannoroth->HealthBelowPct(70))
+                    {
+                        if (!felguardQuote)
+                        {
+                            me->MonsterTextEmote("Felguard pour forth from the demonic portal!", 0, true, 250.0f);
+                            felguardQuote = true;
+                        }
                         pMannoroth->SummonCreature(PortalDemons::FELGUARD, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                    }
                 }
                 felGuardTimer = 3000;
             }
@@ -1265,7 +1360,14 @@ public:
                 if (Creature * pMannoroth = ObjectAccessor::GetObjectInMap(mannorothGUID, me->GetMap(), (Creature*)NULL))
                 {
                     if (pMannoroth->HealthBelowPct(60))
+                    {
+                        if (!devastatorQuote)
+                        {
+                            me->MonsterTextEmote("Doomguard pour forth from the demonic portal!", 0, true, 250.0f);
+                            devastatorQuote = true;
+                        }
                         pMannoroth->SummonCreature(PortalDemons::DOOMGUARD_DEVASTATOR, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                    }
                 }
                 devastatorTimer = 3000;
             }
@@ -1432,18 +1534,17 @@ public:
                     {
                         Creature * pAnnihilator = pMannoroth->SummonCreature(ENTRY_DOOMGUARD_ANNIHILATOR_SUMMON, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 4.1f);
 
-                        float xDiff = float(urand(0, 12));
-                        float yDiff = float(urand(0, 5));
+                        #define LANDING_X  3299.22f
+                        #define LANDING_Y -5681.15f
+                        #define LANDING_Z   12.91f
 
-                        if (urand(0, 1))
-                            xDiff *= -1.0f;
+                        float radius = frand(0.0f, 20.0f);
+                        float angle = frand(0.0f, 2 * M_PI);
 
-                        if (urand(0, 1))
-                            yDiff *= -1.0f;
+                        float z =  me->GetBaseMap()->GetHeight(me->GetPhaseMask(), LANDING_X, LANDING_Y, LANDING_Z, true) + 1.0f;
 
-                        // TODO: Improve land point positions
                         if (pAnnihilator)
-                            pAnnihilator->GetMotionMaster()->MovePoint(0, 3296.0f + xDiff, -5671.0f + yDiff, 12.0f, false, false);
+                            pAnnihilator->GetMotionMaster()->MovePoint(0, LANDING_X + cos(angle)*radius, LANDING_Y + sin(angle)*radius, z, false, false);
                     }
                 }
                 summonAnnihilatorTimer = 15000;
@@ -1631,9 +1732,9 @@ public:
             if (caster == nullptr)
                 return;
 
-            Trinity::AnyUnitInObjectRangeCheck u_check(caster, 250.0f);
+            Trinity::AnyUnitInObjectRangeCheck u_check(caster, 400.0f);
             Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(caster, unitList, u_check);
-            caster->VisitNearbyObject(300.0f, searcher);
+            caster->VisitNearbyObject(400.0f, searcher);
 
             for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); itr++)
             {
@@ -1654,22 +1755,21 @@ public:
                             unit->GetMotionMaster()->MovementExpired(false);
                             unit->InterruptNonMeleeSpells(false);
                         }
-                    }
-                }
-            }
 
-            // Add mannoroth vehicle riders
-            if (Creature * pMannoroth = caster->FindNearestCreature(MANNOROTH_ENTRY, 250.0f, true))
-            {
-                if (Vehicle * veh = pMannoroth->GetVehicleKit())
-                {
-                    uint8 seats = veh->m_Seats.size();
-
-                    for (uint8 i = 0; i < seats; i++)
-                    {
-                        if (Unit * passenger = veh->GetPassenger(i))
+                        if (entry == MANNOROTH_ENTRY)
                         {
-                            targets.push_back(passenger);
+                            if (Vehicle * veh = unit->GetVehicleKit())
+                            {
+                                uint8 seats = veh->m_Seats.size();
+
+                                for (uint8 i = 0; i < seats; i++)
+                                {
+                                    if (Unit * passenger = veh->GetPassenger(i))
+                                    {
+                                        targets.push_back(passenger);
+                                    }
+                                }
+                            }
                         }
                     }
                 }

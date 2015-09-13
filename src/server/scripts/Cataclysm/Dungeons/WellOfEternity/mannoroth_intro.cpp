@@ -17,6 +17,7 @@
 
 #include "ScriptPCH.h"
 #include "well_of_eternity.h"
+#include "TaskScheduler.h"
 
 #define CAST_WOE_INSTANCE(i)     (dynamic_cast<instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript*>(i))
 
@@ -80,6 +81,27 @@ QUOTE_EVENTS preCombatQuotes [MAX_PRECOMBAT_QUOTES] =
     {4000, ENTRY_TYRANDE_PRELUDE, "I cannot strike them! What is this demon magic?", 25996},
     {MAX_TIMER, ENTRY_ILLIDAN_PRELUDE, "They are not what they appear to be! Strike in an area, it is the only way to uncover the real one!", 26093}
 };
+
+#define MAX_OUTRO_QUOTES 14
+
+QUOTE_EVENTS outroQuotes[MAX_OUTRO_QUOTES] =
+{
+    { 14,   ENTRY_CHROMIE_MANNOROTH, "Did I miss anything? Oh WOW!", 0 },
+    { 2,    ENTRY_TYRANDE_PRELUDE, "The Dragon Soul's link to the portal has been broken! The Soul plummets downwards towards the Well!", 0 }, // boss emote
+    { 2,    ENTRY_CHROMIE_MANNOROTH, "We've gathered up some items from this time period. I hope this helps!", 0 },
+    { 4,    ENTRY_ILLIDAN_PRELUDE, "The artifact!", 26059 }, // yell
+    { 10,   ENTRY_NOZDORMU_PRELUDE, "The Dragon Soul is safe once again. Quickly, into the time portal before this world sunders!", 25960 }, // yell
+    { 3,    ENTRY_TYRANDE_PRELUDE, "Malfurion...", 25989 },
+    { 5,    ENTRY_MALFURION_PRELUDE, "Hush, Tyrande. Where is Illidan?", 26490 },
+    { 8,    ENTRY_TYRANDE_PRELUDE, "By the very edge...", 25990 },
+    { 7,    ENTRY_ILLIDAN_PRELUDE, "Brother, a timely arrival...", 26060 },
+    { 6,    ENTRY_MALFURION_PRELUDE, "Illidan! The well is out of control!", 26491 }, // yell
+    { 30,   ENTRY_ILLIDAN_PRELUDE, "Aye. It's been twisted and turned by too many spells. The fuss we - especially you - made with the portal was too much! The same spell that sent the Burning Legion back to their foul realm now works on the well! It's devouring itself and taking its surroundings with it! Fascinating, isn't it?", 26061 },
+    { 8,    ENTRY_MALFURION_PRELUDE, "Not if we're caught up in it! Why weren't you running! What have you been doing with your hand in the Well?", 26492 },
+    { 10,   ENTRY_ILLIDAN_PRELUDE, "If you've a way out of here, we should probably use it! I've tried casting myself and Tyrande out of here, but the well is too much in flux!", 26062 },
+    { 2, ENTRY_MALFURION_PRELUDE, "This way!", 26493 } // yell
+};
+
 #define CAST_WOE_INSTANCE(i)     (dynamic_cast<instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript*>(i))
 
 static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
@@ -92,12 +114,20 @@ static void PlayQuote (Creature * source, SimpleQuote quote, bool yell = false)
         source->MonsterSay(quote.text, LANG_UNIVERSAL,0,200.0f);
 }
 
-enum pathWaypointsIds
+static void PlayEventQuote(Creature * source, QUOTE_EVENTS quote, bool yell)
 {
-    PATH_POINT1_WP = 6789,
-    PATH_POINT2_WP,
-    PATH_POINT3_WP,
-    PATH_POINT_INVALID
+    source->PlayDirectSound(quote.soundID);
+
+    if (yell)
+        source->MonsterYell(quote.yellQuote, LANG_UNIVERSAL, 0, SIZE_OF_GRIDS - 1);
+    else
+        source->MonsterSay(quote.yellQuote, LANG_UNIVERSAL, 0, SIZE_OF_GRIDS - 1);
+}
+
+enum illidanOutroWaypoints
+{
+    ILLIDAN_OUTRO_WP_BEFORE_TYRANDE = 999,
+    ILLIDAN_OUTRO_WP_WELL_EDGE
 };
 
 class npc_illidan_mannoroth_woe : public CreatureScript
@@ -124,6 +154,7 @@ public:
             tauntTimer = MAX_TIMER;
         }
 
+        TaskScheduler scheduler;
         pathWaypointsIds currentWP = PATH_POINT_INVALID;
         bool pathCompleted;
 
@@ -186,6 +217,31 @@ public:
             {
                 me->SetFacingTo(illidanVarothenPos.m_orientation);
             }
+            else if (id == ILLIDAN_OUTRO_WP_BEFORE_TYRANDE)
+            {
+                me->SetFacingTo(2.8f);
+                me->CastSpell(me, SPELL_KNEEL_ANIM_KIT, true);
+            }
+            else if (id == ILLIDAN_OUTRO_WP_WELL_EDGE)
+            {
+                me->SetFacingTo(1.15f);
+            }
+            else if (id == PRELUDES_WP_RUNAWAY_1)
+            {
+                scheduler.Schedule(Seconds(1), [this](TaskContext /*context*/)
+                {
+                    me->GetMotionMaster()->MovePoint(PRELUDES_WP_RUNAWAY_2, preludesOutroPositions[1].GetPositionX(), preludesOutroPositions[1].GetPositionY(), preludesOutroPositions[1].GetPositionZ(), true, true);
+                });
+            }
+            else if (id == PRELUDES_WP_RUNAWAY_2)
+            {
+                me->SetVisible(false);
+                me->Kill(me);
+            }
+            else if (id == PATH_POINT_TREE)
+            {
+                moveTimer = 100;
+            }
         }
 
         void DoAction(const int32 action) override
@@ -195,7 +251,13 @@ public:
             else if (action == ACTION_ILLIDAN_PRELUDE_EVENT_CONTINUE)
             {
                 PlayQuote(me, afterDoomguardsDeath);
-                moveTimer = 4000;
+
+                scheduler.Schedule(Seconds(4), [this](TaskContext context)
+                {
+                    me->GetMotionMaster()->MovePoint(PATH_POINT_TREE, pathTreePos, false);
+                    if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE, 100.0f, true))
+                        pTyrande->GetMotionMaster()->MovePoint(PATH_POINT_TREE, pathTreePos, false);
+                });
             }
             else if (action == ACTION_ILLIDAN_PRECOMBAT_QUOTES_START)
                 preCombatTimer = 2000;
@@ -221,6 +283,8 @@ public:
                 me->RemoveAllAuras();
                 me->GetMotionMaster()->Clear(false);
                 me->GetMotionMaster()->MovementExpired(false);
+
+                me->GetMotionMaster()->MovePoint(ILLIDAN_OUTRO_WP_BEFORE_TYRANDE, 3325.0f, -5710.0f, 16.36f, true, true);
 
                 canAttackMannoroth = false;
             }
@@ -248,6 +312,8 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
+            scheduler.Update(diff);
+
             if (pathCompleted == false && currentWP != PATH_POINT_INVALID)
             {
                 pathCompleted = true;
@@ -312,9 +378,6 @@ public:
             if (moveTimer <= diff)
             {
                 me->GetMotionMaster()->MovePoint(PATH_POINT1_WP, pathStartPos, false);
-                if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE,100.0f,true))
-                    pTyrande->GetMotionMaster()->MovePoint(PATH_POINT1_WP, pathStartPos, false);
-
                 moveTimer = MAX_TIMER;
             }
             else moveTimer -= diff;
@@ -410,6 +473,139 @@ public:
         npc_malfurion_mannoroth_woeAI(Creature* creature) : ScriptedAI(creature)
         {
             me->CastSpell(me, SPELL_NATURE_CHANNELING, false);
+        }
+
+        TaskScheduler quoteScheduler;
+        TaskScheduler movementScheduler;
+
+        void DoAction(const int32 action) override
+        {
+            #define SEARCH_DISTANCE 250.f
+
+            if (action == ACTION_MALFURION_START_OUTRO)
+            {
+                quoteScheduler.Schedule(Seconds(20), [this](TaskContext context)
+                {
+                    uint32 repeatCounter = context.GetRepeatCounter();
+
+                    if (repeatCounter >= MAX_OUTRO_QUOTES)
+                        return;
+
+                    Creature * pTalker = nullptr;
+                    QUOTE_EVENTS qEvent = outroQuotes[repeatCounter];
+
+                    if (qEvent.entry == me->GetEntry())
+                        pTalker = me;
+                    else
+                        pTalker = me->FindNearestCreature(qEvent.entry, SEARCH_DISTANCE, true);
+
+                    context.Repeat(Seconds(qEvent.nextEventTime));
+
+                    if (pTalker == nullptr)
+                        return;
+
+                    // Set visible before quote
+                    if (repeatCounter == 4)
+                    {
+                        me->SetVisible(true);
+                        me->SendMovementFlagUpdate();
+                        me->GetMotionMaster()->MovePoint(PRELUDES_WP_KNEEL_POINT, 3320.84f, -5707.4f, 16.6f, true, true);
+                    }
+
+                    switch (repeatCounter)
+                    {
+                        case 1:
+                            me->SendMovementFlagUpdate();
+                            me->MonsterTextEmote(qEvent.yellQuote, 0, true, SEARCH_DISTANCE);
+                            break;
+                        case 3:
+                        case 4:
+                        case 9:
+                        case MAX_OUTRO_QUOTES - 1:
+                        {
+                            PlayEventQuote(pTalker, qEvent, true);
+                            break;
+                        }
+                        default:
+                            PlayEventQuote(pTalker, qEvent, false);
+                            break;
+                    }
+
+                    if (repeatCounter == 7)
+                    {
+                        me->RemoveAura(SPELL_KNEEL_ANIM_KIT);
+                        if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, SEARCH_DISTANCE, true))
+                            me->SetFacingTo(me->GetAngle(pIllidan));
+
+                        movementScheduler.Schedule(Seconds(2), [this](TaskContext /*context*/)
+                        {
+                            me->GetMotionMaster()->MovePoint(MALFURIONS_WP_BEFORE_WELL_EDGE, 3303.47f, -5675.6f, 12.3f, true, true);
+                        });
+                    }
+                    else if (repeatCounter == 8)
+                    {
+                        pTalker->SetFacingTo(me->GetOrientation() + M_PI);
+                    }
+                    else if (repeatCounter == MAX_OUTRO_QUOTES - 1)
+                    {
+                        movementScheduler.Schedule(Seconds(2), [this](TaskContext /*context*/)
+                        {
+                            if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, SEARCH_DISTANCE, true))
+                                pIllidan->GetMotionMaster()->MovePoint(PRELUDES_WP_RUNAWAY_1, preludesOutroPositions[0].GetPositionX(), preludesOutroPositions[0].GetPositionY(), preludesOutroPositions[0].GetPositionZ(), true, true);
+
+                            me->GetMotionMaster()->MovePoint(PRELUDES_WP_RUNAWAY_1, preludesOutroPositions[0].GetPositionX(), preludesOutroPositions[0].GetPositionY(), preludesOutroPositions[0].GetPositionZ(), true, true);
+
+                            if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE, SEARCH_DISTANCE, true))
+                            {
+                                pTyrande->AI()->DoAction(ACTION_TYRANDE_LEAVING_QUOTE);
+                            }
+                        });
+                    }
+                });
+
+                movementScheduler.Schedule(Seconds(20), [this](TaskContext /*context*/)
+                {
+                    if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, SEARCH_DISTANCE, true))
+                    {
+                        pIllidan->GetMotionMaster()->MovePoint(ILLIDAN_OUTRO_WP_WELL_EDGE, 3309.0f, -5650.6f, 15.0f, false, false);
+                        pIllidan->RemoveAllAuras(); // Drop kneel aura anim kit
+                    }
+                });
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 id) override
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (id == PRELUDES_WP_KNEEL_POINT)
+            {
+                me->CastSpell(me, SPELL_KNEEL_ANIM_KIT, true);
+            }
+            else if (id == PRELUDES_WP_RUNAWAY_1)
+            {
+                movementScheduler.Schedule(Seconds(1), [this](TaskContext /*context*/)
+                {
+                    me->GetMotionMaster()->MovePoint(PRELUDES_WP_RUNAWAY_2, preludesOutroPositions[1].GetPositionX(), preludesOutroPositions[1].GetPositionY(), preludesOutroPositions[1].GetPositionZ(), true, true);
+                });
+            }
+            else if (id == PRELUDES_WP_RUNAWAY_2)
+            {
+                me->SetVisible(false);
+                me->Kill(me);
+            }
+            else if (id == MALFURIONS_WP_BEFORE_WELL_EDGE)
+            {
+                if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, SEARCH_DISTANCE, true))
+                    me->SetFacingTo(me->GetAngle(pIllidan));
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            quoteScheduler.Update(diff);
+            movementScheduler.Update(diff);
         }
     };
 };
@@ -605,26 +801,17 @@ public:
 
         void Reset() override
         {
-            if (me->HasAura(SPELL_DEMON_PORTAL_PULL_AURA))
-                return;
-
             abyssalFlamesTimer = 2000;
             ScriptedAI::Reset();
         }
 
         void JustReachedHome() override
         {
-            if (me->HasAura(SPELL_DEMON_PORTAL_PULL_AURA))
-                return;
-
             me->CastSpell(me, SPELL_ABSYSSAL_FLAMETHROWER, true);
         }
 
         void AttackStart(Unit* victim) override
         {
-            if (me->HasAura(SPELL_DEMON_PORTAL_PULL_AURA))
-                return;
-
             if (victim->GetTypeId() == TYPEID_UNIT && victim->GetOwnerGUID() == 0)
                 return;
 
@@ -633,9 +820,6 @@ public:
 
         void EnterCombat(Unit * victim) override
         {
-            if (me->HasAura(SPELL_DEMON_PORTAL_PULL_AURA))
-                return;
-
             if (victim->GetTypeId() == TYPEID_UNIT && victim->GetOwnerGUID() == 0)
                 return;
 

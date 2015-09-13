@@ -250,33 +250,14 @@ public:
             }
             ScriptedAI::EnterCombat(who);
 
-            // THIS IS MUST
-            // WE NEED TO REMOVE VEHICLE KIT AURAS + REMOVE ANY PASSENGERS IF WE FIND SOME
-            // OTHERWISE HAND OF THE QUEEN WILL NOT BOARD TO PLAYER
+            // For sure, remove vehicle kit form players when encounter starts
             Map::PlayerList const& lPlayers = pInstance->instance->GetPlayers();
 
             if (!lPlayers.isEmpty())
             {
                 for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
                     if (Player *pPlayer = itr->getSource())
-                    {
-                        Vehicle * veh = pPlayer->GetVehicleKit();
-                        if (veh)
-                            veh->RemoveAllPassengers();
                         pPlayer->RemoveAurasByType(SPELL_AURA_SET_VEHICLE_ID);
-                    }
-            }
-
-            // IF EVERYTHING ELSE FAILS, TRY HARDER WAY
-            #define PLAYER_SHADOWCLOAK_STALKER      (55154)
-            std::list<Creature*> vehicleStalkers;
-            GetCreatureListWithEntryInGrid(vehicleStalkers, me, PLAYER_SHADOWCLOAK_STALKER, 250.0f);
-            for (std::list<Creature*>::const_iterator itr = vehicleStalkers.begin(); itr != vehicleStalkers.end(); ++itr)
-            {
-                if (Creature * vehStalker = *itr)
-                {
-                    vehStalker->Kill(vehStalker);
-                }
             }
         }
 

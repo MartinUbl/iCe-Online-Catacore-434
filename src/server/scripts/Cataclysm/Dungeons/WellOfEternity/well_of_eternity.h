@@ -144,7 +144,10 @@ enum mannorothEntries
 
     // Encounter mobs
     ENTRY_DDREADLORD_DEBILITATOR = 55762,
-    ENTRY_DOOMGUARD_ANNIHILATOR_SUMMON = 55700
+    ENTRY_DOOMGUARD_ANNIHILATOR_SUMMON = 55700,
+
+    ENTRY_CHROMIE_MANNOROTH = 57913,
+    ENTRY_ALURMI_MANNOROTH = 57864
 };
 
 enum CrystalOrientations
@@ -222,7 +225,9 @@ enum Actions
     ACTION_ILLIDAN_START_COMBAT_AFTER_WIPE,
     ACTION_MANNOROTH_ENCOUNTER_FAILED,
     ACTION_MANNOROTH_FIGHT_ENDED,
-    ACTION_TYRANDE_PREPARE_WRATH_OF_ELUNE
+    ACTION_TYRANDE_PREPARE_WRATH_OF_ELUNE,
+    ACTION_MALFURION_START_OUTRO,
+    ACTION_TYRANDE_LEAVING_QUOTE
 };
 
 enum SpecialActions
@@ -414,6 +419,30 @@ enum drakeActions
     ACTION_VEHICLE_MOVE
 };
 
+enum pathWaypointsIds
+{
+    PATH_POINT_TREE = 6789,
+    PATH_POINT1_WP,
+    PATH_POINT2_WP,
+    PATH_POINT3_WP,
+    PATH_POINT_INVALID
+};
+
+enum preludesOutroWaypoints
+{
+    PRELUDES_WP_KNEEL_POINT = 63125,
+    MALFURIONS_WP_BEFORE_WELL_EDGE,
+    TYRANDE_WP_PREPARING_TO_LEAVE,
+    PRELUDES_WP_RUNAWAY_1,
+    PRELUDES_WP_RUNAWAY_2
+};
+
+static const Position preludesOutroPositions[2] =
+{
+    { 3213.65f, -5681.92f, 18.01f, 2.10f },
+    { 3169.90f, -5586.44f, 17.92f, 2.13f },
+};
+
 #define MAX_ENCOUNTER      (3)
 
 struct CONNECTOR_INFO
@@ -431,7 +460,10 @@ struct CONNECTOR_INFO
 #define NIGH_ELF_ILLUSION_MALE 108465
 #define NIGH_ELF_ILLUSION_FEMALE 108466
 
+#define SPELL_KNEEL_ANIM_KIT 39656
+
 // Path from forest to Mannoroth (shore path)
+const Position pathTreePos = { 3172.0f, -5589.0f, 17.8f, 5.11f };
 const Position pathStartPos = {3173.0f, -5595.0f, 17.65f,5.08f};
 const Position pathMiddlePos = {3210.0f, -5678.0f, 18.02f,5.5f};
 
@@ -445,7 +477,9 @@ const Position tyrandeHighGuardPos = {3249.0f, -5702.0f, 17.72f,6.12f};
 const Position illidanVarothenPos = {3278.0f, -5705.0f, 16.35f,6.1f};
 const Position tyrandeVarothenPos = {3284.0f, -5693.0f, 15.37f,6.1f};
 // Tyrande combat position
-const Position tyrandeCombatPos = {3308.0f, -5695.0f, 15.5f,5.6f};
+const Position tyrandeCombatPos = { 3308.0f, -5695.0f, 15.5f, 5.6f };
+// Tyrande kneel position
+const Position tyrandeKneelPos = {3322.80f, -5708.7f, 16.38f,5.7f};
 
 #define PRELUDES_WP_ON_ENCOUNTER_FAIL 100
 
@@ -476,6 +510,7 @@ public:
 
         uint64 illidanPreludeGUID;
         uint64 tyrandePreludeGUID;
+        uint64 malfurionPreludeGUID;
 
         uint64 portalToTwistingNetherGUID;
 

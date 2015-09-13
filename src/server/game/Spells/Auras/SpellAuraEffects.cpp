@@ -3328,8 +3328,8 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                         if (!caster || !caster->GetInstanceScript())
                             break;
 
-                        // Only out of combat, but allow while perotharn encounter is active
-                        if (caster->IsInCombat() && caster->GetInstanceScript()->GetData(0) != IN_PROGRESS) // Perotharn
+                        // Only out of combat
+                        if (caster->IsInCombat())
                             break;
 
                         #define PLAYER_SHADOWCLOAK_STALKER      (55154)
@@ -3347,8 +3347,7 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                             }
                         }
 
-                        if (caster->GetInstanceScript()->GetData(0) != IN_PROGRESS)
-                            triggerSpellId = 103020; // continue stack dummy aura
+                        triggerSpellId = 103020; // continue stack dummy aura
                         break;
                     }
                     // Thaumaturgy Channel

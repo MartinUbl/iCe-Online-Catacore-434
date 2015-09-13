@@ -32,6 +32,7 @@ void INST_WOE_SCRIPT::Initialize()
     varothenGUID = 0;
     illidanPreludeGUID = 0;
     tyrandePreludeGUID = 0;
+    malfurionPreludeGUID = 0;
     portalToTwistingNetherGUID = 0;
 
     waveCounter = WAVE_ONE;
@@ -125,6 +126,9 @@ void INST_WOE_SCRIPT::OnCreatureCreate(Creature* pCreature, bool add)
         case ENTRY_TYRANDE_PRELUDE:
             tyrandePreludeGUID = pCreature->GetGUID();
             break;
+        case ENTRY_MALFURION_PRELUDE:
+            malfurionPreludeGUID = pCreature->GetGUID();
+            break;
         case DATA_PORTAL_TO_TWISTING_NETHER:
             portalToTwistingNetherGUID = pCreature->GetGUID();
             break;
@@ -194,6 +198,8 @@ uint64 INST_WOE_SCRIPT::GetData64(uint32 type)
             return illidanPreludeGUID;
         case ENTRY_TYRANDE_PRELUDE:
             return tyrandePreludeGUID;
+        case ENTRY_MALFURION_PRELUDE:
+            return malfurionPreludeGUID;
         case DATA_PORTAL_TO_TWISTING_NETHER:
             return portalToTwistingNetherGUID;
     }

@@ -472,9 +472,6 @@ public:
                 {
                     if (introStep == 1)
                     {
-                        if (Creature * pLegionDemon = ObjectAccessor::GetCreature(*me, felGuardGUID))
-                            pLegionDemon->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
-
                         scheduler.Schedule(Seconds(3), [this](TaskContext context)
                         {
                             if (Creature * pLegionDemon = ObjectAccessor::GetCreature(*me, felGuardGUID))
