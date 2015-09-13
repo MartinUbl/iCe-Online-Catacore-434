@@ -967,7 +967,8 @@ class GS_CreatureScript : public CreatureScript
                         }
                         case GSCR_SAY:
                         {
-                            source->MonsterSay(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, 0);
+                            Unit* invoker = m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                            source->MonsterSay(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, invoker ? invoker->GetGUID() : 0);
                             int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
                             if (sound > 0)
                                 source->PlayDirectSound(sound);
@@ -975,7 +976,8 @@ class GS_CreatureScript : public CreatureScript
                         }
                         case GSCR_YELL:
                         {
-                            source->MonsterYell(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, 0);
+                            Unit* invoker = m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                            source->MonsterYell(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, invoker ? invoker->GetGUID() : 0);
                             int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
                             if (sound > 0)
                                 source->PlayDirectSound(sound);
