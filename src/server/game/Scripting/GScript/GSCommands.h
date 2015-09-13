@@ -185,6 +185,7 @@ enum gs_subject_type
     GSST_CLOSEST_CREATURE = 12, // closest creature - expects parameter in round parenthesis
     GSST_CLOSEST_PLAYER = 13,   // closest player
     GSST_LAST_SUMMON = 14,      // last summoned unit
+    GSST_CLOSEST_CREATURE_GUID = 15,// closest creature by GUID
 };
 
 // type of subject parameter in specifier
