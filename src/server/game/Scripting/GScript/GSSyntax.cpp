@@ -337,19 +337,6 @@ gs_specifier gs_specifier::parse(const char* str)
         }
     }
 
-    // variable name - recognized by first character
-    if (str[0] == '$')
-    {
-        std::string varname = std::string(str + 1);
-        auto itr = gscr_variable_map.find(varname.c_str());
-        if (itr == gscr_variable_map.end())
-            return rr;
-
-        rr.value = (*itr).second;
-        rr.subject_type = GSST_VARIABLE_VALUE;
-        return rr;
-    }
-
     int lastpos = 0;
     size_t i;
     bool subject = false;
@@ -362,7 +349,18 @@ gs_specifier gs_specifier::parse(const char* str)
         {
             // decide about specifier target type
             std::string subid = std::string(str).substr(0, i);
-            if (subid == "me")
+            // variable name - recognized by first character
+            if (str[0] == '$')
+            {
+                std::string varname = subid.substr(1, subid.size()-1);
+                auto itr = gscr_variable_map.find(varname.c_str());
+                if (itr == gscr_variable_map.end())
+                    return rr;
+
+                rr.value = (*itr).second;
+                rr.subject_type = GSST_VARIABLE_VALUE;
+            }
+            else if (subid == "me")
                 rr.subject_type = GSST_ME;
             else if (subid == "target")
                 rr.subject_type = GSST_TARGET;
@@ -1258,6 +1256,36 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             }
             else
                 CLEANUP_AND_THROW("invalid parameters for instruction TURN");
+
+            break;
+        // follow instruction - follows specifier target
+        // Syntax: follow <who> [<distance> [<angle>]]
+        //         follow stop
+        case GSCR_FOLLOW:
+            if (src->parameters.size() < 1)
+                CLEANUP_AND_THROW("too few parameters for instruction FOLLOW");
+            if (src->parameters.size() > 3)
+                CLEANUP_AND_THROW("too many parameters for instruction FOLLOW");
+
+            if (src->parameters[0] == "stop")
+                ret->params.c_follow.subject.subject_type = GSST_NONE;
+            else
+            {
+                ret->params.c_follow.subject = gs_specifier::parse(src->parameters[0].c_str());
+                if (src->parameters.size() > 1)
+                {
+                    ret->params.c_follow.distance = gs_specifier::parse(src->parameters[1].c_str());
+                    if (src->parameters.size() == 3)
+                        ret->params.c_follow.angle = gs_specifier::parse(src->parameters[2].c_str());
+                    else
+                        ret->params.c_follow.angle = gs_specifier::make_default_float_value(M_PI);
+                }
+                else
+                {
+                    ret->params.c_follow.distance = gs_specifier::make_default_float_value(INTERACTION_DISTANCE);
+                    ret->params.c_follow.angle = gs_specifier::make_default_float_value(M_PI);
+                }
+            }
 
             break;
     }

@@ -71,6 +71,7 @@ enum gs_command_type
     GSCR_ENDWHEN = 42,
     GSCR_TALK = 43,
     GSCR_TURN = 44,
+    GSCR_FOLLOW = 45,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -120,6 +121,7 @@ static std::string gscr_identifiers[] = {
     "endwhen",
     "talk",
     "turn",
+    "follow",
 };
 
 enum gs_quest_operation
@@ -472,6 +474,13 @@ struct gs_command
             gs_specifier amount;
             bool relative;
         } c_turn;
+
+        struct
+        {
+            gs_specifier subject;
+            gs_specifier distance;
+            gs_specifier angle;
+        } c_follow;
 
     } params;
 

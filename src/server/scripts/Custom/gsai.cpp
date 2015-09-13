@@ -734,7 +734,7 @@ class GS_CreatureScript : public CreatureScript
             GS_Variable GS_GetValueFromSpecifier(gs_specifier& spec)
             {
                 // variable has priority before anything else, due to its genericity
-                if (spec.subject_type == GSST_VARIABLE_VALUE)
+                if (spec.subject_type == GSST_VARIABLE_VALUE && spec.subject_parameter == GSSP_NONE)
                 {
                     if (variable_map.find(spec.value) == variable_map.end())
                         variable_map[spec.value] = GS_Variable((int32)0);
@@ -1300,6 +1300,14 @@ class GS_CreatureScript : public CreatureScript
                                 else
                                     source->SetFacingTo(turnpar.toFloat());
                             }
+                            break;
+                        }
+                        case GSCR_FOLLOW:
+                        {
+                            if (Unit* target = GS_SelectTarget(curr->params.c_follow.subject))
+                                me->GetMotionMaster()->MoveFollow(target, GS_GetValueFromSpecifier(curr->params.c_follow.distance).toFloat(), GS_GetValueFromSpecifier(curr->params.c_follow.angle).toFloat());
+                            else
+                                me->GetMotionMaster()->MovementExpired();
                             break;
                         }
                         default:
