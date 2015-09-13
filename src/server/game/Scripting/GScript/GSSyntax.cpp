@@ -386,7 +386,7 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_type = GSST_CLOSEST_PLAYER;
             else if (subid == "last_summon")
                 rr.subject_type = GSST_LAST_SUMMON;
-            else if (subid == "closest_creature_guid")
+            else if (subid == "creature_guid")
                 rr.subject_type = GSST_CLOSEST_CREATURE_GUID;
             else if (subid == "ready")
             {
