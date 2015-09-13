@@ -219,6 +219,9 @@ bool Condition::Meets(Player * player, Unit* invoker)
             break;
     }
 
+    if (mNegativeCondition)
+        condMeets = !condMeets;
+
     bool refMeets = false;
     if (condMeets && refId)//only have to check references if 'this' is met
     {
@@ -392,7 +395,7 @@ void ConditionMgr::LoadConditions(bool isReload)
     }
 
     uint32 count = 0;
-    QueryResult result = WorldDatabase.Query("SELECT SourceTypeOrReferenceId, SourceGroup, SourceEntry, ElseGroup, ConditionTypeOrReference, ConditionValue1, ConditionValue2, ConditionValue3, ErrorTextId, ScriptName FROM conditions");
+    QueryResult result = WorldDatabase.Query("SELECT SourceTypeOrReferenceId, SourceGroup, SourceEntry, ElseGroup, ConditionTypeOrReference, ConditionValue1, ConditionValue2, ConditionValue3, ErrorTextId, ScriptName, NegativeCondition FROM conditions");
 
     if (!result)
     {
@@ -416,6 +419,7 @@ void ConditionMgr::LoadConditions(bool isReload)
         cond->mConditionValue3           = fields[7].GetUInt32();
         cond->ErrorTextd                 = fields[8].GetUInt32();
         cond->mScriptId                  = sObjectMgr->GetScriptId(fields[9].GetCString());
+        cond->mNegativeCondition         = fields[10].GetBool();
 
         if (iConditionTypeOrReference >= 0)
             cond->mConditionType = ConditionType(iConditionTypeOrReference);
