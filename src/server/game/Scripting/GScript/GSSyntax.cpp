@@ -486,6 +486,20 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
     if (ret->type == GSCR_NONE)
         CLEANUP_AND_THROW(std::string("invalid instruction: ") + src->instruction);
 
+    ret->command_delegate = gs_specifier::make_default_subject(GSST_ME);
+    // parse command delegate if any
+    if (src->parameters.size() > 0)
+    {
+        std::string lastpar = src->parameters[src->parameters.size() - 1];
+        // it has to contain at least one character inside [ ] parenthesis
+        if (lastpar.size() > 2 && lastpar[0] == '[' && lastpar[lastpar.size() - 1] == ']')
+        {
+            ret->command_delegate = gs_specifier::parse(lastpar.substr(1, lastpar.size() - 2).c_str());
+            // delegate is not considered parameter for specific instruction, remove it
+            src->parameters.erase(src->parameters.begin() + src->parameters.size() - 1);
+        }
+    }
+
     switch (ret->type)
     {
         default:
@@ -1007,8 +1021,14 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         // unmount instruction - dismounts script owner from mount
         // Syntax: unmount
         case GSCR_DESPAWN:
-            if (src->parameters.size() != 0)
-                CLEANUP_AND_THROW("invalid parameter count for instruction DESPAWN - do not supply parameters");
+            if (src->parameters.size() > 1)
+                CLEANUP_AND_THROW("invalid parameter count for instruction DESPAWN - do not supply parameters, or supply one");
+
+            if (src->parameters.size() == 0)
+                ret->params.c_despawn.subject = gs_specifier::make_default_subject(GSST_ME, GSSP_NONE);
+            else
+                ret->params.c_despawn.subject = gs_specifier::parse(src->parameters[0].c_str());
+
             break;
         // repeat instruction - standard control sequence; needs to be closed by until
         // Syntax: repeat

@@ -270,6 +270,8 @@ struct gs_command
 {
     // type of command
     gs_command_type type;
+    // entity, which will play this command
+    gs_specifier command_delegate;
 
     union
     {
@@ -406,6 +408,11 @@ struct gs_command
             gs_specifier objective_index;
             gs_specifier value;
         } c_quest;
+
+        struct
+        {
+            gs_specifier subject;
+        } c_despawn;
 
         struct
         {
