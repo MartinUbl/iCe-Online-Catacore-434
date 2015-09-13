@@ -291,6 +291,25 @@ bool Vehicle::HasEmptySeat(int8 seatId) const
     return !seat->second.passenger;
 }
 
+bool Vehicle::HasPassengers() const
+{
+    uint32 sn = 0;
+    for (uint32 i = 0; i < MAX_VEHICLE_SEATS; ++i)
+    {
+        if (uint32 seatId = m_vehicleInfo->m_seatID[i])
+            if (VehicleSeatEntry const *veSeat = sVehicleSeatStore.LookupEntry(seatId))
+            {
+                if (veSeat->IsUsableByPlayer())
+                    sn++;
+            }
+    }
+
+    if (sn == m_usableSeatNum)
+        return false;
+
+    return true;
+}
+
 Unit *Vehicle::GetPassenger(int8 seatId) const
 {
     SeatMap::const_iterator seat = m_Seats.find(seatId);

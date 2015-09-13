@@ -260,6 +260,8 @@ class GS_CreatureScript : public CreatureScript
             int m_outOfCombatScriptId = -1;
             // script IDs for gossip options
             int m_gossipSelectScripts[10];
+            // script ID when vehicle entered
+            int m_vehicleEnterScriptId = -1;
             // map of script IDs for quests
             std::map<uint32, GS_QuestScriptRecord> m_questScripts;
 
@@ -293,8 +295,8 @@ class GS_CreatureScript : public CreatureScript
             // set of all passed WHEN's offsets in script
             std::set<int> when_set;
 
-            Player* m_scriptInvoker = nullptr;
-            Player* m_inheritedScriptInvoker = nullptr;
+            Unit* m_scriptInvoker = nullptr;
+            Unit* m_inheritedScriptInvoker = nullptr;
 
             Unit* m_parentUnit = nullptr;
             Unit* m_lastSummonedUnit = nullptr;
@@ -393,7 +395,28 @@ class GS_CreatureScript : public CreatureScript
                 }
             }
 
-            void SetInheritedInvoker(Player* pl)
+            void PassengerBoarded(Unit* who, int8 seatId, bool apply)
+            {
+                if (m_currentScriptType != GS_TYPE_COMBAT && m_currentScriptType != GS_TYPE_VEHICLE_ENTER && apply)
+                {
+                    if (m_vehicleEnterScriptId >= 0)
+                    {
+                        ResetState();
+                        m_scriptInvoker = who;
+                        my_commands = sGSMgr->GetScript(m_vehicleEnterScriptId);
+                        m_currentScriptType = GS_TYPE_VEHICLE_ENTER;
+                    }
+                }
+
+                // if we are doing vehicle entered script, and passenger is leaving, reset state if it's last passenger
+                if (m_currentScriptType == GS_TYPE_VEHICLE_ENTER && !apply)
+                {
+                    if (!me->GetVehicleKit()->HasPassengers())
+                        EnterEvadeMode();
+                }
+            }
+
+            void SetInheritedInvoker(Unit* pl)
             {
                 m_inheritedScriptInvoker = pl;
             }
@@ -440,6 +463,9 @@ class GS_CreatureScript : public CreatureScript
                                 if (m_questScripts.find(scriptParam) == m_questScripts.end())
                                     m_questScripts[scriptParam] = GS_QuestScriptRecord();
                                 m_questScripts[scriptParam].completeScriptId = scriptId;
+                                break;
+                            case GS_TYPE_VEHICLE_ENTER:
+                                m_vehicleEnterScriptId = scriptId;
                                 break;
                             default:
                             case GS_TYPE_NONE:
@@ -1138,14 +1164,14 @@ class GS_CreatureScript : public CreatureScript
                             source->Unmount();
                             break;
                         case GSCR_QUEST:
-                            if (m_scriptInvoker && m_scriptInvoker->IsInWorld())
+                            if (m_scriptInvoker && m_scriptInvoker->IsInWorld() && m_scriptInvoker->GetTypeId() == TYPEID_PLAYER)
                             {
                                 if (curr->params.c_quest.op == GSQO_COMPLETE)
-                                    m_scriptInvoker->CompleteQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
+                                    m_scriptInvoker->ToPlayer()->CompleteQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
                                 else if (curr->params.c_quest.op == GSQO_FAIL)
-                                    m_scriptInvoker->FailQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
+                                    m_scriptInvoker->ToPlayer()->FailQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
                                 else if (curr->params.c_quest.op == GSQO_PROGRESS)
-                                    m_scriptInvoker->AddQuestObjectiveProgress(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.objective_index).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.value).toInteger());
+                                    m_scriptInvoker->ToPlayer()->AddQuestObjectiveProgress(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.objective_index).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.value).toInteger());
                             }
                             break;
                         case GSCR_DESPAWN:

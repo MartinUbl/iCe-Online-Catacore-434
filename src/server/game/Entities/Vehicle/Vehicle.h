@@ -224,6 +224,7 @@ class Vehicle : public TransportBase
         VehicleEntry const *GetVehicleInfo() const { return m_vehicleInfo; }
 
         bool HasEmptySeat(int8 seatId) const;
+        bool HasPassengers() const;
         Unit *GetPassenger(int8 seatId) const;
         int8 GetNextEmptySeat(int8 seatId, bool next, bool byAura = false) const;
         bool AddPassenger(WorldObject *passenger, int8 seatId = -1, bool byAura = false);
