@@ -72,6 +72,8 @@ enum gs_command_type
     GSCR_TALK = 43,
     GSCR_TURN = 44,
     GSCR_FOLLOW = 45,
+    GSCR_TEXTEMOTE = 46,
+    GSCR_BOSSEMOTE = 47,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -122,6 +124,8 @@ static std::string gscr_identifiers[] = {
     "talk",
     "turn",
     "follow",
+    "textemote",
+    "bossemote",
 };
 
 enum gs_quest_operation

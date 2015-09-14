@@ -584,12 +584,16 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         // say and yell instructions are basically the same
         // Syntax: say "Hello world!"
         //         yell "Hello universe!"
+        //         textemote "Hello Milky Way!"
+        //         bossemote "Hello everything!"
         case GSCR_SAY:
         case GSCR_YELL:
+        case GSCR_TEXTEMOTE:
+        case GSCR_BOSSEMOTE:
             if (src->parameters.size() < 1)
-                CLEANUP_AND_THROW("too few parameters for instruction SAY/YELL");
+                CLEANUP_AND_THROW("too few parameters for instruction SAY/YELL/TEXTEMOTE/BOSSEMOTE");
             if (src->parameters.size() > 2)
-                CLEANUP_AND_THROW("too many parameters for instruction SAY/YELL");
+                CLEANUP_AND_THROW("too many parameters for instruction SAY/YELL/TEXTEMOTE/BOSSEMOTE");
 
             // store string to be said / yelled
             ret->params.c_say_yell.tosay = src->parameters[0].c_str();

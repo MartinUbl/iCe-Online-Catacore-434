@@ -983,6 +983,24 @@ class GS_CreatureScript : public CreatureScript
                                 source->PlayDirectSound(sound);
                             break;
                         }
+                        case GSCR_TEXTEMOTE:
+                        {
+                            Unit* invoker = m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                            source->MonsterTextEmote(curr->params.c_say_yell.tosay, invoker ? invoker->GetGUID() : 0, false);
+                            int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
+                            if (sound > 0)
+                                source->PlayDirectSound(sound);
+                            break;
+                        }
+                        case GSCR_BOSSEMOTE:
+                        {
+                            Unit* invoker = m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                            source->MonsterTextEmote(curr->params.c_say_yell.tosay, invoker ? invoker->GetGUID() : 0, true);
+                            int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
+                            if (sound > 0)
+                                source->PlayDirectSound(sound);
+                            break;
+                        }
                         case GSCR_IF:
                             // if script does not meet condition passed in, move to endif offset
                             if (!GS_Meets(curr->params.c_if.condition))
