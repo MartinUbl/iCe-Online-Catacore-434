@@ -230,7 +230,7 @@ public:
             {
                 scheduler.Schedule(Seconds(1), [this](TaskContext /*context*/)
                 {
-                    me->GetMotionMaster()->MovePoint(PRELUDES_WP_RUNAWAY_2, preludesOutroPositions[1].GetPositionX(), preludesOutroPositions[1].GetPositionY(), preludesOutroPositions[1].GetPositionZ(), true, true);
+                    me->GetMotionMaster()->MovePoint(PRELUDES_WP_RUNAWAY_2, preludesOutroPositions[1].GetPositionX(), preludesOutroPositions[1].GetPositionY(), preludesOutroPositions[1].GetPositionZ());
                 });
             }
             else if (id == PRELUDES_WP_RUNAWAY_2)
@@ -279,14 +279,13 @@ public:
             }
             else if (action == ACTION_MANNOROTH_FIGHT_ENDED)
             {
-                me->DeleteThreatList();
+                canAttackMannoroth = false;
                 me->RemoveAllAuras();
+                me->AI()->EnterEvadeMode();
+                me->SetReactState(REACT_PASSIVE);
                 me->GetMotionMaster()->Clear(false);
                 me->GetMotionMaster()->MovementExpired(false);
-
-                me->GetMotionMaster()->MovePoint(ILLIDAN_OUTRO_WP_BEFORE_TYRANDE, 3325.0f, -5710.0f, 16.36f, true, true);
-
-                canAttackMannoroth = false;
+                me->GetMotionMaster()->MovePoint(ILLIDAN_OUTRO_WP_BEFORE_TYRANDE, 3325.0f, -5710.0f, 16.36f);
             }
             else if (action == ACTION_ILLIDAN_START_COMBAT_AFTER_WIPE)
             {
@@ -567,7 +566,7 @@ public:
                 {
                     if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, SEARCH_DISTANCE, true))
                     {
-                        pIllidan->GetMotionMaster()->MovePoint(ILLIDAN_OUTRO_WP_WELL_EDGE, 3309.0f, -5650.6f, 15.0f, false, false);
+                        pIllidan->GetMotionMaster()->MovePoint(ILLIDAN_OUTRO_WP_WELL_EDGE, 3309.0f, -5650.6f, 15.0f);
                         pIllidan->RemoveAllAuras(); // Drop kneel aura anim kit
                     }
                 });

@@ -55,7 +55,7 @@ namespace Illidan
 {
     SimpleQuote onBladeThrow = {26095,"The sword has pierced his infernal armor! Strike him down!"};
     SimpleQuote stillConnected = {26099, "He is still connected to the well somehow! Focus your attacks on Mannoroth, we must disrupt his concentration!" };
-    SimpleQuote demonicQuote = { 0, "Revos ill ok mordanas archim maz naztheros! Archim xi ante maz-re mishun le nagas!"};
+    SimpleQuote demonicQuote = { 26097, "Revos ill ok mordanas archim maz naztheros! Archim xi ante maz-re mishun le nagas!" };
 }
 
 namespace Tyrande
@@ -63,11 +63,11 @@ namespace Tyrande
     SimpleQuote onAggro = {25997, "I will handle the demons. Elune, guide my arrows!"}; // say
     SimpleQuote onOverhelmed = {25998, "Light of Elune, save me!"};
     SimpleQuote onRelieved = {25999, "I will hold them back for now!"};
-    SimpleQuote onPortalCollapsing = {26003, "Malfurion, he has done it! The portal is collapsing!"}; // say -> todo get timer
+    SimpleQuote onPortalCollapsing = {26003, "Malfurion, he has done it! The portal is collapsing!"}; // say
     SimpleQuote onOutOfArrows = { 26000, "Illidan, I am out of arrows! Moon goddess, protect us from the darkness, that we may see your light again another night!" };
 }
 
-#define MAX_PHASE3_QUOTES 7
+#define MAX_PHASE3_QUOTES 6
 
 QUOTE_EVENTS phase3[MAX_PHASE3_QUOTES] =
 {
@@ -76,8 +76,7 @@ QUOTE_EVENTS phase3[MAX_PHASE3_QUOTES] =
     {10000, ENTRY_ILLIDAN_PRELUDE, "You are not the sole wielder of Sargeras' power, Mannoroth! Behold!", 26096},
     {8000, ENTRY_TYRANDE_PRELUDE, "Illidan... you mustn't!", 26001},
     {10000, ENTRY_ILLIDAN_PRELUDE, "I will be the savior of our people! I WILL FULFILL MY DESTINY!", 26098},
-    {1000, ENTRY_TYRANDE_PRELUDE, "No! Illidan!", 0 }, // TODO: sound id
-    {MAX_TIMER, ENTRY_ILLIDAN_PRELUDE, "[Demonic] Revos ill ok mordanas archim maz naztheros! Archim xi ante maz-re mishun le nagas!", 26097} // demonic
+    { MAX_TIMER, ENTRY_TYRANDE_PRELUDE, "No! Illidan!", 26002 }
 };
 
 #define CAST_WOE_INSTANCE(i)     (dynamic_cast<instance_well_of_eternity::instance_well_of_eternity_InstanceMapScript*>(i))
@@ -318,6 +317,7 @@ public:
                 if (Creature * pTwistingNetherPortal = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_PORTAL_TO_TWISTING_NETHER)))
                     pTwistingNetherPortal->RemoveAura(SPELL_DEMON_PORTAL_PULL_VISUAL_PERIODIC);
 
+                pInstance->DoCompleteAchievement(6118); // Heroic: Well of Eternity
                 me->SetVisible(false);
                 me->Kill(me);
             }
@@ -678,9 +678,10 @@ public:
                                 break;
                             case 2:
                                 talker->CastSpell(talker, SPELL_GIFT_OF_SARGERAS, false); // 30 s cast time
+
                                 scheduler.Schedule(Seconds(25), [this](TaskContext context)
                                 {
-                                    if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, 100.0f, true))
+                                    if (Creature * pIllidan = me->FindNearestCreature(ENTRY_ILLIDAN_PRELUDE, 150.0f, true))
                                     {
                                         pIllidan->MonsterYell(Illidan::demonicQuote.text, LANG_DEMONIC, 0);
                                         pIllidan->PlayDirectSound(26097);
@@ -695,9 +696,6 @@ public:
                                 PlayQuoteEvent(talker, phase3[phase3QuoteCounter], true);
                                 break;
                             case 5:
-                                PlayQuoteEvent(talker, phase3[phase3QuoteCounter], false);
-                                break;
-                            case 6:
                                 PlayQuoteEvent(talker, phase3[phase3QuoteCounter], false);
                                 break;
                             default:
