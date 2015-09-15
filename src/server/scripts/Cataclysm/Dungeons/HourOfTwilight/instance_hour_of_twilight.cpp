@@ -683,7 +683,7 @@ public:
                             break;
                         }
                         case 10:
-                            if (instance->GetData(TYPE_BOSS_ARCURION) == DONE)
+                            if (instance->GetData(TYPE_BOSS_ARCURION) == DONE && !me->HasAura(103251) /*Icy Tomb*/)
                             {
                                 Move_Point++;
                                 Move_Timer = 5000;
