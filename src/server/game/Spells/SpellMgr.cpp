@@ -4871,6 +4871,7 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 103004: // Shadowcloak
             spellInfo->EffectAmplitude[EFFECT_1] = 1000;
+            spellInfo->procFlags = 0;
             break;
         case 102994: // Shadowcloak (stealth + vehicle kit)
             spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_DUMMY; // we don't really need real stealth
@@ -4926,10 +4927,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             break;
         case 103888: // Fel Firestorm periodic
-            spellInfo->EffectAmplitude[EFFECT_0] = 150; // prenerfed ?
+            spellInfo->EffectAmplitude[EFFECT_0] = 100; // prenerfed ?
             break;
         case 103889: // Fel Firestorm summon
-            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_70_YARDS;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_80_YARDS;
             break;
         case 104820: // Embedded Blade
             spellInfo->EffectTriggerSpell[EFFECT_0] = 0;

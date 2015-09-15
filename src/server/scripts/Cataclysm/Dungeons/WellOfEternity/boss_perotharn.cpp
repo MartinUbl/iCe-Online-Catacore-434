@@ -363,15 +363,6 @@ public:
 
         void AttackStart(Unit * victim) override
         {
-            // First remove passenger !
-            if (Creature* vehPassenger = victim->GetVehicleCreatureBase())
-            {
-                vehPassenger->Kill(vehPassenger);
-                vehPassenger->ForcedDespawn();
-            }
-
-            victim->RemoveAura(102994); // Remove Stealth + vehicle kit
-
             ScriptedAI::AttackStart(victim);
         }
 
@@ -517,8 +508,7 @@ public:
             {
                 if (pInstance)
                 {
-                    // Remove stealth auras
-                    pInstance->DoRemoveAurasDueToSpellOnPlayers(102994); // TODO: is this safe ? -> we should kill vehicle ...
+                    pInstance->DoRemoveAurasDueToSpellOnPlayers(102994);
                     if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
                         pIllidan->AI()->DoAction(ACTION_ILLIDAN_REMOVE_VEHICLE); // Need to first properly remove vehicle passenger and destroy vehicle kit
                 }

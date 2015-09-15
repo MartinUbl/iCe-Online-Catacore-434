@@ -3328,8 +3328,13 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                         if (!caster || !caster->GetInstanceScript())
                             break;
 
+                        Creature * pIllidan = ObjectAccessor::GetCreature(*caster, caster->GetInstanceScript()->GetData64(4004));
+
+                        if (!pIllidan)
+                            break;
+
                         // Only out of combat
-                        if (caster->IsInCombat())
+                        if (caster->IsInCombat() && !pIllidan->HasAura(105547))
                             break;
 
                         #define PLAYER_SHADOWCLOAK_STALKER      (55154)

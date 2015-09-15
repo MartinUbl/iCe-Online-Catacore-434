@@ -1155,7 +1155,7 @@ public:
                     if (player && player->GetQuestStatus(QUEST_DOCUMENTING_THE_TIMEWAYS) == QUEST_STATUS_INCOMPLETE)
                     {
                         player->CastSpell(me, SPELL_ARCHIVAL_HANDMAIDEN_CHANNEL, true);
-                        me->CastSpell(player, SPELL_ARCHIVAL_HANDMAIDEN_CREDIT, true);
+                        player->CastSpell(player, SPELL_ARCHIVAL_HANDMAIDEN_CREDIT, true);
                     }
                 }
             }

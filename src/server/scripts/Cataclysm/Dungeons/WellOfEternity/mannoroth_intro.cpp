@@ -509,6 +509,9 @@ public:
                         me->SetVisible(true);
                         me->SendMovementFlagUpdate();
                         me->GetMotionMaster()->MovePoint(PRELUDES_WP_KNEEL_POINT, 3320.84f, -5707.4f, 16.6f, true, true);
+
+                        if (Creature * pTyrande = me->FindNearestCreature(ENTRY_TYRANDE_PRELUDE, SEARCH_DISTANCE, true))
+                            pTyrande->SetFacingTo(2.8f);
                     }
 
                     switch (repeatCounter)

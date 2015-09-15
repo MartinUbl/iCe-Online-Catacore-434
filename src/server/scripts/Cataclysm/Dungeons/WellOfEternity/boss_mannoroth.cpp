@@ -876,7 +876,7 @@ public:
                         if (player && player->GetQuestStatus(QUEST_DOCUMENTING_THE_TIMEWAYS) == QUEST_STATUS_INCOMPLETE)
                         {
                             player->CastSpell(me, SPELL_ARCHIVAL_VAROTHEN_CHANNEL, true);
-                            me->CastSpell(player, SPELL_ARCHIVAL_VAROTHEN_CREDIT, true);
+                            player->CastSpell(player, SPELL_ARCHIVAL_VAROTHEN_CREDIT, true);
                         }
                     }
                 }
@@ -1102,6 +1102,7 @@ public:
                     CastElunesWrath();
                     tyrandeCollapsed = true;
                     me->MonsterTextEmote("Tyrande collapses! The light of Elune winks out!", 0, true, 250.0f);
+                    me->RemoveAllAuras();
                     me->CastSpell(me, 89196, true); // Dead anim kit
                 });
             }

@@ -9139,12 +9139,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                     }
                     case 103004: // Shadowcloak (Well of Eternity)
                     {
-                        // First remove passenger !
-                        if (Creature* vehPassenger = GetVehicleCreatureBase())
-                        {
-                            vehPassenger->Kill(vehPassenger);
-                            vehPassenger->ForcedDespawn();
-                        }
+                        if (!GetInstanceScript())
+                            return false;
+
+                        Creature * pIllidan = ObjectAccessor::GetCreature(*this, GetInstanceScript()->GetData64(4004));
+
+                        if (!pIllidan || pIllidan->HasAura(105547)) // Do not proc if we are in seeking phase (illidan has meditation aura on him)
+                            return false;
 
                         RemoveAura(102994); // Remove Stealth + vehicle kit
 
@@ -9158,7 +9159,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                         if (Aura * ambusher = AddAura(103018,this)) // Scale duration of Shadow Ambusher with number of dummy stacks
                             ambusher->SetDuration(stacks * 1000);
 
-                        break;
+                        return false;
                     }
                     case 104820: //Embedded Blade (Mannoroth)
                     {

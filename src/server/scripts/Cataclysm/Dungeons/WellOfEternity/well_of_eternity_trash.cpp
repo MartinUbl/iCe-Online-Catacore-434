@@ -659,7 +659,7 @@ public:
                             if (player && player->GetQuestStatus(QUEST_DOCUMENTING_THE_TIMEWAYS) == QUEST_STATUS_INCOMPLETE)
                             {
                                 player->CastSpell(me,SPELL_ARCHIVAL_DEMON_CHANNEL,true);
-                                me->CastSpell(player,SPELL_ARCHIVAL_DEMON_CREDIT,true);
+                                player->CastSpell(player, SPELL_ARCHIVAL_DEMON_CREDIT, true);
                             }
                         }
                     }
@@ -707,7 +707,7 @@ public:
             if (pInstance && (entry == CORRUPTED_ARCANIST_ENTRY || entry == DREADLORD_DEFFENDER_ENTRY))
             {
                 // Remove stealth auras
-                pInstance->DoRemoveAurasDueToSpellOnPlayers(102994); // TODO: is this safe ? -> we should kill vehicle ...
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(102994);
                 CAST_WOE_INSTANCE(pInstance)->RegisterIllidanVictim(me->GetGUID());
 
                 if (Creature * pIllidan = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ILLIDAN)))
@@ -1085,7 +1085,7 @@ namespace Illidan
         SPELL_WALL_OF_SHADOW = 104400, // Wall of Shadow
 
         // Shadow system on players
-        SPELL_SHADOW_WALK_STEALTH = 102994, // stealth + speed + SPELL_AURA_SET_VEHICLE_ID -> misc value 1763)
+        SPELL_SHADOW_WALK_STEALTH = 102994, // stealth + speed + SPELL_AURA_SET_VEHICLE_ID
         SPELL_SHADOW_CLOAK_TRIGGERER = 103004, // Triggering two spells every second (THESE SHOULD TRIGGER SHADOW WALK OUT OF COMBAT)
         SPELL_SHADOW_WALK_STACK_AURA = 103020, // just dummy stacking aura
         SPELL_SHADOW_CLOAK_FAKE_STEALTH = 105915,
