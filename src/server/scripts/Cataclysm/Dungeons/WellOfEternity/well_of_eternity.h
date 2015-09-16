@@ -538,12 +538,6 @@ public:
 
         void OnPlayerEnter(Player * player) override
         {
-            if (!player->IsGameMaster() && !player->HasAura(109546)) // TODO: Revert this after official release
-            {
-                player->RepopAtGraveyard();
-                return;
-            }
-
             if (player->getClass() == CLASS_DRUID) // Layering of SPELL_AURA_TRANSFORM is little fucked up, so turn morph for druids for now
                 return;
 
