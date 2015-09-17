@@ -331,6 +331,7 @@ class Spell
         void EffectCreateItem2(SpellEffIndex effIndex);
         void EffectCreateRandomItem(SpellEffIndex effIndex);
         void EffectPersistentAA(SpellEffIndex effIndex);
+        void EffectCreateAreaTrigger(SpellEffIndex effIndex);
         void EffectEnergize(SpellEffIndex effIndex);
         void EffectOpenLock(SpellEffIndex effIndex);
         void EffectSummonChangeItem(SpellEffIndex effIndex);

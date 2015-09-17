@@ -258,7 +258,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSanctuary,                                //176 SPELL_EFFECT_SANCTUARY_2
     &Spell::EffectNULL,                                     //177
     &Spell::EffectUnused,                                   //178 unused
-    &Spell::EffectNULL,                                     //179
+    &Spell::EffectCreateAreaTrigger,                        //179 SPELL_EFFECT_CREATE_AREATRIGGER
     &Spell::EffectUnused,                                   //180 unused
     &Spell::EffectUnused,                                   //181 unused
     &Spell::EffectNULL,                                     //182
@@ -5154,6 +5154,18 @@ void Spell::EffectPersistentAA(SpellEffIndex effIndex)
     }
     ASSERT(m_spellAura->GetDynobjOwner());
     m_spellAura->_ApplyEffectForTargets(effIndex);
+}
+
+void Spell::EffectCreateAreaTrigger(SpellEffIndex effIndex)
+{
+    float radius = GetEffectRadius(effIndex);
+
+    // trigger entry/miscvalue relation is currently unknown, for now use MiscValue as trigger entry
+    uint32 triggerEntry = GetSpellInfo()->EffectMiscValue[effIndex];
+
+    AreaTrigger * areaTrigger = new AreaTrigger;
+    if (!areaTrigger->CreateAreaTrigger(sObjectMgr->GenerateLowGuid(HIGHGUID_AREATRIGGER), triggerEntry, GetCaster(), GetSpellInfo(), m_targets.m_dstPos))
+        delete areaTrigger;
 }
 
 void Spell::EffectEnergize(SpellEffIndex effIndex)
