@@ -228,10 +228,10 @@ namespace Trinity
         WorldObject const* _searcher;
         WorldObject* &i_object;
         Check &i_check;
-        uint32 i_mapTypeMask;
+        uint32 i_phaseMask;
 
-        WorldObjectLastSearcher(WorldObject const* searcher, WorldObject* & result, Check& check, uint32 mapTypeMask = GRID_MAP_TYPE_MASK_ALL)
-            : _searcher(searcher), i_object(result), i_check(check), i_mapTypeMask(mapTypeMask) { }
+        WorldObjectLastSearcher(WorldObject const* searcher, WorldObject* & result, Check& check)
+            : _searcher(searcher), i_object(result), i_check(check), i_phaseMask(searcher->GetPhaseMask()) { }
 
         void Visit(GameObjectMapType &m);
         void Visit(PlayerMapType &m);
