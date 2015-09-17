@@ -17,7 +17,6 @@
 
 #include "ScriptPCH.h"
 #include "well_of_eternity.h"
-#include "TaskScheduler.h"
 
 enum spells
 {
@@ -194,8 +193,6 @@ public:
                 }
         }
 
-        TaskScheduler scheduler;
-
         std::vector<uint64> magesGUIDs;
         InstanceScript * pInstance;
         bool encounterComplete;
@@ -212,8 +209,6 @@ public:
         uint32 obedienceTimer;
         uint32 obedienceCheckTimer;
 
-        uint64 handGUID;
-
         // After combat timers
         uint32 dialogTimer;
         // Phasing
@@ -221,8 +216,6 @@ public:
 
         void Reset() override
         {
-            handGUID = 0;
-            scheduler.CancelAll();
             totalObedienceInterrupted = false;
             interruptCounter = 0;
             magusWave = 0;
@@ -464,29 +457,24 @@ public:
                 PlayQuote(me, leavingQuotes[1]);
         }
 
-        uint64 BoardHandOfTheQueenOnPlayer(Unit * player)
+        void BoardHandOfTheQueenOnPlayer(Unit * player)
         {
             if (Vehicle * veh = player->GetVehicleKit())
             {
-                if (Creature * pHand = me->SummonCreature(ENTRY_HAND_OF_THE_QUEEN, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0.0f))
+                if (Creature * pHand = me->SummonCreature(ENTRY_HAND_OF_THE_QUEEN, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0.0f,TEMPSUMMON_DEAD_DESPAWN,5000))
                 {
                     pHand->SendMovementFlagUpdate();
                     pHand->AI()->SetGUID(player->GetGUID());
-                    pHand->setFaction(me->getFaction());
                     pHand->EnterVehicle(veh, 0);
                     pHand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    return pHand->GetGUID();
                 }
             }
-            return 0;
         }
 
         void UpdateAI(const uint32 diff) override
         {
             if (!pInstance)
                 return;
-
-            scheduler.Update(diff);
 
             if (encounterComplete == true)
             {
@@ -533,18 +521,7 @@ public:
                     if (player != nullptr && combatPlayers > 1)
                     {
                         me->AddAura(SPELL_SERVANT_OF_THE_QUEEN, player);
-                        handGUID = BoardHandOfTheQueenOnPlayer(player);
-
-                        // If hand wil not board, drop charm aura after few seconds
-                        scheduler.Schedule(Seconds(6), [this](TaskContext context)
-                        {
-                            Creature * pHand = ObjectAccessor::GetCreature(*me, handGUID);
-
-                            if (pInstance && (!pHand || !pHand->IsAlive()))
-                            {
-                                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SERVANT_OF_THE_QUEEN);
-                            }
-                        });
+                        BoardHandOfTheQueenOnPlayer(player);
                     }
                     else
                     {
@@ -982,7 +959,7 @@ public:
 
     struct npc_hand_of_the_queen_woeAI : public ScriptedAI
     {
-        npc_hand_of_the_queen_woeAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_hand_of_the_queen_woeAI(Creature* creature) : ScriptedAI(creature) { me->SetReactState(REACT_PASSIVE); }
 
         uint64 playerVehicleGUID = 0;
 
@@ -997,6 +974,12 @@ public:
                 plVehicle->RemoveAurasByType(SPELL_AURA_AOE_CHARM); // Drop Servant of the Queen aura from player
             me->ForcedDespawn(10000);
         }
+
+        void Reset() override {}
+        void EnterEvadeMode() override { }
+        void EnterCombat(Unit* /*enemy*/) override {}
+        void AttackStart(Unit * who) override {}
+        void MoveInLineOfSight(Unit* /*who*/) override { }
     };
 };
 
