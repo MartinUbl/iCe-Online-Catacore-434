@@ -1446,6 +1446,8 @@ class ObjectMgr
         GuidMap m_groupGuidMap;
         GuidMap m_moTransGuidMap;
 
+        uint32 _hiAreaTriggerGuid;
+
         // other persistent storage guids
         GuidMap m_arenaTeamGuidMap;
         GuidMap m_auctionGuidMap;

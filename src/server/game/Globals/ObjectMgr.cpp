@@ -299,6 +299,8 @@ ObjectMgr::ObjectMgr()
     m_ItemTextId        = 1;
     m_hiGuildNewsId     = 1;
 
+    _hiAreaTriggerGuid  = 1,
+
     m_charGuidMap.Init(PLAYER_GRANULARITY);
     m_creatureGuidMap.Init(CREATURE_GRANULARITY);
     m_goGuidMap.Init(GAMEOBJECT_GRANULARITY);
@@ -6936,6 +6938,15 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
                 ASSERT("MO Transport guid overflow!" && false);
             }
             return id;
+        case HIGHGUID_AREATRIGGER:
+        {
+            if (id >= 0xFFFFFFFE)
+            {
+                sLog->outError("AreaTrigger guid overflow!! Can't continue, shutting down server. ");
+                ASSERT("AreaTrigger guid overflow!" && false);
+            }
+            return _hiAreaTriggerGuid++;
+        }
         default:
             ASSERT(0);
     }

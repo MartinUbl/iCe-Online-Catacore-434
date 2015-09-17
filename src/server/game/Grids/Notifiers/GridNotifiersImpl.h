@@ -76,6 +76,26 @@ void Trinity::WorldObjectSearcher<Check>::Visit(GameObjectMapType &m)
 }
 
 template<class Check>
+void Trinity::WorldObjectSearcher<Check>::Visit(AreaTriggerMapType &m)
+{
+    // already found
+    if (i_object)
+        return;
+
+    for (AreaTriggerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+    {
+        if (!itr->getSource()->InSamePhase(i_phaseMask))
+            continue;
+
+        if (i_check(itr->getSource()))
+        {
+            i_object = itr->getSource();
+            return;
+        }
+    }
+}
+
+template<class Check>
 void Trinity::WorldObjectSearcher<Check>::Visit(PlayerMapType &m)
 {
     // already found
@@ -162,6 +182,14 @@ void Trinity::WorldObjectListSearcher<Check>::Visit(PlayerMapType &m)
         if (itr->getSource()->InSamePhase(i_phaseMask))
             if (i_check(itr->getSource()))
                 i_objects.push_back(itr->getSource());
+}
+
+template<class Check>
+void Trinity::WorldObjectListSearcher<Check>::Visit(AreaTriggerMapType &m)
+{
+    for (AreaTriggerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+        if (i_check(itr->getSource()))
+            i_objects.push_back(itr->getSource());
 }
 
 template<class Check>
@@ -290,6 +318,19 @@ template<class Check>
 void Trinity::UnitLastSearcher<Check>::Visit(CreatureMapType &m)
 {
     for (CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if (!itr->getSource()->InSamePhase(i_phaseMask))
+            continue;
+
+        if (i_check(itr->getSource()))
+            i_object = itr->getSource();
+    }
+}
+
+template<class Check>
+void Trinity::WorldObjectLastSearcher<Check>::Visit(AreaTriggerMapType &m)
+{
+    for (AreaTriggerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
             continue;

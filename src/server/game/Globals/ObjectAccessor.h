@@ -44,6 +44,7 @@ class WorldObject;
 class Vehicle;
 class Map;
 class Transport;
+class AreaTrigger;
 
 template <class T>
 class HashMapHolder
@@ -194,6 +195,7 @@ class ObjectAccessor
         static Pet* GetPet(WorldObject const&, uint64 guid);
         static Player* GetPlayer(WorldObject const&, uint64 guid);
         static Creature* GetCreatureOrPetOrVehicle(WorldObject const&, uint64);
+        static AreaTrigger* GetAreaTrigger(WorldObject const& u, uint64 guid);
 
         // these functions return objects if found in whole world
         // ACCESS LIKE THAT IS NOT THREAD SAFE

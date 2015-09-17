@@ -2600,6 +2600,9 @@ void Map::RemoveAllObjectsInRemoveList()
         case TYPEID_DYNAMICOBJECT:
             Remove((DynamicObject*)obj,true);
             break;
+        case TYPEID_AREATRIGGER:
+            Remove((AreaTrigger*)obj, true);
+            break;
         case TYPEID_GAMEOBJECT:
             Remove((GameObject*)obj,true);
             break;
@@ -2735,11 +2738,13 @@ template void Map::Add(Corpse *);
 template void Map::Add(Creature *);
 template void Map::Add(GameObject *);
 template void Map::Add(DynamicObject *);
+template void Map::Add(AreaTrigger*);
 
 template void Map::Remove(Corpse *,bool);
 template void Map::Remove(Creature *,bool);
 template void Map::Remove(GameObject *, bool);
 template void Map::Remove(DynamicObject *, bool);
+template void Map::Remove(AreaTrigger*, bool);
 
 template void Map::AddToActive(Corpse*);
 template void Map::AddToActive(GameObject*);

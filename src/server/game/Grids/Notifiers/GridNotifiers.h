@@ -29,6 +29,7 @@
 
 #include "Corpse.h"
 #include "Object.h"
+#include "AreaTrigger.h"
 #include "DynamicObject.h"
 #include "GameObject.h"
 #include "Player.h"
@@ -120,6 +121,7 @@ namespace Trinity
         void Visit(GameObjectMapType &m) { updateObjects<GameObject>(m); }
         void Visit(DynamicObjectMapType &m) { updateObjects<DynamicObject>(m); }
         void Visit(CorpseMapType &m) { updateObjects<Corpse>(m); }
+        void Visit(AreaTriggerMapType &m) { updateObjects<AreaTrigger>(m); }
     };
 
     struct MessageDistDeliverer
@@ -139,6 +141,7 @@ namespace Trinity
         void Visit(PlayerMapType &m);
         void Visit(CreatureMapType &m);
         void Visit(DynamicObjectMapType &m);
+        void Visit(AreaTriggerMapType &m);
         template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
 
         void SendPacket(Player* plr)
@@ -170,6 +173,7 @@ namespace Trinity
         void Visit(PlayerMapType &m);
         void Visit(CreatureMapType &m);
         void Visit(DynamicObjectMapType &m);
+        void Visit(AreaTriggerMapType &m);
         template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
 
         void SendPacket(Player* plr)
@@ -213,8 +217,30 @@ namespace Trinity
         void Visit(CreatureMapType &m);
         void Visit(CorpseMapType &m);
         void Visit(DynamicObjectMapType &m);
+        void Visit(AreaTriggerMapType &m);
 
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+    };
+
+    template<class Check>
+    struct WorldObjectLastSearcher
+    {
+        WorldObject const* _searcher;
+        WorldObject* &i_object;
+        Check &i_check;
+        uint32 i_mapTypeMask;
+
+        WorldObjectLastSearcher(WorldObject const* searcher, WorldObject* & result, Check& check, uint32 mapTypeMask = GRID_MAP_TYPE_MASK_ALL)
+            : _searcher(searcher), i_object(result), i_check(check), i_mapTypeMask(mapTypeMask) { }
+
+        void Visit(GameObjectMapType &m);
+        void Visit(PlayerMapType &m);
+        void Visit(CreatureMapType &m);
+        void Visit(CorpseMapType &m);
+        void Visit(DynamicObjectMapType &m);
+        void Visit(AreaTriggerMapType &m);
+
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) { }
     };
 
     template<class Check>
@@ -232,6 +258,7 @@ namespace Trinity
         void Visit(CorpseMapType &m);
         void Visit(GameObjectMapType &m);
         void Visit(DynamicObjectMapType &m);
+        void Visit(AreaTriggerMapType &m);
 
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
@@ -275,6 +302,13 @@ namespace Trinity
         void Visit(DynamicObjectMapType &m)
         {
             for (DynamicObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+                if (itr->getSource()->InSamePhase(i_phaseMask))
+                    i_do(itr->getSource());
+        }
+
+        void Visit(AreaTriggerMapType &m)
+        {
+            for (AreaTriggerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
                     i_do(itr->getSource());
         }

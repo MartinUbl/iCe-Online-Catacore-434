@@ -455,3 +455,4 @@ bool CarrionFeederObjectCheck::operator()(Corpse* u)
 template void ObjectUpdater::Visit<Creature>(CreatureMapType&);
 template void ObjectUpdater::Visit<GameObject>(GameObjectMapType &);
 template void ObjectUpdater::Visit<DynamicObject>(DynamicObjectMapType &);
+template void ObjectUpdater::Visit<AreaTrigger>(AreaTriggerMapType &);
