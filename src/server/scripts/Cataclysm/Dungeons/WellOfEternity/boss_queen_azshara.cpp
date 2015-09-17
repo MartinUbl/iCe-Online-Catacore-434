@@ -211,6 +211,9 @@ public:
         uint32 servantTimer;
         uint32 obedienceTimer;
         uint32 obedienceCheckTimer;
+
+        uint64 handGUID;
+
         // After combat timers
         uint32 dialogTimer;
         // Phasing
@@ -218,6 +221,7 @@ public:
 
         void Reset() override
         {
+            handGUID = 0;
             scheduler.CancelAll();
             totalObedienceInterrupted = false;
             interruptCounter = 0;
@@ -460,7 +464,7 @@ public:
                 PlayQuote(me, leavingQuotes[1]);
         }
 
-        void BoardHandOfTheQueenOnPlayer(Unit * player)
+        uint64 BoardHandOfTheQueenOnPlayer(Unit * player)
         {
             if (Vehicle * veh = player->GetVehicleKit())
             {
@@ -471,8 +475,10 @@ public:
                     pHand->setFaction(me->getFaction());
                     pHand->EnterVehicle(veh, 0);
                     pHand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                    return pHand->GetGUID();
                 }
             }
+            return 0;
         }
 
         void UpdateAI(const uint32 diff) override
@@ -527,32 +533,16 @@ public:
                     if (player != nullptr && combatPlayers > 1)
                     {
                         me->AddAura(SPELL_SERVANT_OF_THE_QUEEN, player);
-                        BoardHandOfTheQueenOnPlayer(player);
+                        handGUID = BoardHandOfTheQueenOnPlayer(player);
 
-                        scheduler.Schedule(Milliseconds(500), [this](TaskContext context)
+                        // If hand wil not board, drop charm aura after few seconds
+                        scheduler.Schedule(Seconds(6), [this](TaskContext context)
                         {
-                            if (Unit * vehPlayer = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, SPELL_SERVANT_OF_THE_QUEEN))
-                            {
-                                if (Vehicle * veh = vehPlayer->GetVehicleKit())
-                                {
-                                    if (veh->GetPassenger(0) == nullptr)
-                                        BoardHandOfTheQueenOnPlayer(vehPlayer);
-                                }
-                            }
-                            if (context.GetRepeatCounter() <= 3) // Try it 4 times ...
-                                context.Repeat();
-                        });
+                            Creature * pHand = ObjectAccessor::GetCreature(*me, handGUID);
 
-                        // If hand wil not board, drop charm aura between 6 - 8 seconds
-                        scheduler.Schedule(Seconds(6), Seconds(8), [this](TaskContext context)
-                        {
-                            if (Unit * vehPlayer = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, SPELL_SERVANT_OF_THE_QUEEN))
+                            if (pInstance && (!pHand || !pHand->IsAlive()))
                             {
-                                if (Vehicle * veh = vehPlayer->GetVehicleKit())
-                                {
-                                    if (veh->GetPassenger(0) == nullptr)
-                                        vehPlayer->RemoveAura(SPELL_SERVANT_OF_THE_QUEEN);
-                                }
+                                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SERVANT_OF_THE_QUEEN);
                             }
                         });
                     }
