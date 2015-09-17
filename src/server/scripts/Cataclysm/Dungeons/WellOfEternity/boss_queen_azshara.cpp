@@ -17,6 +17,7 @@
 
 #include "ScriptPCH.h"
 #include "well_of_eternity.h"
+#include "TaskScheduler.h"
 
 enum spells
 {
@@ -193,6 +194,8 @@ public:
                 }
         }
 
+        TaskScheduler scheduler;
+
         std::vector<uint64> magesGUIDs;
         InstanceScript * pInstance;
         bool encounterComplete;
@@ -215,6 +218,7 @@ public:
 
         void Reset() override
         {
+            scheduler.CancelAll();
             totalObedienceInterrupted = false;
             interruptCounter = 0;
             magusWave = 0;
@@ -462,6 +466,7 @@ public:
             {
                 if (Creature * pHand = me->SummonCreature(ENTRY_HAND_OF_THE_QUEEN, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0.0f))
                 {
+                    pHand->SendMovementFlagUpdate();
                     pHand->AI()->SetGUID(player->GetGUID());
                     pHand->setFaction(me->getFaction());
                     pHand->EnterVehicle(veh, 0);
@@ -474,6 +479,8 @@ public:
         {
             if (!pInstance)
                 return;
+
+            scheduler.Update(diff);
 
             if (encounterComplete == true)
             {
@@ -521,6 +528,33 @@ public:
                     {
                         me->AddAura(SPELL_SERVANT_OF_THE_QUEEN, player);
                         BoardHandOfTheQueenOnPlayer(player);
+
+                        scheduler.Schedule(Milliseconds(500), [this](TaskContext context)
+                        {
+                            if (Unit * vehPlayer = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, SPELL_SERVANT_OF_THE_QUEEN))
+                            {
+                                if (Vehicle * veh = vehPlayer->GetVehicleKit())
+                                {
+                                    if (veh->GetPassenger(0) == nullptr)
+                                        BoardHandOfTheQueenOnPlayer(vehPlayer);
+                                }
+                            }
+                            if (context.GetRepeatCounter() <= 3) // Try it 4 times ...
+                                context.Repeat();
+                        });
+
+                        // If hand wil not board, drop charm aura between 6 - 8 seconds
+                        scheduler.Schedule(Seconds(6), Seconds(8), [this](TaskContext context)
+                        {
+                            if (Unit * vehPlayer = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, SPELL_SERVANT_OF_THE_QUEEN))
+                            {
+                                if (Vehicle * veh = vehPlayer->GetVehicleKit())
+                                {
+                                    if (veh->GetPassenger(0) == nullptr)
+                                        vehPlayer->RemoveAura(SPELL_SERVANT_OF_THE_QUEEN);
+                                }
+                            }
+                        });
                     }
                     else
                     {
