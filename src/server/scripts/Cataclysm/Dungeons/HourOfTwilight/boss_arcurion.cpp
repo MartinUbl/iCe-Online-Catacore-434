@@ -45,6 +45,7 @@ enum Objects
     ICE_WALL2             = 210049, // Exit - destroyed by Thrall
 };
 
+
 const float SpawnPosition[14][4] =
 {
     {4739.72f, 84.1997f, 107.230f, 5.30915f},
@@ -445,18 +446,19 @@ public:
 
         void DoAction(const int32 /*param*/)
         {
-            Creature * arcurion = me->FindNearestCreature(54590, 200.0, true);
-
-            if (arcurion && arcurion->HealthBelowPct(30))
-                Cast = false;
-
-            Current_Health = arcurion->GetHealthPct();
-            if (Current_Health > Health)
+            if (Creature * arcurion = me->FindNearestCreature(54590, 250.0, true))
             {
-                int round_health_up = 0;
-                round_health_up = 10 - (Current_Health % 10);
-                Health = Current_Health + round_health_up;
-                Cast_Faster_Timer = 15000;
+                if (arcurion->HealthBelowPct(30))
+                    Cast = false;
+
+                Current_Health = arcurion->GetHealthPct();
+                if (Current_Health > Health)
+                {
+                    int round_health_up = 0;
+                    round_health_up = 10 - (Current_Health % 10);
+                    Health = Current_Health + round_health_up;
+                    Cast_Faster_Timer = 15000;
+                }
             }
         }
 
