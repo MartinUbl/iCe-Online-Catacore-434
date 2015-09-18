@@ -5158,8 +5158,6 @@ void Spell::EffectPersistentAA(SpellEffIndex effIndex)
 
 void Spell::EffectCreateAreaTrigger(SpellEffIndex effIndex)
 {
-    float radius = GetEffectRadius(effIndex);
-
     // trigger entry/miscvalue relation is currently unknown, for now use MiscValue as trigger entry
     uint32 triggerEntry = GetSpellInfo()->EffectMiscValue[effIndex];
 
