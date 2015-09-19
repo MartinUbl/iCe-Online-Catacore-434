@@ -290,6 +290,10 @@ public:
             else if (action == ACTION_ILLIDAN_START_COMBAT_AFTER_WIPE)
             {
                 me->CastSpell(me, SPELL_DEMONIC_SIGHT_DODGE, true);
+
+                if (!me->HasAura(SPELL_WATERS_OF_ETERNITY))
+                    me->CastSpell(me, SPELL_WATERS_OF_ETERNITY, true);
+
                 canAttackMannoroth = true; // Allow usage of combat abilities
                 darkLanceTimer = 2000;
                 tauntTimer = 6000;

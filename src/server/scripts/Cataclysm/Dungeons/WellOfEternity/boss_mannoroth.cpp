@@ -419,7 +419,7 @@ public:
             if (action == 0) // called from Unit::HandleProcTriggerSpell
             {
                 canProcMagistirke = false;
-                magistrikeCDTimer = 2500;
+                magistrikeCDTimer = 3000;
             }
         }
 
