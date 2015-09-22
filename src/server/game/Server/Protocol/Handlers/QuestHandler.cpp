@@ -260,6 +260,9 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket & recv_data)
             _player->AddQuest(pQuest, pObject);
             if (_player->CanCompleteQuest(quest))
                 _player->CompleteQuest(quest);
+
+            if (pObject && pObject->GetTypeId() == TYPEID_UNIT)
+                (pObject->ToCreature())->AI()->sQuestAccept(_player, pQuest);
         }
 
         if (pQuest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE))
