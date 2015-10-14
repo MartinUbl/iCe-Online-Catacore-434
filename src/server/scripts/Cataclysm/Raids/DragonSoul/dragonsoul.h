@@ -22,13 +22,87 @@ enum Encounters
 {
     // Bosses
     TYPE_BOSS_MORCHOK                   = 0,
-    TYPE_BOSS_YORSAHJ                   = 1,
-    TYPE_BOSS_ZONOZZ                    = 2,
+    TYPE_BOSS_ZONOZZ                    = 1,
+    TYPE_BOSS_YORSAHJ                   = 2,
     TYPE_BOSS_HAGARA                    = 3,
     TYPE_BOSS_ULTRAXION                 = 4,
     TYPE_BOSS_BLACKHORN                 = 5,
     TYPE_BOSS_SPINE_OF_DEATHWING        = 6,
     TYPE_BOSS_MADNESS_OF_DEATHWING      = 7,
     MAX_ENCOUNTER                       = 8,
+};
+
+enum AdditionalEvents
+{
+    DATA_HEROIC_KILLS                   = 9,
+};
+
+enum AchievEvents
+{
+    //
+};
+
+enum DragonsoulCreatureIds
+{
+    NPC_VALEERA                         = 57289, // Travel to Zon'ozz
+    NPC_EIENDORMI                       = 57288, // Travel to Yor'sahj
+    NPC_NETHESTRASZ                     = 57287, // Travel at the top of the Wyrmrest Temple
+
+    NPC_TRAVEL_TO_WYRMREST_TEMPLE       = 57328, //
+    NPC_TRAVEL_TO_WYRMREST_BASE         = 57882, //
+    NPC_TRAVEL_TO_WYRMREST_SUMMIT       = 57379, // Teleport at the top of the Wyrmrest Temple
+    NPC_TRAVEL_TO_EYE_OF_ETERNITY       = 57377, // Teleport to Hagara
+    NPC_TRAVEL_TO_MAELSTORM             = 57443, // Teleport to Madness of Deathwing
+    NPC_TRAVEL_TO_DECK                  = 57378, // Teleport to Aliance Ship
+
+    NPC_THE_DRAGON_SOUL                 = 56668, // Ultraxion - Top of the Wyrmrest Temple
+    NPC_THE_DRAGON_SOUL_SPINE           = 56694, // After spine
+
+    // Thrall
+    NPC_THRALL                          = 56667, // Ultraxion - Top of the Wyrmrest Temple
+    NPC_THRALL_SPINE                    = 56103, // After Spine of Deathwing
+    NPC_THRALL_MADNESS                  = 58232, // After killing Madness of Deathwing - outro
+
+    // Aspects
+    NPC_ALEXTRASZA_THE_LIFE_BINDER      = 56630, // Ultraxion - Top of the Wyrmrest Temple
+    NPC_ALEXSTRASZA_DRAGON_FORM         = 56099, // Madness of Deathwing - 1st platform
+    NPC_ALEXSTRASZA_MADNESS             = 58207, // After killing Madness of Deathwing - outro
+
+    NPC_NOZDORMU_THE_TIMELESS_ONE       = 56666, // Ultraxion - Top of the Wyrmrest Temple
+    NPC_NOZDORMU_DRAGON_FORM            = 56102, // Madness of Deathwing - 2nd platform
+    NPC_NOZDORMU_MADNESS                = 58208, // After killing Madness of Deathwing - outro
+
+    NPC_YSERA_THE_AWAKENED              = 56665, // Ultraxion - Top of the Wyrmrest Temple
+    NPC_YSERA_DRAGON_FORM               = 56100, // Madness of Deathwing - 3rd platform
+    NPC_YSERA_MADNESS                   = 58209, // After killing Madness of Deathwing - outro
+
+    NPC_KALECGOS                        = 56664, // Ultraxion - Top of the Wyrmrest Temple
+    NPC_KALECGOS_DRAGON_FORM            = 56101, // Madness of Deathwing - 4th platform
+    NPC_KALECGOS_MADNESS                = 58210, // After killing Madness of Deathwing - outro
+};
+
+enum SharedSpells
+{
+    SPELL_TELEPORT_VISUAL_ACTIVE                = 108203,
+    SPELL_TELEPORT_VISUAL_DISABLED              = 108227,
+
+    SPELL_CHARGING_UP_LIFE                      = 108490,
+    SPELL_CHARGING_UP_MAGIC                     = 108491,
+    SPELL_CHARGING_UP_EARTH                     = 108492,
+    SPELL_CHARGING_UP_TIME                      = 108493,
+    SPELL_CHARGING_UP_DREAMS                    = 108494,
+    SPELL_WARD_OF_TIME                          = 108160,
+    SPELL_WARD_OF_EARTH                         = 108161,
+    SPELL_WARD_OF_MAGIC                         = 108162,
+    SPELL_WARD_OF_LIFE                          = 108163,
+    SPELL_WARD_OF_DREAMS                        = 108164,
+
+    SPELL_TELEPORT_SINGLE_TO_DEATHWINGS_BACK    = 106054,
+    SPELL_DRAGON_SOUL_PARATROOPER_KIT_1         = 104953, // Swayze has it while jumping to spine of deathwing
+    SPELL_DRAGON_SOUL_PARATROOPER_KIT_2         = 105008, // Reevs has it while jumping to spine of deathwing
+
+    SPELL_PARACHUTE                             = 110660, // Used by players
+
+    SPELL_PLAY_MOVIE_DEATHWING_2                = 106085, // Movie before jumping at spine of deathwing
 };
 #endif
