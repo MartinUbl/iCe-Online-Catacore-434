@@ -160,6 +160,12 @@ public:
 
         void Reset()
         {
+            if (instance)
+            {
+                if (instance->GetData(TYPE_BOSS_ZONOZZ) != DONE)
+                    instance->SetData(TYPE_BOSS_ZONOZZ, NOT_STARTED);
+            }
+
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,10.0f);
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -239,6 +245,11 @@ public:
 
         void EnterCombat(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_BOSS_ZONOZZ, IN_PROGRESS);
+            }
+
             PlayQuote(aggroQuote.soundId, aggroQuote.text);
             if (instance)
                 me->MonsterYell("INSTANCE OK",0,0);
@@ -283,8 +294,13 @@ public:
             }
         }
 
-        void JustDied()
+        void JustDied(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_BOSS_ZONOZZ, DONE);
+            }
+
             PlayQuote(deathQuote.soundId, deathQuote.text);
             summons.DespawnAll();
         }

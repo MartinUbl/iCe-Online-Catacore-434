@@ -213,6 +213,12 @@ public:
 
         void Reset()
         {
+            if (instance)
+            {
+                if (instance->GetData(TYPE_BOSS_YORSAHJ) != DONE)
+                    instance->SetData(TYPE_BOSS_YORSAHJ, NOT_STARTED);
+            }
+
             forgottenCounter = 0;
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -284,6 +290,11 @@ public:
 
         void EnterCombat(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_BOSS_YORSAHJ, IN_PROGRESS);
+            }
+
             PlayQuoteAndWhisper(me, aggroQuote.soundId, aggroQuote.facelessText, aggroQuote.whisperText);
         }
 
@@ -301,8 +312,13 @@ public:
             PlayQuoteAndWhisper(me, killQuotes[randPos].soundId, killQuotes[randPos].facelessText, killQuotes[randPos].whisperText);
         }
 
-        void JustDied()
+        void JustDied(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_BOSS_YORSAHJ, DONE);
+            }
+
             summons.DespawnAll();
             PlayQuoteAndWhisper(me, deathQuote.soundId, deathQuote.facelessText, deathQuote.whisperText);
         }

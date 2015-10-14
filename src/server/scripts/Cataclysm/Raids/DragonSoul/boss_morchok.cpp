@@ -171,6 +171,12 @@ public:
 
         void Reset()
         {
+            if (instance)
+            {
+                if (instance->GetData(TYPE_BOSS_MORCHOK) != DONE)
+                    instance->SetData(TYPE_BOSS_MORCHOK, NOT_STARTED);
+            }
+
             bloodTicks = 0;
 
             crushArmorTimer = 6000;
@@ -268,6 +274,11 @@ public:
 
         void EnterCombat(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_BOSS_MORCHOK, IN_PROGRESS);
+            }
+
             PlayAndYell(aggroQuote.soundId, aggroQuote.text);
         }
 
@@ -287,8 +298,13 @@ public:
             }
         }
 
-        void JustDied()
+        void JustDied(Unit * /*who*/)
         {
+            if (instance)
+            {
+                instance->SetData(TYPE_BOSS_MORCHOK, DONE);
+            }
+
             uint32 randInt = urand(0, 1);
             PlayAndYell(deathQuotes[randInt].soundId, deathQuotes[randInt].text);
 
