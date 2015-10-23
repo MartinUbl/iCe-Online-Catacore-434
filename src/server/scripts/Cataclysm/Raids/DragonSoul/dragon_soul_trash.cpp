@@ -18,6 +18,151 @@
 #include "ScriptPCH.h"
 #include "dragonsoul.h"
 
+///////////////////////////
+///    Morchok stuff    ///
+///////////////////////////
+
+///////////////////////////
+///    Zonozz stuff     ///
+///////////////////////////
+
+///////////////////////////
+///    Yorsahj stuff    ///
+///////////////////////////
+
+///////////////////////////
+///    Hagara stuff     ///
+///////////////////////////
+
+///////////////////////////
+///   Ultraxion stuff   ///
+///////////////////////////
+
+///////////////////////////
+///   Blackhorn stuff   ///
+///////////////////////////
+
+///////////////////////////
+///     Spine stuff     ///
+///////////////////////////
+
+///////////////////////////
+///    Madness stuff    ///
+///////////////////////////
+
+////////////////////////////
+/// Other instance stuff ///
+////////////////////////////
+
+static const Position telePos[6] =
+{
+    {  -1779.50f,  -2393.43f,  45.61f, 3.20f }, // Wyrmrest Temple/Base
+    {  -1804.10f,  -2402.60f, 341.35f, 0.48f }, // Wyrmrest Summit
+    {  13629.35f,  13612.09f, 123.49f, 3.14f }, // Hagara
+    {  13444.90f, -12133.30f, 151.21f, 0.00f }, // Skifire (Ship)
+    { -13852.50f, -13665.38f, 297.37f, 1.53f }, // Spine of Deathwing
+    { -12081.39f,  12160.05f,  30.60f, 6.03f }, // Madness of Deathwing
+};
+
+class go_ds_instance_teleporter : public GameObjectScript
+{
+public:
+    go_ds_instance_teleporter() : GameObjectScript("go_ds_instance_teleporter") { }
+
+    bool OnGossipHello(Player* pPlayer, GameObject* pGameObject)
+    {
+        if (InstanceScript* pInstance = pGameObject->GetInstanceScript())
+        {
+            // Disable teleport if encounter in progress
+            for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+            {
+                if (pInstance->GetData(i) == IN_PROGRESS)
+                    return true;
+            }
+
+            switch (pGameObject->GetEntry())
+            {
+                // Base Teleporter near Entrance
+            case GO_TRAVEL_TO_WYRMREST_TEMPLE:
+                if (pInstance->GetData(TYPE_BOSS_SPINE_OF_DEATHWING) == DONE)
+                    pPlayer->NearTeleportTo(telePos[5].GetPositionX(), telePos[5].GetPositionY(), telePos[5].GetPositionZ(), telePos[5].GetOrientation());
+                else if (pInstance->GetData(TYPE_BOSS_BLACKHORN) == DONE || pInstance->GetData(TYPE_BOSS_ULTRAXION) == DONE)
+                    pPlayer->NearTeleportTo(telePos[3].GetPositionX(), telePos[3].GetPositionY(), telePos[3].GetPositionZ(), telePos[3].GetOrientation());
+                else if (pInstance->GetData(TYPE_BOSS_HAGARA) == DONE
+                    || (pInstance->GetData(TYPE_BOSS_ZONOZZ) == DONE && pInstance->GetData(TYPE_BOSS_YORSAHJ) == DONE))
+                    pPlayer->NearTeleportTo(telePos[1].GetPositionX(), telePos[1].GetPositionY(), telePos[1].GetPositionZ(), telePos[1].GetOrientation());
+                else if (pInstance->GetData(TYPE_BOSS_MORCHOK) == DONE)
+                    pPlayer->NearTeleportTo(telePos[0].GetPositionX(), telePos[0].GetPositionY(), telePos[0].GetPositionZ(), telePos[0].GetOrientation());
+                break;
+                // Zonozz and Yorsahj teleport back to wyrmrest temple
+            case GO_TRAVEL_TO_WYRMREST_BASE:
+                pPlayer->NearTeleportTo(telePos[0].GetPositionX(), telePos[0].GetPositionY(), telePos[0].GetPositionZ(), telePos[0].GetOrientation());
+                break;
+                // Hagara back teleporter
+            case GO_TRAVEL_TO_WYRMREST_SUMMIT:
+                pPlayer->NearTeleportTo(telePos[1].GetPositionX(), telePos[1].GetPositionY(), telePos[1].GetPositionZ(), telePos[1].GetOrientation());
+                break;
+                // Hagara teleporter
+            case GO_TRAVEL_TO_EYE_OF_ETERNITY:
+                if (pInstance->GetData(TYPE_BOSS_ZONOZZ) == DONE)
+                    pPlayer->NearTeleportTo(telePos[2].GetPositionX(), telePos[2].GetPositionY(), telePos[2].GetPositionZ(), telePos[2].GetOrientation());
+                break;
+                // Skifire teleporter
+            case GO_TRAVEL_TO_DECK:
+                if (pInstance->GetData(TYPE_BOSS_ULTRAXION) == DONE)
+                    pPlayer->NearTeleportTo(telePos[3].GetPositionX(), telePos[3].GetPositionY(), telePos[3].GetPositionZ(), telePos[3].GetOrientation());
+                break;
+                // Maelstrom teleporter
+            case GO_TRAVEL_TO_MAELSTROM:
+                if (pInstance->GetData(TYPE_BOSS_SPINE_OF_DEATHWING) == DONE)
+                    pPlayer->NearTeleportTo(telePos[6].GetPositionX(), telePos[6].GetPositionY(), telePos[6].GetPositionZ(), telePos[6].GetOrientation());
+                break;
+            default:
+                break;
+            }
+
+        }
+        return true;
+    }
+};
+
+class npc_ds_instance_teleporter : public CreatureScript
+{
+public:
+    npc_ds_instance_teleporter() : CreatureScript("npc_ds_instance_teleporter") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_instance_teleporterAI(pCreature);
+    }
+
+    struct npc_ds_instance_teleporterAI : public ScriptedAI
+    {
+        npc_ds_instance_teleporterAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+
+            if (instance && !(instance->GetData(TYPE_BOSS_MORCHOK) == DONE))
+                me->SetVisible(false);
+            if (instance && (instance->GetData(TYPE_BOSS_HAGARA) == DONE) && (me->GetEntry() == NPC_TRAVEL_TO_EYE_OF_ETERNITY))
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
+
+        InstanceScript * instance;
+
+        void SpellHit(Unit* /*caster*/, SpellEntry const* spell) override
+        {
+            if (spell->Id == SPELL_OPEN_EYE_OF_ETERNITY_PORTAL)
+            {
+                me->SetVisible(true);
+                me->SummonGameObject(GO_TRAVEL_TO_EYE_OF_ETERNITY, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() - 3, me->GetOrientation(), 0, 0, 0, 0, 604800);
+            }
+        }
+    };
+};
+
 void AddSC_dragon_soul_trash()
 {
+    new npc_ds_instance_teleporter();
+    new go_ds_instance_teleporter();
 }

@@ -46,6 +46,7 @@ public:
         uint64 yseraDragonGuid;
         uint64 kalecgosDragonGuid;
 
+        std::vector<uint64> teleportGUIDs;
         std::string saveData;
 
         void Initialize()
@@ -66,6 +67,8 @@ public:
             kalecgosDragonGuid      = 0;
 
             heroicKills             = 0;
+
+            teleportGUIDs.clear();
         }
 
         std::string GetSaveData()
@@ -140,6 +143,17 @@ public:
             case 56173: // Madness of Deathwing
                 deathwingMadnessGuid = pCreature->GetGUID();
                 break;
+            case NPC_TRAVEL_TO_WYRMREST_TEMPLE:
+            case NPC_TRAVEL_TO_WYRMREST_BASE:
+            case NPC_TRAVEL_TO_WYRMREST_SUMMIT:
+            case NPC_TRAVEL_TO_EYE_OF_ETERNITY:
+            case NPC_TRAVEL_TO_DECK:
+            case NPC_TRAVEL_TO_MAELSTORM:
+            case NPC_ANDORGOS:
+                teleportGUIDs.push_back(pCreature->GetGUID());
+                break;
+            default:
+                break;
             }
         }
 
@@ -201,8 +215,119 @@ public:
                 m_auiEncounter[type] = data;
 
             if (data == DONE)
+            {
                 if (this->instance->IsHeroic())
                     heroicKills++;
+
+                if (type == TYPE_BOSS_MORCHOK)
+                {
+                    if (!teleportGUIDs.empty())
+                    {
+                        for (std::vector<uint64>::const_iterator itr = teleportGUIDs.begin(); itr != teleportGUIDs.end(); ++itr)
+                        {
+                            if (Creature* pTeleport = instance->GetCreature((*itr)))
+                            {
+                                if (pTeleport->GetEntry() != NPC_TRAVEL_TO_EYE_OF_ETERNITY)
+                                    pTeleport->SetVisible(true);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (data == IN_PROGRESS)
+            {
+                if (!teleportGUIDs.empty())
+                {
+                    for (std::vector<uint64>::const_iterator itr = teleportGUIDs.begin(); itr != teleportGUIDs.end(); ++itr)
+                    {
+                        if (Creature* pTeleport = instance->GetCreature((*itr)))
+                        {
+                            if (pTeleport->HasAura(SPELL_TELEPORT_VISUAL_ACTIVE))
+                                pTeleport->RemoveAura(SPELL_TELEPORT_VISUAL_ACTIVE);
+                            if (pTeleport->GetEntry() != NPC_ANDORGOS)
+                            {
+                                pTeleport->CastSpell(pTeleport, SPELL_TELEPORT_VISUAL_DISABLED, true);
+                                if (pTeleport->GetEntry() != NPC_TRAVEL_TO_EYE_OF_ETERNITY || GetData(TYPE_BOSS_HAGARA) == DONE)
+                                {
+                                    uint32 gameObjectId;
+                                    switch (pTeleport->GetEntry())
+                                    {
+                                    case NPC_TRAVEL_TO_WYRMREST_BASE:
+                                        gameObjectId = GO_TRAVEL_TO_WYRMREST_BASE;
+                                        break;
+                                    case NPC_TRAVEL_TO_WYRMREST_TEMPLE:
+                                        gameObjectId = GO_TRAVEL_TO_WYRMREST_TEMPLE;
+                                        break;
+                                    case NPC_TRAVEL_TO_WYRMREST_SUMMIT:
+                                        gameObjectId = GO_TRAVEL_TO_WYRMREST_SUMMIT;
+                                        break;
+                                    case NPC_TRAVEL_TO_EYE_OF_ETERNITY:
+                                        gameObjectId = GO_TRAVEL_TO_EYE_OF_ETERNITY;
+                                        break;
+                                    case NPC_TRAVEL_TO_DECK:
+                                        gameObjectId = GO_TRAVEL_TO_DECK;
+                                        break;
+                                    case NPC_TRAVEL_TO_MAELSTORM:
+                                        gameObjectId = GO_TRAVEL_TO_MAELSTROM;
+                                        break;
+                                    default:
+                                        break;
+                                    }
+                                    if (GameObject * pGoTeleport = pTeleport->FindNearestGameObject(gameObjectId, 5.0f))
+                                        pGoTeleport->Delete();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (!teleportGUIDs.empty())
+                {
+                    for (std::vector<uint64>::const_iterator itr = teleportGUIDs.begin(); itr != teleportGUIDs.end(); ++itr)
+                    {
+                        if (Creature* pTeleport = instance->GetCreature((*itr)))
+                        {
+                            if (pTeleport->HasAura(SPELL_TELEPORT_VISUAL_DISABLED))
+                                pTeleport->RemoveAura(SPELL_TELEPORT_VISUAL_DISABLED);
+                            if (pTeleport->GetEntry() != NPC_ANDORGOS)
+                            {
+                                pTeleport->CastSpell(pTeleport, SPELL_TELEPORT_VISUAL_ACTIVE, true);
+                                if (pTeleport->GetVisibility() == VISIBILITY_ON)
+                                {
+                                    uint32 gameObjectId;
+                                    switch (pTeleport->GetEntry())
+                                    {
+                                    case NPC_TRAVEL_TO_WYRMREST_BASE:
+                                        gameObjectId = GO_TRAVEL_TO_WYRMREST_BASE;
+                                        break;
+                                    case NPC_TRAVEL_TO_WYRMREST_TEMPLE:
+                                        gameObjectId = GO_TRAVEL_TO_WYRMREST_TEMPLE;
+                                        break;
+                                    case NPC_TRAVEL_TO_WYRMREST_SUMMIT:
+                                        gameObjectId = GO_TRAVEL_TO_WYRMREST_SUMMIT;
+                                        break;
+                                    case NPC_TRAVEL_TO_EYE_OF_ETERNITY:
+                                        gameObjectId = GO_TRAVEL_TO_EYE_OF_ETERNITY;
+                                        break;
+                                    case NPC_TRAVEL_TO_DECK:
+                                        gameObjectId = GO_TRAVEL_TO_DECK;
+                                        break;
+                                    case NPC_TRAVEL_TO_MAELSTORM:
+                                        gameObjectId = GO_TRAVEL_TO_MAELSTROM;
+                                        break;
+                                    default:
+                                        break;
+                                    }
+                                    pTeleport->SummonGameObject(gameObjectId, pTeleport->GetPositionX(), pTeleport->GetPositionY(), pTeleport->GetPositionZ() - 3, pTeleport->GetOrientation(), 0, 0, 0, 0, 604800);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             if (data == DONE)
             {
