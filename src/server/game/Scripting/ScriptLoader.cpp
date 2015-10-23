@@ -1052,6 +1052,7 @@ void AddSC_boss_ragnaros_fl();
 // Dragon Soul - 85
 void AddSC_instance_dragonsoul();
 void AddSC_dragon_soul_trash();
+void AddSC_dragon_soul_aspects();
 void AddSC_boss_morchok();
 void AddSC_boss_warlord_zonozz();
 void AddSC_boss_yorsahj_the_unsleeping();
@@ -2029,6 +2030,7 @@ void AddCataclysmScripts()
     // Dragon Soul
     AddSC_instance_dragonsoul();
     AddSC_dragon_soul_trash();
+    AddSC_dragon_soul_aspects();
     AddSC_boss_morchok();
     AddSC_boss_warlord_zonozz();
     AddSC_boss_yorsahj_the_unsleeping();

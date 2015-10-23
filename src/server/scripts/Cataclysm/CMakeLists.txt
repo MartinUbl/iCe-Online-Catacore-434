@@ -193,6 +193,7 @@ set(SC_Cata_DS
   Cataclysm/Raids/DragonSoul/boss_warlord_zonozz.cpp
   Cataclysm/Raids/DragonSoul/boss_warmaster_blackhorn.cpp
   Cataclysm/Raids/DragonSoul/boss_yorsahj_the_unsleeping.cpp
+  Cataclysm/Raids/DragonSoul/dragon_soul_aspects.cpp
   Cataclysm/Raids/DragonSoul/dragon_soul_trash.cpp
   Cataclysm/Raids/DragonSoul/dragonsoul.h
   Cataclysm/Raids/DragonSoul/instance_dragonsoul.cpp)
