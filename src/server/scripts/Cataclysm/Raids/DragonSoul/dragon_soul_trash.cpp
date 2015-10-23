@@ -17,6 +17,7 @@
 
 #include "ScriptPCH.h"
 #include "dragonsoul.h"
+#include "TaskScheduler.h"
 
 ///////////////////////////
 ///    Morchok stuff    ///
@@ -161,8 +162,165 @@ public:
     };
 };
 
+#define GOSSIP_GUNSHIP_READY                       "We are the Alliance. We are always ready."
+#define GOSSIP_START_BLACKHORN_ENCOUNTER           "Bring us in closer!"
+#define GOSSIP_SPINE_OF_DEATHWING                  "JUSTICE AND GLORY!"
+
+enum SkyfireNpc
+{
+    NPC_BOSS_BLACKHORN                  = 56427,
+};
+
+enum gunshipActions
+{
+    ACTION_READY_TO_FOLLOW_DEATHWING    = 0,
+    ACTION_START_BLACKHORN_ENCOUNTER    = 1,
+    ACTION_SPINE_OF_DEATHWING           = 2,
+};
+
+class npc_ds_alliance_ship_crew : public CreatureScript
+{
+public:
+    npc_ds_alliance_ship_crew() : CreatureScript("npc_ds_alliance_ship_crew") { }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        if (pCreature->IsQuestGiver())
+            pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+        if (pCreature->GetInstanceScript()->GetData(TYPE_BOSS_BLACKHORN) == DONE)
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SPINE_OF_DEATHWING, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+        }
+        else if (Creature * pBlackhorn = pCreature->FindNearestCreature(NPC_BOSS_BLACKHORN, 200.0f, true))
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_BLACKHORN_ENCOUNTER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        }
+        else if (pCreature->GetInstanceScript()->GetData(DATA_ASPECTS_PREPARE_TO_CHANNEL) == 3)
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_GUNSHIP_READY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+        pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            if (pCreature->GetInstanceScript()->GetData(DATA_ASPECTS_PREPARE_TO_CHANNEL) == 3)
+                pCreature->AI()->DoAction(ACTION_READY_TO_FOLLOW_DEATHWING);
+            else
+                pPlayer->NearTeleportTo(telePos[3].GetPositionX(), telePos[3].GetPositionY(), telePos[3].GetPositionZ(), telePos[3].GetOrientation());
+        }
+        else if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
+        {
+            pCreature->AI()->DoAction(ACTION_START_BLACKHORN_ENCOUNTER);
+        }
+        else if (uiAction == GOSSIP_ACTION_AUCTION + 3)
+        {
+            pCreature->AI()->DoAction(ACTION_SPINE_OF_DEATHWING);
+        }
+        pPlayer->CLOSE_GOSSIP_MENU();
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_alliance_ship_crewAI(pCreature);
+    }
+
+    struct npc_ds_alliance_ship_crewAI : public ScriptedAI
+    {
+        npc_ds_alliance_ship_crewAI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+
+            if (instance && instance->GetData(TYPE_BOSS_ULTRAXION) != DONE)
+                me->SetVisible(false);
+        }
+
+        InstanceScript * instance;
+        TaskScheduler scheduler;
+
+        void Reset() override
+        {
+            if (me->GetEntry() == NPC_SKY_CAPTAIN_SWAYZE)
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        }
+
+        void TeleportAllPlayers(uint32 action, bool withParachute)
+        {
+            Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+            for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+            {
+                if (Player* player = i->getSource())
+                {
+                    if (!player->IsGameMaster())
+                    {
+                        if (action == ACTION_READY_TO_FOLLOW_DEATHWING)
+                            player->NearTeleportTo(telePos[3].GetPositionX(), telePos[3].GetPositionY(), telePos[3].GetPositionZ(), telePos[3].GetOrientation());
+                        else if (action == ACTION_SPINE_OF_DEATHWING)
+                            player->NearTeleportTo(telePos[3].GetPositionX(), telePos[3].GetPositionY(), telePos[3].GetPositionZ(), telePos[3].GetOrientation());
+
+                        if (withParachute == true)
+                            player->AddAura(SPELL_PARACHUTE, player);
+                    }
+                }
+            }
+        }
+
+        void PlayMovieToPlayers(uint32 movieId)
+        {
+            if (!instance)
+                return;
+
+            Map::PlayerList const& plList = instance->instance->GetPlayers();
+            if (plList.isEmpty())
+                return;
+
+            for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+            {
+                if (Player * pPlayer = itr->getSource())
+                    pPlayer->SendMovieStart(movieId);
+            }
+        }
+
+        void DoAction(const int32 action) override
+        {
+            if (instance)
+            {
+                if (action == ACTION_READY_TO_FOLLOW_DEATHWING)
+                {
+                    TeleportAllPlayers(action, false);
+                    instance->SetData(DATA_ASPECTS_PREPARE_TO_CHANNEL, 4);
+                }
+                else if (action == ACTION_START_BLACKHORN_ENCOUNTER)
+                {
+                    instance->SetData(DATA_START_BLACKHORN_ENCOUNTER, 0);
+                }
+                else if (action == ACTION_SPINE_OF_DEATHWING)
+                {
+                    //PlayMovieToPlayers(ID);
+                    scheduler.Schedule(Seconds(11), [this](TaskContext /*Show Movie and teleport to Spine of Deathwing*/)
+                    {
+                        TeleportAllPlayers(ACTION_SPINE_OF_DEATHWING, true);
+                    });
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            scheduler.Update(diff);
+        }
+    };
+};
+
 void AddSC_dragon_soul_trash()
 {
     new npc_ds_instance_teleporter();
     new go_ds_instance_teleporter();
+    new npc_ds_alliance_ship_crew();
 }

@@ -46,6 +46,8 @@ public:
         uint64 yseraDragonGuid;
         uint64 kalecgosDragonGuid;
 
+        uint64 allianceShipGuid;
+
         std::vector<uint64> teleportGUIDs;
         std::string saveData;
 
@@ -65,6 +67,8 @@ public:
             nozdormuDragonGuid      = 0;
             yseraDragonGuid         = 0;
             kalecgosDragonGuid      = 0;
+
+            allianceShipGuid        = 0;
 
             heroicKills             = 0;
 
@@ -161,6 +165,16 @@ public:
         {
             if (add == false)
                 return;
+
+            if (go->GetEntry() == GO_ALLIANCE_SHIP)
+            {
+                allianceShipGuid = go->GetGUID();
+                if (GetData(TYPE_BOSS_ULTRAXION) == DONE)
+                    go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+                else
+                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+                go->UpdateObjectVisibility();
+            }
         }
 
         uint64 GetData64(uint32 type)
