@@ -35,6 +35,17 @@ enum Encounters
 enum AdditionalEvents
 {
     DATA_HEROIC_KILLS                   = 9,
+
+    DATA_PLAYERS_SUMMIT_ARRIVAL         = 10,
+    DATA_START_ULTRAXION_ASPECTS_EVENT  = 11,
+    DATA_ASPECTS_PREPARE_TO_CHANNEL     = 12,
+    DATA_CHANNEL_DRAGONSOUL             = 13,
+    DATA_DEATHWING_GREETINGS            = 14,
+    DATA_ULTRAXION_DRAKES               = 15,
+    DATA_SUMMON_ULTRAXION               = 16,
+    DATA_HELP_AGAINST_ULTRAXION         = 17,
+    DATA_ULTRAXION_DEFEATED             = 18,
+    DATA_START_BLACKHORN_ENCOUNTER      = 19,
 };
 
 enum AchievEvents
@@ -48,13 +59,7 @@ enum DragonsoulCreatureIds
     NPC_EIENDORMI                       = 57288, // Travel to Yor'sahj
     NPC_NETHESTRASZ                     = 57287, // Travel at the top of the Wyrmrest Temple
 
-    NPC_TRAVEL_TO_WYRMREST_TEMPLE       = 57328, //
-    NPC_TRAVEL_TO_WYRMREST_BASE         = 57882, //
-    NPC_TRAVEL_TO_WYRMREST_SUMMIT       = 57379, // Teleport at the top of the Wyrmrest Temple
-    NPC_TRAVEL_TO_EYE_OF_ETERNITY       = 57377, // Teleport to Hagara
-    NPC_TRAVEL_TO_MAELSTORM             = 57443, // Teleport to Madness of Deathwing
-    NPC_TRAVEL_TO_DECK                  = 57378, // Teleport to Aliance Ship
-
+    // Dragon Soul
     NPC_THE_DRAGON_SOUL                 = 56668, // Ultraxion - Top of the Wyrmrest Temple
     NPC_THE_DRAGON_SOUL_SPINE           = 56694, // After spine
 
@@ -64,7 +69,7 @@ enum DragonsoulCreatureIds
     NPC_THRALL_MADNESS                  = 58232, // After killing Madness of Deathwing - outro
 
     // Aspects
-    NPC_ALEXTRASZA_THE_LIFE_BINDER      = 56630, // Ultraxion - Top of the Wyrmrest Temple
+    NPC_ALEXSTRASZA_THE_LIFE_BINDER     = 56630, // Ultraxion - Top of the Wyrmrest Temple
     NPC_ALEXSTRASZA_DRAGON_FORM         = 56099, // Madness of Deathwing - 1st platform
     NPC_ALEXSTRASZA_MADNESS             = 58207, // After killing Madness of Deathwing - outro
 
@@ -79,30 +84,43 @@ enum DragonsoulCreatureIds
     NPC_KALECGOS                        = 56664, // Ultraxion - Top of the Wyrmrest Temple
     NPC_KALECGOS_DRAGON_FORM            = 56101, // Madness of Deathwing - 4th platform
     NPC_KALECGOS_MADNESS                = 58210, // After killing Madness of Deathwing - outro
+
+    NPC_TRAVEL_TO_WYRMREST_TEMPLE       = 57328,
+    NPC_TRAVEL_TO_WYRMREST_BASE         = 57882,
+    NPC_TRAVEL_TO_WYRMREST_SUMMIT       = 57379, // Teleport at the top of the Wyrmrest Temple
+    NPC_TRAVEL_TO_EYE_OF_ETERNITY       = 57377, // Teleport to Hagara
+    NPC_TRAVEL_TO_DECK                  = 57378, // Teleport to Aliance Ship
+    NPC_TRAVEL_TO_MAELSTORM             = 57443, // Teleport to Madness of Deathwing
+    NPC_ANDORGOS                        = 15502,
+
+    NPC_SKY_CAPTAIN_SWAYZE              = 55870,
+    NPC_KAANU_REEVS                     = 55891,
+
+    NPC_DEATHWING_WYRMREST_TEMPLE       = 55971,
+    NPC_TWILIGHT_ASSAULTER              = 56252,
+    NPC_TWILIGHT_ASSAULTERESS           = 56250,
 };
 
 enum SharedSpells
 {
     SPELL_TELEPORT_VISUAL_ACTIVE                = 108203,
     SPELL_TELEPORT_VISUAL_DISABLED              = 108227,
-
-    SPELL_CHARGING_UP_LIFE                      = 108490,
-    SPELL_CHARGING_UP_MAGIC                     = 108491,
-    SPELL_CHARGING_UP_EARTH                     = 108492,
-    SPELL_CHARGING_UP_TIME                      = 108493,
-    SPELL_CHARGING_UP_DREAMS                    = 108494,
-    SPELL_WARD_OF_TIME                          = 108160,
-    SPELL_WARD_OF_EARTH                         = 108161,
-    SPELL_WARD_OF_MAGIC                         = 108162,
-    SPELL_WARD_OF_LIFE                          = 108163,
-    SPELL_WARD_OF_DREAMS                        = 108164,
-
-    SPELL_TELEPORT_SINGLE_TO_DEATHWINGS_BACK    = 106054,
+    SPELL_OPEN_EYE_OF_ETERNITY_PORTAL           = 109527,
     SPELL_DRAGON_SOUL_PARATROOPER_KIT_1         = 104953, // Swayze has it while jumping to spine of deathwing
     SPELL_DRAGON_SOUL_PARATROOPER_KIT_2         = 105008, // Reevs has it while jumping to spine of deathwing
-
     SPELL_PARACHUTE                             = 110660, // Used by players
+};
 
-    SPELL_PLAY_MOVIE_DEATHWING_2                = 106085, // Movie before jumping at spine of deathwing
+enum DragonsoulGameobjectsId
+{
+    GO_ALLIANCE_SHIP                    = 210081,
+    GO_ALLIANCE_SHIP2                   = 210083,
+    GO_HORDE_SHIP                       = 210082,
+    GO_TRAVEL_TO_WYRMREST_TEMPLE        = 210085,
+    GO_TRAVEL_TO_WYRMREST_BASE          = 210086,
+    GO_TRAVEL_TO_WYRMREST_SUMMIT        = 210087,
+    GO_TRAVEL_TO_EYE_OF_ETERNITY        = 210088,
+    GO_TRAVEL_TO_DECK                   = 210089,
+    GO_TRAVEL_TO_MAELSTROM              = 210090,
 };
 #endif
