@@ -139,7 +139,7 @@ struct Condition
     bool isLoaded() const { return mConditionType > CONDITION_NONE || mReferenceId; }
 };
 
-typedef std::list<Condition*> ConditionList;
+typedef std::vector<Condition*> ConditionList;
 typedef std::map<uint32, ConditionList > ConditionTypeMap;
 typedef std::map<ConditionSourceType, ConditionTypeMap > ConditionMap;
 typedef std::map<uint32, ConditionTypeMap > VehicleSpellConditionMap;
