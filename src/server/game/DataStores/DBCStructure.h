@@ -2704,7 +2704,7 @@ struct SpellEffect
         effects[1] = NULL;
         effects[2] = NULL;
     }
-    SpellEffectEntry const* effects[3];
+    SpellEffectEntry const* effects[MAX_SPELL_EFFECTS];
 };
 
 typedef std::map<uint32, SpellEffect> SpellEffectMap;
