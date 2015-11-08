@@ -4948,6 +4948,106 @@ public:
     //INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES ('80004', 'Pet was succesfuly recovered.');
 };
 
+// QUEST A HIDDEN MESSAGE
+enum npc_altha_and_rafir_stuff
+{
+    QUEST_A_HIDDEN_MESSAGE          = 29802,
+
+    ITEM_CRYPTOMANCERS_DECODER_RING = 74256,
+    ITEM_CHARGING_DECODER_RING      = 74749,
+    ITEM_SINGED_CIPHER              = 74750,
+};
+
+#define THAUMATURGE_TEXT_ID_1 800
+#define THAUMATURGE_TEXT_ID_2 801
+#define THAUMATURGE_TEXT_ID_3 802
+#define THAUMATURGE_GOSSIP_1 "Can you charge my Cryptomancer's Decoder Ring?"
+#define THAUMATURGE_GOSSIP_2 "<Pay the 10.000 gold.>"
+#define THAUMATURGE_GOSSIP_3 "Ten thousand?! Outrageous! I'll kill you while you sleep!"
+
+class npc_thaumaturge_altha_and_rafir : public CreatureScript
+{
+public:
+    npc_thaumaturge_altha_and_rafir() : CreatureScript("npc_thaumaturge_altha_and_rafir") { }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {
+        if (pCreature->IsQuestGiver())
+            pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+        if (pPlayer->GetQuestStatus(QUEST_A_HIDDEN_MESSAGE) == QUEST_STATUS_INCOMPLETE)
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, THAUMATURGE_GOSSIP_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            pPlayer->SEND_GOSSIP_MENU(THAUMATURGE_TEXT_ID_1, pCreature->GetGUID());
+        }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            pPlayer->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_CHAT, THAUMATURGE_GOSSIP_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2, "Are you sure you want to pay?", 10000 * GOLD, 0);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, THAUMATURGE_GOSSIP_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+            pPlayer->SEND_GOSSIP_MENU(THAUMATURGE_TEXT_ID_2, pCreature->GetGUID());
+        }
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
+        {
+            if (pPlayer->GetItemCount(ITEM_CRYPTOMANCERS_DECODER_RING, false) == 1 && pPlayer->GetMoney() > 10000 * GOLD)
+            {
+                pPlayer->DestroyItemCount(ITEM_CRYPTOMANCERS_DECODER_RING, 1, true, true);
+                pPlayer->ModifyMoney(-10000 * GOLD);
+                pPlayer->AddItem(ITEM_CHARGING_DECODER_RING, 1);
+                pCreature->MonsterSay("Very good! Remember, your ring will not reach its full charge for many hours.", LANG_UNIVERSAL, 0);
+                pPlayer->CLOSE_GOSSIP_MENU();
+            }
+            else
+            {
+                if (pPlayer->GetSession())
+                    pPlayer->GetSession()->SendNotification("You don't have Cryptomancer's Ring or enough money!");
+                pPlayer->CLOSE_GOSSIP_MENU();
+            }
+        }
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 3)
+        {
+            pPlayer->SEND_GOSSIP_MENU(THAUMATURGE_TEXT_ID_3, pCreature->GetGUID());
+        }
+        return true;
+    }
+};
+
+class npc_corastrasza_rogue_quest : public CreatureScript
+{
+public:
+    npc_corastrasza_rogue_quest() : CreatureScript("npc_corastrasza_rogue_quest") { }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {
+        if (pCreature->IsQuestGiver())
+            pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+        if (pPlayer->GetQuestStatus(QUEST_A_HIDDEN_MESSAGE) == QUEST_STATUS_INCOMPLETE)
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Lord Afrasastrasz sent me. He said you have a message to decode?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
+        }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            pPlayer->AddItem(ITEM_SINGED_CIPHER, 1);
+            pPlayer->AddQuestObjectiveProgress(QUEST_A_HIDDEN_MESSAGE, 1, 1);
+            pCreature->MonsterSay("Here's what's left of the message we found. Can you make any sense of it?", LANG_UNIVERSAL, 0);
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+        return true;
+    }
+};
 
 void AddSC_npcs_special()
 {
@@ -5006,4 +5106,6 @@ void AddSC_npcs_special()
     new npc_fiery_imp;
     new npc_raid_marker;
     new npc_pet_repairer;
+    new npc_thaumaturge_altha_and_rafir;
+    new npc_corastrasza_rogue_quest;
 }

@@ -532,6 +532,23 @@ public:
     }
 };
 
+/*#####
+# item_charging_decoder_ring
+#####*/
+
+class item_charging_decoder_ring : public ItemScript
+{
+public:
+    item_charging_decoder_ring() : ItemScript("item_charging_decoder_ring") {}
+
+    bool OnExpire(Player *pPlayer, ItemPrototype const * /*pItemProto*/)
+    {
+        pPlayer->AddQuestObjectiveProgress(29802, 0, 1); // quest Hidden message - 1st objective
+        pPlayer->AddItem(74748, 1); // item_charged_decoder_ring
+        return true;
+    }
+};
+
 void AddSC_item_scripts()
 {
     new item_only_for_flight;
@@ -549,4 +566,5 @@ void AddSC_item_scripts()
     new item_trident_of_nazjan;
     new item_captured_frog();
     new item_tiki_torch();
+    new item_charging_decoder_ring;
 }
