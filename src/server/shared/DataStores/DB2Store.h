@@ -37,6 +37,7 @@ template<class T>
 class DB2Storage
 {
     typedef std::list<char*> StringPoolList;
+    typedef std::vector<T*> DataTableEx;
 public:
     explicit DB2Storage(const char *f) : nCount(0), fieldCount(0), fmt(f), indexTable(NULL), m_dataTable(NULL) { }
     ~DB2Storage() { Clear(); }
@@ -45,6 +46,31 @@ public:
     uint32  GetNumRows() const { return nCount; }
     char const* GetFormat() const { return fmt; }
     uint32 GetFieldCount() const { return fieldCount; }
+
+    /// Copies the provided entry and stores it.
+    T* CreateEntry(uint32 id, bool evenIfExists = false)
+    {
+        if (evenIfExists && LookupEntry(id))
+            return NULL;
+
+        if (id >= nCount)
+        {
+            // reallocate index table
+            char** tmpIdxTable = new char*[id + 1];
+            memset(tmpIdxTable, 0, (id + 1) * sizeof(char*));
+            memcpy(tmpIdxTable, (char*)indexTable, nCount * sizeof(char*));
+            delete[]((char*)indexTable);
+            nCount = id + 1;
+            indexTable = (T**)tmpIdxTable;
+        }
+
+        T* entryDst = new T;
+        m_dataTableEx.push_back(entryDst);
+        indexTable[id] = entryDst;
+        return entryDst;
+    }
+
+    void EraseEntry(uint32 id) { indexTable[id] = NULL; }
 
     bool Load(char const* fn)
     {
@@ -95,6 +121,10 @@ public:
         delete[] ((char*)m_dataTable);
         m_dataTable = NULL;
 
+        for (typename DataTableEx::iterator itr = m_dataTableEx.begin(); itr != m_dataTableEx.end(); ++itr)
+            delete *itr;
+        m_dataTableEx.clear();
+
         while(!m_stringPoolList.empty())
         {
             delete[] m_stringPoolList.front();
@@ -103,16 +133,13 @@ public:
         nCount = 0;
     }
 
-    void EraseEntry(uint32 id) { indexTable[id] = NULL; }
-
-    void SetEntry(uint32 id, T* record) { indexTable[id] = record; }
-
 private:
     uint32 nCount;
     uint32 fieldCount;
     char const* fmt;
     T** indexTable;
     T* m_dataTable;
+    DataTableEx m_dataTableEx;
     StringPoolList m_stringPoolList;
 };
 

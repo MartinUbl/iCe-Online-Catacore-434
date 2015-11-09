@@ -135,49 +135,39 @@ void LoadDB2Stores(const std::string& dataPath)
     // initialize
 
     // head
-    ItemExtendedCostEntry* a = new ItemExtendedCostEntry;
-    memset(a, 0, sizeof(ItemExtendedCostEntry));
+    ItemExtendedCostEntry* a = sItemExtendedCostStore.CreateEntry(78);
+    *a = ItemExtendedCostEntry();
     a->ID = 78;
     a->RequiredCurrency[0] = 390;
     a->RequiredCurrencyCount[0] = 165000;
-    // insert
-    sItemExtendedCostStore.SetEntry(a->ID, a);
 
     // shoulders
-    a = new ItemExtendedCostEntry;
-    memset(a, 0, sizeof(ItemExtendedCostEntry));
+    a = sItemExtendedCostStore.CreateEntry(79);
+    *a = ItemExtendedCostEntry();
     a->ID = 79;
     a->RequiredCurrency[0] = 390;
     a->RequiredCurrencyCount[0] = 220000;
-    // insert
-    sItemExtendedCostStore.SetEntry(a->ID, a);
 
     // chest
-    a = new ItemExtendedCostEntry;
-    memset(a, 0, sizeof(ItemExtendedCostEntry));
+    a = sItemExtendedCostStore.CreateEntry(80);
+    *a = ItemExtendedCostEntry();
     a->ID = 80;
     a->RequiredCurrency[0] = 390;
     a->RequiredCurrencyCount[0] = 220000;
-    // insert
-    sItemExtendedCostStore.SetEntry(a->ID, a);
 
     // legs
-    a = new ItemExtendedCostEntry;
-    memset(a, 0, sizeof(ItemExtendedCostEntry));
+    a = sItemExtendedCostStore.CreateEntry(81);
+    *a = ItemExtendedCostEntry();
     a->ID = 81;
     a->RequiredCurrency[0] = 390;
     a->RequiredCurrencyCount[0] = 220000;
-    // insert
-    sItemExtendedCostStore.SetEntry(a->ID, a);
 
     // hands
-    a = new ItemExtendedCostEntry;
-    memset(a, 0, sizeof(ItemExtendedCostEntry));
+    a = sItemExtendedCostStore.CreateEntry(82);
+    *a = ItemExtendedCostEntry();
     a->ID = 82;
     a->RequiredCurrency[0] = 390;
     a->RequiredCurrencyCount[0] = 165000;
-    // insert
-    sItemExtendedCostStore.SetEntry(a->ID, a);
 
     sLog->outString(">> Custom entries successfully loaded.");
     sLog->outString();
