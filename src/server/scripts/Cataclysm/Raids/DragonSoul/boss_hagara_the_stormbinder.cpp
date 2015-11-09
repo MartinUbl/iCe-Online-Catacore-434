@@ -34,7 +34,6 @@ TO DO:
 
 /*
 TO DO: Add correct sounds to spells
-26251, 10, "VO_DS_HAGARA_INTRO_01", "vo_ds_hagara_intro_01.ogg"
 26252, 10, "VO_DS_HAGARA_LIGHTNING_01", "vo_ds_hagara_lightning_01.ogg"
 26253, 10, "VO_DS_HAGARA_LIGHTNING_02", "vo_ds_hagara_lightning_02.ogg"
 26228, 10, "VO_DS_HAGARA_CIRCUIT_01", "vo_ds_hagara_circuit_01.ogg"
@@ -52,18 +51,12 @@ TO DO: Add correct sounds to spells
 26240, 10, "VO_DS_HAGARA_CRYSTALDEAD_06", "vo_ds_hagara_crystaldead_06.ogg"
 26241, 10, "VO_DS_HAGARA_CRYSTALDEAD_07", "vo_ds_hagara_crystaldead_07.ogg"
 26242, 10, "VO_DS_HAGARA_CRYSTALHIT_01", "vo_ds_hagara_crystalhit_01.ogg"
-26223, 10, "VO_DS_HAGARA_ADDS_01", "vo_ds_hagara_adds_01.ogg"
-26224, 10, "VO_DS_HAGARA_ADDS_02", "vo_ds_hagara_adds_02.ogg"
-26225, 10, "VO_DS_HAGARA_ADDS_03", "vo_ds_hagara_adds_03.ogg"
-26226, 10, "VO_DS_HAGARA_ADDS_04", "vo_ds_hagara_adds_04.ogg"
 */
 
 #include "ScriptPCH.h"
 #include "dragonsoul.h"
-#include "Spell.h"
-#include "UnitAI.h"
 #include "MapManager.h"
-#include <stdlib.h>
+#include "TaskScheduler.h"
 
 #define DATA_ICE_WAVE_SLOT           1
 
@@ -78,7 +71,7 @@ enum NPC
     NPC_CRYSTAL_CONDUCTOR           = 56165,
     NPC_BOUND_LIGHNING_ELEMENTAL    = 56700,
     NPC_COLLAPSING_ICICLE           = 57867,
-
+    NPC_HAGARA_TRASH_PORTAL         = 57809,
     NPC_LIGHTNING_STORM_TEST        = 119950,
 };
 
@@ -193,6 +186,36 @@ enum Phases
     ICE_PHASE          = 2,
 };
 
+enum HagaraGameobjects
+{
+    GO_FOCUSING_IRIS        = 210132,
+};
+
+enum HagaraActions
+{
+    ACTION_INTRO                = 0,
+    ACTION_CRYSTAL_DIED         = 1,
+    ACTION_PREPARE_FOR_FIGHT    = 2,
+};
+
+enum HagaraWaves
+{
+    INTRO_FIRST_WAVE        = 1,
+    INTRO_SECOND_WAVE       = 2,
+    INTRO_THIRD_WAVE        = 3,
+    INTRO_FOURTH_WAVE       = 4,
+};
+
+const Position portalPos[6] =
+{
+    { 13551.85f, 13612.07f, 129.94f, 6.20f }, // hagara fly position
+    { 13545.51f, 13612.07f, 123.49f, 0.00f }, // center portal
+    { 13557.44f, 13643.37f, 123.48f, 5.45f }, // 1st left portal
+    { 13557.31f, 13580.67f, 123.48f, 0.78f }, // 1st rigt portal
+    { 13594.21f, 13654.59f, 123.48f, 4.52f }, // 2nd left portal
+    { 13596.83f, 13569.83f, 123.48f, 1.70f }, // 2nd right portal
+};
+
 const float SpawnPos[6][4] =
 {
     // Frozen Binding Crystals
@@ -230,9 +253,17 @@ public:
         boss_hagara_the_stormbinderAI(Creature *creature) : ScriptedAI(creature),Summons(creature)
         {
             instance = creature->GetInstanceScript();
+
+            me->GetMotionMaster()->MovePoint(0, portalPos[0]);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetVisible(false);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
         InstanceScript* instance;
+        TaskScheduler scheduler;
         uint32 Random_Text;
         uint32 Phase;
         uint32 Enrage_Timer;
@@ -274,8 +305,14 @@ public:
                     instance->SetData(TYPE_BOSS_HAGARA, NOT_STARTED);
             }
 
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            me->SetReactState(REACT_AGGRESSIVE);
+            if (instance && instance->GetData(DATA_HAGARA_INTRO_TRASH) >= 35)
+            {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->SetVisible(true);
+            }
 
             Enrage_Timer = 480000; // 8 mins
             Phase = NORMAL_PHASE; // Start with normal phase
@@ -373,7 +410,7 @@ public:
         {
             switch (param)
             {
-                case 0:
+                case ACTION_CRYSTAL_DIED:
                 {
                     switch (Frozen_Crystal_Killed)
                     {
@@ -397,7 +434,50 @@ public:
                             break;
                     }
                     Frozen_Crystal_Killed++;
+                    break;
                 }
+                case DATA_HAGARA_INTRO_TRASH:
+                    if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 0)
+                    {
+                        me->MonsterYell("Even with the Aspect of Time on your side, you stumble foolishly into a trap?", LANG_UNIVERSAL, 0);
+                        me->SendPlaySound(26223, false);
+                        SummonNPC(INTRO_FIRST_WAVE);
+                    }
+                    else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 4)
+                    {
+                        me->MonsterYell("Don't preen just yet, little pups. We'll cleanse this world of your kind.", LANG_UNIVERSAL, 0);
+                        me->SendPlaySound(26224, false);
+                        SummonNPC(INTRO_SECOND_WAVE);
+                    }
+                    else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 18)
+                    {
+                        me->MonsterYell("You'll not leave this place alive!", LANG_UNIVERSAL, 0);
+                        me->SendPlaySound(26225, false);
+                        SummonNPC(INTRO_THIRD_WAVE);
+                    }
+                    else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 24)
+                    {
+                        me->MonsterYell("Not one of you will live to see the final cataclysm! Finish them!", LANG_UNIVERSAL, 0);
+                        me->SendPlaySound(26226, false);
+                        SummonNPC(INTRO_FOURTH_WAVE);
+                    }
+                    else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 35)
+                    {
+                        me->MonsterYell("Swagger all you like, you pups don't stand a chance. Flee now, while you can.", LANG_UNIVERSAL, 0);
+                        me->SendPlaySound(26251, false);
+                        me->AI()->DoAction(ACTION_PREPARE_FOR_FIGHT);
+                    }
+                    break;
+                case ACTION_PREPARE_FOR_FIGHT:
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->GetMotionMaster()->MoveTargetedHome();
+                    scheduler.Schedule(Seconds(10), [this](TaskContext /* task context */)
+                    {
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                    });
+                    break;
                 default:
                     break;
             }
@@ -564,6 +644,18 @@ public:
             case NPC_BOUND_LIGHNING_ELEMENTAL:
                 me->SummonCreature(NPC_BOUND_LIGHNING_ELEMENTAL, SpawnPos[5][0], SpawnPos[5][1], SpawnPos[5][2], SpawnPos[5][3], TEMPSUMMON_DEAD_DESPAWN);
                 break;
+            case INTRO_FIRST_WAVE:
+            case INTRO_FOURTH_WAVE:
+                me->SummonCreature(NPC_HAGARA_TRASH_PORTAL, portalPos[1], TEMPSUMMON_TIMED_DESPAWN, 30000);
+                break;
+            case INTRO_SECOND_WAVE:
+                me->SummonCreature(NPC_HAGARA_TRASH_PORTAL, portalPos[2], TEMPSUMMON_TIMED_DESPAWN, 30000);
+                me->SummonCreature(NPC_HAGARA_TRASH_PORTAL, portalPos[3], TEMPSUMMON_TIMED_DESPAWN, 30000);
+                break;
+            case INTRO_THIRD_WAVE:
+                me->SummonCreature(NPC_HAGARA_TRASH_PORTAL, portalPos[4], TEMPSUMMON_TIMED_DESPAWN, 30000);
+                me->SummonCreature(NPC_HAGARA_TRASH_PORTAL, portalPos[5], TEMPSUMMON_TIMED_DESPAWN, 30000);
+                break;
             default:
                 break;
             }
@@ -638,6 +730,8 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
+            scheduler.Update(diff);
+
             if (!UpdateVictim())
                 return;
 

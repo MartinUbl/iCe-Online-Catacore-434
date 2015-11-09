@@ -46,6 +46,7 @@ enum AdditionalEvents
     DATA_HELP_AGAINST_ULTRAXION         = 17,
     DATA_ULTRAXION_DEFEATED             = 18,
     DATA_START_BLACKHORN_ENCOUNTER      = 19,
+    DATA_HAGARA_INTRO_TRASH             = 20,
 };
 
 enum AchievEvents

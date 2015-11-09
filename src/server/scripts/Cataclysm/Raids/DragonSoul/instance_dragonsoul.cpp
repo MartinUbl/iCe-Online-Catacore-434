@@ -30,6 +30,9 @@ public:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint32 currEnc[MAX_ENCOUNTER];
         uint32 heroicKills;
+        uint32 hagaraTrashKills;
+        uint32 aspectsPrepareToChannel;
+        uint32 drakesKilled;
 
         uint64 morchokGuid;
         uint64 yorsahjGuid;
@@ -37,6 +40,7 @@ public:
         uint64 hagaraGuid;
         uint64 ultraxionGuid;
         uint64 blackhornGuid;
+        uint64 deathwingSummitGuid;
         uint64 deathwingSpineGuid;
         uint64 deathwingMadnessGuid;
 
@@ -46,8 +50,18 @@ public:
         uint64 yseraDragonGuid;
         uint64 kalecgosDragonGuid;
 
+        uint64 thrallSummitGuid;
+        uint64 alexstraszaSummitGuid;
+        uint64 nozdormuSummitGuid;
+        uint64 yseraSummitGuid;
+        uint64 kalecgosSummitGuid;
+
         uint64 allianceShipGuid;
 
+        uint64 valeeraGuid;
+        uint64 eiendormiGuid;
+        uint64 nethestraszGuid;
+        std::vector<uint64> ultraxionDrakesGUIDs;
         std::vector<uint64> teleportGUIDs;
         std::string saveData;
 
@@ -59,8 +73,15 @@ public:
             hagaraGuid              = 0;
             ultraxionGuid           = 0;
             blackhornGuid           = 0;
+            deathwingSummitGuid     = 0;
             deathwingSpineGuid      = 0;
             deathwingMadnessGuid    = 0;
+
+            thrallGuid              = 0;
+            alexstraszaDragonGuid   = 0;
+            nozdormuDragonGuid      = 0;
+            yseraDragonGuid         = 0;
+            kalecgosDragonGuid      = 0;
 
             thrallGuid              = 0;
             alexstraszaDragonGuid   = 0;
@@ -71,8 +92,15 @@ public:
             allianceShipGuid        = 0;
 
             heroicKills             = 0;
+            hagaraTrashKills        = 0;
+            drakesKilled            = 0;
+            aspectsPrepareToChannel = 0;
 
+            valeeraGuid             = 0;
+            eiendormiGuid           = 0;
+            nethestraszGuid         = 0;
             teleportGUIDs.clear();
+            ultraxionDrakesGUIDs.clear();
         }
 
         std::string GetSaveData()
@@ -156,6 +184,37 @@ public:
             case NPC_ANDORGOS:
                 teleportGUIDs.push_back(pCreature->GetGUID());
                 break;
+            case NPC_VALEERA:
+                valeeraGuid = pCreature->GetGUID();
+                break;
+            case NPC_EIENDORMI:
+                eiendormiGuid = pCreature->GetGUID();
+                break;
+            case NPC_NETHESTRASZ:
+                nethestraszGuid = pCreature->GetGUID();
+                break;
+            case NPC_DEATHWING_WYRMREST_TEMPLE:
+                deathwingSummitGuid = pCreature->GetGUID();
+                break;
+            case NPC_TWILIGHT_ASSAULTER:
+            case NPC_TWILIGHT_ASSAULTERESS:
+                ultraxionDrakesGUIDs.push_back(pCreature->GetGUID());
+                break;
+            case NPC_ALEXSTRASZA_THE_LIFE_BINDER:
+                alexstraszaSummitGuid = pCreature->GetGUID();
+                break;
+            case NPC_YSERA_THE_AWAKENED:
+                yseraSummitGuid = pCreature->GetGUID();
+                break;
+            case NPC_KALECGOS:
+                kalecgosSummitGuid = pCreature->GetGUID();
+                break;
+            case NPC_NOZDORMU_THE_TIMELESS_ONE:
+                nozdormuSummitGuid = pCreature->GetGUID();
+                break;
+            case NPC_THRALL:
+                thrallSummitGuid = pCreature->GetGUID();
+                break;
             default:
                 break;
             }
@@ -219,6 +278,12 @@ public:
 
             if (DataId == DATA_HEROIC_KILLS)
                 return heroicKills;
+            else if (DataId == DATA_HAGARA_INTRO_TRASH)
+                return hagaraTrashKills;
+            else if (DataId == DATA_ASPECTS_PREPARE_TO_CHANNEL)
+                return aspectsPrepareToChannel;
+            else if (DataId == DATA_ULTRAXION_DRAKES)
+                return drakesKilled;
 
             return 0;
         }
@@ -228,6 +293,58 @@ public:
             if (type < MAX_ENCOUNTER)
                 m_auiEncounter[type] = data;
 
+            if (type == DATA_HAGARA_INTRO_TRASH)
+            {
+                hagaraTrashKills++;
+
+                Creature * pHagara = this->instance->GetCreature(hagaraGuid);
+                if (hagaraTrashKills == 4 || hagaraTrashKills == 18 || hagaraTrashKills == 24 || hagaraTrashKills == 35)
+                {
+                    if (pHagara)
+                        pHagara->AI()->DoAction(DATA_HAGARA_INTRO_TRASH);
+                }
+
+            }
+            else if (type == DATA_ASPECTS_PREPARE_TO_CHANNEL)
+                aspectsPrepareToChannel = data;
+            else if (type == DATA_ULTRAXION_DRAKES)
+            {
+                if (data == 0 || data == 16)
+                {
+                    if (data == 16)
+                    {
+                        if (Creature * pDeathwingSummit = this->instance->GetCreature(deathwingSummitGuid))
+                            pDeathwingSummit->SetVisible(false);
+                    }
+
+                    if (!ultraxionDrakesGUIDs.empty())
+                    {
+                        for (std::vector<uint64>::const_iterator itr = ultraxionDrakesGUIDs.begin(); itr != ultraxionDrakesGUIDs.end(); ++itr)
+                        {
+                            if (Creature* pTwilightAssaulter = instance->GetCreature((*itr)))
+                            {
+                                if (data == 0)
+                                    pTwilightAssaulter->AI()->DoAction(DATA_ULTRAXION_DRAKES);
+                                else
+                                    pTwilightAssaulter->SetVisible(false);
+                            }
+                        }
+                    }
+                }
+
+                drakesKilled += data;
+                if (drakesKilled == 15)
+                {
+                    if (Creature * pDeathwingSummit = this->instance->GetCreature(deathwingSummitGuid))
+                        pDeathwingSummit->AI()->DoAction(DATA_SUMMON_ULTRAXION);
+                }
+            }
+            else if (type == DATA_SUMMON_ULTRAXION)
+            {
+                if (Creature * pUltraxion = this->instance->GetCreature(ultraxionGuid))
+                    pUltraxion->AI()->DoAction(DATA_SUMMON_ULTRAXION);
+            }
+
             if (data == DONE)
             {
                 if (this->instance->IsHeroic())
@@ -235,6 +352,9 @@ public:
 
                 if (type == TYPE_BOSS_MORCHOK)
                 {
+                    if (Creature * pValeera = this->instance->GetCreature(valeeraGuid))
+                        pValeera->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
                     if (!teleportGUIDs.empty())
                     {
                         for (std::vector<uint64>::const_iterator itr = teleportGUIDs.begin(); itr != teleportGUIDs.end(); ++itr)
@@ -245,6 +365,37 @@ public:
                                     pTeleport->SetVisible(true);
                             }
                         }
+                    }
+                }
+                else if (type == TYPE_BOSS_ZONOZZ)
+                {
+                    if (Creature * pEiendormi = this->instance->GetCreature(eiendormiGuid))
+                        pEiendormi->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
+                else if (type == TYPE_BOSS_YORSAHJ)
+                {
+                    if (Creature * pNethestrasz = this->instance->GetCreature(nethestraszGuid))
+                        pNethestrasz->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
+                else if (type == TYPE_BOSS_HAGARA)
+                {
+                    if (Creature * pKalecgos = this->instance->GetCreature(kalecgosSummitGuid))
+                        pKalecgos->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                }
+                else if (type == TYPE_BOSS_ULTRAXION)
+                {
+                    Creature * pAlexstrasza = this->instance->GetCreature(alexstraszaSummitGuid);
+                    Creature * pYsera = this->instance->GetCreature(yseraSummitGuid);
+                    Creature * pKalecgos = this->instance->GetCreature(kalecgosSummitGuid);
+                    Creature * pNozdormu = this->instance->GetCreature(nozdormuSummitGuid);
+                    Creature * pThrall = this->instance->GetCreature(thrallSummitGuid);
+                    if (pAlexstrasza && pYsera && pKalecgos && pNozdormu && pThrall)
+                    {
+                        pAlexstrasza->AI()->DoAction(DATA_ULTRAXION_DEFEATED);
+                        pYsera->AI()->DoAction(DATA_ULTRAXION_DEFEATED);
+                        pKalecgos->AI()->DoAction(DATA_ULTRAXION_DEFEATED);
+                        pNozdormu->AI()->DoAction(DATA_ULTRAXION_DEFEATED);
+                        pThrall->AI()->DoAction(DATA_ULTRAXION_DEFEATED);
                     }
                 }
             }
@@ -335,7 +486,9 @@ public:
                                     default:
                                         break;
                                     }
-                                    pTeleport->SummonGameObject(gameObjectId, pTeleport->GetPositionX(), pTeleport->GetPositionY(), pTeleport->GetPositionZ() - 3, pTeleport->GetOrientation(), 0, 0, 0, 0, 604800);
+                                    GameObject * pGoTeleport = pTeleport->FindNearestGameObject(gameObjectId, 5.0f);
+                                    if (pGoTeleport == nullptr)
+                                        pTeleport->SummonGameObject(gameObjectId, pTeleport->GetPositionX(), pTeleport->GetPositionY(), pTeleport->GetPositionZ() - 3, pTeleport->GetOrientation(), 0, 0, 0, 0, 604800);
                                 }
                             }
                         }

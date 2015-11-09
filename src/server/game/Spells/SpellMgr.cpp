@@ -4552,6 +4552,68 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
             break;
+        // Ultraxion
+        case 105929: // Heroic Will
+        case 106369: // Twilight Shift
+        case 105984: // Timeloop
+        case 106080: // Last Defender of Azeroth
+        case 106224:
+        case 106226:
+        case 106227:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            break;
+        case 106182: // Last Defender of Azeroth
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
+            break;
+        case 106042: // Gift of Life
+        case 109349:
+        case 109350:
+        case 109351:
+        case 106049: // Essence of Dreams
+        case 109356:
+        case 109357:
+        case 109358:
+        case 106050: // Source of Magic
+        case 109353:
+        case 109354:
+        case 109355:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            spellInfo->EffectTriggerSpell[0] = 0;
+            spellInfo->EffectTriggerSpell[1] = 0;
+            spellInfo->AttributesEx5 &= ~SPELL_ATTR5_UNK19; // SPELL_ATTR5_DONT_TURN_DURING_CAST
+            break;
+        case 103327: // Hour of Twilight
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_AREA_ENEMY_SRC;
+            spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_AREA_ENEMY_SRC;
+            break;
+        case 106371:
+        case 109415:
+        case 109416:
+        case 109417:
+            spellInfo->Effect[2] = 0;
+            break;
+        case 108160: // Ascpect's Wards
+        case 108161:
+        case 108162:
+        case 108163:
+        case 108164:
+            spellInfo->Effect[1] = 0;
+            break;
+        case 108242: // Charging Dragon Soul
+        case 108243:
+        case 108471:
+        case 108472:
+        case 108473:
+        case 109527: // Eye of Eternity portal
+        case 108096: // Twilight Portal Beam
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            count++;
+            break;
 /*************************        DRAGON SOUL END        *****************************/
 
         case 88691: //Marked for Death Tracking
