@@ -69,7 +69,7 @@ namespace MMAP
 #else
         bool isBGMap = (mapId == 30 || mapId == 489 || mapId == 529 || mapId == 566 || mapId == 628 || mapId == 726 || mapId == 761);
 
-        return ((mapId == 530 || mapId == 939 || isBGMap) && sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS));
+        return ((mapId == 530 || mapId == 939 || mapId == 967 || isBGMap) && sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS));
 #endif
         //return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS) && g_mmapDisabledIds->find(mapId) == g_mmapDisabledIds->end();
     }
