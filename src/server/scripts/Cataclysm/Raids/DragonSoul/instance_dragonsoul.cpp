@@ -415,7 +415,7 @@ public:
                                 pTeleport->CastSpell(pTeleport, SPELL_TELEPORT_VISUAL_DISABLED, true);
                                 if (pTeleport->GetEntry() != NPC_TRAVEL_TO_EYE_OF_ETERNITY || GetData(TYPE_BOSS_HAGARA) == DONE)
                                 {
-                                    uint32 gameObjectId;
+                                    uint32 gameObjectId = 0;
                                     switch (pTeleport->GetEntry())
                                     {
                                     case NPC_TRAVEL_TO_WYRMREST_BASE:
@@ -462,7 +462,7 @@ public:
                                 pTeleport->CastSpell(pTeleport, SPELL_TELEPORT_VISUAL_ACTIVE, true);
                                 if (pTeleport->GetVisibility() == VISIBILITY_ON)
                                 {
-                                    uint32 gameObjectId;
+                                    uint32 gameObjectId = 0;
                                     switch (pTeleport->GetEntry())
                                     {
                                     case NPC_TRAVEL_TO_WYRMREST_BASE:

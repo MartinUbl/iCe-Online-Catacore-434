@@ -297,7 +297,7 @@ public:
     };
 };
 
-const Position middlePos = { -1785.47f, -2393.37f, 45.58f };
+const Position middlePos = { -1785.47f, -2393.37f, 45.58f, 0.0f };
 
 class npc_ds_twilight_siege_breaker : public CreatureScript
 {
@@ -1206,7 +1206,7 @@ public:
 
         void SpellHit(Unit* /*caster*/, SpellEntry const* spell) override
         {
-            uint32 gameobjectId;
+            uint32 gameobjectId = 0;
             uint32 gameobjectCount;
             gameobjectCount = (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC) ? 2 : 1;
 
@@ -1655,8 +1655,8 @@ public:
 };
 
 // Dethwings position from where he talks to players and aspects
-const Position greetingsPos = { -1690.0f, -2384.0f, 358.0f };
-const Position leavePos = { -1729.0f, -2165.0f, 372.0f };
+const Position greetingsPos = { -1690.0f, -2384.0f, 358.0f, 0.0f };
+const Position leavePos = { -1729.0f, -2165.0f, 372.0f, 0.0f };
 
 static const Position spawnDrakePos[8] =
 {
@@ -1825,7 +1825,7 @@ public:
         {
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SPINE_OF_DEATHWING, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
         }
-        else if (Creature * pBlackhorn = pCreature->FindNearestCreature(NPC_BOSS_BLACKHORN, 200.0f, true))
+        else if (pCreature->FindNearestCreature(NPC_BOSS_BLACKHORN, 200.0f, true))
         {
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_BLACKHORN_ENCOUNTER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
         }
