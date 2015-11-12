@@ -156,6 +156,7 @@ enum BFLeaveReason
 
 #define DB2_REPLY_SPARSE 0x919BE54E
 #define DB2_REPLY_ITEM   0x50238EC2
+#define DB2_REPLY_KEYCHAIN 0x6D8A2694
 
 /// Player session in the World
 class WorldSession
@@ -249,6 +250,7 @@ class WorldSession
 
         void SendItemDb2Reply(uint32 entry);
         void SendItemSparseDb2Reply(uint32 entry);
+        void SendKeyChainDb2Reply(uint32 entry);
 
         // Spell
         void HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlags, SpellCastTargets & targets);

@@ -159,6 +159,14 @@ struct ItemSparseEntry
     int32      CurrencySubstitutionCount;                    // 130
 };
 
+#define KEYCHAIN_SIZE   32
+
+struct KeyChainEntry
+{
+    uint32      Id;
+    uint8       Key[KEYCHAIN_SIZE];
+};
+
 #if defined(__GNUC__)
 #pragma pack()
 #else

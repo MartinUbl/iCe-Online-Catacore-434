@@ -8972,6 +8972,41 @@ void ObjectMgr::LoadTrainerSpell()
     sLog->outString(">> Loaded %d Trainers", count);
 }
 
+void ObjectMgr::LoadMissingKeyChains()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT keyId, k1, k2, k3, k4, k5, k6, k7, k8, "
+        "k9, k10, k11, k12, k13, k14, k15, k16, "
+        "k17, k18, k19, k20, k21, k22, k23, k24, "
+        "k25, k26, k27, k28, k29, k30, k31, k32 "
+        "FROM keychain_db2 ORDER BY keyId DESC");
+
+    if (!result)
+    {
+        sLog->outString(">> Loaded 0 KeyChain entries. DB table `keychain_db2` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 id = fields[0].GetUInt32();;
+
+        KeyChainEntry* kce = sKeyChainStore.CreateEntry(id, true);
+        *kce = KeyChainEntry();
+        kce->Id = id;
+        for (uint32 i = 0; i < KEYCHAIN_SIZE; ++i)
+            kce->Key[i] = fields[1 + i].GetUInt8();
+
+        ++count;
+    } while (result->NextRow());
+
+    sLog->outString(">> Loaded %u KeyChain entries in %u ms", count, getMSTimeDiff(oldMSTime, getMSTime()));
+}
+
 int ObjectMgr::LoadReferenceVendor(int32 vendor, int32 item, std::set<uint32> *skip_vendors)
 {
     // find all items from the reference vendor

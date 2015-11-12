@@ -504,6 +504,9 @@ void WorldSession::HandleRequestHotFixOpcode(WorldPacket & recv_data)
             case DB2_REPLY_SPARSE:
                 SendItemSparseDb2Reply(entry);
                 break;
+            case DB2_REPLY_KEYCHAIN:
+                SendKeyChainDb2Reply(entry);
+                break;
             default:
                 sLog->outDebug("CMSG_REQUEST_HOTFIX: Received unknown hotfix type: %u", type);
                 recv_data.rfinish();
@@ -676,6 +679,33 @@ void WorldSession::SendItemSparseDb2Reply(uint32 entry)
     buff << float(1.0f/*proto->StatScalingFactor*/);    // StatScalingFactor
     buff << uint32(0 /*proto->CurrencySubstitutionId*/);
     buff << uint32(0 /*proto->CurrencySubstitutionCount*/);
+
+    data << uint32(buff.size());
+    data.append(buff);
+
+    SendPacket(&data);
+}
+
+void WorldSession::SendKeyChainDb2Reply(uint32 entry)
+{
+    WorldPacket data(SMSG_DB_REPLY, 44);
+    KeyChainEntry const* keyChain = sKeyChainStore.LookupEntry(entry);
+    if (!keyChain)
+    {
+        data << -int32(entry);      // entry
+        data << uint32(DB2_REPLY_KEYCHAIN);
+        data << uint32(time(NULL)); // hotfix date
+        data << uint32(0);          // size of next block
+        return;
+    }
+
+    data << uint32(entry);
+    data << uint32(DB2_REPLY_KEYCHAIN);
+    data << uint32(time(nullptr)/*sObjectMgr->GetHotfixDate(entry, DB2_REPLY_KEYCHAIN)*/);
+
+    ByteBuffer buff;
+    buff << uint32(entry);
+    buff.append(keyChain->Key, KEYCHAIN_SIZE);
 
     data << uint32(buff.size());
     data.append(buff);
