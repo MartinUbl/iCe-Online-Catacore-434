@@ -931,7 +931,7 @@ public:
                     scheduler.Schedule(Seconds(37), [this](TaskContext /*Show Movie and ship*/)
                     {
                         me->SetSpeed(MOVE_WALK, 1.2f);
-                        //PlayMovieToPlayers(73);
+                        PlayMovieToPlayers(73);
                         if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, 100.0f))
                             pDragonSoul->SetVisible(false);
                         if (GameObject * allianceShip = me->FindNearestGameObject(GO_ALLIANCE_SHIP, 150.0f))
