@@ -4994,7 +4994,7 @@ public:
         }
         if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
         {
-            if (pPlayer->GetItemCount(ITEM_CRYPTOMANCERS_DECODER_RING, false) == 1 && pPlayer->GetMoney() > 10000 * GOLD)
+            if (pPlayer->GetItemCount(ITEM_CRYPTOMANCERS_DECODER_RING, false) == 1 && pPlayer->GetMoney() >= 10000 * GOLD)
             {
                 pPlayer->DestroyItemCount(ITEM_CRYPTOMANCERS_DECODER_RING, 1, true, true);
                 pPlayer->ModifyMoney(-10000 * GOLD);
@@ -5027,10 +5027,13 @@ public:
         if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-        if (pPlayer->GetQuestStatus(QUEST_A_HIDDEN_MESSAGE) == QUEST_STATUS_INCOMPLETE)
+        if (pPlayer->GetQuestStatus(QUEST_A_HIDDEN_MESSAGE) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_A_HIDDEN_MESSAGE) == QUEST_STATUS_COMPLETE)
         {
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Lord Afrasastrasz sent me. He said you have a message to decode?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
+            if (pPlayer->GetItemCount(ITEM_SINGED_CIPHER, true) == 0)
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Lord Afrasastrasz sent me. He said you have a message to decode?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
+            }
         }
         return true;
     }
