@@ -4428,6 +4428,16 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
+        // Warmaster Blackhorn
+        case 108038: // Harpoon
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            break;
+        case 107588: // Twilight Onsloaught
+            spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
+            break;
+        case 108406: // Shockwave
+            spellInfo->AttributesEx5 &= ~SPELL_ATTR5_UNK19; // SPELL_ATTR5_DONT_TURN_DURING_CAST
+            break;
 /*************************        DRAGON SOUL END        *****************************/
 
         case 88691: //Marked for Death Tracking

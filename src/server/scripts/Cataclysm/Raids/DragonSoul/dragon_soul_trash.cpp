@@ -1340,9 +1340,479 @@ public:
 ///   Blackhorn stuff   ///
 ///////////////////////////
 
+enum BlackhornTrashNPC
+{
+    NPC_SKYFIRE                         = 56598,
+    NPC_TWILIGHT_ASSAULT_DRAKE_LEFT     = 56855,
+    NPC_TWILIGHT_ASSAULT_DRAKE_RIGHT    = 56587,
+    NPC_TWILIGHT_ELITE_DREADBLADE       = 56854,
+    NPC_TWILIGHT_ELITE_SLAYER           = 56848,
+    NPC_TWILIGHT_SAPPER                 = 56923,
+    NPC_HARPOON                         = 56681,
+};
+
+enum BlackhornTrashSpells
+{
+    // Twilight Assault Drake
+    SPELL_TWILIGHT_BARRAGE          = 107286,
+    SPELL_TWILIGHT_BARRAGE_DMG_1    = 107439,
+    SPELL_TWILIGHT_BARRAGE_DUMMY    = 107287,
+    SPELL_TWILIGHT_BARRAGE_DMG_2    = 107501,
+    SPELL_HARPOON                   = 108038,
+
+    // Twilight Elite Dreadblade & Slayer
+    SPELL_BLADE_RUSH                = 107594,
+    SPELL_BLADE_RUSH_DMG            = 107595,
+    SPELL_BRUTAL_STRIKE             = 107567,
+    SPELL_DEGENERATION              = 107558,
+
+    // Twilight Sapper
+    SPELL_EVADE                     = 107761,
+    SPELL_DETONATE                  = 107518,
+    SPELL_SMOKE_BOMB                = 107752,
+
+    SPELL_ENGINE_FIRE               = 107799,
+    SPELL_TWILIGHT_FLAMES_AURA      = 108053,
+};
+
+const Position harpoonPos[2] =
+{
+    { 13430.10f, -12161.81f, 154.11f, 1.51f }, // Left harpoon drake position
+    { 13432.68f, -12103.32f, 154.11f, 4.66f }, // Right harpoon drake position
+};
+
+enum drakeSide
+{
+    LEFT_HARPOON_POSITION           = 0,
+    RIGHT_HARPOON_POSITION          = 1,
+};
+
+enum GorionaDrakesPosition
+{
+    LEFT_DRAKE_SPAWN_POS            = 0,
+    RIGHT_DRAKE_SPAWN_POS           = 1,
+    LEFT_DRAKE_DROP_POS             = 2,
+    RIGHT_DRAKE_DROP_POS            = 3,
+    LEFT_DRAKE_END_FLY_POS          = 4,
+    RIGHT_DRAKE_END_FLY_POS         = 5,
+};
+
+const Position assaultDrakePos[6] =
+{
+    { 13441.83f, -12184.15f, 172.05f, 1.49f }, // Left Spawn Drake Pos
+    { 13447.38f, -12083.55f, 172.05f, 4.45f }, // Right Spawn Drake Pos
+    { 13431.26f, -12125.28f, 172.05f, 3.08f }, // Left drake drop add position
+    { 13430.35f, -12140.22f, 172.05f, 3.08f }, // Right drake drop add position
+    { 13433.40f, -12082.54f, 172.05f, 4.65f }, // Left drake end fly position
+    { 13429.12f, -12182.25f, 172.05f, 1.46f }, // Right drake end fly position
+};
+
+enum actionsSkyfire
+{
+    ACTION_START_WARMASTER_ENCOUNTER    = 0,
+    ACTION_SHOOT_DRAKE                  = 1,
+};
+
+class npc_ds_twilight_assault_drake : public CreatureScript
+{
+public:
+    npc_ds_twilight_assault_drake() : CreatureScript("npc_ds_twilight_assault_drake") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_twilight_assault_drakeAI(pCreature);
+    }
+
+    struct npc_ds_twilight_assault_drakeAI : public ScriptedAI
+    {
+        npc_ds_twilight_assault_drakeAI(Creature *creature) : ScriptedAI(creature) { }
+
+        TaskScheduler scheduler;
+        uint32 harpoonTimer;
+        uint32 releaseTimer;
+        uint32 twilightBarrageTimer;
+        bool harpoon;
+
+        void Reset() override
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlying(true);
+            me->SetSpeed(MOVE_FLIGHT, 1.5f);
+            me->SetInCombatWithZone();
+            harpoonTimer = 30000;
+            twilightBarrageTimer = urand(8000, 16000);
+            harpoon = false;
+
+            scheduler.Schedule(Seconds(7), [this](TaskContext /*task context*/)
+            {
+                if (Vehicle * veh = me->GetVehicleKit())
+                {
+                    if (Unit * passenger = veh->GetPassenger(0))
+                    {
+                        passenger->ExitVehicle();
+                        passenger->GetMotionMaster()->MoveFall();
+                    }
+                }
+
+                if (me->GetEntry() == NPC_TWILIGHT_ASSAULT_DRAKE_LEFT)
+                    me->GetMotionMaster()->MovePoint(LEFT_DRAKE_END_FLY_POS, assaultDrakePos[LEFT_DRAKE_END_FLY_POS], true, false);
+                else
+                    me->GetMotionMaster()->MovePoint(RIGHT_DRAKE_END_FLY_POS, assaultDrakePos[RIGHT_DRAKE_END_FLY_POS], true, false);
+
+                scheduler.Schedule(Seconds(5), [this](TaskContext /*task context*/)
+                {
+                    if (me->GetEntry() == NPC_TWILIGHT_ASSAULT_DRAKE_LEFT)
+                        me->SetFacingTo(assaultDrakePos[LEFT_DRAKE_END_FLY_POS].GetOrientation());
+                    else
+                        me->SetFacingTo(assaultDrakePos[RIGHT_DRAKE_END_FLY_POS].GetOrientation());
+                });
+            });
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellEntry const* spell) override
+        {
+            if (spell->Id == SPELL_HARPOON)
+            {
+                me->SetSpeed(MOVE_FLIGHT, 1.0f);
+                if (me->GetEntry() == NPC_TWILIGHT_ASSAULT_DRAKE_LEFT)
+                    me->GetMotionMaster()->MovePoint(0, harpoonPos[RIGHT_HARPOON_POSITION], true, true);
+                else
+                    me->GetMotionMaster()->MovePoint(0, harpoonPos[LEFT_HARPOON_POSITION], true, true);
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            scheduler.Update(diff);
+
+            if (!harpoon)
+            {
+                if (harpoonTimer <= diff)
+                {
+                    if (Creature * pHarpoon = me->FindNearestCreature(NPC_HARPOON, 200.0f, true))
+                        pHarpoon->CastSpell(me, SPELL_HARPOON, true);
+
+                    uint32 releaseTimer = IsHeroic() ? 20 : 25;
+                    scheduler.Schedule(Seconds(releaseTimer), [this](TaskContext harpoon)
+                    {
+                        if (harpoon.GetRepeatCounter() == 0)
+                        {
+                            if (Creature * pHarpoon = me->FindNearestCreature(NPC_HARPOON, 200.0f, true))
+                            {
+                                pHarpoon->InterruptNonMeleeSpells(true);
+                                me->SetSpeed(MOVE_FLIGHT, 2.0f);
+                                if (me->GetEntry() == NPC_TWILIGHT_ASSAULT_DRAKE_LEFT)
+                                    me->GetMotionMaster()->MovePoint(LEFT_DRAKE_END_FLY_POS, assaultDrakePos[LEFT_DRAKE_END_FLY_POS], true);
+                                else me->GetMotionMaster()->MovePoint(RIGHT_DRAKE_END_FLY_POS, assaultDrakePos[RIGHT_DRAKE_END_FLY_POS], true);
+                            }
+                            harpoon.Repeat(Seconds(3));
+                        }
+                        else
+                        {
+                            if (me->GetEntry() == NPC_TWILIGHT_ASSAULT_DRAKE_LEFT)
+                                me->SetFacingTo(assaultDrakePos[LEFT_DRAKE_END_FLY_POS].GetOrientation());
+                            else
+                                me->SetFacingTo(assaultDrakePos[RIGHT_DRAKE_END_FLY_POS].GetOrientation());
+                        }
+                    });
+                    harpoon = true;
+                }
+                else harpoonTimer -= diff;
+            }
+
+            if (twilightBarrageTimer <= diff)
+            {
+                uint32 randPos = urand(0, 24);
+                me->CastSpell(warmasterDamagePos[randPos].GetPositionX(), warmasterDamagePos[randPos].GetPositionY(), warmasterDamagePos[randPos].GetPositionZ(), SPELL_TWILIGHT_BARRAGE, false);
+                twilightBarrageTimer = 8000;
+            }
+            else twilightBarrageTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_ds_engine_stalker : public CreatureScript
+{
+public:
+    npc_ds_engine_stalker() : CreatureScript("npc_ds_engine_stalker") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_engine_stalkerAI(pCreature);
+    }
+
+    struct npc_ds_engine_stalkerAI : public ScriptedAI
+    {
+        npc_ds_engine_stalkerAI(Creature *creature) : ScriptedAI(creature) { }
+
+        void SpellHit(Unit* /*caster*/, SpellEntry const* spell) override
+        {
+            if (spell->Id == 99148)
+            {
+                me->CastSpell(me, SPELL_ENGINE_FIRE, false);
+            }
+        }
+    };
+};
+
+class npc_ds_twilight_elite_dreadblade : public CreatureScript
+{
+public:
+    npc_ds_twilight_elite_dreadblade() : CreatureScript("npc_ds_twilight_elite_dreadblade") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_twilight_elite_dreadbladeAI(pCreature);
+    }
+
+    struct npc_ds_twilight_elite_dreadbladeAI : public ScriptedAI
+    {
+        npc_ds_twilight_elite_dreadbladeAI(Creature *creature) : ScriptedAI(creature) { }
+
+        uint32 bladeRushTimer;
+        uint32 degenerationTimer;
+
+        void Reset() override
+        {
+            bladeRushTimer = 10000;
+            degenerationTimer = 15000;
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (bladeRushTimer <= diff)
+            {
+
+                bladeRushTimer = 10000;
+            }
+            else bladeRushTimer -= diff;
+
+            if (degenerationTimer <= diff)
+            {
+                me->CastSpell(me->GetVictim(), SPELL_DEGENERATION, false);
+                degenerationTimer = 10000;
+            }
+            else degenerationTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_ds_twilight_elite_slayer : public CreatureScript
+{
+public:
+    npc_ds_twilight_elite_slayer() : CreatureScript("npc_ds_twilight_elite_slayer") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_twilight_elite_slayerAI(pCreature);
+    }
+
+    struct npc_ds_twilight_elite_slayerAI : public ScriptedAI
+    {
+        npc_ds_twilight_elite_slayerAI(Creature *creature) : ScriptedAI(creature) { }
+
+        uint32 bladeRushTimer;
+        uint32 brutalStrikeTimer;
+
+        void Reset() override
+        {
+            bladeRushTimer = 10000;
+            brutalStrikeTimer = 15000;
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (bladeRushTimer <= diff)
+            {
+
+                bladeRushTimer = 10000;
+            }
+            else bladeRushTimer -= diff;
+
+            if (brutalStrikeTimer <= diff)
+            {
+                me->CastSpell(me->GetVictim(), SPELL_BRUTAL_STRIKE, false);
+                brutalStrikeTimer = 10000;
+            }
+            else brutalStrikeTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_ds_twilight_infiltrator : public CreatureScript
+{
+public:
+    npc_ds_twilight_infiltrator() : CreatureScript("npc_ds_twilight_infiltrator") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_twilight_infiltratorAI(pCreature);
+    }
+
+    struct npc_ds_twilight_infiltratorAI : public ScriptedAI
+    {
+        npc_ds_twilight_infiltratorAI(Creature *creature) : ScriptedAI(creature) { }
+
+        TaskScheduler scheduler;
+
+        void Reset() override
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlying(true);
+            me->SetSpeed(MOVE_FLIGHT, 2.3f);
+
+            scheduler.Schedule(Seconds(4), [this](TaskContext /*task context*/)
+            {
+                me->SummonCreature(NPC_TWILIGHT_SAPPER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 2000);
+            });
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            scheduler.Update(diff);
+        }
+    };
+};
+
+const Position sapperEndPos = { 13469.45f, -12134.10f, 150.9f, 0.0f };
+
+class npc_ds_twilight_sapper : public CreatureScript
+{
+public:
+    npc_ds_twilight_sapper() : CreatureScript("npc_ds_twilight_sapper") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_twilight_sapperAI(pCreature);
+    }
+
+    struct npc_ds_twilight_sapperAI : public ScriptedAI
+    {
+        npc_ds_twilight_sapperAI(Creature *creature) : ScriptedAI(creature) { }
+
+        TaskScheduler scheduler;
+        bool explosion;
+
+        void Reset() override
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->GetMotionMaster()->MoveFall();
+
+            scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
+            {
+                me->CastSpell(me, SPELL_SMOKE_BOMB, false);
+                me->CastSpell(me, SPELL_EVADE, false);
+                me->GetMotionMaster()->MovePoint(0, sapperEndPos, true, true);
+            });
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            scheduler.Update(diff);
+
+            if (!explosion)
+            {
+                if (me->GetDistance2d(sapperEndPos.GetPositionX(), sapperEndPos.GetPositionY()) <= 2.0f)
+                {
+                    if (Creature* pShip = me->FindNearestCreature(NPC_SKYFIRE, 300.0f))
+                        pShip->SetHealth(pShip->GetHealth() - pShip->GetMaxHealth()*0.2);
+                    me->CastSpell(me, SPELL_DETONATE, false);
+                    explosion = true;
+                }
+            }
+        }
+    };
+};
+
+class npc_ds_twilight_flames : public CreatureScript
+{
+public:
+    npc_ds_twilight_flames() : CreatureScript("npc_ds_twilight_flames") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_twilight_flamesAI(pCreature);
+    }
+
+    struct npc_ds_twilight_flamesAI : public ScriptedAI
+    {
+        npc_ds_twilight_flamesAI(Creature *creature) : ScriptedAI(creature) { }
+
+        TaskScheduler scheduler;
+
+        void Reset() override
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetInCombatWithZone();
+
+            scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
+            {
+                me->CastSpell(me, SPELL_TWILIGHT_FLAMES_AURA, false);
+            });
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            scheduler.Update(diff);
+        }
+    };
+};
+
+class npc_ds_skyfire_deck : public CreatureScript
+{
+public:
+    npc_ds_skyfire_deck() : CreatureScript("npc_ds_skyfire_deck") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_skyfire_deckAI(pCreature);
+    }
+
+    struct npc_ds_skyfire_deckAI : public ScriptedAI
+    {
+        npc_ds_skyfire_deckAI(Creature *creature) : ScriptedAI(creature) { }
+
+        void Reset() override
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetMaxHealth(RAID_MODE(4000000, 10000000, 6000000, 15000000));
+            me->SetHealth(RAID_MODE(4000000, 10000000, 6000000, 15000000));
+        }
+
+        void DoAction(const int32 action) override
+        {
+            if (action == ACTION_START_WARMASTER_ENCOUNTER)
+                me->SetInCombatWithZone();
+        }
+
+        void UpdateAI(const uint32 diff) override {}
+    };
+};
+
 ///////////////////////////
 ///     Spine stuff     ///
 ///////////////////////////
+
+
 
 ///////////////////////////
 ///    Madness stuff    ///
@@ -1720,13 +2190,13 @@ public:
                         {
                             me->GetMotionMaster()->MoveIdle(MOTION_SLOT_IDLE);
                             me->SetFacingTo(3.18f);
-                            me->MonsterYell("It's good to see you again, Alexstrasza. I have been busy in my absence.", LANG_UNIVERSAL, false);
+                            me->MonsterYell("It's good to see you again, Alexstrasza. I have been busy in my absence.", LANG_UNIVERSAL, 0);
                             me->SendPlaySound(26360, false);
                             greetings.Repeat(Seconds(8));
                         }
                         else if (repeatCount == 1)
                         {
-                            me->MonsterYell("Twisting your pitiful whelps into mindless abominations, bent only to my will. It was a very...painful process.", LANG_UNIVERSAL, false);
+                            me->MonsterYell("Twisting your pitiful whelps into mindless abominations, bent only to my will. It was a very...painful process.", LANG_UNIVERSAL, 0);
                             me->SendPlaySound(26361, false);
                             greetings.Repeat(Seconds(25));
                         }
@@ -1745,19 +2215,19 @@ public:
                         {
                             me->GetMotionMaster()->MoveIdle(MOTION_SLOT_IDLE);
                             me->SetFacingTo(3.18f);
-                            me->MonsterYell("Mere whelps, experiments, a means to a greater end. You will see what the research of my clutch has yielded.", LANG_UNIVERSAL, false);
+                            me->MonsterYell("Mere whelps, experiments, a means to a greater end. You will see what the research of my clutch has yielded.", LANG_UNIVERSAL, 0);
                             me->SendPlaySound(26362, false);
                             greetings.Repeat(Seconds(11));
                         }
                         else if (repeatCount == 1)
                         {
-                            me->MonsterYell("Nefarian? Onyxia? Sinestra? They were nothing. Now you face my ultimate creation.", LANG_UNIVERSAL, false);
+                            me->MonsterYell("Nefarian? Onyxia? Sinestra? They were nothing. Now you face my ultimate creation.", LANG_UNIVERSAL, 0);
                             me->SendPlaySound(26363, false);
                             greetings.Repeat(Seconds(10));
                         }
                         else if (repeatCount == 2)
                         {
-                            me->MonsterYell("The Hour of Twilight is nigh; the sun sets on your pitiful, mortal existence!", LANG_UNIVERSAL, false);
+                            me->MonsterYell("The Hour of Twilight is nigh; the sun sets on your pitiful, mortal existence!", LANG_UNIVERSAL, 0);
                             me->SendPlaySound(26364, false);
                             greetings.Repeat(Seconds(7));
 
@@ -1802,13 +2272,15 @@ public:
 enum SkyfireNpc
 {
     NPC_BOSS_BLACKHORN                  = 56427,
+    NPC_GORIONA                         = 56781,
 };
 
 enum gunshipActions
 {
-    ACTION_READY_TO_FOLLOW_DEATHWING    = 0,
-    ACTION_START_BLACKHORN_ENCOUNTER    = 1,
-    ACTION_SPINE_OF_DEATHWING           = 2,
+    ACTION_READY_TO_FOLLOW_DEATHWING = 0,
+    ACTION_START_BLACKHORN_ENCOUNTER = 1,
+    ACTION_SPINE_OF_DEATHWING        = 2,
+    ACTION_START_ENCOUNTER           = 0,
 };
 
 class npc_ds_alliance_ship_crew : public CreatureScript
@@ -1851,7 +2323,7 @@ public:
         {
             pCreature->AI()->DoAction(ACTION_START_BLACKHORN_ENCOUNTER);
         }
-        else if (uiAction == GOSSIP_ACTION_AUCTION + 3)
+        else if (uiAction == GOSSIP_ACTION_INFO_DEF + 3)
         {
             pCreature->AI()->DoAction(ACTION_SPINE_OF_DEATHWING);
         }
@@ -1895,7 +2367,7 @@ public:
                         if (action == ACTION_READY_TO_FOLLOW_DEATHWING)
                             player->NearTeleportTo(telePos[3].GetPositionX(), telePos[3].GetPositionY(), telePos[3].GetPositionZ(), telePos[3].GetOrientation());
                         else if (action == ACTION_SPINE_OF_DEATHWING)
-                            player->NearTeleportTo(telePos[3].GetPositionX(), telePos[3].GetPositionY(), telePos[3].GetPositionZ(), telePos[3].GetOrientation());
+                            player->NearTeleportTo(telePos[4].GetPositionX(), telePos[4].GetPositionY(), telePos[4].GetPositionZ(), telePos[4].GetOrientation());
 
                         if (withParachute == true)
                             player->AddAura(SPELL_PARACHUTE, player);
@@ -1931,12 +2403,44 @@ public:
                 }
                 else if (action == ACTION_START_BLACKHORN_ENCOUNTER)
                 {
-                    instance->SetData(DATA_START_BLACKHORN_ENCOUNTER, 0);
+                    scheduler.Schedule(Seconds(0), [this](TaskContext greetings)
+                    {
+                        uint32 repeatCount = greetings.GetRepeatCounter();
+                        if (repeatCount == 0)
+                        {
+                            if (Creature * pGoriona = me->FindNearestCreature(NPC_GORIONA, 300.0f, true))
+                                pGoriona->AI()->DoAction(ACTION_START_ENCOUNTER);
+                            me->MonsterYell("All ahead full. Everything depends on our speed! We can't let the Destroyer get away.", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(26292, false);
+                            greetings.Repeat(Seconds(8));
+                        }
+                        else if (repeatCount == 1)
+                        {
+                            instance->SetData(DATA_START_BLACKHORN_ENCOUNTER, 0);
+                            greetings.Repeat(Seconds(15));
+                        }
+                        else if (repeatCount == 2)
+                        {
+                            me->MonsterYell("Our engines are damaged! We're sitting ducks up here!", LANG_UNIVERSAL, 0);
+                            me->SendPlaySound(26303, false);
+                            greetings.Repeat(Seconds(6));
+
+                        }
+                        else if (repeatCount == 3)
+                        {
+                            if (Creature * pWarmasterBlackhorn = me->FindNearestCreature(NPC_BOSS_BLACKHORN, 300.0f, true))
+                            {
+                                pWarmasterBlackhorn->MonsterYell("You won't get near the Master. Dragonriders, attack!", LANG_UNIVERSAL, 0);
+                                pWarmasterBlackhorn->SendPlaySound(26210, false);
+                            }
+                            greetings.Repeat(Seconds(8));
+                        }
+                    });
                 }
                 else if (action == ACTION_SPINE_OF_DEATHWING)
                 {
-                    //PlayMovieToPlayers(ID);
-                    scheduler.Schedule(Seconds(11), [this](TaskContext /*Show Movie and teleport to Spine of Deathwing*/)
+                    PlayMovieToPlayers(74);
+                    scheduler.Schedule(Seconds(20), [this](TaskContext /*Show Movie and teleport to Spine of Deathwing*/)
                     {
                         TeleportAllPlayers(ACTION_SPINE_OF_DEATHWING, true);
                     });
@@ -1973,6 +2477,14 @@ void AddSC_dragon_soul_trash()
     new npc_ultraxion_go_spawn();
     new npc_ds_twilight_assaulter();
     new go_ds_focusing_iris();
+    new npc_ds_twilight_sapper();
+    new npc_ds_twilight_infiltrator();
+    new npc_ds_twilight_assault_drake();
+    new npc_ds_twilight_elite_dreadblade();
+    new npc_ds_twilight_elite_slayer();
+    new npc_ds_twilight_flames();
+    new npc_ds_engine_stalker();
+    new npc_ds_skyfire_deck();
     new npc_ds_instance_teleporter();
     new npc_ds_travel_with_drakes();
     new go_ds_instance_teleporter();
