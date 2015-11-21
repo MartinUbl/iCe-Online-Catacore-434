@@ -25,7 +25,7 @@
 // NPCs
 enum NPC
 {
-    BOSS_MADNESS_OF_DEATHWING         = 53879,
+    BOSS_MADNESS_OF_DEATHWING           = 56173,
 };
 
 // Spells

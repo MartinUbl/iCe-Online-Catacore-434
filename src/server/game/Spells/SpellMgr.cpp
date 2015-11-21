@@ -4438,6 +4438,15 @@ void SpellMgr::LoadSpellCustomAttr()
         case 108406: // Shockwave
             spellInfo->AttributesEx5 &= ~SPELL_ATTR5_UNK19; // SPELL_ATTR5_DONT_TURN_DURING_CAST
             break;
+        // Spine of Deathwing
+        case 105366:
+        case 105384:
+        case 105847:
+        case 105848:
+        case 105363:
+        case 105385:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_GAMEOBJECT;
+            break;
 /*************************        DRAGON SOUL END        *****************************/
 
         case 88691: //Marked for Death Tracking

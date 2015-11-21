@@ -64,6 +64,7 @@ enum AdditionalEvents
     DATA_ULTRAXION_DEFEATED             = 18,
     DATA_START_BLACKHORN_ENCOUNTER      = 19,
     DATA_HAGARA_INTRO_TRASH             = 20,
+    DATA_PREPARE_SPINE_ENCOUNTER        = 21,
 };
 
 enum AchievEvents
@@ -140,6 +141,9 @@ enum DragonsoulGameobjectsId
     GO_TRAVEL_TO_EYE_OF_ETERNITY        = 210088,
     GO_TRAVEL_TO_DECK                   = 210089,
     GO_TRAVEL_TO_MAELSTROM              = 210090,
+    GO_DEATHWING_BACK_PLATE_1           = 209623,
+    GO_DEATHWING_BACK_PLATE_2           = 209631,
+    GO_DEATHWING_BACK_PLATE_3           = 209632,
 };
 
 const Position warmasterDamagePos[25] =

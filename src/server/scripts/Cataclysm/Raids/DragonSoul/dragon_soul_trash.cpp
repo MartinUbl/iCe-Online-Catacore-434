@@ -1812,7 +1812,417 @@ public:
 ///     Spine stuff     ///
 ///////////////////////////
 
+enum NPC
+{
+    NPC_SPINE_OF_DEATHWING          = 53879,
+    NPC_HIDEOUS_AMALGAMATION        = 53890,
+    NPC_CORRUPTION                  = 53891,
+    NPC_CORRUPTION_2                = 56161, // ?
+    NPC_CORRUPTION_3                = 56162, // ?
+    NPC_SPAWNER                     = 53888,
+    NPC_CORRUPTED_BLOOD             = 53889,
+    NPC_BURNING_TENDONS_LEFT        = 56341, // left
+    NPC_BURNING_TENDONS_RIGHT       = 56575, // right
+};
 
+enum Spells
+{
+    // Corruption
+    SPELL_FIERY_GRIP                = 105490,
+    SPELL_FIERY_GRIP_25             = 109457,
+    SPELL_FIERY_GRIP_10H            = 109458,
+    SPELL_FIERY_GRIP_25H            = 109459,
+    SPELL_SEARING_PLASMA_AOE        = 109379,
+    SPELL_SEARING_PLASMA            = 105479,
+
+    // Hideous Amalgamation
+    SPELL_ZERO_REGEN                = 109121,
+    SPELL_ABSORB_BLOOD_BAR          = 109329,
+    SPELL_DEGRADATION               = 106005,
+    SPELL_NUCLEAR_BLAST             = 105845,
+    SPELL_NUCLEAR_BLAST_SCRIPT      = 105846,
+    SPELL_SUPERHEATED_NUCLEUS       = 105834,
+    SPELL_SUPERHEATED_NUCLEUS_DMG   = 106264,
+    SPELL_ABSORB_BLOOD              = 105244,
+    SPELL_ABSORB_BLOOD_DUMMY        = 105241, // target on 105223
+    SPELL_ABSORBED_BLOOD            = 105248,
+
+    // Spawner ?
+    SPELL_GRASPING_TENDRILS         = 105510,
+    SPELL_GRASPING_TENDRILS_10      = 105563,
+    SPELL_GRASPING_TENDRILS_25      = 109454,
+    SPELL_GRASPING_TENDRILS_10H     = 109455,
+    SPELL_GRASPING_TENDRILS_25H     = 109456,
+
+    // Corrupted Blood
+    SPELL_RESIDUE                   = 105223,
+    SPELL_BURST                     = 105219,
+
+    // Burning Tendons
+    SPELL_SEAL_ARMOR_BREACH_1       = 105847,
+    SPELL_SEAL_ARMOR_BREACH_2       = 105848,
+    SPELL_BREACH_ARMOR_1            = 105363,
+    SPELL_BREACH_ARMOR_2            = 105385,
+    SPELL_PLATE_FLY_OFF_LEFT        = 105366,
+    SPELL_PLATE_FLY_OFF_RIGHT       = 105384,
+    SPELL_SLOW                      = 110907, // ?
+
+    SPELL_BLOOD_CORRUPTION_DEATH    = 106199,
+    SPELL_BLOOD_CORRUPTION_EARTH    = 106200,
+    SPELL_BLOOD_OF_DEATHWING        = 106201,
+    SPELL_BLOOD_OF_NELTHARION       = 106213,
+};
+
+enum SpineActions
+{
+    ACTION_CORRUPTED_DIED           = 0,
+    ACTION_CORRUPTED_POSITION       = 1,
+    ACTION_ABSORB_BLOOD             = 2,
+    ACTION_TENDONS_POSITION         = 3,
+    ACTION_OPEN_PLATE               = 4,
+    ACTION_CLOSE_PLATE              = 5,
+};
+
+class npc_ds_spine_corruption : public CreatureScript
+{
+public:
+    npc_ds_spine_corruption() : CreatureScript("npc_ds_spine_corruption") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_spine_corruptionAI(pCreature);
+    }
+
+    struct npc_ds_spine_corruptionAI : public ScriptedAI
+    {
+        npc_ds_spine_corruptionAI(Creature *creature) : ScriptedAI(creature) { }
+
+        uint32 searingPlasmaTimer;
+        uint32 fieryGripTimer;
+        uint32 damageCounter;
+        uint32 corruptedPosition;
+        bool isGrip;
+
+        void Reset() override
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_PASSIVE);
+
+            isGrip = false;
+            damageCounter = 0;
+            corruptedPosition = 0;
+            searingPlasmaTimer = urand(1000, 8000);
+            fieryGripTimer = 10000;
+        }
+
+        void JustDied(Unit * /*who*/) override
+        {
+            if (Creature * pSpineOfDeathwing = me->FindNearestCreature(NPC_SPINE_OF_DEATHWING, 300.0f, true))
+                pSpineOfDeathwing->AI()->SetData(ACTION_CORRUPTED_POSITION, corruptedPosition);
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            if (type == ACTION_CORRUPTED_POSITION)
+                corruptedPosition = data;
+        }
+
+        void DamageTaken(Unit* /*who*/, uint32 &damage)
+        {
+            if (!isGrip)
+                return;
+
+            if (damageCounter <= damage)
+            {
+                damageCounter = 0;
+                isGrip = false;
+                fieryGripTimer = urand(30000, 35000);
+                me->InterruptSpell(CURRENT_CHANNELED_SPELL);
+            }
+            else
+                damageCounter -= damage;
+        }
+
+        void UpdateAI(const uint32 diff) override 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (searingPlasmaTimer <= diff)
+            {
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                    me->CastSpell(pTarget, SPELL_SEARING_PLASMA, false);
+                searingPlasmaTimer = 8000;
+            }
+            else searingPlasmaTimer -= diff;
+
+            if (fieryGripTimer <= diff)
+            {
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_FIERY_GRIP))
+                {
+                    me->CastCustomSpell(SPELL_FIERY_GRIP, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 3), pTarget, false);
+                    damageCounter = me->CountPctFromMaxHealth(20);
+                    isGrip = true;
+                }
+                else
+                    pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true);
+                fieryGripTimer = urand(30000, 35000);
+            }
+            else fieryGripTimer -= diff;
+        }
+    };
+};
+
+class npc_ds_spine_burning_tendons : public CreatureScript
+{
+public:
+    npc_ds_spine_burning_tendons() : CreatureScript("npc_ds_spine_burning_tendons") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_spine_burning_tendonsAI(pCreature);
+    }
+
+    struct npc_ds_spine_burning_tendonsAI : public ScriptedAI
+    {
+        npc_ds_spine_burning_tendonsAI(Creature *creature) : ScriptedAI(creature) { }
+
+        uint32 openTimer;
+        uint32 tendonsPosition;
+        bool isOpen;
+
+        void Reset() override
+        {
+            me->SetVisible(false);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+            tendonsPosition = 0;
+            openTimer = 0;
+            isOpen = false;
+        }
+
+        void JustDied(Unit * /*who*/) override
+        {
+            me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_PLATE_FLY_OFF_RIGHT : SPELL_PLATE_FLY_OFF_LEFT, true);
+        }
+
+        void DoAction(const int32 action) override
+        {
+            switch (action)
+            {
+            case ACTION_OPEN_PLATE:
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetVisible(true);
+                if (GameObject * pPlate = me->FindNearestGameObject(GO_DEATHWING_BACK_PLATE_1, 100.0f))
+                    pPlate->CastSpell(pPlate, SPELL_PLATE_FLY_OFF_LEFT, false);
+                //me->CastSpell(me, 10000, false);
+                openTimer = 23000;
+                isOpen = true;
+                break;
+            case ACTION_CLOSE_PLATE:
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                //me->CastSpell(me, 10000, false);
+                me->SetVisible(false);
+                break;
+            default:
+                break;
+            }
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            if (type == ACTION_TENDONS_POSITION)
+                tendonsPosition = data;
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (isOpen)
+            {
+                if (openTimer <= diff)
+                {
+                    me->AI()->DoAction(ACTION_CLOSE_PLATE);
+                    isOpen = false;
+                }
+                else openTimer -= diff;
+            }
+        }
+    };
+};
+
+class npc_ds_spine_corrupted_blood : public CreatureScript
+{
+public:
+    npc_ds_spine_corrupted_blood() : CreatureScript("npc_ds_spine_corrupted_blood") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_spine_corrupted_bloodAI(pCreature);
+    }
+
+    struct npc_ds_spine_corrupted_bloodAI : public ScriptedAI
+    {
+        npc_ds_spine_corrupted_bloodAI(Creature *creature) : ScriptedAI(creature) { }
+
+        uint32 searingPlasmaTimer;
+        uint32 fieryGripTimer;
+        uint32 moveBackTimer;
+        bool isDead;
+
+        void Reset() override
+        {
+            me->SetWalk(true);
+            me->SetSpeed(MOVE_WALK, 1.0f, true);
+            isDead = false;
+            moveBackTimer = 0;
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void JustReachedHome() override
+        {
+            isDead = false;
+            DoResetThreat();
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveAura(SPELL_RESIDUE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void DamageTaken(Unit* /*who*/, uint32 & damage)
+        {
+            if (me->GetHealth() < damage)
+            {
+                damage = 0;
+                if (!isDead)
+                {
+                    moveBackTimer = 5000;
+                    isDead = true;
+                    DoResetThreat();
+                    me->SetReactState(REACT_PASSIVE);
+                    me->AttackStop();
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                    me->CastSpell(me, SPELL_BURST, true);
+                    me->CastSpell(me, SPELL_RESIDUE, true);
+                    me->SetWalk(true);
+                    me->SetSpeed(MOVE_WALK, 0.1f, true);
+
+                    std::list<Creature*> hideous_amalgamation;
+                    GetCreatureListWithEntryInGrid(hideous_amalgamation, me, NPC_HIDEOUS_AMALGAMATION, 200.0f);
+                    for (std::list<Creature*>::const_iterator itr = hideous_amalgamation.begin(); itr != hideous_amalgamation.end(); ++itr)
+                    {
+                        if (*itr)
+                            (*itr)->AI()->DoAction(ACTION_ABSORB_BLOOD);
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (isDead)
+            {
+                if (moveBackTimer <= diff)
+                {
+                    me->GetMotionMaster()->MoveTargetedHome();
+                    isDead = false;
+                }
+                else moveBackTimer -= diff;
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_ds_spine_hideous_amalgamation : public CreatureScript
+{
+public:
+    npc_ds_spine_hideous_amalgamation() : CreatureScript("npc_ds_spine_hideous_amalgamation") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_spine_hideous_amalgamationAI(pCreature);
+    }
+
+    struct npc_ds_spine_hideous_amalgamationAI : public ScriptedAI
+    {
+        npc_ds_spine_hideous_amalgamationAI(Creature *creature) : ScriptedAI(creature) { }
+
+        uint32 searingPlasmaTimer;
+        uint32 fieryGripTimer;
+        bool isExplode;
+
+        void Reset() override
+        {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            isExplode = false;
+        }
+
+        void DoAction(const int32 action)
+        {
+            if (action == ACTION_ABSORB_BLOOD)
+            {
+                me->CastSpell(me, SPELL_ABSORBED_BLOOD, true);
+
+                if (Aura * aur = me->GetAura(SPELL_ABSORBED_BLOOD))
+                {
+                    if (aur->GetStackAmount() == 9)
+                        me->CastSpell(me, SPELL_SUPERHEATED_NUCLEUS, true);
+                }
+            }
+        }
+
+        void JustDied(Unit * /*who*/) override
+        {
+            Creature * pBurningTendonsLeft = me->FindNearestCreature(NPC_BURNING_TENDONS_LEFT, 100.0f, true);
+            Creature * pBurningTendonsRight = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, 100.0f, true);
+            if (pBurningTendonsLeft && pBurningTendonsRight)
+            {
+                if (me->GetDistance2d(pBurningTendonsLeft->GetPositionX(), pBurningTendonsLeft->GetPositionY()) <=
+                    me->GetDistance2d(pBurningTendonsRight->GetPositionX(), pBurningTendonsRight->GetPositionY()))
+                {
+                    pBurningTendonsLeft->AI()->DoAction(ACTION_OPEN_PLATE);
+                }
+                else
+                    pBurningTendonsRight->AI()->DoAction(ACTION_OPEN_PLATE);
+            }
+        }
+
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            if (me->GetHealth() <= damage)
+            {
+                if (Aura * aur = me->GetAura(SPELL_ABSORBED_BLOOD))
+                {
+                    if (aur->GetStackAmount() >= 9)
+                    {
+                        damage = 0;
+                        if (!isExplode)
+                        {
+                            isExplode = true;
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                            me->CastSpell(me, SPELL_NUCLEAR_BLAST, false);
+                            me->DespawnOrUnsummon(5500);
+                        }
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
 
 ///////////////////////////
 ///    Madness stuff    ///
@@ -2439,6 +2849,7 @@ public:
                 }
                 else if (action == ACTION_SPINE_OF_DEATHWING)
                 {
+                    instance->SetData(DATA_PREPARE_SPINE_ENCOUNTER, 0);
                     PlayMovieToPlayers(74);
                     scheduler.Schedule(Seconds(20), [this](TaskContext /*Show Movie and teleport to Spine of Deathwing*/)
                     {
@@ -2485,6 +2896,10 @@ void AddSC_dragon_soul_trash()
     new npc_ds_twilight_flames();
     new npc_ds_engine_stalker();
     new npc_ds_skyfire_deck();
+    new npc_ds_spine_corruption();
+    new npc_ds_spine_corrupted_blood();
+    new npc_ds_spine_hideous_amalgamation();
+    new npc_ds_spine_burning_tendons();
     new npc_ds_instance_teleporter();
     new npc_ds_travel_with_drakes();
     new go_ds_instance_teleporter();

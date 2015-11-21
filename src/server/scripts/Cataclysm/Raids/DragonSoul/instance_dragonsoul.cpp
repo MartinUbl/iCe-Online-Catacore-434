@@ -344,6 +344,11 @@ public:
                 if (Creature * pUltraxion = this->instance->GetCreature(ultraxionGuid))
                     pUltraxion->AI()->DoAction(DATA_SUMMON_ULTRAXION);
             }
+            else if (type == DATA_PREPARE_SPINE_ENCOUNTER)
+            {
+                if (Creature * pDeathwingSpine = this->instance->GetCreature(deathwingSpineGuid))
+                    pDeathwingSpine->AI()->DoAction(DATA_PREPARE_SPINE_ENCOUNTER);
+            }
 
             if (data == DONE)
             {
