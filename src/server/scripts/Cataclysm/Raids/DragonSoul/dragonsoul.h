@@ -65,6 +65,7 @@ enum AdditionalEvents
     DATA_START_BLACKHORN_ENCOUNTER      = 19,
     DATA_HAGARA_INTRO_TRASH             = 20,
     DATA_PREPARE_SPINE_ENCOUNTER        = 21,
+    DATA_SPINE_OF_DEATHWING_PLATES      = 22,
 };
 
 enum AchievEvents

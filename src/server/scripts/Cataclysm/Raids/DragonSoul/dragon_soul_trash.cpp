@@ -1847,7 +1847,7 @@ enum Spells
     SPELL_ABSORB_BLOOD_DUMMY        = 105241, // target on 105223
     SPELL_ABSORBED_BLOOD            = 105248,
 
-    // Spawner ?
+    // Spawner
     SPELL_GRASPING_TENDRILS         = 105510,
     SPELL_GRASPING_TENDRILS_10      = 105563,
     SPELL_GRASPING_TENDRILS_25      = 109454,
@@ -1859,13 +1859,13 @@ enum Spells
     SPELL_BURST                     = 105219,
 
     // Burning Tendons
-    SPELL_SEAL_ARMOR_BREACH_1       = 105847,
-    SPELL_SEAL_ARMOR_BREACH_2       = 105848,
-    SPELL_BREACH_ARMOR_1            = 105363,
-    SPELL_BREACH_ARMOR_2            = 105385,
-    SPELL_PLATE_FLY_OFF_LEFT        = 105366,
-    SPELL_PLATE_FLY_OFF_RIGHT       = 105384,
-    SPELL_SLOW                      = 110907, // ?
+    SPELL_SEAL_ARMOR_BREACH_LEFT    = 105847, // 1698
+    SPELL_SEAL_ARMOR_BREACH_RIGHT   = 105848, // 1699
+    SPELL_BREACH_ARMOR_LEFT         = 105363, // 1677
+    SPELL_BREACH_ARMOR_RIGHT        = 105385, // 1681
+    SPELL_PLATE_FLY_OFF_LEFT        = 105366, // 1678
+    SPELL_PLATE_FLY_OFF_RIGHT       = 105384, // 1680
+    SPELL_SLOW                      = 110907,
 
     SPELL_BLOOD_CORRUPTION_DEATH    = 106199,
     SPELL_BLOOD_CORRUPTION_EARTH    = 106200,
@@ -1906,14 +1906,13 @@ public:
         void Reset() override
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetReactState(REACT_PASSIVE);
+            me->SetReactState(REACT_AGGRESSIVE);
 
             isGrip = false;
             damageCounter = 0;
             corruptedPosition = 0;
-            searingPlasmaTimer = urand(1000, 8000);
-            fieryGripTimer = 10000;
+            searingPlasmaTimer = urand(10000, 18000);
+            fieryGripTimer = urand(10000, 25000);
         }
 
         void JustDied(Unit * /*who*/) override
@@ -1961,12 +1960,10 @@ public:
             {
                 if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_FIERY_GRIP))
                 {
-                    me->CastCustomSpell(SPELL_FIERY_GRIP, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 3), pTarget, false);
+                    me->CastCustomSpell(SPELL_FIERY_GRIP, SPELLVALUE_MAX_TARGETS, 1, pTarget, false);
                     damageCounter = me->CountPctFromMaxHealth(20);
                     isGrip = true;
                 }
-                else
-                    pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true);
                 fieryGripTimer = urand(30000, 35000);
             }
             else fieryGripTimer -= diff;
@@ -1986,8 +1983,12 @@ public:
 
     struct npc_ds_spine_burning_tendonsAI : public ScriptedAI
     {
-        npc_ds_spine_burning_tendonsAI(Creature *creature) : ScriptedAI(creature) { }
+        npc_ds_spine_burning_tendonsAI(Creature *creature) : ScriptedAI(creature) 
+        {
+            instance = creature->GetInstanceScript();
+        }
 
+        InstanceScript* instance;
         uint32 openTimer;
         uint32 tendonsPosition;
         bool isOpen;
@@ -2005,7 +2006,22 @@ public:
 
         void JustDied(Unit * /*who*/) override
         {
-            me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_PLATE_FLY_OFF_RIGHT : SPELL_PLATE_FLY_OFF_LEFT, true);
+            if (me->GetEntry() == NPC_BURNING_TENDONS_LEFT)
+            {
+                if (Creature * pRightTendons = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, 100.0f, true))
+                    pRightTendons->DespawnOrUnsummon();
+            }
+            else if (me->GetEntry() == NPC_BURNING_TENDONS_RIGHT)
+            {
+                if (Creature * pLeftTendons = me->FindNearestCreature(NPC_BURNING_TENDONS_LEFT, 100.0f, true))
+                    pLeftTendons->DespawnOrUnsummon();
+            }
+
+            // Here is the part when Deathwing Plate should fly off - but whis spell doesn`t work
+            me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_PLATE_FLY_OFF_RIGHT : SPELL_PLATE_FLY_OFF_LEFT, false);
+
+            if (instance)
+                instance->SetData(DATA_SPINE_OF_DEATHWING_PLATES, 0);
         }
 
         void DoAction(const int32 action) override
@@ -2015,15 +2031,15 @@ public:
             case ACTION_OPEN_PLATE:
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->SetVisible(true);
-                if (GameObject * pPlate = me->FindNearestGameObject(GO_DEATHWING_BACK_PLATE_1, 100.0f))
-                    pPlate->CastSpell(pPlate, SPELL_PLATE_FLY_OFF_LEFT, false);
-                //me->CastSpell(me, 10000, false);
+                // Here plate should open - but whis spell doesn`t work
+                me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_BREACH_ARMOR_LEFT : SPELL_BREACH_ARMOR_RIGHT, false);
                 openTimer = 23000;
                 isOpen = true;
                 break;
             case ACTION_CLOSE_PLATE:
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                //me->CastSpell(me, 10000, false);
+                // Here plate should seal again - but whis spell doesn`t work
+                me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_SEAL_ARMOR_BREACH_LEFT : SPELL_SEAL_ARMOR_BREACH_RIGHT, false);
                 me->SetVisible(false);
                 break;
             default:
@@ -2099,7 +2115,6 @@ public:
                 {
                     moveBackTimer = 5000;
                     isDead = true;
-                    DoResetThreat();
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
@@ -2153,6 +2168,7 @@ public:
     {
         npc_ds_spine_hideous_amalgamationAI(Creature *creature) : ScriptedAI(creature) { }
 
+        TaskScheduler scheduler;
         uint32 searingPlasmaTimer;
         uint32 fieryGripTimer;
         bool isExplode;
@@ -2179,17 +2195,17 @@ public:
 
         void JustDied(Unit * /*who*/) override
         {
-            Creature * pBurningTendonsLeft = me->FindNearestCreature(NPC_BURNING_TENDONS_LEFT, 100.0f, true);
-            Creature * pBurningTendonsRight = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, 100.0f, true);
-            if (pBurningTendonsLeft && pBurningTendonsRight)
+            if (IsHeroic())
             {
-                if (me->GetDistance2d(pBurningTendonsLeft->GetPositionX(), pBurningTendonsLeft->GetPositionY()) <=
-                    me->GetDistance2d(pBurningTendonsRight->GetPositionX(), pBurningTendonsRight->GetPositionY()))
+                Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+                if (!PlList.isEmpty())
                 {
-                    pBurningTendonsLeft->AI()->DoAction(ACTION_OPEN_PLATE);
+                    for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
+                    {
+                        if (Player* pPlayer = itr->getSource())
+                            pPlayer->AddAura(SPELL_DEGRADATION, pPlayer);
+                    }
                 }
-                else
-                    pBurningTendonsRight->AI()->DoAction(ACTION_OPEN_PLATE);
             }
         }
 
@@ -2206,8 +2222,24 @@ public:
                         {
                             isExplode = true;
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             me->CastSpell(me, SPELL_NUCLEAR_BLAST, false);
-                            me->DespawnOrUnsummon(5500);
+                            scheduler.Schedule(Seconds(6), [this](TaskContext /* Task context */)
+                            {
+                                Creature * pBurningTendonsLeft = me->FindNearestCreature(NPC_BURNING_TENDONS_LEFT, 100.0f, true);
+                                Creature * pBurningTendonsRight = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, 100.0f, true);
+                                if (pBurningTendonsLeft && pBurningTendonsRight)
+                                {
+                                    if (me->GetDistance2d(pBurningTendonsLeft->GetPositionX(), pBurningTendonsLeft->GetPositionY()) <=
+                                        me->GetDistance2d(pBurningTendonsRight->GetPositionX(), pBurningTendonsRight->GetPositionY()))
+                                    {
+                                        pBurningTendonsLeft->AI()->DoAction(ACTION_OPEN_PLATE);
+                                    }
+                                    else
+                                        pBurningTendonsRight->AI()->DoAction(ACTION_OPEN_PLATE);
+                                }
+                                me->Kill(me);
+                            });
                         }
                     }
                 }
@@ -2216,10 +2248,51 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
+            scheduler.Update(diff);
+
             if (!UpdateVictim())
                 return;
 
             DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_ds_spine_spawner : public CreatureScript
+{
+public:
+    npc_ds_spine_spawner() : CreatureScript("npc_ds_spine_spawner") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_spine_spawnerAI(pCreature);
+    }
+
+    struct npc_ds_spine_spawnerAI : public ScriptedAI
+    {
+        npc_ds_spine_spawnerAI(Creature *creature) : ScriptedAI(creature) { }
+
+        uint32 checkTimer;
+
+        void Reset() override
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            checkTimer = 1000;
+        }
+
+        void UpdateAI(const uint32 diff) override 
+        {
+            if (checkTimer <= diff)
+            {
+                if (me->FindNearestCreature(NPC_CORRUPTION, 5.0f, true))
+                    me->RemoveAura(SPELL_GRASPING_TENDRILS);
+                else
+                    me->CastSpell(me, SPELL_GRASPING_TENDRILS, false);
+                checkTimer = 2500;
+            }
+            else checkTimer -= diff;
         }
     };
 };
@@ -2851,7 +2924,7 @@ public:
                 {
                     instance->SetData(DATA_PREPARE_SPINE_ENCOUNTER, 0);
                     PlayMovieToPlayers(74);
-                    scheduler.Schedule(Seconds(20), [this](TaskContext /*Show Movie and teleport to Spine of Deathwing*/)
+                    scheduler.Schedule(Seconds(19), [this](TaskContext /*Show Movie and teleport to Spine of Deathwing*/)
                     {
                         TeleportAllPlayers(ACTION_SPINE_OF_DEATHWING, true);
                     });
@@ -2900,6 +2973,7 @@ void AddSC_dragon_soul_trash()
     new npc_ds_spine_corrupted_blood();
     new npc_ds_spine_hideous_amalgamation();
     new npc_ds_spine_burning_tendons();
+    new npc_ds_spine_spawner();
     new npc_ds_instance_teleporter();
     new npc_ds_travel_with_drakes();
     new go_ds_instance_teleporter();

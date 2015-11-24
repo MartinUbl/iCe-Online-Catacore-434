@@ -33,6 +33,7 @@ public:
         uint32 hagaraTrashKills;
         uint32 aspectsPrepareToChannel;
         uint32 drakesKilled;
+        uint32 platesDestroyed;
 
         uint64 morchokGuid;
         uint64 yorsahjGuid;
@@ -95,6 +96,7 @@ public:
             hagaraTrashKills        = 0;
             drakesKilled            = 0;
             aspectsPrepareToChannel = 0;
+            platesDestroyed         = 0;
 
             valeeraGuid             = 0;
             eiendormiGuid           = 0;
@@ -284,6 +286,8 @@ public:
                 return aspectsPrepareToChannel;
             else if (DataId == DATA_ULTRAXION_DRAKES)
                 return drakesKilled;
+            else if (DataId == DATA_SPINE_OF_DEATHWING_PLATES)
+                return platesDestroyed;
 
             return 0;
         }
@@ -348,6 +352,13 @@ public:
             {
                 if (Creature * pDeathwingSpine = this->instance->GetCreature(deathwingSpineGuid))
                     pDeathwingSpine->AI()->DoAction(DATA_PREPARE_SPINE_ENCOUNTER);
+            }
+            else if (type == DATA_SPINE_OF_DEATHWING_PLATES)
+            {
+                platesDestroyed++;
+
+                if (Creature * pDeathwingSpine = this->instance->GetCreature(deathwingSpineGuid))
+                    pDeathwingSpine->AI()->DoAction(DATA_SPINE_OF_DEATHWING_PLATES);
             }
 
             if (data == DONE)
