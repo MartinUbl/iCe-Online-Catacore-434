@@ -85,7 +85,7 @@ enum DragonsoulCreatureIds
 
     // Thrall
     NPC_THRALL                          = 56667, // Ultraxion - Top of the Wyrmrest Temple
-    NPC_THRALL_SPINE                    = 56103, // After Spine of Deathwing
+    NPC_THRALL_MADNESS_START            = 56103, // After Spine of Deathwing
     NPC_THRALL_MADNESS                  = 58232, // After killing Madness of Deathwing - outro
 
     // Aspects

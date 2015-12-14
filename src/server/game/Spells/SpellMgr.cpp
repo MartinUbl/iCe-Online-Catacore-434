@@ -4438,6 +4438,23 @@ void SpellMgr::LoadSpellCustomAttr()
         case 108406: // Shockwave
             spellInfo->AttributesEx5 &= ~SPELL_ATTR5_UNK19; // SPELL_ATTR5_DONT_TURN_DURING_CAST
             break;
+        // Madness of Deathwing
+        case 106464: // Enter the Dream
+            spellInfo->DurationIndex = 21; // unlimited
+            break;
+        case 106641: // Concentration (Aspects)
+        case 106642:
+        case 106643:
+        case 106644:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            break;
+        //case 105565: // Cauterize
+        case 106588: // Expoose Weakness (Aspects)
+        case 106600:
+        case 106613:
+        case 106624:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            break;
 /*************************        DRAGON SOUL END        *****************************/
 
         case 88691: //Marked for Death Tracking

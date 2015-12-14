@@ -1812,6 +1812,498 @@ public:
 ///    Madness stuff    ///
 ///////////////////////////
 
+enum MadnessNpc
+{
+    NPC_MADNESS_OF_DEATHWING            = 56173,
+    NPC_ALEXSTRASZA_DRAGON              = 56099,
+    NPC_NOZDORMU_DRAGON                 = 56102,
+    NPC_YSERA_DRAGON                    = 56100,
+    NPC_KALECGOS_DRAGON                 = 56101,
+    NPC_JUMP_PAD                        = 56699,
+    NPC_PLATFORM                        = 56307,
+    NPC_TIMEZONE                        = 56311,
+};
+
+enum MadnessSpells
+{
+    // Aspects
+    SPELL_ALEXSTRASZA_PRESENCE          = 105825,
+    SPELL_ALEXSTRASZA_PRESENCE_AURA     = 106028,
+    SPELL_ALEXSTRASZA_PRESENCE_AURA_25  = 109571,
+    SPELL_ALEXSTRASZA_PRESENCE_AURA_10H = 109572,
+    SPELL_ALEXSTRASZA_PRESENCE_AURA_25H = 109573,
+
+    SPELL_CAUTERIZE_BLIST_TENTACLE_10N  = 105565, // Cast
+    SPELL_CAUTERIZE_BLIST_TENTACLE_25N  = 109579,
+    SPELL_CAUTERIZE_BLIST_TENTACLE_10HC = 109580,
+    SPELL_CAUTERIZE_BLIST_TENTACLE_25HC = 109581,
+    SPELL_CAUTERIZE_DMG_10N             = 105569, // Dmg
+    SPELL_CAUTERIZE_DMG_25N             = 109576,
+    SPELL_CAUTERIZE_DMG_10HC            = 109577,
+    SPELL_CAUTERIZE_DMG_25HC            = 109578,
+
+    SPELL_CAUTERIZE_2_1                 = 106860, // deathwing phase 2 5 sec
+    SPELL_CAUTERIZE_2_2                 = 106888, // deathwing phase 2 10 sec
+    SPELL_CAUTERIZE_2_3                 = 106889, // deathwing phase 2 15 sec
+    SPELL_CAUTERIZE_2_DMG               = 106886,
+    SPELL_CAUTERIZE_3                   = 108840, // parasite
+    SPELL_CAUTERIZE_3_DMG               = 109045,
+
+    SPELL_NOZDORMU_PRESENCE             = 105823,
+    SPELL_NOZDORMU_PRESENCE_AURA        = 106027,
+    SPELL_NOZDORMU_PRESENCE_AURA_25     = 109622,
+    SPELL_NOZDORMU_PRESENCE_AURA_10H    = 109623,
+    SPELL_NOZDORMU_PRESENCE_AURA_25H    = 109624,
+    SPELL_TIME_ZONE_FORCE               = 106919, // first spell, there are npcs 'platform'
+    SPELL_TIME_ZONE_SUMMON_TARGET       = 105793, // summon target
+    SPELL_TIME_ZONE_MISSILE_1           = 105799,
+    SPELL_TIME_ZONE_SUMMON_1            = 105802, // summon time zone
+    SPELL_TIME_ZONE                     = 105831, // main aura on trigger
+    SPELL_TIME_ZONE_AURA_1              = 105830, // aura (debuff)
+    SPELL_TIME_ZONE_MISSILE_2           = 107055, // ? maybe heroic
+    SPELL_TIME_ZONE_SUMMON_2            = 107057, // ? maybe heroic
+    SPELL_TIME_ZONE_AURA_2              = 108646, // for parasite
+
+    SPELL_YSERA_PRESENCE                = 106456,
+    SPELL_YSERA_PRESENCE_AURA           = 106457,
+    SPELL_YSERA_PRESENCE_AURA_25        = 109640,
+    SPELL_YSERA_PRESENCE_AURA_10H       = 109641,
+    SPELL_YSERA_PRESENCE_AURA_25H       = 109642,
+    SPELL_THE_DREAMER                   = 106463,
+    SPELL_ENTER_THE_DREAM               = 106464,
+
+    SPELL_KALECGOS_PRESENCE             = 106026,
+    SPELL_KALECGOS_PRESENCE_AURA        = 106029,
+    SPELL_KALECGOS_PRESENCE_AURA_25     = 109606,
+    SPELL_KALECGOS_PRESENCE_AURA_10H    = 109607,
+    SPELL_KALECGOS_PRESENCE_AURA_25H    = 109608,
+    SPELL_SPELLWEAVER                   = 106039,
+    SPELL_SPELLWEAVING                  = 106040,
+
+    // Thrall
+    SPELL_ASTRAL_RECALL                 = 108537,
+    SPELL_ASTRAL_RECALL_2               = 101063,
+    SPELL_TRIGGER_ASPECT_YELL_1         = 109708,
+    SPELL_TRIGGER_ASPECT_YELL_2         = 109727,
+    SPELL_FIRE_DRAGON_SOUL_ASPECTS      = 110067,
+    SPELL_FIRE_DRAGON_SOUL              = 109971,
+    SPELL_FIRE_DRAGON_SOUL_SCRIPT       = 110065,
+
+    // Jump Pad
+    SPELL_CARRYING_WINDS_DUMMY          = 106678,
+    SPELL_CARRYING_WINDS_SPEED_10N      = 106664,
+    SPELL_CARRYING_WINDS_SPEED_25N      = 109963,
+    SPELL_CARRYING_WINDS_SPEED_10HC     = 109962,
+    SPELL_CARRYING_WINDS_SPEED_25HC     = 109961,
+};
+
+const Position jumpPadSpawnPos[36] =
+{
+    // 1 to 2
+    { -11990.8f, 12284.9f,  0.00f, 6.25f },
+    { -11989.7f, 12271.9f,  0.00f, 5.27f },
+    { -11987.3f, 12261.2f,  0.00f, 0.29f },
+    { -11981.8f, 12251.7f,  0.00f, 0.32f },
+    { -11975.7f, 12243.3f,  0.00f, 0.27f },
+    { -11969.4f, 12233.7f,  0.00f, 5.13f },
+    // 2 to 1
+    { -12029.6f, 12261.1f, -4.90f, 1.00f },
+    { -12021.3f, 12253.6f, -4.90f, 0.75f },
+    { -12013.1f, 12247.1f, -5.55f, 5.42f },
+    { -12009.6f, 12237.1f, -6.55f, 5.38f },
+    { -12002.5f, 12228.5f, -6.55f, 6.13f },
+    { -11996.7f, 12218.6f, -6.55f, 3.45f },
+    // 2 to 3
+    { -12076.4f, 12225.7f, -7.45f, 5.79f },
+    { -12070.7f, 12216.5f, -7.45f, 0.62f },
+    { -12067.6f, 12207.4f, -7.90f, 1.90f },
+    { -12060.6f, 12199.2f, -7.45f, 0.01f },
+    { -12054.4f, 12190.5f, -7.45f, 0.62f },
+    { -12047.9f, 12181.2f, -7.45f, 5.42f },
+    // 3 to 2
+    { -12103.3f, 12194.7f, -4.36f, 6.11f },
+    { -12091.9f, 12191.5f, -4.36f, 5.31f },
+    { -12083.3f, 12183.7f, -4.36f, 6.00f },
+    { -12072.4f, 12179.2f, -4.36f, 5.65f },
+    { -12063.2f, 12172.2f, -4.36f, 4.23f },
+    { -12054.1f, 12165.9f, -4.28f, 5.69f },
+    // 3 to 4
+    { -12131.4f, 12147.3f, -2.74f, 0.52f },
+    { -12122.5f, 12140.1f, -2.74f, 1.07f },
+    { -12113.2f, 12135.4f, -2.74f, 0.98f },
+    { -12103.4f, 12132.3f, -2.74f, 1.08f },
+    { -12093.5f, 12127.6f, -2.74f, 1.15f },
+    { -12082.8f, 12124.7f, -3.04f, 5.84f },
+    // 4 to 3
+    { -12086.9f, 12093.6f,  0.75f, 2.77f },
+    { -12095.4f, 12097.0f,  0.26f, 5.84f },
+    { -12105.1f, 12101.5f,  0.48f, 4.51f },
+    { -12115.7f, 12102.9f,  1.27f, 4.39f },
+    { -12126.2f, 12105.1f,  1.20f, 6.12f },
+    { -12135.4f, 12111.9f,  0.47f, 5.93f },
+};
+
+const Position jumpPadLandPos[6] =
+{
+    { -12022.9f, 12233.8f, -6.38f, 0.0f }, // from 1 to 2
+    { -11970.9f, 12260.5f,  1.26f, 0.0f }, // from 2 to 1
+    { -12086.9f, 12172.9f, -3.02f, 0.0f }, // from 2 to 3
+    { -12053.5f, 12210.7f, -6.00f, 0.0f }, // from 3 to 2
+    { -12114.6f, 12090.8f,  2.30f, 0.0f }, // from 3 to 4
+    { -12098.0f, 12149.4f, -2.73f, 0.0f }, // from 4 to 3
+};
+
+const Position thrallPos = { -12061.8f, 12188.0f, 10.2f, 5.57f };
+
+const Position alexstraszaPos = { -11957.3f, 12338.3f, 38.9f, 5.061f };
+const Position nozdormuPos = { -12093.8f, 12312.0f, 38.9f, 5.427f };
+const Position yseraPos = { -12157.4f, 12212.5f, 38.9f, 5.759f };
+const Position kalecgosPos = { -12224.8f, 12128.5f, 38.9f, 5.846f };
+
+// List of gossip texts
+#define GOSSIP_DESTROYER_DEFEAT     "We defeated the Destroyer!"
+#define GOSSIP_WHATS_THAT_NOICE     "Inconceivable! He coulnd't possibly be alive!"
+
+enum ThrallActions
+{
+    ACTION_THRALL_INTRO_SPEECH         = 0,
+    ACTION_SPAWN_JUMP_PADS             = 1,
+    ACTION_START_MADNESS_ENCOUNTER     = 2,
+    ACTION_ADD_ENTER_THE_DREAM_ABILITY = 3,
+    ACTION_ADD_SPELLWEAVING            = 4,
+    ACTION_TELEPORT_HOME               = 5,
+    ACTION_CAUTERIZE                   = 6,
+};
+
+class npc_ds_madness_thrall : public CreatureScript
+{
+public:
+    npc_ds_madness_thrall() : CreatureScript("npc_ds_madness_thrall") { }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        if (pCreature->GetInstanceScript()->GetData(TYPE_BOSS_MADNESS_OF_DEATHWING) != 3)
+        {
+            if (pCreature->AI()->GetData(ACTION_THRALL_INTRO_SPEECH) == 0)
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_DESTROYER_DEFEAT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
+            }
+            else
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_WHATS_THAT_NOICE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+                pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
+            }
+        }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            pCreature->AI()->DoAction(ACTION_THRALL_INTRO_SPEECH);
+            pCreature->AI()->DoAction(ACTION_SPAWN_JUMP_PADS);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+        else if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
+        {
+            pCreature->AI()->DoAction(ACTION_START_MADNESS_ENCOUNTER);
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_madness_thrallAI(pCreature);
+    }
+
+    struct npc_ds_madness_thrallAI : public ScriptedAI
+    {
+        npc_ds_madness_thrallAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            instance = pCreature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        TaskScheduler scheduler;
+        uint8 intro;
+
+        void Reset() override
+        {
+            intro = 0;
+        }
+
+        void DoAction(const int32 action) override
+        {
+            switch (action)
+            {
+            case ACTION_THRALL_INTRO_SPEECH:
+                intro = 1;
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                scheduler.Schedule(Seconds(0), [this](TaskContext introSpeech)
+                {
+                    if (introSpeech.GetRepeatCounter() == 0)
+                    {
+                        Creature* pAlexstrasza = me->SummonCreature(NPC_ALEXSTRASZA_DRAGON_FORM, alexstraszaPos, TEMPSUMMON_MANUAL_DESPAWN);
+                        Creature* pKalecgos = me->SummonCreature(NPC_KALECGOS_DRAGON_FORM, kalecgosPos, TEMPSUMMON_MANUAL_DESPAWN);
+                        Creature* pNozdormu = me->SummonCreature(NPC_NOZDORMU_DRAGON_FORM, nozdormuPos, TEMPSUMMON_MANUAL_DESPAWN);
+                        Creature* pYsera = me->SummonCreature(NPC_YSERA_DRAGON_FORM, yseraPos, TEMPSUMMON_MANUAL_DESPAWN);
+                        if (pAlexstrasza && pKalecgos && pYsera && pNozdormu)
+                        {
+                            me->MonsterYell("It is done; at last the Destroyer has met his end. Now, we can begin to heal our world.", LANG_UNIVERSAL, false);
+                            me->SendPlaySound(25901, false);
+                            introSpeech.Repeat(Seconds(10));
+                        }
+                    }
+                    else if (introSpeech.GetRepeatCounter() == 1)
+                    {
+                        if (Creature* pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_DRAGON_FORM, 300.0f, true))
+                            pAlexstrasza->MonsterYell("You have accomplished the impossible, succeeded where all Azeroth feared you would fail.", LANG_UNIVERSAL, false);
+                        me->SendPlaySound(26501, false);
+                        introSpeech.Repeat(Seconds(9));
+                    }
+                    else if (introSpeech.GetRepeatCounter() == 2)
+                    {
+                        if (Creature* pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_DRAGON_FORM, 300.0f, true))
+                            pAlexstrasza->MonsterYell("Before you is the Cache of the Aspects. Take from it what you will, for you have more than earned the right.", LANG_UNIVERSAL, false);
+                        me->SendPlaySound(26502, false);
+                        introSpeech.Repeat(Seconds(11));
+                    }
+                    else if (introSpeech.GetRepeatCounter() == 3)
+                    {
+                        if (Creature* pNozdormu = me->FindNearestCreature(NPC_NOZDORMU_DRAGON_FORM, 300.0f, true))
+                            pNozdormu->MonsterYell("...although, you may want to hurry.", LANG_UNIVERSAL, false);
+                        me->SendPlaySound(25952, false);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    }
+                });
+                break;
+            case ACTION_SPAWN_JUMP_PADS:
+                for (uint8 i = 0; i < 36; i++)
+                {
+                    uint32 platformPos = 0;
+                    if (i <= 5)
+                        platformPos = 0;
+                    else if (i <= 11)
+                        platformPos = 1;
+                    else if (i <= 17)
+                        platformPos = 2;
+                    else if (i <= 23)
+                        platformPos = 3;
+                    else if (i <= 29)
+                        platformPos = 4;
+                    else if (i <= 35)
+                        platformPos = 5;
+
+                    if (Creature * pJumpPad = me->SummonCreature(NPC_JUMP_PAD, jumpPadSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN))
+                        pJumpPad->AI()->SetData(ACTION_SPAWN_JUMP_PADS, platformPos);
+                }
+                break;
+            case ACTION_START_MADNESS_ENCOUNTER:
+                if (Creature* pYsera = me->FindNearestCreature(NPC_YSERA_DRAGON_FORM, 300.0f, true))
+                    pYsera->AI()->DoAction(ACTION_ADD_ENTER_THE_DREAM_ABILITY);
+                if (Creature* pKalecgos = me->FindNearestCreature(NPC_KALECGOS_DRAGON_FORM, 300.0f, true))
+                    pKalecgos->AI()->DoAction(ACTION_ADD_SPELLWEAVING);
+
+                me->CastSpell(me, SPELL_ASTRAL_RECALL, false);
+
+                scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
+                {
+                    if (Creature* pMadnessDeathwing = me->FindNearestCreature(NPC_MADNESS_OF_DEATHWING, 300.0f, true))
+                        pMadnessDeathwing->SetInCombatWithZone();
+
+                    me->GetMotionMaster()->MoveJump(thrallPos.GetPositionX(), thrallPos.GetPositionY(), thrallPos.GetPositionZ(), 100.0f, 100.0f);
+                    me->NearTeleportTo(thrallPos.GetPositionX(), thrallPos.GetPositionY(), thrallPos.GetPositionZ(), thrallPos.GetOrientation());
+                    scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
+                    {
+                        me->SetOrientation(thrallPos.GetOrientation());
+                    });
+                });
+                break;
+            case ACTION_TELEPORT_HOME:
+                me->GetMotionMaster()->MoveJump(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ(), 100.0f, 100.0f);
+                me->NearTeleportTo(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ(), me->GetHomePosition().GetOrientation());
+                scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
+                {
+                    me->SetOrientation(me->GetHomePosition().GetOrientation());
+                });
+                break;
+            default:
+                break;
+            }
+        }
+
+        uint32 GetData(uint32 data)
+        {
+            return intro;
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            scheduler.Update(diff);
+        }
+    };
+};
+
+class npc_ds_madness_aspects_dragon_form : public CreatureScript
+{
+public:
+    npc_ds_madness_aspects_dragon_form() : CreatureScript("npc_ds_madness_aspects_dragon_form") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_madness_aspects_dragon_formAI(pCreature);
+    }
+
+    struct npc_ds_madness_aspects_dragon_formAI : public ScriptedAI
+    {
+        npc_ds_madness_aspects_dragon_formAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        void Reset() override
+        {
+            me->SetFlying(true);
+            switch (me->GetEntry())
+            {
+            case NPC_ALEXSTRASZA_DRAGON_FORM:
+                me->CastSpell(me, SPELL_ALEXSTRASZA_PRESENCE, false);
+                break;
+            case NPC_NOZDORMU_DRAGON_FORM:
+                me->CastSpell(me, SPELL_NOZDORMU_PRESENCE, false);
+                break;
+            case NPC_KALECGOS_DRAGON_FORM:
+                me->CastSpell(me, SPELL_KALECGOS_PRESENCE, false);
+                break;
+            case NPC_YSERA_DRAGON_FORM:
+                me->CastSpell(me, SPELL_YSERA_PRESENCE, false);
+                break;
+            default:
+                break;
+            }
+        }
+
+        void DoAction(const int32 action) override
+        {
+            if (action == ACTION_CAUTERIZE)
+            {
+                me->MonsterYell("Action Cauterize", LANG_UNIVERSAL, 0);
+                if (me->HasAura(SPELL_ALEXSTRASZA_PRESENCE))
+                {
+                    me->CastSpell(me, SPELL_CAUTERIZE_BLIST_TENTACLE_10N, false);
+                    me->MonsterYell("Cauterizing", LANG_UNIVERSAL, 0);
+                }
+            }
+
+            Map * map = me->GetMap();
+            if (!map)
+                return;
+
+            Map::PlayerList const& plrList = map->GetPlayers();
+            if (plrList.isEmpty())
+                return;
+
+            for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+            {
+                if (Player* pl = itr->getSource())
+                {
+                    if (action == ACTION_ADD_ENTER_THE_DREAM_ABILITY)
+                        pl->CastSpell(pl, SPELL_ENTER_THE_DREAM, true);
+                    else if (action == ACTION_ADD_ENTER_THE_DREAM_ABILITY)
+                        me->CastSpell(me, SPELL_SPELLWEAVING, false);
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override { }
+    };
+};
+
+enum JumpPads
+{
+    JUMP_PAD_1_TO_2                     = 0,
+    JUMP_PAD_2_TO_1                     = 1,
+    JUMP_PAD_2_TO_3                     = 2,
+    JUMP_PAD_3_TO_2                     = 3,
+    JUMP_PAD_3_TO_4                     = 4,
+    JUMP_PAD_4_TO_3                     = 5,
+};
+
+class npc_ds_madness_jump_pad : public CreatureScript
+{
+public:
+    npc_ds_madness_jump_pad() : CreatureScript("npc_ds_madness_jump_pad") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_madness_jump_padAI(pCreature);
+    }
+
+    struct npc_ds_madness_jump_padAI : public ScriptedAI
+    {
+        npc_ds_madness_jump_padAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        uint32 jumpPadPos;
+
+        void Reset() override
+        {
+            jumpPadPos = 0;
+            me->SetVisible(false);
+        }
+
+        void SetData(uint32 type, uint32 data) override
+        {
+            if (type == ACTION_SPAWN_JUMP_PADS)
+            {
+                jumpPadPos = data;
+            }
+        }
+
+        void MoveInLineOfSight(Unit *who)
+        {
+            if (!who)
+                return;
+
+            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && who->GetExactDist2d(me) < 9.0f)
+            {
+                uint8 jumpLandPos = 0;
+                switch (jumpPadPos)
+                {
+                case JUMP_PAD_1_TO_2:
+                    jumpLandPos = JUMP_PAD_1_TO_2;
+                    break;
+                case JUMP_PAD_2_TO_1:
+                    jumpLandPos = JUMP_PAD_2_TO_1;
+                    break;
+                case JUMP_PAD_2_TO_3:
+                    jumpLandPos = JUMP_PAD_2_TO_3;
+                    break;
+                case JUMP_PAD_3_TO_2:
+                    jumpLandPos = JUMP_PAD_3_TO_2;
+                    break;
+                case JUMP_PAD_3_TO_4:
+                    jumpLandPos = JUMP_PAD_3_TO_4;
+                    break;
+                case JUMP_PAD_4_TO_3:
+                    jumpLandPos = JUMP_PAD_4_TO_3;
+                    break;
+                default:
+                    break;
+                }
+                if (!who->HasAura(SPELL_CARRYING_WINDS_SPEED_10N) && !who->HasAura(SPELL_CARRYING_WINDS_SPEED_25N)
+                    && !who->HasAura(SPELL_CARRYING_WINDS_SPEED_10HC) && !who->HasAura(SPELL_CARRYING_WINDS_SPEED_25HC))
+                {
+                    who->GetMotionMaster()->MoveJump(jumpPadLandPos[jumpLandPos].GetPositionX(), jumpPadLandPos[jumpLandPos].GetPositionY(), jumpPadLandPos[jumpLandPos].GetPositionZ(), 25.0f, 15.0f);
+                    who->CastSpell(who, SPELL_CARRYING_WINDS_SPEED_10N, true);
+                }
+            }
+        }
+    };
+};
+
 ////////////////////////////
 /// Other instance stuff ///
 ////////////////////////////
@@ -2480,6 +2972,9 @@ void AddSC_dragon_soul_trash()
     new npc_ds_twilight_flames();
     new npc_ds_engine_stalker();
     new npc_ds_skyfire_deck();
+    new npc_ds_madness_thrall();
+    new npc_ds_madness_aspects_dragon_form();
+    new npc_ds_madness_jump_pad();
     new npc_ds_instance_teleporter();
     new npc_ds_travel_with_drakes();
     new go_ds_instance_teleporter();
