@@ -1147,8 +1147,8 @@ public:
         if (Creature * pHagara = pGo->FindNearestCreature(NPC_HAGARA_THE_STORMBINDER, 200.0f, true))
         {
             pHagara->SetFacingTo(6.27f);
-            pHagara->SetVisible(true);
             pHagara->AI()->DoAction(DATA_HAGARA_INTRO_TRASH);
+            //pGo->Use(pPlayer);
             pGo->Delete();
         }
         return true;
@@ -2115,7 +2115,10 @@ public:
                 scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
                 {
                     if (Creature* pMadnessDeathwing = me->FindNearestCreature(NPC_MADNESS_OF_DEATHWING, 300.0f, true))
+                    {
                         pMadnessDeathwing->SetInCombatWithZone();
+                        pMadnessDeathwing->CastSpell(pMadnessDeathwing, 75764, false); // Emerge
+                    }
 
                     me->GetMotionMaster()->MoveJump(thrallPos.GetPositionX(), thrallPos.GetPositionY(), thrallPos.GetPositionZ(), 100.0f, 100.0f);
                     me->NearTeleportTo(thrallPos.GetPositionX(), thrallPos.GetPositionY(), thrallPos.GetPositionZ(), thrallPos.GetOrientation());

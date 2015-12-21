@@ -1037,7 +1037,10 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                             // Consecration
                             case 20720: visual = 17387; break;
                             // Frost trap aura
-                            case 3759: visual = 20731; break;
+                            case 3759:
+                                if (owner->GetEntry() != 119556) // exception for Hagara Encounter
+                                    visual = 20731;
+                                break;
                             // Power Word: Barrier
                             case 13210: visual = 20732; break;
                             // Hand of Gul'Dan

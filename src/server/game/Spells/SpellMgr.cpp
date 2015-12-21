@@ -4366,6 +4366,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
             break;
+        case 107850: // Focused Assault
+            spellInfo->Effect[0] = SPELL_EFFECT_SCHOOL_DAMAGE;
+            break;
         // Ultraxion
         case 105929: // Heroic Will
         case 106369: // Twilight Shift
@@ -4397,7 +4400,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             spellInfo->EffectTriggerSpell[0] = 0;
             spellInfo->EffectTriggerSpell[1] = 0;
-            spellInfo->AttributesEx5 &= ~SPELL_ATTR5_UNK19; // SPELL_ATTR5_DONT_TURN_DURING_CAST
+            spellInfo->AttributesEx5 |= SPELL_ATTR5_UNK19; // SPELL_ATTR5_DONT_TURN_DURING_CAST
             break;
         case 103327: // Hour of Twilight
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;

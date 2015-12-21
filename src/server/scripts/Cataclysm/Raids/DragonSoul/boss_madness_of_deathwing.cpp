@@ -362,7 +362,7 @@ public:
             }
 
             std::list<Creature*> time_zone;
-            GetCreatureListWithEntryInGrid(time_zone, me, NPC_TIME_ZONE, 300.0f);
+            GetCreatureListWithEntryInGrid(time_zone, me, NPC_TIME_ZONE, 500.0f);
             for (std::list<Creature*>::const_iterator itr = time_zone.begin(); itr != time_zone.end(); ++itr)
             {
                 (*itr)->DespawnOrUnsummon();

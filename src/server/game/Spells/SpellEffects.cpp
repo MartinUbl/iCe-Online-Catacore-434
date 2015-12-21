@@ -6034,6 +6034,10 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
         }
     }
 
+    // Frostflake
+    if (unitTarget->HasAura(109325))
+        unitTarget->RemoveAurasDueToSpell(109325);
+
     Unit::AuraMap const& auras = unitTarget->GetOwnedAuras();
     for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
