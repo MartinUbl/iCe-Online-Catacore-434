@@ -597,7 +597,9 @@ class ByteBuffer
             lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
 
             #if _MSC_VER >= 1900
-            #define __timezone _timezone
+                #define __timezone _timezone
+            #else
+                #define __timezone timezone
             #endif
 
             return uint32(mktime(&lt) + __timezone);
