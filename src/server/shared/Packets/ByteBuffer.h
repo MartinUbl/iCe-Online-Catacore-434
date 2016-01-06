@@ -596,7 +596,11 @@ class ByteBuffer
             lt.tm_mon = (packedDate >> 20) & 0xF;
             lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
 
-            return uint32(mktime(&lt) + timezone);
+            #if _MSC_VER >= 1900
+            #define __timezone _timezone
+            #endif
+
+            return uint32(mktime(&lt) + __timezone);
         }
 
         ByteBuffer& ReadPackedTime(uint32& time)
