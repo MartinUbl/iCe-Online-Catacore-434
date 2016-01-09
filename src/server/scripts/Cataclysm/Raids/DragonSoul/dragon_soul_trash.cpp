@@ -2214,7 +2214,7 @@ public:
             {
                 if (Aura * aur = me->GetAura(SPELL_SUPERHEATED_NUCLEUS))
                 {
-                    damage = 0;
+                    damage = me->GetHealth() - 1;
                     if (!isExplode)
                     {
                         isExplode = true;
