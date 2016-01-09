@@ -2172,6 +2172,7 @@ public:
         uint32 searingPlasmaTimer;
         uint32 fieryGripTimer;
         bool isExplode;
+        int absorbedBloodCount = 0;
 
         void Reset() override
         {
@@ -2184,12 +2185,10 @@ public:
             if (action == ACTION_ABSORB_BLOOD)
             {
                 me->CastSpell(me, SPELL_ABSORBED_BLOOD, true);
-
-                if (Aura * aur = me->GetAura(SPELL_ABSORBED_BLOOD))
-                {
-                    if (aur->GetStackAmount() == 9)
-                        me->CastSpell(me, SPELL_SUPERHEATED_NUCLEUS, true);
-                }
+                // the spell SPELL_ABSORBED_BLOOD has a travel time - can't look at its aura
+                absorbedBloodCount++;
+                if (absorbedBloodCount == 9)
+                    me->CastSpell(me, SPELL_SUPERHEATED_NUCLEUS, true);
             }
         }
 
@@ -2213,34 +2212,31 @@ public:
         {
             if (me->GetHealth() <= damage)
             {
-                if (Aura * aur = me->GetAura(SPELL_ABSORBED_BLOOD))
+                if (Aura * aur = me->GetAura(SPELL_SUPERHEATED_NUCLEUS))
                 {
-                    if (aur->GetStackAmount() >= 9)
+                    damage = 0;
+                    if (!isExplode)
                     {
-                        damage = 0;
-                        if (!isExplode)
+                        isExplode = true;
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        me->CastSpell(me, SPELL_NUCLEAR_BLAST, false);
+                        scheduler.Schedule(Seconds(6), [this](TaskContext /* Task context */)
                         {
-                            isExplode = true;
-                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            me->CastSpell(me, SPELL_NUCLEAR_BLAST, false);
-                            scheduler.Schedule(Seconds(6), [this](TaskContext /* Task context */)
+                            Creature * pBurningTendonsLeft = me->FindNearestCreature(NPC_BURNING_TENDONS_LEFT, 100.0f, true);
+                            Creature * pBurningTendonsRight = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, 100.0f, true);
+                            if (pBurningTendonsLeft && pBurningTendonsRight)
                             {
-                                Creature * pBurningTendonsLeft = me->FindNearestCreature(NPC_BURNING_TENDONS_LEFT, 100.0f, true);
-                                Creature * pBurningTendonsRight = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, 100.0f, true);
-                                if (pBurningTendonsLeft && pBurningTendonsRight)
+                                if (me->GetDistance2d(pBurningTendonsLeft->GetPositionX(), pBurningTendonsLeft->GetPositionY()) <=
+                                    me->GetDistance2d(pBurningTendonsRight->GetPositionX(), pBurningTendonsRight->GetPositionY()))
                                 {
-                                    if (me->GetDistance2d(pBurningTendonsLeft->GetPositionX(), pBurningTendonsLeft->GetPositionY()) <=
-                                        me->GetDistance2d(pBurningTendonsRight->GetPositionX(), pBurningTendonsRight->GetPositionY()))
-                                    {
-                                        pBurningTendonsLeft->AI()->DoAction(ACTION_OPEN_PLATE);
-                                    }
-                                    else
-                                        pBurningTendonsRight->AI()->DoAction(ACTION_OPEN_PLATE);
+                                    pBurningTendonsLeft->AI()->DoAction(ACTION_OPEN_PLATE);
                                 }
-                                me->Kill(me);
-                            });
-                        }
+                                else
+                                    pBurningTendonsRight->AI()->DoAction(ACTION_OPEN_PLATE);
+                            }
+                            me->Kill(me);
+                        });
                     }
                 }
             }
