@@ -15,18 +15,29 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+ /*
+ Encounter: Warlord Zon'ozz
+ Dungeon: Dragon Soul
+ Difficulty: Normal / Heroic
+ Mode: 10-man normal/ 10-man heroic
+ Autor: Artisan
+ Note: 25 normal and 25 heroic NYI
+ */
+
 #include "ScriptPCH.h"
 #include "dragonsoul.h"
 #include "MapManager.h"
+#include "TaskScheduler.h"
 
-enum spells
+enum spells : uint32
 {
     /* BOSS SPELLS */
     SPELL_FOCUSED_ANGER                 = 104543, // OK
     SPELL_PSYCHIC_DRAIN                 = 104323, // OK
     SPELL_DISRUPTING_SHADOWS            = 103434, // OK (maybe cast with max affected targets)
     SPELL_DISRUPTING_SHADOWS_KNOCKBACK  = 103948, // this should be triggered after dispeling spell above
-    SPELL_BLACK_BLOOD_INFINTY           = 104377, // infinite duration (in heroic ?)
+    SPELL_BLACK_BLOOD_10_HC             = 104377, // stackable periodic damage aura
+    SPELL_BLACK_BLOOD_25_HC             = 110306, // stackable periodic damage aura
     SPELL_BLACK_BLOOD                   = 104378, // higher damage + 30 s duration
     SPELL_VOID_OF_THE_UNMAKING_CHANNEL  = 103946, // dummy channel
     SPELL_VOID_OF_THE_UNMAKING_SUMMON   = 103571, // summon sphere in front of the caster
@@ -43,7 +54,7 @@ enum spells
     SPELL_VOID_DIFFUSION_TAKEN          = 104031, // stackable damage taken aura (TARGET_UNIT_SRC_AREA_ENTRY) -> just use AddAura on boss instead
     SPELL_VOID_OF_THE_UNMAKING_VISUAL   = 109187, // visual purple aura (infinite)
     SPELL_VOID_OF_THE_UNMAKING_REMOVE   = 105336, // should remove aura above
-    SPELL_BLACK_BLOOD_ERUPTION          = 110382, // if sphere hits the edge of the room -> TARGET_UNIT_CASTER -> cast by players themsleves probably
+    SPELL_BLACK_BLOOD_ERUPTION          = 108799, // if sphere hits the edge of the room
 
     /* SUMMONS SPELLS*/
     SPELL_OOZE_SPIT                     = 109396, // Casted by Claw of Go'rath when no one in melee range
@@ -52,78 +63,125 @@ enum spells
     SPELL_SLUDGE_SPEW                   = 110102, // Casted be Flail of Go'rath to random player
 };
 
-enum entries
+enum blackBloodSpells : uint32
 {
-    WARLORD_ENTRY               = 55308,
-    CLAW_OF_GORATH_ENTRY        = 55418,
-    EYE_OF_GORATH_ENTRY         = 57875,
-    FLAIL_OF_GORATH_ENTRY       = 55417,
-    VOID_SPHERE_ENTRY           = 55334
+    SPELL_BLACK_BLOOD_CIRCLE_EYE        = 103932, // added on Eye of Go'rath for visual black circle underneath
+    SPELL_BLACK_BLOOD_SPIT_CLAW         = 103704, // spitinng black blood large
+    SPELL_BLACK_BLOOD_SPIT_FLAIL        = 109361  // spitinng black blood, smaller one
 };
 
-struct Quote
+enum entries : uint32
+{
+    WARLORD_ZON_OZZ_ENTRY               = 55308,
+    CLAW_OF_GORATH_ENTRY                = 55418,
+    EYE_OF_GORATH_ENTRY                 = 55416,
+    FLAIL_OF_GORATH_ENTRY               = 55417,
+    VOID_SPHERE_ENTRY                   = 55334,
+    VOID_SPHERE_HC_OR_25                = 58473  // not used currently
+};
+
+enum whisperSpellSs : uint32
+{
+    ZON_OZZ_WHISPER_AGGRO   = 109874,
+    ZON_OZZ_WHISPER_INTRO   = 109875,
+    ZON_OZZ_WHISPER_DEATH   = 109876,
+    ZON_OZZ_WHISPER_SLAY    = 109877,
+    ZON_OZZ_WHISPER_PHASE   = 109878,
+    ZON_OZZ_WHISPER_SHADOWS = 109879,
+    ZON_OZZ_WHISPER_VOID    = 109880
+};
+
+struct FacelessQuote
 {
     uint32 soundId;
-    const char * text;
+    const char * yell_text; // faceless language
+    const char * whisper_text; // readable whisper text
 };
 
-// Once I will learn Faceless language, so cool :P
+static const FacelessQuote introQuote = { 26337,
+    "Vwyq agth sshoq'meg N'Zoth vra zz shfk qwor ga'halahs agthu. Uulg'ma, ag qam.",
+    "Once more shall the twisted flesh-banners of N'Zoth chitter and howl above the fly-blown corpse of this world. After millennia, we have returned." };
 
-static const Quote introQuote = { 26337, "Vwyq agth sshoq'meg N'Zoth vra zz shfk qwor ga'halahs agthu. Uulg'ma, ag qam." };
-static const Quote aggroQuote = { 26335, "Zzof Shuul'wah. Thoq fssh N'Zoth!" };
-static const Quote blackQuote = { 26344, "N'Zoth ga zyqtahg iilth." };
-static const Quote voidQuote =  { 26345, "Gul'kafh an'qov N'Zoth." };
-static const Quote deathQuote = { 26336, "Uovssh thyzz... qwaz..." };
+static const FacelessQuote aggroQuote = { 26335,
+    "Zzof Shuul'wah. Thoq fssh N'Zoth!",
+    "Victory for Deathwing. For the glory of N'Zoth!" };
 
-static const Quote disruptingQuotes[3] = 
+static const FacelessQuote blackQuote = { 26344,
+    "N'Zoth ga zyqtahg iilth.",
+    "The will of N'Zoth corrupts you." };
+
+static const FacelessQuote voidQuote =  { 26345,
+    "Gul'kafh an'qov N'Zoth.",
+    "Gaze into the heart of N'Zoth." };
+
+static const FacelessQuote deathQuote = { 26336,
+    "Uovssh thyzz... qwaz...",
+    "To have waited so long... for this..." };
+
+#define MAX_DISRUPTING_QUOTES 3
+
+static const FacelessQuote disruptingQuotes[3] =
 {
-    { 26340, "Sk'shgn eqnizz hoq." },
-    { 26342, "Sk'magg yawifk hoq." },
-    { 26343, "Sk'uuyat guulphg hoq." },
+    { 26340, "Sk'shgn eqnizz hoq.", "Your fear drives me." },
+    { 26342, "Sk'magg yawifk hoq.", "Your suffering strengthens me." },
+    { 26343, "Sk'uuyat guulphg hoq.", "Your agony sustains me." },
 };
+#define MAX_KILL_QUOTES 3
 
-static const Quote killQuotes[3] = 
+static const FacelessQuote killQuotes[3] =
 {
-    { 26338, "Sk'tek agth nuq N'Zoth yyqzz." },
-    { 26339, "Sk'shuul agth vorzz N'Zoth naggwa'fssh." },
-    { 26341, "Sk'yahf agth huqth N'Zoth qornaus." },
+    { 26338, "Sk'tek agth nuq N'Zoth yyqzz.", "Your skulls shall adorn N'Zoth's writhing throne." },
+    { 26339, "Sk'shuul agth vorzz N'Zoth naggwa'fssh.", "Your deaths shall sing of N'Zoth's unending glory." },
+    { 26341, "Sk'yahf agth huqth N'Zoth qornaus.", "Your souls shall sate N'Zoth's endless hunger."},
 };
 
 #define MIDDLE_X (-1766.0f)
 #define MIDDLE_Y (-1917.0f)
 #define MIDDLE_Z (-226.00f)
 
-#define MIDDLE_RADIUS (105.0f)
+#define ROOM_RADIUS (105.0f)
+
+#define EYE_SPAWN_RANGE (73.0f)
+#define FLAIL_SPAWN_RANGE (55.0f)
 
 #define EYE_Z (-221.0f)
 
+#define DARK_PHASE_NORMAL_TIMER (30000)
+#define TENTACLES_DESPAWN_TIMER (28000)
 
-#define DARK_PHASE_NORMAL (30000)
+#define BOUNCE_REQUIRED_FOR_ACHIEV 10
 
-const Position eyePos [8]  =
+#define EYES_IN_10_HEROIC       5
+#define FLAILS_IN_10_HEROIC     2
+#define CLAWS_IN_10_HEROIC      1
+
+#define TENTACLES_IN_10_HEORIC (EYES_IN_10_HEROIC + FLAILS_IN_10_HEROIC + CLAWS_IN_10_HEROIC)
+
+#define MAX_EYES_NORMAL 8
+
+static const Position eyePos [MAX_EYES_NORMAL]  =
 {
-    {-1791.0f,-1989.0f,EYE_Z,1.51f},
-    {-1733.0f,-1985.0f,EYE_Z,1.99f},
-    {-1694.0f,-1940.0f,EYE_Z,2.95f},
-    {-1701.0f,-1883.0f,EYE_Z,3.57f},
-    {-1745.0f,-1845.0f,EYE_Z,4.50f},
-    {-1802.0f,-1849.0f,EYE_Z,5.30f},
-    {-1840.0f,-1894.0f,EYE_Z,6.03f},
-    {-1835.0f,-1951.0f,EYE_Z,0.48f}
+    {-1791.0f, -1989.0f, EYE_Z, 1.51f},
+    {-1733.0f, -1985.0f, EYE_Z, 1.99f},
+    {-1694.0f, -1940.0f, EYE_Z, 2.95f},
+    {-1701.0f, -1883.0f, EYE_Z, 3.57f},
+    {-1745.0f, -1845.0f, EYE_Z, 4.50f},
+    {-1802.0f, -1849.0f, EYE_Z, 5.30f},
+    {-1840.0f, -1894.0f, EYE_Z, 6.03f},
+    {-1835.0f, -1951.0f, EYE_Z, 0.48f}
 };
 
-typedef uint8 PHASE;
-
-enum phases
+enum phase : uint8
 {
     NORMAL_PHASE,
     TRANSITION_PHASE,
     DARK_PHASE,
 };
 
-enum actions
+enum actions : int32
 {
-    ACTION_SPHERE_HIT_BOSS,
+    ACTION_SPHERE_BOUNCE,
+    ACTION_SPHERE_HIT_BOSS
 };
 
 class boss_warlord_zonozz : public CreatureScript
@@ -131,7 +189,7 @@ class boss_warlord_zonozz : public CreatureScript
 public:
     boss_warlord_zonozz() : CreatureScript("boss_warlord_zonozz") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_warlord_zonozzAI(creature);
     }
@@ -140,138 +198,32 @@ public:
     {
         boss_warlord_zonozzAI(Creature* creature) : ScriptedAI(creature), summons(me)
         {
-            instance = creature->GetInstanceScript();
+            instance = me->GetInstanceScript();
             introDone = false;
         }
 
-        InstanceScript* instance;
-        uint32 voidSphereTimer;
-        uint32 focusedAngerTimer;
-        uint32 psychicDrainTimer;
-        uint32 disruptingShadowsTimer;
-        uint32 roarTimer;
-        uint32 enrageTimer;
-        bool introDone;
-        SummonList summons;
-
-
-        PHASE phase;
-        uint32 phaseTimer;
-
-        void Reset()
+        /* Not overriding methods */
+        Position GetRandomPositionInRadius(float min_radius, float max_radius, float angle = frand(0.0f, 2 * M_PI))
         {
-            if (instance)
-            {
-                if (instance->GetData(TYPE_BOSS_ZONOZZ) != DONE)
-                    instance->SetData(TYPE_BOSS_ZONOZZ, NOT_STARTED);
-            }
-
-            me->SetFloatValue(UNIT_FIELD_COMBATREACH,10.0f);
-            me->SetReactState(REACT_AGGRESSIVE);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            summons.DespawnAll();
-            phase = NORMAL_PHASE;
-            me->RemoveAllAuras();
+            float radius = frand(min_radius, max_radius);
+            Position pos;
+            pos.m_positionX = MIDDLE_X + cos(angle)*radius;
+            pos.m_positionY = MIDDLE_Y + sin(angle)*radius;
+            pos.m_positionZ = me->GetBaseMap()->GetHeight(me->GetPhaseMask(), MIDDLE_X, MIDDLE_Y, MIDDLE_Z, true) + 1.0f;
+            return pos;
         }
 
-        void JustSummoned(Creature *pSummon)
+        inline bool IsCastingAllowed()
         {
-            summons.Summon(pSummon);
-        }
-
-        void SummonedCreatureDespawn(Creature *pSummon)
-        {
-            switch (pSummon->GetEntry())
-            {
-                case EYE_OF_GORATH_ENTRY:
-                {
-                    phase = NORMAL_PHASE;
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    focusedAngerTimer = 6000;
-                    disruptingShadowsTimer = 6000;
-                    if (me->GetVictim())
-                    {
-                        me->SetUInt64Value(UNIT_FIELD_TARGET, me->GetVictim()->GetGUID());
-                        me->GetMotionMaster()->MoveChase(me->GetVictim());
-                    }
-                    break;
-                }
-            }
-            summons.Despawn(pSummon);
-        }
-
-        void PlayQuote(uint32 soundId, const char * text)
-        {
-            DoPlaySoundToSet(me,soundId);
-            me->MonsterYell(text, LANG_UNIVERSAL, 0);
-        }
-
-        void ReceiveEmote(Player* pPlayer, uint32 text_emote) // This is only for testing purpose
-        {
-            phaseTimer = urand(1000, 2000); // Switch phase after void sphere despawn
-        }
-
-        void DoAction(const int32 action)
-        {
-            if (action == ACTION_SPHERE_HIT_BOSS)
-            {
-                phaseTimer = 500; // Switch phase after void sphere hit the boss
-                // Remove all stacks of focused anger on boss
-                me->RemoveAurasDueToSpell(SPELL_FOCUSED_ANGER);
-
-                /*me->RemoveAura(109409);
-                me->RemoveAura(109410);
-                me->RemoveAura(109411);*/
-
-                voidSphereTimer = DARK_PHASE_NORMAL + 28000; // Default time of next sphere
-                psychicDrainTimer = voidSphereTimer + 8500;
-
-                // Add 5% damage taken debuff for every bounce of the sphere
-                if (Creature * pSphere = me->FindNearestCreature(VOID_SPHERE_ENTRY,200.0f,true))
-                if (Aura * pAura = pSphere->GetAura(SPELL_VOID_DIFFUSION_STACK))
-                {
-                    uint32 stacks = pAura->GetStackAmount();
-                    for (uint32 i = 0; i < stacks; i++)
-                        me->AddAura(SPELL_VOID_DIFFUSION_TAKEN, me);
-
-                    stacks = stacks > 7 ? 7 : stacks;
-
-                    voidSphereTimer = DARK_PHASE_NORMAL + (DARK_PHASE_NORMAL - (stacks * IN_MILLISECONDS * 4)); // 4 seconds reduction for every bounce
-                    psychicDrainTimer = voidSphereTimer + 8500;
-                }
-            }
-        }
-
-        void EnterCombat(Unit * /*who*/)
-        {
-            if (instance)
-            {
-                instance->SetData(TYPE_BOSS_ZONOZZ, IN_PROGRESS);
-            }
-
-            PlayQuote(aggroQuote.soundId, aggroQuote.text);
-            if (instance)
-                me->MonsterYell("INSTANCE OK",0,0);
-
-            enrageTimer = 6 * MINUTE * IN_MILLISECONDS;
-            phaseTimer = MAX_TIMER; // must be set before summonig of sphere
-            roarTimer = MAX_TIMER;
-            voidSphereTimer = MAX_TIMER;
-            focusedAngerTimer = 10500;
-            psychicDrainTimer = 13000;
-
-            me->SetInCombatWithZone();
-            SpawnVoidSphere();
+            return !me->IsNonMeleeSpellCasted(false);
         }
 
         void SpawnVoidSphere()
         {
-            //me->CastSpell(me, SPELL_VOID_OF_THE_UNMAKING_SUMMON, true);
+            bounceCount = 0;
+            me->CastSpell(me, ZON_OZZ_WHISPER_VOID, true);
 
-            PlayQuote(voidQuote.soundId, voidQuote.text);
-
-            // Summon void sphere inf frontof the boss and cast beam on it
+            // Summon void sphere in front of the boss and cast beam on it, we should use SPELL_VOID_OF_THE_UNMAKING_SUMMON, but spawning position of this spell is fucked up
             float x, y, z;
             me->GetNearPoint(me, x, y, z, 30.0f, 0.0f, me->GetOrientation());
 
@@ -279,120 +231,361 @@ public:
                 me->CastSpell(sphere, SPELL_VOID_OF_THE_UNMAKING_CHANNEL, false);
         }
 
-        void EnterEvadeMode()
+        /*
+            Brief description of this method:
+            - eye tentacles should spawn on "holes" in room, there are 8 holes around rooom with same distance with each other
+              but only 4 should spawn on heroic
+            - eye spawn postions should adjust relative to players position
+            - so we need to have find 4 holes following continuously
+            - We need to determine M_PI segment which contains most players and spawn tentacles in this semicirlce
+        */
+        void SpawnTentaclesHeroic()
         {
+            float startingOrientation = 5.20f;
+
+            Position pos;
+            pos.m_positionX = MIDDLE_X;
+            pos.m_positionY = MIDDLE_Y;
+            pos.m_positionZ = MIDDLE_Z;
+
+            float MOST_PLAYERS_ANGLE = startingOrientation;
+            uint32 MAX_PLAYERS_IN_ARC = 0;
+
+            Map::PlayerList const &playerList = me->GetMap()->GetPlayers();
+
+            for (uint32 segmentIndex = 0; segmentIndex < 8; segmentIndex++)
+            {
+                float o = MapManager::NormalizeOrientation(startingOrientation + (M_PI / 4.0f * (float)segmentIndex));
+
+                pos.m_orientation = o;
+                uint32 playersInAngle = 0;
+
+                for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                {
+                    if (Player* pPlayer = i->getSource())
+                    {
+                        if (pos.HasInArc(M_PI / 2.0f, pPlayer))
+                            playersInAngle++;
+                    }
+                }
+
+                if (playersInAngle >= MAX_PLAYERS_IN_ARC)
+                {
+                    MAX_PLAYERS_IN_ARC = playersInAngle;
+                    MOST_PLAYERS_ANGLE = MapManager::NormalizeOrientation(o - (M_PI / 2.0f)); // take quarter step back to find accurate starting angle
+                }
+            }
+
+            // Now we have starting angle, just spawn eyes and flails
+            for (uint32 i = 0; i < EYES_IN_10_HEROIC; i++)
+            {
+                float spawnAngle = MapManager::NormalizeOrientation(MOST_PLAYERS_ANGLE + (M_PI / 4.0f * (float)i));
+                float spawnOrientaton = MapManager::NormalizeOrientation(spawnAngle + M_PI);
+
+                switch(i)
+                {
+                    case 1:
+                    case 3:
+                    {
+                        pos.m_positionX = MIDDLE_X + cos(spawnAngle) * FLAIL_SPAWN_RANGE;
+                        pos.m_positionY = MIDDLE_Y + sin(spawnAngle) * FLAIL_SPAWN_RANGE;
+
+                        float z = me->GetMap()->GetHeight2(pos.GetPositionX(), pos.GetPositionY(), me->GetPositionZ());
+
+                        me->SummonCreature(FLAIL_OF_GORATH_ENTRY, pos.GetPositionX(), pos.GetPositionY(), z, spawnOrientaton);
+                        // no break intended !!!
+                    }
+                    case 0:
+                    case 2:
+                    case 4:
+                    {
+                        pos.m_positionX = MIDDLE_X + cos(spawnAngle) * EYE_SPAWN_RANGE;
+                        pos.m_positionY = MIDDLE_Y + sin(spawnAngle) * EYE_SPAWN_RANGE;
+
+                        float z = me->GetMap()->GetHeight2(pos.GetPositionX(), pos.GetPositionY(), me->GetPositionZ());
+                        z = EYE_Z; // GetHeight2 not returning correct height, why ?
+
+                        me->SummonCreature(EYE_OF_GORATH_ENTRY, pos.GetPositionX(), pos.GetPositionY(), z, spawnOrientaton);
+
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            // Summon Claws
+            for (uint32 i = 0; i < CLAWS_IN_10_HEROIC; i++)
+                me->SummonCreature(CLAW_OF_GORATH_ENTRY, GetRandomPositionInRadius(20.0f, 30.0f, MOST_PLAYERS_ANGLE));
+        }
+
+        void RemoveBlackBloodAuraFromPlayersHeroic()
+        {
+            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+
+            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                if (Player* pPlayer = i->getSource())
+                {
+                    pPlayer->RemoveAura(SPELL_BLACK_BLOOD_10_HC);
+                    pPlayer->RemoveAura(SPELL_BLACK_BLOOD_25_HC);
+                }
+        }
+
+        InstanceScript* instance;
+        TaskScheduler scheduler;
+
+        uint32 voidSphereTimer;
+        uint32 focusedAngerTimer;
+        uint32 psychicDrainTimer;
+        uint32 disruptingShadowsTimer;
+        uint32 roarTimer;
+        bool introDone;
+        SummonList summons;
+
+        // Achiev
+        uint32 bounceCount;
+        phase phase;
+
+        void Reset() override
+        {
+            bounceCount = 0;
+
+            if (instance)
+            {
+                if (instance->GetData(TYPE_BOSS_ZONOZZ) != DONE)
+                    instance->SetData(TYPE_BOSS_ZONOZZ, NOT_STARTED);
+
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            }
+
+            me->SetFloatValue(UNIT_FIELD_COMBATREACH,10.0f);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            phase = NORMAL_PHASE;
+
+            me->RemoveAllAuras();
+
+            summons.DespawnAll();
+            scheduler.CancelAll();
+
+            if (IsHeroic())
+            {
+                RemoveBlackBloodAuraFromPlayersHeroic();
+            }
+        }
+
+        void JustSummoned(Creature *pSummon) override
+        {
+            summons.Summon(pSummon);
+        }
+
+        void SummonedCreatureDespawn(Creature *pSummon) override
+        {
+            summons.Despawn(pSummon);
+        }
+
+        void DoAction(const int32 action) override
+        {
+            if (action == ACTION_SPHERE_HIT_BOSS)
+            {
+                // Add 5% damage taken debuff for every bounce of the sphere
+                if (Creature * pSphere = me->FindNearestCreature(VOID_SPHERE_ENTRY, 200.0f, true))
+                {
+                    if (Aura * pAura = pSphere->GetAura(SPELL_VOID_DIFFUSION_STACK))
+                    {
+                        uint32 stacks = pAura->GetStackAmount();
+                        for (uint32 i = 0; i < stacks; i++)
+                            me->AddAura(SPELL_VOID_DIFFUSION_TAKEN, me);
+                    }
+                }
+
+                // Switch to TRANSITION_PHASE after 500 ms
+                scheduler.Schedule(Milliseconds(500), [this](TaskContext /*context*/)
+                {
+                    me->SetReactState(REACT_PASSIVE);
+                    me->GetMotionMaster()->MovePoint(0, MIDDLE_X, MIDDLE_Y, MIDDLE_Z);
+                    this->phase = TRANSITION_PHASE;
+                });
+            }
+            else if (action == ACTION_SPHERE_BOUNCE)
+            {
+                bounceCount++; // achiev counter
+            }
+        }
+
+        void EnterCombat(Unit * /*who*/) override
+        {
+            if (instance)
+            {
+                instance->SetData(TYPE_BOSS_ZONOZZ, IN_PROGRESS);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            }
+
+            me->CastSpell(me, ZON_OZZ_WHISPER_AGGRO, true);
+
+            roarTimer               = MAX_TIMER;
+            voidSphereTimer         = 6000;
+            focusedAngerTimer       = 12000;
+            psychicDrainTimer       = 18000;
+            disruptingShadowsTimer  = 26000;
+
+            me->SetInCombatWithZone();
+
+            scheduler.Schedule(Minutes(6), [this](TaskContext)
+            {
+                me->CastSpell(me, SPELL_BERSERK, true);
+            });
+        }
+
+        void EnterEvadeMode() override
+        {
+            if (instance)
+            {
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            }
+
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             ScriptedAI::EnterEvadeMode();
         }
 
-        void KilledUnit(Unit* victim)
+        void KilledUnit(Unit* victim) override
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
             {
-                uint32 randPos = urand(0, 2);
-                PlayQuote(killQuotes[randPos].soundId, killQuotes[randPos].text);
+                me->CastSpell(me, ZON_OZZ_WHISPER_SLAY, true);
             }
         }
 
-        void JustDied(Unit * /*who*/)
+        void JustDied(Unit * killer) override
         {
+            me->CastSpell(me, ZON_OZZ_WHISPER_DEATH, true);
+
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_ZONOZZ, DONE);
+
+                if (bounceCount >= BOUNCE_REQUIRED_FOR_ACHIEV)
+                    instance->DoCompleteAchievement(6128); // Ping Pong Champion
             }
 
-            PlayQuote(deathQuote.soundId, deathQuote.text);
             summons.DespawnAll();
+
+            if (IsHeroic())
+            {
+                RemoveBlackBloodAuraFromPlayersHeroic();
+            }
+
+            if (instance)
+            {
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            }
+
+            ScriptedAI::JustDied(killer);
         }
 
-        void MoveInLineOfSight(Unit *who)
+        void MoveInLineOfSight(Unit * who) override
         {
             if (!introDone && who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && who->GetExactDist2d(me) < 60.0f)
             {
-                PlayQuote(introQuote.soundId, introQuote.text);
+                me->CastSpell(me, ZON_OZZ_WHISPER_INTRO, true);
                 introDone = true;
                 me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
             }
         }
 
-        void MovementInform(uint32 type, uint32 id)
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type != POINT_MOTION_TYPE)
                 return;
-            
+
+            // Remove all stacks of focused anger on boss after arriving to middle
+            me->RemoveAurasDueToSpell(SPELL_FOCUSED_ANGER);
+            // Root him at place
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            me->CastSpell(me, SPELL_DARKNESS, true);
+            // Switch to dark phase
+            phase = DARK_PHASE;
+
+            // Black blood phase is always delayed by 1 seconds after arrival to position
+            scheduler.Schedule(Seconds(1), [this](TaskContext /*context*/)
+            {
+                me->CastSpell(me, SPELL_DARKNESS, true);
+                me->CastSpell(me, ZON_OZZ_WHISPER_PHASE, true);
+
+                roarTimer = 500;
+
+                IsHeroic() ? HandleBlackBloodPhaseHeroic() : HandleBlackBloodPhaseNormal();
+            })
+            // After roaring for 14 seconds, keep attacking highest threat target
+             .Schedule(Seconds(14), [this](TaskContext /*context*/)
+            {
+                this->phase = NORMAL_PHASE;
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                me->SetReactState(REACT_AGGRESSIVE);
+
+                if (Unit * pVictim = me->GetVictim())
+                {
+                    me->SetUInt64Value(UNIT_FIELD_TARGET, pVictim->GetGUID());
+                    me->GetMotionMaster()->MoveChase(pVictim);
+                }
+
+                // We need to setup timers here, beacause these timer are updating only in NORMAL_PHASE
+                if (IsHeroic())
+                {
+                    focusedAngerTimer = 24000;
+                    disruptingShadowsTimer = 24000;
+                    voidSphereTimer = 40000;
+                    psychicDrainTimer = 50000;
+                }
+                else
+                {
+                    focusedAngerTimer = 35000;
+                    disruptingShadowsTimer = 24000;
+                    voidSphereTimer = 24000;
+                    psychicDrainTimer = 30000;
+                }
+            });
+        }
+
+        void HandleBlackBloodPhaseNormal()
+        {
             me->CastSpell(me, SPELL_BLACK_BLOOD, true);
 
-            uint32 rands[] = {0,1,2,3,4,5,6,7};
-            std::vector<uint32> randInts (rands, rands + sizeof(rands) / sizeof(uint32));
-            std::random_shuffle (randInts.begin(),randInts.end());
+            uint32 rands[] = { 0,1,2,3,4,5,6,7 };
+            std::vector<uint32> randInts(rands, rands + sizeof(rands) / sizeof(uint32));
+            std::random_shuffle(randInts.begin(), randInts.end());
 
             // Summon 5 eyes in 10 man -> 8 eyes in 25 man
             uint32 maxSummons = Is25ManRaid() ? 8 : 5;
 
             for (uint32 i = 0; i < maxSummons; i++)
-                me->SummonCreature(EYE_OF_GORATH_ENTRY, eyePos[i], TEMPSUMMON_TIMED_DESPAWN, 28000);
+                me->SummonCreature(EYE_OF_GORATH_ENTRY, eyePos[i], TEMPSUMMON_TIMED_DESPAWN, TENTACLES_DESPAWN_TIMER);
 
             //Summon one claw
-            me->SummonCreature(CLAW_OF_GORATH_ENTRY, GetRandomPositionInRadius(20.0f,30.0f), TEMPSUMMON_TIMED_DESPAWN, 28000);
+            me->SummonCreature(CLAW_OF_GORATH_ENTRY, GetRandomPositionInRadius(20.0f, 30.0f), TEMPSUMMON_TIMED_DESPAWN, TENTACLES_DESPAWN_TIMER);
             //Summon one flail
-            me->SummonCreature(FLAIL_OF_GORATH_ENTRY, GetRandomPositionInRadius(40.0f,50.0f), TEMPSUMMON_TIMED_DESPAWN, 28000);
-            // Can enter to dark phase
-            phase = DARK_PHASE;
-            //voidSphereTimer = 30000 + 18000;
-            psychicDrainTimer = DARK_PHASE_NORMAL + 18000 + 10000;
-            roarTimer = 500;
-
-            PlayQuote(blackQuote.soundId, blackQuote.text);
+            me->SummonCreature(FLAIL_OF_GORATH_ENTRY, GetRandomPositionInRadius(40.0f, 50.0f), TEMPSUMMON_TIMED_DESPAWN, TENTACLES_DESPAWN_TIMER);
         }
 
-        Position GetRandomPositionInRadius(float min_radius,float max_radius)
+        void HandleBlackBloodPhaseHeroic()
         {
-            float radius = frand(min_radius, max_radius);
-            float angle = frand(0.0f,2*M_PI);
-            Position pos;
-            pos.m_positionX = MIDDLE_X + cos(angle)*radius;
-            pos.m_positionY = MIDDLE_Y + sin(angle)*radius;
-            pos.m_positionZ = me->GetBaseMap()->GetHeight(me->GetPhaseMask(),MIDDLE_X,MIDDLE_Y,MIDDLE_Z,true) + 1.0f;
-            return pos;
+            for (int i = 0; i < TENTACLES_IN_10_HEORIC; i++)
+                me->CastSpell(me, SPELL_BLACK_BLOOD_10_HC, true);
+
+            SpawnTentaclesHeroic();
         }
 
-        bool CanCast()
-        {
-            if (me->IsNonMeleeSpellCasted(false))
-                return false;
-            else
-                return true;
-        }
-
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
 
-            if (enrageTimer <= diff)
-            {
-                me->CastSpell(me, SPELL_BERSERK, true);
-                enrageTimer = MAX_TIMER;
-            }
-            else enrageTimer -= diff;
-
-            if (phaseTimer <= diff)
-            {
-                me->SetReactState(REACT_PASSIVE);
-                me->GetMotionMaster()->MovePoint(0, MIDDLE_X, MIDDLE_Y, MIDDLE_Z);
-                phase = TRANSITION_PHASE;
-                phaseTimer = MAX_TIMER; // not happend periodicaly
-                return;
-            }
-            else phaseTimer -= diff;
+            scheduler.Update(diff);
 
             if (phase == NORMAL_PHASE)
             {
                 if (voidSphereTimer <= diff)
                 {
-                    if (CanCast())
+                    if (IsCastingAllowed())
                     {
                         SpawnVoidSphere();
                         voidSphereTimer = MAX_TIMER;
@@ -402,7 +595,7 @@ public:
 
                 if (psychicDrainTimer <= diff)
                 {
-                    if(CanCast())
+                    if(IsCastingAllowed())
                     {
                         me->CastSpell(me->GetVictim(), SPELL_PSYCHIC_DRAIN, false);
                         psychicDrainTimer = urand(20000, 25000);
@@ -420,10 +613,7 @@ public:
                 if (disruptingShadowsTimer <= diff)
                 {
                     uint32 max = Is25ManRaid() ? urand(7,10) : 3;
-                    me->CastCustomSpell(SPELL_DISRUPTING_SHADOWS, SPELLVALUE_MAX_TARGETS,max, me, true);
-
-                    uint32 randPos = urand(0, 2);
-                    PlayQuote(disruptingQuotes[randPos].soundId, disruptingQuotes[randPos].text);
+                    me->CastCustomSpell(SPELL_DISRUPTING_SHADOWS, SPELLVALUE_MAX_TARGETS, max, me, true); // triggerng Zon'ozz Whisper: Shadows
 
                     disruptingShadowsTimer = 25000;
                 }
@@ -453,16 +643,16 @@ public:
     };
 };
 
-// These spells are probably not for this encounter, but help us a lot
+// These spells are probably not for this encounter, but help us a lot (because originally it should be handled by spell 103521, but it is triggering unknown spell 103522)
 #define CLUMP_CHECK_1 98399
-#define CLUMP_CHECK_2 100943 
+#define CLUMP_CHECK_2 100943
 
 class npc_warlord_void_sphere : public CreatureScript
 {
 public:
     npc_warlord_void_sphere() : CreatureScript("npc_warlord_void_sphere") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_warlord_void_sphereAI(creature);
     }
@@ -471,19 +661,18 @@ public:
     {
         npc_warlord_void_sphereAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = creature->GetInstanceScript();
             bossGUID = 0;
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
 
-        InstanceScript* instance;
         uint64 bossGUID;
+
         // Timers and stuff
         uint32 moveTimer;
         uint32 checkTimer;
         uint32 refreshTimer;
 
-        void Reset()
+        void Reset() override
         {
             me->SetReactState(REACT_PASSIVE);
             me->SetSpeed(MOVE_RUN, 0.8f, true);
@@ -492,7 +681,7 @@ public:
             refreshTimer = 4000;
         }
 
-        void SpellHitTarget(Unit* target, const SpellEntry* spell)
+        void SpellHitTarget(Unit* target, const SpellEntry* spell) override
         {
             if (target->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -505,6 +694,10 @@ public:
                 me->CastSpell(me, SPELL_VOID_DIFFUSION_DAMAGE, true);
                 me->CastSpell(me, SPELL_VOID_DIFFUSION_STACK, true);
                 me->CastSpell(me, SPELL_VOID_OF_THE_UNMAKING_REMOVE, true);
+
+                if (Creature * pBoss = ObjectAccessor::GetCreature(*me, bossGUID))
+                    pBoss->AI()->DoAction(ACTION_SPHERE_BOUNCE);
+
                 UpdateMovePoint(true);
                 moveTimer = 2000;
                 refreshTimer = 5000;
@@ -515,6 +708,7 @@ public:
         {
             float x, y, z;
             float angle = me->GetOrientation();
+
             if (reverse)
             {
                 angle = MapManager::NormalizeOrientation(angle + M_PI); // Switch direction
@@ -526,35 +720,26 @@ public:
             me->GetMotionMaster()->MovePoint(0, x, y, z, false, false);
         }
 
-        void CastEruptionByPlayers()
-        {
-            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+        void EnterCombat(Unit * /*who*/) override {}
+        void MoveInLineOfSight(Unit * /*who*/) override {}
+        void EnterEvadeMode() override {}
 
-            if (!PlayerList.isEmpty())
-                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                if (Player* pPlayer = i->getSource())
-                    pPlayer->CastSpell(pPlayer, SPELL_BLACK_BLOOD_ERUPTION, true,NULL,NULL,me->GetGUID());
-        }
-
-        void EnterCombat(Unit * /*who*/) {}
-        void MoveInLineOfSight(Unit * /*who*/) {}
-        void EnterEvadeMode() {}
-
-        void KilledUnit(Unit* victim)
+        void KilledUnit(Unit* victim) override
         {
             if (victim->GetTypeId() != TYPEID_PLAYER)
                 return;
+
             if (Creature * pBoss = ObjectAccessor::GetCreature(*me,bossGUID))
                 pBoss->AI()->KilledUnit(victim);
         }
 
-        void IsSummonedBy(Unit* pSummoner)
+        void IsSummonedBy(Unit* pSummoner) override
         {
             if (pSummoner && pSummoner->ToCreature())
                 bossGUID = pSummoner->GetGUID();
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             if (refreshTimer <= diff)
             {
@@ -569,12 +754,14 @@ public:
                 // AoE dummy spell (8 yards)
                 me->CastSpell(me, CLUMP_CHECK_1, true);
 
-                if (Creature * pBoss = me->FindNearestCreature(WARLORD_ENTRY,50.0f,true))
+                if (Creature * pBoss = ObjectAccessor::GetCreature(*me, bossGUID))
                 {
-                    if (me->GetExactDist2d(pBoss) < 10.0f && !pBoss->HasAura(SPELL_DARKNESS))
+                    if (me->GetExactDist2d(pBoss) < 10.0f && me->HasAura(SPELL_VOID_OF_THE_UNMAKING_VISUAL))
                     {
                         pBoss->AI()->DoAction(ACTION_SPHERE_HIT_BOSS);
-                        me->ForcedDespawn(200);
+                        me->ForcedDespawn(100);
+                        moveTimer = 10000;
+                        refreshTimer = 10000;
                     }
                 }
                 checkTimer = 1000;
@@ -586,9 +773,9 @@ public:
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-                if (me->GetDistance2d(MIDDLE_X,MIDDLE_Y) >= MIDDLE_RADIUS)
+                if (me->GetDistance2d(MIDDLE_X,MIDDLE_Y) >= ROOM_RADIUS)
                 {
-                    CastEruptionByPlayers();
+                    me->CastSpell(me, SPELL_BLACK_BLOOD_ERUPTION, true);
                     UpdateMovePoint(true);
                     moveTimer = 4000;
                     return;
@@ -599,9 +786,117 @@ public:
                 moveTimer = 2000;
             }
             else moveTimer -= diff;
-
         }
     };
+};
+
+struct TentacleAI : public ScriptedAI
+{
+    TentacleAI(Creature* c) : ScriptedAI(c)
+    {
+        bossGUID = 0;
+        abilityTimer = 10000;
+    }
+
+    public:
+    uint64 bossGUID;
+    uint32 abilityTimer;
+
+    void Reset() override
+    {
+        if (!IsHeroic())
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+        else
+        {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        // Every tentacle should not be able to move
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+        // Add visual black blood auras
+        ApplyBlackBloodAuras();
+
+        if (IsHeroic() || me->GetEntry() == EYE_OF_GORATH_ENTRY)
+            me->SetInCombatWithZone();
+    }
+
+    void IsSummonedBy(Unit* pSummoner) override
+    {
+        if (pSummoner->ToCreature())
+            bossGUID = pSummoner->GetGUID();
+    }
+
+    void KilledUnit(Unit * victim) override
+    {
+        if (Creature * pZonozz = GetSummnoner())
+            pZonozz->AI()->KilledUnit(victim);
+    }
+
+    void JustDied(Unit * killer) override
+    {
+        // Ignore normal difficulty
+        if (!IsHeroic())
+            return;
+
+        Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            if (Player* player = i->getSource())
+            {
+                // Drop stack of black blood if tentacle is killed
+                if (Aura * aBlackBlood = player->GetAura(Is25ManRaid() ? SPELL_BLACK_BLOOD_25_HC : SPELL_BLACK_BLOOD_10_HC))
+                {
+                    aBlackBlood->ModStackAmount(-1);
+                    aBlackBlood->RefreshDuration(); // no need to refresh, because infinite duration, but this will also cause to periodic effect to recalculate properly ...
+                }
+            }
+    }
+
+    void ApplyBlackBloodAuras()
+    {
+        switch (me->GetEntry())
+        {
+            case EYE_OF_GORATH_ENTRY:
+                me->CastSpell(me, SPELL_BLACK_BLOOD_CIRCLE_EYE, true);
+                break;
+            case FLAIL_OF_GORATH_ENTRY:
+                me->CastSpell(me, SPELL_BLACK_BLOOD_SPIT_FLAIL, true);
+                break;
+            case CLAW_OF_GORATH_ENTRY:
+                me->CastSpell(me, SPELL_BLACK_BLOOD_SPIT_CLAW, true);
+                break;
+            default:
+                break;
+        }
+    }
+
+    bool CanTentacleMeleeAttack()
+    {
+        return IsHeroic() && me->GetEntry() != EYE_OF_GORATH_ENTRY;
+    }
+
+    Creature * GetSummnoner()
+    {
+        return ObjectAccessor::GetCreature(*me, bossGUID);
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        if (!CanTentacleMeleeAttack())
+            return;
+
+        if (me->GetEntry() == CLAW_OF_GORATH_ENTRY)
+        {
+            DoMeleeAttackIfReady();
+        }
+    }
 };
 
 class npc_eye_of_gorath : public CreatureScript
@@ -609,66 +904,35 @@ class npc_eye_of_gorath : public CreatureScript
 public:
     npc_eye_of_gorath() : CreatureScript("npc_eye_of_gorath") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_eye_of_gorathAI(creature);
     }
 
-    struct npc_eye_of_gorathAI : public ScriptedAI
+    struct npc_eye_of_gorathAI : public TentacleAI
     {
-        npc_eye_of_gorathAI(Creature* creature) : ScriptedAI(creature) { bossGUID = 0; }
-
-        uint32 beamTimer;
-        uint64 bossGUID;
-
-        void Reset()
+        npc_eye_of_gorathAI(Creature* creature) : TentacleAI(creature)
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetInCombatWithZone();
-            beamTimer = urand(1000, 4000);
+            abilityTimer = urand(2000,4000);
         }
 
-        void DoAction(const int32 action)
-        {
-        }
+        const int32 SPELL_SHADOW_GAZE_BY_DIFFICULTY = RAID_MODE<int32>(104347,104602,104603,104604);
 
-        void EnterCombat(Unit * /*who*/)
+        void UpdateAI(const uint32 diff) override
         {
-        }
+            TentacleAI::UpdateAI(diff);
 
-        void EnterEvadeMode()
-        {
-            ScriptedAI::EnterEvadeMode();
-        }
-
-        void KilledUnit(Unit* victim)
-        {
-            if (victim->GetTypeId() != TYPEID_PLAYER)
-                return;
-            if (Creature * pBoss = ObjectAccessor::GetCreature(*me,bossGUID))
-                pBoss->AI()->KilledUnit(victim);
-        }
-
-        void IsSummonedBy(Unit* pSummoner)
-        {
-            if (pSummoner && pSummoner->ToCreature())
-                bossGUID = pSummoner->GetGUID();
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            if (beamTimer <= diff)
+            if (abilityTimer <= diff)
             {
-                if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true,-SPELL_SHADOW_GAZE))
-                    me->CastSpell(target, SPELL_SHADOW_GAZE, true);
-                beamTimer = 3000;
+                if (!me->IsNonMeleeSpellCasted(false))
+                {
+                    if (Unit * player = SelectTarget(SELECT_TARGET_RANDOM, 0, 300.0f, true, -SPELL_SHADOW_GAZE_BY_DIFFICULTY))
+                        me->CastSpell(player, SPELL_SHADOW_GAZE, false);
+
+                    abilityTimer = 3000;
+                }
             }
-            else beamTimer -= diff;
+            else abilityTimer -= diff;
         }
     };
 };
@@ -678,63 +942,36 @@ class npc_claw_of_gorath : public CreatureScript
 public:
     npc_claw_of_gorath() : CreatureScript("npc_claw_of_gorath") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_claw_of_gorathAI(creature);
     }
 
-    struct npc_claw_of_gorathAI : public ScriptedAI
+    struct npc_claw_of_gorathAI : public TentacleAI
     {
-        npc_claw_of_gorathAI(Creature* creature) : ScriptedAI(creature)
+        npc_claw_of_gorathAI(Creature* creature) : TentacleAI(creature)
         {
-            instance = creature->GetInstanceScript();
-            bossGUID = 0;
+            abilityTimer = 6000;
         }
 
-        InstanceScript* instance;
-        uint64 bossGUID;
-        // Timers and stuff
-
-        void Reset()
+        void UpdateAI(const uint32 diff) override
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        }
+            TentacleAI::UpdateAI(diff);
 
-        void DoAction(const int32 action)
-        {
-        }
-
-        void EnterCombat(Unit * /*who*/)
-        {
-        }
-
-        void EnterEvadeMode()
-        {
-            ScriptedAI::EnterEvadeMode();
-        }
-
-        void KilledUnit(Unit* victim)
-        {
-            if (victim->GetTypeId() != TYPEID_PLAYER)
+            if (!IsHeroic())
                 return;
-            if (Creature * pBoss = ObjectAccessor::GetCreature(*me,bossGUID))
-                pBoss->AI()->KilledUnit(victim);
-        }
 
-        void IsSummonedBy(Unit* pSummoner)
-        {
-            if (pSummoner && pSummoner->ToCreature())
-                bossGUID = pSummoner->GetGUID();
-        }
-
-        void JustDied()
-        {
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
+            if (abilityTimer <= diff)
+            {
+                // When not tanked the Claw of Go'rath spits ooze at a random player
+                if (!me->IsWithinMeleeRange(me->GetVictim()))
+                {
+                    if (Unit * player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                        me->CastSpell(player, SPELL_OOZE_SPIT, false);
+                }
+                abilityTimer = 3000;
+            }
+            else abilityTimer -= diff;
         }
     };
 };
@@ -744,63 +981,42 @@ class npc_flail_of_gorath : public CreatureScript
 public:
     npc_flail_of_gorath() : CreatureScript("npc_flail_of_gorath") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_flail_of_gorathAI(creature);
     }
 
-    struct npc_flail_of_gorathAI : public ScriptedAI
+    struct npc_flail_of_gorathAI : public TentacleAI
     {
-        npc_flail_of_gorathAI(Creature* creature) : ScriptedAI(creature)
+        npc_flail_of_gorathAI(Creature* creature) : TentacleAI(creature)
         {
-            instance = creature->GetInstanceScript();
-            bossGUID = 0;
+            abilityTimer    = urand(4000,5000);
+            sludgeSpewTimer = urand(2000, 4000);
         }
 
-        InstanceScript* instance;
-        uint64 bossGUID;
-        // Timers and stuff
+        uint32 sludgeSpewTimer;
 
-        void Reset()
+        void UpdateAI(const uint32 diff) override
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        }
+            TentacleAI::UpdateAI(diff);
 
-        void DoAction(const int32 action)
-        {
-        }
-
-        void EnterCombat(Unit * /*who*/)
-        {
-        }
-
-        void EnterEvadeMode()
-        {
-            ScriptedAI::EnterEvadeMode();
-        }
-
-        void KilledUnit(Unit* victim)
-        {
-            if (victim->GetTypeId() != TYPEID_PLAYER)
+            if (!IsHeroic())
                 return;
-            if (Creature * pBoss = ObjectAccessor::GetCreature(*me,bossGUID))
-                pBoss->AI()->KilledUnit(victim);
-        }
 
-        void IsSummonedBy(Unit* pSummoner)
-        {
-            if (pSummoner && pSummoner->ToCreature())
-                bossGUID = pSummoner->GetGUID();
-        }
+            if (abilityTimer <= diff)
+            {
+                me->CastSpell(me, SPELL_WILD_FLAIL, false);
+                abilityTimer = 5000;
+            }
+            else abilityTimer -= diff;
 
-        void JustDied()
-        {
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
+            if (sludgeSpewTimer <= diff)
+            {
+                if (Unit * player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                    me->CastSpell(player, SPELL_SLUDGE_SPEW, false);
+                sludgeSpewTimer = 2500;
+            }
+            else sludgeSpewTimer -= diff;
         }
     };
 };
@@ -823,35 +1039,133 @@ public:
             }
         }
 
-        void Register()
+        void Register() override
         {
             OnEffectRemove += AuraEffectRemoveFn(spell_gen_disrupting_shadows_AuraScript::OnDispel, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
-    AuraScript *GetAuraScript() const
+    AuraScript *GetAuraScript() const override
     {
         return new spell_gen_disrupting_shadows_AuraScript();
     }
 };
 
+class spell_gen_zon_ozz_whisper_scripted : public SpellScriptLoader
+{
+public:
+    spell_gen_zon_ozz_whisper_scripted() : SpellScriptLoader("spell_gen_zon_ozz_whisper_scripted") { }
+
+    class spell_gen_zon_ozz_whisper_scripted_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_zon_ozz_whisper_scripted_SpellScript);
+
+        #define YELL_RADIUS 300.0f
+
+        void WhisperToPlayers(const FacelessQuote fQuote)
+        {
+            Unit * caster = GetCaster();
+
+            caster->PlayDirectSound(fQuote.soundId);
+            caster->MonsterYell(fQuote.yell_text, LANG_UNIVERSAL, YELL_RADIUS);
+
+            Map::PlayerList const &playerList = GetCaster()->GetMap()->GetPlayers();
+
+            for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                if (Player* pPlayer = itr->getSource())
+                    if (pPlayer->GetDistance(caster) <= YELL_RADIUS)
+                        caster->MonsterWhisper(fQuote.whisper_text, pPlayer->GetGUID());
+        }
+
+        void HandleScriptedTexts(std::list<Unit*>& unitList)
+        {
+            unitList.clear();
+
+            const SpellEntry* spellInfo = GetSpellInfo();
+
+            if (!spellInfo)
+                return;
+
+            switch (spellInfo->Id)
+            {
+                case ZON_OZZ_WHISPER_AGGRO:
+                {
+                    WhisperToPlayers(aggroQuote);
+                    break;
+                }
+                case ZON_OZZ_WHISPER_INTRO:
+                {
+                    WhisperToPlayers(introQuote);
+                    break;
+                }
+                case ZON_OZZ_WHISPER_DEATH:
+                {
+                    WhisperToPlayers(deathQuote);
+                    break;
+                }
+                case ZON_OZZ_WHISPER_SLAY:
+                {
+                    uint32 randPos = urand(0, MAX_KILL_QUOTES - 1);
+                    WhisperToPlayers(killQuotes[randPos]);
+                    break;
+                }
+                case ZON_OZZ_WHISPER_PHASE:
+                {
+                    WhisperToPlayers(blackQuote);
+                    break;
+                }
+                case ZON_OZZ_WHISPER_SHADOWS:
+                {
+                    uint32 randPos = urand(0, MAX_DISRUPTING_QUOTES - 1);
+                    WhisperToPlayers(disruptingQuotes[randPos]);
+                    break;
+                }
+                case ZON_OZZ_WHISPER_VOID:
+                {
+                    WhisperToPlayers(voidQuote);
+                    break;
+                }
+                default:
+                    return;
+            }
+        }
+
+        void Register() override
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_zon_ozz_whisper_scripted_SpellScript::HandleScriptedTexts, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_gen_zon_ozz_whisper_scripted_SpellScript();
+    }
+};
 
 void AddSC_boss_warlord_zonozz()
 {
-    new boss_warlord_zonozz(); // 55308
-    new npc_warlord_void_sphere(); // 55334
-    new npc_eye_of_gorath(); // 57875
-    new npc_claw_of_gorath(); // 55418
-    new npc_flail_of_gorath(); // 55417
-    new spell_gen_disrupting_shadows(); // 103434,104599,104600,104601
+    new boss_warlord_zonozz();                  // 55308
+    new npc_warlord_void_sphere();              // 55334
+    new npc_eye_of_gorath();                    // 55416
+    new npc_claw_of_gorath();                   // 55418
+    new npc_flail_of_gorath();                  // 55417
+    new spell_gen_disrupting_shadows();         // 103434,104599,104600,104601
+    new spell_gen_zon_ozz_whisper_scripted();   // 109874, 109875, 109876, 109877, 109878, 109879, 109880
 }
 
-/* select * from creature_template where entry in (55308,55334,57875,55418,55417)
+/* select * from creature_template where entry in (55308,55334,55416,55418,55417)
 
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (103434, 'spell_gen_disrupting_shadows');
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104599, 'spell_gen_disrupting_shadows');
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104600, 'spell_gen_disrupting_shadows');
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104601, 'spell_gen_disrupting_shadows');
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (103434, 'spell_gen_disrupting_shadows');
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104599, 'spell_gen_disrupting_shadows');
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104600, 'spell_gen_disrupting_shadows');
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104601, 'spell_gen_disrupting_shadows');
 
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109874, 'spell_gen_zon_ozz_whisper_scripted');
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109875, 'spell_gen_zon_ozz_whisper_scripted');
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109876, 'spell_gen_zon_ozz_whisper_scripted');
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109877, 'spell_gen_zon_ozz_whisper_scripted');
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109878, 'spell_gen_zon_ozz_whisper_scripted');
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109879, 'spell_gen_zon_ozz_whisper_scripted');
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109880, 'spell_gen_zon_ozz_whisper_scripted');
 
 */
