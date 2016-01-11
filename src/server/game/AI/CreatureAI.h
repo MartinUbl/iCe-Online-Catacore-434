@@ -109,6 +109,9 @@ class CreatureAI : public UnitAI
         virtual void SummonedCreatureDespawn(Creature* /*unit*/) {}
         virtual void SummonedCreatureDies(Creature* /*unit*/, Unit* /*killer*/) {}
 
+        // Called when the creature summon GO
+        virtual void OnWildGameObjectSummon(GameObject*) {}
+
         // Called when hit by a spell
         virtual void SpellHit(Unit*, const SpellEntry*) {}
 

@@ -7466,6 +7466,13 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
     // Wild object not have owner and check clickable by players
     map->Add(pGameObj);
 
+    // AI inform hook
+    if (m_caster->GetTypeId() == TYPEID_UNIT)
+    {
+        if (m_caster->ToCreature()->IsAIEnabled)
+            m_caster->ToCreature()->AI()->OnWildGameObjectSummon(pGameObj);
+    }
+
     if (pGameObj->GetGoType() == GAMEOBJECT_TYPE_FLAGDROP && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         Player *pl = m_caster->ToPlayer();
