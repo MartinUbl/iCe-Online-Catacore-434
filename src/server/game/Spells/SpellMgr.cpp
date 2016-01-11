@@ -4513,10 +4513,13 @@ void SpellMgr::LoadSpellCustomAttr()
 
 /*************************         DRAGON SOUL        *****************************/
 
-        case 104512: // Earthen Vortex ( unwanted summon effect)
-            spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_NONE;
+        case 103640: // Resonating Crystal
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_20_YARDS; // Increase spawn radius from 5 to 20
             break;
-        case 98399: // I think these spells should be used by Ragnaros for clustering check, but i did it manually, so borrow them :)
+        case 109548: // Share health
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
+            break;
+        case 98399: // I think these spells should be used by Ragnaros for clustering check, but I did it manually, so borrow them :)
         case 100943:
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_SRC_CASTER;
             spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_AREA_ENEMY_SRC;
