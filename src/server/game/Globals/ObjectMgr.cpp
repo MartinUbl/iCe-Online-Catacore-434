@@ -6940,7 +6940,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return id;
         case HIGHGUID_AREATRIGGER:
         {
-            if (id >= 0xFFFFFFFE)
+            if (_hiAreaTriggerGuid >= 0xFFFFFFFE)
             {
                 sLog->outError("AreaTrigger guid overflow!! Can't continue, shutting down server. ");
                 ASSERT("AreaTrigger guid overflow!" && false);
