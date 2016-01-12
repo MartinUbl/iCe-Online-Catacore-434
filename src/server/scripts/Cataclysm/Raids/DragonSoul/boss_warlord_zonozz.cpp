@@ -171,7 +171,7 @@ static const Position eyePos [MAX_EYES_NORMAL]  =
     {-1835.0f, -1951.0f, EYE_Z, 0.48f}
 };
 
-enum phase : uint8
+enum bossPhase : uint8
 {
     NORMAL_PHASE,
     TRANSITION_PHASE,
@@ -344,7 +344,7 @@ public:
 
         // Achiev
         uint32 bounceCount;
-        phase phase;
+        bossPhase phase;
 
         void Reset() override
         {
@@ -404,7 +404,7 @@ public:
                 {
                     me->SetReactState(REACT_PASSIVE);
                     me->GetMotionMaster()->MovePoint(0, MIDDLE_X, MIDDLE_Y, MIDDLE_Z);
-                    this->phase = TRANSITION_PHASE;
+                    phase = TRANSITION_PHASE;
                 });
             }
             else if (action == ACTION_SPHERE_BOUNCE)
@@ -518,7 +518,7 @@ public:
             // After roaring for 14 seconds, keep attacking highest threat target
              .Schedule(Seconds(14), [this](TaskContext /*context*/)
             {
-                this->phase = NORMAL_PHASE;
+                phase = NORMAL_PHASE;
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 me->SetReactState(REACT_AGGRESSIVE);
 
