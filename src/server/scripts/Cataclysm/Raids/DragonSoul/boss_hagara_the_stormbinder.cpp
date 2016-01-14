@@ -388,6 +388,7 @@ public:
 
             enrageTimer = 480000; // 8 mins
             phase = NORMAL_PHASE; // Start with normal phase
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             nextPhase = urand(LIGHTNING_PHASE, ICE_PHASE);
             EquipCorrectAxes(nextPhase);
 
@@ -444,7 +445,8 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_HAGARA, DONE);
-                instance->DoCompleteAchievement(ACHIEVEMENT_HOLDING_HANDS);
+                if (IsHeroic())
+                    instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_HAGARA);
             }
 
             PlayAndSay(justDied.sound, justDied.text);
