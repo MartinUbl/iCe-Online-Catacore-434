@@ -916,7 +916,7 @@ public:
             abilityTimer = urand(2000,4000);
         }
 
-        const int32 SPELL_SHADOW_GAZE_BY_DIFFICULTY = RAID_MODE<int32>(104347,104602,104603,104604);
+        const int32 SPELL_SHADOW_GAZE_BY_DIFFICULTY = ScriptedAI::RAID_MODE<int32>(104347, 104602, 104603, 104604);
 
         void UpdateAI(const uint32 diff) override
         {
