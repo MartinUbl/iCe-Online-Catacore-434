@@ -2737,7 +2737,7 @@ public:
                         uint32 npcId = (urand(0, 1) == 0) ? NPC_TWILIGHT_ASSAULTER : NPC_TWILIGHT_ASSAULTERESS;
                         uint32 randPos = urand(0, 7);
                         me->SummonCreature(npcId, spawnDrakePos[randPos], TEMPSUMMON_DEAD_DESPAWN);
-                        if (summonDrakes.GetRepeatCounter() < 15)
+                        if (summonDrakes.GetRepeatCounter() < 14)
                             summonDrakes.Repeat(Seconds(10));
                     });
                     break;

@@ -19,6 +19,9 @@
 #include "dragonsoul.h"
 #include "TaskScheduler.h"
 
+#define DEFAULT_Z_POS     341.355f
+#define SEARCH_RANGE      300.0f
+
 enum aspectsNPC
 {
     NPC_GO_GIFT_OF_LIFE_SPAWN           = 119550,
@@ -194,36 +197,44 @@ public:
                 scheduler.Schedule(Seconds(10), [this](TaskContext /*Alexstrazsa starts channeling*/)
                 {
                     me->CastSpell(me, SPELL_CHARGING_UP_LIFE, false);
-                    if (Creature* pThrall = me->FindNearestCreature(NPC_THRALL, 100.0f))
+                    if (Creature* pThrall = me->FindNearestCreature(NPC_THRALL, SEARCH_RANGE))
                         pThrall->AI()->DoAction(DATA_ASPECTS_PREPARE_TO_CHANNEL);
                 });
                 break;
             case DATA_CHANNEL_DRAGONSOUL:
                 scheduler.Schedule(Seconds(43), [this](TaskContext /*Alexstrasza's Quote*/)
                 {
-                    me->MonsterSay("They... are my clutch no longer. Bring them down.", LANG_UNIVERSAL, 0);
-                    me->SendPlaySound(26505, true);
+                    if (instance && (instance->GetData(DATA_ULTRAXION_DRAKES) <= 14))
+                    {
+                        me->MonsterSay("They... are my clutch no longer. Bring them down.", LANG_UNIVERSAL, 0);
+                        me->SendPlaySound(26505, true);
 
-                    if (Creature* pDeathwing = me->FindNearestCreature(NPC_DEATHWING_WYRMREST_TEMPLE, 200.0f))
-                        pDeathwing->AI()->DoAction(DATA_ULTRAXION_DRAKES);
+                        if (Creature* pDeathwing = me->FindNearestCreature(NPC_DEATHWING_WYRMREST_TEMPLE, SEARCH_RANGE))
+                            pDeathwing->AI()->DoAction(DATA_ULTRAXION_DRAKES);
+                    }
                 });
                 scheduler.Schedule(Seconds(48), [this](TaskContext /*Start channel*/)
                 {
                     me->CastSpell(me, SPELL_WARD_OF_LIFE, true);
-                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2, 2.0f, 2.0f);
-                    if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, 100.0f))
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS + 2, 2.0f, 2.0f);
+                    if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
                         me->CastSpell(pDragonSoul, SPELL_CHARGE_DRAGONSOUL_LIFE, true);
                 });
                 scheduler.Schedule(Seconds(50), [this](TaskContext /*Ascend*/)
                 {
-                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2, 0.2f, 0.2f);
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS + 4, 0.2f, 0.2f);
                 });
                 break;
             case DATA_HELP_AGAINST_ULTRAXION:
                 me->MonsterYell("Take heart, heroes, life will always blossom from the darkest soil!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(26506, true);
-                if (Creature* pNpcGiftOfLife = me->FindNearestCreature(NPC_GO_GIFT_OF_LIFE_SPAWN, 100.0f))
+                if (Creature* pNpcGiftOfLife = me->FindNearestCreature(NPC_GO_GIFT_OF_LIFE_SPAWN, SEARCH_RANGE))
                     me->CastSpell(pNpcGiftOfLife, GIFT_OF_LIFE_MISSILE_10N, true);
+                break;
+            case DATA_ULTRAXION_RESET:
+                me->InterruptNonMeleeSpells(true, 0, true);
+                me->RemoveAllAuras();
+                me->GetMotionMaster()->MoveFall();
                 break;
             case DATA_ULTRAXION_DEFEATED:
                 me->SetWalk(true);
@@ -232,12 +243,12 @@ public:
                 {
                     me->InterruptNonMeleeSpells(true, 0, true);
                     me->RemoveAllAuras();
-                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() - 4, 5.0f, 5.0f);
+                    me->GetMotionMaster()->MoveFall();
 
                     me->MonsterSay("It is done! Our power now resides within the Dragon Soul! Our fate lies with you, Earth-Warder!", LANG_UNIVERSAL, 0, 100.0f);
                     me->SendPlaySound(26507, true);
 
-                    if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, 100.0f))
+                    if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
                         pDragonSoul->CastSpell(pDragonSoul, SPELL_DRAGON_SOUL_CHARGED_COSMETIC, true);
                 });
                 scheduler.Schedule(Seconds(46), [this](TaskContext moveSteps)
@@ -331,7 +342,7 @@ public:
                 scheduler.Schedule(Seconds(5), [this](TaskContext /*Ysera starts channeling*/)
                 {
                     me->CastSpell(me, SPELL_CHARGING_UP_DREAMS, false);
-                    if (Creature* pNozdormu = me->FindNearestCreature(NPC_NOZDORMU_THE_TIMELESS_ONE, 100.0f))
+                    if (Creature* pNozdormu = me->FindNearestCreature(NPC_NOZDORMU_THE_TIMELESS_ONE, SEARCH_RANGE))
                         pNozdormu->AI()->DoAction(DATA_ASPECTS_PREPARE_TO_CHANNEL);
                 });
                 break;
@@ -339,20 +350,26 @@ public:
                 scheduler.Schedule(Seconds(48), [this](TaskContext /*Start channel*/)
                 {
                     me->CastSpell(me, SPELL_WARD_OF_DREAMS, true);
-                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2, 2.0f, 2.0f);
-                    if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, 100.0f))
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS + 2, 2.0f, 2.0f);
+                    if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
                         me->CastSpell(pDragonSoul, SPELL_CHARGE_DRAGONSOUL_DREAMS, true);
                 });
                 scheduler.Schedule(Seconds(50), [this](TaskContext /*Ascend*/)
                 {
-                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2, 0.2f, 0.2f);
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS + 4, 0.2f, 0.2f);
                 });
                 break;
             case DATA_HELP_AGAINST_ULTRAXION:
                 me->MonsterYell("In dreams, we may overcome any obstacle.", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(26149, true);
-                if (Creature* pNpcEssenceOfDreams = me->FindNearestCreature(NPC_GO_ESSENCE_OF_DREAMS_SPAWN, 100.0f))
+                if (Creature* pNpcEssenceOfDreams = me->FindNearestCreature(NPC_GO_ESSENCE_OF_DREAMS_SPAWN, SEARCH_RANGE))
                     me->CastSpell(pNpcEssenceOfDreams, ESSENCE_OF_DREAMS_MISSILE_10N, true);
+                break;
+            case DATA_ULTRAXION_RESET:
+                // They have failed us sister!
+                me->InterruptNonMeleeSpells(true, 0, true);
+                me->RemoveAllAuras();
+                me->GetMotionMaster()->MoveFall();
                 break;
             case DATA_ULTRAXION_DEFEATED:
                 me->SetWalk(true);
@@ -361,7 +378,7 @@ public:
                 {
                     me->InterruptNonMeleeSpells(true, 0, true);
                     me->RemoveAllAuras();
-                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() - 4, 5.0f, 5.0f);
+                    me->GetMotionMaster()->MoveFall();
                 });
                 scheduler.Schedule(Seconds(40), [this](TaskContext moveSteps)
                 {
@@ -447,7 +464,7 @@ public:
                 scheduler.Schedule(Seconds(4), [this](TaskContext /*Nozdormu starts channeling*/)
                 {
                     me->CastSpell(me, SPELL_CHARGING_UP_TIME, false);
-                    if (Creature* pKalecgos = me->FindNearestCreature(NPC_KALECGOS, 100.0f))
+                    if (Creature* pKalecgos = me->FindNearestCreature(NPC_KALECGOS, SEARCH_RANGE))
                         pKalecgos->AI()->DoAction(DATA_ASPECTS_PREPARE_TO_CHANNEL);
                 });
                 break;
@@ -455,30 +472,27 @@ public:
                 scheduler.Schedule(Seconds(48), [this](TaskContext /*Start channel*/)
                 {
                     me->CastSpell(me, SPELL_WARD_OF_TIME, true);
-                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2, 2.0f, 2.0f);
-                    if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, 100.0f))
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS + 2, 2.0f, 2.0f);
+                    if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
                         me->CastSpell(pDragonSoul, SPELL_CHARGE_DRAGONSOUL_TIME, true);
                 });
                 scheduler.Schedule(Seconds(50), [this](TaskContext /*Ascend*/)
                 {
-                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2, 0.2f, 0.2f);
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS + 4, 0.2f, 0.2f);
                 });
                 break;
             case DATA_HELP_AGAINST_ULTRAXION:
             {
                 me->MonsterYell("The cycle of time brings an end to all things.", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(25954, true);
-                Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
-                for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-                {
-                    if (Player* player = i->getSource())
-                    {
-                        if (!player->IsGameMaster())
-                            me->CastSpell(player, TIMELOOP, true);
-                    }
-                }
+                me->CastSpell(me, TIMELOOP, true);
                 break;
             }
+            case DATA_ULTRAXION_RESET:
+                me->InterruptNonMeleeSpells(true, 0, true);
+                me->RemoveAllAuras();
+                me->GetMotionMaster()->MoveFall();
+                break;
             case DATA_ULTRAXION_DEFEATED:
                 me->SetWalk(true);
                 me->SetSpeed(MOVE_WALK, 1.2f);
@@ -486,7 +500,7 @@ public:
                 {
                     me->InterruptNonMeleeSpells(true, 0, true);
                     me->RemoveAllAuras();
-                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() - 4, 5.0f, 5.0f);
+                    me->GetMotionMaster()->MoveFall();
                 });
                 scheduler.Schedule(Seconds(40), [this](TaskContext moveSteps)
                 {
@@ -615,15 +629,15 @@ public:
                     me->MonsterSay("Then I will open the way into the Eye of Eternity. You must not fail, heroes. The future of Azeroth hinges on your actions.", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(26266, true);
 
-                    if (Creature * pEyeOfEternityPortal = me->FindNearestCreature(NPC_TRAVEL_TO_EYE_OF_ETERNITY, 50.0f, true))
+                    if (Creature * pEyeOfEternityPortal = me->FindNearestCreature(NPC_TRAVEL_TO_EYE_OF_ETERNITY, SEARCH_RANGE, true))
                         me->CastSpell(pEyeOfEternityPortal, SPELL_OPEN_EYE_OF_ETERNITY_PORTAL, false);
                 });
                 break;
             case DATA_START_ULTRAXION_ASPECTS_EVENT:
                 me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, 100.0f))
+                if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
                     me->SetFacingToObject(pDragonSoul);
-                if (Creature* pYsera = me->FindNearestCreature(NPC_YSERA_THE_AWAKENED, 100.0f))
+                if (Creature* pYsera = me->FindNearestCreature(NPC_YSERA_THE_AWAKENED, SEARCH_RANGE))
                 {
                     pYsera->AI()->DoAction(DATA_ASPECTS_PREPARE_TO_CHANNEL);
                     if (instance)
@@ -636,7 +650,7 @@ public:
                 scheduler.Schedule(Seconds(4), [this](TaskContext /*Kalecgos starts channeling*/)
                 {
                     me->CastSpell(me, SPELL_CHARGING_UP_MAGIC, false);
-                    if (Creature* pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_THE_LIFE_BINDER, 100.0f))
+                    if (Creature* pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_THE_LIFE_BINDER, SEARCH_RANGE))
                         pAlexstrasza->AI()->DoAction(DATA_ASPECTS_PREPARE_TO_CHANNEL);
                 });
                 break;
@@ -644,20 +658,25 @@ public:
                 scheduler.Schedule(Seconds(48), [this](TaskContext /*Start channel*/)
                 {
                     me->CastSpell(me, SPELL_WARD_OF_MAGIC, true);
-                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2, 2.0f, 2.0f);
-                    if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, 100.0f))
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS + 2, 2.0f, 2.0f);
+                    if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
                         me->CastSpell(pDragonSoul, SPELL_CHARGE_DRAGONSOUL_MAGIC, true);
                 });
                 scheduler.Schedule(Seconds(50), [this](TaskContext /*Ascend*/)
                 {
-                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2, 0.2f, 0.2f);
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS + 4, 0.2f, 0.2f);
                 });
                 break;
             case DATA_HELP_AGAINST_ULTRAXION:
                 me->MonsterYell("Winds of the arcane be at their backs, and refresh them in this hour of darkness!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(26267, true);
-                if (Creature* pNpcSourceOfMagic = me->FindNearestCreature(NPC_GO_SOURCE_OF_MAGIC_SPAWN, 100.0f))
+                if (Creature* pNpcSourceOfMagic = me->FindNearestCreature(NPC_GO_SOURCE_OF_MAGIC_SPAWN, SEARCH_RANGE))
                     me->CastSpell(pNpcSourceOfMagic, SOURCE_OF_MAGIC_MISSILE_10N, true);
+                break;
+            case DATA_ULTRAXION_RESET:
+                me->InterruptNonMeleeSpells(true, 0, true);
+                me->RemoveAllAuras();
+                me->GetMotionMaster()->MoveFall();
                 break;
             case DATA_ULTRAXION_DEFEATED:
                 me->SetWalk(true);
@@ -729,7 +748,8 @@ public:
         if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-        if (pCreature->GetInstanceScript()->GetData(DATA_ASPECTS_PREPARE_TO_CHANNEL) == 2)
+        if ((pCreature->GetInstanceScript()->GetData(DATA_ASPECTS_PREPARE_TO_CHANNEL) == 2) ||
+            (pCreature->GetInstanceScript()->GetData(DATA_ASPECTS_PREPARE_TO_CHANNEL) == 4))
         {
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_RITUAL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
@@ -802,11 +822,11 @@ public:
                 {
                 case DATA_PLAYERS_SUMMIT_ARRIVAL:
                 {
-                    if (Creature* pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_THE_LIFE_BINDER, 100.0f))
+                    if (Creature* pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_THE_LIFE_BINDER, SEARCH_RANGE))
                         pAlexstrasza->AI()->DoAction(DATA_PLAYERS_SUMMIT_ARRIVAL);
-                    if (Creature* pKalecgos = me->FindNearestCreature(NPC_KALECGOS, 100.0f))
+                    if (Creature* pKalecgos = me->FindNearestCreature(NPC_KALECGOS, SEARCH_RANGE))
                         pKalecgos->AI()->DoAction(DATA_PLAYERS_SUMMIT_ARRIVAL);
-                    if (Creature* pYsera = me->FindNearestCreature(NPC_YSERA_THE_AWAKENED, 100.0f))
+                    if (Creature* pYsera = me->FindNearestCreature(NPC_YSERA_THE_AWAKENED, SEARCH_RANGE))
                         pYsera->AI()->DoAction(DATA_PLAYERS_SUMMIT_ARRIVAL);
 
                     me->MonsterSay("It is no use, the power of the Dragon Soul is too great. I cannot wield it safely, the raging forces contained within it may be the doom of us all.", LANG_UNIVERSAL, 0);
@@ -837,33 +857,32 @@ public:
                         me->SendPlaySound(25900, true);
                         me->CastSpell(me, SPELL_CHARGING_UP_EARTH, false);
                         me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                        if (instance)
-                            instance->SetData(DATA_ASPECTS_PREPARE_TO_CHANNEL, 2);
+                        instance->SetData(DATA_ASPECTS_PREPARE_TO_CHANNEL, 2);
                     });
                     break;
                 case DATA_CHANNEL_DRAGONSOUL:
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
-                    if (Creature* pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_THE_LIFE_BINDER, 100.0f, true))
+                    if (Creature* pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_THE_LIFE_BINDER, SEARCH_RANGE, true))
                         pAlexstrasza->AI()->DoAction(DATA_CHANNEL_DRAGONSOUL);
-                    if (Creature* pKalecgos = me->FindNearestCreature(NPC_KALECGOS, 100.0f, true))
+                    if (Creature* pKalecgos = me->FindNearestCreature(NPC_KALECGOS, SEARCH_RANGE, true))
                         pKalecgos->AI()->DoAction(DATA_CHANNEL_DRAGONSOUL);
-                    if (Creature* pNozdormu = me->FindNearestCreature(NPC_NOZDORMU_THE_TIMELESS_ONE, 100.0f, true))
+                    if (Creature* pNozdormu = me->FindNearestCreature(NPC_NOZDORMU_THE_TIMELESS_ONE, SEARCH_RANGE, true))
                         pNozdormu->AI()->DoAction(DATA_CHANNEL_DRAGONSOUL);
-                    if (Creature* pYsera = me->FindNearestCreature(NPC_YSERA_THE_AWAKENED, 100.0f, true))
+                    if (Creature* pYsera = me->FindNearestCreature(NPC_YSERA_THE_AWAKENED, SEARCH_RANGE, true))
                         pYsera->AI()->DoAction(DATA_CHANNEL_DRAGONSOUL);
 
-                    if (instance && instance->GetData(DATA_ULTRAXION_DRAKES <= 14))
+                    if (Creature* pDeathwing = me->FindNearestCreature(NPC_DEATHWING_WYRMREST_TEMPLE, 500.0f, true))
                     {
-                        if (Creature* pDeathwing = me->FindNearestCreature(NPC_DEATHWING_WYRMREST_TEMPLE, 500.0f, true))
+                        if (instance->GetData(DATA_ULTRAXION_DRAKES) <= 14)
                             pDeathwing->AI()->DoAction(DATA_DEATHWING_GREETINGS);
                     }
 
                     scheduler.Schedule(Seconds(48), [this](TaskContext /*Start channel*/)
                     {
                         me->CastSpell(me, SPELL_WARD_OF_EARTH, true);
-                        me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2, 2.0f, 2.0f);
-                        if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, 100.0f))
+                        me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS + 2, 2.0f, 2.0f);
+                        if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
                             me->CastSpell(pDragonSoul, SPELL_CHARGE_DRAGONSOUL_EARTH, true);
                     });
                     scheduler.Schedule(Seconds(50), [this](TaskContext /*Ascend*/)
@@ -871,53 +890,29 @@ public:
                         if (instance->GetData(DATA_ULTRAXION_DRAKES) >= 15)
                             instance->SetData(DATA_SUMMON_ULTRAXION, 0);
 
-                        me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2, 0.2f, 0.2f);
-                        if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, 100.0f))
-                            pDragonSoul->GetMotionMaster()->MoveJump(pDragonSoul->GetPositionX(), pDragonSoul->GetPositionY(), pDragonSoul->GetPositionZ() + 8, 0.4f, 0.4f);
+                        me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS + 4, 0.2f, 0.2f);
+                        if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
+                            pDragonSoul->GetMotionMaster()->MoveJump(pDragonSoul->GetPositionX(), pDragonSoul->GetPositionY(), 352.0f, 0.4f, 0.4f);
                     });
                     break;
                 case DATA_HELP_AGAINST_ULTRAXION:
-                {
                     me->MonsterYell("Strength of the Earth, hear my call! Shield them in this dark hour, the last defenders of Azeroth!", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(25907, true);
-                    Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
-                    for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-                    {
-                        if (Player* player = i->getSource())
-                        {
-                            if (!player->IsGameMaster() && player->HasTankSpec())
-                            {
-                                me->CastSpell(player, LAST_DEFENDER_OF_AZEROTH, true);
-                                switch (player->GetActiveTalentBranchSpec())
-                                {
-                                case SPEC_WARRIOR_PROTECTION:
-                                    player->CastSpell(player, LAST_DEFENDER_OF_AZEROTH_WARR, true);
-                                    break;
-                                case SPEC_PALADIN_PROTECTION:
-                                    player->CastSpell(player, LAST_DEFENDER_OF_AZEROTH_PALA, true);
-                                    break;
-                                case SPEC_DK_BLOOD:
-                                    player->CastSpell(player, LAST_DEFENDER_OF_AZEROTH_DK, true);
-                                    break;
-                                case SPEC_DRUID_FERAL:
-                                    player->CastSpell(player, LAST_DEFENDER_OF_AZEROTH_DRUID, true);
-                                    break;
-                                default:
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    me->CastSpell(me, LAST_DEFENDER_OF_AZEROTH, true);
                     break;
-                }
+                case DATA_ULTRAXION_RESET:
+                    me->InterruptNonMeleeSpells(true, 0, true);
+                    me->RemoveAllAuras();
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS, 5.0f, 5.0f);
+                    break;
                 case DATA_ULTRAXION_DEFEATED:
                     scheduler.Schedule(Seconds(15), [this](TaskContext /*Jump Down*/)
                     {
                         me->InterruptNonMeleeSpells(true, 0, true);
                         me->RemoveAllAuras();
-                        me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() - 4, 5.0f, 5.0f);
+                        me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS, 5.0f, 5.0f);
 
-                        if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, 100.0f))
+                        if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
                             pDragonSoul->GetMotionMaster()->MoveJump(pDragonSoul->GetPositionX(), pDragonSoul->GetPositionY(), pDragonSoul->GetPositionZ() - 8, 1.0f, 1.0f);
                     });
                     scheduler.Schedule(Seconds(25), [this](TaskContext /*Walk towards Dragon Soul*/)
@@ -925,22 +920,22 @@ public:
                         me->SetSpeed(MOVE_WALK, 0.4f);
                         me->SetWalk(true);
                         me->GetMotionMaster()->MovePoint(0, pickDragonSoulPos, true);
-                        me->MonsterSay("Taretha... Cairne... Aggra... I will not fail you. I will not fail this world!", LANG_UNIVERSAL, 0, 100.0f);
+                        me->MonsterSay("Taretha... Cairne... Aggra... I will not fail you. I will not fail this world!", LANG_UNIVERSAL, 0, SEARCH_RANGE);
                         me->SendPlaySound(25908, true);
                     });
                     scheduler.Schedule(Seconds(37), [this](TaskContext /*Show Movie and ship*/)
                     {
                         me->SetSpeed(MOVE_WALK, 1.2f);
                         PlayMovieToPlayers(73);
-                        if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, 100.0f))
+                        if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
                             pDragonSoul->SetVisible(false);
-                        if (GameObject * allianceShip = me->FindNearestGameObject(GO_ALLIANCE_SHIP, 150.0f))
+                        if (GameObject * allianceShip = me->FindNearestGameObject(GO_ALLIANCE_SHIP, SEARCH_RANGE))
                         {
                             allianceShip->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
                             allianceShip->UpdateObjectVisibility();
-                            if (Creature * pSwayze = me->FindNearestCreature(NPC_SKY_CAPTAIN_SWAYZE, 150.0f, true))
+                            if (Creature * pSwayze = me->FindNearestCreature(NPC_SKY_CAPTAIN_SWAYZE, SEARCH_RANGE, true))
                                 pSwayze->SetVisible(true);
-                            if (Creature * pKaanuReevs = me->FindNearestCreature(NPC_KAANU_REEVS, 150.0f, true))
+                            if (Creature * pKaanuReevs = me->FindNearestCreature(NPC_KAANU_REEVS, SEARCH_RANGE, true))
                                 pKaanuReevs->SetVisible(true);
                         }
                     });
@@ -974,8 +969,8 @@ public:
                         }
                         else
                         {
-                            if (instance)
-                                instance->SetData(DATA_ASPECTS_PREPARE_TO_CHANNEL, 3);
+                            instance->SetData(DATA_ASPECTS_PREPARE_TO_CHANNEL, 3);
+
                             if (Unit * pDragonSoul = me->SummonCreature(NPC_THE_DRAGON_SOUL, dragonSoulShipPos.GetPositionX(), dragonSoulShipPos.GetPositionY(), dragonSoulShipPos.GetPositionZ() + 1.5f, dragonSoulShipPos.GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
                             {
                                 me->SetFacingTo(4.77f);

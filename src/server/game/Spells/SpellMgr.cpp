@@ -4366,13 +4366,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
             break;
+        //case 109337:
+        //    spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
         case 107850: // Focused Assault
             spellInfo->Effect[0] = SPELL_EFFECT_SCHOOL_DAMAGE;
             break;
         // Ultraxion
-        case 105929: // Heroic Will
         case 106369: // Twilight Shift
-        case 105984: // Timeloop
         case 106080: // Last Defender of Azeroth
         case 106224:
         case 106226:
@@ -4380,9 +4380,8 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             break;
-        case 106182: // Last Defender of Azeroth
-            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
-            spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
+        case 106390: // Unstable Monstrosity
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
             break;
         case 106042: // Gift of Life
         case 109349:
@@ -4402,16 +4401,37 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectTriggerSpell[1] = 0;
             spellInfo->AttributesEx5 |= SPELL_ATTR5_UNK19; // SPELL_ATTR5_DONT_TURN_DURING_CAST
             break;
+        case 106182: // Last Defender of Azeroth
+            spellInfo->MaxAffectedTargets = 2;
+            count++;
+        case 105984: // Timeloop
+            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_AREA_ALLY_DST;
+        case 105996: // Essence of Dreams
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_DST;
+            break;
         case 103327: // Hour of Twilight
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
             spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_AREA_ENEMY_SRC;
             spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_AREA_ENEMY_SRC;
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+            count++;
             break;
-        case 106371:
+        case 106371: // Hour of Twilight
         case 109415:
         case 109416:
         case 109417:
             spellInfo->Effect[2] = 0;
+            break;
+        case 106375: // Twilight Instability
+        case 109182:
+        case 109183:
+        case 109184:
+        case 109075: // Fading Light
+        case 110080:
+        case 110079:
+        case 110078:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             break;
         case 108160: // Ascpect's Wards
         case 108161:
@@ -4430,6 +4450,18 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
+            break;
+        case 105929: // Ultraxion Normal Realm Cosmetic
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            break;
+        case 109404:
+            spellInfo->SpellVisual[0] = 22250;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_DST;
+            break;
+        case 109405: // Cosmetic Lightning
+        case 109406:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             break;
         // Warmaster Blackhorn
         case 108038: // Harpoon

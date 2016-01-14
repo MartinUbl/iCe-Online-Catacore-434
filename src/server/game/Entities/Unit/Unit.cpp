@@ -8885,6 +8885,18 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                     *handled = true;
                     break;
                 }
+                // Essence of Dreams
+                case 105900:
+                {
+                    if (procFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS)
+                    {
+                        int32 bp0 = damage;
+                        CastCustomSpell(this, 105996, &bp0, NULL, NULL, true);
+                    }
+                    *handled = true;
+                    return false;
+                }
+                break;
             }
             break;
         case SPELLFAMILY_PALADIN:

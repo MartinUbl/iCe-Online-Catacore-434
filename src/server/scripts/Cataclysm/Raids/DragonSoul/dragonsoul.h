@@ -66,6 +66,7 @@ enum AdditionalEvents
     DATA_HAGARA_INTRO_TRASH             = 20,
     DATA_PREPARE_SPINE_ENCOUNTER        = 21,
     DATA_SPINE_OF_DEATHWING_PLATES      = 22,
+    DATA_ULTRAXION_RESET                = 23,
 };
 
 enum AchievEvents
