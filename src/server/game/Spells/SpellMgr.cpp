@@ -4413,8 +4413,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
             spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_AREA_ENEMY_SRC;
             spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_AREA_ENEMY_SRC;
-            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
-            count++;
             break;
         case 106371: // Hour of Twilight
         case 109415:

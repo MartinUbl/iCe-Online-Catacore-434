@@ -1068,14 +1068,14 @@ public:
             targets.remove_if(HasHeroicWill());
 
             uint32 min_players = 1;
-            /*
+            
             switch (GetCaster()->GetMap()->GetDifficulty())
             {
-            case RAID_DIFFICULTY_10MAN_HEROIC: min_players = 2; break;
-            case RAID_DIFFICULTY_25MAN_NORMAL: min_players = 3; break;
-            case RAID_DIFFICULTY_25MAN_HEROIC: min_players = 5; break;
-            default:     min_players = 1; break;
-            }*/
+                case RAID_DIFFICULTY_10MAN_HEROIC: min_players = 2; break;
+                case RAID_DIFFICULTY_25MAN_NORMAL: min_players = 3; break;
+                case RAID_DIFFICULTY_25MAN_HEROIC: min_players = 5; break;
+                default:/*RAID_DIFFICULTY_10MAN N*/min_players = 1; break;
+            }
 
             if (targets.size() < min_players)
             {
