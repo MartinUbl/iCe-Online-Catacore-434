@@ -12081,6 +12081,11 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
         newWeekCount = int32(weekCap);
         newTotalCount -= delta;
         newSeasonCount -= delta;
+
+        if (newTotalCount < 0)
+            newTotalCount = 0;
+        if (newSeasonCount < 0)
+            newSeasonCount = 0;
     }
 
     uint32 totalCap = currency->TotalCap;
@@ -12090,6 +12095,13 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
         newWeekCount -= delta;
         newTotalCount = int32(totalCap);
         newSeasonCount -= delta;
+
+        if (newTotalCount < 0)
+            newTotalCount = 0;
+        if (newWeekCount < 0)
+            newWeekCount = 0;
+        if (newSeasonCount < 0)
+            newSeasonCount = 0;
     }
 
     if (!ignoreweekcap && src != CURRENCY_SOURCE_ALL && id == CURRENCY_TYPE_CONQUEST_POINTS)
@@ -12106,6 +12118,13 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
             newWeekCount -= delta;
             newTotalCount -= delta;
             newSeasonCount -= delta;
+
+            if (newTotalCount < 0)
+                newTotalCount = 0;
+            if (newWeekCount < 0)
+                newWeekCount = 0;
+            if (newSeasonCount < 0)
+                newSeasonCount = 0;
         }
     }
 
