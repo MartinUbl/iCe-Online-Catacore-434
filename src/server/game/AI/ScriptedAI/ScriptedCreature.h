@@ -158,9 +158,26 @@ struct ScriptedAI : public CreatureAI
     //Drops all threat to 0%. Does not remove players from the threat list
     void DoResetThreat();
 
+    //Returns pointer to summoner if me is temporary summon
+    template<class T>
+    T* GetSummoner()
+    {
+        TempSummon * summon = me->ToTempSummon();
+
+        if (!summon)
+            return nullptr;
+
+        Unit * summoner = summon->GetSummoner();
+
+        if (!summoner)
+            return nullptr;
+
+        return dynamic_cast<T*>(summoner);
+    }
 
     // Say or yell boss quote with sound
     virtual void RunPlayableQuote(PlayableQuote quote, bool yell = true);
+
     float DoGetThreat(Unit* u);
     void DoModifyThreatPercent(Unit* pUnit, int32 pct);
 
