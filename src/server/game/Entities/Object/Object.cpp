@@ -2733,7 +2733,7 @@ Creature* WorldObject::FindNearestCreature(uint32 entry, float range, bool alive
     return creature;
 }
 
-GameObject* WorldObject::FindNearestGameObject(uint32 entry, float range)
+GameObject* WorldObject::FindNearestGameObject(uint32 entry, float range) const
 {
     GameObject *go = NULL;
     Trinity::NearestGameObjectEntryInObjectRangeCheck checker(*this, entry, range);

@@ -251,7 +251,7 @@ bool SpellScript::IsTriggered() const
     return m_spell ? m_spell->IsTriggered() : false;
 }
 
-Unit * SpellScript::GetCaster()
+Unit * SpellScript::GetCaster() const
 {
      return m_spell->GetCaster();
 }

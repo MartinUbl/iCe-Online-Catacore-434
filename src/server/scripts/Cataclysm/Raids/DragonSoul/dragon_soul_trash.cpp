@@ -2004,8 +2004,12 @@ public:
             isOpen = false;
         }
 
-        void JustDied(Unit * /*who*/) override
+        void DamageTaken(Unit* /*who*/, uint32 &damage) override
         {
+            if (me->GetHealth() > damage)
+                return;
+
+            // can't cast spells in JustDied because I am dead in that function
             if (me->GetEntry() == NPC_BURNING_TENDONS_LEFT)
             {
                 if (Creature * pRightTendons = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, 100.0f, true))
@@ -2017,7 +2021,6 @@ public:
                     pLeftTendons->DespawnOrUnsummon();
             }
 
-            // Here is the part when Deathwing Plate should fly off - but whis spell doesn`t work
             me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_PLATE_FLY_OFF_RIGHT : SPELL_PLATE_FLY_OFF_LEFT, false);
 
             if (instance)
@@ -2031,15 +2034,13 @@ public:
             case ACTION_OPEN_PLATE:
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->SetVisible(true);
-                // Here plate should open - but whis spell doesn`t work
                 me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_BREACH_ARMOR_LEFT : SPELL_BREACH_ARMOR_RIGHT, false);
+                me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_SEAL_ARMOR_BREACH_LEFT : SPELL_SEAL_ARMOR_BREACH_RIGHT, false);
                 openTimer = 23000;
                 isOpen = true;
                 break;
             case ACTION_CLOSE_PLATE:
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                // Here plate should seal again - but whis spell doesn`t work
-                me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_SEAL_ARMOR_BREACH_LEFT : SPELL_SEAL_ARMOR_BREACH_RIGHT, false);
                 me->SetVisible(false);
                 break;
             default:
@@ -2064,6 +2065,57 @@ public:
                 }
                 else openTimer -= diff;
             }
+        }
+    };
+};
+
+struct spell_ds_spine_plate_activate_loader : SpellScriptLoader
+{
+    spell_ds_spine_plate_activate_loader() : SpellScriptLoader("spell_ds_spine_plate_activate") { }
+
+    SpellScript *GetSpellScript() const override
+    {
+        return new spell_ds_spine_plate_activate();
+    }
+
+private:
+    struct spell_ds_spine_plate_activate : SpellScript
+    {
+        PrepareSpellScript(spell_ds_spine_plate_activate);
+
+    public:
+        void Register() override
+        {
+            OnEffect += SpellEffectFn(spell_ds_spine_plate_activate::HandleActivate, 0, SPELL_EFFECT_ACTIVATE_OBJECT);
+        }
+
+    private:
+        void HandleActivate(SpellEffIndex effectIndex)
+        {
+            if (auto *plate = GetNearestPlate())
+            {
+                plate->SendAnimKit(GetSpellInfo()->EffectMiscValueB[effectIndex]);
+            }
+        }
+
+        GameObject *GetNearestPlate() const
+        {
+            const Unit *caster = GetCaster();
+            GameObject *nearestPlate = nullptr;
+            float minDistance = std::numeric_limits<float>::max();
+            for (auto plateId : {GO_DEATHWING_BACK_PLATE_1, GO_DEATHWING_BACK_PLATE_2, GO_DEATHWING_BACK_PLATE_3})
+            {
+                if (GameObject *plate = caster->FindNearestGameObject(plateId, 10))
+                {
+                    auto distance = caster->GetDistance(*plate);
+                    if (distance > minDistance)
+                        continue;
+                    minDistance = distance;
+                    nearestPlate = plate;
+                }
+            }
+
+            return nearestPlate;
         }
     };
 };
@@ -2969,6 +3021,7 @@ void AddSC_dragon_soul_trash()
     new npc_ds_spine_corrupted_blood();
     new npc_ds_spine_hideous_amalgamation();
     new npc_ds_spine_burning_tendons();
+    new spell_ds_spine_plate_activate_loader();
     new npc_ds_spine_spawner();
     new npc_ds_instance_teleporter();
     new npc_ds_travel_with_drakes();

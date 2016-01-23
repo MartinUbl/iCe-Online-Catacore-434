@@ -234,7 +234,7 @@ class SpellScript : public _SpellScript
         // methods allowing interaction with Spell object
         //
         // methods useable during all spell handling phases
-        Unit * GetCaster();
+        Unit * GetCaster() const;
         Unit * GetOriginalCaster();
         SpellEntry const * GetSpellInfo();
 
