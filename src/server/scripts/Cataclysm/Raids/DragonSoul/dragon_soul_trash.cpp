@@ -1880,7 +1880,6 @@ enum SpineActions
     ACTION_ABSORB_BLOOD             = 2,
     ACTION_TENDONS_POSITION         = 3,
     ACTION_OPEN_PLATE               = 4,
-    ACTION_CLOSE_PLATE              = 5,
 };
 
 class npc_ds_spine_corruption : public CreatureScript
@@ -1981,17 +1980,18 @@ public:
         return new npc_ds_spine_burning_tendonsAI(pCreature);
     }
 
-    struct npc_ds_spine_burning_tendonsAI : public ScriptedAI
+    class npc_ds_spine_burning_tendonsAI : public ScriptedAI
     {
+        InstanceScript* instance = nullptr;
+        uint32 openTimer = 0;
+        uint32 tendonsPosition = 0;
+        bool isOpen = false;
+
+    public:
         npc_ds_spine_burning_tendonsAI(Creature *creature) : ScriptedAI(creature) 
         {
             instance = creature->GetInstanceScript();
         }
-
-        InstanceScript* instance;
-        uint32 openTimer;
-        uint32 tendonsPosition;
-        bool isOpen;
 
         void Reset() override
         {
@@ -2029,23 +2029,8 @@ public:
 
         void DoAction(const int32 action) override
         {
-            switch (action)
-            {
-            case ACTION_OPEN_PLATE:
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetVisible(true);
-                me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_BREACH_ARMOR_LEFT : SPELL_BREACH_ARMOR_RIGHT, false);
-                me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_SEAL_ARMOR_BREACH_LEFT : SPELL_SEAL_ARMOR_BREACH_RIGHT, false);
-                openTimer = 23000;
-                isOpen = true;
-                break;
-            case ACTION_CLOSE_PLATE:
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetVisible(false);
-                break;
-            default:
-                break;
-            }
+            if (action == ACTION_OPEN_PLATE)
+                OpenPlate();
         }
 
         void SetData(uint32 type, uint32 data)
@@ -2060,11 +2045,28 @@ public:
             {
                 if (openTimer <= diff)
                 {
-                    me->AI()->DoAction(ACTION_CLOSE_PLATE);
-                    isOpen = false;
+                    ClosePlate();
                 }
                 else openTimer -= diff;
             }
+        }
+
+    private:
+        void OpenPlate()
+        {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetVisible(true);
+            me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_BREACH_ARMOR_LEFT : SPELL_BREACH_ARMOR_RIGHT, false);
+            me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_SEAL_ARMOR_BREACH_LEFT : SPELL_SEAL_ARMOR_BREACH_RIGHT, false);
+            openTimer = 23000;
+            isOpen = true;
+        }
+
+        void ClosePlate()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetVisible(false);
+            isOpen = false;
         }
     };
 };
