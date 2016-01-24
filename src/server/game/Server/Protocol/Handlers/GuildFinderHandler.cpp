@@ -292,13 +292,18 @@ void WorldSession::HandleGuildFinderGetRecruits(WorldPacket& recvPacket)
         MembershipRequest request = *itr;
         ObjectGuid playerGuid(MAKE_NEW_GUID(request.GetPlayerGUID(), 0, HIGHGUID_PLAYER));
 
-        data.WriteBits(request.GetComment().size(), 11);
+        std::string comment = request.GetComment();
+        std::string plname = request.GetName();
+        if (plname.size() == 0 || plname.size() > 24)
+            plname = "<Unknown>";
+
+        data.WriteBits(comment.size(), 11);
         data.WriteBit(playerGuid[2]);
         data.WriteBit(playerGuid[4]);
         data.WriteBit(playerGuid[3]);
         data.WriteBit(playerGuid[7]);
         data.WriteBit(playerGuid[0]);
-        data.WriteBits(request.GetName().size(), 7);
+        data.WriteBits(plname.size(), 7);
         data.WriteBit(playerGuid[5]);
         data.WriteBit(playerGuid[1]);
         data.WriteBit(playerGuid[6]);
@@ -323,8 +328,8 @@ void WorldSession::HandleGuildFinderGetRecruits(WorldPacket& recvPacket)
         dataBuffer << int32(request.GetInterests());
         dataBuffer << int32(request.GetExpiryTime() - time(NULL)); // TIme in seconds until application expires.
 
-        dataBuffer.WriteString(request.GetName());
-        dataBuffer.WriteString(request.GetComment());
+        dataBuffer.WriteString(plname);
+        dataBuffer.WriteString(comment);
 
         dataBuffer << int32(request.GetClass());
 
