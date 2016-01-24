@@ -1970,6 +1970,25 @@ public:
     };
 };
 
+static GameObject *GetNearestPlate(const Unit *caster)
+{
+    GameObject *nearestPlate = nullptr;
+    float minDistance = std::numeric_limits<float>::max();
+    for (auto plateId : {GO_DEATHWING_BACK_PLATE_1, GO_DEATHWING_BACK_PLATE_2, GO_DEATHWING_BACK_PLATE_3})
+    {
+        if (GameObject *plate = caster->FindNearestGameObject(plateId, 10))
+        {
+            auto distance = caster->GetDistance(*plate);
+            if (distance > minDistance)
+                continue;
+            minDistance = distance;
+            nearestPlate = plate;
+        }
+    }
+
+    return nearestPlate;
+}
+
 class npc_ds_spine_burning_tendons : public CreatureScript
 {
 public:
@@ -1995,13 +2014,9 @@ public:
 
         void Reset() override
         {
-            me->SetVisible(false);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
             tendonsPosition = 0;
-            openTimer = 0;
-            isOpen = false;
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            ClosePlate();
         }
 
         void DamageTaken(Unit* /*who*/, uint32 &damage) override
@@ -2025,6 +2040,8 @@ public:
 
             if (instance)
                 instance->SetData(DATA_SPINE_OF_DEATHWING_PLATES, 0);
+
+            HidePlate();
         }
 
         void DoAction(const int32 action) override
@@ -2067,6 +2084,17 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetVisible(false);
             isOpen = false;
+            if (auto *plate = GetNearestPlate(me))
+            {
+                plate->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                plate->SetGoState(GO_STATE_READY);
+            }
+        }
+
+        void HidePlate()
+        {
+            if (auto *plate = GetNearestPlate(me))
+                plate->SetGoState(GO_STATE_ACTIVE);
         }
     };
 };
@@ -2094,30 +2122,10 @@ private:
     private:
         void HandleActivate(SpellEffIndex effectIndex)
         {
-            if (auto *plate = GetNearestPlate())
+            if (auto *plate = GetNearestPlate(GetCaster()))
             {
                 plate->SendAnimKit(GetSpellInfo()->EffectMiscValueB[effectIndex]);
             }
-        }
-
-        GameObject *GetNearestPlate() const
-        {
-            const Unit *caster = GetCaster();
-            GameObject *nearestPlate = nullptr;
-            float minDistance = std::numeric_limits<float>::max();
-            for (auto plateId : {GO_DEATHWING_BACK_PLATE_1, GO_DEATHWING_BACK_PLATE_2, GO_DEATHWING_BACK_PLATE_3})
-            {
-                if (GameObject *plate = caster->FindNearestGameObject(plateId, 10))
-                {
-                    auto distance = caster->GetDistance(*plate);
-                    if (distance > minDistance)
-                        continue;
-                    minDistance = distance;
-                    nearestPlate = plate;
-                }
-            }
-
-            return nearestPlate;
         }
     };
 };
