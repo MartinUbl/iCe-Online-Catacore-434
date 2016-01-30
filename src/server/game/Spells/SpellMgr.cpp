@@ -4524,14 +4524,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_SRC_CASTER;
             spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_AREA_ENEMY_SRC;
             break;
-        case 105420: // Color Combination
-        case 105435:
-        case 105436:
-        case 105437:
-        case 105439:
-        case 105440:
-            spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
-            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_SRC;
+        case 105695: // Fixate (SPELL_AURA_MOD_POSSESS_PET --> blizzard jokers)
+            spellInfo->MaxAffectedTargets = 1;
+            spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
+            spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_1;
             break;
         // Hagara the Stormbringer
         case 105466: // Lightning Storm Cosmetic

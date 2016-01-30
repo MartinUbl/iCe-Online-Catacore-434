@@ -9642,7 +9642,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
     }
 
     // Proc required some HP condition (mostly below PCT) to proc
-    // Melee attacks which reduce you below x% health ...
+    uint32 hpPctCondition = 0;
+
     switch (auraSpellInfo->Id)
     {
         // Leaden Despair
@@ -9656,9 +9657,21 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 92356:
         // Bedrock Talisman
         case 92234:
-            if (GetHealth() - damage < GetMaxHealth() * 0.35)
-                break;
-            else return false;
+            hpPctCondition = 35;
+            break;
+        // Fusing Vapors
+        case 103968:
+            hpPctCondition = 50;
+            break;
+        default:
+            break;
+    }
+
+    // Check if can proc if hpPctCondition was set
+    if (hpPctCondition)
+    {
+        if (!HealthBelowPctDamaged(hpPctCondition, damage))
+            return false;
     }
 
     // Custom requirements (not listed in procEx) Warning! damage dealing after this

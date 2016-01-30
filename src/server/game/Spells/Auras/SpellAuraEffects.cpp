@@ -2680,6 +2680,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             switch(GetId())
             {
                 case 31447: // Mark of Kaz'rogal
+                {
                     if (target->GetPower(power) == 0)
                     {
                         target->CastSpell(target, 31463, true, 0, this);
@@ -2687,8 +2688,9 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         GetBase()->SetDuration(0);
                     }
                     break;
-
+                }
                 case 32960: // Mark of Kazzak
+                {
                     int32 modifier = int32(target->GetPower(power) * 0.05f);
                     target->ModifyPower(power, -modifier);
 
@@ -2698,6 +2700,20 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         // Remove aura
                         GetBase()->SetDuration(0);
                     }
+                    break;
+                }
+                case 105530: // Mana Void
+                {
+                    if (target && caster && caster->GetTypeId() == TYPEID_UNIT)
+                    {
+                        // Register all drain mana amount into AI of mana void
+                        #define SET_DRAIN_AMOUNT 0
+                        caster->ToCreature()->AI()->SetData(SET_DRAIN_AMOUNT, uint32(drain_amount));
+                        // Cast dummy visual spell which should be casted by 105534, but it is not
+                        target->CastSpell(caster, 105536, true);
+                    }
+                    break;
+                }
             }
             break;
         }

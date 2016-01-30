@@ -1473,6 +1473,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         if (caster->HasAura(33333) && caster == target)
                             target->CastSpell(target, 96219, true);      // Suppress movement speed reduction when cast on self
 
+                        // TODO: Fix me !!!
+                        // Yor'sahj encounter (Deep corruption proc from absorb of PWD)
+                        if (target->HasAura(105171))
+                        {
+                            target->CastSpell(target, 103628, true, nullptr, target->GetAuraEffect(105171, EFFECT_0));
+                        }
+
                         break;
                     }
                 // T11 4p bonus apply
