@@ -3012,6 +3012,14 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 break;
             case TARGET_UNIT_AREA_ENTRY_DST:
             case TARGET_UNIT_AREA_ENTRY_SRC:
+            {
+                if (m_spellInfo->AttributesEx3 & SPELL_ATTR3_PLAYERS_ONLY)
+                {
+                    radius = GetEffectRadius(i);
+                    targetType = SPELL_TARGETS_ANY;
+                    break;
+                }
+            }
             case TARGET_UNIT_CONE_ENTRY: // fix me
                 if (m_spellInfo->Id == 91858 // Overcharged Power Generator
                     || m_spellInfo->Id == 79629 // Power Generator
