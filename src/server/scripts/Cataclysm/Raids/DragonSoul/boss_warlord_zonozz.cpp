@@ -80,15 +80,15 @@ enum entries : uint32
     VOID_SPHERE_HC_OR_25                = 58473  // not used currently
 };
 
-enum whisperSpellSs : uint32
+enum whisperSpells : uint32
 {
-    ZON_OZZ_WHISPER_AGGRO   = 109874,
-    ZON_OZZ_WHISPER_INTRO   = 109875,
-    ZON_OZZ_WHISPER_DEATH   = 109876,
-    ZON_OZZ_WHISPER_SLAY    = 109877,
-    ZON_OZZ_WHISPER_PHASE   = 109878,
-    ZON_OZZ_WHISPER_SHADOWS = 109879,
-    ZON_OZZ_WHISPER_VOID    = 109880
+    SPELL_ZON_OZZ_WHISPER_AGGRO   = 109874,
+    SPELL_ZON_OZZ_WHISPER_INTRO   = 109875,
+    SPELL_ZON_OZZ_WHISPER_DEATH   = 109876,
+    SPELL_ZON_OZZ_WHISPER_SLAY    = 109877,
+    SPELL_ZON_OZZ_WHISPER_PHASE   = 109878,
+    SPELL_ZON_OZZ_WHISPER_SHADOWS = 109879,
+    SPELL_ZON_OZZ_WHISPER_VOID    = 109880
 };
 
 struct FacelessQuote
@@ -98,29 +98,24 @@ struct FacelessQuote
     const char * whisper_text; // readable whisper text
 };
 
-static const FacelessQuote introQuote = { 26337,
+static const FacelessQuote introQuote = 
+{ 
+    26337,
     "Vwyq agth sshoq'meg N'Zoth vra zz shfk qwor ga'halahs agthu. Uulg'ma, ag qam.",
-    "Once more shall the twisted flesh-banners of N'Zoth chitter and howl above the fly-blown corpse of this world. After millennia, we have returned." };
+    "Once more shall the twisted flesh-banners of N'Zoth chitter and howl above the fly-blown corpse of this world. After millennia, we have returned." 
+};
 
-static const FacelessQuote aggroQuote = { 26335,
-    "Zzof Shuul'wah. Thoq fssh N'Zoth!",
-    "Victory for Deathwing. For the glory of N'Zoth!" };
+static const FacelessQuote aggroQuote = { 26335, "Zzof Shuul'wah. Thoq fssh N'Zoth!", "Victory for Deathwing. For the glory of N'Zoth!" };
 
-static const FacelessQuote blackQuote = { 26344,
-    "N'Zoth ga zyqtahg iilth.",
-    "The will of N'Zoth corrupts you." };
+static const FacelessQuote blackQuote = { 26344, "N'Zoth ga zyqtahg iilth.", "The will of N'Zoth corrupts you." };
 
-static const FacelessQuote voidQuote =  { 26345,
-    "Gul'kafh an'qov N'Zoth.",
-    "Gaze into the heart of N'Zoth." };
+static const FacelessQuote voidQuote =  { 26345, "Gul'kafh an'qov N'Zoth.", "Gaze into the heart of N'Zoth." };
 
-static const FacelessQuote deathQuote = { 26336,
-    "Uovssh thyzz... qwaz...",
-    "To have waited so long... for this..." };
+static const FacelessQuote deathQuote = { 26336, "Uovssh thyzz... qwaz...", "To have waited so long... for this..." };
 
 #define MAX_DISRUPTING_QUOTES 3
 
-static const FacelessQuote disruptingQuotes[3] =
+static const FacelessQuote disruptingQuotes[MAX_DISRUPTING_QUOTES] =
 {
     { 26340, "Sk'shgn eqnizz hoq.", "Your fear drives me." },
     { 26342, "Sk'magg yawifk hoq.", "Your suffering strengthens me." },
@@ -128,7 +123,7 @@ static const FacelessQuote disruptingQuotes[3] =
 };
 #define MAX_KILL_QUOTES 3
 
-static const FacelessQuote killQuotes[3] =
+static const FacelessQuote killQuotes[MAX_KILL_QUOTES] =
 {
     { 26338, "Sk'tek agth nuq N'Zoth yyqzz.", "Your skulls shall adorn N'Zoth's writhing throne." },
     { 26339, "Sk'shuul agth vorzz N'Zoth naggwa'fssh.", "Your deaths shall sing of N'Zoth's unending glory." },
@@ -202,135 +197,6 @@ public:
             introDone = false;
         }
 
-        /* Not overriding methods */
-        Position GetRandomPositionInRadius(float min_radius, float max_radius, float angle = frand(0.0f, 2 * M_PI))
-        {
-            float radius = frand(min_radius, max_radius);
-            Position pos;
-            pos.m_positionX = MIDDLE_X + cos(angle)*radius;
-            pos.m_positionY = MIDDLE_Y + sin(angle)*radius;
-            pos.m_positionZ = me->GetBaseMap()->GetHeight(me->GetPhaseMask(), MIDDLE_X, MIDDLE_Y, MIDDLE_Z, true) + 1.0f;
-            return pos;
-        }
-
-        inline bool IsCastingAllowed()
-        {
-            return !me->IsNonMeleeSpellCasted(false);
-        }
-
-        void SpawnVoidSphere()
-        {
-            bounceCount = 0;
-            me->CastSpell(me, ZON_OZZ_WHISPER_VOID, true);
-
-            // Summon void sphere in front of the boss and cast beam on it, we should use SPELL_VOID_OF_THE_UNMAKING_SUMMON, but spawning position of this spell is fucked up
-            float x, y, z;
-            me->GetNearPoint(me, x, y, z, 30.0f, 0.0f, me->GetOrientation());
-
-            if (Creature * sphere = me->SummonCreature(VOID_SPHERE_ENTRY, x, y, z, me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
-                me->CastSpell(sphere, SPELL_VOID_OF_THE_UNMAKING_CHANNEL, false);
-        }
-
-        /*
-            Brief description of this method:
-            - eye tentacles should spawn on "holes" in room, there are 8 holes around rooom with same distance with each other
-              but only 4 should spawn on heroic
-            - eye spawn postions should adjust relative to players position
-            - so we need to have find 4 holes following continuously
-            - We need to determine M_PI segment which contains most players and spawn tentacles in this semicirlce
-        */
-        void SpawnTentaclesHeroic()
-        {
-            float startingOrientation = 5.20f;
-
-            Position pos;
-            pos.m_positionX = MIDDLE_X;
-            pos.m_positionY = MIDDLE_Y;
-            pos.m_positionZ = MIDDLE_Z;
-
-            float MOST_PLAYERS_ANGLE = startingOrientation;
-            uint32 MAX_PLAYERS_IN_ARC = 0;
-
-            Map::PlayerList const &playerList = me->GetMap()->GetPlayers();
-
-            for (uint32 segmentIndex = 0; segmentIndex < 8; segmentIndex++)
-            {
-                float o = MapManager::NormalizeOrientation(startingOrientation + (M_PI / 4.0f * (float)segmentIndex));
-
-                pos.m_orientation = o;
-                uint32 playersInAngle = 0;
-
-                for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-                {
-                    if (Player* pPlayer = i->getSource())
-                    {
-                        if (pos.HasInArc(M_PI / 2.0f, pPlayer))
-                            playersInAngle++;
-                    }
-                }
-
-                if (playersInAngle >= MAX_PLAYERS_IN_ARC)
-                {
-                    MAX_PLAYERS_IN_ARC = playersInAngle;
-                    MOST_PLAYERS_ANGLE = MapManager::NormalizeOrientation(o - (M_PI / 2.0f)); // take quarter step back to find accurate starting angle
-                }
-            }
-
-            // Now we have starting angle, just spawn eyes and flails
-            for (uint32 i = 0; i < EYES_IN_10_HEROIC; i++)
-            {
-                float spawnAngle = MapManager::NormalizeOrientation(MOST_PLAYERS_ANGLE + (M_PI / 4.0f * (float)i));
-                float spawnOrientaton = MapManager::NormalizeOrientation(spawnAngle + M_PI);
-
-                switch(i)
-                {
-                    case 1:
-                    case 3:
-                    {
-                        pos.m_positionX = MIDDLE_X + cos(spawnAngle) * FLAIL_SPAWN_RANGE;
-                        pos.m_positionY = MIDDLE_Y + sin(spawnAngle) * FLAIL_SPAWN_RANGE;
-
-                        float z = me->GetMap()->GetHeight2(pos.GetPositionX(), pos.GetPositionY(), me->GetPositionZ());
-
-                        me->SummonCreature(FLAIL_OF_GORATH_ENTRY, pos.GetPositionX(), pos.GetPositionY(), z, spawnOrientaton);
-                        // no break intended !!!
-                    }
-                    case 0:
-                    case 2:
-                    case 4:
-                    {
-                        pos.m_positionX = MIDDLE_X + cos(spawnAngle) * EYE_SPAWN_RANGE;
-                        pos.m_positionY = MIDDLE_Y + sin(spawnAngle) * EYE_SPAWN_RANGE;
-
-                        float z = me->GetMap()->GetHeight2(pos.GetPositionX(), pos.GetPositionY(), me->GetPositionZ());
-                        z = EYE_Z; // GetHeight2 not returning correct height, why ?
-
-                        me->SummonCreature(EYE_OF_GORATH_ENTRY, pos.GetPositionX(), pos.GetPositionY(), z, spawnOrientaton);
-
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
-
-            // Summon Claws
-            for (uint32 i = 0; i < CLAWS_IN_10_HEROIC; i++)
-                me->SummonCreature(CLAW_OF_GORATH_ENTRY, GetRandomPositionInRadius(20.0f, 30.0f, MOST_PLAYERS_ANGLE));
-        }
-
-        void RemoveBlackBloodAuraFromPlayersHeroic()
-        {
-            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
-
-            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                if (Player* pPlayer = i->getSource())
-                {
-                    pPlayer->RemoveAura(SPELL_BLACK_BLOOD_10_HC);
-                    pPlayer->RemoveAura(SPELL_BLACK_BLOOD_25_HC);
-                }
-        }
-
         InstanceScript* instance;
         TaskScheduler scheduler;
 
@@ -339,6 +205,7 @@ public:
         uint32 psychicDrainTimer;
         uint32 disruptingShadowsTimer;
         uint32 roarTimer;
+        uint32 quoteIndex;
         bool introDone;
         SummonList summons;
 
@@ -348,6 +215,7 @@ public:
 
         void Reset() override
         {
+            quoteIndex = 0;
             bounceCount = 0;
 
             if (instance)
@@ -358,7 +226,7 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
-            me->SetFloatValue(UNIT_FIELD_COMBATREACH,10.0f);
+            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.0f);
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             phase = NORMAL_PHASE;
@@ -368,9 +236,10 @@ public:
             summons.DespawnAll();
             scheduler.CancelAll();
 
-            if (IsHeroic())
+            if (IsHeroic() && instance)
             {
-                RemoveBlackBloodAuraFromPlayersHeroic();
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BLACK_BLOOD_10_HC);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BLACK_BLOOD_25_HC);
             }
         }
 
@@ -421,7 +290,8 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             }
 
-            me->CastSpell(me, ZON_OZZ_WHISPER_AGGRO, true);
+            PlayQuote(aggroQuote);
+            me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_AGGRO, true);
 
             roarTimer               = MAX_TIMER;
             voidSphereTimer         = 6000;
@@ -452,13 +322,16 @@ public:
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
             {
-                me->CastSpell(me, ZON_OZZ_WHISPER_SLAY, true);
+                quoteIndex = urand(0, MAX_KILL_QUOTES - 1);
+                PlayQuote(killQuotes[quoteIndex]);
+                me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_SLAY, true);
             }
         }
 
         void JustDied(Unit * killer) override
         {
-            me->CastSpell(me, ZON_OZZ_WHISPER_DEATH, true);
+            PlayQuote(deathQuote);
+            me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_DEATH, true);
 
             if (instance)
             {
@@ -470,14 +343,15 @@ public:
 
             summons.DespawnAll();
 
-            if (IsHeroic())
-            {
-                RemoveBlackBloodAuraFromPlayersHeroic();
-            }
-
             if (instance)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+                if (IsHeroic())
+                {
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BLACK_BLOOD_10_HC);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BLACK_BLOOD_25_HC);
+                }
             }
 
             ScriptedAI::JustDied(killer);
@@ -487,7 +361,9 @@ public:
         {
             if (!introDone && who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && who->GetExactDist2d(me) < 60.0f)
             {
-                me->CastSpell(me, ZON_OZZ_WHISPER_INTRO, true);
+                PlayQuote(introQuote);
+                me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_INTRO, true);
+
                 introDone = true;
                 me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
             }
@@ -509,7 +385,8 @@ public:
             scheduler.Schedule(Seconds(1), [this](TaskContext /*context*/)
             {
                 me->CastSpell(me, SPELL_DARKNESS, true);
-                me->CastSpell(me, ZON_OZZ_WHISPER_PHASE, true);
+                PlayQuote(blackQuote);
+                me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_PHASE, true);
 
                 roarTimer = 500;
 
@@ -546,6 +423,44 @@ public:
             });
         }
 
+        void SpellHitTarget(Unit *target, const SpellEntry *spell) override
+        {
+            switch (spell->Id)
+            {
+                case SPELL_ZON_OZZ_WHISPER_INTRO:
+                    me->MonsterWhisper(introQuote.whisper_text, target->GetGUID());
+                    break;
+                case SPELL_ZON_OZZ_WHISPER_AGGRO:
+                    me->MonsterWhisper(aggroQuote.whisper_text, target->GetGUID());
+                    break;
+                case SPELL_ZON_OZZ_WHISPER_DEATH:
+                    me->MonsterWhisper(deathQuote.whisper_text, target->GetGUID());
+                    break;
+                case SPELL_ZON_OZZ_WHISPER_SLAY:
+                    if (quoteIndex < MAX_KILL_QUOTES)
+                        me->MonsterWhisper(killQuotes[quoteIndex].whisper_text, target->GetGUID());
+                    break;
+                case SPELL_ZON_OZZ_WHISPER_PHASE:
+                    me->MonsterWhisper(blackQuote.whisper_text, target->GetGUID());
+                    break;
+                case SPELL_ZON_OZZ_WHISPER_SHADOWS:
+                    if (quoteIndex < MAX_DISRUPTING_QUOTES)
+                        me->MonsterWhisper(disruptingQuotes[quoteIndex].whisper_text, target->GetGUID());
+                    break;
+                case SPELL_ZON_OZZ_WHISPER_VOID:
+                    me->MonsterWhisper(voidQuote.whisper_text, target->GetGUID());
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void PlayQuote(FacelessQuote quote)
+        {
+            me->MonsterYell(quote.yell_text, LANG_UNIVERSAL, 0);
+            me->PlayDirectSound(quote.soundId);
+        }
+
         void HandleBlackBloodPhaseNormal()
         {
             me->CastSpell(me, SPELL_BLACK_BLOOD, true);
@@ -560,10 +475,15 @@ public:
             for (uint32 i = 0; i < maxSummons; i++)
                 me->SummonCreature(EYE_OF_GORATH_ENTRY, eyePos[i], TEMPSUMMON_TIMED_DESPAWN, TENTACLES_DESPAWN_TIMER);
 
+            float x, y, z;
+
             //Summon one claw
-            me->SummonCreature(CLAW_OF_GORATH_ENTRY, GetRandomPositionInRadius(20.0f, 30.0f), TEMPSUMMON_TIMED_DESPAWN, TENTACLES_DESPAWN_TIMER);
+            me->GetNearPoint(me, x, y, z, 1.0f, frand(20.0f, 30.0f), frand(0.0f, 2.0f * M_PI));
+            me->SummonCreature(CLAW_OF_GORATH_ENTRY, x, y, z, 0.0f, TEMPSUMMON_TIMED_DESPAWN, TENTACLES_DESPAWN_TIMER);
+
             //Summon one flail
-            me->SummonCreature(FLAIL_OF_GORATH_ENTRY, GetRandomPositionInRadius(40.0f, 50.0f), TEMPSUMMON_TIMED_DESPAWN, TENTACLES_DESPAWN_TIMER);
+            me->GetNearPoint(me, x, y, z, 1.0f, frand(40.0f, 50.0f), frand(0.0f, 2.0f * M_PI));
+            me->SummonCreature(FLAIL_OF_GORATH_ENTRY, x, y, z, 0.0f, TEMPSUMMON_TIMED_DESPAWN, TENTACLES_DESPAWN_TIMER);
         }
 
         void HandleBlackBloodPhaseHeroic()
@@ -572,6 +492,118 @@ public:
                 me->CastSpell(me, SPELL_BLACK_BLOOD_10_HC, true);
 
             SpawnTentaclesHeroic();
+        }
+
+        inline bool IsCastingAllowed()
+        {
+            return !me->IsNonMeleeSpellCasted(false);
+        }
+
+        void SpawnVoidSphere()
+        {
+            bounceCount = 0;
+            PlayQuote(voidQuote);
+            me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_VOID, true);
+
+            // Summon void sphere in front of the boss and cast beam on it, we should use SPELL_VOID_OF_THE_UNMAKING_SUMMON, but spawning position of this spell is fucked up
+            float x, y, z;
+            me->GetNearPoint(me, x, y, z, 30.0f, 0.0f, me->GetOrientation());
+
+            if (Creature * sphere = me->SummonCreature(VOID_SPHERE_ENTRY, x, y, z, me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
+                me->CastSpell(sphere, SPELL_VOID_OF_THE_UNMAKING_CHANNEL, false);
+        }
+
+        /*
+            Brief description of this method:
+            - eye tentacles should spawn on "holes" in room, there are 8 holes around rooom with same distance with each other
+            but only 4 should spawn on heroic
+            - eye spawn postions should adjust relative to players position
+            - so we need to have find 4 holes following continuously
+            - We need to determine M_PI segment which contains most players and spawn tentacles in this semicirlce
+        */
+        void SpawnTentaclesHeroic()
+        {
+            float startingOrientation = 5.20f;
+
+            Position pos;
+            pos.m_positionX = MIDDLE_X;
+            pos.m_positionY = MIDDLE_Y;
+            pos.m_positionZ = MIDDLE_Z;
+
+            float MOST_PLAYERS_ANGLE = startingOrientation;
+            uint32 MAX_PLAYERS_IN_ARC = 0;
+
+            Map::PlayerList const &playerList = me->GetMap()->GetPlayers();
+
+            for (uint32 segmentIndex = 0; segmentIndex < 8; segmentIndex++)
+            {
+                float o = MapManager::NormalizeOrientation(startingOrientation + (M_PI / 4.0f * (float)segmentIndex));
+
+                pos.m_orientation = o;
+                uint32 playersInAngle = 0;
+
+                for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                {
+                    if (Player* pPlayer = i->getSource())
+                    {
+                        if (pos.HasInArc(M_PI / 2.0f, pPlayer))
+                            playersInAngle++;
+                    }
+                }
+
+                if (playersInAngle >= MAX_PLAYERS_IN_ARC)
+                {
+                    MAX_PLAYERS_IN_ARC = playersInAngle;
+                    MOST_PLAYERS_ANGLE = MapManager::NormalizeOrientation(o - (M_PI / 2.0f)); // take quarter step back to find accurate starting angle
+                }
+            }
+
+            // Now we have starting angle, just spawn eyes and flails
+            for (uint32 i = 0; i < EYES_IN_10_HEROIC; i++)
+            {
+                float spawnAngle = MapManager::NormalizeOrientation(MOST_PLAYERS_ANGLE + (M_PI / 4.0f * (float)i));
+                float spawnOrientaton = MapManager::NormalizeOrientation(spawnAngle + M_PI);
+
+                switch (i)
+                {
+                case 1:
+                case 3:
+                {
+                    pos.m_positionX = MIDDLE_X + cos(spawnAngle) * FLAIL_SPAWN_RANGE;
+                    pos.m_positionY = MIDDLE_Y + sin(spawnAngle) * FLAIL_SPAWN_RANGE;
+
+                    float z = me->GetMap()->GetHeight2(pos.GetPositionX(), pos.GetPositionY(), me->GetPositionZ());
+
+                    me->SummonCreature(FLAIL_OF_GORATH_ENTRY, pos.GetPositionX(), pos.GetPositionY(), z, spawnOrientaton);
+                    // no break intended !!!
+                }
+                case 0:
+                case 2:
+                case 4:
+                {
+                    pos.m_positionX = MIDDLE_X + cos(spawnAngle) * EYE_SPAWN_RANGE;
+                    pos.m_positionY = MIDDLE_Y + sin(spawnAngle) * EYE_SPAWN_RANGE;
+
+                    float z = me->GetMap()->GetHeight2(pos.GetPositionX(), pos.GetPositionY(), me->GetPositionZ());
+                    z = EYE_Z; // GetHeight2 not returning correct height, why ?
+
+                    me->SummonCreature(EYE_OF_GORATH_ENTRY, pos.GetPositionX(), pos.GetPositionY(), z, spawnOrientaton);
+
+                    break;
+                }
+                default:
+                    break;
+                }
+            }
+
+            // Summon Claws
+            for (uint32 i = 0; i < CLAWS_IN_10_HEROIC; i++)
+            {
+                float x, y, z;
+                me->GetNearPoint(me, x, y, z, 1.0f, frand(20.0f, 30.0f), MOST_PLAYERS_ANGLE);
+
+                me->SummonCreature(CLAW_OF_GORATH_ENTRY, x, y, z);
+            }
         }
 
         void UpdateAI(const uint32 diff) override
@@ -613,7 +645,11 @@ public:
                 if (disruptingShadowsTimer <= diff)
                 {
                     uint32 max = Is25ManRaid() ? urand(7,10) : 3;
-                    me->CastCustomSpell(SPELL_DISRUPTING_SHADOWS, SPELLVALUE_MAX_TARGETS, max, me, true); // triggerng Zon'ozz Whisper: Shadows
+                    me->CastCustomSpell(SPELL_DISRUPTING_SHADOWS, SPELLVALUE_MAX_TARGETS, max, me, true); // triggers Zon'ozz Whisper: Shadows
+
+                    quoteIndex = urand(0, MAX_DISRUPTING_QUOTES - 1);
+
+                    PlayQuote(disruptingQuotes[quoteIndex]);
 
                     disruptingShadowsTimer = 25000;
                 }
@@ -1051,97 +1087,6 @@ public:
     }
 };
 
-class spell_gen_zon_ozz_whisper_scripted : public SpellScriptLoader
-{
-public:
-    spell_gen_zon_ozz_whisper_scripted() : SpellScriptLoader("spell_gen_zon_ozz_whisper_scripted") { }
-
-    class spell_gen_zon_ozz_whisper_scripted_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_gen_zon_ozz_whisper_scripted_SpellScript);
-
-        #define YELL_RADIUS 300.0f
-
-        void WhisperToPlayers(const FacelessQuote fQuote)
-        {
-            Unit * caster = GetCaster();
-
-            caster->PlayDirectSound(fQuote.soundId);
-            caster->MonsterYell(fQuote.yell_text, LANG_UNIVERSAL, YELL_RADIUS);
-
-            Map::PlayerList const &playerList = GetCaster()->GetMap()->GetPlayers();
-
-            for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
-                if (Player* pPlayer = itr->getSource())
-                    if (pPlayer->GetDistance(caster) <= YELL_RADIUS)
-                        caster->MonsterWhisper(fQuote.whisper_text, pPlayer->GetGUID());
-        }
-
-        void HandleScriptedTexts(std::list<Unit*>& unitList)
-        {
-            unitList.clear();
-
-            const SpellEntry* spellInfo = GetSpellInfo();
-
-            if (!spellInfo)
-                return;
-
-            switch (spellInfo->Id)
-            {
-                case ZON_OZZ_WHISPER_AGGRO:
-                {
-                    WhisperToPlayers(aggroQuote);
-                    break;
-                }
-                case ZON_OZZ_WHISPER_INTRO:
-                {
-                    WhisperToPlayers(introQuote);
-                    break;
-                }
-                case ZON_OZZ_WHISPER_DEATH:
-                {
-                    WhisperToPlayers(deathQuote);
-                    break;
-                }
-                case ZON_OZZ_WHISPER_SLAY:
-                {
-                    uint32 randPos = urand(0, MAX_KILL_QUOTES - 1);
-                    WhisperToPlayers(killQuotes[randPos]);
-                    break;
-                }
-                case ZON_OZZ_WHISPER_PHASE:
-                {
-                    WhisperToPlayers(blackQuote);
-                    break;
-                }
-                case ZON_OZZ_WHISPER_SHADOWS:
-                {
-                    uint32 randPos = urand(0, MAX_DISRUPTING_QUOTES - 1);
-                    WhisperToPlayers(disruptingQuotes[randPos]);
-                    break;
-                }
-                case ZON_OZZ_WHISPER_VOID:
-                {
-                    WhisperToPlayers(voidQuote);
-                    break;
-                }
-                default:
-                    return;
-            }
-        }
-
-        void Register() override
-        {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_zon_ozz_whisper_scripted_SpellScript::HandleScriptedTexts, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
-        }
-    };
-
-    SpellScript* GetSpellScript() const override
-    {
-        return new spell_gen_zon_ozz_whisper_scripted_SpellScript();
-    }
-};
-
 void AddSC_boss_warlord_zonozz()
 {
     new boss_warlord_zonozz();                  // 55308
@@ -1149,8 +1094,7 @@ void AddSC_boss_warlord_zonozz()
     new npc_eye_of_gorath();                    // 55416
     new npc_claw_of_gorath();                   // 55418
     new npc_flail_of_gorath();                  // 55417
-    new spell_gen_disrupting_shadows();         // 103434,104599,104600,104601
-    new spell_gen_zon_ozz_whisper_scripted();   // 109874, 109875, 109876, 109877, 109878, 109879, 109880
+    new spell_gen_disrupting_shadows();         // 103434, 104599, 104600, 104601
 }
 
 /* select * from creature_template where entry in (55308,55334,55416,55418,55417)
@@ -1159,13 +1103,5 @@ REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (103434, 'sp
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104599, 'spell_gen_disrupting_shadows');
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104600, 'spell_gen_disrupting_shadows');
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (104601, 'spell_gen_disrupting_shadows');
-
-REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109874, 'spell_gen_zon_ozz_whisper_scripted');
-REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109875, 'spell_gen_zon_ozz_whisper_scripted');
-REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109876, 'spell_gen_zon_ozz_whisper_scripted');
-REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109877, 'spell_gen_zon_ozz_whisper_scripted');
-REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109878, 'spell_gen_zon_ozz_whisper_scripted');
-REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109879, 'spell_gen_zon_ozz_whisper_scripted');
-REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (109880, 'spell_gen_zon_ozz_whisper_scripted');
 
 */
