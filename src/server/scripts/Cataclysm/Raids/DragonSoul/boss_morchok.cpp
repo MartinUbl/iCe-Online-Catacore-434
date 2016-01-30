@@ -94,10 +94,11 @@ static const Quotes killQuotes[MAX_KILL_QUOTES] =
     { 26287, "Ground to dust." },
 };
 
+#define MAX_DEATH_QUOTES 2
 #define DEATH_QUOTE_MORCHOK_INDEX 0
 #define DEATH_QUOTE_LORD_AFASASTRASZ_INDEX 1
 
-static const Quotes deathQuotes[2] =
+static const Quotes deathQuotes[MAX_DEATH_QUOTES] =
 {
     { 26269, "Impossible. This cannot be. The tower...must...fall." }, // Morchok
     { 26535, "The Twilight's Hammer is retreating! The temple is ours; fortify your positions within!" }, // Lord Afasastrasz
@@ -176,19 +177,14 @@ enum goEntries : uint32
 
 namespace MorchokHelpers
 {
-    void RemoveBeamAuraFromPlayers(Unit * source)
+    static void RemoveBeamAuraFromPlayers(InstanceScript * instance)
     {
-        Map::PlayerList const& plList = source->GetMap()->GetPlayers();
+        if (!instance)
+            return;
 
-        for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
-        {
-            if (Player * p = itr->getSource())
-            {
-                p->RemoveAurasDueToSpell(SAFE_BEAM);
-                p->RemoveAurasDueToSpell(WARNING_BEAM);
-                p->RemoveAurasDueToSpell(DANGER_BEAM);
-            }
-        }
+        instance->DoRemoveAurasDueToSpellOnPlayers(SAFE_BEAM);
+        instance->DoRemoveAurasDueToSpellOnPlayers(WARNING_BEAM);
+        instance->DoRemoveAurasDueToSpellOnPlayers(DANGER_BEAM);
     }
 }
 
@@ -197,6 +193,7 @@ struct ElementalAI : public ScriptedAI
     ElementalAI(Creature* c) : ScriptedAI(c), summonList(c)
     {
         instance = c->GetInstanceScript();
+        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.0f);
     }
 
     void PlayAndYell(uint32 soundId, const char * text)
@@ -243,13 +240,13 @@ struct ElementalAI : public ScriptedAI
             vortexTimer = 55000;
 
             me->GetMotionMaster()->MoveChase(who);
-            MorchokHelpers::RemoveBeamAuraFromPlayers(me);
+            MorchokHelpers::RemoveBeamAuraFromPlayers(instance);
 
             scheduler.Schedule(Minutes(7), [this](TaskContext)
             {
                 me->CastSpell(me, SPELL_BERSERK, true);
 
-                if (Creature * pKohcrom = me->FindNearestCreature(KOHCROM_ENTRY,GRID_SEARCH_DISTANCE,true))
+                if (Creature * pKohcrom = me->FindNearestCreature(KOHCROM_ENTRY, GRID_SEARCH_DISTANCE, true))
                     pKohcrom->CastSpell(pKohcrom, SPELL_BERSERK, true);
             });
         }
@@ -260,6 +257,9 @@ struct ElementalAI : public ScriptedAI
         if (instance)
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
+            if (me->GetEntry() == KOHCROM_ENTRY)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_UPDATE_PRIORITY, me);
         }
 
         ScriptedAI::EnterCombat(who);
@@ -279,7 +279,7 @@ struct ElementalAI : public ScriptedAI
         summonList.DespawnAll();
         scheduler.CancelAll();
         DeactivateFragments();
-        MorchokHelpers::RemoveBeamAuraFromPlayers(me);
+        MorchokHelpers::RemoveBeamAuraFromPlayers(instance);
 
         ScriptedAI::EnterEvadeMode();
     }
@@ -293,7 +293,7 @@ struct ElementalAI : public ScriptedAI
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
-        MorchokHelpers::RemoveBeamAuraFromPlayers(me);
+        MorchokHelpers::RemoveBeamAuraFromPlayers(instance);
         DeactivateFragments();
         summonList.DespawnAll();
 
@@ -498,7 +498,7 @@ struct ElementalAI : public ScriptedAI
 
         if (crystalTimer <= diff)
         {
-            if (IsCastingAllowed() && vortexTimer > 20000) // 12 till exploson + 1 s to spawn + few seconds to recover
+            if (IsCastingAllowed() && vortexTimer > 20000) // 12 till explosion + 1 s to spawn + few seconds to recover
             {
                 uint32 randInt = urand(0, MAX_SUMMON_CRYSTAL_QUOTES - 1);
                 PlayAndYell(summonCrystalQuotes[randInt].soundId, summonCrystalQuotes[randInt].text);
@@ -565,6 +565,15 @@ public:
         }
 
         bool kohcromSummoned = false;
+
+        void SummonedCreatureDespawn(Creature *pSummon) override
+        {
+            if (pSummon->GetEntry() == KOHCROM_ENTRY)
+            {
+                if (instance)
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pSummon);
+            }
+        }
 
         void ScheduleWyrmestSiege()
         {
@@ -649,13 +658,15 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (IsCastingAllowed() && me->HealthBelowPct(90) && !kohcromSummoned)
+            if (IsCastingAllowed() && me->HealthBelowPct(90) && !kohcromSummoned && IsHeroic() && instance)
             {
                 kohcromSummoned = true;
 
                 // Handled in spellscript
                 me->CastSpell(me, SPELL_SUMMON_KOHCROM, true);
                 PlayAndYell(summonMorchokQuote.soundId, summonMorchokQuote.text);
+
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_UPDATE_PRIORITY, me);
             }
         }
     };
@@ -700,25 +711,10 @@ public:
             }
         }
 
-        void EnterCombat(Unit * who) override
-        {
-            ElementalAI::EnterCombat(who);
-        }
-
         void KilledUnit(Unit* victim) override
         {
             if (Creature * pMorchok = ObjectAccessor::GetCreature(*me, summonerGUID))
                 pMorchok->AI()->KilledUnit(victim);
-        }
-
-        void EnterEvadeMode() override
-        {
-            ElementalAI::EnterEvadeMode();
-        }
-
-        void UpdateAI(const uint32 diff) override
-        {
-            ElementalAI::UpdateAI(diff);
         }
     };
 };
@@ -760,7 +756,7 @@ public:
                 me->CastSpell(me, SPELL_RESONATING_CRYSTAL_DAMAGE, false);
                 explodeTimer = MAX_TIMER;
                 me->RemoveAllAuras();
-                MorchokHelpers::RemoveBeamAuraFromPlayers(me);
+                MorchokHelpers::RemoveBeamAuraFromPlayers(me->GetInstanceScript());
                 me->ForcedDespawn(1000);
             }
             else explodeTimer -= diff;
@@ -805,7 +801,7 @@ public:
         void EnterCombat(Unit *) {}
         void EnterEvadeMode() override {}
         /*
-            Overriding OnCharmed is crutial ! When player enters vehicle, he charms vehicle, which will cause deleting the whole AI and not repsoding to anything
+            Overriding OnCharmed is crucial ! When player enters vehicle, he charms vehicle, which will cause deleting the whole AI and not repsoding to anything
             But we want move with vehicle to boss position (handled in spellscript)
             Instead of this, we will inherit from PassiveAI + override some methods which could lead to reacting of npc to some actions.
         */
@@ -885,13 +881,13 @@ public:
             int32 damage = GetHitDamage() / unitsAffected; // Split damage between beam targets
             float distance = caster->GetDistance(hitUnit);
 
-            // The total damage increases the further the targets are from the explosion.
-            if (distance < SAFE_BEAM_DISTANCE)
-                damage = damage * 1;
-            else if (distance < WARNING_BEAM_DISTANCE)
-                damage = damage * 2;
-            else
+            // The total damage increases the further the targets are from the explosion
+            if (hitUnit->HasAura(SAFE_BEAM))
+                damage = damage * 150 / 100;
+            else if (hitUnit->HasAura(WARNING_BEAM))
                 damage = damage * 3;
+            else if (hitUnit->HasAura(DANGER_BEAM))
+                damage = damage * 5;
 
             SetHitDamage(damage);
         }
@@ -936,8 +932,6 @@ public:
         void FindClosestTargets(std::list<Unit*>& unitList)
         {
             Unit * caster = GetCaster();
-            if (!caster)
-                return;
 
             // Order affected units by distance descending
             unitList.sort(Trinity::ObjectDistanceOrderPred(caster));
@@ -1020,10 +1014,6 @@ public:
             Creature * morchok = caster->ToCreature();
 
             morchok->AI()->DoAction(ACTION_SPAWN_FRAGMENT);
-
-            // Give 30 % chance to spawn more than one framgment on tick, because there are more fragments on blizz servers
-            if (urand(0,100) > 70)
-                morchok->AI()->DoAction(ACTION_SPAWN_FRAGMENT);
 
             // Immediately cast black blood after spawning all fragments
             if (aurEff->GetTickNumber() == (uint32)aurEff->GetTotalTicks())
@@ -1169,8 +1159,10 @@ public:
 
                     if (!player->HasAura(spellId))
                     {
+                        // Cast appropriate beam
                         me->CastSpell(player, spellId, true);
 
+                        // Drop all beam auras, except casted one
                         if (player->HasAura(SAFE_BEAM) && SAFE_BEAM != spellId)
                             player->RemoveAura(SAFE_BEAM);
 
