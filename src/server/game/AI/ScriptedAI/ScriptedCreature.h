@@ -58,6 +58,23 @@ class SummonList : public std::list<uint64>
         Creature *me;
 };
 
+struct PlayableQuote
+{
+    private:
+    uint32 soundId;
+    std::string text;
+
+    public:
+    PlayableQuote(uint32 soundId, std::string text)
+    {
+        this->soundId = soundId;
+        this->text = text;
+    }
+
+    const char * GetText() { return text.c_str(); }
+    uint32 GetSoundId() { return soundId; }
+};
+
 struct ScriptedAI : public CreatureAI
 {
     explicit ScriptedAI(Creature* pCreature);
@@ -141,6 +158,9 @@ struct ScriptedAI : public CreatureAI
     //Drops all threat to 0%. Does not remove players from the threat list
     void DoResetThreat();
 
+
+    // Say or yell boss quote with sound
+    void RunPlayableQuote(PlayableQuote quote, bool yell = true);
     float DoGetThreat(Unit* u);
     void DoModifyThreatPercent(Unit* pUnit, int32 pct);
 

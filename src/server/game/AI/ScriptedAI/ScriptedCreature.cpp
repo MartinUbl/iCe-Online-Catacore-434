@@ -355,6 +355,16 @@ bool ScriptedAI::CanCast(Unit* pTarget, SpellEntry const* pSpell, bool bTriggere
     return true;
 }
 
+void ScriptedAI::RunPlayableQuote(PlayableQuote quote, bool yell)
+{
+    if (yell)
+        me->MonsterYell(quote.GetText(), LANG_UNIVERSAL, 0);
+    else
+        me->MonsterSay(quote.GetText(), LANG_UNIVERSAL, 0);
+
+    me->PlayDirectSound(quote.GetSoundId());
+}
+
 void ScriptedAI::DoResetThreat()
 {
     if (!me->CanHaveThreatList() || me->getThreatManager().isThreatListEmpty())
