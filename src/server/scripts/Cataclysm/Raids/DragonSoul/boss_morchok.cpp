@@ -872,7 +872,6 @@ public:
                 return;
 
             int32 damage = GetHitDamage() / unitsAffected; // Split damage between beam targets
-            float distance = caster->GetDistance(hitUnit);
 
             // The total damage increases the further the targets are from the explosion
             if (hitUnit->HasAura(SAFE_BEAM))
