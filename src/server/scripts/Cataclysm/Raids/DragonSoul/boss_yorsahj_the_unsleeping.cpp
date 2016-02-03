@@ -20,21 +20,21 @@
 #include "MapManager.h"
 #include "TaskScheduler.h"
 
-static FacelessQuote introQuote =
+static const FacelessQuote introQuote =
 {
     26328,
     "Ak'agthshi ma uhnish, ak'uq shg'cul vwahuhn! H'iwn iggksh Phquathi gag OOU KAAXTH SHUUL!",
     "Our numbers are endless, our power beyond reckoning! All who oppose the Destroyer will DIE A THOUSAND DEATHS!"
 };
 
-static FacelessQuote aggroQuote =
+static const FacelessQuote aggroQuote =
 {
     26326,
     "Iilth qi'uothk shn'ma yeh'glu Shath'Yar! H'IWN IILTH!",
     "You will drown in the blood of the Old Gods! ALL OF YOU!"
 };
 
-static FacelessQuote deathQuote =
+static const FacelessQuote deathQuote =
 {
     26327,
     "Ez, Shuul'wah! Sk'woth'gl yu'gaz yog'ghyl ilfah!",
@@ -43,7 +43,7 @@ static FacelessQuote deathQuote =
 
 #define MAX_BLOOD_QUOTES 2
 
-static FacelessQuote bloodQuotes[MAX_BLOOD_QUOTES] =
+static const FacelessQuote bloodQuotes[MAX_BLOOD_QUOTES] =
 {
     { 26332, "KYTH ag'xig yyg'far IIQAATH ONGG!", "SEE how we pour from the CURSED EARTH!" },
     { 26333, "UULL lwhuk H'IWN!", "The DARKNESS devours ALL!" },
@@ -51,7 +51,7 @@ static FacelessQuote bloodQuotes[MAX_BLOOD_QUOTES] =
 
 #define MAX_KILL_QUOTES 3
 
-static FacelessQuote killQuotes[MAX_KILL_QUOTES] =
+static const FacelessQuote killQuotes[MAX_KILL_QUOTES] =
 {
     { 26329, "Sk'yahf qi'plahf PH'MAGG!", "Your soul will know ENDLESS TORMENT!" },
     { 26330, "H'iwn zaix Shuul'wah, PHQUATHI!", "All praise Deathwing, THE DESTROYER!" },

@@ -28,7 +28,7 @@
 #include "MapManager.h"
 #include "TaskScheduler.h"
 
-static PlayableQuote firstIntroQuotes[6] = 
+static const PlayableQuote firstIntroQuotes[6] = 
 {
     { 26282, "No mortal shall turn me from my task!" }, // Morchok
     { 26531, "Wyrmrest Accord, attack!" }, // Lord Afrasastrasz
@@ -190,7 +190,7 @@ struct ElementalAI : public ScriptedAI
         me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.0f);
     }
 
-    void RunQuote(PlayableQuote quote)
+    void RunPlayableQuote(PlayableQuote quote, bool yell = true) override
     {
         if (me->GetEntry() == MORCHOK_ENTRY)
         {
@@ -454,7 +454,7 @@ struct ElementalAI : public ScriptedAI
                 return;
 
             uint32 randInt = urand(0, MAX_BLACK_BLOOD_QUOTES - 1);
-            RunQuote(blackBloodQuotes[randInt]);
+            RunPlayableQuote(blackBloodQuotes[randInt]);
 
             // Start channeling after summonning of fragments
             me->CastSpell(me, SPELL_BLACK_BLOOD_CHANNEL, false);
@@ -494,7 +494,7 @@ struct ElementalAI : public ScriptedAI
             if (IsCastingAllowed() && vortexTimer > 20000) // 12 till explosion + 1 s to spawn + few seconds to recover
             {
                 uint32 randInt = urand(0, MAX_SUMMON_CRYSTAL_QUOTES - 1);
-                RunQuote(summonCrystalQuotes[randInt]);
+                RunPlayableQuote(summonCrystalQuotes[randInt]);
 
                 uint32 pos = me->getThreatManager().getThreatList().size() == 1 ? 0 : 1;
 
@@ -511,7 +511,7 @@ struct ElementalAI : public ScriptedAI
             if (IsCastingAllowed())
             {
                 uint32 randInt = urand(0, MAX_VORTEX_QUOTES - 1);
-                RunQuote(vortexQuotes[randInt]);
+                RunPlayableQuote(vortexQuotes[randInt]);
 
                 me->CastSpell(me, SPELL_EARTH_VORTEX, true); // pull players
                 me->CastSpell(me, SPELL_EARTH_VENGEANCE, false); // start summoning fragments
@@ -617,7 +617,7 @@ public:
                 instance->SetData(TYPE_BOSS_MORCHOK, IN_PROGRESS);
             }
 
-            RunQuote(aggroQuote);
+            RunPlayableQuote(aggroQuote);
             Reset();
         }
 
@@ -628,7 +628,7 @@ public:
             if (victim->GetTypeId() == TYPEID_PLAYER)
             {
                 uint32 randInt = urand(0, MAX_KILL_QUOTES - 1);
-                RunQuote(killQuotes[randInt]);
+                RunPlayableQuote(killQuotes[randInt]);
             }
         }
 
@@ -641,7 +641,7 @@ public:
                 instance->SetData(TYPE_BOSS_MORCHOK, DONE);
             }
 
-            RunQuote(deathQuotes[DEATH_QUOTE_MORCHOK_INDEX]);
+            RunPlayableQuote(deathQuotes[DEATH_QUOTE_MORCHOK_INDEX]);
         }
 
         void UpdateAI(const uint32 diff) override
@@ -657,7 +657,7 @@ public:
 
                 // Handled in spellscript
                 me->CastSpell(me, SPELL_SUMMON_KOHCROM, true);
-                RunQuote(summonMorchokQuote);
+                RunPlayableQuote(summonMorchokQuote);
 
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_UPDATE_PRIORITY, me);
             }

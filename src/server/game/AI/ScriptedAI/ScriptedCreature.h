@@ -71,8 +71,8 @@ struct PlayableQuote
         this->text = text;
     }
 
-    const char * GetText() { return text.c_str(); }
-    uint32 GetSoundId() { return soundId; }
+    const char * GetText() const { return text.c_str(); }
+    uint32 GetSoundId() const { return soundId; }
 };
 
 struct ScriptedAI : public CreatureAI

@@ -91,24 +91,24 @@ enum whisperSpells : uint32
     SPELL_ZON_OZZ_WHISPER_VOID    = 109880
 };
 
-static FacelessQuote introQuote = 
+static const FacelessQuote introQuote =
 { 
     26337,
     "Vwyq agth sshoq'meg N'Zoth vra zz shfk qwor ga'halahs agthu. Uulg'ma, ag qam.",
     "Once more shall the twisted flesh-banners of N'Zoth chitter and howl above the fly-blown corpse of this world. After millennia, we have returned." 
 };
 
-static FacelessQuote aggroQuote = { 26335, "Zzof Shuul'wah. Thoq fssh N'Zoth!", "Victory for Deathwing. For the glory of N'Zoth!" };
+static const FacelessQuote aggroQuote = { 26335, "Zzof Shuul'wah. Thoq fssh N'Zoth!", "Victory for Deathwing. For the glory of N'Zoth!" };
 
-static FacelessQuote blackQuote = { 26344, "N'Zoth ga zyqtahg iilth.", "The will of N'Zoth corrupts you." };
+static const FacelessQuote blackQuote = { 26344, "N'Zoth ga zyqtahg iilth.", "The will of N'Zoth corrupts you." };
 
-static FacelessQuote voidQuote =  { 26345, "Gul'kafh an'qov N'Zoth.", "Gaze into the heart of N'Zoth." };
+static const FacelessQuote voidQuote =  { 26345, "Gul'kafh an'qov N'Zoth.", "Gaze into the heart of N'Zoth." };
 
-static FacelessQuote deathQuote = { 26336, "Uovssh thyzz... qwaz...", "To have waited so long... for this..." };
+static const FacelessQuote deathQuote = { 26336, "Uovssh thyzz... qwaz...", "To have waited so long... for this..." };
 
 #define MAX_DISRUPTING_QUOTES 3
 
-static FacelessQuote disruptingQuotes[MAX_DISRUPTING_QUOTES] =
+static const FacelessQuote disruptingQuotes[MAX_DISRUPTING_QUOTES] =
 {
     { 26340, "Sk'shgn eqnizz hoq.", "Your fear drives me." },
     { 26342, "Sk'magg yawifk hoq.", "Your suffering strengthens me." },
@@ -116,7 +116,7 @@ static FacelessQuote disruptingQuotes[MAX_DISRUPTING_QUOTES] =
 };
 #define MAX_KILL_QUOTES 3
 
-static FacelessQuote killQuotes[MAX_KILL_QUOTES] =
+static const FacelessQuote killQuotes[MAX_KILL_QUOTES] =
 {
     { 26338, "Sk'tek agth nuq N'Zoth yyqzz.", "Your skulls shall adorn N'Zoth's writhing throne." },
     { 26339, "Sk'shuul agth vorzz N'Zoth naggwa'fssh.", "Your deaths shall sing of N'Zoth's unending glory." },

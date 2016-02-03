@@ -29,7 +29,7 @@ public:
         this->whisperText = whisperText;
     }
 
-    const char * GetWhisperText()
+    const char * GetWhisperText() const
     {
         return whisperText.c_str();
     }
