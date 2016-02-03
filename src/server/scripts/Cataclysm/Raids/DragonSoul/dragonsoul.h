@@ -18,6 +18,23 @@
 #ifndef INSTANCE_DRAGONSOUL_H
 #define INSTANCE_DRAGONSOUL_H
 
+struct FacelessQuote : public PlayableQuote
+{
+private:
+    std::string whisperText;
+
+public:
+    FacelessQuote(uint32 soundId, std::string text, std::string whisperText) : PlayableQuote(soundId, text)
+    {
+        this->whisperText = whisperText;
+    }
+
+    const char * GetWhisperText()
+    {
+        return whisperText.c_str();
+    }
+};
+
 enum Encounters
 {
     // Bosses

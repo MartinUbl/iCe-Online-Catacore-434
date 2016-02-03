@@ -91,31 +91,24 @@ enum whisperSpells : uint32
     SPELL_ZON_OZZ_WHISPER_VOID    = 109880
 };
 
-struct FacelessQuote
-{
-    uint32 soundId;
-    const char * yell_text; // faceless language
-    const char * whisper_text; // readable whisper text
-};
-
-static const FacelessQuote introQuote = 
+static FacelessQuote introQuote = 
 { 
     26337,
     "Vwyq agth sshoq'meg N'Zoth vra zz shfk qwor ga'halahs agthu. Uulg'ma, ag qam.",
     "Once more shall the twisted flesh-banners of N'Zoth chitter and howl above the fly-blown corpse of this world. After millennia, we have returned." 
 };
 
-static const FacelessQuote aggroQuote = { 26335, "Zzof Shuul'wah. Thoq fssh N'Zoth!", "Victory for Deathwing. For the glory of N'Zoth!" };
+static FacelessQuote aggroQuote = { 26335, "Zzof Shuul'wah. Thoq fssh N'Zoth!", "Victory for Deathwing. For the glory of N'Zoth!" };
 
-static const FacelessQuote blackQuote = { 26344, "N'Zoth ga zyqtahg iilth.", "The will of N'Zoth corrupts you." };
+static FacelessQuote blackQuote = { 26344, "N'Zoth ga zyqtahg iilth.", "The will of N'Zoth corrupts you." };
 
-static const FacelessQuote voidQuote =  { 26345, "Gul'kafh an'qov N'Zoth.", "Gaze into the heart of N'Zoth." };
+static FacelessQuote voidQuote =  { 26345, "Gul'kafh an'qov N'Zoth.", "Gaze into the heart of N'Zoth." };
 
-static const FacelessQuote deathQuote = { 26336, "Uovssh thyzz... qwaz...", "To have waited so long... for this..." };
+static FacelessQuote deathQuote = { 26336, "Uovssh thyzz... qwaz...", "To have waited so long... for this..." };
 
 #define MAX_DISRUPTING_QUOTES 3
 
-static const FacelessQuote disruptingQuotes[MAX_DISRUPTING_QUOTES] =
+static FacelessQuote disruptingQuotes[MAX_DISRUPTING_QUOTES] =
 {
     { 26340, "Sk'shgn eqnizz hoq.", "Your fear drives me." },
     { 26342, "Sk'magg yawifk hoq.", "Your suffering strengthens me." },
@@ -123,7 +116,7 @@ static const FacelessQuote disruptingQuotes[MAX_DISRUPTING_QUOTES] =
 };
 #define MAX_KILL_QUOTES 3
 
-static const FacelessQuote killQuotes[MAX_KILL_QUOTES] =
+static FacelessQuote killQuotes[MAX_KILL_QUOTES] =
 {
     { 26338, "Sk'tek agth nuq N'Zoth yyqzz.", "Your skulls shall adorn N'Zoth's writhing throne." },
     { 26339, "Sk'shuul agth vorzz N'Zoth naggwa'fssh.", "Your deaths shall sing of N'Zoth's unending glory." },
@@ -290,7 +283,7 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             }
 
-            PlayQuote(aggroQuote);
+            RunPlayableQuote(aggroQuote);
             me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_AGGRO, true);
 
             roarTimer               = MAX_TIMER;
@@ -323,14 +316,14 @@ public:
             if (victim->GetTypeId() == TYPEID_PLAYER)
             {
                 quoteIndex = urand(0, MAX_KILL_QUOTES - 1);
-                PlayQuote(killQuotes[quoteIndex]);
+                RunPlayableQuote(killQuotes[quoteIndex]);
                 me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_SLAY, true);
             }
         }
 
         void JustDied(Unit * killer) override
         {
-            PlayQuote(deathQuote);
+            RunPlayableQuote(deathQuote);
             me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_DEATH, true);
 
             if (instance)
@@ -361,7 +354,7 @@ public:
         {
             if (!introDone && who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && who->GetExactDist2d(me) < 60.0f)
             {
-                PlayQuote(introQuote);
+                RunPlayableQuote(introQuote);
                 me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_INTRO, true);
 
                 introDone = true;
@@ -385,7 +378,7 @@ public:
             scheduler.Schedule(Seconds(1), [this](TaskContext /*context*/)
             {
                 me->CastSpell(me, SPELL_DARKNESS, true);
-                PlayQuote(blackQuote);
+                RunPlayableQuote(blackQuote);
                 me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_PHASE, true);
 
                 roarTimer = 500;
@@ -428,37 +421,31 @@ public:
             switch (spell->Id)
             {
                 case SPELL_ZON_OZZ_WHISPER_INTRO:
-                    me->MonsterWhisper(introQuote.whisper_text, target->GetGUID());
+                    me->MonsterWhisper(introQuote.GetWhisperText(), target->GetGUID());
                     break;
                 case SPELL_ZON_OZZ_WHISPER_AGGRO:
-                    me->MonsterWhisper(aggroQuote.whisper_text, target->GetGUID());
+                    me->MonsterWhisper(aggroQuote.GetWhisperText(), target->GetGUID());
                     break;
                 case SPELL_ZON_OZZ_WHISPER_DEATH:
-                    me->MonsterWhisper(deathQuote.whisper_text, target->GetGUID());
+                    me->MonsterWhisper(deathQuote.GetWhisperText(), target->GetGUID());
                     break;
                 case SPELL_ZON_OZZ_WHISPER_SLAY:
                     if (quoteIndex < MAX_KILL_QUOTES)
-                        me->MonsterWhisper(killQuotes[quoteIndex].whisper_text, target->GetGUID());
+                        me->MonsterWhisper(killQuotes[quoteIndex].GetWhisperText(), target->GetGUID());
                     break;
                 case SPELL_ZON_OZZ_WHISPER_PHASE:
-                    me->MonsterWhisper(blackQuote.whisper_text, target->GetGUID());
+                    me->MonsterWhisper(blackQuote.GetWhisperText(), target->GetGUID());
                     break;
                 case SPELL_ZON_OZZ_WHISPER_SHADOWS:
                     if (quoteIndex < MAX_DISRUPTING_QUOTES)
-                        me->MonsterWhisper(disruptingQuotes[quoteIndex].whisper_text, target->GetGUID());
+                        me->MonsterWhisper(disruptingQuotes[quoteIndex].GetWhisperText(), target->GetGUID());
                     break;
                 case SPELL_ZON_OZZ_WHISPER_VOID:
-                    me->MonsterWhisper(voidQuote.whisper_text, target->GetGUID());
+                    me->MonsterWhisper(voidQuote.GetWhisperText(), target->GetGUID());
                     break;
                 default:
                     break;
             }
-        }
-
-        void PlayQuote(FacelessQuote quote)
-        {
-            me->MonsterYell(quote.yell_text, LANG_UNIVERSAL, 0);
-            me->PlayDirectSound(quote.soundId);
         }
 
         void HandleBlackBloodPhaseNormal()
@@ -502,7 +489,7 @@ public:
         void SpawnVoidSphere()
         {
             bounceCount = 0;
-            PlayQuote(voidQuote);
+            RunPlayableQuote(voidQuote);
             me->CastSpell(me, SPELL_ZON_OZZ_WHISPER_VOID, true);
 
             // Summon void sphere in front of the boss and cast beam on it, we should use SPELL_VOID_OF_THE_UNMAKING_SUMMON, but spawning position of this spell is fucked up
@@ -649,7 +636,7 @@ public:
 
                     quoteIndex = urand(0, MAX_DISRUPTING_QUOTES - 1);
 
-                    PlayQuote(disruptingQuotes[quoteIndex]);
+                    RunPlayableQuote(disruptingQuotes[quoteIndex]);
 
                     disruptingShadowsTimer = 25000;
                 }

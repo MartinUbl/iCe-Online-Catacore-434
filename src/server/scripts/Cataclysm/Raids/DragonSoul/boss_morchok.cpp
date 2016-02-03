@@ -28,13 +28,7 @@
 #include "MapManager.h"
 #include "TaskScheduler.h"
 
-struct Quotes
-{
-    uint32 soundId;
-    const char * text;
-};
-
-static const Quotes firstIntroQuotes[6] = 
+static PlayableQuote firstIntroQuotes[6] = 
 {
     { 26282, "No mortal shall turn me from my task!" }, // Morchok
     { 26531, "Wyrmrest Accord, attack!" }, // Lord Afrasastrasz
@@ -44,7 +38,7 @@ static const Quotes firstIntroQuotes[6] =
     { 26270, "Cowards! Weaklings! Come down and fight or I will bring you down!" }, // Morchok
 };
 
-static const Quotes secondIntroQuotes[5] =
+static const PlayableQuote secondIntroQuotes[5] =
 {
     { 26271, "You cannot hide in this temple forever, shaman!" }, // Morchok
     { 26273, "Wyrmrest will fall. All will be dust." }, // Morchok
@@ -53,13 +47,13 @@ static const Quotes secondIntroQuotes[5] =
     { 26272, " I will turn this tower to rubble and scatter it across the wastes." }, // Morchok
 };
 
-static const Quotes aggroQuote = { 26268, "You seek to halt an avalanche. I will bury you." };
+static const PlayableQuote aggroQuote = { 26268, "You seek to halt an avalanche. I will bury you." };
 
-static const Quotes summonMorchokQuote = { 26288, "You thought to fight me alone? The earth splits to swallow and crush you." };
+static const PlayableQuote summonMorchokQuote = { 26288, "You thought to fight me alone? The earth splits to swallow and crush you." };
 
 #define MAX_SUMMON_CRYSTAL_QUOTES 2
 
-static const Quotes summonCrystalQuotes[MAX_SUMMON_CRYSTAL_QUOTES] =
+static const PlayableQuote summonCrystalQuotes[MAX_SUMMON_CRYSTAL_QUOTES] =
 {
     { 26283, "Flee and die!" },
     { 26284, "Run, and perish." },
@@ -67,7 +61,7 @@ static const Quotes summonCrystalQuotes[MAX_SUMMON_CRYSTAL_QUOTES] =
 
 #define MAX_VORTEX_QUOTES 4
 
-static const Quotes vortexQuotes[MAX_VORTEX_QUOTES] =
+static const PlayableQuote vortexQuotes[MAX_VORTEX_QUOTES] =
 {
     { 26274, "The stone calls..." },
     { 26275, "The ground shakes..." },
@@ -77,7 +71,7 @@ static const Quotes vortexQuotes[MAX_VORTEX_QUOTES] =
 
 #define MAX_BLACK_BLOOD_QUOTES 4
 
-static const Quotes blackBloodQuotes[MAX_BLACK_BLOOD_QUOTES] =
+static const PlayableQuote blackBloodQuotes[MAX_BLACK_BLOOD_QUOTES] =
 {
     { 26278, "...and the black blood of the earth consumes you." },
     { 26279, "...and there is no escape from the old gods." },
@@ -87,7 +81,7 @@ static const Quotes blackBloodQuotes[MAX_BLACK_BLOOD_QUOTES] =
 
 #define MAX_KILL_QUOTES 3
 
-static const Quotes killQuotes[MAX_KILL_QUOTES] =
+static const PlayableQuote killQuotes[MAX_KILL_QUOTES] =
 {
     { 26285, "I am unstoppable." },
     { 26286, "It was inevitable." },
@@ -98,7 +92,7 @@ static const Quotes killQuotes[MAX_KILL_QUOTES] =
 #define DEATH_QUOTE_MORCHOK_INDEX 0
 #define DEATH_QUOTE_LORD_AFASASTRASZ_INDEX 1
 
-static const Quotes deathQuotes[MAX_DEATH_QUOTES] =
+static const PlayableQuote deathQuotes[MAX_DEATH_QUOTES] =
 {
     { 26269, "Impossible. This cannot be. The tower...must...fall." }, // Morchok
     { 26535, "The Twilight's Hammer is retreating! The temple is ours; fortify your positions within!" }, // Lord Afasastrasz
@@ -196,12 +190,11 @@ struct ElementalAI : public ScriptedAI
         me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.0f);
     }
 
-    void PlayAndYell(uint32 soundId, const char * text)
+    void RunQuote(PlayableQuote quote)
     {
         if (me->GetEntry() == MORCHOK_ENTRY)
         {
-            DoPlaySoundToSet(me, soundId);
-            me->MonsterYell(text, LANG_UNIVERSAL, 0);
+            ScriptedAI::RunPlayableQuote(quote);
         }
     }
 
@@ -461,7 +454,7 @@ struct ElementalAI : public ScriptedAI
                 return;
 
             uint32 randInt = urand(0, MAX_BLACK_BLOOD_QUOTES - 1);
-            PlayAndYell(blackBloodQuotes[randInt].soundId, blackBloodQuotes[randInt].text);
+            RunQuote(blackBloodQuotes[randInt]);
 
             // Start channeling after summonning of fragments
             me->CastSpell(me, SPELL_BLACK_BLOOD_CHANNEL, false);
@@ -501,7 +494,7 @@ struct ElementalAI : public ScriptedAI
             if (IsCastingAllowed() && vortexTimer > 20000) // 12 till explosion + 1 s to spawn + few seconds to recover
             {
                 uint32 randInt = urand(0, MAX_SUMMON_CRYSTAL_QUOTES - 1);
-                PlayAndYell(summonCrystalQuotes[randInt].soundId, summonCrystalQuotes[randInt].text);
+                RunQuote(summonCrystalQuotes[randInt]);
 
                 uint32 pos = me->getThreatManager().getThreatList().size() == 1 ? 0 : 1;
 
@@ -518,7 +511,7 @@ struct ElementalAI : public ScriptedAI
             if (IsCastingAllowed())
             {
                 uint32 randInt = urand(0, MAX_VORTEX_QUOTES - 1);
-                PlayAndYell(vortexQuotes[randInt].soundId, vortexQuotes[randInt].text);
+                RunQuote(vortexQuotes[randInt]);
 
                 me->CastSpell(me, SPELL_EARTH_VORTEX, true); // pull players
                 me->CastSpell(me, SPELL_EARTH_VENGEANCE, false); // start summoning fragments
@@ -624,7 +617,7 @@ public:
                 instance->SetData(TYPE_BOSS_MORCHOK, IN_PROGRESS);
             }
 
-            PlayAndYell(aggroQuote.soundId, aggroQuote.text);
+            RunQuote(aggroQuote);
             Reset();
         }
 
@@ -635,7 +628,7 @@ public:
             if (victim->GetTypeId() == TYPEID_PLAYER)
             {
                 uint32 randInt = urand(0, MAX_KILL_QUOTES - 1);
-                PlayAndYell(killQuotes[randInt].soundId, killQuotes[randInt].text);
+                RunQuote(killQuotes[randInt]);
             }
         }
 
@@ -648,7 +641,7 @@ public:
                 instance->SetData(TYPE_BOSS_MORCHOK, DONE);
             }
 
-            PlayAndYell(deathQuotes[DEATH_QUOTE_MORCHOK_INDEX].soundId, deathQuotes[DEATH_QUOTE_MORCHOK_INDEX].text);
+            RunQuote(deathQuotes[DEATH_QUOTE_MORCHOK_INDEX]);
         }
 
         void UpdateAI(const uint32 diff) override
@@ -664,7 +657,7 @@ public:
 
                 // Handled in spellscript
                 me->CastSpell(me, SPELL_SUMMON_KOHCROM, true);
-                PlayAndYell(summonMorchokQuote.soundId, summonMorchokQuote.text);
+                RunQuote(summonMorchokQuote);
 
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_UPDATE_PRIORITY, me);
             }

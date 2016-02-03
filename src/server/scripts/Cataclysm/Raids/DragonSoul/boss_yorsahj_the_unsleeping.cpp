@@ -20,28 +20,21 @@
 #include "MapManager.h"
 #include "TaskScheduler.h"
 
-struct FacelessQuote
-{
-    uint32 soundId;
-    const char * facelessText;
-    const char * whisperText;
-};
-
-static const FacelessQuote introQuote =
+static FacelessQuote introQuote =
 {
     26328,
     "Ak'agthshi ma uhnish, ak'uq shg'cul vwahuhn! H'iwn iggksh Phquathi gag OOU KAAXTH SHUUL!",
     "Our numbers are endless, our power beyond reckoning! All who oppose the Destroyer will DIE A THOUSAND DEATHS!"
 };
 
-static const FacelessQuote aggroQuote =
+static FacelessQuote aggroQuote =
 {
     26326,
     "Iilth qi'uothk shn'ma yeh'glu Shath'Yar! H'IWN IILTH!",
     "You will drown in the blood of the Old Gods! ALL OF YOU!"
 };
 
-static const FacelessQuote deathQuote =
+static FacelessQuote deathQuote =
 {
     26327,
     "Ez, Shuul'wah! Sk'woth'gl yu'gaz yog'ghyl ilfah!",
@@ -50,7 +43,7 @@ static const FacelessQuote deathQuote =
 
 #define MAX_BLOOD_QUOTES 2
 
-static const FacelessQuote bloodQuotes[MAX_BLOOD_QUOTES] =
+static FacelessQuote bloodQuotes[MAX_BLOOD_QUOTES] =
 {
     { 26332, "KYTH ag'xig yyg'far IIQAATH ONGG!", "SEE how we pour from the CURSED EARTH!" },
     { 26333, "UULL lwhuk H'IWN!", "The DARKNESS devours ALL!" },
@@ -58,7 +51,7 @@ static const FacelessQuote bloodQuotes[MAX_BLOOD_QUOTES] =
 
 #define MAX_KILL_QUOTES 3
 
-static const FacelessQuote killQuotes[MAX_KILL_QUOTES] =
+static FacelessQuote killQuotes[MAX_KILL_QUOTES] =
 {
     { 26329, "Sk'yahf qi'plahf PH'MAGG!", "Your soul will know ENDLESS TORMENT!" },
     { 26330, "H'iwn zaix Shuul'wah, PHQUATHI!", "All praise Deathwing, THE DESTROYER!" },
@@ -295,12 +288,6 @@ public:
             return me->IsNonMeleeSpellCasted(false) || me->HasAura(SPELL_CHANNEL_ANIM_KIT) || me->HasAura(SPELL_MANA_VOID_DUMMY_CASTING);
         }
 
-        void PlayQuote(FacelessQuote quote)
-        {
-            me->MonsterYell(quote.facelessText, LANG_UNIVERSAL, 0);
-            me->PlayDirectSound(quote.soundId);
-        }
-
         void Reset() override
         {
             if (instance)
@@ -338,7 +325,7 @@ public:
                 me->CastSpell(me, SPELL_BERSERK, true);
             });
 
-            PlayQuote(aggroQuote);
+            RunPlayableQuote(aggroQuote);
             me->CastSpell(me, SPELL_WHISPER_AGGRO, true);
 
             ScriptedAI::EnterCombat(who);
@@ -376,7 +363,7 @@ public:
         {
             if (!introDone && who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && who->GetExactDist2d(me) < 60.0f)
             {
-                PlayQuote(introQuote);
+                RunPlayableQuote(introQuote);
                 me->CastSpell(me, SPELL_WHISPER_INTRO, true);
 
                 introDone = true;
@@ -393,7 +380,7 @@ public:
                 return;
 
             quoteIndex = urand(0, MAX_KILL_QUOTES - 1);
-            PlayQuote(killQuotes[quoteIndex]);
+            RunPlayableQuote(killQuotes[quoteIndex]);
             me->CastSpell(me, SPELL_WHISPER_SLAY, true);
         }
 
@@ -408,7 +395,7 @@ public:
             summons.DespawnAll();
             scheduler.CancelAll();
 
-            PlayQuote(deathQuote);
+            RunPlayableQuote(deathQuote);
             me->CastSpell(me, SPELL_WHISPER_DEATH, true);
         }
 
@@ -433,21 +420,21 @@ public:
                     me->CastSpell(target, SPELL_DIGESTIVE_ACID_MISSILE, true);
                     break;
                 case SPELL_WHISPER_INTRO:
-                    me->MonsterWhisper(introQuote.whisperText, target->GetGUID());
+                    me->MonsterWhisper(introQuote.GetWhisperText(), target->GetGUID());
                     break;
                 case SPELL_WHISPER_AGGRO:
-                    me->MonsterWhisper(aggroQuote.whisperText, target->GetGUID());
+                    me->MonsterWhisper(aggroQuote.GetWhisperText(), target->GetGUID());
                     break;
                 case SPELL_WHISPER_DEATH:
-                    me->MonsterWhisper(deathQuote.whisperText, target->GetGUID());
+                    me->MonsterWhisper(deathQuote.GetWhisperText(), target->GetGUID());
                     break;
                 case SPELL_WHISPER_SLAY:
                     if (quoteIndex < MAX_KILL_QUOTES)
-                        me->MonsterWhisper(killQuotes[quoteIndex].whisperText, target->GetGUID());
+                        me->MonsterWhisper(killQuotes[quoteIndex].GetWhisperText(), target->GetGUID());
                     break;
                 case SPELL_WHISPER_MINIONS:
                     if (quoteIndex < MAX_BLOOD_QUOTES)
-                        me->MonsterWhisper(bloodQuotes[quoteIndex].whisperText, target->GetGUID());
+                        me->MonsterWhisper(bloodQuotes[quoteIndex].GetWhisperText(), target->GetGUID());
                     break;
                 case SPELL_WHISPER_CORRUPTION:
                     // Not used at all ?
@@ -609,7 +596,7 @@ public:
 
                 // Yell and whisper
                 quoteIndex = urand(0, MAX_BLOOD_QUOTES - 1);
-                PlayQuote(bloodQuotes[quoteIndex]);
+                RunPlayableQuote(bloodQuotes[quoteIndex]);
 
                 me->CastSpell(me, SPELL_WHISPER_MINIONS, true);
             }
