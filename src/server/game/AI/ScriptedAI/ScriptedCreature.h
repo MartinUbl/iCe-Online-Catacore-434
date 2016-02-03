@@ -160,7 +160,7 @@ struct ScriptedAI : public CreatureAI
 
 
     // Say or yell boss quote with sound
-    void RunPlayableQuote(PlayableQuote quote, bool yell = true);
+    virtual void RunPlayableQuote(PlayableQuote quote, bool yell = true);
     float DoGetThreat(Unit* u);
     void DoModifyThreatPercent(Unit* pUnit, int32 pct);
 
