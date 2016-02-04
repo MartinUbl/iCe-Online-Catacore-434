@@ -1530,13 +1530,14 @@ void AuraEffect::ApplySpellMod(Unit *target, bool apply)
             for (Unit::AuraApplicationMap::iterator iter = auras.begin(); iter != auras.end(); ++iter)
             {
                 Aura *aura = iter->second->GetBase();
-                // only passive auras-active auras should have amount set on spellcast and not be affected
-                // if aura is casted by others, it will not be affected
                 DynamicObject * dynObj = target->GetDynObject(aura->GetId());
 
-                if ( aura->IsPassive() && 
-                    (aura->GetCasterGUID() == guid || (dynObj && dynObj->GetGUID() == aura->GetCasterGUID()))
-                    && sSpellMgr->IsAffectedByMod(aura->GetSpellProto(), m_spellmod))
+                // Only passive or permament auras-active auras should have amount set on spellcast and not be affected
+                bool isPassiveOrPermanent = aura->IsPassive() || aura->IsPermanent();
+                // If aura is cast by others, it will not be affected
+                bool isDynObjAura = dynObj && dynObj->GetGUID() == aura->GetCasterGUID();
+
+                if (isPassiveOrPermanent && (aura->GetCasterGUID() == guid || isDynObjAura) && sSpellMgr->IsAffectedByMod(aura->GetSpellProto(), m_spellmod))
                 {
                     if (GetMiscValue() == SPELLMOD_ALL_EFFECTS)
                     {
