@@ -1689,6 +1689,7 @@ void AddNorthrendScripts()
     AddSC_sholazar_basin();
     AddSC_storm_peaks();
     AddSC_zuldrak();
+    AddSC_wintergrasp();
     // City
     AddSC_dalaran();
     // Utgarde Keep: Utgarde Keep
