@@ -10792,6 +10792,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             target = pVictim;
     }
 
+    // This condition is not generic enough, I think most of spells with PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS will have target selected as null, not this
+    // TODO: Research and find more more correct solution for selecting target of proc spell
+    if (procSpell->AttributesEx9 & SPELL_ATTR9_SUMMON_PLAYER_TOTEM)
+        target = this;
 
     // try detect target manually if not set
     if (target == NULL)
