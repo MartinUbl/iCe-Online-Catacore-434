@@ -1664,9 +1664,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     // Maelstrom Weapon - spell alert
                     if (caster && GetId() == 53817)
                     {
-                        Aura *maelstrom = aurApp->GetBase();
-                        if (maelstrom->GetStackAmount() == 5)
+                        uint32 maealStormStacks = aurApp->GetBase()->GetStackAmount();
+
+                        if (maealStormStacks == aurApp->GetBase()->GetSpellProto()->StackAmount)
                             caster->AddAura(60349, caster);
+
+                        //Shaman T13 Enhancement 2P Bonus (Maelstrom Weapon)
+                        if (maealStormStacks == 1 && caster->HasAura(105866))
+                        {
+                            // Temporal Maelstrom
+                            caster->CastSpell(caster, 105869, true);
+                        }
                     }
                 }
                 break;
@@ -2270,9 +2278,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
                 break;
             case SPELLFAMILY_SHAMAN:
-                // Maelstrom Weapon - remove spell alert
+                // Maelstrom Weapon
                 if (caster && GetId() == 53817)
+                {
+                    // remove Temporal Maelstrom
+                    caster->RemoveAura(105869);
+                    // remove spell alert
                     caster->RemoveAura(60349);
+                }
                 break;
             case SPELLFAMILY_HUNTER:
                 // Glyph of Freezing Trap
