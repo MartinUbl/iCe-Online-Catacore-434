@@ -8575,8 +8575,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             // cobra shot focus effect + add 6 seconds to serpent sting
             if (m_spellInfo->SpellFamilyFlags[2] & 0x400000)
             {
-                SpellEntry const* energizeSpell = sSpellStore.LookupEntry(91954);
-                if (energizeSpell)
+                if (SpellEntry const* energizeSpell = sSpellStore.LookupEntry(91954))
                 {
                     int32 bp0 = energizeSpell->EffectBasePoints[0];
                     if (unitTarget && unitTarget->GetHealthPct() <= 25.0f)
@@ -8587,7 +8586,12 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         else if (m_caster->HasAura(83489))
                             bp0 += 3;
                     }
-                    m_caster->CastCustomSpell(m_caster,91954,&bp0,0,0,true);
+
+                    // Hunter T13 2P Bonus (Steady Shot and Cobra Shot)
+                    if (m_caster->HasAura(105732))
+                        bp0 *= 2;
+
+                    m_caster->CastCustomSpell(m_caster, 91954, &bp0, 0, 0, true);
                 }
 
                 if (unitTarget->GetAura(1978, m_originalCasterGUID))
