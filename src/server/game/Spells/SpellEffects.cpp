@@ -10889,9 +10889,19 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
     float radius = 5.0f;
     uint32 amount = damage > 0 ? damage : 1;
     int32 duration = GetSpellDuration(m_spellInfo);
+
+    if (Player* modOwner = m_originalCaster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
+
     switch (m_spellInfo->Id)
     {
-        case 1122: // Inferno
+        case 1122:  // Inferno
+        case 60478: // Doomguard
+        {
+            if (AuraEffect * aurEff = caster->GetAuraEffect(105888,EFFECT_1)) // Warlock T13 2P Bonus (Doomguard and Infernal)
+                duration += aurEff->GetAmount() * IN_MILLISECONDS;
+            // no break !
+        }
         case 46619: // Raise Ally
             amount = 1;
             break;
@@ -10899,8 +10909,7 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
             amount = 1;
             break;
     }
-    if (Player* modOwner = m_originalCaster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
+
 
     //TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN;
     Map *map = caster->GetMap();
