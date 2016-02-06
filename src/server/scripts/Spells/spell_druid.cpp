@@ -24,10 +24,12 @@
 #include "ScriptPCH.h"
 #include "SpellAuraEffects.h"
 
-enum DruidSpells
+enum DruidSpells : uint32
 {
     DRUID_INCREASED_MOONFIRE_DURATION   = 38414,
-    DRUID_NATURES_SPLENDOR              = 57865
+    DRUID_NATURES_SPLENDOR              = 57865,
+    DRUID_SPELL_RIP                     = 1079,
+    DRUID_2P_T13_CAT_SET_BONUS_AURA     = 105725
 };
 
 class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
@@ -75,66 +77,46 @@ class spell_druid_blood_in_water : public SpellScriptLoader
         {
             PrepareSpellScript(spell_druid_blood_in_water_SpellScript);
 
-            enum spell
-            {
-                RIP = 1079,
-            };
-
-            bool Validate(SpellEntry const* /*spellEntry*/)
-            {
-               return (sSpellStore.LookupEntry(RIP));
-            }
-
-            bool Load()
-            {
-                _executed = false;
-                return (GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getClass() == CLASS_DRUID);
-            }
-
             void HandleAfterHit()
             {
-                if (_executed)
-                    return;
+                Unit * unitTarget = GetHitUnit();
+                Unit * caster = GetCaster();
 
-                _executed = true;
+                if (Aura * auraRip = unitTarget->GetAura(DRUID_SPELL_RIP, caster->GetGUID()))
+                {
+                    // Blizzard trolls, rank 1 SPELL_AURA_PROC_TRIGGER_SPELL, rank2 SPELL_AURA_DUMMY ....
+                    AuraEffect * bloodInWaterEffRank1 = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_DRUID, 4399, EFFECT_0);
+                    AuraEffect * bloodInWaterEffRank2 = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4399, EFFECT_0);
 
-                    if( Unit* caster = GetCaster())
-                        if (Unit* unitTarget = GetHitUnit())
-                            if(unitTarget->HealthBelowPct(26)) // <= 25 %
-                                if (unitTarget->HasAura(RIP))
-                                {
+                    float chance = bloodInWaterEffRank1 ? 50.0f : bloodInWaterEffRank2 ? 100.0f : 0.0f;
+                    float hpPctCondition = bloodInWaterEffRank1 ? bloodInWaterEffRank1->GetAmount() : bloodInWaterEffRank2 ? bloodInWaterEffRank2->GetAmount() : 0;
 
-                                    Unit::AuraApplicationMap const& auras = unitTarget->GetAppliedAuras();
-                                    for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-                                    {
-                                        Aura* aura = itr->second->GetBase();
-                                        if(aura->GetCaster() != NULL && aura->GetCaster()->GetTypeId() == TYPEID_PLAYER
-                                            && aura->GetCaster()->ToPlayer() == caster && aura->GetId() == RIP)
-                                        {
-                                            if(caster->HasAura(80318) && roll_chance_i(50)) // 50 % rank 1
-                                            {
-                                                aura->RefreshDuration();
-                                                break;
-                                            }
-                                            else if(roll_chance_i(100) && caster->HasAura(80319)) // 100 % rank 2
-                                            {
-                                                aura->RefreshDuration();
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
+                    // If we have talent
+                    if (hpPctCondition)
+                    {
+                        // Druid T13 Feral 2P Bonus (Savage Defense and Blood In The Water) overrides HP condition
+                        if (AuraEffect * aurEffSetBonus = caster->GetAuraEffect(DRUID_2P_T13_CAT_SET_BONUS_AURA, EFFECT_1))
+                            hpPctCondition = aurEffSetBonus->GetAmount();
+
+                        if (unitTarget->HealthBelowPct(hpPctCondition))
+                        {
+                            if (roll_chance_i(chance))
+                            {
+                                // Refresh duration
+                                auraRip->RefreshDuration();
+                            }
+                        }
+                    }
+                }
             }
 
-            void Register()
+            void Register() override
             {
                 AfterHit += SpellHitFn(spell_druid_blood_in_water_SpellScript::HandleAfterHit);
             }
-
-            bool _executed;
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const override
         {
             return new spell_druid_blood_in_water_SpellScript;
         }
