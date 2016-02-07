@@ -9227,6 +9227,24 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                         trigger_spell_id = 25997;
                         break;
                     }
+                    case 62600: // Savage Defense (Passive)
+                    {
+                        if (procEx & PROC_EX_CRITICAL_HIT)
+                        {
+                            int32 chanceInt = triggeredByAura->GetAmount();
+                            // Druid T13 Feral 2P Bonus (overrides proc chance)
+                            if (AuraEffect * aurEff = GetAuraEffect(105725, EFFECT_1))
+                            {
+                                // Pulverize
+                                if (HasAura(80951))
+                                    chanceInt = aurEff->GetAmount();
+                            }
+
+                            if (!roll_chance_i(chanceInt))
+                                return true;
+                        }
+                        break;
+                    }
                 }
                 break;
             case SPELLFAMILY_MAGE:
