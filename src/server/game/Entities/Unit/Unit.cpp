@@ -561,10 +561,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             {
                 pVictim->CastSpell(pVictim, 59628, true);
                 CastSpell(this, 57933, true);
-
-                //Rogue T13 2P Bonus (Tricks of the Trade)
-                if (HasAura(105849))
-                    CastSpell(this, 105864, true);
             }
         }
 
