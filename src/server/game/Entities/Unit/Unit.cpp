@@ -13194,6 +13194,13 @@ uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32
                 // Pain and Suffering reduces damage
                 if (AuraEffect * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2874, 1))
                     back_damage += aurEff->GetAmount() * back_damage / 100; // += due to - basepoint in spelleffect
+
+                // Priest T13 Shadow 2P Bonus (Shadow Word: Death)
+                if (AuraEffect * aurEff = caster->GetAuraEffect(105843, EFFECT_1))
+                {
+                    back_damage = back_damage * (100 - aurEff->GetAmount()) / 100;
+                }
+
                 caster->CastCustomSpell(caster, 32409, &back_damage, 0, 0, true);
 
                 if (unitTarget->GetHealthPct() <= 25.0f)
