@@ -4062,6 +4062,28 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_DEATHKNIGHT:
+        {
+            // Sudden Doom + Freezing Fog
+            if (m_spellAura->GetId() == 81340 || m_spellAura->GetId() == 59052)
+            {
+                //Item - Death Knight T13 DPS 2P Bonus
+                if (Aura * setBonusAura = m_caster->GetAura(105609))
+                {
+                    if (AuraEffect * aurEff = setBonusAura->GetEffect(EFFECT_0))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            m_spellAura->SetCharges(2);
+                    }
+                    if (AuraEffect * aurEff = setBonusAura->GetEffect(EFFECT_1))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            m_spellAura->SetCharges(2);
+                    }
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_PRIEST:
         {
             // Inner Focus
