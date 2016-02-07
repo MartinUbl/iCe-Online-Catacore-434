@@ -873,9 +873,7 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB)
 bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) const
 {
     SpellEntry const *spellproto = sSpellStore.LookupEntry(spellId);
-
-    if (!spellproto)
-        return false;
+    if (!spellproto) return false;
 
     // not found a single positive spell with this attribute
     if (spellproto->Attributes & SPELL_ATTR0_NEGATIVE_1)
@@ -950,7 +948,7 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
     }
 
     // Special case: effects which determine positivity of whole spell
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    for (uint8 i = 0; i<MAX_SPELL_EFFECTS; ++i)
     {
         if (spellproto->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH)
             return true;
@@ -1524,7 +1522,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellEntry const* spellProto, Spel
 
     *Only Dots can proc auras with PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG or PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG
 
-    *Only Hots can proc auras with PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS or PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS, or any positive magic spell
+    *Only Hots can proc auras with PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS or PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS
 
     *Only Dots can proc auras with PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG or PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG
 
@@ -1537,10 +1535,6 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellEntry const* spellProto, Spel
     * @param spellProto SpellInfo of aura to be procced
 
     */
-
-    // All magical positive spells should proc from PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS
-    if (procFlags & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS && EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS)
-        return true;
 
     /// Quick Check - If PROC_FLAG_TAKEN_DAMAGE is set for aura and procSpell dealt damage, proc no matter what kind of spell that deals the damage.
     if (procFlags & PROC_FLAG_TAKEN_DAMAGE && EventProcFlag & PROC_FLAG_TAKEN_DAMAGE)
