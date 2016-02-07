@@ -296,6 +296,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
             if (pItemProto->Quality == ITEM_QUALITY_HEIRLOOM)
             {
                 item->ClearEnchantment(TRANSMOGRIFY_ENCHANTMENT_SLOT);
+                pl->SetVisibleItemSlot(itemSlots[i], item);
             }
         }
 
