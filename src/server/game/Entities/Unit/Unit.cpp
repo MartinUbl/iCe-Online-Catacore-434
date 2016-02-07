@@ -9663,6 +9663,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 103968:
             hpPctCondition = 50;
             break;
+        // Death Knight T13 Blood 2P Bonus
+        case 105552:
+            hpPctCondition = 35;
+            break;
         default:
             break;
     }
