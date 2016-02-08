@@ -9787,6 +9787,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        case 105764: // Shaman T13 Restoration 2P Bonus (Mana Tide)
+            target = this;
+            break;
         case 99134:// Priest T12 Healer 2P Bonus
         {
             // Proc only from Flash Heal, Heal, Greater Heal, Prayer of Mending proc handled in Spell::EffectApplyAura
@@ -10791,11 +10794,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             (auraSpellInfo->HasSpellEffect(SPELL_EFFECT_SCHOOL_DAMAGE) || auraSpellInfo->AppliesAuraType(SPELL_AURA_PERIODIC_DAMAGE)))
             target = pVictim;
     }
-
-    // This condition is not generic enough, I think most of spells with PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS will have target selected as null, not this
-    // TODO: Research and find more more correct solution for selecting target of proc spell
-    if (procSpell && procSpell->AttributesEx9 & SPELL_ATTR9_SUMMON_PLAYER_TOTEM)
-        target = this;
 
     // try detect target manually if not set
     if (target == NULL)
