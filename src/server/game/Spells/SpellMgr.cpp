@@ -1501,6 +1501,26 @@ void SpellMgr::LoadSpellBonusess()
     sLog->outString(">> Loaded %u extra spell bonus data",  count);
 }
 
+bool SpellMgr::CanSpellProcSpecial(SpellEntry const* procSpell, uint32 EventProcFlag, uint32 procFlags) const
+{
+    if (!procSpell)
+        return false;
+
+    // All magical positive spells should logicaly proc from PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS, but blizz ...
+    if ((procFlags & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS) && (EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS))
+    {
+        // This is hack switch for spell ids with this proc flag, which should definitely should be able to proc
+        switch (procSpell->Id)
+        {
+            case 16190: // Mana Tide Totem -> Shaman T13 Restoration 2P Bonus (Mana Tide)
+                return true;
+            default:
+                break;
+        }
+    }
+    return false;
+}
+
 bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellEntry const* spellProto, SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellEntry const* procSpell, uint32 procFlags, uint32 procExtra, bool active) const
 {
     // No extra req need
@@ -1524,7 +1544,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellEntry const* spellProto, Spel
 
     *Only Dots can proc auras with PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG or PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG
 
-    *Only Hots can proc auras with PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS or PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS, or any positive magic spell
+    *Only Hots can proc auras with PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS or PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS
 
     *Only Dots can proc auras with PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG or PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG
 
@@ -1538,8 +1558,8 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellEntry const* spellProto, Spel
 
     */
 
-    // All magical positive spells should proc from PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS
-    if (procFlags & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS && EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS)
+    // If no general condition can be applied to resolve procing from spell, use this function to handle special cases ...
+    if (CanSpellProcSpecial(procSpell, EventProcFlag, procFlags))
         return true;
 
     /// Quick Check - If PROC_FLAG_TAKEN_DAMAGE is set for aura and procSpell dealt damage, proc no matter what kind of spell that deals the damage.
