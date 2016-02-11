@@ -77,6 +77,11 @@ class spell_druid_blood_in_water : public SpellScriptLoader
         {
             PrepareSpellScript(spell_druid_blood_in_water_SpellScript);
 
+            bool Validate(SpellEntry const * /*spellEntry*/) override
+            {
+                return sSpellStore.LookupEntry(DRUID_2P_T13_CAT_SET_BONUS_AURA);
+            }
+
             void HandleAfterHit()
             {
                 Unit * unitTarget = GetHitUnit();
@@ -95,8 +100,8 @@ class spell_druid_blood_in_water : public SpellScriptLoader
                     if (hpPctCondition)
                     {
                         // Druid T13 Feral 2P Bonus (Savage Defense and Blood In The Water) overrides HP condition
-                        if (AuraEffect * aurEffSetBonus = caster->GetAuraEffect(DRUID_2P_T13_CAT_SET_BONUS_AURA, EFFECT_1))
-                            hpPctCondition = aurEffSetBonus->GetAmount();
+                        if (caster->HasAura(DRUID_2P_T13_CAT_SET_BONUS_AURA))
+                            hpPctCondition = sSpellStore.LookupEntry(DRUID_2P_T13_CAT_SET_BONUS_AURA)->EffectBasePoints[EFFECT_1];
 
                         if (unitTarget->HealthBelowPct(hpPctCondition))
                         {
