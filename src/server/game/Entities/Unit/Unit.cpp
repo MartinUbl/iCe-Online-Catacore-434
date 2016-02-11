@@ -9229,20 +9229,20 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                     }
                     case 62600: // Savage Defense (Passive)
                     {
-                        if (procEx & PROC_EX_CRITICAL_HIT)
-                        {
-                            int32 chanceInt = triggeredByAura->GetAmount();
-                            // Druid T13 Feral 2P Bonus (overrides proc chance)
-                            if (AuraEffect * aurEff = GetAuraEffect(105725, EFFECT_1))
-                            {
-                                // Pulverize
-                                if (HasAura(80951))
-                                    chanceInt = aurEff->GetAmount();
-                            }
+                        if (!(procEx & PROC_EX_CRITICAL_HIT) || !triggeredByAura)
+                            return false;
 
-                            if (!roll_chance_i(chanceInt))
-                                return true;
+                        int32 chanceInt = triggeredByAura->GetSpellProto()->EffectBasePoints[EFFECT_1]; // 50 % by default
+
+                        // Druid T13 Feral 2P Bonus (overrides proc chance to 100% if pulverize active and proced from Mangle (Bear Form))
+                        if (AuraEffect * aurEff = GetAuraEffect(105725, EFFECT_0))
+                        {
+                            if (HasAura(80951) && procSpell && procSpell->Id == 33878)
+                                chanceInt = aurEff->GetAmount();
                         }
+
+                        if (!roll_chance_i(chanceInt))
+                            return false;
                         break;
                     }
                 }
