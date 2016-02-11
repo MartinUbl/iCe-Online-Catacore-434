@@ -65,7 +65,6 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
     mailbox[0] = recv_data.ReadBit();
 
     ObjectGuid itemGUIDs[MAX_MAIL_ITEMS];
-    uint8 itemSlots[MAX_MAIL_ITEMS];
 
     for (uint8 i = 0; i < items_count; ++i)
     {
@@ -96,7 +95,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
         recv_data.ReadByteSeq(itemGUIDs[i][1]);
         recv_data.ReadByteSeq(itemGUIDs[i][7]);
         recv_data.ReadByteSeq(itemGUIDs[i][2]);
-        recv_data.ReadByteSeq(itemSlots[i]);            // item slot in mail
+        recv_data.read_skip<uint8>();            // item slot in mail, not used
         recv_data.ReadByteSeq(itemGUIDs[i][3]);
         recv_data.ReadByteSeq(itemGUIDs[i][0]);
         recv_data.ReadByteSeq(itemGUIDs[i][4]);
@@ -288,15 +287,6 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
         {
             pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_EQUIP_ERROR, EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS);
             return;
-        }
-
-        // Mailing heirlooms should wipe the transmog off of them
-        if (ItemPrototype const *pItemProto = item->GetProto())
-        {
-            if (pItemProto->Quality == ITEM_QUALITY_HEIRLOOM)
-            {
-                item->ClearEnchantment(TRANSMOGRIFY_ENCHANTMENT_SLOT);
-            }
         }
 
         items[i] = item;
