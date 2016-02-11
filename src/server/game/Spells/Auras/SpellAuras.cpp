@@ -2282,7 +2282,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 if (caster && GetId() == 53817)
                 {
                     // remove Temporal Maelstrom
-                    caster->RemoveAura(105869);
+                    if (removeMode != AURA_REMOVE_BY_STACK)
+                        caster->RemoveAura(105869);
+
                     // remove spell alert
                     caster->RemoveAura(60349);
                 }
