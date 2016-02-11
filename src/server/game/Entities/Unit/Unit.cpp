@@ -9418,6 +9418,20 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                         target = this;
                         break;
                     }
+                    case 105800: // Paladin T13 Protection 2P Bonus
+                    {
+                        // Proc only from Judgements
+                        if (procSpell->Id != 54158 && procSpell->Id != 31804 && procSpell->Id != 20187)
+                            return false;
+
+                        if (AuraEffect * aurEff = GetAuraEffect(105800, EFFECT_0))
+                        {
+                            int32 bp0 = damage * aurEff->GetAmount() / 100;
+                            // Delayed Judgement (absorb shield)
+                            CastCustomSpell(this, 105801, &bp0, nullptr, nullptr, true);
+                        }
+                        break;
+                    }
                     // Soul Preserver
                     case 60510:
                     {
@@ -10313,22 +10327,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             break;
         case 53556:  // Enlightened Judgements (Rank 1)
         case 53557:  // Enlightened Judgements (Rank 2)
-        case 105800: // Paladin T13 Protection 2P Bonus 
-
-            // Proc only from Judgements
-            if (procSpell->Id != 54158 && procSpell->Id != 31804 && procSpell->Id != 20187)
+            if (procSpell->Id != 54158 && procSpell->Id != 31804 && procSpell->Id != 20187) // Proc only from Judgements
                 return false;
-
-            // Paladin T13 Protection 2P Bonus 
-            if (auraSpellInfo->Id == 105800)
-            {
-                if (AuraEffect * aurEff = GetAuraEffect(105800, EFFECT_0))
-                {
-                    int32 bp0 = damage * aurEff->GetAmount() / 100;
-                    //Delayed Judgement (absorb shield)
-                    CastCustomSpell(this, 105801, &bp0, nullptr, nullptr, true);
-                }
-            }
             break;
         case 46945: // Safeguard
         case 46949:
