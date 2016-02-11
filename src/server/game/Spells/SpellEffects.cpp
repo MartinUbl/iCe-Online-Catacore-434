@@ -2465,8 +2465,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             if (m_spellInfo->SpellFamilyFlags[1] & 0x1)
             {
                 // focus effect (it has its own skill for this)
-                SpellEntry const* energizeSpell = sSpellStore.LookupEntry(77443);
-                if (energizeSpell)
+                if(SpellEntry const* energizeSpell = sSpellStore.LookupEntry(77443))
                 {
                     int32 bp0 = energizeSpell->EffectBasePoints[0];
                     if (unitTarget && unitTarget->GetHealthPct() <= 25.0f)
@@ -2477,6 +2476,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         else if (m_caster->HasAura(83489))
                             bp0 += 3;
                     }
+
+                    // Hunter T13 2P Bonus (Steady Shot and Cobra Shot)
+                    if (m_caster->HasAura(105732))
+                        bp0 *= 2;
+
                     m_caster->CastCustomSpell(m_caster,77443,&bp0,0,0,true);
                 }
 
