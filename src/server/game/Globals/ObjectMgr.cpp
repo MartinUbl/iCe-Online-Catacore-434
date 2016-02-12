@@ -79,7 +79,6 @@ enum GuidMapGranularity
     AUCTION_GRANULARITY        = 20000,
     EQUIPMENT_SET_GRANULARITY  = 20000,
     GUILD_GRANULARITY          = 2000,
-    MAIL_GRANULARITY           = 100000,
 };
 
 ScriptMapMap sQuestEndScripts;
@@ -316,7 +315,6 @@ ObjectMgr::ObjectMgr()
     m_auctionGuidMap.Init(AUCTION_GRANULARITY);
     m_equipmentSetGuidMap.Init(EQUIPMENT_SET_GRANULARITY);
     m_guildGuidMap.Init(GUILD_GRANULARITY);
-    m_mailGuidMap.Init(MAIL_GRANULARITY);
 
     m_spellCritDebug = false;
     m_addonDebug = false;
@@ -6738,14 +6736,11 @@ void ObjectMgr::SetHighestGuids()
     if (result)
         m_hiGuildNewsId = (*result)[0].GetUInt32()+1;
 
-    result = CharacterDatabase.Query("SELECT id FROM mail");
+    result = CharacterDatabase.Query("SELECT MAX(id) FROM mail");
     if (result)
-    {
-        do
-        {
-            m_mailGuidMap.SetBit((*result)[0].GetUInt32());
-        } while (result->NextRow());
-    }
+        m_mailGuidMax = (*result)[0].GetUInt32() + 1;
+    else
+        m_mailGuidMax = 1;
 
     result = CharacterDatabase.Query("SELECT guid FROM corpse");
     if (result)
@@ -6853,14 +6848,12 @@ uint32 ObjectMgr::GenerateGuildId()
 
 uint32 ObjectMgr::GenerateMailID()
 {
-    uint32 id = m_mailGuidMap.UseEmpty();
-
-    if (id >= 0xFFFFFFFE)
+    if (m_mailGuidMax >= 0xFFFFFFFE)
     {
         sLog->outError("Mail ids overflow!! Can't continue, shutting down server. ");
         ASSERT("Mail ids overflow!" && false);
     }
-    return id;
+    return m_mailGuidMax++;
 }
 
 uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)

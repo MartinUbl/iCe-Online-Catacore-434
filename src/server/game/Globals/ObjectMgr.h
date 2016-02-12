@@ -1455,7 +1455,7 @@ class ObjectMgr
         GuidMap m_auctionGuidMap;
         GuidMap m_equipmentSetGuidMap;
         GuidMap m_guildGuidMap;
-        GuidMap m_mailGuidMap;
+        uint32 m_mailGuidMax;
 
         QuestMap            mQuestTemplates;
 
