@@ -22036,6 +22036,12 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
                 return false;
             break;
         }
+        case 105609: // Death Knight T13 DPS 2P Bonus
+        {
+            if (!roll_chance_i(mod->ownerAura->GetSpellProto()->EffectBasePoints[spellInfo->Id == 81340 ? EFFECT_0 : EFFECT_1]))
+                return false;
+            break;
+        }
     }
 
     return sSpellMgr->IsAffectedByMod(spellInfo, mod);

@@ -1303,9 +1303,11 @@ void AuraEffect::CalculateSpellMod()
     switch (GetAuraType())
     {
         case SPELL_AURA_DUMMY:
-            switch(GetSpellProto()->SpellFamilyName)
+        {
+            switch (GetSpellProto()->SpellFamilyName)
             {
                 case SPELLFAMILY_PRIEST:
+                {
                     // Pain and Suffering
                     if (m_spellProto->SpellIconID == 2874)
                     {
@@ -1320,7 +1322,9 @@ void AuraEffect::CalculateSpellMod()
                         m_spellmod->value = GetAmount();
                     }
                     break;
+                }
                 case SPELLFAMILY_DRUID:
+                {
                     switch (GetId())
                     {
                         case 34246:                                 // Idol of the Emerald Queen
@@ -1334,21 +1338,41 @@ void AuraEffect::CalculateSpellMod()
                                 m_spellmod->spellId = GetId();
                                 m_spellmod->mask[1] = 0x0010;
                             }
-                            m_spellmod->value = GetAmount()/7;
+                            m_spellmod->value = GetAmount() / 7;
                         }
                         break;
                     }
                     break;
+                }
+                case SPELLFAMILY_DEATHKNIGHT:
+                {
+                    // Death Knight T13 DPS 2P Bonus ( Sudden Doom has a 30% chance and Rime has a 60% chance to grant 2 charges when triggered instead of 1.)
+                    // Chances are handled in Player::IsAffectedBySpellmod
+                    if (GetId() == 105609)
+                    {
+                        if (!m_spellmod)
+                        {
+                            m_spellmod = new SpellModifier(GetBase());
+                            m_spellmod->op = SPELLMOD_CHARGES;
+                            m_spellmod->type = SPELLMOD_FLAT;
+                            m_spellmod->spellId = GetId();
+                            m_spellmod->mask[2] = 0x00060000; // Sudden Doom + Rime
+                        }
+                        m_spellmod->value = 1;
+                    }
+                    break;
+                }
                 default:
                     break;
             }
             break;
+        }
         case SPELL_AURA_MOD_SPELL_CRIT_CHANCE:
-            switch(GetId())
+        {
+            switch (GetId())
             {
-                case 51466: // Elemental oath
-                case 51470: // Elemental oath
-                    // "while Clearcasting from Elemental Focus is active, you deal 5%/10% more spell damage."
+                case 51466: // Elemental oath (rank 1)
+                case 51470: // Elemental oath (rank 2)
                     if (!m_spellmod)
                     {
                         m_spellmod = new SpellModifier(GetBase());
@@ -1357,12 +1381,14 @@ void AuraEffect::CalculateSpellMod()
                         m_spellmod->spellId = GetId();
                         m_spellmod->mask[1] = 0x0004000;
                     }
+                    // While Clearcasting from Elemental Focus is active, you deal 5%/10% more spell damage.
                     m_spellmod->value = GetBase()->GetUnitOwner()->CalculateSpellDamage(GetBase()->GetUnitOwner(), GetSpellProto(), 1);
                     break;
                 default:
                     break;
             }
             break;
+        }
         case SPELL_AURA_HASTE_MOD_COOLDOWN:
         {
             if (!GetBase()->GetUnitOwner() || GetBase()->GetUnitOwner()->GetTypeId() != TYPEID_PLAYER)
@@ -1397,6 +1423,7 @@ void AuraEffect::CalculateSpellMod()
         }
         case SPELL_AURA_ADD_FLAT_MODIFIER:
         case SPELL_AURA_ADD_PCT_MODIFIER:
+        {
             if (!m_spellmod)
             {
                 m_spellmod = new SpellModifier(GetBase());
@@ -1410,6 +1437,7 @@ void AuraEffect::CalculateSpellMod()
             }
             m_spellmod->value = GetAmount();
             break;
+        }
         default:
             break;
     }
