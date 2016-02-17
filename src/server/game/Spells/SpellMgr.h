@@ -1530,7 +1530,6 @@ class SpellMgr
         void LoadSpellPetAuras();
         void LoadCustomSpells();
         void LoadSpellCustomAttr();
-        void LoadSpellCustomCrafts(uint32 i, SpellEntry* spellInfo);
         void LoadEnchantCustomAttr();
         void LoadSpellEnchantProcData();
         void LoadSpellLinked();
