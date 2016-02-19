@@ -2775,55 +2775,30 @@ class npc_Flying_Spells : public CreatureScript
         {
             npc_Flying_SpellsAI(Creature* creature) : ScriptedAI(creature)
             {
+                //me->ForcedDespawn(4000);
                 me->SetFlying(true);
-                me->SetLevel(88);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                me->SetReactState(REACT_AGGRESSIVE);
-                me->SetInCombatWithZone();
 
                 if (me->GetEntry() == NPC_INCENDIARY_CLOUD)
                 {
                     me->CastSpell(me, SPELL_INCENDIARY_CLOUD, false);
-                    if (Aura* Incendiary = me->GetAura(SPELL_INCENDIARY_CLOUD))
-                        Incendiary->SetDuration(4000);
-                 }
+                }
+
                 if (me->GetEntry() == NPC_BLAZING_POWER)
                 {
                     me->CastSpell(me, SPELL_BLAZING_POWER, false);
-                    if (Aura* Incendiary = me->GetAura(SPELL_BLAZING_POWER))
-                        Incendiary->SetDuration(4000);
-                 }
+                }
             }
 
-        void MoveInLineOfSight(Unit * who) 
-        {
-            if (who && who->ToPlayer() && who->GetDistance(me) <= 12 && me->GetEntry() == NPC_BLAZING_POWER)
-            {
-                if (Aura * aWings = who->GetAura(98619)) // Wings of flame
-                {
-                    if (aWings->GetDuration() <= 28000)
-                        aWings->RefreshDuration();
-                }
-
-                if (Aura * aBlaze = who->GetAura(SPELL_BLAZING_POWER_EFFECT)) // Blazing power
-                {
-                    if (aBlaze->GetDuration() <= 38000)
-                    {
-                        who->AddAura(SPELL_BLAZING_POWER_EFFECT,who);
-                    }
-                }
-                else
-                    who->AddAura(SPELL_BLAZING_POWER_EFFECT,who);
-
-            }
-        }
-
-        void UpdateAI(const uint32 diff){ }
+        void UpdateAI(const uint32 diff) override { }
+        void EnterCombat(Unit* /*who*/) override { }
+        void AttackStart(Unit* /*who*/) override { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_Flying_SpellsAI(creature);
         }
@@ -3168,38 +3143,40 @@ class spell_Molten_Feather : public SpellScriptLoader
         }
 };
 
-class spell_Blazing_Power : public SpellScriptLoader
+class spell_blazing_power : public SpellScriptLoader
 {
     public:
-        spell_Blazing_Power() : SpellScriptLoader("spell_Blazing_Power") { }
+        spell_blazing_power() : SpellScriptLoader("spell_Blazing_Power") { }
 
-        class spell_Blazing_Power_AuraScript : public AuraScript
+        class spell_blazing_power_AuraScript : public AuraScript
             {
-                PrepareAuraScript(spell_Blazing_Power_AuraScript);
+                PrepareAuraScript(spell_blazing_power_AuraScript);
 
-                void AddBuff(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+                void OnAuraApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
                 {
-                    if (Aura* Blazing = GetTarget()->GetAura(SPELL_BLAZING_POWER_EFFECT))
+                    Unit * target = GetTarget();
+
+                    if (Aura * wingsAura = target->GetAura(SPELL_WINGS_OF_FLAME_FLY))
+                        wingsAura->RefreshDuration();
+
+                    if (Aura* blazingAura = target->GetAura(SPELL_BLAZING_POWER_EFFECT))
                     {
-                        if (Blazing->GetStackAmount() >= 24)
+                        if (blazingAura->GetStackAmount() == blazingAura->GetSpellProto()->StackAmount)
                         {
-                            if (Aura* Power = GetTarget()->GetAura(SPELL_ALYSRAS_RAZOR))
-                                Power->SetDuration(40000);
-                            else
-                                GetTarget()->AddAura(SPELL_ALYSRAS_RAZOR, GetTarget());
+                            target->CastSpell(target, SPELL_ALYSRAS_RAZOR, true);
                         }
                     }
                 }
 
-                 void Register()
+                 void Register() override
                 {
-                    OnEffectApply += AuraEffectApplyFn(spell_Blazing_Power_AuraScript::AddBuff, EFFECT_0, SPELL_AURA_MELEE_SLOW, AURA_EFFECT_HANDLE_REAL);
+                    OnEffectApply += AuraEffectApplyFn(spell_blazing_power_AuraScript::OnAuraApply, EFFECT_0, SPELL_AURA_MELEE_SLOW, AURA_EFFECT_HANDLE_REAL);
                 }
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript* GetAuraScript() const override
         {
-            return new spell_Blazing_Power_AuraScript();
+            return new spell_blazing_power_AuraScript();
         }
 };
 
@@ -3348,7 +3325,7 @@ void AddSC_boss_alysrazor()
     new npc_molten_meteor();
     new npc_bouder();
     new npc_fiery_vortex();
-    new spell_Blazing_Power();
+    new spell_blazing_power();
     new spell_Molten_Feather();
     new spell_Fieroblast_buff();
     new spell_Gushing_Wound();
