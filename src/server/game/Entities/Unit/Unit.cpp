@@ -3658,8 +3658,17 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
     // passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
     if (!aura->IsPassive() && aura->GetId() != 44413)
     {
+        Aura * foundAura = GetOwnedAura(aura->GetId(), aura->GetCasterGUID(), (sSpellMgr->GetSpellCustomAttr(aura->GetId()) & SPELL_ATTR0_CU_ENCHANT_PROC) ? aura->GetCastItemGUID() : 0, 0, aura);
+
+        // If both casters are creatures with same entries and aura is stackable -> allow to stack
+        if (caster && aura->GetCaster() && aura->GetSpellProto()->StackAmount && caster->GetTypeId() == TYPEID_UNIT && aura->GetCaster()->GetTypeId() == TYPEID_UNIT)
+        {
+            if (caster->GetEntry() == aura->GetCaster()->GetEntry())
+                foundAura = GetAura(aura->GetId());
+        }
+
         // find current aura from spell and change it's stackamount
-        if (Aura * foundAura = GetOwnedAura(aura->GetId(), aura->GetCasterGUID(), (sSpellMgr->GetSpellCustomAttr(aura->GetId()) & SPELL_ATTR0_CU_ENCHANT_PROC) ? aura->GetCastItemGUID() : 0, 0, aura))
+        if (foundAura)
         {
             // do not get stacks from aura which is being removed
             if (!foundAura->IsRemoved())
