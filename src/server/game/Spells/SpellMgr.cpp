@@ -4615,11 +4615,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
 /****************------- HOUR OF TWILIGHT 5 MAN DUNGEON -------********************/
         // Asira Dawnslayer
-        case 103419: // Blade barrier
-        case 103562: // Lesser blade barrier
-            spellInfo->DurationIndex = 21; // Unlimited
-            spellInfo->EffectBasePoints[0] = 1000000; // Absorb amount 1M
-            break;
         case 102726: // Mark of Silence
             spellInfo->AttributesEx5 &= ~SPELL_ATTR5_HIDE_DURATION; // This debuff should be visible on player
             spellInfo->DurationIndex = 21; // Unlimited

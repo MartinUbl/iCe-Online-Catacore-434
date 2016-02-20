@@ -98,10 +98,9 @@ public:
 
         InstanceScript* instance;
         uint32 Choking_Smoke_Bomb_Timer;
-        uint32 Check_Hp_Timer;
         uint32 Cast_Check_Timer;
-        uint32 Pct;
         int Random_Text;
+        bool bladesUsed;
 
         void Reset()
         {
@@ -128,9 +127,8 @@ public:
             me->SendPlaySound(25820, true);
 
             Choking_Smoke_Bomb_Timer = 16000;
-            Check_Hp_Timer = 5000;
             Cast_Check_Timer = 1000;
-            Pct = 90;
+            bladesUsed = false;
         }
 
         void EnterCombat(Unit * /*who*/)
@@ -224,35 +222,16 @@ public:
             }
         }
 
-        void DamageTaken(Unit* attacker, uint32& damage)
-        {
-            if ((me->HasAura(LESSER_BLADE_BARRIER)))
-            {
-                if (damage < 30000)
-                    damage = 1;
-                else
-                {
-                    damage = 1;
-                    me->RemoveAura(LESSER_BLADE_BARRIER);
-                }
-            }
-
-            if ((me->HasAura(BLADE_BARRIER)))
-            {
-                if (damage < 40000)
-                    damage = 1;
-                else
-                {
-                    damage = 1;
-                    me->RemoveAura(BLADE_BARRIER);
-                }
-            }
-        }
-
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
+
+            if (!bladesUsed && me->HealthBelowPct(30))
+            {
+                bladesUsed = true;
+                me->CastSpell(me, BLADE_BARRIER, false);
+            }
 
             if (Choking_Smoke_Bomb_Timer <= diff)
             {
@@ -264,20 +243,6 @@ public:
                 Choking_Smoke_Bomb_Timer = 24000;
             }
             else Choking_Smoke_Bomb_Timer -= diff;
-
-            if (Check_Hp_Timer <= diff)
-            {
-                if (me->HealthBelowPct(Pct))
-                {
-                    if (Pct%20 == 0)
-                        me->CastSpell(me, LESSER_BLADE_BARRIER, false);
-                    else
-                        me->CastSpell(me, BLADE_BARRIER, false);
-                    Pct -= 10;
-                }
-                Check_Hp_Timer = 5000;
-            }
-            else Check_Hp_Timer -= diff;
 
             if (Cast_Check_Timer <= diff)
             {
@@ -584,10 +549,53 @@ public:
     };
 };
 
+class spell_gen_blade_barrier_hot : public SpellScriptLoader
+{
+    public: spell_gen_blade_barrier_hot() : SpellScriptLoader("spell_gen_blade_barrier_hot") { }
+
+    class spell_gen_blade_barrier_hot_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_blade_barrier_hot_AuraScript);
+
+        void OnAbsorb(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
+        {
+            uint32 damage = dmgInfo.GetDamage();
+
+            if (damage > (uint32)GetSpellProto()->EffectBasePoints[EFFECT_0])
+                aurEff->GetBase()->Remove();
+            else
+                absorbAmount = damage;
+        }
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (GetSpellProto()->Id == BLADE_BARRIER)
+                GetCaster()->CastSpell(GetCaster(), GetSpellProto()->EffectBasePoints[EFFECT_1], true);
+        }
+
+        void Register() override
+        {
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_gen_blade_barrier_hot_AuraScript::OnAbsorb, EFFECT_0);
+            OnEffectRemove += AuraEffectRemoveFn(spell_gen_blade_barrier_hot_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const override
+    {
+        return new spell_gen_blade_barrier_hot_AuraScript();
+    }
+};
+
 void AddSC_boss_asira_dawnslayer()
 {
     new boss_asira_dawnslayer();
     new npc_life_warden();
     new npc_asira_dawnslayer_intro();
     new npc_choking_smoke_bomb();
+    new spell_gen_blade_barrier_hot();
 }
+
+/*
+    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (103562 , 'spell_gen_blade_barrier_hot');
+    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (103419 , 'spell_gen_blade_barrier_hot');
+*/
