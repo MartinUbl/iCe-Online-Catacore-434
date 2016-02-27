@@ -1130,3 +1130,14 @@ void AddSC_boss_spine_of_deathwing()
     new spell_ds_spine_plate_activate_loader();
     new npc_ds_spine_spawner();
 }
+
+/*
+insert into spell_script_names(spell_id, ScriptName) values
+(105363, 'spell_ds_spine_plate_activate'),
+(105366, 'spell_ds_spine_plate_activate'),
+(105384, 'spell_ds_spine_plate_activate'),
+(105385, 'spell_ds_spine_plate_activate'),
+(105847, 'spell_ds_spine_plate_activate'),
+(105848, 'spell_ds_spine_plate_activate');
+update gameobject_template set type = 5, IconName = '' where entry in(209623, 209631, 209632);
+*/
