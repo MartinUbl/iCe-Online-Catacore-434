@@ -308,18 +308,6 @@ public:
             ScriptedAI::EnterEvadeMode();
         }
 
-        void PlayAndYell(uint32 soundId, const char * text)
-        {
-            me->SendPlaySound(soundId, false);
-            me->MonsterYell(text, LANG_UNIVERSAL, 0, 400.0f);
-        }
-
-        void PlayAndSay(uint32 soundId, const char * text)
-        {
-            me->SendPlaySound(soundId, false);
-            me->MonsterSay(text, LANG_UNIVERSAL, 0, SEARCH_RANGE);
-        }
-
         uint32 GetData(uint32 DataId)
         {
             if (DataId == ACTION_CAST_VISUAL_LIGHTNING)
@@ -503,7 +491,7 @@ public:
                 me->CastSpell(me, SPELL_FALL_ANIMATION, false);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
-                RunPlayableQuote(yell[QUOTE_DEATH]);
+                RunPlayableQuote(yell[QUOTE_DEATH], false);
 
                 scheduler.Schedule(Seconds(4), [this](TaskContext /* Task context */)
                 {
