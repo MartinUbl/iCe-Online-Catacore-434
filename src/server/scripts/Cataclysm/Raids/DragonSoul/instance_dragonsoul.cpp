@@ -115,6 +115,7 @@ public:
                 saveStream << " " << m_auiEncounter[i];
 
             saveStream << " " << heroicKills;
+            saveStream << " " << hagaraTrashKills;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -135,6 +136,10 @@ public:
                 loadStream >> m_auiEncounter[i];
 
             loadStream >> heroicKills;
+            loadStream >> hagaraTrashKills;
+
+            if (hagaraTrashKills < 35)
+                hagaraTrashKills = 0;
 
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
@@ -300,6 +305,7 @@ public:
             if (type == DATA_HAGARA_INTRO_TRASH)
             {
                 hagaraTrashKills++;
+                SaveToDB();
 
                 Creature * pHagara = this->instance->GetCreature(hagaraGuid);
                 if (hagaraTrashKills == 4 || hagaraTrashKills == 18 || hagaraTrashKills == 24 || hagaraTrashKills == 35)

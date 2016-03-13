@@ -696,7 +696,7 @@ public:
         void Reset() override
         {
             frostvoltTimer = 0;
-            blizzardTimer = urand(4000, 6000);
+            blizzardTimer = urand(5000, 15000);
             shacklesOfIceTimer = 0;
         }
 
@@ -726,7 +726,7 @@ public:
             {
                 if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                     me->CastSpell(pTarget, SPELL_BLIZZARD, false);
-                blizzardTimer = 10000;
+                blizzardTimer = urand(15000, 30000);
             }
             else blizzardTimer -= diff;
 

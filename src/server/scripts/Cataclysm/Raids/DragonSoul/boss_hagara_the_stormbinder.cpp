@@ -80,6 +80,7 @@ enum Spells
     SPELL_ICE_TOMB_DUMMY            = 104448, // Ice Tomb
     SPELL_ICE_TOMB_STUN             = 104451, // Stun + dmg
     SPELL_ICE_TOMB_MISSILE          = 104449, // Ice Tomb
+    SPELL_ICE_TOMB_EFFECT           = 99837,  // Crystal Prison Trap Effect - used for heal immunity
 
     SPELL_SHATTERED_ICE_10N         = 105289, // Shattered Ice 10N
     SPELL_SHATTERED_ICE_25N         = 108567, // Shattered Ice 25N
@@ -238,16 +239,10 @@ struct Dist
     float distance;
 };
 
-struct Yells
-{
-    uint32 sound;
-    const char * text;
-};
+struct PlayableQuote aggro { 26227, "You cross the Stormbinder!I'll slaughter you all." };
+struct PlayableQuote justDied { 26243, "Cowards! You pack of weakling... dogs..." };
 
-struct Yells aggro { 26227, "You cross the Stormbinder!I'll slaughter you all." };
-struct Yells justDied { 26243, "Cowards! You pack of weakling... dogs..." };
-
-struct Yells killedUnit[4]
+struct PlayableQuote killedUnit[4]
 {
     { 26255, "You should have run, dog." },
     { 26254, "Feh!" },
@@ -255,7 +250,7 @@ struct Yells killedUnit[4]
     { 26257, "A waste of my time." },
 };
 
-struct Yells crystalDied[6]
+struct PlayableQuote crystalDied[6]
 {
     { 26235, "The time I spent binding that, WASTED!" },
     { 26236, "You'll PAY for that." },
@@ -265,7 +260,7 @@ struct Yells crystalDied[6]
     { 26241, "The one remaining is still enough to finish you." },
 };
 
-struct Yells intro[5]
+struct PlayableQuote intro[5]
 {
     { 26223, "Even with the Aspect of Time on your side, you stumble foolishly into a trap?"},
     { 26224, "Don't preen just yet, little pups. We'll cleanse this world of your kind." },
@@ -274,7 +269,7 @@ struct Yells intro[5]
     { 26251, "Swagger all you like, you pups don't stand a chance. Flee now, while you can." },
 };
 
-struct Yells conductorCharged[6]
+struct PlayableQuote conductorCharged[6]
 {
     { 26228, "What are you doing?"},
     { 26229, "You're toying with death." },
@@ -284,32 +279,32 @@ struct Yells conductorCharged[6]
     { 26234, "I'll finish you now pups!" },
 };
 
-struct Yells specialPhaseEnd[2]
+struct PlayableQuote specialPhaseEnd[2]
 {
     { 26238, "Aughhhh!" },
     { 26231, "Impossible! Aughhhh!" },
 };
 
-struct Yells iceTomb[2]
+struct PlayableQuote iceTomb[2]
 {
     { 26249, "Stay, pup."},
     { 26250, "Hold still." },
 };
 
-struct Yells iceLance[3]
+struct PlayableQuote iceLance[3]
 {
     { 26244, "You face more than my axes, this close."},
     { 26245, "See what becomes of those who stand before me!" },
     { 26246, "Feel a chill up your spine...?" },
 };
 
-struct Yells iceWave[2]
+struct PlayableQuote iceWave[2]
 {
     { 26247, "You can't outrun the storm." },
     { 26248, "Die beneath the ice." },
 };
 
-struct Yells storm[2]
+struct PlayableQuote storm[2]
 {
     { 26252, "Suffer the storm's wrath!"},
     { 26253, "Thunder and lightning dance at my call!" },
@@ -332,11 +327,15 @@ public:
         {
             instance = creature->GetInstanceScript();
 
-            HoverDisc();
-            me->GetMotionMaster()->MovePoint(FLY_POSITION, portalPos[FLY_POSITION]);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetReactState(REACT_PASSIVE);
-            me->SetVisible(false);
+            if (instance->GetData(DATA_HAGARA_INTRO_TRASH) < 35)
+            {
+                me->SummonGameObject(GO_FOCUSING_IRIS, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), 0, 0, 0, 0, 86400);
+                HoverDisc();
+                me->GetMotionMaster()->MovePoint(FLY_POSITION, portalPos[FLY_POSITION]);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetReactState(REACT_PASSIVE);
+                me->SetVisible(false);
+            }
         }
 
         InstanceScript* instance;
@@ -393,11 +392,11 @@ public:
             EquipCorrectAxes(nextPhase);
 
             normalPhaseTimer = 30000;
-            focusedAssaultTimer = 15000;
+            focusedAssaultTimer = 5000;
             checkTimer = 1000;
             icicleTimer = 0;
             iceLanceTimer = 10000;
-            shatteredIceTimer = 3000;
+            shatteredIceTimer = 2000;
             iceTombTimer = 60000;
             frostflakeTimer = 5000;
             stormPillarTimer = 5000;
@@ -414,6 +413,8 @@ public:
 
             summons.DespawnAll();
             LightningStorm(true);
+
+            ScriptedAI::Reset();
         }
 
         void JustSummoned(Creature* summon) override
@@ -428,7 +429,7 @@ public:
                 instance->SetData(TYPE_BOSS_HAGARA, IN_PROGRESS);
             }
 
-            PlayAndYell(aggro.sound, aggro.text);
+            RunPlayableQuote(aggro);
         }
 
         void KilledUnit(Unit* victim) override
@@ -436,7 +437,7 @@ public:
             if (victim->GetTypeId() == TYPEID_PLAYER)
             {
                 randomText = urand(0, 3);
-                PlayAndYell(killedUnit[randomText].sound, killedUnit[randomText].text);
+                RunPlayableQuote(killedUnit[randomText]);
             }
         }
 
@@ -449,21 +450,9 @@ public:
                     instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_HAGARA);
             }
 
-            PlayAndSay(justDied.sound, justDied.text);
+            RunPlayableQuote(justDied);
             summons.DespawnAll();
             LightningStorm(true);
-        }
-
-        void PlayAndYell(uint32 soundId, const char * text)
-        {
-            me->SendPlaySound(soundId, false);
-            me->MonsterYell(text, LANG_UNIVERSAL, 0);
-        }
-
-        void PlayAndSay(uint32 soundId, const char * text)
-        {
-            me->SendPlaySound(soundId, false);
-            me->MonsterSay(text, LANG_UNIVERSAL, 0, 150.0f);
         }
 
         void DoAction(const int32 param) override
@@ -475,7 +464,7 @@ public:
                 if (frozenCrystalKilled < 3)
                 {
                     randomText = urand(0, 5);
-                    PlayAndYell(crystalDied[randomText].sound, crystalDied[randomText].text);
+                    RunPlayableQuote(crystalDied[randomText]);
                 }
                 frozenCrystalKilled++;
                 break;
@@ -499,18 +488,24 @@ public:
                     CheckForAchievementCriteria();
                 chargedConductorCount++;
                 randomText = urand(0, 5);
-                PlayAndYell(conductorCharged[randomText].sound, conductorCharged[randomText].text);
+                RunPlayableQuote(conductorCharged[randomText]);
                 break;
             }
             case DATA_HAGARA_INTRO_TRASH:
             {
-                if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 0)
+                if (Creature * pHoverDisc = me->FindNearestCreature(NPC_HOVER_DISC_VEHICLE, SEARCH_RANGE, true))
+                    pHoverDisc->SetVisible(true);
+                me->SetVisible(true);
+
+                // Skip trash when already defeated once
+                if (instance->GetData(DATA_HAGARA_INTRO_TRASH) >= 35)
                 {
-                    if (Creature * pHoverDisc = me->FindNearestCreature(NPC_HOVER_DISC_VEHICLE, SEARCH_RANGE, true))
-                        pHoverDisc->SetVisible(true);
-                    me->SetVisible(true);
-                    SummonNPC(INTRO_FIRST_WAVE);
+                    me->AI()->DoAction(ACTION_PREPARE_FOR_FIGHT);
+                    return;
                 }
+
+                if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 0)
+                    SummonNPC(INTRO_FIRST_WAVE);
                 else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 4)
                     SummonNPC(INTRO_SECOND_WAVE);
                 else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 18)
@@ -520,7 +515,7 @@ public:
                 else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 35)
                     me->AI()->DoAction(ACTION_PREPARE_FOR_FIGHT);
 
-                PlayAndYell(intro[introYell].sound, intro[introYell].text);
+                RunPlayableQuote(intro[introYell]);
                 introYell++;
                 break;
             }
@@ -658,7 +653,7 @@ public:
 
                     angle += angleAddition;
                     angle = MapManager::NormalizeOrientation(angle);
-                    (*i)->SummonCreature(NPC_ICE_LANCE, SpawnPos[4][0] + cos(angle)*distance, SpawnPos[4][1] + sin(angle)*distance, SpawnPos[4][2] + 2.0f, angle, TEMPSUMMON_TIMED_DESPAWN, 15000);
+                    (*i)->SummonCreature(NPC_ICE_LANCE, SpawnPos[4][0] + cos(angle)*distance, SpawnPos[4][1] + sin(angle)*distance, SpawnPos[4][2] + 2.0f, angle, TEMPSUMMON_TIMED_DESPAWN, 15500);
 
                     if (target_list.size() >= size)
                     {
@@ -735,7 +730,7 @@ public:
                 break;
             }
             case NPC_ICE_LANCE:
-                CastSpellOnRandomPlayers(SPELL_ICE_LANCE, 3, 0, false, false, false);
+                CastSpellOnRandomPlayers(SPELL_ICE_LANCE, 3, SPELL_ICE_TOMB_STUN, false, false, false);
                 break;
             case NPC_BOUND_LIGHNING_ELEMENTAL:
                 me->SummonCreature(NPC_BOUND_LIGHNING_ELEMENTAL, SpawnPos[5][0], SpawnPos[5][1], SpawnPos[5][2], SpawnPos[5][3], TEMPSUMMON_DEAD_DESPAWN);
@@ -858,8 +853,11 @@ public:
             {
                 if (target)
                 {
-                    if (Creature * ice_tomb = target->SummonCreature(NPC_ICE_TOMB, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_DEAD_DESPAWN))
-                        target->NearTeleportTo(ice_tomb->GetPositionX(), ice_tomb->GetPositionY(), ice_tomb->GetPositionZ(), target->GetOrientation(), false);
+                    if (Creature * pIceTomb = target->SummonCreature(NPC_ICE_TOMB, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f))
+                    {
+                        target->NearTeleportTo(pIceTomb->GetPositionX(), pIceTomb->GetPositionY(), pIceTomb->GetPositionZ(), target->GetOrientation(), false);
+                        pIceTomb->CastSpell(target, SPELL_ICE_TOMB_EFFECT, true);
+                    }
                 }
             }
         }
@@ -869,8 +867,8 @@ public:
             me->RemoveAllAuras();
             summons.DespawnAll();
 
-            normalPhaseTimer = 50000;
-            iceLanceTimer = 10000;
+            normalPhaseTimer = 62000;
+            iceLanceTimer = 12000;
             iceTombTimer = 20000;
             teleport = false;
 
@@ -886,7 +884,7 @@ public:
             me->CastSpell(me, SPELL_FEEDBACK, false);
 
             randomText = urand(0, 1);
-            PlayAndYell(specialPhaseEnd[randomText].sound, specialPhaseEnd[randomText].text);
+            RunPlayableQuote(specialPhaseEnd[randomText]);
         }
 
         void UpdateAI(const uint32 diff) override
@@ -919,9 +917,9 @@ public:
                     CastSpellOnRandomPlayers(SPELL_ICE_TOMB_MISSILE, max, 0, true, true, false);
 
                     randomText = urand(0, 1);
-                    PlayAndYell(iceTomb[randomText].sound, iceTomb[randomText].text);
-
-                    iceTombTimer = 20000;
+                    RunPlayableQuote(iceTomb[randomText]);
+                    
+                    iceTombTimer = 60000;
                 }
                 else iceTombTimer -= diff;
 
@@ -931,7 +929,7 @@ public:
                     SummonNPC(NPC_ICE_LANCE);
                     iceLanceTimer = 30000;
                     randomText = urand(0, 2);
-                    PlayAndYell(iceLance[randomText].sound, iceLance[randomText].text);
+                    RunPlayableQuote(iceLance[randomText]);
                 }
                 else iceLanceTimer -= diff;
 
@@ -941,7 +939,7 @@ public:
                     Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, SEARCH_RANGE, true);
                     if (target)
                         me->CastSpell(target, SPELL_SHATTERED_ICE_10N, false);
-                    shatteredIceTimer = 12000;
+                    shatteredIceTimer = urand(10500, 15000);
                 }
                 else shatteredIceTimer -= diff;
 
@@ -984,7 +982,7 @@ public:
                         else if (icePhase.GetRepeatCounter() == 1)
                         {
                             randomText = urand(0, 1);
-                            PlayAndYell(iceWave[randomText].sound, iceWave[randomText].text);
+                            RunPlayableQuote(iceWave[randomText]);
                             SummonNPC(NPC_ICE_WAVE);
                             icePhase.Repeat(Seconds(1));
                         }
@@ -1000,7 +998,6 @@ public:
                 if (icicleTimer <= diff)
                 {
                     SummonNPC(NPC_COLLAPSING_ICICLE);
-
                     icicleTimer = 1000;
                 }
                 else icicleTimer -= diff;
@@ -1042,7 +1039,7 @@ public:
                     me->CastSpell(me, SPELL_WATER_SHIELD_10N, false);
 
                     randomText = urand(0, 1);
-                    PlayAndYell(storm[randomText].sound, storm[randomText].text);
+                    RunPlayableQuote(storm[randomText]);
 
                     scheduler.Schedule(Seconds(1), [this](TaskContext /* Task context */)
                     {
@@ -1117,7 +1114,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetReactState(REACT_PASSIVE);
             dummyAuraTimer = 500;
-            iceLanceTimer = 1000;
+            iceLanceTimer = 0;
             summonerGuid = 0;
 
             me->SetInCombatWithZone();
@@ -1132,8 +1129,7 @@ public:
 
         void IsSummonedBy(Unit* pSummoner) override
         {
-            if (pSummoner)
-                summonerGuid = pSummoner->GetGUID();
+            summonerGuid = pSummoner->GetGUID();
         }
 
         void UpdateAI(const uint32 diff) override
@@ -1143,7 +1139,7 @@ public:
                 me->CastSpell(me, SPELL_ICE_LANCE_DUMMY, true);
                 dummyAuraTimer = 16000;
 
-                if (Player* pPlayer = ObjectAccessor::FindPlayer(summonerGuid))
+                if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, summonerGuid))
                     me->CastSpell(pPlayer, SPELL_TARGET, true);
             }
             else dummyAuraTimer -= diff;
@@ -1151,7 +1147,7 @@ public:
             if (iceLanceTimer <= diff)
             {
                 Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
-                if (Player* pPlayer = ObjectAccessor::FindPlayer(summonerGuid))
+                if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, summonerGuid))
                 {
                     for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                     {
@@ -1183,7 +1179,7 @@ public:
                             }
                         }
                         // Find correct player with right guid and cast Ice Lance
-                        if (Player* pPlayer = ObjectAccessor::FindPlayer(player_guid))
+                        if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, player_guid))
                             me->CastSpell(pPlayer, SPELL_ICE_LANCE_MISSILE, true);
                         dist.clear();
                     }
@@ -1210,7 +1206,10 @@ public:
 
     struct npc_ice_tombAI : public ScriptedAI
     {
-        npc_ice_tombAI(Creature *creature) : ScriptedAI(creature) {}
+        npc_ice_tombAI(Creature *creature) : ScriptedAI(creature) 
+        {
+            summonerGuid = 0;
+        }
 
         uint64 summonerGuid;
 
@@ -1218,20 +1217,24 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetReactState(REACT_PASSIVE);
-            summonerGuid = 0;
         }
 
         void IsSummonedBy(Unit* pSummoner) override
         {
-            if (pSummoner)
-                summonerGuid = pSummoner->GetGUID();
+            summonerGuid = pSummoner->GetGUID();
         }
 
         void JustDied(Unit* who) override
         {
-            if (Player* pPlayer = ObjectAccessor::FindPlayer(summonerGuid))
+            if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, summonerGuid))
+            {
                 if (pPlayer->HasAura(SPELL_ICE_TOMB_STUN))
+                {
                     pPlayer->RemoveAura(SPELL_ICE_TOMB_STUN);
+                    pPlayer->RemoveAura(SPELL_ICE_TOMB_EFFECT);
+                    me->DespawnOrUnsummon();
+                }
+            }
         }
     };
 };
@@ -1457,16 +1460,16 @@ public:
                     break;
                 case 42:
                     moveTimer = 500;
-                    me->SetSpeed(MOVE_RUN, 1.2f);
+                    me->SetSpeed(MOVE_RUN, 1.20f);
                     break;
                 case 50:
                     moveTimer = 500;
-                    me->SetSpeed(MOVE_RUN, 1.35f);
+                    me->SetSpeed(MOVE_RUN, 1.40f);
                     break;
                 default:
                     break;
                 }
-                i = i - (2 * M_PI / 64);
+                i = i - (2 * M_PI / 76);
                 me->GetMotionMaster()->MovePoint(0, sx + (distance*cos(i)), (sy + distance*sin(i)), me->GetPositionZ());
             }
             else moveTimer -= diff;
@@ -1620,8 +1623,7 @@ public:
 
         void IsSummonedBy(Unit* pSummoner) override
         {
-            if (pSummoner)
-                summonerGuid = pSummoner->GetGUID();
+            summonerGuid = pSummoner->GetGUID();
         }
 
         void Reset() override
@@ -1639,7 +1641,7 @@ public:
         {
             if (repeatTimer <= diff)
             {
-                if (Player * pPlayer = ObjectAccessor::FindPlayer(summonerGuid))
+                if (Player * pPlayer = ObjectAccessor::GetPlayer(*me, summonerGuid))
                     if (!pPlayer->HasAura(SPELL_LIGHTNING_CONDUIT))
                         me->CastSpell(pPlayer, SPELL_LIGHTNING_STORM_COSMETIC, false);
 
@@ -1650,7 +1652,7 @@ public:
 
             if (unauraTimer <= diff)
             {
-                if (Player * pPlayer = ObjectAccessor::FindPlayer(summonerGuid))
+                if (Player * pPlayer = ObjectAccessor::GetPlayer(*me, summonerGuid))
                     pPlayer->RemoveAura(SPELL_LIGHTNING_STORM_COSMETIC);
                 unauraTimer = 2100;
             }
@@ -1658,34 +1660,11 @@ public:
 
             if (moveTimer <= diff)
             {
-                if (Player * pPlayer = ObjectAccessor::FindPlayer(summonerGuid))
+                if (Player * pPlayer = ObjectAccessor::GetPlayer(*me, summonerGuid))
                     me->GetMotionMaster()->MovePoint(0, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ() + 30, true);
                 moveTimer = 500;
             }
             else moveTimer -= diff;
-        }
-    };
-};
-
-class npc_hagara_frost_trap : public CreatureScript
-{
-public:
-    npc_hagara_frost_trap() : CreatureScript("npc_hagara_frost_trap") { }
-
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_hagara_frost_trapAI(pCreature);
-    }
-
-    struct npc_hagara_frost_trapAI : public ScriptedAI
-    {
-        npc_hagara_frost_trapAI(Creature *creature) : ScriptedAI(creature) {}
-
-        void Reset() override
-        {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->SetReactState(REACT_PASSIVE);
         }
     };
 };
@@ -1920,16 +1899,10 @@ public:
                 if (Player* pPlayer = i->getSource())
                 {
                     if (pPlayer->GetDistance2d(hitUnit) < CONDUIT_RANGE && pPlayer->GetGUID() != GetCaster()->GetGUID() && !pPlayer->HasAura(SPELL_LIGHTNING_CONDUIT))
-                        playerList.push_back(pPlayer);
-                }
-            }
-
-            if (!playerList.empty())
-            {
-                for (std::list<Unit*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
-                {
-                    hitUnit->CastSpell((*itr), SPELL_LIGHTNING_CONDUIT, true);
-                    hitUnit->CastSpell((*itr), spell_dmg, true);
+                    {
+                        hitUnit->CastSpell(pPlayer, SPELL_LIGHTNING_CONDUIT, true);
+                        hitUnit->CastSpell(pPlayer, spell_dmg, true);
+                    }
                 }
             }
         }
@@ -1949,31 +1922,82 @@ public:
 void AddSC_boss_hagara_the_stormbinder()
 {
     // Boss
-    new boss_hagara_the_stormbinder();
+    new boss_hagara_the_stormbinder();          // 55689
 
     // Normal Phase
-    new npc_ice_lance();
-    new npc_ice_tomb();
+    new npc_ice_lance();                        // 56108
+    new npc_ice_tomb();                         // 55695
 
     // Lightning Phase
-    new npc_crystal_conductor();
-    new npc_bound_lightning_elemental();
-    new npc_test_lightning_storm();
+    new npc_crystal_conductor();                // 56165
+    new npc_bound_lightning_elemental();        // 56700
+    new npc_test_lightning_storm();             // 119950
 
     // Ice Phase
-    new npc_frozen_binding_crystal();
-    new npc_ice_wave();
-    new npc_collapsing_icicle();
-    new npc_hagara_frost_trap();
-    new npc_frostflake_snare();
+    new npc_frozen_binding_crystal();           // 56136
+    new npc_ice_wave();                         // 56104
+    new npc_collapsing_icicle();                // 57867
+    new npc_frostflake_snare();                 // 119556
 
     // Spells
-    new spell_ds_frostflake();
-    new spell_ds_focused_assault();
-    new spell_ds_ice_lance_dmg();
-    new spell_ds_lightning_conduit();
+    new spell_ds_frostflake();                  // 109325
+    new spell_ds_focused_assault();             // 107851, 110900, 110899, 110898
+    new spell_ds_ice_lance_dmg();               // 105316, 107061, 107062, 107063
+    new spell_ds_lightning_conduit();           // 105367
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////         SQL QUERY          ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
+/*
+--NPC
+--Hagara the Stormbinder
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`,
+`exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`,
+`trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`,
+`spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`,
+`questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) values('55689','57462','57955','57956','0','0','39318','0','0','0','Hagara the Stormbinder','','','0','88','88','3','14','14','0','1.57143','1','1','1','0',
+'0','0','0','1','2000','2000','2','0','0','0','0','0','0','0','0','0','0','7','108','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','0','3','400','100','1','0','0','0','0','0','0','0','157','1','55689','0','1','boss_hagara_the_stormbinder','15595');
+
+--Frostflake Snare
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`,
+`exp`,`faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`,
+`trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`,
+`spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`,
+`questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) values('119556','0','0','0','0','0','11686','0','0','0','Frostflake Snare',NULL,NULL,'0','85','85','3','14','14','0','1','1.14286','1','0','0','0',
+'0','0','1','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','0','3','1','1','1','0','0','0','0','0','0','0','0','1','0','0','128','npc_frostflake_snare','1');
+
+--Lightning Storm
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`,
+`exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`,
+`trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`,
+`spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`,
+`questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) values('119950','0','0','0','0','0','11686','0','0','0','Lightning Storm Test',NULL,NULL,'0','85','85','3','14','14','0','1','1.14286','1','0','0','0',
+'0','0','1','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','0','3','1','1','1','0','0','0','0','0','0','0','0','1','0','0','0','npc_test_lightning_storm','1');
+
+--EQUIPMENT TEMPLATE
+REPLACE INTO `creature_equip_template` (`entry`, `equipentry1`, `equipentry2`, `equipentry3`) values('55689','75236','75236','0');
+REPLACE INTO `creature_equip_template` (`entry`, `equipentry1`, `equipentry2`, `equipentry3`) values('57462','75237','75237','0');
+
+--GAMEOBJECTS
+REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`,
+`questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`,`data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`,
+`data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `data24`, `data25`, `data26`, `data27`, `data28`, `data29`,`data30`, `data31`, `AIName`, `ScriptName`, `WDBVerified`) values
+('210132','10','7800','The Focusing Iris','','','','0','0','5','0','0','0','0','0','0','0','0','0','3000','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','go_ds_focusing_iris','15595');
+
+--SPELL SCRIPTS
+insert into `spell_script_names` (`spell_id`, `ScriptName`) values('109325','spell_ds_frostflake');
+insert into `spell_script_names` (`spell_id`, `ScriptName`) values('105367','spell_ds_lightning_conduit');
+
+insert into `spell_script_names` (`spell_id`, `ScriptName`) values
+('107851','spell_ds_focused_assault'),
+('110900','spell_ds_focused_assault'),
+('110899','spell_ds_focused_assault'),
+('110898','spell_ds_focused_assault');
+
+insert into `spell_script_names` (`spell_id`, `ScriptName`) values
+('105316','spell_ds_ice_lance_dmg'),
+('107061','spell_ds_ice_lance_dmg'),
+('107062','spell_ds_ice_lance_dmg'),
+('107063','spell_ds_ice_lance_dmg');
+*/
