@@ -166,12 +166,6 @@ enum Actions
     ACTION_CHANGE_COSMETIC_LIGHTNING        = 3,
 };
 
-struct Yells
-{
-    uint32 sound;
-    const char * text;
-};
-
 enum Quotes
 {
     QUOTE_AGGRO                 = 0,
@@ -186,7 +180,7 @@ enum Quotes
     QUOTE_MORE_UNSTABLE         = 9,
 };
 
-struct Yells yell[10]
+struct PlayableQuote yell[10]
 { 
     { 26314, "Now is the hour of twilight!" },
     { 26317, "I am the beginning of the end...the shadow which blots out the sun...the bell which tolls your doom..." },
@@ -255,9 +249,10 @@ public:
         bool achievement;
         bool visualLightning;
 
+        // Shortcut for testing purpose
         void ReceiveEmote(Player* player, uint32 uiTextEmote) override
         {
-            if (uiTextEmote == TEXTEMOTE_KNEEL)
+            if (uiTextEmote == TEXTEMOTE_KNEEL && player->IsGameMaster())
             {
                 me->AI()->DoAction(DATA_SUMMON_ULTRAXION);
             }
@@ -373,7 +368,7 @@ public:
                 me->SetSpeed(MOVE_FLIGHT, 1.8f);
                 me->GetMotionMaster()->MovePoint(0, WAYPOINT_X, WAYPOINT_Y, WAYPOINT_Z, false, true);
 
-                PlayAndYell(yell[QUOTE_APPEAR].sound, yell[QUOTE_APPEAR].text);
+                RunPlayableQuote(yell[QUOTE_APPEAR]);
 
                 scheduler.Schedule(Seconds(13), [this](TaskContext intro)
                 {
@@ -385,7 +380,7 @@ public:
                         // Make invisible all drakes and Deathwing
                         if (instance)
                             instance->SetData(DATA_ULTRAXION_DRAKES, 16);
-                        PlayAndYell(yell[QUOTE_PHASE].sound, yell[QUOTE_PHASE].text);
+                        RunPlayableQuote(yell[QUOTE_PHASE]);
                         SpawnUltraxionGauntlet();
                         visualLightning = true;
                         intro.Repeat(Seconds(18));
@@ -402,7 +397,7 @@ public:
             case ACTION_TWILIGHT_ERRUPTION:
                 me->InterruptNonMeleeSpells(false);
                 me->CastSpell(me, SPELL_TWILIGHT_ERUPTION, false);
-                PlayAndYell(yell[QUOTE_TWILIGHT_ERUPTION].sound, yell[QUOTE_TWILIGHT_ERUPTION].text);
+                RunPlayableQuote(yell[QUOTE_TWILIGHT_ERUPTION]);
                 break;
             case ACTION_TWILIGHT_BURST:
                 if (!me->HasUnitState(UNIT_STATE_CASTING))
@@ -440,7 +435,7 @@ public:
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ULTRAXION_ACHIEVEMENT_AURA);
             }
 
-            PlayAndYell(yell[QUOTE_AGGRO].sound, yell[QUOTE_AGGRO].text);
+            RunPlayableQuote(yell[QUOTE_AGGRO]);
             me->CastSpell(me, SPELL_UNSTABLE_MONSTROSITY_6S, false);
 
             // Aspects and their help during the encounter
@@ -459,7 +454,7 @@ public:
             if (victim && victim->GetTypeId() == TYPEID_PLAYER)
             {
                 uint32 rand = urand(QUOTE_KILL_1, QUOTE_KILL_3);
-                PlayAndYell(yell[rand].sound, yell[rand].text);
+                RunPlayableQuote(yell[rand]);
             }
         }
 
@@ -508,7 +503,7 @@ public:
                 me->CastSpell(me, SPELL_FALL_ANIMATION, false);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
-                PlayAndSay(yell[QUOTE_DEATH].sound, yell[QUOTE_DEATH].text);
+                RunPlayableQuote(yell[QUOTE_DEATH]);
 
                 scheduler.Schedule(Seconds(4), [this](TaskContext /* Task context */)
                 {
@@ -685,7 +680,7 @@ public:
                     me->CastSpell(me, SPELL_UNSTABLE_MONSTROSITY_3S, true);
                     break;
                 case 4: // 3s -> 2s
-                    PlayAndYell(yell[QUOTE_MORE_UNSTABLE].sound, yell[QUOTE_MORE_UNSTABLE].text);
+                    RunPlayableQuote(yell[QUOTE_MORE_UNSTABLE]);
                     me->RemoveAura(SPELL_UNSTABLE_MONSTROSITY_3S);
                     me->CastSpell(me, SPELL_UNSTABLE_MONSTROSITY_2S, true);
                     break;
@@ -695,7 +690,7 @@ public:
                     break;
                 case 6: // 1s -> Twilight Eruption
                     me->CastSpell(me, SPELL_TWILIGHT_ERUPTION, false);
-                    PlayAndYell(yell[QUOTE_TWILIGHT_ERUPTION].sound, yell[QUOTE_TWILIGHT_ERUPTION].text);
+                    RunPlayableQuote(yell[QUOTE_TWILIGHT_ERUPTION]);
                 default:
                     break;
                 }
@@ -709,7 +704,7 @@ public:
                 hourOfTwilightTimer = 45000;
                 FadingLight();
 
-                PlayAndYell(yell[QUOTE_HOUR_OF_TWILIGHT].sound, yell[QUOTE_HOUR_OF_TWILIGHT].text);
+                RunPlayableQuote(yell[QUOTE_HOUR_OF_TWILIGHT]);
             }
             else hourOfTwilightTimer -= diff;
 
@@ -1184,7 +1179,7 @@ public:
 
         void Register()
         {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_essence_of_dreams_SpellScript::TargetsCount, EFFECT_0, TARGET_UNIT_AREA_ALLY_DST);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_essence_of_dreams_SpellScript::TargetsCount, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
             OnEffect += SpellEffectFn(spell_ds_ultraxion_essence_of_dreams_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
         }
     };
@@ -1274,19 +1269,15 @@ public:
             {
             case SPEC_WARRIOR_PROTECTION:
                 victim->CastSpell(victim, SPELL_LAST_DEFENDER_OF_AZEROTH_WARR, true);
-                victim->AddAura(SPELL_LAST_DEFENDER_OF_AZEROTH_WARR, victim);
                 break;
             case SPEC_PALADIN_PROTECTION:
                 victim->CastSpell(victim, SPELL_LAST_DEFENDER_OF_AZEROTH_PALA, true);
-                victim->AddAura(SPELL_LAST_DEFENDER_OF_AZEROTH_PALA, victim);
                 break;
             case SPEC_DK_BLOOD:
                 victim->CastSpell(victim, SPELL_LAST_DEFENDER_OF_AZEROTH_DK, true);
-                victim->AddAura(SPELL_LAST_DEFENDER_OF_AZEROTH_DK, victim);
                 break;
             case SPEC_DRUID_FERAL:
                 victim->CastSpell(victim, SPELL_LAST_DEFENDER_OF_AZEROTH_DRUID, true);
-                victim->AddAura(SPELL_LAST_DEFENDER_OF_AZEROTH_DRUID, victim);
                 break;
             default:
                 break;
@@ -1308,20 +1299,98 @@ public:
 void AddSC_boss_ultraxion()
 {
     // Boss
-    new boss_ultraxion(); // 55294
-    new npc_ds_ultraxion_gauntlet(); // 56305
-    new npc_ds_ultraxion_lightning_trigger(); // 119557
+    new boss_ultraxion();                                       // 55294
+    new npc_ds_ultraxion_gauntlet();                            // 56305
+    new npc_ds_ultraxion_lightning_trigger();                   // 119558
 
     // Spells
-    new spell_ds_ultraxion_heroic_will(); // 106108
-    new spell_ds_ultraxion_fading_light(); // 109075, 110078, 110079, 110080
-    new spell_ds_ultraxion_twilight_instability(); // 109176
-    new spell_ds_ultraxion_hour_of_twilight_dmg(); // 103327
-    new spell_ds_ultraxion_time_loop(); // 105984
-    new spell_ds_ultraxion_essence_of_dreams(); // 105996
-    new spell_ds_ultraxion_last_defender_of_azeroth(); // 106182
-    new spell_ds_ultraxion_last_defender_of_azeroth_dummy(); // 110327
+    new spell_ds_ultraxion_heroic_will();                       // 106108
+    new spell_ds_ultraxion_fading_light();                      // 109075, 110078, 110079, 110080
+    new spell_ds_ultraxion_twilight_instability();              // 109176
+    new spell_ds_ultraxion_hour_of_twilight_dmg();              // 103327
+    new spell_ds_ultraxion_time_loop();                         // 105984
+    new spell_ds_ultraxion_essence_of_dreams();                 // 105996
+    new spell_ds_ultraxion_last_defender_of_azeroth();          // 106182
+    new spell_ds_ultraxion_last_defender_of_azeroth_dummy();    // 110327
 
     // Gameobjects
-    new go_ds_ultraxion_aspect_gifts(); // 209873, 209874, 209875
+    new go_ds_ultraxion_aspect_gifts();                         // 209873, 209874, 209875
 }
+
+//////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////         SQL QUERY          ///////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+/*
+    --NPC
+    --Ultraxion
+    REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`,
+    `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`,
+    `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`,
+    `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`,
+    `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) values('55294','0','0','0','0','0','39099','0','0','0','Ultraxion','','','0','88','88','3','14','14','0','1.42857','1','1','1','0',
+    '0','0','0','1','2000','2000','1','32832','4','0','0','0','0','0','0','0','0','2','2097260','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1847','0','0','','0','3','660','0.01056','1','0','0','0','0','0','0','0','144','1','0','0','1','boss_ultraxion','15595');
+
+    --Ultraxion Gauntlet
+    REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`,
+    `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`,
+    `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`,
+    `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`,
+    `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) values('56305','0','0','0','0','0','24103','38497','0','0','Ultraxion Gauntlet','','','0','87','87','3','14','14','0','1.14286','1','1','1','0',
+    '0','0','0','1','2000','2000','1','0','0','0','0','0','0','0','0','0','0','11','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','0','7','100','1','1','0','0','0','0','0','0','0','0','1','0','0','0','npc_ds_ultraxion_gauntlet','15595');
+
+    --Ultraxion Lightning Main
+    REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`,
+    `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`,
+    `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`,
+    `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`,
+    `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) values('119558','0','0','0','0','0','11686','0','0','0','Ultraxion Lightning Triger Main',NULL,NULL,'0','85','85','3','35','35','0','1','1.14286','1','0','0','0',
+    '0','0','1','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','0','3','1','1','1','0','0','0','0','0','0','0','0','1','0','0','128','npc_ds_ultraxion_lightning_trigger','1');
+
+    --Ultraxion Lightning Adds
+    REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`,
+    `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`,
+    `trainer_spell`,`trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`,
+    `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`,
+    `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) values('119557','0','0','0','0','0','11686','0','0','0','Ultraxion Lightning Trigger Adds',NULL,NULL,'0','85','85','3','35','35','0','1','1.14286','1','0','0','0',
+    '0','0','1','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','0','3','1','1','1','0','0','0','0','0','0','0','0','1','0','0','128','','1');
+
+    --SPAWN
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('15430850','55294','967','15','17','0','0','-1386.04','-2385.98','142.901','3.08266','10080','0','0','1','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219205','119557','967','15','16','0','0','-1734.89','-2400.66','340.855','0.0588808','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219206','119557','967','15','16','0','0','-1736.93','-2376.16','340.856','0.0981507','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219207','119557','967','15','16','0','0','-1730.43','-2383.65','340.858','0.0981507','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219208','119557','967','15','16','0','0','-1729.63','-2391.79','340.859','0.0981507','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219209','119557','967','15','16','0','0','-1736.95','-2395.49','340.849','0.117777','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219210','119557','967','15','16','0','0','-1738.66','-2380.53','340.849','0.0627987','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219211','119557','967','15','16','0','0','-1745.85','-2378.25','340.844','0.0627987','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219212','119557','967','15','16','0','0','-1746.29','-2371.18','340.853','0.0627987','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219213','119557','967','15','16','0','0','-1744.16','-2399.82','340.842','0.0824336','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219214','119557','967','15','16','0','0','-1743.68','-2405.58','340.847','0.0824336','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219215','119557','967','15','16','0','0','-1750.94','-2402.19','340.834','0.0824336','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219216','119557','967','15','16','0','0','-1753.12','-2375.82','340.837','0.0824336','300','0','0','77491','0','0','0','0','0','0');
+    INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values('219204','119558','967','15','16','0','0','-1742.94','-2388.69','340.838','0.0942256','300','0','0','77491','0','0','0','0','0','0');
+
+    --GAMEOBJECTS
+    REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`,
+    `data21`, `data22`, `data23`, `data24`, `data25`, `data26`, `data27`, `data28`, `data29`, `data30`, `data31`, `AIName`, `ScriptName`, `WDBVerified`) values('209873','10','8513','Gift of Life','','','','0','0','6','0','0','0','0','0','0','86','0','0','3000','0','1','0','0','0','0','105896','0','0','0','0','0','0','0','0','0','0','0','13132','1','0','0','0','0','0','0','0','0','','go_ds_ultraxion_aspect_gifts','15595');
+    REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`,
+    `data21`, `data22`, `data23`, `data24`, `data25`, `data26`, `data27`, `data28`, `data29`, `data30`, `data31`, `AIName`, `ScriptName`, `WDBVerified`) values('209874','10','7822','Essence of Dreams','','','','0','0','3','0','0','0','0','0','0','86','0','0','3000','0','1','0','0','0','0','105900','0','0','0','0','0','0','0','0','0','0','0','13132','1','0','0','0','0','0','0','0','0','','go_ds_ultraxion_aspect_gifts','15595');
+    REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`,
+    `data21`, `data22`, `data23`, `data24`, `data25`, `data26`, `data27`, `data28`, `data29`, `data30`, `data31`, `AIName`, `ScriptName`, `WDBVerified`) values('209875','10','7841','Source of Magic','','','','0','0','3','0','0','0','0','0','0','86','0','0','3000','0','1','0','0','0','0','105903','0','0','0','0','0','0','0','0','0','0','0','13132','1','0','0','0','0','0','0','0','0','','go_ds_ultraxion_aspect_gifts','15595');
+
+    --SPELL SCRIPTS
+    insert into `spell_script_names` (`spell_id`, `ScriptName`) values('109176','spell_ds_ultraxion_twilight_instability');
+    insert into `spell_script_names` (`spell_id`, `ScriptName`) values('103327','spell_ds_ultraxion_hour_of_twilight_dmg');
+    insert into `spell_script_names` (`spell_id`, `ScriptName`) values('106108','spell_ds_ultraxion_heroic_will');
+
+    insert into `spell_script_names` (`spell_id`, `ScriptName`) values('105984','spell_ds_ultraxion_time_loop');
+    insert into `spell_script_names` (`spell_id`, `ScriptName`) values('105996','spell_ds_ultraxion_essence_of_dreams');
+    insert into `spell_script_names` (`spell_id`, `ScriptName`) values('106182','spell_ds_ultraxion_last_defender_of_azeroth');
+    insert into `spell_script_names` (`spell_id`, `ScriptName`) values('110327','spell_ds_ultraxion_last_defender_of_azeroth_dummy');
+
+    insert into `spell_script_names` (`spell_id`, `ScriptName`) values
+        ('109075','spell_ds_ultraxion_fading_light'),
+        ('110078','spell_ds_ultraxion_fading_light'),
+        ('110079','spell_ds_ultraxion_fading_light'),
+        ('110080','spell_ds_ultraxion_fading_light');
+*/

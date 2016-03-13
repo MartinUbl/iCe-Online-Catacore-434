@@ -4366,20 +4366,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
             break;
-        //case 109337:
-        //    spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
         case 107850: // Focused Assault
             spellInfo->Effect[0] = SPELL_EFFECT_SCHOOL_DAMAGE;
             break;
         // Ultraxion
-        case 106369: // Twilight Shift
-        case 106080: // Last Defender of Azeroth
-        case 106224:
-        case 106226:
-        case 106227:
-            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
-            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
-            break;
         case 106390: // Unstable Monstrosity
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
             break;
@@ -4404,15 +4394,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 106182: // Last Defender of Azeroth
             spellInfo->MaxAffectedTargets = 2;
             count++;
-        case 105984: // Timeloop
-            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_AREA_ALLY_DST;
-        case 105996: // Essence of Dreams
-            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_DST;
-            break;
-        case 103327: // Hour of Twilight
-            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
-            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_AREA_ENEMY_SRC;
-            spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_AREA_ENEMY_SRC;
             break;
         case 106371: // Hour of Twilight
         case 109415:
@@ -4451,10 +4432,6 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 105929: // Ultraxion Normal Realm Cosmetic
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
-            break;
-        case 109404:
-            spellInfo->SpellVisual[0] = 22250;
-            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_DST;
             break;
         case 109405: // Cosmetic Lightning
         case 109406:
