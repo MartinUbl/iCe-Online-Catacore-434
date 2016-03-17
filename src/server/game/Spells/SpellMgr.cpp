@@ -4450,6 +4450,21 @@ void SpellMgr::LoadSpellCustomAttr()
         case 107588: // Twilight Onsloaught
             spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
             break;
+        // Spine of Deathwing
+        case 109379: // Searing Plasma
+            spellInfo->MaxAffectedTargets = 1;
+            count++;
+            break;
+        case 105490: // Fiery Grip 10N
+        case 109458: // Fiery Grip 10HC
+            spellInfo->MaxAffectedTargets = 1;
+            count++;
+            break;
+        case 109457: // Fiery Grip 25N
+        case 109459: // Fiery Grip 25HC
+            spellInfo->MaxAffectedTargets = 3;
+            count++;
+            break;
         // Madness of Deathwing
         case 106464: // Enter the Dream
             spellInfo->DurationIndex = 21; // unlimited

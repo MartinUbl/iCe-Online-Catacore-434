@@ -361,6 +361,12 @@ public:
             }
             else if (type == DATA_SPINE_OF_DEATHWING_PLATES)
             {
+                if (data == 0)
+                {
+                    platesDestroyed = 0;
+                    return;
+                }
+
                 platesDestroyed++;
 
                 if (Creature * pDeathwingSpine = this->instance->GetCreature(deathwingSpineGuid))

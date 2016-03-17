@@ -27,14 +27,17 @@ Autor: Lazik
 TO DO:
 1) Heroic abilities
 2) 25 man mode
-3) Plate animations 
-all scripts for adds can be found in dragon_soul_trash.cpp - Spine of Deathwing part
+3) Fiery Grip sometime targets two different players and Effect 0 is used on player 1 and Effect 1 is used on player 2
+4) Searing Plasma - still sometimes targets player who already has Searing Plasma debuff
 */
 
 #include "ScriptPCH.h"
 #include "dragonsoul.h"
 #include "MapManager.h"
 #include "TaskScheduler.h"
+
+#define CENTRAL_SPINE_AXIS -13855.0
+#define SEARCH_RANGE 300.0f
 
 // NPCs
 enum NPC
@@ -55,53 +58,56 @@ enum NPC
 enum Spells
 {
     // Deathwing
-    SPELL_SUMMON_SLIME_AOE = 105537,
-    SPELL_SUMMON_SLIME = 104999, // cast on spawner
+    SPELL_SUMMON_SLIME_AOE          = 105537,
+    SPELL_SUMMON_SLIME              = 104999, // cast on spawner
 
     // Corruption
-    SPELL_FIERY_GRIP = 105490,
-    SPELL_FIERY_GRIP_25 = 109457,
-    SPELL_FIERY_GRIP_10H = 109458,
-    SPELL_FIERY_GRIP_25H = 109459,
-    SPELL_SEARING_PLASMA_AOE = 109379,
-    SPELL_SEARING_PLASMA = 105479,
+    SPELL_FIERY_GRIP                = 105490,
+    SPELL_FIERY_GRIP_25             = 109457,
+    SPELL_FIERY_GRIP_10H            = 109458,
+    SPELL_FIERY_GRIP_25H            = 109459,
+    SPELL_SEARING_PLASMA_AOE        = 109379,
+    SPELL_SEARING_PLASMA            = 105479,
 
     // Hideous Amalgamation
-    SPELL_ZERO_REGEN = 109121,
-    SPELL_ABSORB_BLOOD_BAR = 109329,
-    SPELL_DEGRADATION = 106005,
-    SPELL_NUCLEAR_BLAST = 105845,
-    SPELL_NUCLEAR_BLAST_SCRIPT = 105846,
-    SPELL_SUPERHEATED_NUCLEUS = 105834,
-    SPELL_SUPERHEATED_NUCLEUS_DMG = 106264,
-    SPELL_ABSORB_BLOOD = 105244,
-    SPELL_ABSORB_BLOOD_DUMMY = 105241, // target on 105223
-    SPELL_ABSORBED_BLOOD = 105248,
+    SPELL_ZERO_REGEN                = 109121,
+    SPELL_ABSORB_BLOOD_BAR          = 109329,
+    SPELL_DEGRADATION               = 106005,
+    SPELL_NUCLEAR_BLAST             = 105845,
+    SPELL_NUCLEAR_BLAST_SCRIPT      = 105846,
+    SPELL_SUPERHEATED_NUCLEUS       = 105834,
+    SPELL_SUPERHEATED_NUCLEUS_DMG   = 106264,
+    SPELL_ABSORB_BLOOD              = 105244,
+    SPELL_ABSORB_BLOOD_DUMMY        = 105241, // target on 105223
+    SPELL_ABSORBED_BLOOD            = 105248,
 
     // Spawner
-    SPELL_GRASPING_TENDRILS = 105510,
-    SPELL_GRASPING_TENDRILS_10N = 105563,
-    SPELL_GRASPING_TENDRILS_25N = 109454,
-    SPELL_GRASPING_TENDRILS_10HC = 109455,
-    SPELL_GRASPING_TENDRILS_25HC = 109456,
+    SPELL_GRASPING_TENDRILS         = 105510,
+    SPELL_GRASPING_TENDRILS_10N     = 105563,
+    SPELL_GRASPING_TENDRILS_25N     = 109454,
+    SPELL_GRASPING_TENDRILS_10HC    = 109455,
+    SPELL_GRASPING_TENDRILS_25HC    = 109456,
 
     // Corrupted Blood
-    SPELL_RESIDUE = 105223,
-    SPELL_BURST = 105219,
+    SPELL_RESIDUE                   = 105223,
+    SPELL_BURST                     = 105219,
 
     // Burning Tendons
-    SPELL_SEAL_ARMOR_BREACH_LEFT = 105847, // 1698
-    SPELL_SEAL_ARMOR_BREACH_RIGHT = 105848, // 1699
-    SPELL_BREACH_ARMOR_LEFT = 105363, // 1677
-    SPELL_BREACH_ARMOR_RIGHT = 105385, // 1681
-    SPELL_PLATE_FLY_OFF_LEFT = 105366, // 1678
-    SPELL_PLATE_FLY_OFF_RIGHT = 105384, // 1680
-    SPELL_SLOW = 110907,
+    SPELL_SEAL_ARMOR_BREACH_LEFT    = 105847, // 1698
+    SPELL_SEAL_ARMOR_BREACH_RIGHT   = 105848, // 1699
+    SPELL_BREACH_ARMOR_LEFT         = 105363, // 1677
+    SPELL_BREACH_ARMOR_RIGHT        = 105385, // 1681
+    SPELL_PLATE_FLY_OFF_LEFT        = 105366, // 1678
+    SPELL_PLATE_FLY_OFF_RIGHT       = 105384, // 1680
+    SPELL_SLOW                      = 110907,
 
-    SPELL_BLOOD_CORRUPTION_DEATH = 106199,
-    SPELL_BLOOD_CORRUPTION_EARTH = 106200,
-    SPELL_BLOOD_OF_DEATHWING = 106201,
-    SPELL_BLOOD_OF_NELTHARION = 106213,
+    SPELL_BLOOD_CORRUPTION_DEATH    = 106199,
+    SPELL_BLOOD_CORRUPTION_EARTH    = 106200,
+    SPELL_BLOOD_OF_DEATHWING        = 106201,
+    SPELL_BLOOD_OF_NELTHARION       = 106213,
+
+    ACHIEVEMENT_DIZZY               = 6133,
+    ACHIEVEMENT_HEROIC_SPINE        = 6115,
 };
 
 enum LootCache
@@ -126,12 +132,12 @@ const Position corruptionPos[8] =
 
 const Position tendonsPos[6] =
 {
-    { -13862.8f, -13645.0f, 265.7f, 1.5708f }, // left 1
-    { -13846.8f, -13644.7f, 265.7f, 1.5708f }, // right 1
-    { -13862.6f, -13626.3f, 266.5f, 1.5708f }, // left 2
-    { -13846.6f, -13626.0f, 266.6f, 1.5708f }, // right 2
-    { -13862.6f, -13604.9f, 269.2f, 1.5708f }, // left 3
-    { -13846.6f, -13604.7f, 269.1f, 1.5708f }, // right 3
+    { -13867.5f, -13641.0f, 265.7f, 1.5708f }, // left 1
+    { -13844.1f, -13639.7f, 265.7f, 1.5708f }, // right 1
+    { -13867.8f, -13622.7f, 266.5f, 1.5708f }, // left 2
+    { -13841.0f, -13621.7f, 266.6f, 1.5708f }, // right 2
+    { -13867.1f, -13600.3f, 269.2f, 1.5708f }, // left 3
+    { -13840.8f, -13600.6f, 269.1f, 1.5708f }, // right 3
 };
 
 const Position rollPos[2] =
@@ -142,12 +148,13 @@ const Position rollPos[2] =
 
 enum SpineActions
 {
-    ACTION_CORRUPTED_DIED = 0,
-    ACTION_CORRUPTED_POSITION = 1,
-    ACTION_ABSORB_BLOOD = 2,
-    ACTION_TENDONS_POSITION = 3,
-    ACTION_OPEN_PLATE = 4,
-    ACTION_CHECK_ROLL = 5,
+    ACTION_CORRUPTION_DIED          = 0,
+    ACTION_CORRUPTED_POSITION       = 1,
+    ACTION_ABSORB_BLOOD             = 2,
+    ACTION_TENDONS_POSITION         = 3,
+    ACTION_OPEN_PLATE               = 4,
+    ACTION_CHECK_ROLL               = 5,
+    ACTION_SPAWN_CORRUPTED_BLOOD    = 6,
 };
 
 enum RollState
@@ -180,8 +187,27 @@ enum PlayersPosition
     MORE_PLAYERS_ON_RIGHT_SIDE      = 2,
 };
 
+#define MAX_SPINE_OF_DEATHWING_YELL   5
+
+struct PlayableQuote randomYell[MAX_SPINE_OF_DEATHWING_YELL]
+{
+    { 26346, "Your tenacity is admirable, but pointless.You ride into the jaws of the apocalypse." },
+    { 26350, "You are less than dust, fit only to be brushed from my back." },
+    { 26351, "Ha! I had not realize you fools were still there." },
+    { 26352, "Your efforts are insignificant.I carry you to your deaths." },
+    { 26515, "Cling while you can, heroes. You and your world are doomed." },
+};
+
 static const Position teleMadnessPos = { -12099.48f, 12160.05f, 18.79f, 1.74f };
 static const Position cacheSpawnPos = { -12076.60f, 12169.94f, -2.53f, 3.54f };
+
+#define ZERO_PLATE_OFF_MAX_SPAWN_COUNT          3
+#define FIRST_PLATE_OFF_MAX_SPAWN_COUNT         5
+#define SECOND_PLATE_OFF_MAX_SPAWN_COUNT        7
+#define SPINE_OF_DEATHWING_DEFEAT_CINEMATIC    75
+#define MAX_SPAWNER_COUNT                       8
+#define MAX_CORRUPTION_COUNT                    4
+#define MAX_TENDRONS_COUNT                      6
 
 // Spine of Deathwing
 class boss_spine_of_deathwing : public CreatureScript
@@ -207,6 +233,7 @@ public:
         uint32 corruptedPosition;
         uint32 tendonsPosition;
         uint32 playersPosition;
+        uint32 nextSpawnTimer;
         uint32 rollCheckTimer;
         uint32 rollState;
         uint32 talkTimer;
@@ -214,6 +241,7 @@ public:
         uint8 previousRoll;
         uint8 achievementCount;
         bool achievement;
+        bool firstCorruptionKilled;
 
         void Reset() override
         {
@@ -221,11 +249,16 @@ public:
             {
                 if (instance->GetData(TYPE_BOSS_SPINE_OF_DEATHWING) != DONE)
                     instance->SetData(TYPE_BOSS_SPINE_OF_DEATHWING, NOT_STARTED);
+
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                instance->SetData(DATA_SPINE_OF_DEATHWING_PLATES, 0);
             }
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_AGGRESSIVE);
+            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 100.0f);
+            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 100.0f);
 
             corruptedPosition = 0;
             tendonsPosition = 0;
@@ -233,12 +266,20 @@ public:
             previousRoll = 0;
             achievementCount = 0;
             achievement = false;
+            firstCorruptionKilled = false;
             playersPosition = PLAYERS_ARE_IN_MIDDLE;
             rollState = ROLL_NONE;
+            nextSpawnTimer = 15000;
             rollCheckTimer = 10000;
             talkTimer = urand(3000, 5000);
 
+            DeleteGameObjects(GO_DEATHWING_BACK_PLATE_1);
+            DeleteGameObjects(GO_DEATHWING_BACK_PLATE_2);
+            DeleteGameObjects(GO_DEATHWING_BACK_PLATE_3);
+
             Summons.DespawnAll();
+
+            ScriptedAI::Reset();
         }
 
         void JustSummoned(Creature* summon) override
@@ -246,43 +287,34 @@ public:
             Summons.push_back(summon->GetGUID());
         }
 
+        void MoveInLineOfSight(Unit *who) override
+        {
+            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster())
+            {
+                if (instance)
+                {
+                    if (instance->GetData(TYPE_BOSS_SPINE_OF_DEATHWING) != IN_PROGRESS)
+                    {
+                        instance->SetData(DATA_PREPARE_SPINE_ENCOUNTER, 0);
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                    }
+                }
+            }
+            ScriptedAI::MoveInLineOfSight(who);
+        }
+
         void EnterCombat(Unit * /*who*/) override
         {
             if (instance)
-            {
                 instance->SetData(TYPE_BOSS_SPINE_OF_DEATHWING, IN_PROGRESS);
-            }
         }
 
         void SaySomething()
         {
-            switch (deathwingSay)
-            {
-            case 0:
-                me->MonsterYell("Your tenacity is admirable, but pointless.You ride into the jaws of the apocalypse.", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(26346, true);
-                break;
-            case 1:
-                me->MonsterYell("You are less than dust, fit only to be brushed from my back.", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(26350, true);
-                break;
-            case 2:
-                me->MonsterYell("Ha!I had not realize you fools were still there.", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(26351, true);
-                break;
-            case 3:
-                me->MonsterYell("Your efforts are insignificant.I carry you to your deaths.", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(26352, true);
-                break;
-            case 4:
-                me->MonsterYell("Cling while you can, heroes. You and your world are doomed.", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(26515, true);
-                break;
-            default:
-                break;
-            }
+            RunPlayableQuote(randomYell[deathwingSay]);
+
             deathwingSay++;
-            if (deathwingSay >= 5)
+            if (deathwingSay >= MAX_SPINE_OF_DEATHWING_YELL)
                 deathwingSay = 0;
         }
 
@@ -320,11 +352,12 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_SPINE_OF_DEATHWING, DONE);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
                 if (achievement)
-                    instance->DoCompleteAchievement(6133); // Maybe He'll Get Dizzy...
+                    instance->DoCompleteAchievement(ACHIEVEMENT_DIZZY);
                 if (IsHeroic())
-                    instance->DoCompleteAchievement(6115); // Heroic: Spine of Deathwing 
+                    instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_SPINE);
             }
 
             TeleportAllPlayers();
@@ -355,6 +388,19 @@ public:
             me->SummonGameObject(cacheId, cacheSpawnPos.GetPositionX(), cacheSpawnPos.GetPositionY(), cacheSpawnPos.GetPositionZ(), cacheSpawnPos.GetOrientation(), 0, 0, 0, 0, 86400);
         }
 
+        void DeleteGameObjects(uint32 entry)
+        {
+            std::list<GameObject*> gameobjects;
+            me->GetGameObjectListWithEntryInGrid(gameobjects, entry, SEARCH_RANGE);
+            if (!gameobjects.empty())
+            {
+                for (std::list<GameObject*>::iterator itr = gameobjects.begin(); itr != gameobjects.end(); ++itr)
+                {
+                    (*itr)->Delete();
+                }
+            }
+        }
+
         void DoAction(const int32 action) override
         {
             if (instance)
@@ -363,14 +409,14 @@ public:
                 {
                 case DATA_PREPARE_SPINE_ENCOUNTER:
                 {
-                    for (uint32 i = 0; i < 8; i++)
+                    for (uint32 i = 0; i < MAX_SPAWNER_COUNT; i++)
                     {
-                        if (i < 4) // Spawn 4 corruptions
+                        if (i < MAX_CORRUPTION_COUNT) // Spawn 4 corruptions
                         {
                             if (Creature * pCorruption = me->SummonCreature(NPC_CORRUPTION, corruptionPos[i], TEMPSUMMON_DEAD_DESPAWN))
                                 pCorruption->AI()->SetData(ACTION_CORRUPTED_POSITION, i);
                         }
-                        if (i < 6) // Spawn 6 tendons
+                        if (i < MAX_TENDRONS_COUNT) // Spawn 6 tendons
                         {
                             if (Creature* pTendons = me->SummonCreature((((i % 2) == 1) ? NPC_BURNING_TENDONS_RIGHT : NPC_BURNING_TENDONS_LEFT), tendonsPos[i], TEMPSUMMON_DEAD_DESPAWN))
                                 pTendons->AI()->SetData(ACTION_TENDONS_POSITION, i);
@@ -379,22 +425,51 @@ public:
                         me->SummonCreature(NPC_SPAWNER, corruptionPos[i], TEMPSUMMON_MANUAL_DESPAWN);
                     }
 
+                    // Spawn plates
+                    me->SummonGameObject(GO_DEATHWING_BACK_PLATE_1, -13855.0f, -13638.9f, 267.685f, 1.530f, 0, 0, 0, 0, 86400);
+                    me->SummonGameObject(GO_DEATHWING_BACK_PLATE_2, -13855.0f, -13618.4f, 269.402f, 1.550f, 0, 0, 0, 0, 86400);
+                    me->SummonGameObject(GO_DEATHWING_BACK_PLATE_3, -13854.0f, -13599.3f, 272.333f, 1.558f, 0, 0, 0, 0, 86400);
+
                     me->SetVisible(true);
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->SetInCombatWithZone();
                     break;
                 }
-                case ACTION_CORRUPTED_DIED:
+                case ACTION_SPAWN_CORRUPTED_BLOOD:
                 {
-                    Creature * pCorruption = me->FindNearestCreature(NPC_CORRUPTION, 300.0f, true);
+                    // For every plate away, we need to add two more spawn positions
+                    uint32 maxPos = ZERO_PLATE_OFF_MAX_SPAWN_COUNT;
+                    nextSpawnTimer = 9000;
+                    if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 1)
+                    {
+                        maxPos = FIRST_PLATE_OFF_MAX_SPAWN_COUNT;
+                        nextSpawnTimer = 7000;
+                    }
+                    else if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 2)
+                    {
+                        maxPos = SECOND_PLATE_OFF_MAX_SPAWN_COUNT;
+                        nextSpawnTimer = 5000;
+                    }
+
+                    uint32 randPos = (0, maxPos);
+                    if (Creature * pCorruption = me->SummonCreature(NPC_CORRUPTED_BLOOD, corruptionPos[randPos], TEMPSUMMON_DEAD_DESPAWN))
+                        pCorruption->AI()->SetData(ACTION_CORRUPTED_POSITION, randPos);
+                    break;
+                }
+                case ACTION_CORRUPTION_DIED:
+                {
+                    firstCorruptionKilled = true;
+                    nextSpawnTimer = 9000;
+
+                    Creature * pCorruption = me->FindNearestCreature(NPC_CORRUPTION, SEARCH_RANGE, true);
                     if (!pCorruption)
                     {
                         // For every plate away, we need to add two more spawn positions
-                        uint32 maxPos = 3;
+                        uint32 maxPos = ZERO_PLATE_OFF_MAX_SPAWN_COUNT;
                         if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 1)
-                            maxPos = 5;
+                            maxPos = FIRST_PLATE_OFF_MAX_SPAWN_COUNT;
                         else if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 2)
-                            maxPos = 7;
+                            maxPos = SECOND_PLATE_OFF_MAX_SPAWN_COUNT;
 
                         // new corruption shouldn`t spawn at it`s last killed position
                         uint32 randPos = urand(0, maxPos);
@@ -407,13 +482,17 @@ public:
                             pCorruption->AI()->SetData(ACTION_CORRUPTED_POSITION, randPos);
                     }
 
-                    scheduler.Schedule(Seconds(5), [this](TaskContext /* Task context */)
+                    // Spawn Hideous Amalgamation and Corrupted Blood 
+                    uint32 lastCorruptedPosition = corruptedPosition;
+                    scheduler.Schedule(Seconds(5), [this, lastCorruptedPosition](TaskContext spawn)
                     {
-                        me->SummonCreature(NPC_HIDEOUS_AMALGAMATION, corruptionPos[corruptedPosition], TEMPSUMMON_DEAD_DESPAWN);
-                    });
-                    scheduler.Schedule(Seconds(15), [this](TaskContext /* Task context */)
-                    {
-                        me->SummonCreature(NPC_CORRUPTED_BLOOD, corruptionPos[corruptedPosition], TEMPSUMMON_DEAD_DESPAWN);
+                        if (spawn.GetRepeatCounter() == 0)
+                        {
+                            me->SummonCreature(NPC_HIDEOUS_AMALGAMATION, corruptionPos[lastCorruptedPosition], TEMPSUMMON_DEAD_DESPAWN);
+                            spawn.Repeat(Seconds(10));
+                        }
+                        else
+                            me->SummonCreature(NPC_CORRUPTED_BLOOD, corruptionPos[lastCorruptedPosition], TEMPSUMMON_DEAD_DESPAWN);
                     });
                     break;
                 }
@@ -432,7 +511,7 @@ public:
                     case ROLL_PRE_LEFT_1:
                         if (playersPosition == MORE_PLAYERS_ON_LEFT_SIDE)
                         {
-                            me->MonsterTextEmote("Deathwing feels players on his left side. He's about to roll left!", me->GetGUID(), true, 300.0f);
+                            me->MonsterTextEmote("Deathwing feels players on his left side. He's about to roll left!", me->GetGUID(), true, SEARCH_RANGE);
                             rollState = ROLL_PRE_LEFT_2;
                         }
                         else
@@ -442,12 +521,12 @@ public:
                     case ROLL_PRE_LEFT_2:
                         if (playersPosition == MORE_PLAYERS_ON_LEFT_SIDE)
                         {
-                            me->MonsterTextEmote("Deathwing rolls left!", me->GetGUID(), true, 300.0f);
+                            me->MonsterTextEmote("Deathwing rolls left!", me->GetGUID(), true, SEARCH_RANGE);
                             rollState = ROLLING_LEFT;
                         }
                         else
                         {
-                            me->MonsterTextEmote("Deathwing levels out.", me->GetGUID(), true, 300.0f);
+                            me->MonsterTextEmote("Deathwing levels out.", me->GetGUID(), true, SEARCH_RANGE);
                             rollState = ROLL_NONE;
                         }
                         rollCheckTimer = 1000;
@@ -460,7 +539,7 @@ public:
                     case ROLL_PRE_RIGHT_1:
                         if (playersPosition == MORE_PLAYERS_ON_RIGHT_SIDE)
                         {
-                            me->MonsterTextEmote("Deathwing feels players on his right side. He's about to roll right!", me->GetGUID(), true, 300.0f);
+                            me->MonsterTextEmote("Deathwing feels players on his right side. He's about to roll right!", me->GetGUID(), true, SEARCH_RANGE);
                             rollState = ROLL_PRE_RIGHT_2;
                         }
                         else
@@ -470,12 +549,12 @@ public:
                     case ROLL_PRE_RIGHT_2:
                         if (playersPosition == MORE_PLAYERS_ON_RIGHT_SIDE)
                         {
-                            me->MonsterTextEmote("Deathwing rolls right!", me->GetGUID(), true, 300.0f);
+                            me->MonsterTextEmote("Deathwing rolls right!", me->GetGUID(), true, SEARCH_RANGE);
                             rollState = ROLLING_RIGHT;
                         }
                         else
                         {
-                            me->MonsterTextEmote("Deathwing levels out.", me->GetGUID(), true, 300.0f);
+                            me->MonsterTextEmote("Deathwing levels out.", me->GetGUID(), true, SEARCH_RANGE);
                             rollState = ROLL_NONE;
                         }
                         rollCheckTimer = 1000;
@@ -494,7 +573,8 @@ public:
                 case DATA_SPINE_OF_DEATHWING_PLATES:
                     if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 1)
                     {
-                        for (uint8 i = 4; i < 6; i++)
+                        me->DealDamage(me, me->GetMaxHealth() * 0.3);
+                        for (uint8 i = MAX_CORRUPTION_COUNT; i < MAX_CORRUPTION_COUNT + 2; i++)
                         {
                             if (Creature* pCorruption = me->SummonCreature(NPC_CORRUPTION, corruptionPos[i], TEMPSUMMON_DEAD_DESPAWN))
                                 pCorruption->AI()->SetData(ACTION_CORRUPTED_POSITION, i);
@@ -502,7 +582,8 @@ public:
                     }
                     else if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 2)
                     {
-                        for (uint8 i = 6; i < 8; i++)
+                        me->DealDamage(me, me->GetMaxHealth() * 0.3);
+                        for (uint8 i = MAX_CORRUPTION_COUNT + 2; i < MAX_CORRUPTION_COUNT + 4; i++)
                         {
                             if (Creature* pCorruption = me->SummonCreature(NPC_CORRUPTION, corruptionPos[i], TEMPSUMMON_DEAD_DESPAWN))
                                 pCorruption->AI()->SetData(ACTION_CORRUPTED_POSITION, i);
@@ -510,7 +591,7 @@ public:
                     }
                     else if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 3)
                     {
-                        PlayMovieToPlayers(75);
+                        PlayMovieToPlayers(SPINE_OF_DEATHWING_DEFEAT_CINEMATIC);
                         scheduler.Schedule(Seconds(25), [this](TaskContext /* Task context */)
                         {
                             me->Kill(me);
@@ -560,7 +641,7 @@ public:
             }
 
             std::list<Creature*> hideous_amalgamation;
-            GetCreatureListWithEntryInGrid(hideous_amalgamation, me, NPC_HIDEOUS_AMALGAMATION, 200.0f);
+            GetCreatureListWithEntryInGrid(hideous_amalgamation, me, NPC_HIDEOUS_AMALGAMATION, SEARCH_RANGE);
             for (std::list<Creature*>::const_iterator itr = hideous_amalgamation.begin(); itr != hideous_amalgamation.end(); ++itr)
             {
                 if (side == ROLL_LEFT)
@@ -593,16 +674,16 @@ public:
                 {
                     if (pl && pl->IsInWorld() && pl->IsAlive() && !pl->IsGameMaster())
                     {
-                        if (pl->GetPositionX() >= -13850)
+                        if (pl->GetPositionX() >= CENTRAL_SPINE_AXIS)
                             rightSide++;
-                        if (pl->GetPositionX() <= -13860)
+                        else
                             leftSide++;
                         maxPlayers++;
                     }
                 }
             }
 
-            maxDifference = (maxPlayers > 3) ? 2 : 1;
+            maxDifference = (maxPlayers > 1) ? 1 : 1; // Set 1 to zero - now it has only test purpose
 
             if (leftSide - maxDifference > rightSide)
                 playersPosition = MORE_PLAYERS_ON_LEFT_SIDE;
@@ -617,7 +698,7 @@ public:
             if (type == ACTION_CORRUPTED_POSITION)
             {
                 corruptedPosition = data;
-                me->AI()->DoAction(ACTION_CORRUPTED_DIED);
+                me->AI()->DoAction(ACTION_CORRUPTION_DIED);
             }
 
             if (type == ACTION_TENDONS_POSITION)
@@ -643,6 +724,15 @@ public:
                 me->AI()->DoAction(ACTION_CHECK_ROLL);
             }
             else rollCheckTimer -= diff;
+
+            if (firstCorruptionKilled == true)
+            {
+                if (nextSpawnTimer <= diff)
+                {
+                    me->AI()->DoAction(ACTION_SPAWN_CORRUPTED_BLOOD);
+                }
+                else nextSpawnTimer -= diff;
+            }
         }
     };
 };
@@ -675,14 +765,14 @@ public:
             isGrip = false;
             damageCounter = 0;
             corruptedPosition = 0;
-            searingPlasmaTimer = urand(10000, 18000);
+            searingPlasmaTimer = urand(5000, 12000);
             fieryGripTimer = urand(10000, 25000);
         }
 
         void JustDied(Unit * /*who*/) override
         {
-            if (Creature * pSpineOfDeathwing = me->FindNearestCreature(BOSS_SPINE_OF_DEATHWING, 300.0f, true))
-                pSpineOfDeathwing->AI()->SetData(ACTION_CORRUPTED_POSITION, corruptedPosition);
+            if (Creature * pBoss = GetSummoner<Creature>())
+                pBoss->AI()->SetData(ACTION_CORRUPTED_POSITION, corruptedPosition);
         }
 
         void SetData(uint32 type, uint32 data)
@@ -707,6 +797,20 @@ public:
                 damageCounter -= damage;
         }
 
+        void SpellHitTarget(Unit* target, const SpellEntry* spell) override
+        {
+            if (spell->Id == SPELL_SEARING_PLASMA_AOE)
+            {
+                if (!target->HasAura(SPELL_SEARING_PLASMA))
+                    me->CastSpell(target, SPELL_SEARING_PLASMA, true);
+            }
+        }
+
+        inline bool IsCastingAllowed()
+        {
+            return !me->IsNonMeleeSpellCasted(false) && me->GetReactState() == REACT_AGGRESSIVE;
+        }
+
         void UpdateAI(const uint32 diff) override
         {
             if (!UpdateVictim())
@@ -714,21 +818,23 @@ public:
 
             if (searingPlasmaTimer <= diff)
             {
-                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                    me->CastSpell(pTarget, SPELL_SEARING_PLASMA, false);
-                searingPlasmaTimer = 8000;
+                if (IsCastingAllowed())
+                {
+                    me->CastSpell(me, SPELL_SEARING_PLASMA_AOE, false);
+                    searingPlasmaTimer = 9000;
+                }
             }
             else searingPlasmaTimer -= diff;
 
             if (fieryGripTimer <= diff)
             {
-                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_FIERY_GRIP))
+                if (IsCastingAllowed())
                 {
-                    me->CastCustomSpell(SPELL_FIERY_GRIP, SPELLVALUE_MAX_TARGETS, 1, pTarget, false);
+                    me->CastSpell(me, SPELL_FIERY_GRIP, false);
                     damageCounter = me->CountPctFromMaxHealth(20);
                     isGrip = true;
+                    fieryGripTimer = urand(30000, 35000);
                 }
-                fieryGripTimer = urand(30000, 35000);
             }
             else fieryGripTimer -= diff;
         }
@@ -789,22 +895,25 @@ public:
             if (me->GetHealth() > damage)
                 return;
 
-            // can't cast spells in JustDied because I am dead in that function
             if (me->GetEntry() == NPC_BURNING_TENDONS_LEFT)
             {
-                if (Creature * pRightTendons = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, 100.0f, true))
+                if (Creature * pRightTendons = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, SEARCH_RANGE, true))
                     pRightTendons->DespawnOrUnsummon();
             }
             else if (me->GetEntry() == NPC_BURNING_TENDONS_RIGHT)
             {
-                if (Creature * pLeftTendons = me->FindNearestCreature(NPC_BURNING_TENDONS_LEFT, 100.0f, true))
+                if (Creature * pLeftTendons = me->FindNearestCreature(NPC_BURNING_TENDONS_LEFT, SEARCH_RANGE, true))
                     pLeftTendons->DespawnOrUnsummon();
             }
 
+            // can't cast spells in JustDied because I am dead in that function
             me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_PLATE_FLY_OFF_RIGHT : SPELL_PLATE_FLY_OFF_LEFT, false);
 
             if (instance)
-                instance->SetData(DATA_SPINE_OF_DEATHWING_PLATES, 0);
+            {
+                instance->SetData(DATA_SPINE_OF_DEATHWING_PLATES, 1);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            }
 
             HidePlate();
         }
@@ -812,7 +921,11 @@ public:
         void DoAction(const int32 action) override
         {
             if (action == ACTION_OPEN_PLATE)
+            {
+                if (instance)
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 OpenPlate();
+            }
         }
 
         void SetData(uint32 type, uint32 data)
@@ -827,6 +940,8 @@ public:
             {
                 if (openTimer <= diff)
                 {
+                    if (instance)
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     ClosePlate();
                 }
                 else openTimer -= diff;
@@ -838,8 +953,9 @@ public:
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetVisible(true);
-            me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_BREACH_ARMOR_LEFT : SPELL_BREACH_ARMOR_RIGHT, false);
-            me->CastSpell(me, ((tendonsPosition % 2) == 1) ? SPELL_SEAL_ARMOR_BREACH_LEFT : SPELL_SEAL_ARMOR_BREACH_RIGHT, false);
+            me->SetInCombatWithZone();
+            me->CastSpell(me, ((tendonsPosition % 2) == 0) ? SPELL_BREACH_ARMOR_LEFT : SPELL_BREACH_ARMOR_RIGHT, false);
+            me->CastSpell(me, ((tendonsPosition % 2) == 0) ? SPELL_SEAL_ARMOR_BREACH_LEFT : SPELL_SEAL_ARMOR_BREACH_RIGHT, false);
             openTimer = 23000;
             isOpen = true;
         }
@@ -859,7 +975,10 @@ public:
         void HidePlate()
         {
             if (auto *plate = GetNearestPlate(me))
-                plate->SetGoState(GO_STATE_ACTIVE);
+            {
+                plate->Delete();
+            }
+
         }
     };
 };
@@ -912,25 +1031,23 @@ public:
         uint32 searingPlasmaTimer;
         uint32 fieryGripTimer;
         uint32 moveBackTimer;
+        float x, y, z;
         bool isDead;
+
+        void IsSummonedBy(Unit* pSummoner) override
+        {
+            x = me->GetPositionX();
+            y = me->GetPositionY();
+            z = me->GetPositionZ();
+        }
 
         void Reset() override
         {
-            me->SetWalk(true);
-            me->SetSpeed(MOVE_WALK, 1.0f, true);
             isDead = false;
             moveBackTimer = 0;
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-        }
-
-        void JustReachedHome() override
-        {
-            isDead = false;
-            DoResetThreat();
-            me->SetReactState(REACT_AGGRESSIVE);
-            me->RemoveAura(SPELL_RESIDUE);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->SetInCombatWithZone();
         }
 
         void DamageTaken(Unit* /*who*/, uint32 & damage)
@@ -949,14 +1066,6 @@ public:
                     me->CastSpell(me, SPELL_RESIDUE, true);
                     me->SetWalk(true);
                     me->SetSpeed(MOVE_WALK, 0.1f, true);
-
-                    std::list<Creature*> hideous_amalgamation;
-                    GetCreatureListWithEntryInGrid(hideous_amalgamation, me, NPC_HIDEOUS_AMALGAMATION, 200.0f);
-                    for (std::list<Creature*>::const_iterator itr = hideous_amalgamation.begin(); itr != hideous_amalgamation.end(); ++itr)
-                    {
-                        if (*itr)
-                            (*itr)->AI()->DoAction(ACTION_ABSORB_BLOOD);
-                    }
                 }
             }
         }
@@ -967,10 +1076,18 @@ public:
             {
                 if (moveBackTimer <= diff)
                 {
-                    me->GetMotionMaster()->MoveTargetedHome();
+                    me->GetMotionMaster()->MovePoint(0, x, y, z);
                     isDead = false;
                 }
                 else moveBackTimer -= diff;
+            }
+            else if (me->GetDistance(me->GetHomePosition()) <= 1.0f)
+            {
+                isDead = false;
+                DoResetThreat();
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->RemoveAura(SPELL_RESIDUE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             }
 
             if (!UpdateVictim())
@@ -1019,6 +1136,19 @@ public:
             }
         }
 
+        void MoveInLineOfSight(Unit *who) override
+        {
+            if (who->GetExactDist2d(me) < 3.0f)
+            {
+                if (who->IsAlive() && who->HasAura(SPELL_RESIDUE))
+                {
+                    me->AI()->DoAction(ACTION_ABSORB_BLOOD);
+                    who->ToCreature()->DespawnOrUnsummon();
+                }
+            }
+            ScriptedAI::MoveInLineOfSight(who);
+        }
+
         void JustDied(Unit * /*who*/) override
         {
             if (IsHeroic())
@@ -1050,8 +1180,8 @@ public:
                         me->CastSpell(me, SPELL_NUCLEAR_BLAST, false);
                         scheduler.Schedule(Seconds(6), [this](TaskContext /* Task context */)
                         {
-                            Creature * pBurningTendonsLeft = me->FindNearestCreature(NPC_BURNING_TENDONS_LEFT, 100.0f, true);
-                            Creature * pBurningTendonsRight = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, 100.0f, true);
+                            Creature * pBurningTendonsLeft = me->FindNearestCreature(NPC_BURNING_TENDONS_LEFT, 25.0f, true);
+                            Creature * pBurningTendonsRight = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, 25.0f, true);
                             if (pBurningTendonsLeft && pBurningTendonsRight)
                             {
                                 if (me->GetDistance2d(pBurningTendonsLeft->GetPositionX(), pBurningTendonsLeft->GetPositionY()) <=
@@ -1120,6 +1250,38 @@ public:
     };
 };
 
+class spell_ds_spine_searing_plasma : public SpellScriptLoader
+{
+public:
+    spell_ds_spine_searing_plasma() : SpellScriptLoader("spell_ds_spine_searing_plasma") {}
+
+    class spell_ds_spine_searing_plasma_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_spine_searing_plasma_SpellScript);
+
+        void HandleScript()
+        {
+            Unit * hitUnit = GetHitUnit();
+
+            if (!hitUnit)
+                return;
+
+            if (!hitUnit->HasAura(SPELL_SEARING_PLASMA))
+                GetCaster()->CastSpell(GetHitUnit(), SPELL_SEARING_PLASMA, false);
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_ds_spine_searing_plasma_SpellScript::HandleScript);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_spine_searing_plasma_SpellScript();
+    }
+};
+
 void AddSC_boss_spine_of_deathwing()
 {
     new boss_spine_of_deathwing();
@@ -1127,8 +1289,10 @@ void AddSC_boss_spine_of_deathwing()
     new npc_ds_spine_corrupted_blood();
     new npc_ds_spine_hideous_amalgamation();
     new npc_ds_spine_burning_tendons();
-    new spell_ds_spine_plate_activate_loader();
     new npc_ds_spine_spawner();
+
+    new spell_ds_spine_plate_activate_loader();
+    new spell_ds_spine_searing_plasma();
 }
 
 /*
