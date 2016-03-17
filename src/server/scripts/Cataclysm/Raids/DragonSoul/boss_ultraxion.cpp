@@ -264,6 +264,7 @@ public:
             {
                 if (instance->GetData(TYPE_BOSS_ULTRAXION) != DONE)
                     instance->SetData(TYPE_BOSS_ULTRAXION, NOT_STARTED);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
             me->SetMeleeAnimKitId(SPELL_ULTRAXION_COSMETIC);
@@ -420,6 +421,7 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_ULTRAXION, IN_PROGRESS);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ULTRAXION_ACHIEVEMENT_AURA);
             }
 
@@ -506,6 +508,7 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_ULTRAXION, DONE);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
         }
 

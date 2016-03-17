@@ -376,6 +376,7 @@ public:
             {
                 if (instance->GetData(TYPE_BOSS_HAGARA) != DONE)
                     instance->SetData(TYPE_BOSS_HAGARA, NOT_STARTED);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
             if (instance && instance->GetData(DATA_HAGARA_INTRO_TRASH) >= 35)
@@ -427,6 +428,7 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_HAGARA, IN_PROGRESS);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
             RunPlayableQuote(aggro);
@@ -446,6 +448,7 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_HAGARA, DONE);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 if (IsHeroic())
                     instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_HAGARA);
             }
