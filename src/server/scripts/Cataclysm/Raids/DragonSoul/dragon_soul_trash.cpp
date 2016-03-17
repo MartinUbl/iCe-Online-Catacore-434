@@ -1342,6 +1342,7 @@ public:
 
 enum BlackhornTrashNPC
 {
+    NPC_WARMASTER_BLACKHORN             = 56427,
     NPC_SKYFIRE                         = 56598,
     NPC_TWILIGHT_ASSAULT_DRAKE_LEFT     = 56855,
     NPC_TWILIGHT_ASSAULT_DRAKE_RIGHT    = 56587,
@@ -1349,15 +1350,13 @@ enum BlackhornTrashNPC
     NPC_TWILIGHT_ELITE_SLAYER           = 56848,
     NPC_TWILIGHT_SAPPER                 = 56923,
     NPC_HARPOON                         = 56681,
+    NPC_TWILIGHT_FLAMES                 = 57268,
 };
 
 enum BlackhornTrashSpells
 {
     // Twilight Assault Drake
     SPELL_TWILIGHT_BARRAGE          = 107286,
-    SPELL_TWILIGHT_BARRAGE_DMG_1    = 107439,
-    SPELL_TWILIGHT_BARRAGE_DUMMY    = 107287,
-    SPELL_TWILIGHT_BARRAGE_DMG_2    = 107501,
     SPELL_HARPOON                   = 108038,
 
     // Twilight Elite Dreadblade & Slayer
@@ -1372,6 +1371,8 @@ enum BlackhornTrashSpells
     SPELL_SMOKE_BOMB                = 107752,
 
     SPELL_ENGINE_FIRE               = 107799,
+    SPELL_MASSIVE_EXPLOSION         = 108132,
+
     SPELL_TWILIGHT_FLAMES_AURA      = 108053,
 };
 
@@ -1387,31 +1388,15 @@ enum drakeSide
     RIGHT_HARPOON_POSITION          = 1,
 };
 
-enum GorionaDrakesPosition
-{
-    LEFT_DRAKE_SPAWN_POS            = 0,
-    RIGHT_DRAKE_SPAWN_POS           = 1,
-    LEFT_DRAKE_DROP_POS             = 2,
-    RIGHT_DRAKE_DROP_POS            = 3,
-    LEFT_DRAKE_END_FLY_POS          = 4,
-    RIGHT_DRAKE_END_FLY_POS         = 5,
-};
-
-const Position assaultDrakePos[6] =
-{
-    { 13441.83f, -12184.15f, 172.05f, 1.49f }, // Left Spawn Drake Pos
-    { 13447.38f, -12083.55f, 172.05f, 4.45f }, // Right Spawn Drake Pos
-    { 13431.26f, -12125.28f, 172.05f, 3.08f }, // Left drake drop add position
-    { 13430.35f, -12140.22f, 172.05f, 3.08f }, // Right drake drop add position
-    { 13433.40f, -12082.54f, 172.05f, 4.65f }, // Left drake end fly position
-    { 13429.12f, -12182.25f, 172.05f, 1.46f }, // Right drake end fly position
-};
-
 enum actionsSkyfire
 {
     ACTION_START_WARMASTER_ENCOUNTER    = 0,
     ACTION_SHOOT_DRAKE                  = 1,
 };
+
+struct PlayableQuote skyfireSapper { 26296, "An Enemy Sapper has breached the Engine Room!" };
+struct PlayableQuote skyfireLowHP { 26297, "The Skyfire can't take much more of this!" };
+struct PlayableQuote skyfireGoingDown { 26298, "Were going down, abandon the ship!" };
 
 class npc_ds_twilight_assault_drake : public CreatureScript
 {
@@ -1439,7 +1424,7 @@ public:
             me->SetFlying(true);
             me->SetSpeed(MOVE_FLIGHT, 1.5f);
             me->SetInCombatWithZone();
-            harpoonTimer = 30000;
+            harpoonTimer = 25000;
             twilightBarrageTimer = urand(8000, 16000);
             harpoon = false;
 
@@ -1459,6 +1444,7 @@ public:
                 else
                     me->GetMotionMaster()->MovePoint(RIGHT_DRAKE_END_FLY_POS, assaultDrakePos[RIGHT_DRAKE_END_FLY_POS], true, false);
 
+                // Set correct facing to raid
                 scheduler.Schedule(Seconds(5), [this](TaskContext /*task context*/)
                 {
                     if (me->GetEntry() == NPC_TWILIGHT_ASSAULT_DRAKE_LEFT)
@@ -1485,6 +1471,7 @@ public:
         {
             scheduler.Update(diff);
 
+            // Harpoons
             if (!harpoon)
             {
                 if (harpoonTimer <= diff)
@@ -1520,6 +1507,7 @@ public:
                 else harpoonTimer -= diff;
             }
 
+            // Twilight Barrage
             if (twilightBarrageTimer <= diff)
             {
                 uint32 randPos = urand(0, 24);
@@ -1550,37 +1538,40 @@ public:
     {
         npc_ds_engine_stalkerAI(Creature *creature) : ScriptedAI(creature) { }
 
-        void SpellHit(Unit* /*caster*/, SpellEntry const* spell) override
+        void Reset() override
         {
-            if (spell->Id == 99148)
-            {
-                me->CastSpell(me, SPELL_ENGINE_FIRE, false);
-            }
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
         }
     };
 };
 
-class npc_ds_twilight_elite_dreadblade : public CreatureScript
+class npc_ds_twilight_elite : public CreatureScript
 {
 public:
-    npc_ds_twilight_elite_dreadblade() : CreatureScript("npc_ds_twilight_elite_dreadblade") { }
+    npc_ds_twilight_elite() : CreatureScript("npc_ds_twilight_elite") { }
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new npc_ds_twilight_elite_dreadbladeAI(pCreature);
+        return new npc_ds_twilight_eliteAI(pCreature);
     }
 
-    struct npc_ds_twilight_elite_dreadbladeAI : public ScriptedAI
+    struct npc_ds_twilight_eliteAI : public ScriptedAI
     {
-        npc_ds_twilight_elite_dreadbladeAI(Creature *creature) : ScriptedAI(creature) { }
+        npc_ds_twilight_eliteAI(Creature *creature) : ScriptedAI(creature) { }
 
         uint32 bladeRushTimer;
-        uint32 degenerationTimer;
+        uint32 specialAbilityTimer;
 
         void Reset() override
         {
             bladeRushTimer = 10000;
-            degenerationTimer = 15000;
+            specialAbilityTimer = urand(5000, 15000);
+        }
+
+        inline bool IsCastingAllowed()
+        {
+            return !me->IsNonMeleeSpellCasted(false);
         }
 
         void UpdateAI(const uint32 diff) override
@@ -1590,64 +1581,24 @@ public:
 
             if (bladeRushTimer <= diff)
             {
-
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                    me->CastSpell(pTarget, SPELL_BLADE_RUSH, false);
                 bladeRushTimer = 10000;
             }
             else bladeRushTimer -= diff;
 
-            if (degenerationTimer <= diff)
+            if (specialAbilityTimer <= diff)
             {
-                me->CastSpell(me->GetVictim(), SPELL_DEGENERATION, false);
-                degenerationTimer = 10000;
+                if (IsCastingAllowed())
+                {
+                    if (me->GetEntry() == NPC_TWILIGHT_ELITE_DREADBLADE)
+                        me->CastSpell(me->GetVictim(), SPELL_DEGENERATION, false);
+                    else if (me->GetEntry() == NPC_TWILIGHT_ELITE_SLAYER)
+                        me->CastSpell(me->GetVictim(), SPELL_BRUTAL_STRIKE, false);
+                    specialAbilityTimer = urand(7000, 15000);
+                }
             }
-            else degenerationTimer -= diff;
-
-            DoMeleeAttackIfReady();
-        }
-    };
-};
-
-class npc_ds_twilight_elite_slayer : public CreatureScript
-{
-public:
-    npc_ds_twilight_elite_slayer() : CreatureScript("npc_ds_twilight_elite_slayer") { }
-
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_ds_twilight_elite_slayerAI(pCreature);
-    }
-
-    struct npc_ds_twilight_elite_slayerAI : public ScriptedAI
-    {
-        npc_ds_twilight_elite_slayerAI(Creature *creature) : ScriptedAI(creature) { }
-
-        uint32 bladeRushTimer;
-        uint32 brutalStrikeTimer;
-
-        void Reset() override
-        {
-            bladeRushTimer = 10000;
-            brutalStrikeTimer = 15000;
-        }
-
-        void UpdateAI(const uint32 diff) override
-        {
-            if (!UpdateVictim())
-                return;
-
-            if (bladeRushTimer <= diff)
-            {
-
-                bladeRushTimer = 10000;
-            }
-            else bladeRushTimer -= diff;
-
-            if (brutalStrikeTimer <= diff)
-            {
-                me->CastSpell(me->GetVictim(), SPELL_BRUTAL_STRIKE, false);
-                brutalStrikeTimer = 10000;
-            }
-            else brutalStrikeTimer -= diff;
+            else specialAbilityTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
@@ -1719,8 +1670,18 @@ public:
             {
                 me->CastSpell(me, SPELL_SMOKE_BOMB, false);
                 me->CastSpell(me, SPELL_EVADE, false);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->GetMotionMaster()->MovePoint(0, sapperEndPos, true, true);
             });
+        }
+
+        void RunPlayableQuote(PlayableQuote quote, uint32 npcEntry)
+        {
+            if (Creature * pNpcEntry = me->FindNearestCreature(npcEntry, 300.0f))
+            {
+                pNpcEntry->MonsterYell(quote.GetText(), LANG_UNIVERSAL, 0);
+                pNpcEntry->SendPlaySound(quote.GetSoundId(), false);
+            }
         }
 
         void UpdateAI(const uint32 diff) override
@@ -1731,48 +1692,39 @@ public:
             {
                 if (me->GetDistance2d(sapperEndPos.GetPositionX(), sapperEndPos.GetPositionY()) <= 2.0f)
                 {
+                    RunPlayableQuote(skyfireSapper, NPC_SKY_CAPTAIN_SWAYZE);
+                    explosion = true;
+
+                    // Deal dmg to the ship (20% Ship health) 
                     if (Creature* pShip = me->FindNearestCreature(NPC_SKYFIRE, 300.0f))
                         pShip->SetHealth(pShip->GetHealth() - pShip->GetMaxHealth()*0.2);
                     me->CastSpell(me, SPELL_DETONATE, false);
-                    explosion = true;
                 }
             }
         }
     };
 };
 
-class npc_ds_twilight_flames : public CreatureScript
+class npc_ds_warmaster_triggers : public CreatureScript
 {
 public:
-    npc_ds_twilight_flames() : CreatureScript("npc_ds_twilight_flames") { }
+    npc_ds_warmaster_triggers() : CreatureScript("npc_ds_warmaster_triggers") { }
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new npc_ds_twilight_flamesAI(pCreature);
+        return new npc_ds_warmaster_triggersAI(pCreature);
     }
 
-    struct npc_ds_twilight_flamesAI : public ScriptedAI
+    struct npc_ds_warmaster_triggersAI : public ScriptedAI
     {
-        npc_ds_twilight_flamesAI(Creature *creature) : ScriptedAI(creature) { }
-
-        TaskScheduler scheduler;
+        npc_ds_warmaster_triggersAI(Creature *creature) : ScriptedAI(creature) { }
 
         void Reset() override
         {
-            me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->SetInCombatWithZone();
-
-            scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
-            {
+            if (me->GetEntry() == NPC_TWILIGHT_FLAMES)
                 me->CastSpell(me, SPELL_TWILIGHT_FLAMES_AURA, false);
-            });
-        }
-
-        void UpdateAI(const uint32 diff) override
-        {
-            scheduler.Update(diff);
         }
     };
 };
@@ -1789,22 +1741,76 @@ public:
 
     struct npc_ds_skyfire_deckAI : public ScriptedAI
     {
-        npc_ds_skyfire_deckAI(Creature *creature) : ScriptedAI(creature) { }
-
-        void Reset() override
+        npc_ds_skyfire_deckAI(Creature *creature) : ScriptedAI(creature) 
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetMaxHealth(RAID_MODE(4000000, 10000000, 6000000, 15000000));
             me->SetHealth(RAID_MODE(4000000, 10000000, 6000000, 15000000));
         }
 
-        void DoAction(const int32 action) override
+        TaskScheduler scheduler;
+        bool lowHealth;
+        bool canExplode;
+
+        void Reset() override
         {
-            if (action == ACTION_START_WARMASTER_ENCOUNTER)
-                me->SetInCombatWithZone();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->SetReactState(REACT_PASSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            lowHealth = false;
+            canExplode = false;
         }
 
-        void UpdateAI(const uint32 diff) override {}
+        void RunPlayableQuote(PlayableQuote quote, uint32 npcEntry)
+        {
+            if (Creature * pNpcEntry = me->FindNearestCreature(npcEntry, 300.0f))
+            {
+                pNpcEntry->MonsterYell(quote.GetText(), LANG_UNIVERSAL, 0);
+                pNpcEntry->SendPlaySound(quote.GetSoundId(), false);
+            }
+        }
+
+        void DamageTaken(Unit* who, uint32 &damage) override
+        {
+            if (!lowHealth)
+            {
+                if (me->GetHealth() < (me->GetMaxHealth() * 0.4))
+                {
+                    RunPlayableQuote(skyfireLowHP, NPC_SKY_CAPTAIN_SWAYZE);
+                    lowHealth = true;
+                }
+            }
+
+            if (me->GetHealth() > damage)
+                return;
+
+            if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+            {
+                if (canExplode == false)
+                {
+                    if (me->GetHealth() <= damage)
+                    {
+                        damage = me->GetHealth() - 1;
+                        canExplode = true;
+                        me->setFaction(14);
+                        me->CastSpell(me, SPELL_MASSIVE_EXPLOSION, false);
+                        RunPlayableQuote(skyfireGoingDown, NPC_SKY_CAPTAIN_SWAYZE);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+                        scheduler.Schedule(Seconds(5), [this](TaskContext /*task context*/)
+                        {
+                            if (Creature* pWarmaster = me->FindNearestCreature(NPC_WARMASTER_BLACKHORN, 300.0f))
+                                pWarmaster->AI()->Reset();
+                        });
+                    }
+                }
+            }
+            else damage = 0;
+        }
+
+        void UpdateAI(const uint32 diff) override 
+        {
+            scheduler.Update(diff);
+        }
     };
 };
 
@@ -2840,6 +2846,8 @@ public:
 
         void Reset() override
         {
+            me->SetReactState(REACT_PASSIVE);
+
             if (me->GetEntry() == NPC_SKY_CAPTAIN_SWAYZE)
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }
@@ -2892,43 +2900,31 @@ public:
                 }
                 else if (action == ACTION_START_BLACKHORN_ENCOUNTER)
                 {
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     scheduler.Schedule(Seconds(0), [this](TaskContext greetings)
                     {
                         uint32 repeatCount = greetings.GetRepeatCounter();
                         if (repeatCount == 0)
                         {
-                            if (Creature * pGoriona = me->FindNearestCreature(NPC_GORIONA, 300.0f, true))
-                                pGoriona->AI()->DoAction(ACTION_START_ENCOUNTER);
                             me->MonsterYell("All ahead full. Everything depends on our speed! We can't let the Destroyer get away.", LANG_UNIVERSAL, 0);
                             me->SendPlaySound(26292, false);
-                            greetings.Repeat(Seconds(8));
+                            greetings.Repeat(Seconds(10));
                         }
                         else if (repeatCount == 1)
                         {
-                            instance->SetData(DATA_START_BLACKHORN_ENCOUNTER, 0);
-                            greetings.Repeat(Seconds(15));
+                            if (Creature * pGoriona = me->FindNearestCreature(NPC_GORIONA, 300.0f, true))
+                                pGoriona->AI()->DoAction(ACTION_START_ENCOUNTER);
+                            greetings.Repeat(Seconds(8));
                         }
                         else if (repeatCount == 2)
                         {
                             me->MonsterYell("Our engines are damaged! We're sitting ducks up here!", LANG_UNIVERSAL, 0);
                             me->SendPlaySound(26303, false);
-                            greetings.Repeat(Seconds(6));
-
-                        }
-                        else if (repeatCount == 3)
-                        {
-                            if (Creature * pWarmasterBlackhorn = me->FindNearestCreature(NPC_BOSS_BLACKHORN, 300.0f, true))
-                            {
-                                pWarmasterBlackhorn->MonsterYell("You won't get near the Master. Dragonriders, attack!", LANG_UNIVERSAL, 0);
-                                pWarmasterBlackhorn->SendPlaySound(26210, false);
-                            }
-                            greetings.Repeat(Seconds(8));
                         }
                     });
                 }
                 else if (action == ACTION_SPINE_OF_DEATHWING)
                 {
-                    instance->SetData(DATA_PREPARE_SPINE_ENCOUNTER, 0);
                     PlayMovieToPlayers(74);
                     scheduler.Schedule(Seconds(19), [this](TaskContext /*Show Movie and teleport to Spine of Deathwing*/)
                     {
@@ -2970,9 +2966,8 @@ void AddSC_dragon_soul_trash()
     new npc_ds_twilight_sapper();
     new npc_ds_twilight_infiltrator();
     new npc_ds_twilight_assault_drake();
-    new npc_ds_twilight_elite_dreadblade();
-    new npc_ds_twilight_elite_slayer();
-    new npc_ds_twilight_flames();
+    new npc_ds_twilight_elite();
+    new npc_ds_warmaster_triggers();
     new npc_ds_engine_stalker();
     new npc_ds_skyfire_deck();
     new npc_ds_madness_thrall();

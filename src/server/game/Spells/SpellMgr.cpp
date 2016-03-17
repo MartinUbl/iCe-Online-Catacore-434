@@ -888,6 +888,10 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
             {
                 case 34700: // Allergic Reaction
                 case 84715: // Shockwave - Garrosh Hellscream
+                case 107558: // Degeneration 10N
+                case 108861: // 25N
+                case 109207: // 10HC
+                case 109208: // 25 HC
                     return false;
                 case 30877: // Tag Murloc
                     return true;
@@ -4440,13 +4444,11 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         // Warmaster Blackhorn
         case 108038: // Harpoon
+        case 107583: // Twilight Blast
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
             break;
         case 107588: // Twilight Onsloaught
             spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
-            break;
-        case 108406: // Shockwave
-            spellInfo->AttributesEx5 &= ~SPELL_ATTR5_UNK19; // SPELL_ATTR5_DONT_TURN_DURING_CAST
             break;
         // Madness of Deathwing
         case 106464: // Enter the Dream

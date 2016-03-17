@@ -2328,6 +2328,13 @@ void Unit::CalcHealAbsorb(Unit *pVictim, const SpellEntry *healSpell, uint32 &he
 
     absorb = RemainingHeal > 0 ? (healAmount - RemainingHeal) : healAmount;
     healAmount = RemainingHeal;
+
+    // Consuming Shroud
+    if (pVictim->HasAura(110214) || pVictim->HasAura(110598))
+    {
+        int32 bp0 = absorb;
+        pVictim->CastCustomSpell(pVictim, 110215, &bp0, 0, 0, true);
+    }
 }
 
 void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool extra)

@@ -148,7 +148,9 @@ enum DragonsoulGameobjectsId
     GO_DEATHWING_BACK_PLATE_3           = 209632,
 };
 
-const Position warmasterDamagePos[25] =
+#define MAX_WARMASTER_DAMAGE_POSITIONS      25
+
+const Position warmasterDamagePos[MAX_WARMASTER_DAMAGE_POSITIONS] =
 {
     { 13454.01f, -12145.91f, 150.84f, 3.16f },
     { 13450.81f, -12145.89f, 150.83f, 3.05f },
@@ -175,5 +177,27 @@ const Position warmasterDamagePos[25] =
     { 13444.46f, -12131.01f, 150.83f, 4.15f },
     { 13444.04f, -12136.78f, 150.83f, 4.72f },
     { 13444.69f, -12140.80f, 150.82f, 4.87f },
+};
+
+enum GorionaDrakesPosition
+{
+    LEFT_DRAKE_SPAWN_POS                = 0,
+    RIGHT_DRAKE_SPAWN_POS               = 1,
+    LEFT_DRAKE_DROP_POS                 = 2,
+    RIGHT_DRAKE_DROP_POS                = 3,
+    LEFT_DRAKE_END_FLY_POS              = 4,
+    RIGHT_DRAKE_END_FLY_POS             = 5,
+};
+
+#define MAX_ASSAULT_DRAKE_POSITIONS       6
+
+const Position assaultDrakePos[MAX_ASSAULT_DRAKE_POSITIONS] =
+{
+    { 13441.83f, -12184.15f, 172.05f, 1.49f }, // Left Spawn Drake Pos
+    { 13447.38f, -12083.55f, 172.05f, 4.45f }, // Right Spawn Drake Pos
+    { 13431.26f, -12125.28f, 172.05f, 3.08f }, // Left drake drop add position
+    { 13430.35f, -12140.22f, 172.05f, 3.08f }, // Right drake drop add position
+    { 13433.40f, -12082.54f, 172.05f, 4.65f }, // Left drake end fly position
+    { 13429.12f, -12182.25f, 172.05f, 1.46f }, // Right drake end fly position
 };
 #endif
