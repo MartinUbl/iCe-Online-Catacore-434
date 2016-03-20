@@ -841,7 +841,7 @@ public:
                 }
             }
 
-            if (instance && achievReqCount == (Is25ManRaid() ? 25 : 3))
+            if (instance && achievReqCount == (Is25ManRaid() ? 25 : 10))
                 instance->DoCompleteAchievement(ACHIEVEMENT_HOLDING_HANDS);
         }
 
