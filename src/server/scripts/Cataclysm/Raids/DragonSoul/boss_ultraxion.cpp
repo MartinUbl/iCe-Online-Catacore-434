@@ -1081,9 +1081,9 @@ public:
 
         void Register()
         {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_hour_of_twilight_dmg_SpellScript::FilterTargetsDamage, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC);
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_hour_of_twilight_dmg_SpellScript::FilterTargetsDarknessAndAchievement, EFFECT_1, TARGET_UNIT_AREA_ENEMY_SRC);
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_hour_of_twilight_dmg_SpellScript::FilterTargetsDarknessAndAchievement, EFFECT_2, TARGET_UNIT_AREA_ENEMY_SRC);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_hour_of_twilight_dmg_SpellScript::FilterTargetsDamage, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_hour_of_twilight_dmg_SpellScript::FilterTargetsDarknessAndAchievement, EFFECT_1, TARGET_UNIT_AREA_ENTRY_SRC);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_hour_of_twilight_dmg_SpellScript::FilterTargetsDarknessAndAchievement, EFFECT_2, TARGET_UNIT_AREA_ENTRY_SRC);
         }
     };
 
