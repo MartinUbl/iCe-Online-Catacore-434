@@ -205,6 +205,7 @@ struct ElementalAI : public ScriptedAI
             if (GameObject *go = ObjectAccessor::GetGameObject(*me, *itr))
             {
                 go->SetGoState(GO_STATE_ACTIVE);
+                go->EnableCollision(false);
             }
         }
         goGUIDs.clear();
