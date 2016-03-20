@@ -774,19 +774,24 @@ public:
 
             if (checkTimer <= diff)
             {
-                // AoE dummy spell (8 yards)
-                me->CastSpell(me, CLUMP_CHECK_1, true);
+                bool sphereHitBoss = false;
 
                 if (Creature * pBoss = ObjectAccessor::GetCreature(*me, bossGUID))
                 {
                     if (me->GetExactDist2d(pBoss) < 10.0f && me->HasAura(SPELL_VOID_OF_THE_UNMAKING_VISUAL))
                     {
+                        sphereHitBoss = true;
                         pBoss->AI()->DoAction(ACTION_SPHERE_HIT_BOSS);
                         me->ForcedDespawn(100);
                         moveTimer = 10000;
                         refreshTimer = 10000;
                     }
                 }
+
+                // AoE dummy spell (8 yards)
+                if (!sphereHitBoss)
+                    me->CastSpell(me, CLUMP_CHECK_1, true);
+
                 checkTimer = 1000;
             }
             else checkTimer -= diff;
