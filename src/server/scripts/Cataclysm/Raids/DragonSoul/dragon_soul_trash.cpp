@@ -2744,7 +2744,7 @@ public:
                         uint32 randPos = urand(0, 7);
                         me->SummonCreature(npcId, spawnDrakePos[randPos], TEMPSUMMON_DEAD_DESPAWN);
                         if (summonDrakes.GetRepeatCounter() < 14)
-                            summonDrakes.Repeat(Seconds(10));
+                            summonDrakes.Repeat(Seconds(15));
                     });
                     break;
                 default:
