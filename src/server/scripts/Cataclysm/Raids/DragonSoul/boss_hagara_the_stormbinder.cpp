@@ -550,6 +550,7 @@ public:
                 {
                     pHoverDisc->SetVisible(false);
                     pHoverDisc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pHoverDisc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     if (Vehicle * veh = pHoverDisc->GetVehicleKit())
                         me->EnterVehicle(pHoverDisc, 0, nullptr);
                 }
