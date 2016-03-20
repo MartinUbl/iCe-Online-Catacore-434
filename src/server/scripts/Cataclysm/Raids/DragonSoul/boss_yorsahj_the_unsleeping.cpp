@@ -309,7 +309,7 @@ public:
         void EnterCombat(Unit * who) override
         {
             globulesActive = 0;
-            oozeTimer = 2200/**/;
+            oozeTimer = 22000;
             voidBoltTimer = 6000;
             bestowedBlood = false;
 
@@ -397,6 +397,7 @@ public:
 
             RunPlayableQuote(deathQuote);
             me->CastSpell(me, SPELL_WHISPER_DEATH, true);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FIXATE);
         }
 
         void EnterEvadeMode() override
@@ -408,6 +409,7 @@ public:
 
             scheduler.CancelAll();
             summons.DespawnAll();
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FIXATE);
 
             ScriptedAI::EnterEvadeMode();
         }
