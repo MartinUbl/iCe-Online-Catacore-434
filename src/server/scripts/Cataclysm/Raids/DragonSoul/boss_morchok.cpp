@@ -1220,8 +1220,10 @@ public:
 
             if (Creature * pKohcrom = caster->SummonCreature(KOHCROM_ENTRY, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), caster->GetOrientation()))
             {
-                pKohcrom->SetMaxHealth(caster->GetMaxHealth());
-                pKohcrom->SetHealth(caster->GetHealth());
+                pKohcrom->SetMaxHealth(caster->GetMaxHealth() / 2);
+                pKohcrom->SetHealth(caster->GetHealth() / 2);
+                caster->SetMaxHealth(pKohcrom->GetMaxHealth());
+                caster->SetHealth(pKohcrom->GetHealth());
 
                 Position kohcromPos;
                 float kohcromAngle = o - ANGLE_JUMP_OFFSET;
