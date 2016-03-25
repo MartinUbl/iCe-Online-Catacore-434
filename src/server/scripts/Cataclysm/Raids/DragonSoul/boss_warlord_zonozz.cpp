@@ -61,6 +61,9 @@ enum spells : uint32
     SPELL_SHADOW_GAZE                   = 104347, // Casted by Eye of Go'rath to random player
     SPELL_WILD_FLAIL                    = 109199, // Casted be Flail of Go'rath (melee AoE)
     SPELL_SLUDGE_SPEW                   = 110102, // Casted be Flail of Go'rath to random player
+
+    ACHIEVEMENT_HEROIC_ZONOZZ           = 6110,
+    ACHIEVEMENT_PING_PONG_CHAMPION      = 6128,
 };
 
 enum blackBloodSpells : uint32
@@ -331,7 +334,10 @@ public:
                 instance->SetData(TYPE_BOSS_ZONOZZ, DONE);
 
                 if (bounceCount >= BOUNCE_REQUIRED_FOR_ACHIEV)
-                    instance->DoCompleteAchievement(6128); // Ping Pong Champion
+                    instance->DoCompleteAchievement(ACHIEVEMENT_PING_PONG_CHAMPION); // Ping Pong Champion
+
+                if (IsHeroic())
+                    instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_ZONOZZ);
             }
 
             summons.DespawnAll();

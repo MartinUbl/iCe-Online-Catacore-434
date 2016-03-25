@@ -119,7 +119,10 @@ enum Spells : uint32
     SPELL_SUMMON_KOHCROM                = 109017,
     SPELL_JUMP                          = 109070,
     SPELL_SHRINK                        = 96112,    // - 10 % scale
-    SPELL_SHARE_HEALTH                  = 109548
+    SPELL_SHARE_HEALTH                  = 109548,
+
+    ACHIEVEMENT_HEROIC_MORCHOK            = 6109,
+    ACHIEVEMENT_DONT_STAY_SO_CLOSE_TO_ME  = 6174,
 };
 
 enum resonatingCrystalSpells : uint32
@@ -285,6 +288,8 @@ struct ElementalAI : public ScriptedAI
         if (instance)
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            if (IsHeroic())
+                instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_MORCHOK);
         }
 
         MorchokHelpers::RemoveBeamAuraFromPlayers(instance);

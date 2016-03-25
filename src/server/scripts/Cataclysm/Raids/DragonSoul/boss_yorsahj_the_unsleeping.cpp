@@ -118,7 +118,10 @@ enum spells
 
     SPELL_MANA_DIFFUSION_PCT        = 108228,
     SPELL_MANA_DIFFUSION_LFR        = 110742,
-    SPELL_MANA_DIFFUSION_FLAT       = 105539
+    SPELL_MANA_DIFFUSION_FLAT       = 105539,
+
+    ACHIEVEMENT_HEROIC_YORSAHJ      = 6111,
+    ACHIEVEMENT_TASTE_THE_RAINBOW   = 6129,
 };
 
 enum colorCombinationsNormal : uint32
@@ -390,6 +393,9 @@ public:
             {
                 instance->SetData(TYPE_BOSS_YORSAHJ, DONE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+                if (IsHeroic())
+                    instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_YORSAHJ);
             }
 
             summons.DespawnAll();
