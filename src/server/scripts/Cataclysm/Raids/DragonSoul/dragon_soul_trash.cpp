@@ -1755,7 +1755,7 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetReactState(REACT_PASSIVE);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             lowHealth = false;
             canExplode = false;
         }
@@ -1783,28 +1783,23 @@ public:
             if (me->GetHealth() > damage)
                 return;
 
-            if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+            if (canExplode == false)
             {
-                if (canExplode == false)
+                if (me->GetHealth() <= damage)
                 {
-                    if (me->GetHealth() <= damage)
-                    {
-                        damage = me->GetHealth() - 1;
-                        canExplode = true;
-                        me->setFaction(14);
-                        me->CastSpell(me, SPELL_MASSIVE_EXPLOSION, false);
-                        RunPlayableQuote(skyfireGoingDown, NPC_SKY_CAPTAIN_SWAYZE);
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    damage = me->GetHealth() - 1;
+                    canExplode = true;
+                    me->setFaction(14);
+                    me->CastSpell(me, SPELL_MASSIVE_EXPLOSION, false);
+                    RunPlayableQuote(skyfireGoingDown, NPC_SKY_CAPTAIN_SWAYZE);
 
-                        scheduler.Schedule(Seconds(5), [this](TaskContext /*task context*/)
-                        {
-                            if (Creature* pWarmaster = me->FindNearestCreature(NPC_WARMASTER_BLACKHORN, 300.0f))
-                                pWarmaster->AI()->Reset();
-                        });
-                    }
+                    scheduler.Schedule(Seconds(5), [this](TaskContext /*task context*/)
+                    {
+                        if (Creature* pWarmaster = me->FindNearestCreature(NPC_WARMASTER_BLACKHORN, 300.0f))
+                            pWarmaster->AI()->Reset();
+                    });
                 }
             }
-            else damage = 0;
         }
 
         void UpdateAI(const uint32 diff) override 
