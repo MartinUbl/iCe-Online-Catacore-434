@@ -26,7 +26,6 @@ Autor: Lazik
 /*
 TO DO:
 1) Heroic Deck Fire, also rework Twilight Onslaught and Twilight Barrage targeting so it won`t hit burning spot
-2) Shockwave - I've tried everything, but he`s still turning on tank during the cast
 */
 
 #include "ScriptPCH.h"
@@ -51,6 +50,7 @@ enum NPC
     NPC_MASSIVE_EXPLOSION               = 57297,
     NPC_GUNSHIP_PURSUIT_CONTROLLER      = 56599,
     NPC_BROADSIDE_TARGET                = 119559,
+    NPC_SHOCKWAVE_TARGET                = 119560,
     NPC_ONSLAUGHT_TARGET                = 57238,
     NPC_ENGINE_STALKER                  = 57190,
     NPC_FIRE_STALKER                    = 57852,
@@ -197,6 +197,7 @@ public:
         uint32 devastateTimer;
         uint32 vengeanceTimer;
         uint32 berserkTimer;
+        uint32 allowTurningTimer;
         uint32 phase;
         bool siphonVitality;
         bool berserk;
@@ -219,6 +220,7 @@ public:
             shockwaveTimer = 25000;
             devastateTimer = 8000;
             vengeanceTimer = 5000;
+            allowTurningTimer = 0;
             berserkTimer = 0;
             achievement = true;
             berserk = false;
@@ -285,6 +287,7 @@ public:
 
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 phase = PHASE_WARMASTER_ON_BOARD;
+                allowTurningTimer = 60000;
                 me->SetReactState(REACT_AGGRESSIVE);
                 RunPlayableQuote(warmasterOnBoardPhase);
                 berserkTimer = 240 * IN_MILLISECONDS;
@@ -317,7 +320,16 @@ public:
                 if (shockwaveTimer <= diff)
                 {
                     if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, SEARCH_RANGE, true))
-                        me->CastSpell(pTarget, SPELL_SHOCKWAVE, false);
+                    {
+                        if (Creature * pShockwaveTarget = me->SummonCreature(NPC_SHOCKWAVE_TARGET, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 3000))
+                        {
+                            pShockwaveTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE);
+                            me->SetFacingTo(me->GetAngle(pShockwaveTarget));
+                            me->SetUInt64Value(UNIT_FIELD_TARGET, pShockwaveTarget->GetGUID());
+                            me->CastSpell(pShockwaveTarget, SPELL_SHOCKWAVE, false);
+                        }
+                    }
+                    allowTurningTimer = 3500;
 
                     uint32 randQuote = urand(0, MAX_WARMASTER_SHOCKWAVE_QUOTES - 1);
                     RunPlayableQuote(warmasterShockwave[randQuote]);
@@ -360,6 +372,15 @@ public:
                         siphonVitality = true;
                     }
                 }
+
+                // Change target after Shockwave - Don`t even ask :D
+                if (allowTurningTimer <= diff) // Put again our victim to  UNIT_FIELD_TARGET
+                {
+                    if (me->GetVictim() && me->GetVictim()->IsInWorld())
+                        me->SetUInt64Value(UNIT_FIELD_TARGET, me->GetVictim()->GetGUID());
+                    allowTurningTimer = 25000;
+                }
+                else allowTurningTimer -= diff;
 
                 DoMeleeAttackIfReady();
             }
@@ -404,7 +425,7 @@ const Position infiltratorPos[MAX_INFILTRATIOR_POSITIONS] =
     { 13504.39f, -12135.67f, 185.00f, 6.22f }, // End fly position
 };
 
-const Position skyfirePosition { 13434.8f, -12132.7f, 151.1f, 6.27f };
+const Position skyfirePosition { 13500.0f, -12135.6f, 128.6f, 3.03f };
 
 // Goriona
 class npc_ds_goriona : public CreatureScript
@@ -478,6 +499,9 @@ public:
                     pWarmaster->SetVisible(false);
                 }
             });
+
+            if (Creature* pCaptainSwayze = me->FindNearestCreature(NPC_SKY_CAPTAIN_SWAYZE, SEARCH_RANGE))
+                pCaptainSwayze->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
             Summons.DespawnAll();
 
@@ -621,7 +645,6 @@ public:
                 }
                 case ACTION_GORIONA_LEAVES_SCENE:
                     phase = PHASE_INTRO;
-                    me->DeleteThreatList();
                     me->SetReactState(REACT_PASSIVE);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->SetFlying(true);
