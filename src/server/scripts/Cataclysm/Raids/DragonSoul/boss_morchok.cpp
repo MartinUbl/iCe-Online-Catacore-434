@@ -1139,7 +1139,7 @@ public:
             unitList.sort(Trinity::ObjectDistanceOrderPred(me));
 
             // Get count of players wh an be affected by beams
-            uint32 beamPlayersCount = GetSpellInfo()->Id == SPELL_CRYSTAL_TARGET_SELECTION_10 ? MAX_CRYSTAL_TARGETS_10_MAN : MAX_CRYSTAL_TARGETS_25_MAN;
+            int32 beamPlayersCount = GetSpellInfo()->Id == SPELL_CRYSTAL_TARGET_SELECTION_10 ? MAX_CRYSTAL_TARGETS_10_MAN : MAX_CRYSTAL_TARGETS_25_MAN;
 
             // Apply beam spell on them
             for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); itr++)
