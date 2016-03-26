@@ -2207,13 +2207,14 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
                 case 51582:                                 //Rocket Boots Engaged (Rocket Boots Xtreme and Rocket Boots Xtreme Lite)
                 {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    if (Battleground* bg = m_caster->ToPlayer()->GetBattleground())
-                        bg->EventPlayerDroppedFlag(m_caster->ToPlayer());
+                    if (Battleground* bg = unitTarget->ToPlayer()->GetBattleground())
+                        bg->EventPlayerDroppedFlag(unitTarget->ToPlayer());
 
-                    m_caster->CastSpell(m_caster, 30452, true, NULL);
+                    unitTarget->CastSpell(unitTarget, 30452, true); // Rocket Boots Engaged (speed boost)
+                    unitTarget->CastSpell(unitTarget, 96223, true); // Run Speed Marker (CD aura for speed boost spells)
                     return;
                 }
                 case 52759:                                 // Ancestral Awakening
