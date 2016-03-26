@@ -721,7 +721,6 @@ public:
             if (spell->Id == CLUMP_CHECK_1 || spell->Id == CLUMP_CHECK_2)
             {
                 me->CastSpell(me, SPELL_VOID_DIFFUSION_DAMAGE, true);
-                me->CastSpell(me, SPELL_VOID_DIFFUSION_STACK, true);
                 me->CastSpell(me, SPELL_VOID_OF_THE_UNMAKING_REMOVE, true);
 
                 if (Creature * pBoss = ObjectAccessor::GetCreature(*me, bossGUID))
@@ -810,6 +809,7 @@ public:
                 if (me->GetDistance2d(MIDDLE_X,MIDDLE_Y) >= ROOM_RADIUS)
                 {
                     me->CastSpell(me, SPELL_BLACK_BLOOD_ERUPTION, true);
+                    me->CastSpell(me, SPELL_VOID_DIFFUSION_STACK, true);
                     UpdateMovePoint(true);
                     moveTimer = 4000;
                     return;
