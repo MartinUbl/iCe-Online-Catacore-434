@@ -817,6 +817,9 @@ namespace Trinity
                 if (!target->InSamePhase(i_source))
                     continue;
 
+                if (m_spellInfo && (m_spellInfo->AttributesEx3 & SPELL_ATTR3_PLAYERS_ONLY) && target->GetTypeId() != TYPEID_PLAYER)
+                    continue;
+
                 switch (i_TargetType)
                 {
                     case SPELL_TARGETS_ENEMY:
