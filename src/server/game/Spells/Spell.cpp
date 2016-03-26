@@ -6096,6 +6096,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     // Allow some spell to be cast without additional checks or some explicit checks
     switch (m_spellInfo->Id)
     {
+        case 30452: // Rocket Boots Engaged (bypass GCD triggered from use of boot item)
         case 98619: // Wings of Flame 
             return SPELL_CAST_OK;
         case 52610: // Savage Roar
