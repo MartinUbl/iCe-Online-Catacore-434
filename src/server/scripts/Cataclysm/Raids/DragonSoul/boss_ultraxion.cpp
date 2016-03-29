@@ -280,6 +280,7 @@ public:
             twilightBurstTimer = 4000;
             currentAspect = 0;
             achievement = true;
+            visualLightning = false;
 
             for (uint32 goId = GO_GIFT_OF_LIFE; goId <= GO_SOURCE_OF_MAGIC; goId++)
             {
@@ -425,6 +426,7 @@ public:
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ULTRAXION_ACHIEVEMENT_AURA);
             }
 
+            SwitchPlayersToTwilightPhase();
             RunPlayableQuote(yell[QUOTE_AGGRO]);
             me->CastSpell(me, SPELL_UNSTABLE_MONSTROSITY_6S, false);
 
@@ -1160,6 +1162,9 @@ public:
         void HandleHeal(SpellEffIndex /*effIndex*/)
         {
             if (!GetCaster() || !GetHitUnit())
+                return;
+
+            if (targetsCount == 0)
                 return;
 
             float heal = 0.0f;

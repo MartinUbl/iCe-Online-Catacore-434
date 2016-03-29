@@ -4395,10 +4395,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectTriggerSpell[1] = 0;
             spellInfo->AttributesEx5 |= SPELL_ATTR5_UNK19; // SPELL_ATTR5_DONT_TURN_DURING_CAST
             break;
-        case 106182: // Last Defender of Azeroth
-            spellInfo->MaxAffectedTargets = 2;
-            count++;
-            break;
         case 106371: // Hour of Twilight
         case 109415:
         case 109416:
