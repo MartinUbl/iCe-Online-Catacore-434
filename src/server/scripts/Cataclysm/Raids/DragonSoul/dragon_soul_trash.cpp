@@ -2458,6 +2458,8 @@ public:
             pPlayer->SummonCreature(NPC_BRONZE_DRAKE, travelPos[1], TEMPSUMMON_MANUAL_DESPAWN);
         else if (pCreature->GetEntry() == NPC_NETHESTRASZ)
             pPlayer->SummonCreature(NPC_RED_DRAKE, travelPos[2], TEMPSUMMON_MANUAL_DESPAWN);
+
+        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         return true;
     }
 
@@ -2492,10 +2494,7 @@ public:
 
         void IsSummonedBy(Unit* pSummoner) override
         {
-            if (pSummoner)
-            {
-                summonerGuid = pSummoner->GetGUID();
-            }
+            summonerGuid = pSummoner->GetGUID();
         }
 
         void Reset() override
@@ -2509,7 +2508,7 @@ public:
                 {
                     if (fly.GetRepeatCounter() == 0)
                     {
-                        if (Player* pPlayer = ObjectAccessor::FindPlayer(summonerGuid))
+                        if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, summonerGuid))
                             pPlayer->EnterVehicle(me, 0, nullptr);
                         fly.Repeat(Seconds(3));
                     }
@@ -2568,6 +2567,14 @@ public:
                     }
                 });
             }
+            else
+            {
+                scheduler.Schedule(Seconds(2), [this](TaskContext removeFlag)
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    removeFlag.Repeat(Seconds(2));
+                });
+            }
         }
 
         void UpdateAI(const uint32 diff) override
@@ -2596,7 +2603,7 @@ public:
                         }
                         else
                         {
-                            if (Player* pPlayer = ObjectAccessor::FindPlayer(summonerGuid))
+                            if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, summonerGuid))
                             {
                                 if (me->GetEntry() == NPC_EMERALD_DRAKE)
                                     pPlayer->GetMotionMaster()->MoveJump(travelPos[5].GetPositionX(), travelPos[5].GetPositionY(), travelPos[5].GetPositionZ(), 20.0f, 10.0f);
