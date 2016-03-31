@@ -45,6 +45,7 @@ enum NPC
     NPC_TWILIGHT_ELITE_DREADBLADE       = 56854,
     NPC_TWILIGHT_ELITE_SLAYER           = 56848,
     NPC_TWILIGHT_INFILTRATOR            = 56922,
+    NPC_TWILIGHT_SAPPER                 = 56923,
     NPC_SKYFIRE                         = 56598,
     NPC_TWILIGHT_FLAMES                 = 57268,
     NPC_MASSIVE_EXPLOSION               = 57297,
@@ -504,6 +505,9 @@ public:
                 pCaptainSwayze->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
             Summons.DespawnAll();
+            DespawnNPC(NPC_TWILIGHT_ELITE_DREADBLADE);
+            DespawnNPC(NPC_TWILIGHT_ELITE_SLAYER);
+            DespawnNPC(NPC_TWILIGHT_SAPPER);
 
             ScriptedAI::Reset();
         }
@@ -530,6 +534,17 @@ public:
             }
 
             Summons.push_back(summon->GetGUID());
+        }
+
+        void DespawnNPC(uint32 entry)
+        {
+            std::list<Creature*> crList;
+            me->GetCreatureListWithEntryInGrid(crList, entry, SEARCH_RANGE);
+            for (std::list<Creature*>::iterator itr = crList.begin(); itr != crList.end(); ++itr)
+            {
+                if (*itr)
+                    (*itr)->DespawnOrUnsummon();
+            }
         }
 
         void EnterCombat(Unit * /*who*/) override
@@ -730,7 +745,7 @@ public:
                 if (twilightOnsloughtTimer <= diff)
                 {
                     RunPlayableQuote(warmasterGorionaOnslaught, BOSS_WARMASTER_BLACKHORN);
-                    uint32 randPos = urand(0, MAX_WARMASTER_DAMAGE_POSITIONS);
+                    uint32 randPos = urand(0, MAX_WARMASTER_DAMAGE_POSITIONS-1);
                     if (Creature * pOnslaughtTarget = me->SummonCreature(NPC_ONSLAUGHT_TARGET, warmasterDamagePos[randPos].GetPositionX(), warmasterDamagePos[randPos].GetPositionY(), warmasterDamagePos[randPos].GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 10000))
                         pOnslaughtTarget->CastSpell(pOnslaughtTarget, SPELL_TWILIGHT_ONSLAUGHT_DUMMY, false);
                     me->CastSpell(warmasterDamagePos[randPos].GetPositionX(), warmasterDamagePos[randPos].GetPositionY(), warmasterDamagePos[randPos].GetPositionZ(), SPELL_TWILIGHT_ONSLAUGHT, false);
