@@ -4361,8 +4361,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 110893:
         case 110892:
             spellInfo->Effect[0] = 0;
-            spellInfo->excludeTargetAuraSpell = 105367; // Lightning Conduit
-            count++;
             break;
         case 109325: // Frostflake
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;

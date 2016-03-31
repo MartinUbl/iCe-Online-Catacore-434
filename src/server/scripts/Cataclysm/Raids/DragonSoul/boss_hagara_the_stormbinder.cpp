@@ -33,11 +33,17 @@ TO DO:
 #include "MapManager.h"
 #include "TaskScheduler.h"
 
-#define DATA_ICE_WAVE_SLOT           1
-#define CONDUIT_RANGE                10.0f
-#define WATERY_ENTRENCHMENT_RANGE    29.0f
-#define FROSTFLAKE_MAX_STACK         10
-#define SEARCH_RANGE                 300.0f
+const uint32 DATA_ICE_WAVE_SLOT         = 1;
+const float CONDUIT_RANGE               = 10.0f;
+const float WATERY_ENTRENCHMENT_RANGE   = 29.0f;
+const uint32 FROSTFLAKE_MAX_STACK       = 10;
+const float SEARCH_RANGE                = 300.0f;
+const uint32 MAX_TRASH                  = 35;
+const uint32 MAX_PLAYERS_25MAN          = 25;
+const uint32 MAX_PLAYERS_10MAN          = 10;
+const float HAGARA_MELEE_RANGE          = 7.0f;
+const uint32 MAX_CONDUCTORS             = 4;
+const uint32 MAX_CONDUCTORS_10HC        = 8;
 
 // NPCs
 enum NPC
@@ -210,7 +216,9 @@ enum PortalPositions
     RIGHT_PORTAL_FAR            = 5,
 };
 
-const Position portalPos[6] =
+const uint8 MAX_PORTAL_POSTIONS             = 6;
+
+const Position portalPos[MAX_PORTAL_POSTIONS] =
 {
     { 13551.85f, 13612.07f, 129.94f, 6.20f }, // hagara fly position
     { 13545.51f, 13612.07f, 123.49f, 0.00f }, // center portal
@@ -220,7 +228,9 @@ const Position portalPos[6] =
     { 13596.83f, 13569.83f, 123.48f, 1.70f }, // 2nd right portal
 };
 
-const float SpawnPos[6][4] =
+const uint8 MAX_SPAWN_POSTIONS              = 6;
+
+const float SpawnPos[MAX_SPAWN_POSTIONS][4] =
 {
     // Frozen Binding Crystals
     { 13617.26f, 13643.15f, 123.48f, 3.922f },
@@ -242,7 +252,9 @@ struct Dist
 struct PlayableQuote aggro { 26227, "You cross the Stormbinder!I'll slaughter you all." };
 struct PlayableQuote justDied { 26243, "Cowards! You pack of weakling... dogs..." };
 
-struct PlayableQuote killedUnit[4]
+const uint8 MAX_KILL_QUOTES            = 4;
+
+struct PlayableQuote killedUnit[MAX_KILL_QUOTES]
 {
     { 26255, "You should have run, dog." },
     { 26254, "Feh!" },
@@ -250,7 +262,9 @@ struct PlayableQuote killedUnit[4]
     { 26257, "A waste of my time." },
 };
 
-struct PlayableQuote crystalDied[6]
+const uint8 MAX_CRYSTAL_QUOTES          = 6;
+
+struct PlayableQuote crystalDied[MAX_CRYSTAL_QUOTES]
 {
     { 26235, "The time I spent binding that, WASTED!" },
     { 26236, "You'll PAY for that." },
@@ -260,7 +274,9 @@ struct PlayableQuote crystalDied[6]
     { 26241, "The one remaining is still enough to finish you." },
 };
 
-struct PlayableQuote intro[5]
+const uint8 MAX_INTRO_QUOTES            = 5;
+
+struct PlayableQuote intro[MAX_INTRO_QUOTES]
 {
     { 26223, "Even with the Aspect of Time on your side, you stumble foolishly into a trap?"},
     { 26224, "Don't preen just yet, little pups. We'll cleanse this world of your kind." },
@@ -269,7 +285,9 @@ struct PlayableQuote intro[5]
     { 26251, "Swagger all you like, you pups don't stand a chance. Flee now, while you can." },
 };
 
-struct PlayableQuote conductorCharged[6]
+const uint8 MAX_CONDUCTOR_QUOTES        = 6;
+
+struct PlayableQuote conductorCharged[MAX_CONDUCTOR_QUOTES]
 {
     { 26228, "What are you doing?"},
     { 26229, "You're toying with death." },
@@ -279,32 +297,36 @@ struct PlayableQuote conductorCharged[6]
     { 26234, "I'll finish you now pups!" },
 };
 
-struct PlayableQuote specialPhaseEnd[2]
+const uint8 MAX_ICE_LANCE_QUOTES         = 3;
+
+struct PlayableQuote iceLance[MAX_ICE_LANCE_QUOTES]
+{
+    { 26244, "You face more than my axes, this close." },
+    { 26245, "See what becomes of those who stand before me!" },
+    { 26246, "Feel a chill up your spine...?" },
+};
+
+const uint8 MAX_OTHER_QUOTES              = 2;
+
+struct PlayableQuote specialPhaseEnd[MAX_OTHER_QUOTES]
 {
     { 26238, "Aughhhh!" },
     { 26231, "Impossible! Aughhhh!" },
 };
 
-struct PlayableQuote iceTomb[2]
+struct PlayableQuote iceTomb[MAX_OTHER_QUOTES]
 {
     { 26249, "Stay, pup."},
     { 26250, "Hold still." },
 };
 
-struct PlayableQuote iceLance[3]
-{
-    { 26244, "You face more than my axes, this close."},
-    { 26245, "See what becomes of those who stand before me!" },
-    { 26246, "Feel a chill up your spine...?" },
-};
-
-struct PlayableQuote iceWave[2]
+struct PlayableQuote iceWave[MAX_OTHER_QUOTES]
 {
     { 26247, "You can't outrun the storm." },
     { 26248, "Die beneath the ice." },
 };
 
-struct PlayableQuote storm[2]
+struct PlayableQuote storm[MAX_OTHER_QUOTES]
 {
     { 26252, "Suffer the storm's wrath!"},
     { 26253, "Thunder and lightning dance at my call!" },
@@ -327,7 +349,7 @@ public:
         {
             instance = creature->GetInstanceScript();
 
-            if (instance->GetData(DATA_HAGARA_INTRO_TRASH) < 35)
+            if (instance->GetData(DATA_HAGARA_INTRO_TRASH) < MAX_TRASH)
             {
                 me->SummonGameObject(GO_FOCUSING_IRIS, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), 0, 0, 0, 0, 86400);
                 HoverDisc();
@@ -349,6 +371,7 @@ public:
         uint32 introYell;
         uint32 waveCount;
         uint32 achievReqCount;
+        uint32 endSpecialPhaseTimer;
 
         uint32 enrageTimer;
         uint32 normalPhaseTimer;
@@ -360,6 +383,7 @@ public:
         uint32 icicleTimer;
         uint32 frostflakeTimer;
         uint32 stormPillarTimer;
+        float lastIcicleAngle;
 
         uint64 targetGUID;
         uint64 frostflakeGUID;
@@ -369,6 +393,7 @@ public:
 
         bool enrage;
         bool teleport;
+        bool icePhaseEnded;
 
         void Reset() override
         {
@@ -379,7 +404,7 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
-            if (instance && instance->GetData(DATA_HAGARA_INTRO_TRASH) >= 35)
+            if (instance && instance->GetData(DATA_HAGARA_INTRO_TRASH) >= MAX_TRASH)
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->SetReactState(REACT_AGGRESSIVE);
@@ -401,6 +426,7 @@ public:
             iceTombTimer = 60000;
             frostflakeTimer = 5000;
             stormPillarTimer = 5000;
+            endSpecialPhaseTimer = 0;
 
             introYell = 0;
             frozenCrystalKilled = 0;
@@ -411,8 +437,10 @@ public:
 
             teleport = false;
             enrage = false;
+            icePhaseEnded = false;
 
             summons.DespawnAll();
+            scheduler.CancelAll();
             LightningStorm(true);
 
             ScriptedAI::Reset();
@@ -428,7 +456,7 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_HAGARA, IN_PROGRESS);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             }
 
             RunPlayableQuote(aggro);
@@ -438,7 +466,7 @@ public:
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
             {
-                randomText = urand(0, 3);
+                randomText = urand(0, MAX_KILL_QUOTES-1);
                 RunPlayableQuote(killedUnit[randomText]);
             }
         }
@@ -466,7 +494,7 @@ public:
             {
                 if (frozenCrystalKilled < 3)
                 {
-                    randomText = urand(0, 5);
+                    randomText = urand(0, MAX_CRYSTAL_QUOTES-1);
                     RunPlayableQuote(crystalDied[randomText]);
                 }
                 frozenCrystalKilled++;
@@ -487,10 +515,11 @@ public:
             }
             case ACTION_CONDUCTOR_CHARGED:
             {
-                if (chargedConductorCount == (IsHeroic() ? 7 : 3))
-                    CheckForAchievementCriteria();
                 chargedConductorCount++;
-                randomText = urand(0, 5);
+                if (chargedConductorCount == ((IsHeroic() && !Is25ManRaid()) ? MAX_CONDUCTORS_10HC : MAX_CONDUCTORS))
+                    CheckForAchievementCriteria();
+
+                randomText = urand(0, MAX_CONDUCTOR_QUOTES-1);
                 RunPlayableQuote(conductorCharged[randomText]);
                 break;
             }
@@ -501,7 +530,7 @@ public:
                 me->SetVisible(true);
 
                 // Skip trash when already defeated once
-                if (instance->GetData(DATA_HAGARA_INTRO_TRASH) >= 35)
+                if (instance->GetData(DATA_HAGARA_INTRO_TRASH) >= MAX_TRASH)
                 {
                     me->AI()->DoAction(ACTION_PREPARE_FOR_FIGHT);
                     return;
@@ -509,13 +538,13 @@ public:
 
                 if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 0)
                     SummonNPC(INTRO_FIRST_WAVE);
-                else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 4)
+                else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == MAX_TRASH-31)
                     SummonNPC(INTRO_SECOND_WAVE);
-                else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 18)
+                else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == MAX_TRASH-17)
                     SummonNPC(INTRO_THIRD_WAVE);
-                else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 24)
+                else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == MAX_TRASH-11)
                     SummonNPC(INTRO_FOURTH_WAVE);
-                else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == 35)
+                else if (instance->GetData(DATA_HAGARA_INTRO_TRASH) == MAX_TRASH)
                     me->AI()->DoAction(ACTION_PREPARE_FOR_FIGHT);
 
                 RunPlayableQuote(intro[introYell]);
@@ -552,7 +581,7 @@ public:
                     pHoverDisc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     pHoverDisc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     if (Vehicle * veh = pHoverDisc->GetVehicleKit())
-                        me->EnterVehicle(pHoverDisc, 0, nullptr);
+                        me->EnterVehicle(veh, 0, nullptr);
                 }
             }
             else
@@ -701,11 +730,11 @@ public:
                 angle = MapManager::NormalizeOrientation(angle);
                 float distance, height, max;
 
-                max = (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC) ? 8 : 4;
+                max = (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC) ? MAX_CONDUCTORS_10HC : MAX_CONDUCTORS;
 
                 for (uint32 i = 0; i < max; i++)
                 {
-                    if (i < 4)
+                    if (i < MAX_CONDUCTORS)
                     {
                         distance = (getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC) ? 45.0 : 32.0f;
                         height = 2.0f;
@@ -717,7 +746,7 @@ public:
                     }
 
                     me->SummonCreature(NPC_CRYSTAL_CONDUCTOR, me->GetPositionX() + cos(angle)*distance, me->GetPositionY() + sin(angle)*distance, me->GetPositionZ() + height, angle, TEMPSUMMON_MANUAL_DESPAWN);
-                    if (i == 3)
+                    if (i == MAX_CONDUCTORS-1)
                     {
                         angle = angle + (M_PI / 4);
                         angle = MapManager::NormalizeOrientation(angle);
@@ -728,9 +757,13 @@ public:
             }
             case NPC_COLLAPSING_ICICLE:
             {
-                float angle = (rand() % 628) / 100;
+                float angleAddition = frand(0.0f, M_PI / 4.0f);
+                float angle = M_PI + angleAddition;
+                angle = MapManager::NormalizeOrientation(angle);
+                lastIcicleAngle += angle;
+                lastIcicleAngle = MapManager::NormalizeOrientation(lastIcicleAngle);
                 float distance = urand(37, 45);
-                me->SummonCreature(NPC_COLLAPSING_ICICLE, me->GetPositionX() + cos(angle)*distance, me->GetPositionY() + sin(angle)*distance, me->GetPositionZ(), angle, TEMPSUMMON_TIMED_DESPAWN, 8000);
+                me->SummonCreature(NPC_COLLAPSING_ICICLE, me->GetPositionX() + cos(lastIcicleAngle)*distance, me->GetPositionY() + sin(lastIcicleAngle)*distance, me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 8000);
                 break;
             }
             case NPC_ICE_LANCE:
@@ -765,34 +798,20 @@ public:
                 {
                     if (end == false)
                         pPlayer->SummonCreature(NPC_LIGHTNING_STORM_TEST, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ() + 30.0f, 0, TEMPSUMMON_DEAD_DESPAWN);
-                    else if (end == true)
-                    {
-                        uint32 spell_dmg = SPELL_LIGHTNING_CONDUIT_10N;
-                        switch (me->GetMap()->GetDifficulty())
-                        {
-                        case RAID_DIFFICULTY_10MAN_NORMAL:
-                            spell_dmg = SPELL_LIGHTNING_CONDUIT_10N;
-                            break;
-                        case RAID_DIFFICULTY_25MAN_NORMAL:
-                            spell_dmg = SPELL_LIGHTNING_CONDUIT_25N;
-                            break;
-                        case RAID_DIFFICULTY_10MAN_HEROIC:
-                            spell_dmg = SPELL_LIGHTNING_CONDUIT_10HC;
-                            break;
-                        case RAID_DIFFICULTY_25MAN_HEROIC:
-                            spell_dmg = SPELL_LIGHTNING_CONDUIT_25HC;
-                            break;
-                        default:
-                            break;
-                        }
-                        pPlayer->RemoveAurasDueToSpell(spell_dmg);
-                        pPlayer->RemoveAurasDueToSpell(SPELL_LIGHTNING_CONDUIT);
-                    }
                 }
             }
 
             if (end == true)
             {
+                if (instance)
+                {
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_10N);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_10HC);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_25N);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_25HC);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT);
+                }
+
                 std::list<Creature*> lightning_storm;
                 me->GetCreatureListWithEntryInGrid(lightning_storm, NPC_LIGHTNING_STORM_TEST, SEARCH_RANGE);
                 for (std::list<Creature*>::iterator itr = lightning_storm.begin(); itr != lightning_storm.end(); ++itr)
@@ -841,7 +860,7 @@ public:
                 }
             }
 
-            if (instance && achievReqCount == (Is25ManRaid() ? 25 : 10))
+            if (instance && achievReqCount == (Is25ManRaid() ? MAX_PLAYERS_25MAN : MAX_PLAYERS_10MAN))
                 instance->DoCompleteAchievement(ACHIEVEMENT_HOLDING_HANDS);
         }
 
@@ -850,7 +869,7 @@ public:
             if (spell->Id == SPELL_ICE_TOMB_MISSILE)
             {
                 if (target)
-                    me->CastSpell(target, SPELL_ICE_TOMB_STUN, false); // Stun and dmg
+                    me->CastSpell(target, SPELL_ICE_TOMB_STUN, true); // Stun and dmg
             }
 
             if (spell->Id == SPELL_ICE_TOMB_STUN)
@@ -868,10 +887,20 @@ public:
 
         void EndSpecialPhase()
         {
-            me->RemoveAllAuras();
+            me->RemoveAurasDueToSpell(SPELL_CRYSTALLINE_TETHER);
+            me->RemoveAurasDueToSpell(SPELL_FROZEN_TEMPEST_10N);
+            me->RemoveAurasDueToSpell(SPELL_FROZEN_TEMPEST_10HC);
+            me->RemoveAurasDueToSpell(SPELL_FROZEN_TEMPEST_25N);
+            me->RemoveAurasDueToSpell(SPELL_FROZEN_TEMPEST_25HC);
+            me->RemoveAurasDueToSpell(SPELL_WATER_SHIELD_10N);
+            me->RemoveAurasDueToSpell(SPELL_WATER_SHIELD_10HC);
+            me->RemoveAurasDueToSpell(SPELL_WATER_SHIELD_25N);
+            me->RemoveAurasDueToSpell(SPELL_WATER_SHIELD_25HC);
             summons.DespawnAll();
 
             normalPhaseTimer = 62000;
+            focusedAssaultTimer = 16000;
+            shatteredIceTimer = 17000;
             iceLanceTimer = 12000;
             iceTombTimer = 20000;
             teleport = false;
@@ -882,12 +911,15 @@ public:
             me->Attack(me->GetVictim(), true);
             me->SendMovementFlagUpdate();
 
+            if (instance)
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WATERY_ENTRENCHMENT);
+
             LightningStorm(true);
             EquipCorrectAxes(nextPhase);
             phase = NORMAL_PHASE;
             me->CastSpell(me, SPELL_FEEDBACK, false);
 
-            randomText = urand(0, 1);
+            randomText = urand(0, MAX_OTHER_QUOTES-1);
             RunPlayableQuote(specialPhaseEnd[randomText]);
         }
 
@@ -904,7 +936,7 @@ public:
                 // Focused Assault
                 if (focusedAssaultTimer <= diff)
                 {
-                    me->CastSpell(me->GetVictim(), SPELL_FOCUSED_ASSAULT_10N, false);
+                    me->CastSpell(me->GetVictim(), SPELL_FOCUSED_ASSAULT_10N, true);
                     focusedAssaultTimer = 15000;
                     shatteredIceTimer += 5000;
                 }
@@ -913,14 +945,10 @@ public:
                 // Ice Tomb
                 if (iceTombTimer <= diff)
                 {
-                    uint32 max = 2;
-                    if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
-                        max = 5;
-                    else if (getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                        max = 6;
+                    uint32 max = RAID_MODE(2, 5, 2, 6);
                     CastSpellOnRandomPlayers(SPELL_ICE_TOMB_MISSILE, max, 0, true, true, false);
 
-                    randomText = urand(0, 1);
+                    randomText = urand(0, MAX_OTHER_QUOTES-1);
                     RunPlayableQuote(iceTomb[randomText]);
                     
                     iceTombTimer = 60000;
@@ -932,7 +960,7 @@ public:
                 {
                     SummonNPC(NPC_ICE_LANCE);
                     iceLanceTimer = 30000;
-                    randomText = urand(0, 2);
+                    randomText = urand(0, MAX_ICE_LANCE_QUOTES-1);
                     RunPlayableQuote(iceLance[randomText]);
                 }
                 else iceLanceTimer -= diff;
@@ -947,9 +975,13 @@ public:
                 }
                 else shatteredIceTimer -= diff;
 
+                // Melee attack
+                DoMeleeAttackIfReady();
+
                 // Switch Phase
                 if (normalPhaseTimer <= diff)
                 {
+                    endSpecialPhaseTimer = 300000;
                     if (nextPhase == ICE_PHASE)
                     {
                         phase = ICE_PHASE;
@@ -971,8 +1003,11 @@ public:
                 if (!teleport)
                 {
                     Tele();
+                    icicleTimer = 2000;
                     checkTimer = 5000;
                     frostflakeTimer = 5000;
+                    icePhaseEnded = false;
+
                     me->CastSpell(me, SPELL_FROZEN_TEMPEST_10N, false);
 
                     scheduler.Schedule(Seconds(1), [this](TaskContext icePhase)
@@ -985,7 +1020,7 @@ public:
                         }
                         else if (icePhase.GetRepeatCounter() == 1)
                         {
-                            randomText = urand(0, 1);
+                            randomText = urand(0, MAX_OTHER_QUOTES-1);
                             RunPlayableQuote(iceWave[randomText]);
                             SummonNPC(NPC_ICE_WAVE);
                             icePhase.Repeat(Seconds(1));
@@ -1002,7 +1037,7 @@ public:
                 if (icicleTimer <= diff)
                 {
                     SummonNPC(NPC_COLLAPSING_ICICLE);
-                    icicleTimer = 1000;
+                    icicleTimer = 1500;
                 }
                 else icicleTimer -= diff;
 
@@ -1025,7 +1060,7 @@ public:
                 }
 
                 // End of Ice Phase
-                if ((frozenCrystalKilled % 4) == 0 && frozenCrystalKilled != 0)
+                if ((frozenCrystalKilled % MAX_CONDUCTORS) == 0 && frozenCrystalKilled != 0)
                 {
                     EndSpecialPhase();
                     frozenCrystalKilled = 0;
@@ -1042,7 +1077,7 @@ public:
 
                     me->CastSpell(me, SPELL_WATER_SHIELD_10N, false);
 
-                    randomText = urand(0, 1);
+                    randomText = urand(0, MAX_OTHER_QUOTES-1);
                     RunPlayableQuote(storm[randomText]);
 
                     scheduler.Schedule(Seconds(1), [this](TaskContext /* Task context */)
@@ -1067,12 +1102,30 @@ public:
                     else stormPillarTimer -= diff;
                 }
 
-                // End of Lightning Phase
-                if (chargedConductorCount == (IsHeroic() ? 8 : 4))
+                if (icePhaseEnded == false)
+                {
+                    // End of Lightning Phase
+                    if (chargedConductorCount == ((IsHeroic() && !Is25ManRaid()) ? MAX_CONDUCTORS_10HC : MAX_CONDUCTORS))
+                    {
+                        // Delay phase end by 2s
+                        scheduler.Schedule(Seconds(2), [this](TaskContext /* Task context */)
+                        {
+                            EndSpecialPhase();
+                            chargedConductorCount = 0;
+                        });
+                        icePhaseEnded = true;
+                    }
+                }
+            }
+
+            // End special phase after 5 mins when players don`t kill or overload crystals
+            if (phase == ICE_PHASE || phase == LIGHTNING_PHASE)
+            {
+                if (endSpecialPhaseTimer <= diff)
                 {
                     EndSpecialPhase();
-                    chargedConductorCount = 0;
                 }
+                else endSpecialPhaseTimer -= diff;
             }
 
             // Enrage
@@ -1085,9 +1138,6 @@ public:
                 }
                 else enrageTimer -= diff;
             }
-
-            // Melee attack
-            DoMeleeAttackIfReady();
         }
     };
 };
@@ -1158,7 +1208,7 @@ public:
                         if (Player* pl = i->getSource())
                         {
                             // Find out if any player is in between Ice Lance and player with Target buff
-                            if ((pl)->IsInBetween(me, pPlayer, 2.0f) == true)
+                            if ((pl)->IsInBetween(me, pPlayer, 2.0f) == true && pl->IsAlive())
                             {
                                 // Save player's distance from Ice Lance and guid
                                 Dist from_me;
@@ -1197,7 +1247,6 @@ public:
     };
 };
 
-
 class npc_ice_tomb : public CreatureScript
 {
 public:
@@ -1216,11 +1265,13 @@ public:
         }
 
         uint64 summonerGuid;
+        uint32 checkAliveTimer;
 
         void Reset() override
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetReactState(REACT_PASSIVE);
+            checkAliveTimer = 5000;
         }
 
         void IsSummonedBy(Unit* pSummoner) override
@@ -1239,6 +1290,24 @@ public:
                     me->DespawnOrUnsummon();
                 }
             }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (checkAliveTimer <= diff)
+            {
+                if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, summonerGuid))
+                {
+                    if (!pPlayer->IsAlive())
+                    {
+                        pPlayer->RemoveAura(SPELL_ICE_TOMB_STUN);
+                        pPlayer->RemoveAura(SPELL_ICE_TOMB_EFFECT);
+                        me->DespawnOrUnsummon();
+                    }
+                }
+                checkAliveTimer = 1000;
+            }
+            else checkAliveTimer -= diff;
         }
     };
 };
@@ -1497,7 +1566,7 @@ public:
 
         uint32 lightningConduitTimer;
         uint32 lightningConduitDmg;
-        bool turnOn;
+        uint32 targetCount;
 
         void Reset() override
         {
@@ -1507,49 +1576,50 @@ public:
 
             me->CastSpell(me, SPELL_LIGHTNING_ROD, false);
             lightningConduitTimer = 1000;
-            turnOn = false;
+            targetCount = 0;
 
             Unit * hagara = me->FindNearestCreature(BOSS_HAGARA_THE_STORMBINDER, SEARCH_RANGE, true);
             if (hagara)
                 me->CastSpell(hagara, SPELL_CRYSTALLINE_TETHER, false);
-
-            switch (me->GetMap()->GetDifficulty())
-            {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
-                lightningConduitDmg = SPELL_LIGHTNING_CONDUIT_10N;
-                break;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
-                lightningConduitDmg = SPELL_LIGHTNING_CONDUIT_25N;
-                break;
-            case RAID_DIFFICULTY_10MAN_HEROIC:
-                lightningConduitDmg = SPELL_LIGHTNING_CONDUIT_10HC;
-                break;
-            case RAID_DIFFICULTY_25MAN_HEROIC:
-                lightningConduitDmg = SPELL_LIGHTNING_CONDUIT_25HC;
-                break;
-            default:
-                break;
-            }
         }
 
-        void SwitchOn(bool switchOn = false)
+        void SwitchOn()
         {
             me->RemoveAura(SPELL_LIGHTNING_CONDUIT);
+
+            targetCount = 0;
 
             Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
             {
                 if (Player* player = i->getSource())
                 {
-                    if (switchOn == true)
+                    if (player->IsAlive() && player->GetExactDist2d(me) < CONDUIT_RANGE)
                     {
-                        if (player->IsAlive() && player->GetExactDist2d(me) < CONDUIT_RANGE && !player->HasAura(SPELL_LIGHTNING_CONDUIT))
+                        if (!player->HasAura(SPELL_LIGHTNING_CONDUIT))
+                        {
                             me->CastSpell(player, SPELL_LIGHTNING_CONDUIT, true);
+                            player->CastSpell(player, SPELL_LIGHTNING_CONDUIT_10N, true);
+                        }
+                        targetCount++;
                     }
-                    else if (switchOn == false)
+                }
+            }
+
+            if (targetCount == 0)
+            {
+                for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+                {
+                    if (Player* player = i->getSource())
                     {
-                        player->RemoveAura(SPELL_LIGHTNING_CONDUIT);
-                        player->RemoveAura(lightningConduitDmg);
+                        if (player->GetExactDist2d(me) < (CONDUIT_RANGE * 3))
+                        {
+                            player->RemoveAura(SPELL_LIGHTNING_CONDUIT);
+                            player->RemoveAura(SPELL_LIGHTNING_CONDUIT_10N);
+                            player->RemoveAura(SPELL_LIGHTNING_CONDUIT_10HC);
+                            player->RemoveAura(SPELL_LIGHTNING_CONDUIT_25N);
+                            player->RemoveAura(SPELL_LIGHTNING_CONDUIT_25HC);
+                        }
                     }
                 }
             }
@@ -1561,11 +1631,7 @@ public:
             {
                 if (lightningConduitTimer <= diff)
                 {
-                    SwitchOn(turnOn);
-                    if (turnOn == true)
-                        turnOn = false;
-                    else turnOn = true;
-
+                    SwitchOn();
                     lightningConduitTimer = 1000;
                 }
                 else lightningConduitTimer -= diff;
@@ -1636,8 +1702,8 @@ public:
             me->SetReactState(REACT_PASSIVE);
 
             summonerGuid = 0;
-            repeatTimer = 4000;
-            unauraTimer = 5000;
+            repeatTimer = 4100;
+            unauraTimer = 5100;
             moveTimer = 500;
         }
 
@@ -1646,11 +1712,13 @@ public:
             if (repeatTimer <= diff)
             {
                 if (Player * pPlayer = ObjectAccessor::GetPlayer(*me, summonerGuid))
+                {
                     if (!pPlayer->HasAura(SPELL_LIGHTNING_CONDUIT))
                         me->CastSpell(pPlayer, SPELL_LIGHTNING_STORM_COSMETIC, false);
+                }
 
                 repeatTimer = 2100;
-                unauraTimer = 1000;
+                unauraTimer = 1100;
             }
             else repeatTimer -= diff;
 
@@ -1770,7 +1838,7 @@ public:
 
             if (Unit * pTarget = caster->GetVictim())
             {
-                 if (pTarget->IsWithinMeleeRange(GetCaster(), 5.0f))
+                 if (pTarget->IsWithinMeleeRange(caster, HAGARA_MELEE_RANGE))
                      caster->CastCustomSpell(pTarget, SPELL_FOCUSED_ASSAULT, &bp0, 0, 0, true);
                  else
                  {
@@ -1843,6 +1911,53 @@ public:
     }
 };
 
+class HasLightningConduit
+{
+public:
+    bool operator()(WorldObject* object) const
+    {
+        if (Player * player = object->ToPlayer())
+        {
+            if (player->HasAura(SPELL_LIGHTNING_CONDUIT_10N) ||
+                player->HasAura(SPELL_LIGHTNING_CONDUIT_25N) ||
+                player->HasAura(SPELL_LIGHTNING_CONDUIT_10HC) ||
+                player->HasAura(SPELL_LIGHTNING_CONDUIT_25HC))
+                return true;
+        }
+        return false;
+    }
+};
+
+class spell_ds_hagara_lightning_storm : public SpellScriptLoader
+{
+public:
+    spell_ds_hagara_lightning_storm() : SpellScriptLoader("spell_ds_hagara_lightning_storm") { }
+
+    class spell_ds_hagara_lightning_storm_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_hagara_lightning_storm_SpellScript);
+
+        void HandleSelection(std::list<Unit*>& unitList)
+        {
+            if (!GetCaster())
+                return;
+
+            unitList.remove_if(HasLightningConduit());
+        }
+
+        void Register() override
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_hagara_lightning_storm_SpellScript::HandleSelection, EFFECT_1, TARGET_UNIT_AREA_ENEMY_DST);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_hagara_lightning_storm_SpellScript::HandleSelection, EFFECT_2, TARGET_UNIT_AREA_ENEMY_DST);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_ds_hagara_lightning_storm_SpellScript();
+    }
+};
+
 class spell_ds_lightning_conduit : public SpellScriptLoader
 {
 public:
@@ -1863,25 +1978,6 @@ public:
             if (hitUnit->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            uint32 spell_dmg = SPELL_LIGHTNING_CONDUIT_10N;
-            switch (GetCaster()->GetMap()->GetDifficulty())
-            {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
-                spell_dmg = SPELL_LIGHTNING_CONDUIT_10N;
-                break;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
-                spell_dmg = SPELL_LIGHTNING_CONDUIT_25N;
-                break;
-            case RAID_DIFFICULTY_10MAN_HEROIC:
-                spell_dmg = SPELL_LIGHTNING_CONDUIT_10HC;
-                break;
-            case RAID_DIFFICULTY_25MAN_HEROIC:
-                spell_dmg = SPELL_LIGHTNING_CONDUIT_25HC;
-                break;
-            default:
-                break;
-            }
-
             if (Creature* pCrystal = hitUnit->FindNearestCreature(NPC_CRYSTAL_CONDUCTOR, CONDUIT_RANGE, true))
             {
                 if (!pCrystal->HasAura(SPELL_LIGHTNING_ROD_DUMMY))
@@ -1894,9 +1990,6 @@ public:
                 }
             }
 
-            std::list<Unit*> playerList;
-            playerList.clear();
-
             Map::PlayerList const &PlList = GetCaster()->GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
             {
@@ -1905,7 +1998,7 @@ public:
                     if (pPlayer->GetDistance2d(hitUnit) < CONDUIT_RANGE && pPlayer->GetGUID() != GetCaster()->GetGUID() && !pPlayer->HasAura(SPELL_LIGHTNING_CONDUIT))
                     {
                         hitUnit->CastSpell(pPlayer, SPELL_LIGHTNING_CONDUIT, true);
-                        hitUnit->CastSpell(pPlayer, spell_dmg, true);
+                        pPlayer->CastSpell(pPlayer, SPELL_LIGHTNING_CONDUIT_10N, true);
                     }
                 }
             }
@@ -1913,13 +2006,108 @@ public:
 
         void Register()
         {
-            OnHit += SpellHitFn(spell_ds_lightning_conduit_SpellScript::HandleScript);
+            AfterHit += SpellHitFn(spell_ds_lightning_conduit_SpellScript::HandleScript);
         }
     };
 
     SpellScript* GetSpellScript() const
     {
         return new spell_ds_lightning_conduit_SpellScript();
+    }
+};
+
+class spell_ds_lightning_conduit_aura : public SpellScriptLoader
+{
+public:
+    spell_ds_lightning_conduit_aura() : SpellScriptLoader("spell_ds_lightning_conduit_aura") { }
+
+    class spell_ds_lightning_conduit_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ds_lightning_conduit_aura_AuraScript);
+
+        uint32 targetCount;
+
+        void OnPeriodic(AuraEffect const* /*aurEff*/)
+        {
+            Unit * caster = GetCaster();
+            if (!caster)
+                return;
+
+            targetCount = 0;
+
+            // At frist drop the aura if original caster is 10yd away from me
+            if (Aura * pAura = caster->GetAura(SPELL_LIGHTNING_CONDUIT))
+            {
+                if (Unit * pAuraCaster = pAura->GetCaster())
+                {
+                    if (caster->GetDistance2d(pAuraCaster) > CONDUIT_RANGE)
+                        caster->RemoveAura(SPELL_LIGHTNING_CONDUIT);
+                }
+            }
+
+            // Now check if conductor is in range
+            if (Creature* pCrystal = caster->FindNearestCreature(NPC_CRYSTAL_CONDUCTOR, CONDUIT_RANGE, true))
+            {
+                // If not overloaded, overload it
+                if (!pCrystal->HasAura(SPELL_LIGHTNING_ROD_DUMMY))
+                {
+                    caster->CastSpell(pCrystal, SPELL_LIGHTNING_CONDUIT, true);
+                    pCrystal->CastSpell(pCrystal, SPELL_LIGHTNING_ROD_DUMMY, false);
+
+                    if (Creature * pHagara = pCrystal->FindNearestCreature(BOSS_HAGARA_THE_STORMBINDER, SEARCH_RANGE, true))
+                        pHagara->AI()->DoAction(ACTION_CONDUCTOR_CHARGED);
+                }
+                // Else count as charged target in conduit range
+                else
+                    targetCount++;
+            }
+
+            // Here check if another charged player is in conduit range
+            Map::PlayerList const &PlList = GetCaster()->GetMap()->GetPlayers();
+            for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+            {
+                if (Player* pPlayer = i->getSource())
+                {
+                    if (pPlayer->GetDistance2d(caster) < CONDUIT_RANGE && pPlayer->GetGUID() != caster->GetGUID() && pPlayer->HasAura(SPELL_LIGHTNING_CONDUIT))
+                        targetCount++;
+                }
+            }
+
+            // If there is no charged player or conduit, drop the aura
+            if (targetCount == 0)
+            {
+                caster->RemoveAura(SPELL_LIGHTNING_CONDUIT_10N);
+                caster->RemoveAura(SPELL_LIGHTNING_CONDUIT_10HC);
+                caster->RemoveAura(SPELL_LIGHTNING_CONDUIT_25N);
+                caster->RemoveAura(SPELL_LIGHTNING_CONDUIT_25HC);
+                caster->RemoveAura(SPELL_LIGHTNING_CONDUIT);
+            }
+            // If there is charged player or conduit, check for new players in conduit range and charge them
+            else
+            {
+                for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+                {
+                    if (Player* pPlayer = i->getSource())
+                    {
+                        if (pPlayer->GetDistance2d(caster) < CONDUIT_RANGE && pPlayer->GetGUID() != caster->GetGUID() && !pPlayer->HasAura(SPELL_LIGHTNING_CONDUIT))
+                        {
+                            GetCaster()->CastSpell(pPlayer, SPELL_LIGHTNING_CONDUIT, true);
+                            pPlayer->CastSpell(pPlayer, SPELL_LIGHTNING_CONDUIT_10N, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_ds_lightning_conduit_aura_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_ds_lightning_conduit_aura_AuraScript();
     }
 };
 
@@ -1947,7 +2135,9 @@ void AddSC_boss_hagara_the_stormbinder()
     new spell_ds_frostflake();                  // 109325
     new spell_ds_focused_assault();             // 107851, 110900, 110899, 110898
     new spell_ds_ice_lance_dmg();               // 105316, 107061, 107062, 107063
+    new spell_ds_hagara_lightning_storm();      // 105465, 108568, 110893, 110892
     new spell_ds_lightning_conduit();           // 105367
+    new spell_ds_lightning_conduit_aura();      // 105369, 108569, 109201, 109202
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -2004,4 +2194,16 @@ insert into `spell_script_names` (`spell_id`, `ScriptName`) values
 ('107061','spell_ds_ice_lance_dmg'),
 ('107062','spell_ds_ice_lance_dmg'),
 ('107063','spell_ds_ice_lance_dmg');
+
+insert into `spell_script_names` (`spell_id`, `ScriptName`) values
+('105369','spell_ds_lightning_conduit_aura'),
+('108569','spell_ds_lightning_conduit_aura'),
+('109201','spell_ds_lightning_conduit_aura'),
+('109202','spell_ds_lightning_conduit_aura');
+
+insert into `spell_script_names` (`spell_id`, `ScriptName`) values
+('105465','spell_ds_hagara_lightning_storm'),
+('108568','spell_ds_hagara_lightning_storm'),
+('110893','spell_ds_hagara_lightning_storm'),
+('110892','spell_ds_hagara_lightning_storm');
 */
