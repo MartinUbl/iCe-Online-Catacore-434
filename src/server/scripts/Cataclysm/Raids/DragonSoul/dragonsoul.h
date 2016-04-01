@@ -67,6 +67,7 @@ enum AdditionalEvents
     DATA_PREPARE_SPINE_ENCOUNTER        = 21,
     DATA_SPINE_OF_DEATHWING_PLATES      = 22,
     DATA_ULTRAXION_RESET                = 23,
+    DATA_WARMASTER_BOARD_SPOT           = 24,
 };
 
 enum AchievEvents
@@ -146,58 +147,5 @@ enum DragonsoulGameobjectsId
     GO_DEATHWING_BACK_PLATE_1           = 209623,
     GO_DEATHWING_BACK_PLATE_2           = 209631,
     GO_DEATHWING_BACK_PLATE_3           = 209632,
-};
-
-#define MAX_WARMASTER_DAMAGE_POSITIONS      25
-
-const Position warmasterDamagePos[MAX_WARMASTER_DAMAGE_POSITIONS] =
-{
-    { 13454.01f, -12145.91f, 150.84f, 3.16f },
-    { 13450.81f, -12145.89f, 150.83f, 3.05f },
-    { 13438.05f, -12144.99f, 150.79f, 3.09f },
-    { 13427.59f, -12144.45f, 150.82f, 2.87f },
-    { 13421.81f, -12139.19f, 150.86f, 1.95f },
-    { 13421.55f, -12133.15f, 150.90f, 1.50f },
-    { 13425.70f, -12121.36f, 150.84f, 0.84f },
-    { 13432.72f, -12117.58f, 150.78f, 0.21f },
-    { 13444.88f, -12116.27f, 150.79f, 6.26f },
-    { 13453.38f, -12117.73f, 150.83f, 5.69f },
-    { 13458.96f, -12125.79f, 150.89f, 5.06f },
-    { 13459.80f, -12135.03f, 151.00f, 4.66f },
-    { 13453.10f, -12139.57f, 150.84f, 2.88f },
-    { 13449.03f, -12138.92f, 150.83f, 3.06f },
-    { 13439.47f, -12138.54f, 150.81f, 3.01f },
-    { 13437.73f, -12138.22f, 150.81f, 1.61f },
-    { 13437.64f, -12130.64f, 150.83f, 1.55f },
-    { 13437.73f, -12125.13f, 150.80f, 1.55f },
-    { 13437.73f, -12125.13f, 150.80f, 1.51f },
-    { 13442.06f, -12120.55f, 150.79f, 6.22f },
-    { 13446.12f, -12120.87f, 150.81f, 6.17f },
-    { 13451.08f, -12122.58f, 150.83f, 4.38f },
-    { 13444.46f, -12131.01f, 150.83f, 4.15f },
-    { 13444.04f, -12136.78f, 150.83f, 4.72f },
-    { 13444.69f, -12140.80f, 150.82f, 4.87f },
-};
-
-enum GorionaDrakesPosition
-{
-    LEFT_DRAKE_SPAWN_POS                = 0,
-    RIGHT_DRAKE_SPAWN_POS               = 1,
-    LEFT_DRAKE_DROP_POS                 = 2,
-    RIGHT_DRAKE_DROP_POS                = 3,
-    LEFT_DRAKE_END_FLY_POS              = 4,
-    RIGHT_DRAKE_END_FLY_POS             = 5,
-};
-
-#define MAX_ASSAULT_DRAKE_POSITIONS       6
-
-const Position assaultDrakePos[MAX_ASSAULT_DRAKE_POSITIONS] =
-{
-    { 13441.83f, -12184.15f, 172.05f, 1.49f }, // Left Spawn Drake Pos
-    { 13447.38f, -12083.55f, 172.05f, 4.45f }, // Right Spawn Drake Pos
-    { 13431.26f, -12125.28f, 172.05f, 3.08f }, // Left drake drop add position
-    { 13430.35f, -12140.22f, 172.05f, 3.08f }, // Right drake drop add position
-    { 13433.40f, -12082.54f, 172.05f, 4.65f }, // Left drake end fly position
-    { 13429.12f, -12182.25f, 172.05f, 1.46f }, // Right drake end fly position
 };
 #endif

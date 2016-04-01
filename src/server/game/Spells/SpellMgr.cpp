@@ -4444,11 +4444,15 @@ void SpellMgr::LoadSpellCustomAttr()
         case 107588: // Twilight Onsloaught
             spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
             break;
-        case 107595: // Blade Rush
+        case 107594: // Blade Rush
+            spellInfo->Effect[1] = 0;
+            break;
+        case 107595:
         case 109013:
         case 109014:
         case 109015:
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_7_YARDS;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             break;
         // Spine of Deathwing
         case 109379: // Searing Plasma

@@ -55,7 +55,7 @@ enum NPC
     NPC_ONSLAUGHT_TARGET                = 57238,
     NPC_ENGINE_STALKER                  = 57190,
     NPC_FIRE_STALKER                    = 57852,
-    NPC_SKYFIRE_HARPOON_GUN             = 56681,
+    NPC_HARPOON                         = 56681,
     NPC_SKYFIRE_CANNON                  = 57260,
     NPC_SKYFIRE_COMMANDO                = 57264,
 };
@@ -92,16 +92,20 @@ enum Spells
 
     // Skifire
     SPELL_ENGINE_FIRE                   = 107799,
-    SPELL_DECK_FIRE                     = 109445, // 109245
+    SPELL_DECK_FIRE_PERSISTENT_AURA     = 109445,
     SPELL_DECK_FIRE_DMG                 = 110095,
-    SPELL_DECK_FIRE_PERIODIC            = 110092,
+    SPELL_DECK_FIRE_PERIODIC            = 110092, // Periodically trigger damage 
     SPELL_DECK_FIRE_SPAWN               = 109470,
+    SPELL_SHIP_FIRE_VISUAL              = 109245,
     SPELL_HEAVY_SLUG                    = 108010,
     SPELL_ARTILLERY_BARRAGE             = 108040,
     SPELL_ARTILLERY_BARRAGE_DMG         = 108041,
-    SPELL_HARPOON                       = 108038,
     SPELL_RELOADING                     = 108039,
     SPELL_RIDE_VEHICLE                  = 43671, // commandos on harpoon guns and cannons
+
+    // Twilight Assault Drake
+    SPELL_TWILIGHT_BARRAGE              = 107286,
+    SPELL_HARPOON                       = 108038,
 
     // Achievements
     ACHIEVEMENT_HEROIC_WARMASTER        = 6114,
@@ -131,6 +135,20 @@ enum Engines
     LEFT_FRONT_ENGINE                   = 2,
     LEFT_BACK_ENGINE                    = 3,
     MAX_ENGINES                         = 4,
+};
+
+const uint8 MAX_HARPOONS      = 2;
+
+const Position harpoonPos[MAX_HARPOONS] =
+{
+    { 13430.10f, -12161.81f, 154.11f, 1.51f }, // Left harpoon drake position
+    { 13432.68f, -12103.32f, 154.11f, 4.66f }, // Right harpoon drake position
+};
+
+enum drakeSide
+{
+    LEFT_HARPOON_POSITION           = 0,
+    RIGHT_HARPOON_POSITION          = 1,
 };
 
 const Position skyfireEnginePositions[MAX_ENGINES] =
@@ -395,6 +413,44 @@ enum GorionaMoves
     MOVE_RIGHT_POSITION             = 1,
 };
 
+
+const uint32 EMPTY_SPOT = 0;
+const uint32 FULL_SPOT = 1;
+
+const uint32 MAX_WARMASTER_DAMAGE_POSITIONS = 6;
+
+const Position warmasterDamagePos[MAX_WARMASTER_DAMAGE_POSITIONS] =
+{
+    { 13456.34f, -12139.04f, 151.17f, 4.67f },
+    { 13442.35f, -12138.85f, 150.82f, 4.70f },
+    { 13427.95f, -12138.62f, 150.87f, 4.71f },
+    { 13456.39f, -12127.44f, 151.17f, 4.67f },
+    { 13442.41f, -12127.45f, 150.82f, 4.65f },
+    { 13428.14f, -12127.19f, 150.87f, 4.70f },
+};
+
+enum GorionaDrakesPosition
+{
+    LEFT_DRAKE_SPAWN_POS                = 0,
+    RIGHT_DRAKE_SPAWN_POS               = 1,
+    LEFT_DRAKE_DROP_POS                 = 2,
+    RIGHT_DRAKE_DROP_POS                = 3,
+    LEFT_DRAKE_END_FLY_POS              = 4,
+    RIGHT_DRAKE_END_FLY_POS             = 5,
+};
+
+#define MAX_ASSAULT_DRAKE_POSITIONS       6
+
+const Position assaultDrakePos[MAX_ASSAULT_DRAKE_POSITIONS] =
+{
+    { 13441.83f, -12184.15f, 172.05f, 1.49f }, // Left Spawn Drake Pos
+    { 13447.38f, -12083.55f, 172.05f, 4.45f }, // Right Spawn Drake Pos
+    { 13431.26f, -12125.28f, 172.05f, 3.08f }, // Left drake drop add position
+    { 13430.35f, -12140.22f, 172.05f, 3.08f }, // Right drake drop add position
+    { 13433.40f, -12082.54f, 172.05f, 4.65f }, // Left drake end fly position
+    { 13429.12f, -12182.25f, 172.05f, 1.46f }, // Right drake end fly position
+};
+
 #define MAX_GORIONA_POSITIONS        5
 
 const Position gorionaPos[MAX_GORIONA_POSITIONS] =
@@ -427,6 +483,46 @@ const Position infiltratorPos[MAX_INFILTRATIOR_POSITIONS] =
 };
 
 const Position skyfirePosition { 13500.0f, -12135.6f, 128.6f, 3.03f };
+
+typedef struct targetSpots
+{
+    bool free;
+    float x, y, z;
+}TARGET_SPOTS;
+
+struct OnslaughtSpot
+{
+    uint8 spot;
+    uint8 minX, maxX;
+    uint8 minY, maxY;
+};
+
+const uint32 MAX_ONSLAUGHT_POSITIONS                    = 6;
+
+const OnslaughtSpot onslaughtSpot[MAX_ONSLAUGHT_POSITIONS]
+{
+    { 0, 1, 2, 2, 3 },
+    { 1, 3, 4, 2, 3 },
+    { 2, 5, 6, 2, 3 },
+    { 3, 1, 2, 4, 5 },
+    { 4, 3, 4, 4, 5 },
+    { 5, 5, 6, 4, 5 },
+};
+
+enum Status
+{
+    CHECK              = 0,
+    SET_FULL           = 1,
+    SET_EMPTY          = 2,
+};
+
+const uint32 MAX_HORIZONTAL_LINES     = 6;
+const uint32 MAX_VERTICAL_LINES       = 6;
+const float START_X                   =  13460.0f;
+const float START_Y                   = -12147.0f;
+const float START_Z                   = 150.84f;
+const float STEP_X                    = -7.0f;
+const float STEP_Y                    = 5.5f;
 
 // Goriona
 class npc_ds_goriona : public CreatureScript
@@ -465,6 +561,7 @@ public:
         bool nextWave;
         bool flyAway;
         bool heroicLand;
+        TARGET_SPOTS boardSpots[MAX_VERTICAL_LINES][MAX_HORIZONTAL_LINES];
 
         void Reset() override
         {
@@ -512,6 +609,73 @@ public:
             ScriptedAI::Reset();
         }
 
+        void SetBoardSpots()
+        {
+            float startX = START_X;
+            float startY = START_Y;
+
+            for (uint8 i = 0; i < MAX_VERTICAL_LINES; i++)
+            {
+                startY = START_Y;
+
+                for (uint8 j = 0; j < MAX_HORIZONTAL_LINES; j++)
+                {
+                    boardSpots[i][j].free = true;
+                    boardSpots[i][j].z = START_Z;
+                    boardSpots[i][j].x = startX;
+                    boardSpots[i][j].y = startY;
+
+                    startY += STEP_Y;
+                }
+                startX += STEP_X;
+            }
+        }
+
+        bool ValidateFreeSpot(uint32 type, uint32 spotX, uint32 spotY)
+        {
+            if (type == DATA_WARMASTER_BOARD_SPOT)
+            {
+                if (boardSpots[spotX][spotY].free == true)
+                {
+                    boardSpots[spotX][spotY].free = false;
+
+                    scheduler.Schedule(Seconds(5), [this, spotX, spotY](TaskContext greetings)
+                    {
+                        UnlockBoardSpot(spotX, spotY);
+                    });
+                    return EMPTY_SPOT;
+                }
+            }
+            return FULL_SPOT;
+        }
+
+        void UnlockBoardSpot(uint32 spotX, uint32 spotY)
+        {
+            boardSpots[spotX][spotY].free = true;
+        }
+
+        bool OnslaughtBoardSpotStatus(uint32 onslaughtPosition, uint32 status)
+        {
+            for (uint8 i = onslaughtSpot[onslaughtPosition].minX; i < onslaughtSpot[onslaughtPosition].maxX; i++)
+            {
+                for (uint8 j = onslaughtSpot[onslaughtPosition].minY; j < onslaughtSpot[onslaughtPosition].maxY; j++)
+                {
+                    if (status == CHECK)
+                    {
+                        if (boardSpots[i][j].free == false)
+                        {
+                            return FULL_SPOT;
+                        }
+                    }
+                    else if (status == SET_EMPTY)
+                        boardSpots[i][j].free = true;
+                    else if (status == SET_FULL)
+                        boardSpots[i][j].free = false;
+                }
+            }
+            return EMPTY_SPOT;
+        }
+
         void JustSummoned(Creature* summon) override
         {
             switch (summon->GetEntry())
@@ -550,6 +714,7 @@ public:
         void EnterCombat(Unit * /*who*/) override
         {
             phase = PHASE_GORIONA_AIR_ATTACK;
+            SetBoardSpots();
         }
 
         void KilledUnit(Unit* victim) override {}
@@ -745,10 +910,34 @@ public:
                 if (twilightOnsloughtTimer <= diff)
                 {
                     RunPlayableQuote(warmasterGorionaOnslaught, BOSS_WARMASTER_BLACKHORN);
-                    uint32 randPos = urand(0, MAX_WARMASTER_DAMAGE_POSITIONS-1);
-                    if (Creature * pOnslaughtTarget = me->SummonCreature(NPC_ONSLAUGHT_TARGET, warmasterDamagePos[randPos].GetPositionX(), warmasterDamagePos[randPos].GetPositionY(), warmasterDamagePos[randPos].GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 10000))
-                        pOnslaughtTarget->CastSpell(pOnslaughtTarget, SPELL_TWILIGHT_ONSLAUGHT_DUMMY, false);
-                    me->CastSpell(warmasterDamagePos[randPos].GetPositionX(), warmasterDamagePos[randPos].GetPositionY(), warmasterDamagePos[randPos].GetPositionZ(), SPELL_TWILIGHT_ONSLAUGHT, false);
+
+                    std::vector<int> locations;
+                    for (int i = 0; i < MAX_WARMASTER_DAMAGE_POSITIONS; i++)
+                    {
+                        if (OnslaughtBoardSpotStatus(i, CHECK) == EMPTY_SPOT)
+                            locations.push_back(i);
+                    }
+
+                    if (locations.size() != 0)
+                    {
+                        uint32 randPos = locations[urand(0, locations.size() - 1)];
+
+                        if (OnslaughtBoardSpotStatus(randPos, CHECK) == EMPTY_SPOT)
+                        {
+                            if (Creature * pOnslaughtTarget = me->SummonCreature(NPC_ONSLAUGHT_TARGET, warmasterDamagePos[randPos].GetPositionX(), warmasterDamagePos[randPos].GetPositionY(), warmasterDamagePos[randPos].GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 10000))
+                            {
+                                OnslaughtBoardSpotStatus(randPos, SET_FULL);
+                                pOnslaughtTarget->CastSpell(pOnslaughtTarget, SPELL_TWILIGHT_ONSLAUGHT_DUMMY, false);
+                                me->CastSpell(warmasterDamagePos[randPos].GetPositionX(), warmasterDamagePos[randPos].GetPositionY(), warmasterDamagePos[randPos].GetPositionZ(), SPELL_TWILIGHT_ONSLAUGHT, false);
+
+                                scheduler.Schedule(Seconds(5), [this, randPos](TaskContext /*task context*/)
+                                {
+                                    OnslaughtBoardSpotStatus(randPos, SET_EMPTY);
+                                });
+                            }
+                        }
+                    }
+
                     twilightOnsloughtTimer = 30000;
                 }
                 else twilightOnsloughtTimer -= diff;
@@ -837,6 +1026,169 @@ public:
             {
                 me->AI()->DoAction(ACTION_GORIONA_LEAVES_SCENE);
             }
+        }
+    };
+};
+
+class npc_ds_twilight_assault_drake : public CreatureScript
+{
+public:
+    npc_ds_twilight_assault_drake() : CreatureScript("npc_ds_twilight_assault_drake") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_twilight_assault_drakeAI(pCreature);
+    }
+
+    struct npc_ds_twilight_assault_drakeAI : public ScriptedAI
+    {
+        npc_ds_twilight_assault_drakeAI(Creature *creature) : ScriptedAI(creature) { }
+
+        TaskScheduler scheduler;
+        uint32 harpoonTimer;
+        uint32 releaseTimer;
+        uint32 twilightBarrageTimer;
+        bool harpoon;
+        TARGET_SPOTS boardSpots[MAX_VERTICAL_LINES][MAX_HORIZONTAL_LINES];
+
+        void Reset() override
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlying(true);
+            me->SetSpeed(MOVE_FLIGHT, 1.5f);
+            me->SetInCombatWithZone();
+            harpoonTimer = 25000;
+            twilightBarrageTimer = urand(8000, 16000);
+            harpoon = false;
+
+            scheduler.Schedule(Seconds(7), [this](TaskContext /*task context*/)
+            {
+                if (Vehicle * veh = me->GetVehicleKit())
+                {
+                    if (Unit * passenger = veh->GetPassenger(0))
+                    {
+                        passenger->ExitVehicle();
+                        passenger->GetMotionMaster()->MoveFall();
+                    }
+                }
+
+                if (me->GetEntry() == NPC_TWILIGHT_ASSAULT_DRAKE_LEFT)
+                    me->GetMotionMaster()->MovePoint(LEFT_DRAKE_END_FLY_POS, assaultDrakePos[LEFT_DRAKE_END_FLY_POS], true, false);
+                else
+                    me->GetMotionMaster()->MovePoint(RIGHT_DRAKE_END_FLY_POS, assaultDrakePos[RIGHT_DRAKE_END_FLY_POS], true, false);
+
+                // Set correct facing to raid
+                scheduler.Schedule(Seconds(5), [this](TaskContext /*task context*/)
+                {
+                    if (me->GetEntry() == NPC_TWILIGHT_ASSAULT_DRAKE_LEFT)
+                        me->SetFacingTo(assaultDrakePos[LEFT_DRAKE_END_FLY_POS].GetOrientation());
+                    else
+                        me->SetFacingTo(assaultDrakePos[RIGHT_DRAKE_END_FLY_POS].GetOrientation());
+                });
+            });
+        }
+
+        void SetBoardSpots()
+        {
+            float startX = START_X;
+            float startY = START_Y;
+
+            for (uint8 i = 0; i < MAX_VERTICAL_LINES; i++)
+            {
+                startY = START_Y;
+
+                for (uint8 j = 0; j < MAX_HORIZONTAL_LINES; j++)
+                {
+                    boardSpots[i][j].free = true;
+                    boardSpots[i][j].z = START_Z;
+                    boardSpots[i][j].x = startX;
+                    boardSpots[i][j].y = startY;
+                    startY += STEP_Y;
+                }
+                startX += STEP_X;
+            }
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellEntry const* spell) override
+        {
+            if (spell->Id == SPELL_HARPOON)
+            {
+                me->SetSpeed(MOVE_FLIGHT, 1.0f);
+                if (me->GetEntry() == NPC_TWILIGHT_ASSAULT_DRAKE_LEFT)
+                    me->GetMotionMaster()->MovePoint(0, harpoonPos[RIGHT_HARPOON_POSITION], true, true);
+                else
+                    me->GetMotionMaster()->MovePoint(0, harpoonPos[LEFT_HARPOON_POSITION], true, true);
+            }
+        }
+
+        void EnterCombat(Unit * /*who*/) override
+        {
+            SetBoardSpots();
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            scheduler.Update(diff);
+
+            // Harpoons
+            if (!harpoon)
+            {
+                if (harpoonTimer <= diff)
+                {
+                    if (Creature * pHarpoon = me->FindNearestCreature(NPC_HARPOON, 200.0f, true))
+                        pHarpoon->CastSpell(me, SPELL_HARPOON, true);
+
+                    uint32 releaseTimer = IsHeroic() ? 20 : 25;
+                    scheduler.Schedule(Seconds(releaseTimer), [this](TaskContext harpoon)
+                    {
+                        if (harpoon.GetRepeatCounter() == 0)
+                        {
+                            if (Creature * pHarpoon = me->FindNearestCreature(NPC_HARPOON, 200.0f, true))
+                            {
+                                pHarpoon->InterruptNonMeleeSpells(true);
+                                me->SetSpeed(MOVE_FLIGHT, 2.0f);
+                                if (me->GetEntry() == NPC_TWILIGHT_ASSAULT_DRAKE_LEFT)
+                                    me->GetMotionMaster()->MovePoint(LEFT_DRAKE_END_FLY_POS, assaultDrakePos[LEFT_DRAKE_END_FLY_POS], true);
+                                else me->GetMotionMaster()->MovePoint(RIGHT_DRAKE_END_FLY_POS, assaultDrakePos[RIGHT_DRAKE_END_FLY_POS], true);
+                            }
+                            harpoon.Repeat(Seconds(3));
+                        }
+                        else
+                        {
+                            if (me->GetEntry() == NPC_TWILIGHT_ASSAULT_DRAKE_LEFT)
+                                me->SetFacingTo(assaultDrakePos[LEFT_DRAKE_END_FLY_POS].GetOrientation());
+                            else
+                                me->SetFacingTo(assaultDrakePos[RIGHT_DRAKE_END_FLY_POS].GetOrientation());
+                        }
+                    });
+                    harpoon = true;
+                }
+                else harpoonTimer -= diff;
+            }
+
+            // Twilight Barrage
+            if (twilightBarrageTimer <= diff)
+            {
+                uint32 randX = urand(0, MAX_VERTICAL_LINES-1);
+                uint32 randY = urand(0, MAX_HORIZONTAL_LINES - 1);
+
+                Creature * pGoriona = me->FindNearestCreature(NPC_GORIONA, 300.0f, true);
+                if (pGoriona == NULL)
+                    return;
+
+                if (npc_ds_goriona::npc_ds_gorionaAI* pAI = (npc_ds_goriona::npc_ds_gorionaAI*)(pGoriona->GetAI()))
+                {
+                    if (pAI->ValidateFreeSpot(DATA_WARMASTER_BOARD_SPOT, randX, randY) == EMPTY_SPOT)
+                        me->CastSpell(boardSpots[randX][randY].x, boardSpots[randX][randY].y, boardSpots[randX][randY].z, SPELL_TWILIGHT_BARRAGE, false);
+                }
+                twilightBarrageTimer = 8000;
+            }
+            else twilightBarrageTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
         }
     };
 };
@@ -1040,6 +1392,7 @@ void AddSC_boss_warmaster_blackhorn()
 {
     new boss_warmaster_blackhorn();
     new npc_ds_goriona();
+    new npc_ds_twilight_assault_drake();
 
     new spell_ds_twilight_barrage_dmg();
     new spell_ds_twilight_onslaught_dmg();
