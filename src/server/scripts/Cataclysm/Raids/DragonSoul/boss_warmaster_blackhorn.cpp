@@ -1289,19 +1289,19 @@ public:
                     GetCaster()->DealDamage(pShip, bp0);
                 }
             }
-        }
 
-        void HandleDamage(SpellEffIndex /*effIndex*/)
-        {
-            int32 damage = GetHitDamage() / (hitUnitCount + 1); // Shared damage + ship
-
+            int32 damage = GetSpellInfo()->EffectBasePoints[EFFECT_0] / (hitUnitCount + 1); // Shared damage + ship
             // Deal damage to the ship
             if (Creature* pShip = GetCaster()->FindNearestCreature(NPC_SKYFIRE, 300.0f))
                 GetCaster()->DealDamage(pShip, damage);
             // Despawn trigger
             if (Creature* pOnslaught = GetCaster()->FindNearestCreature(NPC_ONSLAUGHT_TARGET, 300.0f))
                 pOnslaught->DespawnOrUnsummon();
+        }
 
+        void HandleDamage(SpellEffIndex /*effIndex*/)
+        {
+            int32 damage = GetHitDamage() / (hitUnitCount + 1); // Shared damage + ship
             SetHitDamage(damage);
         }
 
