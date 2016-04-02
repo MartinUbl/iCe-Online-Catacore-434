@@ -2338,6 +2338,8 @@ static const Position travelPos[12] =
     { -1799.54f, -2367.86f, 345.08f, 5.20f }, // Landing top of the wyrmrest temple
 };
 
+const uint8 ACTION_REMOVE_FLAG                 = 0;
+
 class npc_ds_travel_with_drakes : public CreatureScript
 {
 public:
@@ -2352,6 +2354,7 @@ public:
         else if (pCreature->GetEntry() == NPC_NETHESTRASZ)
             pPlayer->SummonCreature(NPC_RED_DRAKE, travelPos[2], TEMPSUMMON_MANUAL_DESPAWN);
 
+        pCreature->AI()->DoAction(ACTION_REMOVE_FLAG);
         pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         return true;
     }
@@ -2388,6 +2391,18 @@ public:
         void IsSummonedBy(Unit* pSummoner) override
         {
             summonerGuid = pSummoner->GetGUID();
+        }
+
+        void DoAction(const int32 action) override
+        {
+            if (action == ACTION_REMOVE_FLAG)
+            {
+                scheduler.Schedule(Seconds(2), [this](TaskContext removeFlag)
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    removeFlag.Repeat(Seconds(2));
+                });
+            }
         }
 
         void Reset() override
@@ -2458,14 +2473,6 @@ public:
                         if (me->GetEntry() != NPC_RED_DRAKE)
                             ejectPassanger = true;
                     }
-                });
-            }
-            else
-            {
-                scheduler.Schedule(Seconds(2), [this](TaskContext removeFlag)
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    removeFlag.Repeat(Seconds(2));
                 });
             }
         }
