@@ -1456,22 +1456,22 @@ public:
                 switch (slot)
                 {
                 case 0:
-                    distance = 50.0f;
+                    distance = 51.0f;
                     moveTimer = 8000;
                     i = 0.0f;
                     break;
                 case 1:
-                    distance = 50.0f;
+                    distance = 51.0f;
                     moveTimer = 8000;
                     i = M_PI / 2;
                     break;
                 case 2:
-                    distance = 50.0f;
+                    distance = 51.0f;
                     moveTimer = 8000;
                     i = M_PI;
                     break;
                 case 3:
-                    distance = 50.0f;
+                    distance = 51.0f;
                     moveTimer = 8000;
                     i = ((3 * M_PI) / 2);
                     break;
@@ -1496,22 +1496,22 @@ public:
                     i = ((3 * M_PI) / 2);
                     break;
                 case 8:
-                    distance = 35.0f;
+                    distance = 34.0f;
                     moveTimer = 6000;
                     i = 0.0f;
                     break;
                 case 9:
-                    distance = 35.0f;
+                    distance = 34.0f;
                     moveTimer = 6000;
                     i = M_PI / 2;
                     break;
                 case 10:
-                    distance = 35.0f;
+                    distance = 34.0f;
                     moveTimer = 6000;
                     i = M_PI;
                     break;
                 case 11:
-                    distance = 35.0f;
+                    distance = 34.0f;
                     moveTimer = 6000;
                     i = ((3 * M_PI) / 2);
                     break;
@@ -1527,7 +1527,7 @@ public:
             {
                 switch (uint32(distance))
                 {
-                case 35:
+                case 34:
                     moveTimer = 500;
                     me->SetSpeed(MOVE_RUN, 1.0f);
                     break;
@@ -1535,7 +1535,7 @@ public:
                     moveTimer = 500;
                     me->SetSpeed(MOVE_RUN, 1.20f);
                     break;
-                case 50:
+                case 51:
                     moveTimer = 500;
                     me->SetSpeed(MOVE_RUN, 1.40f);
                     break;
