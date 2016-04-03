@@ -247,6 +247,7 @@ public:
         uint32 twilightBurstTimer;
         uint32 currentAspect;
         bool achievement;
+        bool isAboutToDie;
         bool visualLightning;
 
         // Shortcut for testing purpose
@@ -280,6 +281,7 @@ public:
             twilightBurstTimer = 4000;
             currentAspect = 0;
             achievement = true;
+            isAboutToDie = false;
             visualLightning = false;
 
             for (uint32 goId = GO_GIFT_OF_LIFE; goId <= GO_SOURCE_OF_MAGIC; goId++)
@@ -469,39 +471,44 @@ public:
         {
             if (me->GetHealth() <= damage)
             {
-                damage = 0;
-                me->InterruptNonMeleeSpells(false);
+                damage = me->GetHealth() - 1;
 
-                for (uint32 goId = GO_GIFT_OF_LIFE; goId <= GO_SOURCE_OF_MAGIC; goId++)
+                if (!isAboutToDie)
                 {
-                    DeleteGameObjects(goId);
+                    isAboutToDie = true;
+                    me->InterruptNonMeleeSpells(false);
+
+                    for (uint32 goId = GO_GIFT_OF_LIFE; goId <= GO_SOURCE_OF_MAGIC; goId++)
+                    {
+                        DeleteGameObjects(goId);
+                    }
+
+                    RemoveEncounterAuras();
+                    SummonCache(who);
+
+                    CheckForAchievementCriteria();
+                    if (instance)
+                    {
+                        if (achievement)
+                            instance->DoCompleteAchievement(ACHIEVEMENT_MINUTES_TO_MIDNIGHT);
+                        if (IsHeroic())
+                            instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_ULTRAXION);
+                    }
+
+                    twilightBurstTimer = 10000;
+                    me->SetSpeed(MOVE_FLIGHT, 20.0f);
+                    me->GetMotionMaster()->MovePoint(0, WAYPOINT_X, WAYPOINT_Y, WAYPOINT_Z - 300, false, true);
+                    me->CastSpell(me, SPELL_FALL_ANIMATION, false);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+                    RunPlayableQuote(yell[QUOTE_DEATH], false);
+
+                    scheduler.Schedule(Seconds(4), [this](TaskContext /* Task context */)
+                    {
+                        scheduler.CancelAll();
+                        me->Kill(me);
+                    });
                 }
-
-                RemoveEncounterAuras();
-                SummonCache(who);
-
-                CheckForAchievementCriteria();
-                if (instance)
-                {
-                    if (achievement)
-                        instance->DoCompleteAchievement(ACHIEVEMENT_MINUTES_TO_MIDNIGHT);
-                    if (IsHeroic())
-                        instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_ULTRAXION);
-                }
-
-                twilightBurstTimer = 10000;
-                me->SetSpeed(MOVE_FLIGHT, 20.0f);
-                me->GetMotionMaster()->MovePoint(0, WAYPOINT_X, WAYPOINT_Y, WAYPOINT_Z-300, false, true);
-                me->CastSpell(me, SPELL_FALL_ANIMATION, false);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-                RunPlayableQuote(yell[QUOTE_DEATH], false);
-
-                scheduler.Schedule(Seconds(4), [this](TaskContext /* Task context */)
-                {
-                    scheduler.CancelAll();
-                    me->Kill(me);
-                });
             }
         }
 
@@ -593,7 +600,7 @@ public:
             for (uint32 i = 0; i < 2; i++)
             {
                 uint32 rand_time;
-                rand_time = (i == 0) ? urand(10, 20) : urand(30, 40);
+                rand_time = (i == 0) ? urand(10, 20) : urand(30, 35);
 
                 scheduler.Schedule(Seconds(rand_time), [this](TaskContext /*context*/)
                 {
