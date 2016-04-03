@@ -20,6 +20,11 @@
 #include "MapManager.h"
 #include "TaskScheduler.h"
 
+#define SEARCH_RANGE                   300.0f
+#define SEARCH_RANGE_FAR               500.0f
+#define OUTRO_CINEMATIC                 75
+#define ANGLE_RANGE                      0.28f
+
 // NPCs
 enum NPC
 {
@@ -30,13 +35,13 @@ enum NPC
     NPC_ARM_TENTACLE_RIGHT              = 56167, // 3
     NPC_COSMETIC_TENTACLE               = 57693,
     NPC_TAIL_TENTACLE                   = 56844,
+
     NPC_BLISTERING_TENTACLE             = 56188,
     NPC_PLATFORM                        = 56307,
     NPC_ELEMENTIUM_BOLT                 = 56262,
     NPC_MUTATED_CORRUPTION              = 56471,
     NPC_TIME_ZONE                       = 56311,
-    NPC_REGENERAIVE_BLOOD               = 56263,
-
+    NPC_REGENERATIVE_BLOOD              = 56263,
 
     NPC_CRUSH_TARGET                    = 56581,
 
@@ -76,6 +81,7 @@ enum Spells
 
     SPELL_SLUMP                         = 106708, // Fall down with his head
     SPELL_SLUMP_2                       = 110062, // on death ?
+    SPELL_EMERGE                        = 22445,
 
     SPELL_CORRUPTED_BLOOD               = 106834,
     SPELL_CORRUPTED_BLOOD_25            = 109592,
@@ -189,6 +195,8 @@ enum MadnesGameobjects
     GO_ELEMENTIUM_FRAGMENT_25HC     = 210220,
 };
 
+#define MAX_PLATFORMS                 4
+
 enum Platforms
 {
     PLATFORM_ALEXSTRASZA            = 0,
@@ -214,7 +222,7 @@ enum Phase
     PHASE_HEAD_DOWN                 = 2,
 };
 
-const Position limbsPos[4] =
+const Position limbsPos[MAX_PLATFORMS] =
 {
     { -11941.2f, 12248.9f, 12.1f, 1.98f },
     { -12005.8f, 12190.3f, -6.5f, 2.12f },
@@ -222,7 +230,7 @@ const Position limbsPos[4] =
     { -12097.8f, 12067.4f, 13.4f, 2.21f },
 };
 
-const Position platformPos[4] =
+const Position platformPos[MAX_PLATFORMS] =
 {
     { -11957.2f, 12267.9f,  1.2f, 5.07f },
     { -12039.8f, 12224.3f, -6.1f, 5.32f },
@@ -230,7 +238,9 @@ const Position platformPos[4] =
     { -12128.8f, 12077.4f,  2.3f, 2.21f },
 };
 
-const Position boltPos[5] =
+#define MAX_BOLT_POSITIONS              5
+
+const Position boltPos[MAX_BOLT_POSITIONS] =
 {
     { -11961.2f, 12286.0f,  1.3f, 0.0f }, // Alexstrasza land position
     { -12055.0f, 12239.0f, -6.1f, 0.0f }, // Nozdormu land position
@@ -239,7 +249,7 @@ const Position boltPos[5] =
     { -11929.8f, 12035.6f, 35.4f, 0.0f }, // Summon Location
 };
 
-const Position mutatedcorruptionPos[4] =
+const Position mutatedcorruptionPos[MAX_PLATFORMS] =
 {
     { -11993.3f, 12286.3f, -2.5f, 5.91f }, // Alexstrasza platform
     { -12028.8f, 12265.6f, -6.2f, 4.13f }, // Nozdormu platform
@@ -247,7 +257,9 @@ const Position mutatedcorruptionPos[4] =
     { -12160.9f, 12057.0f,  2.4f, 0.73f }  // Kalecgos platform
 };
 
-const Position hemorrhagePos[4] =
+#define MAX_HEMORRHAGE_ADDS             6
+
+const Position hemorrhagePos[MAX_PLATFORMS] =
 {
     { -11955.9f, 12281.7f,  1.30f, 0.0f },
     { -12048.0f, 12237.6f, -6.14f, 0.0f },
@@ -263,7 +275,9 @@ const Position hemorrhagePos[4] =
 //    {-12102.188477f, 12067.497070f, 2.31f, 0.0f},
 //};
 
-const Position impalingPos[8] =
+#define MAX_IMPALING_POSITIONS         8
+
+const Position impalingPos[MAX_IMPALING_POSITIONS] =
 {
     { -12117.3f, 12185.7f, -2.7f, 0.0f },
     { -12115.9f, 12177.0f, -2.7f, 0.0f },
@@ -275,7 +289,9 @@ const Position impalingPos[8] =
     { -12112.7f, 12172.5f, -2.7f, 0.0f }
 };
 
-const Position terrorPos[2] =
+#define MAX_TERROR_POSITIONS            2
+
+const Position terrorPos[MAX_TERROR_POSITIONS] =
 {
     { -12121.2f, 12162.7f, -2.7f, 0.0f },
     { -12117.7f, 12168.8f, -2.7f, 0.0f }
@@ -287,6 +303,19 @@ const Position congealingPos[2] =
     { -12079.5f, 12169.6f, -2.7f, 0.0f } // healing pos
 };
 
+#define MAX_ELEMENTIUM_BOLT_QUOTES             3 
+
+static const PlayableQuote elementiumBoltQuotes[MAX_ELEMENTIUM_BOLT_QUOTES] =
+{
+    { 26354, "There's no shelter from my fury." },
+    { 26355, "Your armor means nothing, your faith even less." },
+    { 26356, "The sea will swallow your smoldering remains." },
+};
+
+static const PlayableQuote aggroQuote = { 26527, "You have done NOTHING. I will tear your world APART." };
+
+static const PlayableQuote slumbQuote = { 26353, "I AM DEATHWING, THE DESTROYER, THE END OF ALL THINGS, INEVITABLE, INDOMITABLE; I AM THE CATACLYSM!" };
+
 const Position deathwingPos         = { -11903.9f, 11989.1f, -113.2f, 2.164f };
 const Position deathwing2Pos        = { -12063.5f, 12198.9f,  -13.0f, 2.164f };
 
@@ -297,6 +326,42 @@ const Position kalecgosendPos       = { -12069.2f, 12159.9f, -2.6f, 5.23f };
 const Position aggraendPos          = { -12066.1f, 12150.4f, -2.6f, 3.05f };
 const Position thrallendPos         = { -12067.7f, 12146.4f, -2.6f, 3.05f };
 const Position cacheSpawnPos        = { -12076.6f, 12169.9f, -2.5f, 3.54f };
+
+struct AspectsEntries
+{
+    uint32 aspectEntryId;
+    const char * textAssault;
+    uint32 firstSoundId;
+    const char * aspectFirstQuote;
+    uint32 secondSoundId;
+    const char * aspectSecondQuote;
+    uint32 presenceId;
+    uint32 concentrationId;
+    uint32 exposeWeaknessId;
+};
+
+static AspectsEntries aspectsInfo[MAX_PLATFORMS] =
+{
+    { NPC_ALEXSTRASZA_DRAGON_FORM, "Deathwing assaults Alexstrasza", 
+      26498, "I will cleanse whatever corruption I can; my fire will not harm you.",
+      26500, "No! Such power! Deathwing's summoning of the final Cataclysm will destroy all life on Azeroth. Quickly, we must interrupt him!",
+      SPELL_ALEXSTRASZA_PRESENCE, SPELL_CONCENTRATION_ALEXSTRASZA, SPELL_EXPOSE_WEAKNESS_ALEXSTRASZA },
+
+    { NPC_NOZDORMU_DRAGON_FORM, "Deathwing assaults Nozdormu",
+      25949, "I will slow the Destroyer's attacks when I can.",
+      25951, "Hurry, heroes. In mere moments Deathwing's Cataclysm will complete what he begun and end the world. Join me in the attack, now!",
+      SPELL_NOZDORMU_PRESENCE, SPELL_CONCENTRATION_NOZDORMU, SPELL_EXPOSE_WEAKNESS_NOZDORMU },
+
+    { NPC_YSERA_DRAGON_FORM, "Deathwing assaults Ysera",
+      26142, "I will bring you closer to the Emerald Dream. Seek safety there when the fight becomes too intense.",
+      26144, "Deathwing is conjuring the final Cataclysm; even the Emerald Dream trembles. If we are to stop the spell, we must attack him together.",
+      SPELL_YSERA_PRESENCE, SPELL_CONCENTRATION_YSERA, SPELL_EXPOSE_WEAKNESS_YSERA },
+    
+    { NPC_KALECGOS_DRAGON_FORM, "Deathwing assaults Kalecgos",
+      26259, "I will charge you with arcane energy to blast your foes.",
+      26261, "The Destroyer is gathering all his might for a blow that will split the world. Attack him, now! We must stop the final Cataclysm!",
+      SPELL_KALECGOS_PRESENCE, SPELL_CONCENTRATION_KALECGOS, SPELL_EXPOSE_WEAKNESS_KALECGOS },
+};
 
 // Madness of Deathwing
 class boss_madness_of_deathwing : public CreatureScript
@@ -311,25 +376,30 @@ public:
 
     struct boss_madness_of_deathwingAI : public ScriptedAI
     {
-        boss_madness_of_deathwingAI(Creature *creature) : ScriptedAI(creature), Summons(creature)
+        boss_madness_of_deathwingAI(Creature *creature) : ScriptedAI(creature), summons(creature)
         {
             instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
         TaskScheduler scheduler;
-        SummonList Summons;
-        uint64 limbsGuids[4];
-        uint64 platformGuids[4];
+        SummonList summons;
+
+        uint64 limbGuids[MAX_PLATFORMS];
+        uint64 platformGuids[MAX_PLATFORMS];
+        uint64 timeZoneGuids[MAX_PLATFORMS];
+
         uint32 assaultAspectsTimer;
         uint32 elementiumBoltTimer;
         uint32 cataclysmTimer;
+
         uint8 platformKilled;
-        uint8 maxPlayersOnPlatform;
+        uint8 activePlatform;
         uint8 phase;
+
         bool newAssault;
         bool canCataclysm;
-        bool platformDestroyed[4];
+        bool platformDestroyed[MAX_PLATFORMS];
 
         void Reset() override
         {
@@ -337,10 +407,12 @@ public:
             {
                 if (instance->GetData(TYPE_BOSS_MADNESS_OF_DEATHWING) != DONE)
                     instance->SetData(TYPE_BOSS_MADNESS_OF_DEATHWING, NOT_STARTED);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+                if (Creature * pThrall = me->FindNearestCreature(NPC_THRALL_MADNESS_START, SEARCH_RANGE, true))
+                    pThrall->AI()->DoAction(ACTION_TELEPORT_HOME);
 
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENTER_THE_DREAM);
-                if (Creature * pThrall = me->FindNearestCreature(NPC_THRALL_MADNESS_START, 300.0f, true))
-                    pThrall->AI()->DoAction(ACTION_TELEPORT_HOME);
             }
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -348,80 +420,82 @@ public:
             me->SetVisible(false);
             me->RemoveAura(SPELL_SLUMP);
 
-            Summons.DespawnAll();
             assaultAspectsTimer = 5000;
             newAssault = true;
             canCataclysm = false;
             platformKilled = 0;
-            maxPlayersOnPlatform = 0;
+            activePlatform = 0;
             phase = PHASE_LIMBS;
 
-            for (uint8 i = 0; i < 4; i++)
+            for (uint8 i = PLATFORM_ALEXSTRASZA; i < MAX_PLATFORMS; i++)
             {
                 platformDestroyed[i] = false;
             }
 
             std::list<Creature*> time_zone;
-            GetCreatureListWithEntryInGrid(time_zone, me, NPC_TIME_ZONE, 500.0f);
+            GetCreatureListWithEntryInGrid(time_zone, me, NPC_TIME_ZONE, SEARCH_RANGE_FAR);
             for (std::list<Creature*>::const_iterator itr = time_zone.begin(); itr != time_zone.end(); ++itr)
             {
                 (*itr)->DespawnOrUnsummon();
             }
 
+            summons.DespawnAll();
             scheduler.CancelAll();
         }
 
         void JustSummoned(Creature* summon) override
         {
-            Summons.push_back(summon->GetGUID());
+            summons.push_back(summon->GetGUID());
         }
 
         void SummonedCreatureDies(Creature* unit, Unit* /*killer*/) override
         {
             if (unit->GetEntry() == NPC_WING_TENTACLE || unit->GetEntry() == NPC_ARM_TENTACLE_LEFT || unit->GetEntry() == NPC_ARM_TENTACLE_RIGHT)
             {
-                for (uint32 i = 0; i < 4; i++)
+                for (uint32 i = 0; i < MAX_PLATFORMS; i++)
                 {
-                    if (unit->GetGUID() == limbsGuids[i])
+                    if (unit->GetGUID() == limbGuids[i])
                     {
-                        platformDestroyed[i] = true;
-                        uint32 aspectsEntry = 0;
-                        uint32 spellId = 0;
-                        uint32 concentrationId = 0;
-
-                        switch (i)
+                        if (Creature * pAspect = me->FindNearestCreature(aspectsInfo[i].aspectEntryId, SEARCH_RANGE_FAR, true))
                         {
-                        case PLATFORM_ALEXSTRASZA:
-                            aspectsEntry = NPC_ALEXSTRASZA_DRAGON_FORM;
-                            spellId = SPELL_ALEXSTRASZA_PRESENCE;
-                            concentrationId = SPELL_CONCENTRATION_ALEXSTRASZA;
-                            break;
-                        case PLATFORM_NOZDORMU:
-                            aspectsEntry = NPC_NOZDORMU_DRAGON_FORM;
-                            spellId = SPELL_NOZDORMU_PRESENCE;
-                            concentrationId = SPELL_CONCENTRATION_NOZDORMU;
-                            break;
-                        case PLATFORM_YSERA:
-                            aspectsEntry = NPC_YSERA_DRAGON_FORM;
-                            spellId = SPELL_YSERA_PRESENCE;
-                            concentrationId = SPELL_CONCENTRATION_YSERA;
-                            break;
-                        case PLATFORM_KALECGOS:
-                            aspectsEntry = NPC_KALECGOS_DRAGON_FORM;
-                            spellId = SPELL_KALECGOS_PRESENCE;
-                            concentrationId = SPELL_CONCENTRATION_KALECGOS;
-                            break;
-                        default:
-                            break;
-                        }
-
-                        if (Creature * pAspect = me->FindNearestCreature(aspectsEntry, 500.0f, true))
-                        {
-                            pAspect->RemoveAurasDueToSpell(spellId);
-                            pAspect->CastSpell(me, concentrationId, true);
+                            pAspect->RemoveAurasDueToSpell(aspectsInfo[i].presenceId);
+                            pAspect->CastSpell(me, aspectsInfo[i].concentrationId, true);
                         }
                     }
                 }
+            }
+        }
+
+        void SpawnLimbs()
+        {
+            // Spawn Tentacles
+            for (uint8 i = PLATFORM_ALEXSTRASZA; i < MAX_PLATFORMS; i++)
+            {
+                uint32 limbsEntryId = 0;
+                switch (i)
+                {
+                    case PLATFORM_ALEXSTRASZA:
+                    case PLATFORM_KALECGOS:
+                        limbsEntryId = NPC_WING_TENTACLE;
+                        break;
+                    case PLATFORM_NOZDORMU:
+                        limbsEntryId = NPC_ARM_TENTACLE_LEFT;
+                        break;
+                    case PLATFORM_YSERA:
+                        limbsEntryId = NPC_ARM_TENTACLE_RIGHT;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (Creature* pLimb = me->SummonCreature(limbsEntryId, limbsPos[i]))
+                {
+                    pLimb->SendPlaySpellVisualKit(SPELL_EMERGE, 0);
+                    limbGuids[i] = pLimb->GetGUID();
+                }
+
+                if (Creature* pPlatform = me->SummonCreature(NPC_PLATFORM, platformPos[i]))
+                    platformGuids[i] = pPlatform->GetGUID();
             }
         }
 
@@ -430,42 +504,13 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_MADNESS_OF_DEATHWING, IN_PROGRESS);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             }
 
-            me->SendPlaySpellVisualKit(22445, 0);
+            me->SendPlaySpellVisualKit(SPELL_EMERGE, 0);
             me->SetVisible(true);
-
-            for (uint8 i = 0; i < 4; i++)
-            {
-                uint32 limbsEntryId = 0;
-                switch (i)
-                {
-                case 0:
-                case 3:
-                    limbsEntryId = NPC_WING_TENTACLE;
-                    break;
-                case 1:
-                    limbsEntryId = NPC_ARM_TENTACLE_LEFT;
-                    break;
-                case 2:
-                    limbsEntryId = NPC_ARM_TENTACLE_RIGHT;
-                    break;
-                default:
-                    break;
-                }
-
-                if (Creature* pLimb = me->SummonCreature(limbsEntryId, limbsPos[i]))
-                {
-                    pLimb->SendPlaySpellVisualKit(22445, 0);
-                    limbsGuids[i] = pLimb->GetGUID();
-                }
-
-                if (Creature* pPlatform = me->SummonCreature(NPC_PLATFORM, platformPos[i]))
-                    platformGuids[i] = pPlatform->GetGUID();
-            }
-
-            me->MonsterYell("You have done NOTHING. I will tear your world APART.", LANG_UNIVERSAL, 0);
-            me->SendPlaySound(26527, false);
+            SpawnLimbs();
+            RunPlayableQuote(aggroQuote);
         }
 
         void SummonCache()
@@ -507,27 +552,6 @@ public:
             }
         }
 
-        void ElementiumBoltYell()
-        {
-            uint32 randYell = urand(0, 2);
-            switch (randYell) {
-            case 0:
-                me->MonsterYell("There's no shelter from my fury.", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(26354, false);
-                break;
-            case 1:
-                me->MonsterYell("Your armor means nothing, your faith even less.", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(26355, false);
-                break;
-            case 2:
-                me->MonsterYell("The sea will swallow your smoldering remains.", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(26356, false);
-                break;
-            default:
-                break;
-            }
-        }
-
         void KilledUnit(Unit* victim) override {}
 
         void JustDied(Unit * /*who*/) override
@@ -535,10 +559,11 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_MADNESS_OF_DEATHWING, DONE);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
             // Outro
-            PlayMovieToPlayers(76);
+            PlayMovieToPlayers(OUTRO_CINEMATIC);
             me->SummonCreature(NPC_ALEXSTRASZA_MADNESS, alexstraszaendPos, TEMPSUMMON_MANUAL_DESPAWN);
             me->SummonCreature(NPC_YSERA_MADNESS, yseraendPos, TEMPSUMMON_MANUAL_DESPAWN);
             me->SummonCreature(NPC_KALECGOS_MADNESS, kalecgosendPos, TEMPSUMMON_MANUAL_DESPAWN);
@@ -554,7 +579,6 @@ public:
             if (me->GetHealth() <= damage)
             {
                 damage = 0;
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->RemoveAura(SPELL_SLUMP);
                 me->CastSpell(me, SPELL_SLUMP_2, false);
             }
@@ -566,19 +590,19 @@ public:
             {
                 switch (action)
                 {
-                case ACTION_LIMB_DIED:
-                    platformKilled++;
-                    if (platformKilled == 4)
-                        phase = PHASE_SLUMB;
-                    me->DealDamage(me, me->GetMaxHealth()*0.2); // Decrease hp by 20%
-                    scheduler.CancelGroup(1); // Cancel Elementium Meteor
-                    assaultAspectsTimer = 15000;
-                    newAssault = true;
-                    canCataclysm = false;
-                    me->InterruptNonMeleeSpells(false);
-                    break;
-                default:
-                    break;
+                    case ACTION_LIMB_DIED:
+                        platformKilled++;
+                        if (platformKilled == MAX_PLATFORMS)
+                            phase = PHASE_SLUMB;
+                        me->DealDamage(me, me->GetMaxHealth()*0.2); // Decrease hp by 20%
+                        scheduler.CancelGroup(1); // Cancel Elementium Meteor and Hemorrhage
+                        assaultAspectsTimer = 15000;
+                        newAssault = true;
+                        canCataclysm = false;
+                        me->InterruptNonMeleeSpells(false);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -593,128 +617,103 @@ public:
             if (plrList.isEmpty())
                 return;
 
-            uint8 alexstraszaPlatform = 0;
-            uint8 nozdormuPlatform = 0;
-            uint8 yseraPlatform = 0;
-            uint8 kalecgosPlatform = 0;
-            uint64 platformGuid = 0;
+            double orientation[MAX_PLATFORMS] = { 1.777, 2.174, 2.390, 2.881 };
 
-            for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+            Position pos;
+            pos.m_positionX = me->GetPositionX();
+            pos.m_positionY = me->GetPositionY();
+            pos.m_positionZ = me->GetPositionZ();
+
+            uint32 maxPlayersInSegment = 0;
+
+            Map::PlayerList const &playerList = me->GetMap()->GetPlayers();
+
+            for (uint32 segmentIndex = 0; segmentIndex < MAX_PLATFORMS; segmentIndex++)
             {
-                if (Player* pl = itr->getSource())
+                pos.m_orientation = orientation[segmentIndex];
+                uint32 playersInAngle = 0;
+
+                for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
                 {
-                    if (pl && pl->IsInWorld() && pl->IsAlive() && !pl->IsGameMaster())
+                    if (Player* pPlayer = i->getSource())
                     {
-                        if (Creature * pPlatform = pl->FindNearestCreature(NPC_PLATFORM, 300.0f, true))
-                            platformGuid = pPlatform->GetGUID();
-                        
-                        if (platformGuid == platformGuids[PLATFORM_ALEXSTRASZA])
-                            alexstraszaPlatform++;
-                        else if (platformGuid == platformGuids[PLATFORM_NOZDORMU])
-                            nozdormuPlatform++;
-                        else if (platformGuid == platformGuids[PLATFORM_YSERA])
-                            yseraPlatform++;
-                        else if (platformGuid == platformGuids[PLATFORM_KALECGOS])
-                            kalecgosPlatform++;
+                        if (pos.HasInArc(ANGLE_RANGE, pPlayer))
+                        {
+                            playersInAngle++;
+                        }
                     }
                 }
-            }
 
-            if (alexstraszaPlatform > nozdormuPlatform && alexstraszaPlatform > yseraPlatform && alexstraszaPlatform > kalecgosPlatform)
-                maxPlayersOnPlatform = PLATFORM_ALEXSTRASZA;
-            else if (nozdormuPlatform > alexstraszaPlatform && nozdormuPlatform > yseraPlatform && nozdormuPlatform > kalecgosPlatform)
-                maxPlayersOnPlatform = PLATFORM_NOZDORMU;
-            else if (yseraPlatform > alexstraszaPlatform && yseraPlatform > nozdormuPlatform && yseraPlatform > kalecgosPlatform)
-                maxPlayersOnPlatform = PLATFORM_YSERA;
-            else maxPlayersOnPlatform = PLATFORM_KALECGOS;
+                if (playersInAngle >= maxPlayersInSegment)
+                {
+                    maxPlayersInSegment = playersInAngle;
+                    activePlatform = segmentIndex;
+                }
+            }
         }
 
         void AssaultAspect()
         {
-            me->MonsterTextEmote("Deathwing begins to cast assault aspects!", me->GetGUID(), true, 300.0f);
+            me->MonsterTextEmote("Deathwing begins to cast assault aspects!", me->GetGUID(), true, SEARCH_RANGE);
             me->CastSpell(me, SPELL_ASSAULT_ASPECTS, false);
+
             CheckPlayersPosition();
 
-            if (platformDestroyed[maxPlayersOnPlatform] == true)
+            // If current platform is already destroyed find another one
+            if (platformDestroyed[activePlatform] == true)
             {
                 std::vector<int> freePlatforms;
-                for (int i = 0; i < 4; i++)
+                for (int i = PLATFORM_ALEXSTRASZA; i < MAX_PLATFORMS; i++)
                 {
-                    if (platformDestroyed[i] == false) // Avoid new assaulted platform to be the same as the killed one
+                    if (platformDestroyed[i] == false) // Skip destroyed platforms
                         freePlatforms.push_back(i);
                 }
-                maxPlayersOnPlatform = freePlatforms[urand(0, freePlatforms.size() - 1)];
+                // Select new platform randomly
+                activePlatform = freePlatforms[urand(0, freePlatforms.size() - 1)];
             }
 
             scheduler.Schedule(Seconds(10), [this](TaskContext /* Task context */)
             {
-                const char * text;
-                const char * aspectYell;
-                uint32 npcId = 0;
-                uint32 soundId = 0;
-
-                switch (maxPlayersOnPlatform)
+                // Deathwing's text emote which platform he's going to assault and aspects response
+                me->MonsterTextEmote(aspectsInfo[activePlatform].textAssault, me->GetGUID(), true, SEARCH_RANGE);
+                if (Creature * pAspect = me->FindNearestCreature(aspectsInfo[activePlatform].aspectEntryId, SEARCH_RANGE_FAR, true))
                 {
-                case PLATFORM_ALEXSTRASZA:
-                    npcId = NPC_ALEXSTRASZA_DRAGON_FORM;
-                    text = "Deathwing assaults Alexstrasza";
-                    aspectYell = "I will cleanse whatever corruption I can; my fire will not harm you.";
-                    soundId = 26498;
-                    break;
-                case PLATFORM_NOZDORMU:
-                    npcId = NPC_NOZDORMU_DRAGON_FORM;
-                    text = "Deathwing assaults Nozdormu";
-                    aspectYell = "I will slow the Destroyer's attacks when I can.";
-                    soundId = 25949;
-                    break;
-                case PLATFORM_YSERA:
-                    npcId = NPC_YSERA_DRAGON_FORM;
-                    text = "Deathwing assaults Ysera";
-                    aspectYell = "I will bring you closer to the Emerald Dream. Seek safety there when the fight becomes too intense.";
-                    soundId = 26142;
-                    break;
-                case PLATFORM_KALECGOS:
-                    npcId = NPC_KALECGOS_DRAGON_FORM;
-                    text = "Deathwing assaults Kalecgos";
-                    aspectYell = "I will charge you with arcane energy to blast your foes.";
-                    soundId = 26259;
-                    break;
-                default:
-                    break;
-                }
-                me->MonsterTextEmote(text, me->GetGUID(), true, 300.0f);
-                if (Creature * pAspect = me->FindNearestCreature(npcId, 500.0f, true))
-                {
-                    pAspect->MonsterYell(aspectYell, LANG_UNIVERSAL, 0);
-                    pAspect->SendPlaySound(soundId, true);
+                    pAspect->MonsterYell(aspectsInfo[activePlatform].aspectFirstQuote, LANG_UNIVERSAL, 0);
+                    pAspect->SendPlaySound(aspectsInfo[activePlatform].firstSoundId, false);
                 }
 
                 // Spawn Mutated Corruption
-                me->SummonCreature(NPC_MUTATED_CORRUPTION, mutatedcorruptionPos[maxPlayersOnPlatform], TEMPSUMMON_MANUAL_DESPAWN);
+                me->SummonCreature(NPC_MUTATED_CORRUPTION, mutatedcorruptionPos[activePlatform], TEMPSUMMON_MANUAL_DESPAWN);
+
                 // Activate Burning Blood on Limb tentacle
-                if (Creature * pLimb = ObjectAccessor::GetObjectInMap(limbsGuids[maxPlayersOnPlatform], me->GetMap(), (Creature*)NULL))
+                if (Creature * pLimb = ObjectAccessor::GetObjectInMap(limbGuids[activePlatform], me->GetMap(), (Creature*)NULL))
                     pLimb->CastSpell(pLimb, SPELL_BURNING_BLOOD, false);
+
                 // Time Zone
-                if (Creature * pPlatform = ObjectAccessor::GetObjectInMap(platformGuids[maxPlayersOnPlatform], me->GetMap(), (Creature*)NULL))
+                if (Creature * pPlatform = ObjectAccessor::GetObjectInMap(platformGuids[activePlatform], me->GetMap(), (Creature*)NULL))
                 {
-                    if (Creature * pNozdormu = pPlatform->FindNearestCreature(NPC_NOZDORMU_DRAGON_FORM, 300.0f, true))
+                    if (Creature * pNozdormu = pPlatform->FindNearestCreature(NPC_NOZDORMU_DRAGON_FORM, SEARCH_RANGE, true))
                         pNozdormu->CastSpell(pPlatform, SPELL_TIME_ZONE_MISSILE, false);
                 }
+
                 // Elementium Bolt
-                scheduler.Schedule(Seconds(55), 1, [this](TaskContext elementiumBolt)
+                scheduler.Schedule(Seconds(55), 1, [this](TaskContext /* Elementium Bolt */)
                 {
                     if (Creature * pElementiumBolt = me->SummonCreature(NPC_ELEMENTIUM_BOLT, boltPos[ELEMENTIUM_BOLT], TEMPSUMMON_DEAD_DESPAWN))
-                        pElementiumBolt->GetMotionMaster()->MovePoint(0, boltPos[maxPlayersOnPlatform], true);
-                    ElementiumBoltYell();
+                        pElementiumBolt->GetMotionMaster()->MovePoint(0, boltPos[activePlatform], true);
+                    
+                    uint32 randQuote = urand(0, MAX_ELEMENTIUM_BOLT_QUOTES - 1);
+                    RunPlayableQuote(elementiumBoltQuotes[randQuote]);
                 });
+
                 // Hemorrhage
                 scheduler.Schedule(Seconds(90), 1, [this](TaskContext hemorrhage)
                 {
                     if (hemorrhage.GetRepeatCounter() < 6)
                     {
-                        if (Creature * pLimb = ObjectAccessor::GetObjectInMap(limbsGuids[maxPlayersOnPlatform], me->GetMap(), (Creature*)NULL))
+                        if (Creature * pLimb = ObjectAccessor::GetObjectInMap(limbGuids[activePlatform], me->GetMap(), (Creature*)NULL))
                         {
-                            pLimb->SummonCreature(NPC_REGENERAIVE_BLOOD, hemorrhagePos[maxPlayersOnPlatform], TEMPSUMMON_MANUAL_DESPAWN);
+                            pLimb->SummonCreature(NPC_REGENERATIVE_BLOOD, hemorrhagePos[activePlatform], TEMPSUMMON_MANUAL_DESPAWN);
                         }
                         hemorrhage.Repeat(Seconds(1));
                     }
@@ -727,44 +726,13 @@ public:
 
         void ExposeWeakness()
         {
-            if (Creature * pLimb = ObjectAccessor::GetObjectInMap(limbsGuids[maxPlayersOnPlatform], me->GetMap(), (Creature*)NULL))
+            if (Creature * pLimb = ObjectAccessor::GetObjectInMap(limbGuids[activePlatform], me->GetMap(), (Creature*)NULL))
             {
-                switch (maxPlayersOnPlatform)
+                if (Creature* pAspect = me->FindNearestCreature(aspectsInfo[activePlatform].aspectEntryId, 500.0f, true))
                 {
-                case PLATFORM_ALEXSTRASZA:
-                    if (Creature* pAspect = me->FindNearestCreature(NPC_ALEXSTRASZA_DRAGON_FORM, 500.0f, true))
-                    {
-                        pAspect->MonsterYell("No! Such power! Deathwing's summoning of the final Cataclysm will destroy all life on Azeroth. Quickly, we must interrupt him!", LANG_UNIVERSAL, false);
-                        me->SendPlaySound(26500, false);
-                        pAspect->CastSpell(pLimb, SPELL_EXPOSE_WEAKNESS_ALEXSTRASZA, false);
-                    }
-                    break;
-                case PLATFORM_NOZDORMU:
-                    if (Creature* pAspect = me->FindNearestCreature(NPC_NOZDORMU_DRAGON_FORM, 500.0f, true))
-                    {
-                        pAspect->MonsterYell("Hurry, heroes. In mere moments Deathwing's Cataclysm will complete what he begun and end the world. Join me in the attack, now!", LANG_UNIVERSAL, false);
-                        me->SendPlaySound(25951, false);
-                        pAspect->CastSpell(pLimb, SPELL_EXPOSE_WEAKNESS_NOZDORMU, false);
-                    }
-                    break;
-                case PLATFORM_YSERA:
-                    if (Creature* pAspect = me->FindNearestCreature(NPC_YSERA_DRAGON_FORM, 500.0f, true))
-                    {
-                        pAspect->MonsterYell("Deathwing is conjuring the final Cataclysm; even the Emerald Dream trembles. If we are to stop the spell, we must attack him together.", LANG_UNIVERSAL, false);
-                        me->SendPlaySound(26144, false);
-                        pAspect->CastSpell(pLimb, SPELL_EXPOSE_WEAKNESS_YSERA, false);
-                    }
-                    break;
-                case PLATFORM_KALECGOS:
-                    if (Creature* pAspect = me->FindNearestCreature(NPC_KALECGOS_DRAGON_FORM, 500.0f, true))
-                    {
-                        pAspect->MonsterYell("The Destroyer is gathering all his might for a blow that will split the world. Attack him, now! We must stop the final Cataclysm!", LANG_UNIVERSAL, false);
-                        me->SendPlaySound(26261, false);
-                        pAspect->CastSpell(pLimb, SPELL_EXPOSE_WEAKNESS_KALECGOS, false);
-                    }
-                    break;
-                default:
-                    break;
+                    pAspect->MonsterYell(aspectsInfo[activePlatform].aspectSecondQuote, LANG_UNIVERSAL, false);
+                    me->SendPlaySound(aspectsInfo[activePlatform].secondSoundId, false);
+                    pAspect->CastSpell(pLimb, aspectsInfo[activePlatform].exposeWeaknessId, false);
                 }
             }
         }
@@ -778,6 +746,7 @@ public:
 
             if (phase == PHASE_LIMBS)
             {
+                // Assault Aspects
                 if (newAssault)
                 {
                     if (assaultAspectsTimer <= diff)
@@ -788,6 +757,7 @@ public:
                     else assaultAspectsTimer -= diff;
                 }
 
+                // Cataclysm
                 if (canCataclysm)
                 {
                     if (cataclysmTimer <= diff)
@@ -805,15 +775,15 @@ public:
                 me->AttackStop();
                 me->GetMotionMaster()->MoveIdle();
                 me->SetFacingTo(deathwingPos.GetOrientation());
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->CastSpell(me, SPELL_SLUMP, false);
                 me->CastSpell(me, SPELL_CORRUPTED_BLOOD, false);
-                me->MonsterYell("I AM DEATHWING, THE DESTROYER, THE END OF ALL THINGS, INEVITABLE, INDOMITABLE; I AM THE CATACLYSM!", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(26353, true);
+                RunPlayableQuote(slumbQuote);
                 phase = PHASE_HEAD_DOWN;
             }
             else if (phase == PHASE_HEAD_DOWN)
             {
-                
+
             }
         }
     };
@@ -834,19 +804,16 @@ public:
         npc_ds_madness_deathwing_limbsAI(Creature* pCreature) : ScriptedAI(pCreature), Summons(pCreature) {}
 
         SummonList Summons;
-        uint32 platformPosition;
-        uint32 checkTimer;
+        uint32 spawnHealthPct;
         bool spawnBlisteringTentacles;
-        bool secondSpawn;
 
         void Reset() override
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetInCombatWithZone();
             me->SetReactState(REACT_PASSIVE);
-            spawnBlisteringTentacles = false;
-            secondSpawn = false;
-            checkTimer = 1000;
+            spawnBlisteringTentacles = true;
+            spawnHealthPct = 70;
 
             me->SendPlaySpellVisualKit(22446, 0);
 
@@ -875,7 +842,7 @@ public:
                 }
             }
 
-            if (Creature * pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_DRAGON_FORM, 300.0f, true))
+            if (Creature * pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_DRAGON_FORM, SEARCH_RANGE, true))
             {
                 pAlexstrasza->CastSpell(me, 105565, false);
                 //pAlexstrasza->AI()->DoAction(ACTION_CAUTERIZE);
@@ -884,10 +851,10 @@ public:
 
         void JustDied(Unit * /*who*/) override
         {
-            if (Creature * pDeathwing = me->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 300.0f, true))
+            if (Creature * pDeathwing = GetSummoner<Creature>())
                 pDeathwing->AI()->DoAction(ACTION_LIMB_DIED);
 
-            if (Creature * pTimeZone = me->FindNearestCreature(NPC_TIME_ZONE, 100.0f, true))
+            if (Creature * pTimeZone = me->FindNearestCreature(NPC_TIME_ZONE, SEARCH_RANGE, true))
                 pTimeZone->DespawnOrUnsummon();
 
             Summons.DespawnAll();
@@ -895,22 +862,17 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
-            if (!spawnBlisteringTentacles)
+            /*
+            if (spawnBlisteringTentacles)
             {
-                if (!secondSpawn)
-                {
-                    if (me->GetHealthPct() <= 70)
-                    {
-                        SpawnBlisteringTentacles();
-                        secondSpawn = true;
-                    }
-                }
-                else if (me->GetHealthPct() <= 40)
+                if (me->GetHealthPct() <= spawnHealthPct)
                 {
                     SpawnBlisteringTentacles();
-                    spawnBlisteringTentacles = true;
+                    if (spawnHealthPct == 70)
+                        spawnHealthPct = 30;
+                    secondSpawn = true;
                 }
-            }
+            }*/
         }
     };
 };
