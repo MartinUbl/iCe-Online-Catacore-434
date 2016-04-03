@@ -150,11 +150,11 @@ enum SpineActions
 {
     ACTION_CORRUPTION_DIED          = 0,
     ACTION_CORRUPTED_POSITION       = 1,
-    ACTION_ABSORB_BLOOD             = 2,
     ACTION_TENDONS_POSITION         = 3,
     ACTION_OPEN_PLATE               = 4,
     ACTION_CHECK_ROLL               = 5,
     ACTION_SPAWN_CORRUPTED_BLOOD    = 6,
+    ACTION_ABSORB_BLOOD             = 7,
 };
 
 enum RollState
@@ -201,9 +201,9 @@ struct PlayableQuote randomYell[MAX_SPINE_OF_DEATHWING_YELL]
 static const Position teleMadnessPos = { -12099.48f, 12160.05f, 18.79f, 1.74f };
 static const Position cacheSpawnPos = { -12076.60f, 12169.94f, -2.53f, 3.54f };
 
-#define ZERO_PLATE_OFF_MAX_SPAWN_COUNT          3
-#define FIRST_PLATE_OFF_MAX_SPAWN_COUNT         5
-#define SECOND_PLATE_OFF_MAX_SPAWN_COUNT        7
+#define ZERO_PLATE_OFF_MAX_SPAWN_COUNT          4
+#define FIRST_PLATE_OFF_MAX_SPAWN_COUNT         6
+#define SECOND_PLATE_OFF_MAX_SPAWN_COUNT        8
 #define SPINE_OF_DEATHWING_DEFEAT_CINEMATIC    75
 #define MAX_SPAWNER_COUNT                       8
 #define MAX_CORRUPTION_COUNT                    4
@@ -451,7 +451,7 @@ public:
                         nextSpawnTimer = 5000;
                     }
 
-                    uint32 randPos = (0, maxPos);
+                    uint32 randPos = (0, maxPos-1);
                     if (Creature * pCorruption = me->SummonCreature(NPC_CORRUPTED_BLOOD, corruptionPos[randPos], TEMPSUMMON_DEAD_DESPAWN))
                         pCorruption->AI()->SetData(ACTION_CORRUPTED_POSITION, randPos);
                     break;
@@ -472,7 +472,7 @@ public:
                             maxPos = SECOND_PLATE_OFF_MAX_SPAWN_COUNT;
 
                         // new corruption shouldn`t spawn at it`s last killed position
-                        uint32 randPos = urand(0, maxPos);
+                        uint32 randPos = urand(0, maxPos-1);
                         if (randPos == corruptedPosition && randPos == maxPos)
                             randPos = urand(0, maxPos-1);
                         else if (randPos == corruptedPosition)
@@ -640,17 +640,7 @@ public:
                 }
             }
 
-            std::list<Creature*> hideous_amalgamation;
-            GetCreatureListWithEntryInGrid(hideous_amalgamation, me, NPC_HIDEOUS_AMALGAMATION, SEARCH_RANGE);
-            for (std::list<Creature*>::const_iterator itr = hideous_amalgamation.begin(); itr != hideous_amalgamation.end(); ++itr)
-            {
-                if (side == ROLL_LEFT)
-                    (*itr)->GetMotionMaster()->MoveJump(rollPos[DEST_LEFT].GetPositionX(), rollPos[DEST_LEFT].GetPositionY(), rollPos[DEST_LEFT].GetPositionZ(), 20.0f, 10.0f);
-                if (side == ROLL_RIGHT)
-                    (*itr)->GetMotionMaster()->MoveJump(rollPos[DEST_RIGHT].GetPositionX(), rollPos[DEST_RIGHT].GetPositionY(), rollPos[DEST_RIGHT].GetPositionZ(), 20.0f, 10.0f);
-
-                (*itr)->DespawnOrUnsummon(5000);
-            }
+            Summons.DoAction(NPC_HIDEOUS_AMALGAMATION, side);
         }
 
         void CheckPlayersPosition()
@@ -683,7 +673,7 @@ public:
                 }
             }
 
-            maxDifference = (maxPlayers > 1) ? 1 : 1; // Set 1 to zero - now it has only test purpose
+            maxDifference = (maxPlayers > 1) ? 1 : 0;
 
             if (leftSide - maxDifference > rightSide)
                 playersPosition = MORE_PLAYERS_ON_LEFT_SIDE;
@@ -1134,6 +1124,16 @@ public:
                 if (absorbedBloodCount == 9)
                     me->CastSpell(me, SPELL_SUPERHEATED_NUCLEUS, true);
             }
+            else if (action == ROLL_LEFT)
+            {
+                me->GetMotionMaster()->MoveJump(rollPos[DEST_LEFT].GetPositionX(), rollPos[DEST_LEFT].GetPositionY(), rollPos[DEST_LEFT].GetPositionZ(), 20.0f, 10.0f);
+                me->DespawnOrUnsummon(3000);
+            }
+            else if (action == ROLL_RIGHT)
+            {
+                me->GetMotionMaster()->MoveJump(rollPos[DEST_RIGHT].GetPositionX(), rollPos[DEST_RIGHT].GetPositionY(), rollPos[DEST_RIGHT].GetPositionZ(), 20.0f, 10.0f);
+                me->DespawnOrUnsummon(3000);
+            }
         }
 
         void MoveInLineOfSight(Unit *who) override
@@ -1169,7 +1169,7 @@ public:
         {
             if (me->GetHealth() <= damage)
             {
-                if (Aura * aur = me->GetAura(SPELL_SUPERHEATED_NUCLEUS))
+                if (me->HasAura(SPELL_SUPERHEATED_NUCLEUS))
                 {
                     damage = me->GetHealth() - 1;
                     if (!isExplode)
