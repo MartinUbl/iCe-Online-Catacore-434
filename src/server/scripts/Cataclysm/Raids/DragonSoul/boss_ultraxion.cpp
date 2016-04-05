@@ -506,7 +506,7 @@ public:
                     scheduler.Schedule(Seconds(4), [this](TaskContext /* Task context */)
                     {
                         scheduler.CancelAll();
-                        me->Kill(me);
+                        me->DealDamage(me, me->GetHealth());
                     });
                 }
             }
