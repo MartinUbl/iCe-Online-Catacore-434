@@ -2717,6 +2717,7 @@ public:
         else if (uiAction == GOSSIP_ACTION_INFO_DEF + 3)
         {
             pCreature->AI()->DoAction(ACTION_SPINE_OF_DEATHWING);
+            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }
         pPlayer->CLOSE_GOSSIP_MENU();
         return true;
@@ -2826,6 +2827,7 @@ public:
                     scheduler.Schedule(Seconds(19), [this](TaskContext /*Show Movie and teleport to Spine of Deathwing*/)
                     {
                         TeleportAllPlayers(ACTION_SPINE_OF_DEATHWING, true);
+                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     });
                 }
             }

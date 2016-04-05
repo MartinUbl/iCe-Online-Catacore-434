@@ -68,6 +68,9 @@ enum Spells
     SPELL_FIERY_GRIP_25H            = 109459,
     SPELL_SEARING_PLASMA_AOE        = 109379,
     SPELL_SEARING_PLASMA            = 105479,
+    SPELL_SEARING_PLASMA_25N        = 109362,
+    SPELL_SEARING_PLASMA_10HC       = 109363,
+    SPELL_SEARING_PLASMA_25HC       = 109364,
 
     // Hideous Amalgamation
     SPELL_ZERO_REGEN                = 109121,
@@ -136,7 +139,7 @@ const Position tendonsPos[6] =
     { -13844.1f, -13639.7f, 265.7f, 1.5708f }, // right 1
     { -13867.8f, -13622.7f, 266.5f, 1.5708f }, // left 2
     { -13841.0f, -13621.7f, 266.6f, 1.5708f }, // right 2
-    { -13867.1f, -13600.3f, 269.2f, 1.5708f }, // left 3
+    { -13867.1f, -13600.3f, 269.7f, 1.5708f }, // left 3
     { -13840.8f, -13600.6f, 269.1f, 1.5708f }, // right 3
 };
 
@@ -252,6 +255,12 @@ public:
 
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 instance->SetData(DATA_SPINE_OF_DEATHWING_PLATES, 0);
+
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_DEGRADATION);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_25N);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_10HC);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_25HC);
             }
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -277,6 +286,7 @@ public:
             DeleteGameObjects(GO_DEATHWING_BACK_PLATE_2);
             DeleteGameObjects(GO_DEATHWING_BACK_PLATE_3);
 
+            scheduler.CancelAll();
             Summons.DespawnAll();
 
             ScriptedAI::Reset();
@@ -353,6 +363,12 @@ public:
             {
                 instance->SetData(TYPE_BOSS_SPINE_OF_DEATHWING, DONE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_DEGRADATION);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_25N);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_10HC);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_25HC);
 
                 if (achievement)
                     instance->DoCompleteAchievement(ACHIEVEMENT_DIZZY);
@@ -473,7 +489,7 @@ public:
 
                         // new corruption shouldn`t spawn at it`s last killed position
                         uint32 randPos = urand(0, maxPos-1);
-                        if (randPos == corruptedPosition && randPos == maxPos)
+                        if (randPos == corruptedPosition && randPos == maxPos-1)
                             randPos = urand(0, maxPos-1);
                         else if (randPos == corruptedPosition)
                             randPos++;
@@ -498,6 +514,10 @@ public:
                 }
                 case ACTION_CHECK_ROLL:
                 {
+                    // Don`t roll when players are watching cinematic
+                    if (instance && instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 3)
+                        return;
+
                     CheckPlayersPosition();
                     switch (rollState)
                     {
@@ -534,7 +554,7 @@ public:
                     case ROLLING_LEFT:
                         DoRoll(ROLL_LEFT);
                         rollState = ROLL_NONE;
-                        rollCheckTimer = 10000;
+                        rollCheckTimer = 1000;
                         break;
                     case ROLL_PRE_RIGHT_1:
                         if (playersPosition == MORE_PLAYERS_ON_RIGHT_SIDE)
@@ -562,7 +582,7 @@ public:
                     case ROLLING_RIGHT:
                         DoRoll(ROLL_RIGHT);
                         rollState = ROLL_NONE;
-                        rollCheckTimer = 10000;
+                        rollCheckTimer = 1000;
                         break;
                     default:
                         rollCheckTimer = 2000;
@@ -591,10 +611,11 @@ public:
                     }
                     else if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 3)
                     {
+                        Summons.DespawnAll();
                         PlayMovieToPlayers(SPINE_OF_DEATHWING_DEFEAT_CINEMATIC);
                         scheduler.Schedule(Seconds(25), [this](TaskContext /* Task context */)
                         {
-                            me->Kill(me);
+                            me->DealDamage(me, me->GetHealth());
                         });
                     }
                     break;
@@ -629,7 +650,7 @@ public:
                     if (pl && pl->IsInWorld() && pl->IsAlive() && !pl->IsGameMaster())
                     {
                         if (!pl->HasAura(SPELL_GRASPING_TENDRILS_10N) && !pl->HasAura(SPELL_GRASPING_TENDRILS_25N)
-                            && !pl->HasAura(SPELL_GRASPING_TENDRILS_25HC) && !pl->HasAura(SPELL_GRASPING_TENDRILS_25HC))
+                            && !pl->HasAura(SPELL_GRASPING_TENDRILS_10HC) && !pl->HasAura(SPELL_GRASPING_TENDRILS_25HC))
                         {
                             if (side == ROLL_LEFT)
                                 pl->GetMotionMaster()->MoveJump(rollPos[DEST_LEFT].GetPositionX(), rollPos[DEST_LEFT].GetPositionY(), rollPos[DEST_LEFT].GetPositionZ(), 20.0f, 10.0f);
@@ -1100,19 +1121,16 @@ public:
 
     struct npc_ds_spine_hideous_amalgamationAI : public ScriptedAI
     {
-        npc_ds_spine_hideous_amalgamationAI(Creature *creature) : ScriptedAI(creature) { }
+        npc_ds_spine_hideous_amalgamationAI(Creature *creature) : ScriptedAI(creature) 
+        {
+            isExplode = false;
+        }
 
         TaskScheduler scheduler;
-        uint32 searingPlasmaTimer;
-        uint32 fieryGripTimer;
         bool isExplode;
         int absorbedBloodCount = 0;
 
-        void Reset() override
-        {
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            isExplode = false;
-        }
+        void Reset() override {}
 
         void DoAction(const int32 action)
         {
@@ -1178,7 +1196,7 @@ public:
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         me->CastSpell(me, SPELL_NUCLEAR_BLAST, false);
-                        scheduler.Schedule(Seconds(6), [this](TaskContext /* Task context */)
+                        scheduler.Schedule(Milliseconds(5100), [this](TaskContext /* Task context */)
                         {
                             Creature * pBurningTendonsLeft = me->FindNearestCreature(NPC_BURNING_TENDONS_LEFT, 25.0f, true);
                             Creature * pBurningTendonsRight = me->FindNearestCreature(NPC_BURNING_TENDONS_RIGHT, 25.0f, true);
