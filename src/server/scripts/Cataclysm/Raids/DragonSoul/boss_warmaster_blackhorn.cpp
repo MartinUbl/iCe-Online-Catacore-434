@@ -288,7 +288,7 @@ public:
             }
 
             if (Creature * pGoriona = me->FindNearestCreature(NPC_GORIONA, SEARCH_RANGE, true))
-                pGoriona->AI()->DoAction(ACTION_GORIONA_LEAVES_SCENE);
+                pGoriona->DespawnOrUnsummon();
 
             if (Creature* pCaptainSwayze = me->FindNearestCreature(NPC_SKY_CAPTAIN_SWAYZE, SEARCH_RANGE))
                 pCaptainSwayze->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
