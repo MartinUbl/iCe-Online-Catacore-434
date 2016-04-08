@@ -912,7 +912,7 @@ public:
                     RunPlayableQuote(warmasterGorionaOnslaught, BOSS_WARMASTER_BLACKHORN);
 
                     std::vector<int> locations;
-                    for (int i = 0; i < MAX_WARMASTER_DAMAGE_POSITIONS; i++)
+                    for (uint32 i = 0; i < MAX_WARMASTER_DAMAGE_POSITIONS; i++)
                     {
                         if (OnslaughtBoardSpotStatus(i, CHECK) == EMPTY_SPOT)
                             locations.push_back(i);

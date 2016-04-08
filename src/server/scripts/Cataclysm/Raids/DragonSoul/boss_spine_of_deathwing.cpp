@@ -467,7 +467,7 @@ public:
                         nextSpawnTimer = 5000;
                     }
 
-                    uint32 randPos = (0, maxPos-1);
+                    uint32 randPos = urand(0, maxPos-1);
                     if (Creature * pCorruption = me->SummonCreature(NPC_CORRUPTED_BLOOD, corruptionPos[randPos], TEMPSUMMON_DEAD_DESPAWN))
                         pCorruption->AI()->SetData(ACTION_CORRUPTED_POSITION, randPos);
                     break;
@@ -843,7 +843,7 @@ public:
                 {
                     if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 300.0f, true, -SPELL_FIERY_GRIP))
                     {
-                        me->CastSpell(me, SPELL_FIERY_GRIP, false);
+                        me->CastSpell(pTarget, SPELL_FIERY_GRIP, false);
                         damageCounter = me->CountPctFromMaxHealth(20);
                         isGrip = true;
                         fieryGripTimer = urand(30000, 35000);
