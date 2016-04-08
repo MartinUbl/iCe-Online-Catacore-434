@@ -4470,8 +4470,8 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         // Madness of Deathwing
-        case 106464: // Enter the Dream
-            spellInfo->DurationIndex = 21; // unlimited
+        case 106728: // Tetanus
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
             break;
         case 106641: // Concentration (Aspects)
         case 106642:
@@ -4479,12 +4479,28 @@ void SpellMgr::LoadSpellCustomAttr()
         case 106644:
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
             break;
-        //case 105565: // Cauterize
         case 106588: // Expoose Weakness (Aspects)
         case 106600:
         case 106613:
         case 106624:
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            break;
+        case 106242: // Elementium Meteor target
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            break;
+        case 106664: // Carrying Winds
+        case 109963:
+        case 109962:
+        case 109961:
+            spellInfo->DurationIndex = 28; // 5s
+            break;
+        case 106776: // Impaling Tentacle
+        case 106766: // Elementium Terror
+            spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_TARGET_ANY;
+            break;
+        case 105569: // Cauterize
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_ENEMY_DST;
             break;
 /*************************        DRAGON SOUL END        *****************************/
 

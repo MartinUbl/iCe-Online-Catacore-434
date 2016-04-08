@@ -1774,6 +1774,11 @@ enum MadnessSpells
     SPELL_SPELLWEAVER                   = 106039,
     SPELL_SPELLWEAVING                  = 106040,
 
+    SPELL_CONCENTRATION_ALEXSTRASZA     = 106641,
+    SPELL_CONCENTRATION_NOZDORMU        = 106642,
+    SPELL_CONCENTRATION_YSERA           = 106643,
+    SPELL_CONCENTRATION_KALECGOS        = 106644,
+
     // Thrall
     SPELL_ASTRAL_RECALL                 = 108537,
     SPELL_ASTRAL_RECALL_2               = 101063,
@@ -1863,10 +1868,35 @@ enum ThrallActions
     ACTION_THRALL_INTRO_SPEECH         = 0,
     ACTION_SPAWN_JUMP_PADS             = 1,
     ACTION_START_MADNESS_ENCOUNTER     = 2,
-    ACTION_ADD_ENTER_THE_DREAM_ABILITY = 3,
-    ACTION_ADD_SPELLWEAVING            = 4,
+    ACTION_NOZDORMU_PLATFORM_DESTROYED = 3,
     ACTION_TELEPORT_HOME               = 5,
-    ACTION_CAUTERIZE                   = 6,
+    ACTION_ASPECTS_SECOND_PHASE        = 10,
+    ACTION_ASPECTS_OUTRO               = 11,
+    ACTION_ASPECTS_HIDE                = 12,
+};
+
+const int8 MAX_SECOND_PHASE_QUOTES = 8;
+
+static const PlayableQuote secondPhaseQuotes[MAX_SECOND_PHASE_QUOTES] =
+{
+    { 26260, "Is he... coming apart?" }, // Kalecgos
+    { 25895, "Aspects! Aid the heroes as best you can!" }, // Thrall
+    { 26499, "He's completely mad!" }, // Alexstrasza
+    { 25896, "These champions are our only hope for exposing Deathwing's weakness. Together, we can prevail." }, // Thrall
+    { 25950, "Press the attack, heroes!" }, // Nozdormu
+    { 25897, "Don't give up! We're counting on you to push Deathwing back." }, // Thrall
+    { 26143, "Such rage I have never seen..." }, // Ysera
+    { 25902, "Strike now, Heroes! Only you can give us our opening!" }, // Thrall
+};
+
+const int8 MAX_OUTRO_QUOTES = 4;
+
+static const PlayableQuote outroQuotes[MAX_OUTRO_QUOTES] =
+{
+    { 26497, "Excellent work. The fire of my heart glows with a brilliant purity unmatched; every spark of it I will channel into the Dragon Soul." }, // Alexstrasza
+    { 26258, "Well done! I will realign the flow of mana and fill the Dragon Soul with all my arcane might." }, // Kalecgos
+    { 25948, "It is time. I will expend everything to bind every thread here, now, around the Dragon Soul. What comes to pass will NEVER be undone." }, // Nozdormu
+    { 26141, "We are one step closer. The unknowable, transcendent power of the Emerald Dream I now give unto the Dragon Soul." }, // Ysera
 };
 
 class npc_ds_madness_thrall : public CreatureScript
@@ -1898,7 +1928,6 @@ public:
         if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
         {
             pCreature->AI()->DoAction(ACTION_THRALL_INTRO_SPEECH);
-            pCreature->AI()->DoAction(ACTION_SPAWN_JUMP_PADS);
             pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             pPlayer->CLOSE_GOSSIP_MENU();
         }
@@ -1917,63 +1946,78 @@ public:
 
     struct npc_ds_madness_thrallAI : public ScriptedAI
     {
-        npc_ds_madness_thrallAI(Creature* pCreature) : ScriptedAI(pCreature)
+        npc_ds_madness_thrallAI(Creature* pCreature) : ScriptedAI(pCreature), summons(pCreature)
         {
             instance = pCreature->GetInstanceScript();
+            scheduler.Schedule(Seconds(2), [this, pCreature](TaskContext introSpeech)
+            {
+                pCreature->GetAI()->DoAction(ACTION_SPAWN_JUMP_PADS);
+
+                me->SummonCreature(NPC_ALEXSTRASZA_DRAGON_FORM, alexstraszaPos, TEMPSUMMON_MANUAL_DESPAWN);
+                me->SummonCreature(NPC_KALECGOS_DRAGON_FORM, kalecgosPos, TEMPSUMMON_MANUAL_DESPAWN);
+                me->SummonCreature(NPC_NOZDORMU_DRAGON_FORM, nozdormuPos, TEMPSUMMON_MANUAL_DESPAWN);
+                me->SummonCreature(NPC_YSERA_DRAGON_FORM, yseraPos, TEMPSUMMON_MANUAL_DESPAWN);
+            });
         }
 
         InstanceScript* instance;
         TaskScheduler scheduler;
+        SummonList summons;
         uint8 intro;
+        uint8 quote;
 
         void Reset() override
         {
             intro = 0;
+            quote = 0;
+        }
+
+        void JustSummoned(Creature* summon) override
+        {
+            summons.push_back(summon->GetGUID());
         }
 
         void DoAction(const int32 action) override
         {
+            Creature* pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_DRAGON_FORM, 300.0f, true);
+            Creature* pKalecgos = me->FindNearestCreature(NPC_KALECGOS_DRAGON_FORM, 300.0f, true);
+            Creature* pNozdormu = me->FindNearestCreature(NPC_NOZDORMU_DRAGON_FORM, 300.0f, true);
+            Creature* pYsera = me->FindNearestCreature(NPC_YSERA_DRAGON_FORM, 300.0f, true);
+
             switch (action)
             {
             case ACTION_THRALL_INTRO_SPEECH:
                 intro = 1;
                 me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                scheduler.Schedule(Seconds(0), [this](TaskContext introSpeech)
+                scheduler.Schedule(Seconds(0), [this, pAlexstrasza, pKalecgos, pYsera, pNozdormu](TaskContext introSpeech)
                 {
-                    if (introSpeech.GetRepeatCounter() == 0)
+                    if (pAlexstrasza && pKalecgos && pYsera && pNozdormu)
                     {
-                        Creature* pAlexstrasza = me->SummonCreature(NPC_ALEXSTRASZA_DRAGON_FORM, alexstraszaPos, TEMPSUMMON_MANUAL_DESPAWN);
-                        Creature* pKalecgos = me->SummonCreature(NPC_KALECGOS_DRAGON_FORM, kalecgosPos, TEMPSUMMON_MANUAL_DESPAWN);
-                        Creature* pNozdormu = me->SummonCreature(NPC_NOZDORMU_DRAGON_FORM, nozdormuPos, TEMPSUMMON_MANUAL_DESPAWN);
-                        Creature* pYsera = me->SummonCreature(NPC_YSERA_DRAGON_FORM, yseraPos, TEMPSUMMON_MANUAL_DESPAWN);
-                        if (pAlexstrasza && pKalecgos && pYsera && pNozdormu)
+                        if (introSpeech.GetRepeatCounter() == 0)
                         {
                             me->MonsterYell("It is done; at last the Destroyer has met his end. Now, we can begin to heal our world.", LANG_UNIVERSAL, false);
                             me->SendPlaySound(25901, false);
                             introSpeech.Repeat(Seconds(10));
                         }
-                    }
-                    else if (introSpeech.GetRepeatCounter() == 1)
-                    {
-                        if (Creature* pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_DRAGON_FORM, 300.0f, true))
+                        else if (introSpeech.GetRepeatCounter() == 1)
+                        {
                             pAlexstrasza->MonsterYell("You have accomplished the impossible, succeeded where all Azeroth feared you would fail.", LANG_UNIVERSAL, false);
-                        me->SendPlaySound(26501, false);
-                        introSpeech.Repeat(Seconds(9));
-                    }
-                    else if (introSpeech.GetRepeatCounter() == 2)
-                    {
-                        if (Creature* pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_DRAGON_FORM, 300.0f, true))
+                            me->SendPlaySound(26501, false);
+                            introSpeech.Repeat(Seconds(9));
+                        }
+                        else if (introSpeech.GetRepeatCounter() == 2)
+                        {
                             pAlexstrasza->MonsterYell("Before you is the Cache of the Aspects. Take from it what you will, for you have more than earned the right.", LANG_UNIVERSAL, false);
-                        me->SendPlaySound(26502, false);
-                        introSpeech.Repeat(Seconds(11));
-                    }
-                    else if (introSpeech.GetRepeatCounter() == 3)
-                    {
-                        if (Creature* pNozdormu = me->FindNearestCreature(NPC_NOZDORMU_DRAGON_FORM, 300.0f, true))
+                            me->SendPlaySound(26502, false);
+                            introSpeech.Repeat(Seconds(11));
+                        }
+                        else if (introSpeech.GetRepeatCounter() == 3)
+                        {
                             pNozdormu->MonsterYell("...although, you may want to hurry.", LANG_UNIVERSAL, false);
-                        me->SendPlaySound(25952, false);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            me->SendPlaySound(25952, false);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        }
                     }
                 });
                 break;
@@ -1999,12 +2043,10 @@ public:
                 }
                 break;
             case ACTION_START_MADNESS_ENCOUNTER:
-                if (Creature* pYsera = me->FindNearestCreature(NPC_YSERA_DRAGON_FORM, 300.0f, true))
-                    pYsera->AI()->DoAction(ACTION_ADD_ENTER_THE_DREAM_ABILITY);
-                if (Creature* pKalecgos = me->FindNearestCreature(NPC_KALECGOS_DRAGON_FORM, 300.0f, true))
-                    pKalecgos->AI()->DoAction(ACTION_ADD_SPELLWEAVING);
-
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->CastSpell(me, SPELL_ASTRAL_RECALL, false);
+                quote = 0;
 
                 scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
                 {
@@ -2016,19 +2058,129 @@ public:
 
                     me->GetMotionMaster()->MoveJump(thrallPos.GetPositionX(), thrallPos.GetPositionY(), thrallPos.GetPositionZ(), 100.0f, 100.0f);
                     me->NearTeleportTo(thrallPos.GetPositionX(), thrallPos.GetPositionY(), thrallPos.GetPositionZ(), thrallPos.GetOrientation());
-                    scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
+
+                    scheduler.Schedule(Seconds(1), [this](TaskContext /*task context*/)
                     {
-                        me->SetOrientation(thrallPos.GetOrientation());
+                        me->SetFacingTo(thrallPos.GetOrientation());
+                        me->SetUnitMovementFlags(MOVEMENTFLAG_HOVER | MOVEMENTFLAG_FLYING);
                     });
                 });
                 break;
             case ACTION_TELEPORT_HOME:
-                me->GetMotionMaster()->MoveJump(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ(), 100.0f, 100.0f);
-                me->NearTeleportTo(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ(), me->GetHomePosition().GetOrientation());
-                scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
                 {
-                    me->SetOrientation(me->GetHomePosition().GetOrientation());
+                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    quote = 0;
+                    me->GetMotionMaster()->MoveJump(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ(), 100.0f, 100.0f);
+                    me->NearTeleportTo(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ(), me->GetHomePosition().GetOrientation());
+                    scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
+                    {
+                        me->SetFacingTo(me->GetHomePosition().GetOrientation());
+                    });
+
+                    if (pAlexstrasza && pKalecgos && pYsera && pNozdormu)
+                    {
+                        pAlexstrasza->CastSpell(pAlexstrasza, SPELL_ALEXSTRASZA_PRESENCE, false);
+                        pNozdormu->CastSpell(pNozdormu, SPELL_NOZDORMU_PRESENCE, false);
+                        pYsera->CastSpell(pYsera, SPELL_THE_DREAMER, false);
+                        pYsera->CastSpell(pYsera, SPELL_YSERA_PRESENCE, false);
+                        pKalecgos->CastSpell(pKalecgos, SPELL_SPELLWEAVER, false);
+                        pKalecgos->CastSpell(pKalecgos, SPELL_KALECGOS_PRESENCE, false);
+                    }
+                }
+                break;
+            case ACTION_ASPECTS_SECOND_PHASE:
+                if (pAlexstrasza && pKalecgos && pYsera && pNozdormu)
+                {
+                    // Schedule raid buffs
+                    scheduler.Schedule(Seconds(5), [this, pAlexstrasza, pYsera, pNozdormu, pKalecgos](TaskContext quote)
+                    {
+                        pAlexstrasza->InterruptNonMeleeSpells(true, 0, true);
+                        pYsera->InterruptNonMeleeSpells(true, 0, true);
+                        pNozdormu->InterruptNonMeleeSpells(true, 0, true);
+                        pKalecgos->InterruptNonMeleeSpells(true, 0, true);
+
+                        pAlexstrasza->CastSpell(pAlexstrasza, SPELL_ALEXSTRASZA_PRESENCE, false);
+                        pNozdormu->CastSpell(pNozdormu, SPELL_NOZDORMU_PRESENCE, false);
+                        pYsera->CastSpell(pYsera, SPELL_THE_DREAMER, false);
+                        pYsera->CastSpell(pYsera, SPELL_YSERA_PRESENCE, false);
+                        pKalecgos->CastSpell(pKalecgos, SPELL_SPELLWEAVER, false);
+                        pKalecgos->CastSpell(pKalecgos, SPELL_KALECGOS_PRESENCE, false);
+                    });
+                    // Schedule Quotes
+                    scheduler.Schedule(Seconds(30), 1, [this, pAlexstrasza, pYsera, pNozdormu, pKalecgos](TaskContext quote)
+                    {
+                        if (quote.GetRepeatCounter() % 2 == 1)
+                            RunPlayableQuote(secondPhaseQuotes[quote.GetRepeatCounter()]);
+                        else
+                        {
+                            if (quote.GetRepeatCounter() == 0)
+                                pKalecgos->MonsterYell(secondPhaseQuotes[quote.GetRepeatCounter()].GetText(), LANG_UNIVERSAL, 0);
+                            if (quote.GetRepeatCounter() == 2)
+                                pAlexstrasza->MonsterYell(secondPhaseQuotes[quote.GetRepeatCounter()].GetText(), LANG_UNIVERSAL, 0);
+                            if (quote.GetRepeatCounter() == 4)
+                                pNozdormu->MonsterYell(secondPhaseQuotes[quote.GetRepeatCounter()].GetText(), LANG_UNIVERSAL, 0);
+                            if (quote.GetRepeatCounter() == 6)
+                                pYsera->MonsterYell(secondPhaseQuotes[quote.GetRepeatCounter()].GetText(), LANG_UNIVERSAL, 0);
+
+                            me->SendPlaySound(secondPhaseQuotes[quote.GetRepeatCounter()].GetSoundId(), false);
+                        }
+                        if (quote.GetRepeatCounter() < MAX_SECOND_PHASE_QUOTES - 1)
+                            quote.Repeat(Seconds(30));
+                    });
+                }
+                break;
+            case ACTION_ASPECTS_OUTRO:
+                scheduler.CancelGroup(1);
+                scheduler.Schedule(Seconds(5), [this, pAlexstrasza, pYsera, pNozdormu, pKalecgos](TaskContext quoteOutro)
+                {
+                    if (pAlexstrasza && pKalecgos && pYsera && pNozdormu)
+                    {
+                        if (quoteOutro.GetRepeatCounter() < MAX_OUTRO_QUOTES)
+                            me->SendPlaySound(outroQuotes[quoteOutro.GetRepeatCounter()].GetSoundId(), false);
+
+                        if (quoteOutro.GetRepeatCounter() == 0)
+                        {
+                            pAlexstrasza->CastSpell(me, SPELL_CONCENTRATION_ALEXSTRASZA, true);
+                            pAlexstrasza->MonsterYell(outroQuotes[quoteOutro.GetRepeatCounter()].GetText(), LANG_UNIVERSAL, 0);
+                            quoteOutro.Repeat(Seconds(10));
+                        }
+                        else if (quoteOutro.GetRepeatCounter() == 1)
+                        {
+                            pKalecgos->CastSpell(me, SPELL_CONCENTRATION_KALECGOS, true);
+                            pKalecgos->MonsterYell(outroQuotes[quoteOutro.GetRepeatCounter()].GetText(), LANG_UNIVERSAL, 0);
+                            quoteOutro.Repeat(Seconds(9));
+                        }
+                        else if (quoteOutro.GetRepeatCounter() == 2)
+                        {
+                            pNozdormu->CastSpell(me, SPELL_CONCENTRATION_NOZDORMU, true);
+                            pNozdormu->MonsterYell(outroQuotes[quoteOutro.GetRepeatCounter()].GetText(), LANG_UNIVERSAL, 0);
+                            quoteOutro.Repeat(Seconds(15));
+                        }
+                        else if (quoteOutro.GetRepeatCounter() == 3)
+                        {
+                            pYsera->CastSpell(me, SPELL_CONCENTRATION_YSERA, true);
+                            pYsera->MonsterYell(outroQuotes[quoteOutro.GetRepeatCounter()].GetText(), LANG_UNIVERSAL, 0);
+                            quoteOutro.Repeat(Seconds(11));
+                        }
+                        else if (quoteOutro.GetRepeatCounter() == 4)
+                        {
+                            me->CastSpell(me, SPELL_FIRE_DRAGON_SOUL, false);
+                            quoteOutro.Repeat(Seconds(15));
+                        }
+                        else if (quoteOutro.GetRepeatCounter() == 5)
+                        {
+                            pAlexstrasza->InterruptNonMeleeSpells(true, 0, true);
+                            pNozdormu->InterruptNonMeleeSpells(true, 0, true);
+                            pYsera->InterruptNonMeleeSpells(true, 0, true);
+                            pKalecgos->InterruptNonMeleeSpells(true, 0, true);
+                        }
+                    }
                 });
+                break;
+            case ACTION_ASPECTS_HIDE:
+                summons.DespawnAll();
+                me->DespawnOrUnsummon();
                 break;
             default:
                 break;
@@ -2074,44 +2226,14 @@ public:
                 break;
             case NPC_KALECGOS_DRAGON_FORM:
                 me->CastSpell(me, SPELL_KALECGOS_PRESENCE, false);
+                me->CastSpell(me, SPELL_SPELLWEAVER, false);
                 break;
             case NPC_YSERA_DRAGON_FORM:
                 me->CastSpell(me, SPELL_YSERA_PRESENCE, false);
+                me->CastSpell(me, SPELL_THE_DREAMER, false);
                 break;
             default:
                 break;
-            }
-        }
-
-        void DoAction(const int32 action) override
-        {
-            if (action == ACTION_CAUTERIZE)
-            {
-                me->MonsterYell("Action Cauterize", LANG_UNIVERSAL, 0);
-                if (me->HasAura(SPELL_ALEXSTRASZA_PRESENCE))
-                {
-                    me->CastSpell(me, SPELL_CAUTERIZE_BLIST_TENTACLE_10N, false);
-                    me->MonsterYell("Cauterizing", LANG_UNIVERSAL, 0);
-                }
-            }
-
-            Map * map = me->GetMap();
-            if (!map)
-                return;
-
-            Map::PlayerList const& plrList = map->GetPlayers();
-            if (plrList.isEmpty())
-                return;
-
-            for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
-            {
-                if (Player* pl = itr->getSource())
-                {
-                    if (action == ACTION_ADD_ENTER_THE_DREAM_ABILITY)
-                        pl->CastSpell(pl, SPELL_ENTER_THE_DREAM, true);
-                    else if (action == ACTION_ADD_ENTER_THE_DREAM_ABILITY)
-                        me->CastSpell(me, SPELL_SPELLWEAVING, false);
-                }
             }
         }
 

@@ -22,53 +22,63 @@
 
 #define SEARCH_RANGE                   300.0f
 #define SEARCH_RANGE_FAR               500.0f
-#define OUTRO_CINEMATIC                 75
+#define OUTRO_CINEMATIC                 76
 #define ANGLE_RANGE                      0.28f
 
 // NPCs
 enum NPC
 {
     BOSS_MADNESS_OF_DEATHWING           = 56173,
-
+    // Parts of Deathwing
     NPC_WING_TENTACLE                   = 56168, // 1 & 4
     NPC_ARM_TENTACLE_LEFT               = 56846, // 2
     NPC_ARM_TENTACLE_RIGHT              = 56167, // 3
+
+    NPC_WING_LEFT                       = 57696,
+    NPC_WING_RIGHT                      = 57695,
+    NPC_ARM_LEFT                        = 57694,
+    NPC_ARM_RIGHT                       = 57686,
+    NPC_HEAD                            = 119561,
+
     NPC_COSMETIC_TENTACLE               = 57693,
     NPC_TAIL_TENTACLE                   = 56844,
 
+    // Phase 1 adds
     NPC_BLISTERING_TENTACLE             = 56188,
     NPC_PLATFORM                        = 56307,
     NPC_ELEMENTIUM_BOLT                 = 56262,
     NPC_MUTATED_CORRUPTION              = 56471,
     NPC_TIME_ZONE                       = 56311,
-    NPC_REGENERATIVE_BLOOD              = 56263,
+    NPC_REGENERATIVE_BLOOD              = 56263, // 105875
 
     NPC_CRUSH_TARGET                    = 56581,
-
-    NPC_HEMORRHAGE_TARGET               = 56359,
+    NPC_HEMORRHAGE_TARGET               = 56359, // 105853
     NPC_CLAWK_MARK                      = 56545,
     NPC_CORRUPTING_PARASITE             = 57479,
 
-    NPC_IMPALING_TENTACLE               = 56724,
-    NPC_ELEMENTIUM_TERROR               = 56710,
+    // Phase 2 adds
+    NPC_ELEMENTIUM_TERROR               = 56710, // 106767
+    NPC_ELEMENTIUM_FRAGMENT             = 56724, // 106777
     NPC_CONGEALING_BLOOD                = 57798,
 
-    NPC_DEATHWING_1                     = 57962, // invisible ?
+    NPC_DEATHWING_HEAD                  = 57962,
+    NPC_AGGRA                           = 58211,
 };
 
 // Spells
 enum Spells
 {
+    SPELL_SUMMON_TAIL_FORCE             = 106239,
+    SPELL_SUMMON_TAIL                   = 106240,
     SPELL_IDLE                          = 106187, // tail tentacle has it
     SPELL_TRIGGER_ASPECT_BUFFS          = 106943, // casted by deathwing 56173
-    SPELL_SHARE_HEALTH_1                = 109547, // casted by deathwing 56173 on self ?
-    SPELL_SHARE_HEALTH_2                = 109548, // casted by deathwing 56173 on 57962
+    SPELL_SHARE_HEALTH                  = 109548, // casted by deathwing 56173 on his head
     SPELL_ASSAULT_ASPECTS               = 107018, // casted by deathwing 56173
     SPELL_ELEMENTIUM_BOLT               = 105651,
     SPELL_ELEMENTIUM_METEOR_SCRIPT      = 105599,
 
     SPELL_ELEMENTIUM_BLAST              = 105723,
-    //SPELL_ELEMENTIUM_METEOR_TARGET      = 106242, // target mark
+    SPELL_ELEMENTIUM_METEOR_TARGET      = 106242, // target mark
     //SPELL_ELEMENTIUM_METEOR_TRANSFORM_1 = 106991, // summon from sniffs ?
     //SPELL_ELEMENTIUM_METEOR_TRANSFORM_2 = 110663,
     SPELL_ELEMENTIUM_METEOR_AURA        = 110628,
@@ -83,10 +93,10 @@ enum Spells
     SPELL_SLUMP_2                       = 110062, // on death ?
     SPELL_EMERGE                        = 22445,
 
-    SPELL_CORRUPTED_BLOOD               = 106834,
-    SPELL_CORRUPTED_BLOOD_25            = 109592,
-    SPELL_CORRUPTED_BLOOD_10H           = 109593,
-    SPELL_CORRUPTED_BLOOD_25H           = 109594,
+    SPELL_CORRUPTED_BLOOD_10N           = 106834,
+    SPELL_CORRUPTED_BLOOD_25N           = 109592,
+    SPELL_CORRUPTED_BLOOD_10HC          = 109593,
+    SPELL_CORRUPTED_BLOOD_25HC          = 109594,
     SPELL_CORRUPTED_BLOOD_STACKER       = 106843,
 
     SPELL_CORRUPTING_PARASITE_AOE       = 108597,
@@ -94,14 +104,10 @@ enum Spells
     SPELL_CORRUPTING_PARASITE_AURA      = 108649,
     SPELL_PARASITIC_BACKSLASH           = 108787,
     SPELL_UNSTABLE_CORRUPTION           = 108813,
+
     SPELL_DEATH                         = 110101,
     SPELL_BERSERK                       = 64238,
     SPELL_ACHIEVEMENT                   = 111533,
-
-    SPELL_TIME_ZONE_MISSILE             = 105799,
-    SPELL_TIME_ZONE_AURA_DUMMY          = 105831, // aura (debuff)
-    SPELL_TIME_ZONE_AURA_2              = 108646, // for parasite
-    SPELL_ENTER_THE_DREAM               = 106464,
 
     // Limb Tentacle
     SPELL_LIMB_EMERGE_VISUAL            = 107991,
@@ -114,8 +120,6 @@ enum Spells
     SPELL_AGONIZING_PAIN                = 106548,
 
     // Mutated Corruption
-    SPELL_SUMMON_TAIL_FORCE             = 106239,
-    SPELL_SUMMON_TAIL                   = 106240,
     SPELL_CRUSH_FORCE                   = 106382,
     SPELL_CRUSH_SUMMON                  = 106384,
     SPELL_CRUSH                         = 106385,
@@ -167,14 +171,11 @@ enum Spells
     SPELL_SHRAPNEL_TARGET               = 106794,
     SPELL_SHRAPNEL_DMG                  = 106791,
 
+    // Aspects
     SPELL_CONCENTRATION_ALEXSTRASZA     = 106641,
     SPELL_CONCENTRATION_NOZDORMU        = 106642,
     SPELL_CONCENTRATION_YSERA           = 106643,
     SPELL_CONCENTRATION_KALECGOS        = 106644,
-    SPELL_CONCENTRATION_ALEXSTRASZA_END = 110071,
-    SPELL_CONCENTRATION_NOZDORMU_END    = 110072,
-    SPELL_CONCENTRATION_YSERA_END       = 110076,
-    SPELL_CONCENTRATION_KALECGOS_END    = 110077,
 
     SPELL_ALEXSTRASZA_PRESENCE          = 105825,
     SPELL_NOZDORMU_PRESENCE             = 105823,
@@ -185,6 +186,18 @@ enum Spells
     SPELL_EXPOSE_WEAKNESS_NOZDORMU      = 106600,
     SPELL_EXPOSE_WEAKNESS_YSERA         = 106613,
     SPELL_EXPOSE_WEAKNESS_KALECGOS      = 106624,
+
+    SPELL_TIME_ZONE_MISSILE             = 105799,
+    SPELL_TIME_ZONE_AURA_DUMMY          = 105831, // aura (debuff)
+    SPELL_TIME_ZONE_AURA_2              = 108646, // for parasite
+    SPELL_THE_DREAMER                   = 106463,
+    SPELL_ENTER_THE_DREAM               = 106464,
+    SPELL_SPELLWEAVER                   = 106039,
+    SPELL_SPELLWEAVING                  = 106040,
+    SPELL_FIRE_DRAGON_SOUL              = 109971,
+
+    ACHIEVEMENT_HEORIC_MADNESS          = 6116,
+    ACHIEVEMENT_REALM_FIRST_MADNESS     = 6126,
 };
 
 enum MadnesGameobjects
@@ -209,10 +222,27 @@ enum Platforms
 
 enum MadnessActions
 {
-    ACTION_SET_PLATFORM             = 0,
-    ACTION_LIMB_DIED                = 1,
-    ACTION_TELEPORT_HOME            = 5,
-    ACTION_CAUTERIZE                = 6,
+    ACTION_SET_PLATFORM                 = 0,
+    ACTION_LIMB_DIED                    = 1,
+    ACTION_TELEPORT_HOME                = 5,
+    ACTION_SPAWN_HEAD                   = 4,
+    ACTION_SPAWN_ELEMENT_TERRORS        = 7,
+    ACTION_SPAWN_ELEMENT_FRAGMENTS      = 8,
+    ACTION_SPAWN_CONGEALING_BLOODS      = 9,
+    ACTION_ASPECTS_SECOND_PHASE         = 10,
+    ACTION_ASPECTS_OUTRO                = 11,
+    ACTION_ASPECTS_HIDE                 = 12,
+};
+
+enum SeatPosition
+{
+    DEATHWING_RIGHT_ARM             = 0,
+    DEATHWING_LEFT_ARM              = 1,
+    DEATHWING_HEAD                  = 2,
+    DEATHWING_RIGHT_WING            = 3,
+    DEATHWING_LEFT_WING             = 4,
+    FREE_SEAT_POSITION              = 5,
+    MAX_SEAT_POSITIONS              = 6,
 };
 
 enum Phase
@@ -220,6 +250,7 @@ enum Phase
     PHASE_LIMBS                     = 0,
     PHASE_SLUMB                     = 1,
     PHASE_HEAD_DOWN                 = 2,
+    PHASE_OUTRO                     = 3,
 };
 
 const Position limbsPos[MAX_PLATFORMS] =
@@ -230,9 +261,11 @@ const Position limbsPos[MAX_PLATFORMS] =
     { -12097.8f, 12067.4f, 13.4f, 2.21f },
 };
 
+const Position tailPos = { -11852.6f, 11844.2f, -64.9f,  2.17f };
+
 const Position platformPos[MAX_PLATFORMS] =
 {
-    { -11957.2f, 12267.9f,  1.2f, 5.07f },
+    { -11958.7f, 12262.9f,  1.3f, 5.07f },
     { -12039.8f, 12224.3f, -6.1f, 5.32f },
     { -12099.0f, 12161.2f, -2.7f, 5.77f },
     { -12128.8f, 12077.4f,  2.3f, 2.21f },
@@ -267,27 +300,10 @@ const Position hemorrhagePos[MAX_PLATFORMS] =
     { -12146.3f, 12093.5f,  2.31f, 0.0f },
 };
 
-//const Position blisteringPos[4] =
-//{
-//    {-11942.116211f, 12249.538086f, 1.37f, 0.0f},
-//    {-12025.414063f, 12213.312500f, -6.14f, 0.0f},
-//    {-12084.824219f, 12146.507813f, -2.72f, 0.0f},
-//    {-12102.188477f, 12067.497070f, 2.31f, 0.0f},
-//};
+#define MAX_FRAGMENT_POSITIONS_10MAN         3
+#define MAX_FRAGMENT_POSITIONS_25MAN         8
 
-#define MAX_IMPALING_POSITIONS         8
-
-const Position impalingPos[MAX_IMPALING_POSITIONS] =
-{
-    { -12117.3f, 12185.7f, -2.7f, 0.0f },
-    { -12115.9f, 12177.0f, -2.7f, 0.0f },
-    { -12122.9f, 12176.0f, -2.7f, 0.0f },
-    { -12120.6f, 12170.0f, -2.7f, 0.0f },
-    { -12115.1f, 12168.3f, -2.7f, 0.0f },
-    { -12120.2f, 12165.8f, -2.7f, 0.0f },
-    { -12113.3f, 12165.1f, -2.7f, 0.0f },
-    { -12112.7f, 12172.5f, -2.7f, 0.0f }
-};
+const Position fragmentTargetPos = { -12107.54f, 12168.70f, -2.73f, 0.61f };
 
 #define MAX_TERROR_POSITIONS            2
 
@@ -297,11 +313,10 @@ const Position terrorPos[MAX_TERROR_POSITIONS] =
     { -12117.7f, 12168.8f, -2.7f, 0.0f }
 };
 
-const Position congealingPos[2] =
-{
-    { -12119.4f, 12162.6f, -2.7f, 0.0f },
-    { -12079.5f, 12169.6f, -2.7f, 0.0f } // healing pos
-};
+const uint8 MAX_CONGEALING_BLOODS           = 9;
+
+const Position congealingPosSpawn = { -12119.4f, 12162.6f, -2.7f, 0.0f };
+const Position congealingPosHeal  = { -12079.5f, 12169.6f, -2.7f, 0.0f };
 
 #define MAX_ELEMENTIUM_BOLT_QUOTES             3 
 
@@ -310,6 +325,24 @@ static const PlayableQuote elementiumBoltQuotes[MAX_ELEMENTIUM_BOLT_QUOTES] =
     { 26354, "There's no shelter from my fury." },
     { 26355, "Your armor means nothing, your faith even less." },
     { 26356, "The sea will swallow your smoldering remains." },
+};
+
+const uint8 MAX_KILL_QUOTES = 3;
+
+static const PlayableQuote killQuotes[MAX_KILL_QUOTES] =
+{
+    { 26528, "There is no hope, no future, all light is doomed!" },
+    { 26529, "Like you, all Azeroth shall burn." },
+    { 26530, "Know that your world will soon follow." },
+};
+
+const uint8 MAX_CATACLYSM_QUOTES = 3;
+
+static const PlayableQuote cataclysmQuotes[MAX_CATACLYSM_QUOTES] =
+{
+    { 26357, "I shall tear this world apart!" },
+    { 26358, "I shall show you a true CATACLYSM!" },
+    { 26347, "Deathwing screams" } // Used only for audio effect
 };
 
 static const PlayableQuote aggroQuote = { 26527, "You have done NOTHING. I will tear your world APART." };
@@ -324,7 +357,7 @@ const Position nozdormuendPos       = { -12078.4f, 12147.5f, -2.6f, 0.17f };
 const Position yseraendPos          = { -12073.8f, 12156.6f, -2.6f, 5.55f };
 const Position kalecgosendPos       = { -12069.2f, 12159.9f, -2.6f, 5.23f };
 const Position aggraendPos          = { -12066.1f, 12150.4f, -2.6f, 3.05f };
-const Position thrallendPos         = { -12067.7f, 12146.4f, -2.6f, 3.05f };
+const Position thrallendPos         = { -12067.7f, 12146.4f, -2.6f, 2.31f };
 const Position cacheSpawnPos        = { -12076.6f, 12169.9f, -2.5f, 3.54f };
 
 struct AspectsEntries
@@ -392,6 +425,11 @@ public:
         uint32 assaultAspectsTimer;
         uint32 elementiumBoltTimer;
         uint32 cataclysmTimer;
+        uint32 elementiumFragmentsTimer;
+        uint32 elementiumTerrorsTimer;
+        uint32 congealingBloodSpawnPct;
+        uint32 congealingBloodSpawnTimer;
+        uint32 berserkTimer;
 
         uint8 platformKilled;
         uint8 activePlatform;
@@ -400,6 +438,8 @@ public:
         bool newAssault;
         bool canCataclysm;
         bool platformDestroyed[MAX_PLATFORMS];
+        bool canSpawnCongealings;
+        bool newTimerCongelingsSet;
 
         void Reset() override
         {
@@ -411,12 +451,10 @@ public:
 
                 if (Creature * pThrall = me->FindNearestCreature(NPC_THRALL_MADNESS_START, SEARCH_RANGE, true))
                     pThrall->AI()->DoAction(ACTION_TELEPORT_HOME);
-
-                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENTER_THE_DREAM);
             }
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetVisible(false);
             me->RemoveAura(SPELL_SLUMP);
 
@@ -425,6 +463,13 @@ public:
             canCataclysm = false;
             platformKilled = 0;
             activePlatform = 0;
+            elementiumFragmentsTimer = 0;
+            elementiumTerrorsTimer = 0;
+            congealingBloodSpawnPct = 15;
+            congealingBloodSpawnTimer = 0;
+            berserkTimer = 15 * MINUTE * IN_MILLISECONDS;
+            canSpawnCongealings = true;
+            newTimerCongelingsSet = false;
             phase = PHASE_LIMBS;
 
             for (uint8 i = PLATFORM_ALEXSTRASZA; i < MAX_PLATFORMS; i++)
@@ -450,6 +495,12 @@ public:
 
         void SummonedCreatureDies(Creature* unit, Unit* /*killer*/) override
         {
+            // Cancel Cataclysm Quote
+            scheduler.CancelGroup(2);
+            // Set platform destroyed
+            platformDestroyed[activePlatform] = true;
+            me->SendPlaySound(cataclysmQuotes[MAX_CATACLYSM_QUOTES - 1].GetSoundId(), false);
+
             if (unit->GetEntry() == NPC_WING_TENTACLE || unit->GetEntry() == NPC_ARM_TENTACLE_LEFT || unit->GetEntry() == NPC_ARM_TENTACLE_RIGHT)
             {
                 for (uint32 i = 0; i < MAX_PLATFORMS; i++)
@@ -459,7 +510,26 @@ public:
                         if (Creature * pAspect = me->FindNearestCreature(aspectsInfo[i].aspectEntryId, SEARCH_RANGE_FAR, true))
                         {
                             pAspect->RemoveAurasDueToSpell(aspectsInfo[i].presenceId);
-                            pAspect->CastSpell(me, aspectsInfo[i].concentrationId, true);
+
+                            if (Vehicle * veh = me->GetVehicleKit())
+                            {
+                                if (Unit * vehiclePassenger = veh->GetPassenger(DEATHWING_HEAD))
+                                    pAspect->CastSpell(vehiclePassenger, aspectsInfo[i].concentrationId, true);
+                            }
+
+                            if (instance)
+                            {
+                                if (activePlatform == PLATFORM_YSERA)
+                                {
+                                    pAspect->RemoveAurasDueToSpell(SPELL_THE_DREAMER);
+                                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENTER_THE_DREAM);
+                                }
+                                else if (activePlatform == PLATFORM_KALECGOS)
+                                {
+                                    pAspect->RemoveAurasDueToSpell(SPELL_SPELLWEAVER);
+                                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SPELLWEAVING);
+                                }
+                            }
                         }
                     }
                 }
@@ -494,6 +564,40 @@ public:
                     limbGuids[i] = pLimb->GetGUID();
                 }
 
+                // Spawn other parts of Deathwing's body
+                if (Vehicle * veh = me->GetVehicleKit())
+                {
+                    uint8 seats = veh->m_Seats.size();
+
+                    for (uint8 i = 0; i < seats; i++)
+                    {
+                        uint32 npcEntry = 0;
+                        if (i == DEATHWING_RIGHT_ARM)
+                            npcEntry = NPC_ARM_RIGHT;
+                        else if (i == DEATHWING_LEFT_ARM)
+                            npcEntry = NPC_ARM_LEFT;
+                        else if (i == DEATHWING_RIGHT_WING)
+                            npcEntry = NPC_WING_RIGHT;
+                        else if (i == DEATHWING_LEFT_WING)
+                            npcEntry = NPC_WING_LEFT;
+                        else if (i == DEATHWING_HEAD)
+                            npcEntry = NPC_HEAD;
+
+                        if (i != FREE_SEAT_POSITION)
+                        {
+                            if (Creature * vehiclePassenger = me->SummonCreature(npcEntry, 0, 0, 0))
+                            {
+                                vehiclePassenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                vehiclePassenger->EnterVehicle(me, i);
+                            }
+                        }
+                    }
+                }
+
+                // Spawn his tail
+                if (Creature* pTail = me->SummonCreature(NPC_TAIL_TENTACLE, tailPos))
+                    pTail->SendPlaySpellVisualKit(SPELL_EMERGE, 0);
+
                 if (Creature* pPlatform = me->SummonCreature(NPC_PLATFORM, platformPos[i]))
                     platformGuids[i] = pPlatform->GetGUID();
             }
@@ -504,7 +608,6 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_MADNESS_OF_DEATHWING, IN_PROGRESS);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             }
 
             me->SendPlaySpellVisualKit(SPELL_EMERGE, 0);
@@ -536,6 +639,33 @@ public:
             me->SummonGameObject(cacheId, cacheSpawnPos.GetPositionX(), cacheSpawnPos.GetPositionY(), cacheSpawnPos.GetPositionZ(), cacheSpawnPos.GetOrientation(), 0, 0, 0, 0, 86400);
         }
 
+        void RewardRealmFirstAchievement()
+        {
+            AchievementEntry const* achievement = sAchievementStore.LookupEntry(ACHIEVEMENT_REALM_FIRST_MADNESS);
+
+            if (!sAchievementMgr->IsRealmCompleted(achievement)) // If (Realm First! Ragnaros achievement) is not already completed
+            {
+                Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
+                if (!plrList.isEmpty())
+                {
+                    if (Player * player = plrList.getFirst()->getSource())
+                    {
+                        if (player->GetGroup() && player->GetGroup()->IsGuildGroup(player->GetGuildId())) // Not in guild group
+                        {
+                            for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                            {
+                                if (Player* pl = itr->getSource())
+                                {
+                                    pl->CompletedAchievement(achievement); // Manually complete achievement for every player
+                                }
+                            }
+                            sAchievementMgr->SetRealmCompleted(achievement); // Lock Achievement manually
+                        }
+                    }
+                }
+            }
+        }
+
         void PlayMovieToPlayers(uint32 movieId)
         {
             if (!instance)
@@ -552,15 +682,18 @@ public:
             }
         }
 
-        void KilledUnit(Unit* victim) override {}
-
-        void JustDied(Unit * /*who*/) override
+        void KilledUnit(Unit* victim) override
         {
-            if (instance)
+            if (victim && victim->GetTypeId() == TYPEID_PLAYER)
             {
-                instance->SetData(TYPE_BOSS_MADNESS_OF_DEATHWING, DONE);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                uint32 rand = urand(0, MAX_KILL_QUOTES - 1);
+                RunPlayableQuote(killQuotes[rand]);
             }
+        }
+
+        void Outro()
+        {
+            summons.DespawnAll();
 
             // Outro
             PlayMovieToPlayers(OUTRO_CINEMATIC);
@@ -569,18 +702,107 @@ public:
             me->SummonCreature(NPC_KALECGOS_MADNESS, kalecgosendPos, TEMPSUMMON_MANUAL_DESPAWN);
             me->SummonCreature(NPC_NOZDORMU_MADNESS, nozdormuendPos, TEMPSUMMON_MANUAL_DESPAWN);
             me->SummonCreature(NPC_THRALL_MADNESS, thrallendPos, TEMPSUMMON_MANUAL_DESPAWN);
+            me->SummonCreature(NPC_AGGRA, aggraendPos, TEMPSUMMON_MANUAL_DESPAWN);
+
+            if (Creature * pThrall = me->FindNearestCreature(NPC_THRALL_MADNESS_START, SEARCH_RANGE, true))
+                pThrall->AI()->DoAction(ACTION_ASPECTS_HIDE);
+
+            scheduler.CancelAll();
+        }
+
+        void JustDied(Unit * /*who*/) override
+        {
+            if (instance)
+            {
+                instance->SetData(TYPE_BOSS_MADNESS_OF_DEATHWING, DONE);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+                if (IsHeroic())
+                {
+                    instance->DoCompleteAchievement(ACHIEVEMENT_HEORIC_MADNESS);
+                    RewardRealmFirstAchievement();
+                }
+            }
 
             SummonCache();
-            scheduler.CancelAll();
         }
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if (me->GetHealth() <= damage)
+            if (phase == PHASE_HEAD_DOWN)
             {
+                // Start Final Aspect Outro
+                if (me->GetHealth() <= damage)
+                {
+                    me->SendPlaySound(cataclysmQuotes[MAX_CATACLYSM_QUOTES - 1].GetSoundId(), false);
+                    damage = me->GetHealth() - 1;
+                    me->RemoveAura(SPELL_SLUMP);
+                    me->RemoveAura(SPELL_CORRUPTED_BLOOD_10N);
+                    me->RemoveAura(SPELL_CORRUPTED_BLOOD_10HC);
+                    me->RemoveAura(SPELL_CORRUPTED_BLOOD_25N);
+                    me->RemoveAura(SPELL_CORRUPTED_BLOOD_25HC);
+                    me->CastSpell(me, SPELL_SLUMP_2, false);
+
+                    summons.DespawnAll();
+                    phase = PHASE_OUTRO;
+
+                    if (Creature * pThrall = me->FindNearestCreature(NPC_THRALL_MADNESS_START, 500.0f, true))
+                        pThrall->AI()->DoAction(ACTION_ASPECTS_OUTRO);
+
+                    // Schedule Death
+                    scheduler.Schedule(Seconds(66), [this](TaskContext death)
+                    {
+                        if (death.GetRepeatCounter() == 0)
+                        {
+                            me->SendPlaySound(cataclysmQuotes[MAX_CATACLYSM_QUOTES - 1].GetSoundId(), false);
+                            me->CastSpell(me, SPELL_DEATH, false);
+                            death.Repeat(Seconds(7));
+                        }
+                        else if (death.GetRepeatCounter() == 1)
+                        {
+                            Outro();
+                            me->SetVisible(false);
+                            death.Repeat(Seconds(95));
+                        }
+                        else
+                            me->Kill(me);
+                    });
+                }
+            }
+            else if (phase == PHASE_OUTRO)
                 damage = 0;
-                me->RemoveAura(SPELL_SLUMP);
-                me->CastSpell(me, SPELL_SLUMP_2, false);
+        }
+
+        void SpawnAdds(uint32 action)
+        {
+            if (Creature * pHemorrhageTarget = me->SummonCreature(NPC_HEMORRHAGE_TARGET, fragmentTargetPos, TEMPSUMMON_TIMED_DESPAWN, 10000))
+            {
+                if (Creature * pDeathwingHead = me->FindNearestCreature(NPC_DEATHWING_HEAD, 300.0f, true))
+                {
+                    if (action == ACTION_SPAWN_ELEMENT_FRAGMENTS)
+                    {
+                        for (uint8 i = 0; i < (Is25ManRaid() ? MAX_FRAGMENT_POSITIONS_25MAN : MAX_FRAGMENT_POSITIONS_10MAN); i++)
+                        {
+                            pDeathwingHead->CastSpell(pHemorrhageTarget, SPELL_IMPALING_TENTACLE_MISSILE, true);
+                        }
+                    }
+                    else if (action == ACTION_SPAWN_ELEMENT_TERRORS)
+                    {
+                        for (uint8 i = 0; i < 2; i++)
+                        {
+                            pDeathwingHead->CastSpell(pHemorrhageTarget, SPELL_ELEMENTIUM_TERROR_MISSILE, true);
+                        }
+                    }
+                    else if (action == ACTION_SPAWN_CONGEALING_BLOODS)
+                    {
+                        scheduler.Schedule(Seconds(0), [this, pHemorrhageTarget, pDeathwingHead](TaskContext congealingBlood)
+                        {
+                            pDeathwingHead->CastSpell(pHemorrhageTarget, SPELL_CONGEALING_BLOOD_MISSILE, true);
+                            if (congealingBlood.GetRepeatCounter() < 9)
+                                congealingBlood.Repeat(Seconds(1));
+                        });
+                    }
+                }
             }
         }
 
@@ -591,15 +813,34 @@ public:
                 switch (action)
                 {
                     case ACTION_LIMB_DIED:
+                        me->InterruptNonMeleeSpells(false);
+                        scheduler.CancelGroup(1); // Cancel Elementium Meteor and Hemorrhage
                         platformKilled++;
                         if (platformKilled == MAX_PLATFORMS)
                             phase = PHASE_SLUMB;
                         me->DealDamage(me, me->GetMaxHealth()*0.2); // Decrease hp by 20%
-                        scheduler.CancelGroup(1); // Cancel Elementium Meteor and Hemorrhage
                         assaultAspectsTimer = 15000;
                         newAssault = true;
                         canCataclysm = false;
-                        me->InterruptNonMeleeSpells(false);
+                        break;
+                    case ACTION_SPAWN_HEAD:
+                        if (Creature * pDeathwingHead = me->SummonCreature(NPC_DEATHWING_HEAD, deathwing2Pos))
+                        {
+                            pDeathwingHead->SetMaxHealth(me->GetMaxHealth());
+                            pDeathwingHead->SetHealth(me->GetHealth());
+
+                            if (instance)
+                            {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pDeathwingHead);
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, pDeathwingHead);
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_UPDATE_OBJECTIVE, pDeathwingHead);
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_UPDATE_PRIORITY, pDeathwingHead);
+                            }
+
+                            me->CastSpell(pDeathwingHead, SPELL_SHARE_HEALTH, false);
+                            pDeathwingHead->CastSpell(me, SPELL_SHARE_HEALTH, false);
+                        }
                         break;
                     default:
                         break;
@@ -657,23 +898,23 @@ public:
             me->MonsterTextEmote("Deathwing begins to cast assault aspects!", me->GetGUID(), true, SEARCH_RANGE);
             me->CastSpell(me, SPELL_ASSAULT_ASPECTS, false);
 
-            CheckPlayersPosition();
-
-            // If current platform is already destroyed find another one
-            if (platformDestroyed[activePlatform] == true)
-            {
-                std::vector<int> freePlatforms;
-                for (int i = PLATFORM_ALEXSTRASZA; i < MAX_PLATFORMS; i++)
-                {
-                    if (platformDestroyed[i] == false) // Skip destroyed platforms
-                        freePlatforms.push_back(i);
-                }
-                // Select new platform randomly
-                activePlatform = freePlatforms[urand(0, freePlatforms.size() - 1)];
-            }
-
             scheduler.Schedule(Seconds(10), [this](TaskContext /* Task context */)
             {
+                CheckPlayersPosition();
+
+                // If current platform is already destroyed find another one
+                if (platformDestroyed[activePlatform] == true)
+                {
+                    std::vector<int> freePlatforms;
+                    for (int i = PLATFORM_ALEXSTRASZA; i < MAX_PLATFORMS; i++)
+                    {
+                        if (platformDestroyed[i] == false) // Skip destroyed platforms
+                            freePlatforms.push_back(i);
+                    }
+                    // Select new platform randomly
+                    activePlatform = freePlatforms[urand(0, freePlatforms.size() - 1)];
+                }
+
                 // Deathwing's text emote which platform he's going to assault and aspects response
                 me->MonsterTextEmote(aspectsInfo[activePlatform].textAssault, me->GetGUID(), true, SEARCH_RANGE);
                 if (Creature * pAspect = me->FindNearestCreature(aspectsInfo[activePlatform].aspectEntryId, SEARCH_RANGE_FAR, true))
@@ -682,25 +923,43 @@ public:
                     pAspect->SendPlaySound(aspectsInfo[activePlatform].firstSoundId, false);
                 }
 
-                // Spawn Mutated Corruption
-                me->SummonCreature(NPC_MUTATED_CORRUPTION, mutatedcorruptionPos[activePlatform], TEMPSUMMON_MANUAL_DESPAWN);
-
                 // Activate Burning Blood on Limb tentacle
                 if (Creature * pLimb = ObjectAccessor::GetObjectInMap(limbGuids[activePlatform], me->GetMap(), (Creature*)NULL))
+                {
+                    if (instance)
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, pLimb);
                     pLimb->CastSpell(pLimb, SPELL_BURNING_BLOOD, false);
+                }
+
+                // Spawn Mutated Corruption
+                if (Creature * pMutatedCorruption = me->SummonCreature(NPC_MUTATED_CORRUPTION, mutatedcorruptionPos[activePlatform], TEMPSUMMON_MANUAL_DESPAWN))
+                {
+                    if (instance)
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, pMutatedCorruption);
+                }
 
                 // Time Zone
                 if (Creature * pPlatform = ObjectAccessor::GetObjectInMap(platformGuids[activePlatform], me->GetMap(), (Creature*)NULL))
                 {
                     if (Creature * pNozdormu = pPlatform->FindNearestCreature(NPC_NOZDORMU_DRAGON_FORM, SEARCH_RANGE, true))
-                        pNozdormu->CastSpell(pPlatform, SPELL_TIME_ZONE_MISSILE, false);
+                    {
+                        if (pNozdormu->HasAura(SPELL_NOZDORMU_PRESENCE))
+                            pNozdormu->CastSpell(pPlatform, SPELL_TIME_ZONE_MISSILE, true);
+                    }
                 }
 
                 // Elementium Bolt
-                scheduler.Schedule(Seconds(55), 1, [this](TaskContext /* Elementium Bolt */)
+                scheduler.Schedule(Seconds(45), 1, [this](TaskContext /* Elementium Bolt */)
                 {
+                    if (Creature * pElementiumBoltTarget = me->SummonCreature(NPC_CLAWK_MARK, boltPos[activePlatform], TEMPSUMMON_TIMED_DESPAWN, 13000))
+                        pElementiumBoltTarget->CastSpell(pElementiumBoltTarget, SPELL_ELEMENTIUM_METEOR_TARGET, false);
+
                     if (Creature * pElementiumBolt = me->SummonCreature(NPC_ELEMENTIUM_BOLT, boltPos[ELEMENTIUM_BOLT], TEMPSUMMON_DEAD_DESPAWN))
+                    {
                         pElementiumBolt->GetMotionMaster()->MovePoint(0, boltPos[activePlatform], true);
+                        if (platformDestroyed[PLATFORM_NOZDORMU] == true)
+                            pElementiumBolt->AI()->SetData(0, 0);
+                    }
                     
                     uint32 randQuote = urand(0, MAX_ELEMENTIUM_BOLT_QUOTES - 1);
                     RunPlayableQuote(elementiumBoltQuotes[randQuote]);
@@ -709,13 +968,20 @@ public:
                 // Hemorrhage
                 scheduler.Schedule(Seconds(90), 1, [this](TaskContext hemorrhage)
                 {
-                    if (hemorrhage.GetRepeatCounter() < 6)
+                    if (Creature * pLimb = ObjectAccessor::GetObjectInMap(limbGuids[activePlatform], me->GetMap(), (Creature*)NULL))
                     {
-                        if (Creature * pLimb = ObjectAccessor::GetObjectInMap(limbGuids[activePlatform], me->GetMap(), (Creature*)NULL))
+                        if (hemorrhage.GetRepeatCounter() == 0)
                         {
-                            pLimb->SummonCreature(NPC_REGENERATIVE_BLOOD, hemorrhagePos[activePlatform], TEMPSUMMON_MANUAL_DESPAWN);
+                            pLimb->SummonCreature(NPC_HEMORRHAGE_TARGET, hemorrhagePos[activePlatform], TEMPSUMMON_TIMED_DESPAWN, 10000);
+                            hemorrhage.Repeat(Seconds(1));
                         }
-                        hemorrhage.Repeat(Seconds(1));
+                        else if (hemorrhage.GetRepeatCounter() <= 6)
+                        {
+                            if (Creature * pHemorrhageTarget = pLimb->FindNearestCreature(NPC_HEMORRHAGE_TARGET, 100.0f, true))
+                                pLimb->CastSpell(pHemorrhageTarget, SPELL_HEMORRHAGE_MISSILE, true);
+
+                            hemorrhage.Repeat(Seconds(1));
+                        }
                     }
                 });
 
@@ -726,6 +992,12 @@ public:
 
         void ExposeWeakness()
         {
+            scheduler.Schedule(Seconds(30), 2, [this](TaskContext hemorrhage)
+            {
+                uint8 rand = urand(0, MAX_CATACLYSM_QUOTES - 1);
+                RunPlayableQuote(cataclysmQuotes[rand]);
+            });
+
             if (Creature * pLimb = ObjectAccessor::GetObjectInMap(limbGuids[activePlatform], me->GetMap(), (Creature*)NULL))
             {
                 if (Creature* pAspect = me->FindNearestCreature(aspectsInfo[activePlatform].aspectEntryId, 500.0f, true))
@@ -775,16 +1047,92 @@ public:
                 me->AttackStop();
                 me->GetMotionMaster()->MoveIdle();
                 me->SetFacingTo(deathwingPos.GetOrientation());
+                me->AI()->DoAction(ACTION_SPAWN_HEAD);
+
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->CastSpell(me, SPELL_SLUMP, false);
-                me->CastSpell(me, SPELL_CORRUPTED_BLOOD, false);
                 RunPlayableQuote(slumbQuote);
+
+                elementiumFragmentsTimer = 10000;
+                elementiumTerrorsTimer = 40000;
+                congealingBloodSpawnTimer = 60000;
+                canSpawnCongealings = true;
                 phase = PHASE_HEAD_DOWN;
+
+                if (Creature * pThrall = me->FindNearestCreature(NPC_THRALL_MADNESS_START, 500.0f, true))
+                    pThrall->AI()->DoAction(ACTION_ASPECTS_SECOND_PHASE);
             }
             else if (phase == PHASE_HEAD_DOWN)
             {
+                if (elementiumFragmentsTimer <= diff)
+                {
+                    SpawnAdds(ACTION_SPAWN_ELEMENT_FRAGMENTS);
+                    elementiumFragmentsTimer = 90000;
+                }
+                else elementiumFragmentsTimer -= diff;
 
+                if (elementiumTerrorsTimer <= diff)
+                {
+                    SpawnAdds(ACTION_SPAWN_ELEMENT_TERRORS);
+                    elementiumTerrorsTimer = 90000;
+                }
+                else elementiumTerrorsTimer -= diff;
+
+                if (IsHeroic())
+                {
+                    if (me->GetHealthPct() == congealingBloodSpawnPct || congealingBloodSpawnTimer <= diff)
+                    {
+                        if (canSpawnCongealings == true)
+                        {
+                            SpawnAdds(ACTION_SPAWN_CONGEALING_BLOODS);
+                            congealingBloodSpawnPct -= 5;
+                            canSpawnCongealings = false;
+                            newTimerCongelingsSet = false;
+                        }
+                    }
+                    else congealingBloodSpawnTimer -= diff;
+
+                    if (!newTimerCongelingsSet)
+                    {
+                        if (me->GetHealthPct() == 15 || me->GetHealthPct() == 10 || me->GetHealthPct() == 5)
+                        {
+                            congealingBloodSpawnTimer = 60000;
+                            canSpawnCongealings = true;
+                            newTimerCongelingsSet = true;
+                        }
+                    }
+                }
             }
+        }
+    };
+};
+
+class npc_ds_madness_deathwing_head : public CreatureScript
+{
+public:
+    npc_ds_madness_deathwing_head() : CreatureScript("npc_ds_madness_deathwing_head") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_madness_deathwing_headAI(pCreature);
+    }
+
+    struct npc_ds_madness_deathwing_headAI : public ScriptedAI
+    {
+        npc_ds_madness_deathwing_headAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            instance = pCreature->GetInstanceScript();
+        }
+
+        InstanceScript * instance;
+
+        void Reset() override
+        {
+            me->SetInCombatWithZone();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+
+            me->CastSpell(me, SPELL_CORRUPTED_BLOOD_10N, false);
         }
     };
 };
@@ -801,10 +1149,14 @@ public:
 
     struct npc_ds_madness_deathwing_limbsAI : public ScriptedAI
     {
-        npc_ds_madness_deathwing_limbsAI(Creature* pCreature) : ScriptedAI(pCreature), Summons(pCreature) {}
+        npc_ds_madness_deathwing_limbsAI(Creature* pCreature) : ScriptedAI(pCreature), Summons(pCreature) 
+        {
+            instance = pCreature->GetInstanceScript();
+        }
 
+        InstanceScript * instance;
         SummonList Summons;
-        uint32 spawnHealthPct;
+        int32 spawnHealthPct;
         bool spawnBlisteringTentacles;
 
         void Reset() override
@@ -814,6 +1166,9 @@ public:
             me->SetReactState(REACT_PASSIVE);
             spawnBlisteringTentacles = true;
             spawnHealthPct = 70;
+
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
             me->SendPlaySpellVisualKit(22446, 0);
 
@@ -835,6 +1190,7 @@ public:
                 {
                     if (Creature * vehiclePassenger = me->SummonCreature(NPC_BLISTERING_TENTACLE, 0, 0, 0))
                     {
+                        vehiclePassenger->CastSpell(vehiclePassenger, SPELL_BLISTERING_HEAT, false);
                         vehiclePassenger->EnterVehicle(me, i);
                         vehiclePassenger->ClearUnitState(UNIT_STATE_UNATTACKABLE);
                         vehiclePassenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -844,8 +1200,8 @@ public:
 
             if (Creature * pAlexstrasza = me->FindNearestCreature(NPC_ALEXSTRASZA_DRAGON_FORM, SEARCH_RANGE, true))
             {
-                pAlexstrasza->CastSpell(me, 105565, false);
-                //pAlexstrasza->AI()->DoAction(ACTION_CAUTERIZE);
+                if (pAlexstrasza->HasAura(SPELL_ALEXSTRASZA_PRESENCE))
+                    pAlexstrasza->CastSpell(me, 105565, false);
             }
         }
 
@@ -853,6 +1209,9 @@ public:
         {
             if (Creature * pDeathwing = GetSummoner<Creature>())
                 pDeathwing->AI()->DoAction(ACTION_LIMB_DIED);
+
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
             if (Creature * pTimeZone = me->FindNearestCreature(NPC_TIME_ZONE, SEARCH_RANGE, true))
                 pTimeZone->DespawnOrUnsummon();
@@ -862,17 +1221,16 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
-            /*
             if (spawnBlisteringTentacles)
             {
                 if (me->GetHealthPct() <= spawnHealthPct)
                 {
                     SpawnBlisteringTentacles();
-                    if (spawnHealthPct == 70)
-                        spawnHealthPct = 30;
-                    secondSpawn = true;
+                    spawnHealthPct -= 30;
+                    if (spawnHealthPct < 40)
+                        spawnBlisteringTentacles = false;
                 }
-            }*/
+            }
         }
     };
 };
@@ -919,9 +1277,10 @@ public:
     {
         npc_ds_madness_elementium_boltAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
+        TaskScheduler scheduler;
         uint32 elementiumBlastTimer;
         bool canBlast;
-        bool isSlow;
+        bool platformNozdormuDestroyed;
 
         void Reset() override
         {
@@ -930,32 +1289,54 @@ public:
             me->SetSpeed(MOVE_WALK, 50.0f, true);
             me->SetSpeed(MOVE_RUN, 50.0f, true);
             me->SetReactState(REACT_PASSIVE);
+            platformNozdormuDestroyed = false;
 
-            isSlow = false;
+            // Slow
+            scheduler.Schedule(Milliseconds(5700), [this](TaskContext slow)
+            {
+                if (platformNozdormuDestroyed == false)
+                {
+                    if (slow.GetRepeatCounter() == 0)
+                    {
+                        me->SetSpeed(MOVE_FLIGHT, 0.225f, true);
+                        me->SetSpeed(MOVE_WALK, 2.5f, true);
+                        me->SetSpeed(MOVE_RUN, 2.5f, true);
+                        slow.Repeat(Seconds(7));
+                    }
+                    else
+                    {
+                        me->SetSpeed(MOVE_FLIGHT, 5.0f, true);
+                        me->SetSpeed(MOVE_WALK, 50.0f, true);
+                        me->SetSpeed(MOVE_RUN, 50.0f, true);
+                        if (!canBlast)
+                        {
+                            elementiumBlastTimer = 1000;
+                            canBlast = true;
+                        }
+                    }
+                }
+                else
+                {
+                    if (!canBlast)
+                    {
+                        elementiumBlastTimer = 1500;
+                        canBlast = true;
+                    }
+                }
+            });
+
             canBlast = false;
             me->CastSpell(me, SPELL_ELEMENTIUM_METEOR_AURA, false);
         }
 
+        void SetData(uint32 type, uint32 data) override
+        {
+            platformNozdormuDestroyed = true;
+        }
+
         void UpdateAI(const uint32 diff) override
         {
-            if (!isSlow && me->FindNearestCreature(NPC_TIME_ZONE, 10.0f, true))
-            {
-                isSlow = true;
-                me->SetSpeed(MOVE_FLIGHT, 0.225f, true);
-                me->SetSpeed(MOVE_WALK, 2.5f, true);
-                me->SetSpeed(MOVE_RUN, 2.5f, true);
-            }
-            else if (isSlow && !me->FindNearestCreature(NPC_PLATFORM, 10.0f, true))
-            {
-                me->SetSpeed(MOVE_FLIGHT, 5.0f, true);
-                me->SetSpeed(MOVE_WALK, 50.0f, true);
-                me->SetSpeed(MOVE_RUN, 50.0f, true);
-                if (!canBlast)
-                {
-                    elementiumBlastTimer = 500;
-                    canBlast = true;
-                }
-            }
+            scheduler.Update(diff);
 
             if (canBlast)
             {
@@ -982,10 +1363,20 @@ public:
 
     struct npc_ds_madness_mutated_corruptionAI : public ScriptedAI
     {
-        npc_ds_madness_mutated_corruptionAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+        npc_ds_madness_mutated_corruptionAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            instance = pCreature->GetInstanceScript();
+        }
 
+        InstanceScript* instance;
+        TaskScheduler scheduler;
         uint32 crushTimer;
         uint32 impaleTimer;
+
+        inline bool IsCastingAllowed()
+        {
+            return !me->IsNonMeleeSpellCasted(false);
+        }
 
         void Reset() override
         {
@@ -996,32 +1387,43 @@ public:
             impaleTimer = 12000;
         }
 
+        void JustDied(Unit * /*who*/) override
+        {
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+        }
+
         void UpdateAI(const uint32 diff) override
         {
+            scheduler.Update(diff);
+
             if (crushTimer <= diff)
             {
-                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                if (IsCastingAllowed())
                 {
-                    me->SetFacingToObject(pTarget);
-                    me->CastSpell(pTarget, SPELL_CRUSH, false);
+                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 300.0f, true))
+                    {
+                        me->SetFacingToObject(pTarget);
+                        me->CastSpell(pTarget, SPELL_CRUSH, false);
+                        me->PlayOneShotAnimKit(1558);
+                    }
+                    crushTimer = 8000;
                 }
-                crushTimer = 8000;
             }
             else crushTimer -= diff;
 
             if (impaleTimer <= diff)
             {
-                Unit* pTarget = me->GetVictim();
-                if (!me->IsWithinMeleeRange(pTarget))
+                if (IsCastingAllowed())
                 {
-                    Unit* pNearest = SelectTarget(SELECT_TARGET_NEAREST, 0, 50.0f, true);
-                    if (pNearest)
-                        pTarget = pNearest;
+                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 300.0f, true))
+                        me->CastSpell(pTarget, SPELL_IMPALE, false);
+                    impaleTimer = 35000;
                 }
-                me->CastSpell(pTarget, SPELL_IMPALE, false);
-                impaleTimer = 35000;
             }
             else impaleTimer -= diff;
+
+            DoMeleeAttackIfReady();
         }
     };
 };
@@ -1160,20 +1562,46 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetInCombatWithZone();
+            me->CastSpell(me, SPELL_SHRAPNEL_AURA, false);
             shrapnelTimer = 8000;
         }
 
         void UpdateAI(const uint32 diff) override
         {
-            if (shrapnelTimer)
+            if (shrapnelTimer < diff)
             {
-                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-                    me->CastSpell(pTarget, SPELL_SHRAPNEL_TARGET, false);
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_SHRAPNEL_TARGET))
+                {
+                    me->CastSpell(pTarget, SPELL_SHRAPNEL_TARGET, true);
+                    me->CastSpell(pTarget, SPELL_SHRAPNEL_DMG, false);
+                }
                 shrapnelTimer = 8000;
             }
             else shrapnelTimer -= diff;
+        }
+    };
+};
 
-            DoMeleeAttackIfReady();
+class npc_ds_madness_congealing_blood : public CreatureScript
+{
+public:
+    npc_ds_madness_congealing_blood() : CreatureScript("npc_ds_madness_congealing_blood") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_madness_congealing_bloodAI(pCreature);
+    }
+
+    struct npc_ds_madness_congealing_bloodAI : public ScriptedAI
+    {
+        npc_ds_madness_congealing_bloodAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        void Reset() override
+        {
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
         }
     };
 };
@@ -1288,6 +1716,41 @@ public:
     }
 };
 
+class spell_ds_corrupted_blood_dmg : public SpellScriptLoader
+{
+public:
+    spell_ds_corrupted_blood_dmg() : SpellScriptLoader("spell_ds_corrupted_blood_dmg") {}
+
+    class spell_ds_corrupted_blood_dmg_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_corrupted_blood_dmg_SpellScript);
+
+        void HandleDamage(SpellEffIndex /*effIndex*/)
+        {
+            Unit * caster = GetCaster();
+            if (!caster)
+                return;
+
+            float damage = 0.0f;
+
+            if (caster->GetHealthPct() < 21)
+                damage = GetHitDamage() * ((21 - caster->GetHealthPct()) * 0.5);
+
+            SetHitDamage((int32)damage);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_ds_corrupted_blood_dmg_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_corrupted_blood_dmg_SpellScript();
+    }
+};
+
 class spell_ds_shrapnel : public SpellScriptLoader
 {
 public:
@@ -1346,7 +1809,6 @@ public:
         void Register()
         {
             OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_madness_cauterize_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_madness_cauterize_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_AREA_ENTRY_SRC);
         }
     };
 
@@ -1358,19 +1820,56 @@ public:
 
 void AddSC_boss_madness_of_deathwing()
 {
-    new boss_madness_of_deathwing();
-    new npc_ds_madness_deathwing_limbs();
-    new npc_ds_madness_blistering_tentacle();
-    new npc_ds_madness_elementium_bolt();
-    new npc_ds_madness_mutated_corruption();
-    new npc_ds_madness_platform();
-    new npc_ds_time_zone();
-    new npc_ds_madness_regenerative_blood();
-    new npc_ds_madness_elementium_fragment();
-    new npc_ds_madness_elementium_terror();
+    new boss_madness_of_deathwing();                // 56173
+    new npc_ds_madness_deathwing_head();            // 57962
+    new npc_ds_madness_deathwing_limbs();           // 56168, 56846, 56167
+    new npc_ds_madness_blistering_tentacle();       // 56188
+    new npc_ds_madness_elementium_bolt();           // 56262
+    new npc_ds_madness_mutated_corruption();        // 56471
+    new npc_ds_madness_platform();                  // 56307
+    new npc_ds_time_zone();                         // 56311
+    new npc_ds_madness_regenerative_blood();        // 56263
+    new npc_ds_madness_elementium_fragment();       // 56724
+    new npc_ds_madness_elementium_terror();         // 56710
+    new npc_ds_madness_congealing_blood();          // 57798
 
-    new spell_ds_elementium_blast();
-    new spell_ds_burning_blood();
-    new spell_ds_burning_blood_dmg();
-    new spell_ds_madness_cauterize();
+    new spell_ds_elementium_blast();                // 105723, 109600, 109601, 109602
+    new spell_ds_burning_blood();                   // 105401
+    new spell_ds_burning_blood_dmg();               // 105408, 105412, 105413, 105414
+    new spell_ds_corrupted_blood_dmg();             // 106835, 109591, 109595, 109596
+    new spell_ds_madness_cauterize();               // 105569, 109576, 109577, 109578
 }
+
+//////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////         SQL QUERY          ///////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+/*
+--NPC
+
+--SPELL SCRIPTS
+insert into `spell_script_names` (`spell_id`, `ScriptName`) values('105401','spell_ds_burning_blood');
+
+insert into `spell_script_names` (`spell_id`, `ScriptName`) values
+('105723','spell_ds_elementium_blast'),
+('109600','spell_ds_elementium_blast'),
+('109601','spell_ds_elementium_blast'),
+('109602','spell_ds_elementium_blast');
+
+insert into `spell_script_names` (`spell_id`, `ScriptName`) values
+('105408','spell_ds_burning_blood_dmg'),
+('105412','spell_ds_burning_blood_dmg'),
+('105413','spell_ds_burning_blood_dmg'),
+('105414','spell_ds_burning_blood_dmg');
+
+insert into `spell_script_names` (`spell_id`, `ScriptName`) values
+('106835','spell_ds_corrupted_blood_dmg'),
+('109591','spell_ds_corrupted_blood_dmg'),
+('109595','spell_ds_corrupted_blood_dmg'),
+('109596','spell_ds_corrupted_blood_dmg');
+
+insert into `spell_script_names` (`spell_id`, `ScriptName`) values
+('105569','spell_ds_madness_cauterize'),
+('109576','spell_ds_madness_cauterize'),
+('109577','spell_ds_madness_cauterize'),
+('109578','spell_ds_madness_cauterize');
+*/
