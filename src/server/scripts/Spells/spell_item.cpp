@@ -1163,7 +1163,41 @@ public:
     }
 };
 
+// 6615 - Free Action
+class spell_action_free : public SpellScriptLoader
+{
+public:
+    spell_action_free() : SpellScriptLoader("spell_action_free") { }
 
+    class spell_action_free_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_action_free_SpellScript)
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* pCaster = GetCaster();
+            if (pCaster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            uint32 duration = (pCaster->getLevel() - 77) * 3000;
+            duration = 30000 - duration;
+
+            if (Aura * pAura = pCaster->GetAura(6615))
+                pAura->SetDuration(duration);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_action_free_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_action_free_SpellScript();
+    }
+};
 
 enum eGenericData
 {
@@ -1195,6 +1229,7 @@ void AddSC_item_spell_scripts()
     new go_food_feast_cataclysm();
     new spell_item_fandrals_flamescythe();
 
+    new spell_action_free();
     new spell_item_flask_of_battle();
     new go_cauldron_of_battle();
     new go_big_cauldron_of_battle();    
