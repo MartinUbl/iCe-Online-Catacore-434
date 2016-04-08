@@ -4461,13 +4461,12 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 105490: // Fiery Grip 10N
         case 109458: // Fiery Grip 10HC
-            spellInfo->MaxAffectedTargets = 1;
-            count++;
-            break;
         case 109457: // Fiery Grip 25N
         case 109459: // Fiery Grip 25HC
-            spellInfo->MaxAffectedTargets = 3;
-            count++;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[2] = TARGET_NONE;
             break;
         // Madness of Deathwing
         case 106728: // Tetanus

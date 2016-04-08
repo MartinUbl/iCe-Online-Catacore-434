@@ -841,10 +841,13 @@ public:
             {
                 if (IsCastingAllowed())
                 {
-                    me->CastSpell(me, SPELL_FIERY_GRIP, false);
-                    damageCounter = me->CountPctFromMaxHealth(20);
-                    isGrip = true;
-                    fieryGripTimer = urand(30000, 35000);
+                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 300.0f, true, -SPELL_FIERY_GRIP))
+                    {
+                        me->CastSpell(me, SPELL_FIERY_GRIP, false);
+                        damageCounter = me->CountPctFromMaxHealth(20);
+                        isGrip = true;
+                        fieryGripTimer = urand(30000, 35000);
+                    }
                 }
             }
             else fieryGripTimer -= diff;
