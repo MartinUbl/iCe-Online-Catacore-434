@@ -2320,7 +2320,10 @@ void Battleground::RatedBattlegroundWon(Player *player)
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)opponent_team_rating - (float)player->GetRatedBattlegroundRating()) / 650.0f));
     float win_mod = ceil((1.0f - chance) * 1000.0f) / 1000.0f;
 
-    int32 rating_change = (int32)ceil(92.0f * win_mod);
+    if (player->GetRatedBattlegroundRating() < 1400)
+        win_mod *= 2.0f;
+
+    int32 rating_change = (int32)ceil(46.0f * win_mod);
 
     SetBattlegroundRatingChangeForPlayer(player->GetGUID(), rating_change);
     player->SetRatedBattlegroundRating(player->GetRatedBattlegroundRating() + rating_change);
@@ -2342,7 +2345,12 @@ void Battleground::RatedBattlegroundLost(Player *player)
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)player_rating - (float)opponent_team_rating) / 650.0f));
     float loose_mod = floor((-chance) * 1000.0f) / 1000.0f;
 
-    int32 rating_change = (int32)floor(92.0f * loose_mod);
+    if (player_rating < 1400)
+        loose_mod = 0.0f;
+    else if (player_rating < 1500)
+        loose_mod *= 0.5f;
+
+    int32 rating_change = (int32)floor(46.0f * loose_mod);
 
     if (int32(player_rating) + rating_change < 0)
         rating_change = (player_rating == 0) ? 0 : player_rating * (-1);
@@ -2367,7 +2375,12 @@ void Battleground::RatedBattlegroundLostOffline(uint64 guid)
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)player_rating - (float)opponent_team_rating) / 650.0f));
     float loose_mod = floor((-chance) * 1000.0f) / 1000.0f;
 
-    int32 rating_change = (int32)floor(92.0f * loose_mod);
+    if (player_rating < 1400)
+        loose_mod = 0.0f;
+    else if (player_rating < 1500)
+        loose_mod *= 0.5f;
+
+    int32 rating_change = (int32)floor(46.0f * loose_mod);
 
     if (int32(player_rating) + rating_change < 0)
         rating_change = (player_rating == 0) ? 0 : player_rating * (-1);
