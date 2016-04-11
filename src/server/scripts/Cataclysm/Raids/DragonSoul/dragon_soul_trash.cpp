@@ -257,7 +257,10 @@ public:
             scheduler.Schedule(Seconds(5), [this](TaskContext /* task context */)
             {
                 if (Creature * pTwilightPortal = me->FindNearestCreature(NPC_TWILIGHT_PORTAL, 50.0f, true))
+                {
+                    pTwilightPortal->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                     me->CastSpell(pTwilightPortal, SPELL_TWILIGHT_PORTAL_BEAM, false);
+                }
             });
 
             twilightVolleyTimer = urand(5000, 25000);
@@ -548,7 +551,7 @@ enum YorsahjTrashSpells
     SPELL_COBALT_BLOOD_OF_SHUMA     = 110747,
     SPELL_SEARING_BLOOD             = 108218,
     SPELL_CRIMSON_BLOOF_OF_SHUMA    = 110750,
-    SPELL_PSYCHIC_SLICE             = 105671,
+    SPELL_PSYCHIC_SLICE             = 108922,
     SPELL_BLACK_BLOOD_OF_SHUMA      = 110746,
     SPELL_GLOWING_BLOOD             = 108221,
     SPELL_GLOWING_BLOOD_OF_SHUMA    = 110753,
