@@ -846,8 +846,8 @@ public:
                         me->CastSpell(pTarget, SPELL_FIERY_GRIP, false);
                         damageCounter = me->CountPctFromMaxHealth(20);
                         isGrip = true;
-                        fieryGripTimer = urand(30000, 35000);
                     }
+                    fieryGripTimer = urand(30000, 35000);
                 }
             }
             else fieryGripTimer -= diff;

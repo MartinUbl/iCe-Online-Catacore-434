@@ -4466,7 +4466,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
-            spellInfo->EffectImplicitTargetB[2] = TARGET_NONE;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
             break;
         // Madness of Deathwing
         case 106728: // Tetanus
