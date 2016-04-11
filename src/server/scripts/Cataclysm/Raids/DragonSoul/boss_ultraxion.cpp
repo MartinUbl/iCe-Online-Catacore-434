@@ -27,9 +27,9 @@ Autor: Lazik
 #include "dragonsoul.h"
 #include "TaskScheduler.h"
 
-#define WAYPOINT_X      -1690.0f
+#define WAYPOINT_X      -1705.0f
 #define WAYPOINT_Y      -2384.0f
-#define WAYPOINT_Z        358.0f
+#define WAYPOINT_Z        355.0f
 #define SEARCH_RANGE      300.0f
 
 // NPCs
@@ -898,8 +898,8 @@ public:
 
         void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            if (GetTarget())
-                GetTarget()->CastSpell(GetTarget(), SPELL_FADED_INTO_TWILIGHT_10N, true);
+            if (GetCaster())
+                GetCaster()->CastSpell(GetCaster(), SPELL_FADED_INTO_TWILIGHT_10N, true);
         }
 
         void Register()
@@ -947,7 +947,10 @@ public:
                 if (target->HasAura(SPELL_TWILIGHT_SHIFT_COSMETIC_EFFECT))
                     target->CastSpell(target, SPELL_FADING_LIGHT_KILL_10N, true);
                 else if (target->HasAura(SPELL_HEROIC_WILL_COSMETIC_EFFECT))
+                {
+                    target->CastSpell(target, SPELL_FADED_INTO_TWILIGHT_10N, true);
                     target->CastSpell(target, SPELL_TWILIGHT_SHIFT_COSMETIC_EFFECT, true);
+                }
             }
         }
 
@@ -1182,7 +1185,7 @@ public:
 
         void Register()
         {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_essence_of_dreams_SpellScript::TargetsCount, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_essence_of_dreams_SpellScript::TargetsCount, EFFECT_0, TARGET_UNIT_AREA_ENTRY_DST);
             OnEffect += SpellEffectFn(spell_ds_ultraxion_essence_of_dreams_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
         }
     };
@@ -1239,8 +1242,8 @@ public:
 
         void Register()
         {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_last_defender_of_azeroth_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ALLY_DST);
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_last_defender_of_azeroth_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_AREA_ALLY_DST);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_last_defender_of_azeroth_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_ultraxion_last_defender_of_azeroth_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_AREA_ENTRY_SRC);
         }
     };
 
