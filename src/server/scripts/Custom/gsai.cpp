@@ -3,6 +3,8 @@
 #include "GSMgr.h"
 #include "CreatureTextMgr.h"
 
+#define GS_FLOAT_EPSILON 0.00001
+
 class GS_CreatureScript : public CreatureScript
 {
     public:
@@ -65,16 +67,52 @@ class GS_CreatureScript : public CreatureScript
 
             bool operator==(GS_Variable &sec)
             {
-                // since they are both same types, we may afford that
                 if (type == sec.type)
+                {
+                    // integer comparison can be done via ==
+                    if (type == GSVTYPE_INTEGER)
+                        return value.asInteger == sec.value.asInteger;
+                    // compare floats using defined epsilon
+                    else if (type == GSVTYPE_FLOAT)
+                        return fabs(value.asFloat - sec.value.asFloat) < GS_FLOAT_EPSILON;
+
+                    // backwards compatibility
                     return value.asInteger == sec.value.asInteger;
+                }
+                else
+                {
+                    // when comparing float and integer, convert both to float and perform epsilon comparison
+                    if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
+                        return fabs(toFloat() - sec.value.asFloat) < GS_FLOAT_EPSILON;
+                    else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_INTEGER)
+                        return fabs(value.asFloat - sec.toFloat()) < GS_FLOAT_EPSILON;
+                }
+
                 return false;
             }
             bool operator!=(GS_Variable &sec)
             {
-                // since they are both same types, we may afford that
                 if (type == sec.type)
+                {
+                    // integer comparison can be done via ==
+                    if (type == GSVTYPE_INTEGER)
+                        return value.asInteger != sec.value.asInteger;
+                    // compare floats using defined epsilon
+                    else if (type == GSVTYPE_FLOAT)
+                        return fabs(value.asFloat - sec.value.asFloat) > GS_FLOAT_EPSILON;
+
+                    // backwards compatibility
                     return value.asInteger != sec.value.asInteger;
+                }
+                else
+                {
+                    // when comparing float and integer, convert both to float and perform epsilon comparison
+                    if (type == GSVTYPE_INTEGER && sec.type == GSVTYPE_FLOAT)
+                        return fabs(toFloat() - sec.value.asFloat) > GS_FLOAT_EPSILON;
+                    else if (type == GSVTYPE_FLOAT && sec.type == GSVTYPE_INTEGER)
+                        return fabs(value.asFloat - sec.toFloat()) > GS_FLOAT_EPSILON;
+                }
+
                 return true;
             }
             bool operator>(GS_Variable &sec)
