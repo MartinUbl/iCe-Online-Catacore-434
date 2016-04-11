@@ -3133,7 +3133,7 @@ float Unit::GetUnitParryChance() const
     }
     else if (GetTypeId() == TYPEID_UNIT)
     {
-        if (GetCreatureType() == CREATURE_TYPE_HUMANOID || (GetTypeId() == TYPEID_UNIT && ToCreature()->isWorldBoss()))
+        if (GetCreatureType() == CREATURE_TYPE_HUMANOID || (GetTypeId() == TYPEID_UNIT && ToCreature()->isWorldBoss() && ToCreature()->GetEntry() != 55294)) // Ultraxion shouldn`t parry attacks
         {
             chance = 5.0f;
             chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
