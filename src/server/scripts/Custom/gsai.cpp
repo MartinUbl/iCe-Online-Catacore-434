@@ -1376,7 +1376,7 @@ class GS_CreatureScript : public CreatureScript
                         {
                             GS_Variable vehEntry = GS_GetValueFromSpecifier(curr->params.c_unvehicle.entry);
                             if (Unit* veh = source->GetVehicleBase())
-                                if (vehEntry.value.asInteger == 0 || vehEntry.value.asInteger == veh->GetEntry())
+                                if (vehEntry.value.asInteger == 0 || vehEntry.value.asInteger == (int32)veh->GetEntry())
                                     source->ExitVehicle();
                             break;
                         }
