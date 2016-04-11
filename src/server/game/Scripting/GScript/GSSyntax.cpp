@@ -1296,6 +1296,17 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             }
 
             break;
+        // leave vehicle, if any
+        // Syntax: unvehicle [entry]
+        case GSCR_UNVEHICLE:
+            if (src->parameters.size() > 1)
+                CLEANUP_AND_THROW("too many parameters for instruction UNVEHICLE");
+
+            if (src->parameters.size() == 1)
+                ret->params.c_unvehicle.entry = gs_specifier::parse(src->parameters[0].c_str());
+            else
+                ret->params.c_unvehicle.entry = gs_specifier::make_default_value(0);
+            break;
     }
 
     return ret;

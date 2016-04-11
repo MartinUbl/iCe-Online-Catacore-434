@@ -74,6 +74,7 @@ enum gs_command_type
     GSCR_FOLLOW = 45,
     GSCR_TEXTEMOTE = 46,
     GSCR_BOSSEMOTE = 47,
+    GSCR_UNVEHICLE = 48,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -126,6 +127,7 @@ static std::string gscr_identifiers[] = {
     "follow",
     "textemote",
     "bossemote",
+    "unvehicle",
 };
 
 enum gs_quest_operation
@@ -487,6 +489,11 @@ struct gs_command
             gs_specifier distance;
             gs_specifier angle;
         } c_follow;
+
+        struct
+        {
+            gs_specifier entry;
+        } c_unvehicle;
 
     } params;
 

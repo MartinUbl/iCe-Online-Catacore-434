@@ -1334,6 +1334,14 @@ class GS_CreatureScript : public CreatureScript
                                 me->GetMotionMaster()->MovementExpired();
                             break;
                         }
+                        case GSCR_UNVEHICLE:
+                        {
+                            GS_Variable vehEntry = GS_GetValueFromSpecifier(curr->params.c_unvehicle.entry);
+                            if (Unit* veh = source->GetVehicleBase())
+                                if (vehEntry.value.asInteger == 0 || vehEntry.value.asInteger == veh->GetEntry())
+                                    source->ExitVehicle();
+                            break;
+                        }
                         default:
                         case GSCR_NONE:
                             break;
