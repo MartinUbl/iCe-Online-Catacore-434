@@ -213,6 +213,8 @@ enum gs_subject_parameter
     GSSP_POS_Z = 13,            // subject position Z
     GSSP_ORIENTATION = 14,      // subject orientation
     GSSP_ALIVE = 15,            // subject alive state
+    GSSP_GUIDLOW = 16,          // subject low GUID (mostly DB table GUID)
+    GSSP_ENTRY = 17,            // subject entry (entry, ID from DB table)
 };
 
 enum gs_numeric_operatror

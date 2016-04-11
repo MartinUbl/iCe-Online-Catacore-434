@@ -788,6 +788,10 @@ class GS_CreatureScript : public CreatureScript
                         return GS_Variable(subject->GetOrientation());
                     case GSSP_ALIVE:
                         return GS_Variable((int32)(subject->IsAlive() ? 1 : 0));
+                    case GSSP_GUIDLOW:
+                        return GS_Variable((int32)subject->GetGUIDLow());
+                    case GSSP_ENTRY:
+                        return GS_Variable((int32)subject->GetEntry());
                     case GSSP_NONE:
                         return GS_Variable(subject);
                     default:

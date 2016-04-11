@@ -459,6 +459,10 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_parameter = GSSP_ORIENTATION;
             else if (parid == "alive")
                 rr.subject_parameter = GSSP_ALIVE;
+            else if (parid == "guid")
+                rr.subject_parameter = GSSP_GUIDLOW;
+            else if (parid == "entry")
+                rr.subject_parameter = GSSP_ENTRY;
         }
     }
 
