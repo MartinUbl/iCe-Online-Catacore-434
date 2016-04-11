@@ -35,7 +35,7 @@ TO DO:
 
 const uint32 DATA_ICE_WAVE_SLOT         = 1;
 const float CONDUIT_RANGE               = 10.0f;
-const float WATERY_ENTRENCHMENT_RANGE   = 29.0f;
+const float WATERY_ENTRENCHMENT_RANGE   = 30.0f;
 const uint32 FROSTFLAKE_MAX_STACK       = 10;
 const float SEARCH_RANGE                = 300.0f;
 const uint32 MAX_TRASH                  = 35;
