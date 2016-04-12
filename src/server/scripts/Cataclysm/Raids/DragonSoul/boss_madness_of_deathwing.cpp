@@ -420,7 +420,6 @@ public:
 
         uint64 limbGuids[MAX_PLATFORMS];
         uint64 platformGuids[MAX_PLATFORMS];
-        uint64 timeZoneGuids[MAX_PLATFORMS];
 
         uint32 assaultAspectsTimer;
         uint32 elementiumBoltTimer;
@@ -477,15 +476,9 @@ public:
                 platformDestroyed[i] = false;
             }
 
-            std::list<Creature*> time_zone;
-            GetCreatureListWithEntryInGrid(time_zone, me, NPC_TIME_ZONE, SEARCH_RANGE_FAR);
-            for (std::list<Creature*>::const_iterator itr = time_zone.begin(); itr != time_zone.end(); ++itr)
-            {
-                (*itr)->DespawnOrUnsummon();
-            }
-
             summons.DespawnAll();
             scheduler.CancelAll();
+            ScriptedAI::Reset();
         }
 
         void JustSummoned(Creature* summon) override
@@ -643,7 +636,7 @@ public:
         {
             AchievementEntry const* achievement = sAchievementStore.LookupEntry(ACHIEVEMENT_REALM_FIRST_MADNESS);
 
-            if (!sAchievementMgr->IsRealmCompleted(achievement)) // If (Realm First! Ragnaros achievement) is not already completed
+            if (!sAchievementMgr->IsRealmCompleted(achievement)) // If (Realm First! Madness of Deathwing achievement) is not already completed
             {
                 Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
                 if (!plrList.isEmpty())
@@ -954,9 +947,9 @@ public:
                     if (Creature * pElementiumBoltTarget = me->SummonCreature(NPC_CLAWK_MARK, boltPos[activePlatform], TEMPSUMMON_TIMED_DESPAWN, 13000))
                         pElementiumBoltTarget->CastSpell(pElementiumBoltTarget, SPELL_ELEMENTIUM_METEOR_TARGET, false);
 
-                    if (Creature * pElementiumBolt = me->SummonCreature(NPC_ELEMENTIUM_BOLT, boltPos[ELEMENTIUM_BOLT], TEMPSUMMON_DEAD_DESPAWN))
+                    if (Creature * pElementiumBolt = me->SummonCreature(NPC_ELEMENTIUM_BOLT, boltPos[ELEMENTIUM_BOLT], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
                     {
-                        pElementiumBolt->GetMotionMaster()->MovePoint(0, boltPos[activePlatform], true);
+                        pElementiumBolt->GetMotionMaster()->MovePoint(0, boltPos[activePlatform], false);
                         if (platformDestroyed[PLATFORM_NOZDORMU] == true)
                             pElementiumBolt->AI()->SetData(0, 0);
                     }
@@ -1120,19 +1113,76 @@ public:
 
     struct npc_ds_madness_deathwing_headAI : public ScriptedAI
     {
-        npc_ds_madness_deathwing_headAI(Creature* pCreature) : ScriptedAI(pCreature)
+        npc_ds_madness_deathwing_headAI(Creature* pCreature) : ScriptedAI(pCreature), summons(pCreature)
         {
             instance = pCreature->GetInstanceScript();
         }
 
         InstanceScript * instance;
+        SummonList summons;
+        uint64 summonerGuid;
+        uint32 checkTimer;
 
         void Reset() override
         {
             me->SetInCombatWithZone();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-
+            me->SetReactState(REACT_AGGRESSIVE);
             me->CastSpell(me, SPELL_CORRUPTED_BLOOD_10N, false);
+            checkTimer = 5000;
+
+            summons.DespawnAll();
+        }
+
+        void CheckPlayers()
+        {
+            uint8 count = 0;
+
+            Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+            {
+                if (Player* pPlayer = itr->getSource())
+                {
+                    if (pPlayer->IsAlive())
+                        count++;
+                }
+            }
+
+            if (count == 0)
+            {
+                if (Creature * pDeathwing = GetSummoner<Creature>())
+                {
+                    pDeathwing->AI()->Reset();
+                }
+            }
+        }
+
+        void JustSummoned(Creature* summon) override
+        {
+            summons.push_back(summon->GetGUID());
+        }
+
+        void IsSummonedBy(Unit* pSummoner) override
+        {
+            summonerGuid = pSummoner->GetGUID();
+        }
+
+        void JustDied(Unit * /*who*/) override
+        {
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+            summons.DespawnAll();
+        }
+
+        void UpdateAI(const uint32 diff) override 
+        {
+            if (checkTimer <= diff)
+            {
+                CheckPlayers();
+                checkTimer = 5000;
+            }
+            else checkTimer -= diff;
         }
     };
 };
@@ -1380,6 +1430,7 @@ public:
 
         void Reset() override
         {
+            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 30.0f);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetInCombatWithZone();
 
@@ -1419,11 +1470,12 @@ public:
                     if (Unit* pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 300.0f, true))
                         me->CastSpell(pTarget, SPELL_IMPALE, false);
                     impaleTimer = 35000;
+                    crushTimer += 8000;
                 }
             }
             else impaleTimer -= diff;
 
-            DoMeleeAttackIfReady();
+            //DoMeleeAttackIfReady();
         }
     };
 };
@@ -1459,6 +1511,9 @@ public:
         {
             if (energizeTimer <= diff)
             {
+                if (me->FindNearestCreature(NPC_TIME_ZONE, 11.0f, true))
+                    me->AddAura(SPELL_TIME_ZONE_AURA_DUMMY - 1, me);
+
                 me->ModifyPower(POWER_ENERGY, 10);
                 if (me->GetPower(POWER_ENERGY) >= 100)
                 {
@@ -1563,14 +1618,14 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetInCombatWithZone();
             me->CastSpell(me, SPELL_SHRAPNEL_AURA, false);
-            shrapnelTimer = 8000;
+            shrapnelTimer = urand(0, 8000);
         }
 
         void UpdateAI(const uint32 diff) override
         {
             if (shrapnelTimer < diff)
             {
-                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_SHRAPNEL_TARGET))
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 300.0f, true, -SPELL_SHRAPNEL_TARGET))
                 {
                     me->CastSpell(pTarget, SPELL_SHRAPNEL_TARGET, true);
                     me->CastSpell(pTarget, SPELL_SHRAPNEL_DMG, false);
@@ -1818,6 +1873,45 @@ public:
     }
 };
 
+class IsNotMadnessNpc
+{
+public:
+    bool operator()(WorldObject* object) const
+    {
+        if (object->ToCreature() && /*object->ToCreature()->GetEntry() == NPC_ELEMENTIUM_TERROR || */ object->ToCreature()->GetEntry() == NPC_REGENERATIVE_BLOOD)
+            return false;
+        return true;
+    }
+};
+
+class spell_ds_time_zone : public SpellScriptLoader
+{
+public:
+    spell_ds_time_zone() : SpellScriptLoader("spell_ds_time_zone") { }
+
+    class spell_ds_time_zone_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_time_zone_SpellScript);
+
+        void RemoveInvalidTargets(std::list<Unit*>& unitList)
+        {
+            unitList.remove_if(IsNotMadnessNpc());
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_time_zone_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_time_zone_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_AREA_ENTRY_SRC);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_time_zone_SpellScript::RemoveInvalidTargets, EFFECT_2, TARGET_UNIT_AREA_ENTRY_SRC);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_time_zone_SpellScript();
+    }
+};
+
 void AddSC_boss_madness_of_deathwing()
 {
     new boss_madness_of_deathwing();                // 56173
@@ -1838,6 +1932,7 @@ void AddSC_boss_madness_of_deathwing()
     new spell_ds_burning_blood_dmg();               // 105408, 105412, 105413, 105414
     new spell_ds_corrupted_blood_dmg();             // 106835, 109591, 109595, 109596
     new spell_ds_madness_cauterize();               // 105569, 109576, 109577, 109578
+    new spell_ds_time_zone();                       // 105830
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -1857,9 +1952,9 @@ insert into `spell_script_names` (`spell_id`, `ScriptName`) values
 
 insert into `spell_script_names` (`spell_id`, `ScriptName`) values
 ('105408','spell_ds_burning_blood_dmg'),
-('105412','spell_ds_burning_blood_dmg'),
-('105413','spell_ds_burning_blood_dmg'),
-('105414','spell_ds_burning_blood_dmg');
+('109612','spell_ds_burning_blood_dmg'),
+('109613','spell_ds_burning_blood_dmg'),
+('109614','spell_ds_burning_blood_dmg');
 
 insert into `spell_script_names` (`spell_id`, `ScriptName`) values
 ('106835','spell_ds_corrupted_blood_dmg'),

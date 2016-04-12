@@ -4501,6 +4501,12 @@ void SpellMgr::LoadSpellCustomAttr()
         case 105569: // Cauterize
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_ENEMY_DST;
             break;
+        case 106523:
+        case 110044:
+        case 110043:
+        case 110042:
+            spellInfo->DurationIndex = 18; // 20s
+            break;
 /*************************        DRAGON SOUL END        *****************************/
 
         case 88691: //Marked for Death Tracking
