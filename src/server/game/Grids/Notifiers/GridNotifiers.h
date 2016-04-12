@@ -1206,6 +1206,33 @@ namespace Trinity
         NearestCreatureEntryWithLiveStateInObjectRangeCheck(NearestCreatureEntryWithLiveStateInObjectRangeCheck const&);
     };
 
+    // Success at unit in range, range update for next check (this can be use with CreatureLastSearcher to find nearest creature)
+    class NearestCreatureDBGuidWithLiveStateInObjectRangeCheck
+    {
+    public:
+        NearestCreatureDBGuidWithLiveStateInObjectRangeCheck(WorldObject const& obj, uint32 dbGuid, bool alive, float range)
+            : i_obj(obj), i_dbGuid(dbGuid), i_alive(alive), i_range(range) {}
+
+        bool operator()(Creature* u)
+        {
+            if (u->GetDBTableGUIDLow() == i_dbGuid && u->IsAlive() == i_alive && i_obj.IsWithinDistInMap(u, i_range))
+            {
+                i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
+                return true;
+            }
+            return false;
+        }
+        float GetLastRange() const { return i_range; }
+    private:
+        WorldObject const& i_obj;
+        uint32 i_dbGuid;
+        bool   i_alive;
+        float  i_range;
+
+        // prevent clone this object
+        NearestCreatureDBGuidWithLiveStateInObjectRangeCheck(NearestCreatureDBGuidWithLiveStateInObjectRangeCheck const&);
+    };
+
     class NearestPlayerWithLiveStateInObjectRangeCheck
     {
     public:

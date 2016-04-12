@@ -347,6 +347,7 @@ struct BossAI : public ScriptedAI
 
 // SD2 grid searchers.
 Creature *GetClosestCreatureWithEntry(WorldObject *pSource, uint32 uiEntry, float fMaxSearchRange, bool bAlive = true);
+Creature *GetClosestCreatureWithDBGuid(WorldObject *pSource, uint32 uiEntry, float fMaxSearchRange, bool bAlive = true);
 GameObject *GetClosestGameObjectWithEntry(WorldObject *pSource, uint32 uiEntry, float fMaxSearchRange);
 void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange);
 void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange);

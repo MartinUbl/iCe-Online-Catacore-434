@@ -742,12 +742,7 @@ class GS_CreatureScript : public CreatureScript
                     case GSST_LAST_SUMMON:
                         return m_lastSummonedUnit;
                     case GSST_CLOSEST_CREATURE_GUID:
-                    {
-                        const CreatureData* crd = sObjectMgr->GetCreatureData(spec.value);
-                        if (crd)
-                            return me->GetMap()->GetCreature(MAKE_NEW_GUID(spec.value, crd->id, HIGHGUID_UNIT));
-                        return nullptr;
-                    }
+                        return GetClosestCreatureWithDBGuid(me, spec.value, 300.0f, true);
                     // may be also variable value, if the variable points to unit
                     case GSST_VARIABLE_VALUE:
                         if (variable_map.find(spec.value) != variable_map.end())
