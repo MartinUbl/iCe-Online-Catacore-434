@@ -1054,18 +1054,18 @@ void WorldSession::SendListInventory(uint64 vendorguid)
         pCreature->StopMoving();
 
     VendorItemData const *vendorItems = pCreature->GetVendorItems();
-    uint8 rawItemCount = vendorItems ? vendorItems->GetItemCount() : 0;
+    uint16 rawItemCount = vendorItems ? vendorItems->GetItemCount() : 0;
 
-    //if (rawItemCount > 300),
-    //    rawItemCount = 300; // client cap but uint8 max value is 255
+    if (rawItemCount > 300)
+        rawItemCount = 300;
 
     ByteBuffer itemsData(32 * rawItemCount);
     std::vector<bool> enablers;
     enablers.reserve(2 * rawItemCount);
 
     const float discountMod = _player->GetReputationPriceDiscount(pCreature);
-    uint8 count = 0;
-    for (uint8 slot = 0; slot < rawItemCount; ++slot)
+    uint16 count = 0;
+    for (uint16 slot = 0; slot < rawItemCount; ++slot)
     {
         VendorItem const* vendorItem = vendorItems->GetItem(slot);
         if (!vendorItem) continue;
@@ -1163,7 +1163,7 @@ void WorldSession::SendListInventory(uint64 vendorguid)
         // else error
 
         // Client limitation of 300 items (but the max value of uint8 is 255, what the heck?)
-        if (count >= 255)
+        if (count >= 300)
             break;
     }
 
