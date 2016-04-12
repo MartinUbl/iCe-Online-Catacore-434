@@ -827,9 +827,9 @@ class GS_CreatureScript : public CreatureScript
                     case GSSP_ALIVE:
                         return GS_Variable((int32)(subject->IsAlive() ? 1 : 0));
                     case GSSP_GUIDLOW:
-                        return GS_Variable((int32)subject->GetGUIDLow());
+                        return (subject->GetTypeId() == TYPEID_UNIT) ? GS_Variable((int32)subject->ToCreature()->GetDBTableGUIDLow()) : GS_Variable((int32)subject->GetGUIDLow());
                     case GSSP_ENTRY:
-                        return GS_Variable((int32)subject->GetEntry());
+                        return (subject->GetTypeId() == TYPEID_UNIT && subject->ToCreature()->GetCreatureInfo()) ? GS_Variable((int32)subject->ToCreature()->GetCreatureInfo()->Entry) : GS_Variable((int32)subject->GetEntry());
                     case GSSP_NONE:
                         return GS_Variable(subject);
                     default:
