@@ -99,6 +99,7 @@ enum aspectsSpells
     SPELL_DRAGON_SOUL_CHARGED_COSMETIC  = 110489,
     SPELL_DRAGON_SOUL_CHARGED_DARK      = 108531,
     SPELL_DRAGON_SOUL_CHARGED_LIGHT     = 108530,
+    SPELL_DRAGON_SOUL_BULWARK           = 108035,
 };
 
 enum AspectsSteps
@@ -975,8 +976,7 @@ public:
                             {
                                 me->SetFacingTo(4.77f);
                                 me->CastSpell(me, SPELL_CHARGING_UP_EARTH, true);
-                                pDragonSoul->CastSpell(pDragonSoul, SPELL_DRAGON_SOUL_CHARGED_DARK, false);
-                                pDragonSoul->CastSpell(pDragonSoul, SPELL_DRAGON_SOUL_CHARGED_LIGHT, true);
+                                pDragonSoul->CastSpell(pDragonSoul, SPELL_DRAGON_SOUL_BULWARK, true);
                             }
                         }
                     });
