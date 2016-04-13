@@ -3275,7 +3275,7 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                 case 96268: // Death's Advance aura periodic tick
                     {
                         Player *pl = caster->ToPlayer();
-                        if (!pl)
+                        if (!pl || pl->getClass() != CLASS_DEATH_KNIGHT)
                             break;
 
                         bool depleted = true;
