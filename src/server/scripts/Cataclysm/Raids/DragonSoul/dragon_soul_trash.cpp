@@ -2079,6 +2079,7 @@ public:
                     scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
                     {
                         me->SetFacingTo(me->GetHomePosition().GetOrientation());
+                        scheduler.CancelAll();
                     });
 
                     if (pAlexstrasza && pKalecgos && pYsera && pNozdormu)

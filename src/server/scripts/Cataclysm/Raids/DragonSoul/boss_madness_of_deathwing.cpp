@@ -453,7 +453,7 @@ public:
             }
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetVisible(false);
             me->RemoveAura(SPELL_SLUMP);
 
@@ -812,9 +812,13 @@ public:
                         if (platformKilled == MAX_PLATFORMS)
                             phase = PHASE_SLUMB;
                         me->DealDamage(me, me->GetMaxHealth()*0.2); // Decrease hp by 20%
-                        assaultAspectsTimer = 15000;
-                        newAssault = true;
-                        canCataclysm = false;
+
+                        if (platformKilled <= MAX_PLATFORMS)
+                        {
+                            assaultAspectsTimer = 15000;
+                            newAssault = true;
+                            canCataclysm = false;
+                        }
                         break;
                     case ACTION_SPAWN_HEAD:
                         if (Creature * pDeathwingHead = me->SummonCreature(NPC_DEATHWING_HEAD, deathwing2Pos))
@@ -1152,7 +1156,9 @@ public:
             {
                 if (Creature * pDeathwing = GetSummoner<Creature>())
                 {
-                    pDeathwing->AI()->Reset();
+                    if (instance)
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                    pDeathwing->AI()->EnterEvadeMode();
                 }
             }
         }
