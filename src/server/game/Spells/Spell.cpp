@@ -6132,7 +6132,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     {
         float x, y, z;
         m_targets.m_dstPos.GetPosition(x, y, z);
-        if (!m_caster->IsWithinLOS(x,y,z))
+        if (VMAP::VMapFactory::checkAreaForLoS(m_caster->GetAreaId()) && !m_caster->IsWithinLOS(x,y,z))
             return SPELL_FAILED_LINE_OF_SIGHT;
     }
 
@@ -6544,7 +6544,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
                 {
-                    if (VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id))
+                    if (VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && VMAP::VMapFactory::checkAreaForLoS(m_caster->GetAreaId()))
                     {
                         bool inLoS;
 

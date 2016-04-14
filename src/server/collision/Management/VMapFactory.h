@@ -37,6 +37,7 @@ namespace VMAP
 
             static void preventSpellsFromBeingTestedForLoS(const char* pSpellIdString);
             static bool checkSpellForLoS(unsigned int pSpellId);
+            static bool checkAreaForLoS(unsigned int areaId);
     };
 
 }

@@ -110,6 +110,13 @@ namespace VMAP
         return(!iIgnoreSpellIds->containsKey(pSpellId));
     }
 
+    bool VMapFactory::checkAreaForLoS(unsigned int areaId)
+    {
+        // TODO: create better, more flexible and less retarded solution for this
+
+        return (areaId != 5960 /* Deathwing - Spine of Deathwing*/);
+    }
+
     //===============================================
     // just return the instance
     IVMapManager* VMapFactory::createOrGetVMapManager()
