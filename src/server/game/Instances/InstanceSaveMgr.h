@@ -202,6 +202,7 @@ class InstanceSaveManager
             case 757://Baradin Hold
             case 754://Throne of the Four Winds
             case 720://Firelands
+            case 967://Dragon Soul
                 return true;
             default:
                 return false;
