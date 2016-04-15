@@ -33,6 +33,8 @@ TO DO:
 #include "MapManager.h"
 #include "TaskScheduler.h"
 
+#include <stack>
+
 const uint32 DATA_ICE_WAVE_SLOT         = 1;
 const float CONDUIT_RANGE               = 10.0f;
 const float WATERY_ENTRENCHMENT_RANGE   = 30.0f;
@@ -1589,6 +1591,9 @@ public:
 
             targetCount = 0;
 
+            std::set<Player*> traversedPlayers;
+            std::stack<Player*> conduitStack;
+
             Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
             {
@@ -1596,12 +1601,41 @@ public:
                 {
                     if (player->IsAlive() && player->GetExactDist2d(me) < CONDUIT_RANGE)
                     {
-                        if (!player->HasAura(SPELL_LIGHTNING_CONDUIT))
+                        if (!player->HasAura(SPELL_LIGHTNING_CONDUIT) && traversedPlayers.find(player) == traversedPlayers.end())
                         {
                             me->CastSpell(player, SPELL_LIGHTNING_CONDUIT, true);
                             player->CastSpell(player, SPELL_LIGHTNING_CONDUIT_10N, true);
+                            traversedPlayers.insert(player);
+                            targetCount++;
                         }
-                        targetCount++;
+                    }
+                }
+            }
+
+            Player* source;
+
+            while (!conduitStack.empty())
+            {
+                source = conduitStack.top();
+                conduitStack.pop();
+
+                for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+                {
+                    if (Player* player = i->getSource())
+                    {
+                        if (traversedPlayers.find(player) != traversedPlayers.end())
+                            continue;
+
+                        if (player->HasAura(SPELL_LIGHTNING_CONDUIT))
+                            continue;
+
+                        if (player->GetExactDist2d(source) < CONDUIT_RANGE)
+                        {
+                            me->CastSpell(player, SPELL_LIGHTNING_CONDUIT, true);
+                            player->CastSpell(player, SPELL_LIGHTNING_CONDUIT_10N, true);
+                            traversedPlayers.insert(player);
+                            conduitStack.push(player);
+                        }
                     }
                 }
             }
@@ -1987,19 +2021,6 @@ public:
 
                     if (Creature * pHagara = hitUnit->FindNearestCreature(BOSS_HAGARA_THE_STORMBINDER, SEARCH_RANGE, true))
                         pHagara->AI()->DoAction(ACTION_CONDUCTOR_CHARGED);
-                }
-            }
-
-            Map::PlayerList const &PlList = GetCaster()->GetMap()->GetPlayers();
-            for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-            {
-                if (Player* pPlayer = i->getSource())
-                {
-                    if (pPlayer->GetDistance2d(hitUnit) < CONDUIT_RANGE && pPlayer->GetGUID() != GetCaster()->GetGUID() && !pPlayer->HasAura(SPELL_LIGHTNING_CONDUIT))
-                    {
-                        hitUnit->CastSpell(pPlayer, SPELL_LIGHTNING_CONDUIT, true);
-                        pPlayer->CastSpell(pPlayer, SPELL_LIGHTNING_CONDUIT_10N, true);
-                    }
                 }
             }
         }
