@@ -1607,8 +1607,8 @@ public:
                             player->CastSpell(player, SPELL_LIGHTNING_CONDUIT_10N, true);
                             conduitStack.push(player);
                             traversedPlayers.insert(player);
-                            targetCount++;
                         }
+                        targetCount++;
                     }
                 }
             }
@@ -1632,7 +1632,7 @@ public:
 
                         if (player->GetExactDist2d(source) < CONDUIT_RANGE)
                         {
-                            me->CastSpell(player, SPELL_LIGHTNING_CONDUIT, true);
+                            source->CastSpell(player, SPELL_LIGHTNING_CONDUIT, true);
                             player->CastSpell(player, SPELL_LIGHTNING_CONDUIT_10N, true);
                             traversedPlayers.insert(player);
                             conduitStack.push(player);
