@@ -665,6 +665,12 @@ public:
                                 pl->GetMotionMaster()->MoveJump(rollPos[DEST_LEFT].GetPositionX(), rollPos[DEST_LEFT].GetPositionY(), rollPos[DEST_LEFT].GetPositionZ(), 20.0f, 10.0f);
                             if (side == ROLL_RIGHT)
                                 pl->GetMotionMaster()->MoveJump(rollPos[DEST_RIGHT].GetPositionX(), rollPos[DEST_RIGHT].GetPositionY(), rollPos[DEST_RIGHT].GetPositionZ(), 20.0f, 10.0f);
+
+                            scheduler.Schedule(Seconds(5), [this, pl](TaskContext /* Task context */)
+                            {
+                                pl->Kill(pl, true);
+                                pl->RepopAtGraveyard();
+                            });
                         }
                     }
                 }
@@ -694,9 +700,9 @@ public:
                 {
                     if (pl && pl->IsInWorld() && pl->IsAlive() && !pl->IsGameMaster())
                     {
-                        if (pl->GetPositionX() >= CENTRAL_SPINE_AXIS)
+                        if (pl->GetPositionX() >= CENTRAL_SPINE_AXIS + 4)
                             rightSide++;
-                        else
+                        else if (pl->GetPositionX() <= CENTRAL_SPINE_AXIS - 4)
                             leftSide++;
                         maxPlayers++;
                     }
