@@ -6107,6 +6107,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (!m_caster->HasAura(91832) || m_caster->GetAura(91832)->GetStackAmount() < m_spellInfo->StackAmount)
                 return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
             break;
+        case 106466: // Dream
+            if (!m_caster->HasAura(106464)) // Enter the Dream - enabler
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            break;
     }
 
     // Combat ressurections per encounter are limited since Cataclysm
