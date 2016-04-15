@@ -113,6 +113,12 @@ enum Spells
     ACHIEVEMENT_HEROIC_SPINE        = 6115,
 };
 
+enum Currencies
+{
+    CURRENCY_VALOR_POINTS           = 396,
+    CURRENCY_MOTE_OF_DARKNESS       = 614,
+};
+
 enum LootCache
 {
     GO_GREATER_CACHE_OF_THE_ASPECTS_10N     = 209894,
@@ -374,6 +380,9 @@ public:
                     instance->DoCompleteAchievement(ACHIEVEMENT_DIZZY);
                 if (IsHeroic())
                     instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_SPINE);
+
+                instance->DoModifyPlayerCurrencies(CURRENCY_VALOR_POINTS, IsHeroic() ? 140 : 120, CURRENCY_SOURCE_OTHER);
+                instance->DoModifyPlayerCurrencies(CURRENCY_MOTE_OF_DARKNESS, 1, CURRENCY_SOURCE_OTHER);
             }
 
             TeleportAllPlayers();

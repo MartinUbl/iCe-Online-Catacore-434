@@ -196,8 +196,15 @@ enum Spells
     SPELL_SPELLWEAVING                  = 106040,
     SPELL_FIRE_DRAGON_SOUL              = 109971,
 
+    ACHIEVEMENT_DESTROYERS_END          = 6177,
     ACHIEVEMENT_HEORIC_MADNESS          = 6116,
     ACHIEVEMENT_REALM_FIRST_MADNESS     = 6126,
+};
+
+enum Currencies
+{
+    CURRENCY_VALOR_POINTS               = 396,
+    CURRENCY_MOTE_OF_DARKNESS           = 615,
 };
 
 enum MadnesGameobjects
@@ -715,6 +722,10 @@ public:
                     instance->DoCompleteAchievement(ACHIEVEMENT_HEORIC_MADNESS);
                     RewardRealmFirstAchievement();
                 }
+                instance->DoCompleteAchievement(ACHIEVEMENT_DESTROYERS_END);
+
+                instance->DoModifyPlayerCurrencies(CURRENCY_VALOR_POINTS, (IsHeroic() ? 140 : 120), CURRENCY_SOURCE_OTHER);
+                instance->DoModifyPlayerCurrencies(CURRENCY_MOTE_OF_DARKNESS, 1, CURRENCY_SOURCE_OTHER);
             }
 
             SummonCache();
