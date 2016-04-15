@@ -1605,6 +1605,7 @@ public:
                         {
                             me->CastSpell(player, SPELL_LIGHTNING_CONDUIT, true);
                             player->CastSpell(player, SPELL_LIGHTNING_CONDUIT_10N, true);
+                            conduitStack.push(player);
                             traversedPlayers.insert(player);
                             targetCount++;
                         }
