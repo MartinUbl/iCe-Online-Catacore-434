@@ -455,16 +455,16 @@ public:
                 {
                     // For every plate away, we need to add two more spawn positions
                     uint32 maxPos = ZERO_PLATE_OFF_MAX_SPAWN_COUNT;
-                    nextSpawnTimer = 9000;
+                    nextSpawnTimer = 11000;
                     if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 1)
                     {
                         maxPos = FIRST_PLATE_OFF_MAX_SPAWN_COUNT;
-                        nextSpawnTimer = 7000;
+                        nextSpawnTimer = 9000;
                     }
                     else if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 2)
                     {
                         maxPos = SECOND_PLATE_OFF_MAX_SPAWN_COUNT;
-                        nextSpawnTimer = 5000;
+                        nextSpawnTimer = 7000;
                     }
 
                     uint32 randPos = urand(0, maxPos-1);
@@ -490,7 +490,7 @@ public:
                         // new corruption shouldn`t spawn at it`s last killed position
                         uint32 randPos = urand(0, maxPos-1);
                         if (randPos == corruptedPosition && randPos == maxPos-1)
-                            randPos = urand(0, maxPos-1);
+                            randPos = urand(0, maxPos-2);
                         else if (randPos == corruptedPosition)
                             randPos++;
 
@@ -647,7 +647,7 @@ public:
             {
                 if (Player* pl = itr->getSource())
                 {
-                    if (pl && pl->IsInWorld() && pl->IsAlive() && !pl->IsGameMaster())
+                    if (pl && pl->IsInWorld() && pl->IsAlive() && !pl->IsGameMaster() && pl->GetPositionZ() >= rollPos[DEST_LEFT].GetPositionZ())
                     {
                         if (!pl->HasAura(SPELL_GRASPING_TENDRILS_10N) && !pl->HasAura(SPELL_GRASPING_TENDRILS_25N)
                             && !pl->HasAura(SPELL_GRASPING_TENDRILS_10HC) && !pl->HasAura(SPELL_GRASPING_TENDRILS_25HC))
@@ -978,6 +978,7 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetVisible(false);
+            me->RemoveAllAuras();
             isOpen = false;
             if (auto *plate = GetNearestPlate(me))
             {
