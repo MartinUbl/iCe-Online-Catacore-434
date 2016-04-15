@@ -1287,8 +1287,6 @@ public:
 
             if (Creature * pTimeZone = me->FindNearestCreature(NPC_TIME_ZONE, SEARCH_RANGE, true))
                 pTimeZone->DespawnOrUnsummon();
-
-            Summons.DespawnAll();
         }
 
         void UpdateAI(const uint32 diff) override
