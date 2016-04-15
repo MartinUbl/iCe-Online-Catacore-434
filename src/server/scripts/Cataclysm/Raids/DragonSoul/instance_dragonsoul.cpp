@@ -151,6 +151,18 @@ public:
             OUT_LOAD_INST_DATA_COMPLETE;
         }
 
+        void OnPlayerEnter(Player * player) override
+        {
+            if (InstanceScript * pInstance = player->GetInstanceScript())
+            {
+                if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
+                {
+                    player->RepopAtGraveyard();
+                    return;
+                }
+            }
+        }
+
         void OnCreatureCreate(Creature* pCreature, bool add)
         {
             if (!add)
