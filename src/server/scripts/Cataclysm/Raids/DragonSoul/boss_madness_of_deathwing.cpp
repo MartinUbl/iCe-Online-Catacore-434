@@ -694,6 +694,8 @@ public:
         void Outro()
         {
             summons.DespawnAll();
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENTER_THE_DREAM);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SPELLWEAVING);
 
             // Outro
             PlayMovieToPlayers(OUTRO_CINEMATIC);
@@ -726,6 +728,9 @@ public:
 
                 instance->DoModifyPlayerCurrencies(CURRENCY_VALOR_POINTS, (IsHeroic() ? 140 : 120), CURRENCY_SOURCE_OTHER);
                 instance->DoModifyPlayerCurrencies(CURRENCY_MOTE_OF_DARKNESS, 1, CURRENCY_SOURCE_OTHER);
+
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENTER_THE_DREAM);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SPELLWEAVING);
             }
 
             SummonCache();
