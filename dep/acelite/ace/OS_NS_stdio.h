@@ -472,11 +472,11 @@ namespace ACE_OS {
   void rewind (FILE *fp);
 
   extern ACE_Export
-  int snprintf (char *buf, size_t maxlen, const char *format, ...);
+  int snprintf_ace (char *buf, size_t maxlen, const char *format, ...);
 
 # if defined (ACE_HAS_WCHAR)
   extern ACE_Export
-  int snprintf (wchar_t *buf, size_t maxlen, const wchar_t *format, ...);
+  int snprintf_ace (wchar_t *buf, size_t maxlen, const wchar_t *format, ...);
 # endif /* ACE_HAS_WCHAR */
 
   extern ACE_Export

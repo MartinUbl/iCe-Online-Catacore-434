@@ -28,7 +28,7 @@
 ulonglong my_getsystime()
 {
 #ifdef HAVE_CLOCK_GETTIME
-  struct timespec tp;
+  struct timespec_mysql tp;
   clock_gettime(CLOCK_REALTIME, &tp);
   return (ulonglong)tp.tv_sec*10000000+(ulonglong)tp.tv_nsec/100;
 #elif defined(__WIN__)

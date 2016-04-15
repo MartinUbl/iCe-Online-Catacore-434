@@ -99,12 +99,12 @@ typedef volatile LONG my_pthread_once_t;
   FILETIME ft;
   __int64 i64;
  };
-struct timespec {
+struct timespec_mysql {
   union ft64 tv;
   /* The max timeout value in millisecond for pthread_cond_timedwait */
   long max_timeout_msec;
 };
-#define set_timespec(ABSTIME,SEC) { \
+#define set_timespec_mysql(ABSTIME,SEC) { \
   GetSystemTimeAsFileTime(&((ABSTIME).tv.ft)); \
   (ABSTIME).tv.i64+= (__int64)(SEC)*10000000; \
   (ABSTIME).max_timeout_msec= (long)((SEC)*1000); \

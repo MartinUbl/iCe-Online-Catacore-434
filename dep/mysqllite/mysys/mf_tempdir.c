@@ -42,8 +42,18 @@ my_bool init_tmpdir(MY_TMPDIR *tmpdir, const char *pathlist)
     if (!pathlist)
       pathlist=getenv("TMP");
 #endif
-    if (!pathlist || !pathlist[0])
-      pathlist=(char*) P_tmpdir;
+	if (!pathlist || !pathlist[0])
+	{
+#if _MSC_VER >= 1900 //P_tmpdir was removed on VS2015
+		char lpTempPathBuffer[MAX_PATH];
+		GetTempPath(MAX_PATH,          // length of the buffer
+			lpTempPathBuffer); // buffer for path
+		pathlist = (char*)lpTempPathBuffer;
+#else
+		pathlist = (char*)P_tmpdir;
+#endif
+	}
+
   }
   do
   {

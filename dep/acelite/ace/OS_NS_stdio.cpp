@@ -317,9 +317,9 @@ ACE_OS::printf (const wchar_t *format, ...)
 #endif /* ACE_HAS_WCHAR */
 
 int
-ACE_OS::snprintf (char *buf, size_t maxlen, const char *format, ...)
+ACE_OS::snprintf_ace (char *buf, size_t maxlen, const char *format, ...)
 {
-  // ACE_OS_TRACE ("ACE_OS::snprintf");
+  // ACE_OS_TRACE ("ACE_OS::snprintf_ace");
   va_list ap;
   va_start (ap, format);
   int const result = ACE_OS::vsnprintf (buf, maxlen, format, ap);
@@ -329,9 +329,9 @@ ACE_OS::snprintf (char *buf, size_t maxlen, const char *format, ...)
 
 #if defined (ACE_HAS_WCHAR)
 int
-ACE_OS::snprintf (wchar_t *buf, size_t maxlen, const wchar_t *format, ...)
+ACE_OS::snprintf_ace (wchar_t *buf, size_t maxlen, const wchar_t *format, ...)
 {
-  // ACE_OS_TRACE ("ACE_OS::snprintf");
+  // ACE_OS_TRACE ("ACE_OS::snprintf_ace");
   va_list ap;
   va_start (ap, format);
   int const result = ACE_OS::vsnprintf (buf, maxlen, format, ap);

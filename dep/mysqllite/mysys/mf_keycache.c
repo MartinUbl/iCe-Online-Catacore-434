@@ -4343,7 +4343,7 @@ static int keycache_pthread_cond_wait(mysql_cond_t *cond,
 {
   int rc;
   struct timeval  now;            /* time when we started waiting        */
-  struct timespec timeout;        /* timeout value for the wait function */
+  struct timespec_mysql timeout;        /* timeout value for the wait function */
   struct timezone tz;
 #if defined(KEYCACHE_DEBUG)
   int cnt=0;
@@ -4355,7 +4355,7 @@ static int keycache_pthread_cond_wait(mysql_cond_t *cond,
   timeout.tv_sec= now.tv_sec + KEYCACHE_TIMEOUT;
  /*
    timeval uses microseconds.
-   timespec uses nanoseconds.
+   timespec_mysql uses nanoseconds.
    1 nanosecond = 1000 micro seconds
  */
   timeout.tv_nsec= now.tv_usec * 1000;

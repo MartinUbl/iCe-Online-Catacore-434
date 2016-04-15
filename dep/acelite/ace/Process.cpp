@@ -110,7 +110,7 @@ ACE_Process::spawn (ACE_Process_Options &options)
       size_t curr_len = ACE_OS::strlen (cmd_line_buf);
       ACE_Handle_Set_Iterator h_iter (*set_p);
       // Because the length of the to-be-formatted +H option is not
-      // known, and we don't have a snprintf, guess at the space
+      // known, and we don't have a snprintf_ace, guess at the space
       // needed (20 chars), and use that as a limit.
       for (ACE_HANDLE h = h_iter ();
            h != ACE_INVALID_HANDLE && curr_len + 20 < max_len;
@@ -1030,7 +1030,7 @@ ACE_Process_Options::setenv (const ACE_TCHAR *variable_name,
 
   if (retval == -1)
     {
-      // In case that vsnprintf is not supported,
+      // In case that vsnprintf_ace is not supported,
       // e.g., LynxOS and VxWorks 5, we have to
       // fall back to vsprintf.
       if (errno == ENOTSUP)
@@ -1044,7 +1044,7 @@ ACE_Process_Options::setenv (const ACE_TCHAR *variable_name,
             return -1;
         }
       else
-        // vsnprintf is failed.
+        // vsnprintf_ace is failed.
         return -1;
     }
 
@@ -1227,8 +1227,8 @@ ACE_Process_Options::command_line (const ACE_TCHAR *format, ...)
   if (command_line_buf_len_ < 1)
     return -1;
 
-#if !defined (ACE_LACKS_VSNPRINTF) || defined (ACE_HAS_TRIO)
-  // vsnprintf the format and args into command_line_buf__.
+#if !defined (ACE_LACKS_Vsnprintf_ace) || defined (ACE_HAS_TRIO)
+  // vsnprintf_ace the format and args into command_line_buf__.
   ACE_OS::vsnprintf (command_line_buf_,
                      command_line_buf_len_,
                      format,

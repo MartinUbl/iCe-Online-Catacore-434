@@ -264,7 +264,7 @@ ACE_Stack_Trace::generate_trace (ssize_t starting_frame_offset,
           size_t len = ACE_OS::strlen (this->buf_);
           size_t space = SYMBUFSIZ - len - 1;
           char *cursor = this->buf_ + len;
-          size_t written = ACE_OS::snprintf (cursor, space, "%x %s",
+          size_t written = ACE_OS::snprintf_ace (cursor, space, "%x %s",
                                              prevFn, fnName);
           cursor += written;
           space -= written;
@@ -273,7 +273,7 @@ ACE_Stack_Trace::generate_trace (ssize_t starting_frame_offset,
           for (int arg = 0; numArgs != -1 && pArgs && arg < numArgs; ++arg)
             {
               if (arg == 0) *cursor++ = '(', --space;
-              written = ACE_OS::snprintf (cursor, space,
+              written = ACE_OS::snprintf_ace (cursor, space,
                                           (arg < numArgs - 1) ? "%x, " : "%x",
                                           pArgs[arg]);
               cursor += written;
@@ -408,7 +408,7 @@ add_frame_to_buf (void* pc, void* usrarg)
       func = (const char *) info.dli_sname;
     }
 
-  (void) ACE_OS::snprintf(buf,
+  (void) ACE_OS::snprintf_ace(buf,
                           ACE_Stack_Trace::SYMBUFSIZ,
                           "%s%s:%s+0x%x\n",
                           buf,
@@ -560,14 +560,14 @@ add_frame_to_buf (struct frame_state const *fs, void *usrarg)
                                           fs->sf.AddrPC.Offset,
                                           &lineDisp, &line))
         {
-          (void) ACE_OS::snprintf (buf, ACE_Stack_Trace::SYMBUFSIZ,
+          (void) ACE_OS::snprintf_ace (buf, ACE_Stack_Trace::SYMBUFSIZ,
                                    "%s%s() %s: %d + 0x%x\n",
                                    buf, fs->pSym->Name, line.FileName,
                                    line.LineNumber, lineDisp);
         }
       else
         {
-          (void) ACE_OS::snprintf (buf, ACE_Stack_Trace::SYMBUFSIZ,
+          (void) ACE_OS::snprintf_ace (buf, ACE_Stack_Trace::SYMBUFSIZ,
                                    "%s%s()+0x%x [0x%x]\n",
                                    buf, fs->pSym->Name, disp,
                                    fs->sf.AddrPC.Offset - dwModBase);
@@ -575,7 +575,7 @@ add_frame_to_buf (struct frame_state const *fs, void *usrarg)
     }
   else
     {
-      (void) ACE_OS::snprintf (buf, ACE_Stack_Trace::SYMBUFSIZ,
+      (void) ACE_OS::snprintf_ace (buf, ACE_Stack_Trace::SYMBUFSIZ,
                                "%s[0x%x]\n",
                                buf, fs->sf.AddrPC.Offset - dwModBase);
     }

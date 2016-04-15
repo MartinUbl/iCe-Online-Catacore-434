@@ -70,7 +70,7 @@ typedef struct {
     cursor is positioned in either case
     pins[0..2] are used, they are NOT removed on return
 */
-static int lfind(LF_SLIST * volatile *head, CHARSET_INFO *cs, uint32 hashnr,
+static int lfind_mysql(LF_SLIST * volatile *head, CHARSET_INFO *cs, uint32 hashnr,
                  const uchar *key, uint keylen, CURSOR *cursor, LF_PINS *pins)
 {
   uint32       cur_hashnr;
@@ -257,7 +257,7 @@ static int ldelete(LF_SLIST * volatile *head, CHARSET_INFO *cs, uint32 hashnr,
     it uses pins[0..2], on return the pin[2] keeps the node found
     all other pins are removed.
 */
-static LF_SLIST *lsearch(LF_SLIST * volatile *head, CHARSET_INFO *cs,
+static LF_SLIST *lsearch_mysql(LF_SLIST * volatile *head, CHARSET_INFO *cs,
                          uint32 hashnr, const uchar *key, uint keylen,
                          LF_PINS *pins)
 {

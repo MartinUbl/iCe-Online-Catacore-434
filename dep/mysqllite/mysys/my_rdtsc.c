@@ -220,7 +220,7 @@ ulonglong my_timer_cycles(void)
   }
 #elif defined(__sgi) && defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_SGI_CYCLE)
   {
-    struct timespec tp;
+    struct timespec_mysql tp;
     clock_gettime(CLOCK_SGI_CYCLE, &tp);
     return (ulonglong) tp.tv_sec * 1000000000 + (ulonglong) tp.tv_nsec;
   }
@@ -257,7 +257,7 @@ ulonglong my_timer_nanoseconds(void)
   return (ulonglong) gethrtime();
 #elif defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_REALTIME)
   {
-    struct timespec tp;
+    struct timespec_mysql tp;
     clock_gettime(CLOCK_REALTIME, &tp);
     return (ulonglong) tp.tv_sec * 1000000000 + (ulonglong) tp.tv_nsec;
   }

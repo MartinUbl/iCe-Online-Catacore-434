@@ -634,7 +634,7 @@ ACE_Function_Node::make_func_name (ACE_TCHAR const * func_name)
 
       ACE_Auto_Basic_Array_Ptr<ACE_TCHAR> safe (mangled_func_name);
 
-      ACE_OS::snprintf (mangled_func_name,
+      ACE_OS::snprintf_ace (mangled_func_name,
                         len,
                         ACE_TEXT ("%s%s%s"),
                         make_prefix,

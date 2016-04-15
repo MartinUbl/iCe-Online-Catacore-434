@@ -448,12 +448,12 @@ void end_thr_alarm(my_bool free_structures)
     }
     if (free_structures)
     {
-      struct timespec abstime;
+      struct timespec_mysql abstime;
 
       DBUG_ASSERT(!alarm_queue.elements);
 
       /* Wait until alarm thread dies */
-      set_timespec(abstime, 10);		/* Wait up to 10 seconds */
+      set_timespec_mysql(abstime, 10);		/* Wait up to 10 seconds */
       while (alarm_thread_running)
       {
         int error= mysql_cond_timedwait(&COND_alarm, &LOCK_alarm, &abstime);
@@ -534,7 +534,7 @@ static sig_handler thread_alarm(int sig __attribute__((unused)))
 }
 
 
-#ifdef HAVE_TIMESPEC_TS_SEC
+#ifdef HAVE_timespec_mysql_TS_SEC
 #define tv_sec ts_sec
 #define tv_nsec ts_nsec
 #endif
@@ -545,7 +545,7 @@ static sig_handler thread_alarm(int sig __attribute__((unused)))
 static void *alarm_handler(void *arg __attribute__((unused)))
 {
   int error;
-  struct timespec abstime;
+  struct timespec_mysql abstime;
 #ifdef MAIN
   puts("Starting alarm thread");
 #endif

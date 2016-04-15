@@ -120,7 +120,7 @@
 
 #define I32FMT "%08I32X"
 #define I64FMT "%016I64X"
-#define snprintf _snprintf
+#define snprintf_com _snprintf
 #define atoll _atoi64
 #define strtoull _strtoui64
 #define vsnprintf _vsnprintf

@@ -1022,13 +1022,13 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
   if (this->msg_off_ <= ACE_Log_Record::MAXLOGMSGLEN)
     bspace -= static_cast<size_t> (this->msg_off_);
 
-  // If this platform has snprintf() capability to prevent overrunning the
+  // If this platform has snprintf_ace() capability to prevent overrunning the
   // output buffer, use it. To avoid adding a maintenance-hassle compile-
   // time couple between here and OS.cpp, don't try to figure this out at
   // compile time. Instead, do a quick check now; if we get a -1 return,
   // the platform doesn't support the length-limiting capability.
   ACE_TCHAR test[2];
-  bool can_check = ACE_OS::snprintf (test, 1, ACE_TEXT ("x")) != -1;
+  bool can_check = ACE_OS::snprintf_ace (test, 1, ACE_TEXT ("x")) != -1;
 
   bool abort_prog = false;
   int exit_value = 0;
@@ -1167,7 +1167,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     ACE_OS::strcpy (fp, ACE_TEXT ("f"));
                     double const value = va_arg (argp, double);
                     if (can_check)
-                      this_len = ACE_OS::snprintf (bp, bspace, format, value);
+                      this_len = ACE_OS::snprintf_ace (bp, bspace, format, value);
                     else
                       this_len = ACE_OS::sprintf (bp, format, value);
                     ACE_UPDATE_COUNT (bspace, this_len);
@@ -1187,7 +1187,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                 case 'l':             // Source file line number
                   ACE_OS::strcpy (fp, ACE_TEXT ("d"));
                   if (can_check)
-                    this_len = ACE_OS::snprintf (bp,
+                    this_len = ACE_OS::snprintf_ace (bp,
                                                  bspace,
                                                  format,
                                                  this->linenum ());
@@ -1203,7 +1203,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                   ACE_OS::strcpy (fp, ACE_TEXT ("s"));
 #endif
                   if (can_check)
-                    this_len = ACE_OS::snprintf (bp, bspace, format,
+                    this_len = ACE_OS::snprintf_ace (bp, bspace, format,
                                                  this->file () ?
                                                  ACE_TEXT_CHAR_TO_TCHAR (this->file ())
                                                  : ACE_TEXT ("<unknown file>"));
@@ -1222,7 +1222,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                   ACE_OS::strcpy (fp, ACE_TEXT ("s"));
 #endif
                   if (can_check)
-                    this_len = ACE_OS::snprintf (bp, bspace, format,
+                    this_len = ACE_OS::snprintf_ace (bp, bspace, format,
                                                  ACE_Log_Msg::program_name_ ?
                                                  ACE_Log_Msg::program_name_ :
                                                  ACE_TEXT ("<unknown>"));
@@ -1242,7 +1242,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                   ACE_OS::strcpy (fp, ACE_TEXT ("d"));
 #endif
                   if (can_check)
-                    this_len = ACE_OS::snprintf
+                    this_len = ACE_OS::snprintf_ace
                       (bp, bspace, format,
                        static_cast<int> (this->getpid ()));
                   else
@@ -1270,7 +1270,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                         ACE_TCHAR *str = va_arg (argp, ACE_TCHAR *);
 #endif
                         if (can_check)
-                          this_len = ACE_OS::snprintf
+                          this_len = ACE_OS::snprintf_ace
                             (bp, bspace, format,
                              str ? str : ACE_TEXT ("(null)"),
                              ACE_TEXT_CHAR_TO_TCHAR (msg));
@@ -1315,7 +1315,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                               ACE::sock_error (errno);
                             ACE_OS::strcpy (fp, ACE_TEXT ("s: %s"));
                             if (can_check)
-                              this_len = ACE_OS::snprintf
+                              this_len = ACE_OS::snprintf_ace
                                 (bp, bspace, format,
                                  str ? str : ACE_TEXT ("(null)"),
                                  message);
@@ -1329,7 +1329,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                           {
                             ACE_OS::strcpy (fp, ACE_TEXT ("s: %s"));
                             if (can_check)
-                              this_len = ACE_OS::snprintf
+                              this_len = ACE_OS::snprintf_ace
                                 (bp, bspace, format,
                                  str ? str : ACE_TEXT ("(null)"),
                                  lpMsgBuf);
@@ -1399,7 +1399,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
 
                       if (can_check)
                       {
-                        this_len = ACE_OS::snprintf
+                        this_len = ACE_OS::snprintf_ace
                           (bp, bspace, format,
 #if !defined (ACE_USES_WCHAR) || defined (ACE_WIN32)
                            (int)
@@ -1460,7 +1460,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                       ACE_OS::strcpy (fp, ACE_TEXT ("s"));
 #endif
                       if (can_check)
-                        this_len = ACE_OS::snprintf
+                        this_len = ACE_OS::snprintf_ace
                           (bp, bspace, format,
                            ACE_Log_Record::priority_name (log_priority));
                       else
@@ -1488,7 +1488,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                         ACE_OS::strcpy (fp, ACE_TEXT ("s"));
 #endif
                         if (can_check)
-                          this_len = ACE_OS::snprintf
+                          this_len = ACE_OS::snprintf_ace
                             (bp, bspace, format, ACE_TEXT_CHAR_TO_TCHAR (msg));
                         else
                           this_len = ACE_OS::sprintf
@@ -1528,7 +1528,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                               ACE::sock_error (errno);
                             ACE_OS::strcpy (fp, ACE_TEXT ("s"));
                             if (can_check)
-                              this_len = ACE_OS::snprintf
+                              this_len = ACE_OS::snprintf_ace
                                 (bp, bspace, format, message);
                             else
                               this_len = ACE_OS::sprintf (bp, format, message);
@@ -1537,7 +1537,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                           {
                             ACE_OS::strcpy (fp, ACE_TEXT ("s"));
                             if (can_check)
-                              this_len = ACE_OS::snprintf
+                              this_len = ACE_OS::snprintf_ace
                                 (bp, bspace, format, lpMsgBuf);
                             else
                               this_len = ACE_OS::sprintf
@@ -1555,7 +1555,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                   this->op_status (va_arg (argp, int));
                   ACE_OS::strcpy (fp, ACE_TEXT ("d"));
                   if (can_check)
-                    this_len = ACE_OS::snprintf
+                    this_len = ACE_OS::snprintf_ace
                       (bp, bspace, format, this->op_status ());
                   else
                     this_len = ACE_OS::sprintf
@@ -1636,7 +1636,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     const int sig = va_arg (argp, int);
                     ACE_OS::strcpy (fp, ACE_TEXT ("s"));
                     if (can_check)
-                      this_len = ACE_OS::snprintf
+                      this_len = ACE_OS::snprintf_ace
                         (bp, bspace, format, ACE_OS::strsignal(sig));
                     else
                       this_len = ACE_OS::sprintf
@@ -1668,7 +1668,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     ACE_OS::strcpy (fp, ACE_TEXT ("s"));
 #endif
                     if (can_check)
-                      this_len = ACE_OS::snprintf
+                      this_len = ACE_OS::snprintf_ace
                         (bp, bspace, format, day_and_time);
                     else
                       this_len = ACE_OS::sprintf (bp, format, day_and_time);
@@ -1690,7 +1690,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     {
                       ACE_Time_Value* time_value = va_arg (argp, ACE_Time_Value*);
                       if (can_check)
-                        this_len = ACE_OS::snprintf
+                        this_len = ACE_OS::snprintf_ace
                           (bp, bspace, format,
                           ACE::timestamp (*time_value, 
                                          day_and_time, 
@@ -1704,7 +1704,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     else
                     {
                       if (can_check)
-                        this_len = ACE_OS::snprintf
+                        this_len = ACE_OS::snprintf_ace
                           (bp, bspace, format,
                           ACE::timestamp (day_and_time, sizeof day_and_time / sizeof (ACE_TCHAR)));
                       else
@@ -1720,7 +1720,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
 #if defined (ACE_WIN32)
                   ACE_OS::strcpy (fp, ACE_TEXT ("u"));
                   if (can_check)
-                    this_len = ACE_OS::snprintf
+                    this_len = ACE_OS::snprintf_ace
                       (bp, bspace, format,
                        static_cast<unsigned> (ACE_Thread::self ()));
                   else
@@ -1739,7 +1739,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
 #  endif /* ACE_HAS_THREADS */
 
                       if (can_check)
-                        this_len = ACE_OS::snprintf (bp, bspace, format, id);
+                        this_len = ACE_OS::snprintf_ace (bp, bspace, format, id);
                       else
                         this_len = ACE_OS::sprintf (bp, format, id);
                   }
@@ -1752,7 +1752,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                   // code for it.
                   ACE_OS::strcpy (fp, ACE_TEXT ("u"));
                   if (can_check)
-                    this_len = ACE_OS::snprintf (bp, bspace, format, t_id);
+                    this_len = ACE_OS::snprintf_ace (bp, bspace, format, t_id);
                   else
                     this_len = ACE_OS::sprintf (bp, format, t_id);
 #  else
@@ -1763,7 +1763,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                   // get an integral type, like the OSes above.
                   ACE_OS::strcpy (fp, ACE_TEXT ("lu"));
                   if (can_check)
-                    this_len = ACE_OS::snprintf
+                    this_len = ACE_OS::snprintf_ace
                       (bp, bspace, format, (unsigned long)t_id);
                   else
                     this_len = ACE_OS::sprintf
@@ -1784,7 +1784,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     ACE_OS::strcpy (fp, ACE_TEXT ("s"));
 #endif /* ACE_WIN32 && ACE_USES_WCHAR */
                     if (can_check)
-                      this_len = ACE_OS::snprintf
+                      this_len = ACE_OS::snprintf_ace
                         (bp, bspace, format, str ? str : ACE_TEXT ("(null)"));
                     else
                       this_len = ACE_OS::sprintf
@@ -1802,7 +1802,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     ACE_OS::strcpy (fp, ACE_TEXT ("s"));
 #endif /* ACE_WIN32 && ACE_USES_WCHAR */
                     if (can_check)
-                      this_len = ACE_OS::snprintf
+                      this_len = ACE_OS::snprintf_ace
                         (bp, bspace, format, cstr ? cstr : "(null)");
                     else
                       this_len = ACE_OS::sprintf
@@ -1827,7 +1827,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     ACE_OS::strcpy (fp, ACE_TEXT ("ls"));
 # endif /* HPUX */
                     if (can_check)
-                      this_len = ACE_OS::snprintf
+                      this_len = ACE_OS::snprintf_ace
                         (bp, bspace, format, wchar_str ? wchar_str : ACE_TEXT_WIDE("(null)"));
                     else
                       this_len = ACE_OS::sprintf
@@ -1845,7 +1845,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                   ACE_OS::strcpy (fp, ACE_TEXT ("C"));
 # endif /* ACE_USES_WCHAR */
                   if (can_check)
-                    this_len = ACE_OS::snprintf
+                    this_len = ACE_OS::snprintf_ace
                       (bp, bspace, format, va_arg (argp, int));
                   else
                     this_len = ACE_OS::sprintf
@@ -1857,7 +1857,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                   ACE_OS::strcpy (fp, ACE_TEXT ("lc"));
 # endif /* HPUX */
                   if (can_check)
-                    this_len = ACE_OS::snprintf
+                    this_len = ACE_OS::snprintf_ace
                       (bp, bspace, format, va_arg (argp, wint_t));
                   else
                     this_len = ACE_OS::sprintf
@@ -1865,7 +1865,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
 #else /* ACE_WIN32 */
                   ACE_OS::strcpy (fp, ACE_TEXT ("u"));
                   if (can_check)
-                    this_len = ACE_OS::snprintf
+                    this_len = ACE_OS::snprintf_ace
                       (bp, bspace, format, va_arg (argp, int));
                   else
                     this_len = ACE_OS::sprintf
@@ -1896,7 +1896,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     ACE_OS::strcpy (fp, ACE_TEXT ("u"));
 #endif /* ACE_WIN32 */
                     if (can_check)
-                      this_len = ACE_OS::snprintf (bp, bspace, format, wtchar);
+                      this_len = ACE_OS::snprintf_ace (bp, bspace, format, wtchar);
                     else
                       this_len = ACE_OS::sprintf (bp, format, wtchar);
                     ACE_UPDATE_COUNT (bspace, this_len);
@@ -1941,7 +1941,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
 # endif /* HPUX */
 #endif /* ACE_WIN32 / ACE_HAS_WCHAR */
                   if (can_check)
-                    this_len = ACE_OS::snprintf
+                    this_len = ACE_OS::snprintf_ace
                       (bp, bspace, format, wchar_t_str);
                   else
                     this_len = ACE_OS::sprintf (bp, format, wchar_t_str);
@@ -1960,7 +1960,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                   ACE_OS::strcpy (fp, ACE_TEXT ("c"));
 #endif /* ACE_WIN32 && ACE_USES_WCHAR */
                   if (can_check)
-                    this_len = ACE_OS::snprintf
+                    this_len = ACE_OS::snprintf_ace
                       (bp, bspace, format, va_arg (argp, int));
                   else
                     this_len = ACE_OS::sprintf
@@ -1973,7 +1973,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                   fp[0] = *format_str;
                   fp[1] = '\0';
                   if (can_check)
-                    this_len = ACE_OS::snprintf
+                    this_len = ACE_OS::snprintf_ace
                       (bp, bspace, format, va_arg (argp, int));
                   else
                     this_len = ACE_OS::sprintf
@@ -1986,7 +1986,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                   fp[0] = *format_str;
                   fp[1] = '\0';
                   if (can_check)
-                    this_len = ACE_OS::snprintf
+                    this_len = ACE_OS::snprintf_ace
                       (bp, bspace, format, va_arg (argp, double));
                   else
                     this_len = ACE_OS::sprintf
@@ -2014,7 +2014,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     const ACE_TCHAR *fmt = ACE_UINT64_FORMAT_SPECIFIER;
                     ACE_OS::strcpy (fp, &fmt[1]);    // Skip leading %
                     if (can_check)
-                      this_len = ACE_OS::snprintf (bp, bspace,
+                      this_len = ACE_OS::snprintf_ace (bp, bspace,
                                                    format,
                                                    va_arg (argp, ACE_UINT64));
                     else
@@ -2035,7 +2035,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                      const ACE_TCHAR *fmt = ACE_INT64_FORMAT_SPECIFIER;
                      ACE_OS::strcpy (fp, &fmt[1]);    // Skip leading %
                      if (can_check)
-                       this_len = ACE_OS::snprintf (bp, bspace,
+                       this_len = ACE_OS::snprintf_ace (bp, bspace,
                                                     format,
                                                     va_arg (argp, ACE_INT64));
                      else
@@ -2053,7 +2053,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     ACE_OS::strcpy (fp, &fmt[1]);    // Skip leading %
                   }
                   if (can_check)
-                    this_len = ACE_OS::snprintf (bp, bspace,
+                    this_len = ACE_OS::snprintf_ace (bp, bspace,
                                                  format,
                                                  va_arg (argp, ssize_t));
                   else
@@ -2069,7 +2069,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     ACE_OS::strcpy (fp, &fmt[1]);    // Skip leading %
                   }
                   if (can_check)
-                    this_len = ACE_OS::snprintf (bp, bspace,
+                    this_len = ACE_OS::snprintf_ace (bp, bspace,
                                                  format,
                                                  va_arg (argp, size_t));
                   else
@@ -2089,7 +2089,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     ACE_OS::strcpy (fp, &fmt[1]);    // Skip leading %
                   }
                   if (can_check)
-                    this_len = ACE_OS::snprintf (bp, bspace,
+                    this_len = ACE_OS::snprintf_ace (bp, bspace,
                                                  format,
                                                  va_arg (argp, time_t));
                   else
@@ -2102,7 +2102,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                 case '@':
                     ACE_OS::strcpy (fp, ACE_TEXT ("p"));
                     if (can_check)
-                      this_len = ACE_OS::snprintf
+                      this_len = ACE_OS::snprintf_ace
                         (bp, bspace, format, va_arg (argp, void*));
                     else
                       this_len = ACE_OS::sprintf
@@ -2117,7 +2117,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
                     ACE_Stack_Trace t(2);
                     ACE_OS::strcpy (fp, ACE_TEXT ("s"));
                     if (can_check)
-                      this_len = ACE_OS::snprintf
+                      this_len = ACE_OS::snprintf_ace
                         (bp, bspace, format, t.c_str ());
                     else
                       this_len = ACE_OS::sprintf
