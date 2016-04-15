@@ -457,6 +457,20 @@ void InstanceScript::DoSetMaxScriptedPowerToPlayers(int32 amount)
                 pPlayer->SetMaxPower(POWER_SCRIPTED, amount);
 }
 
+// Reward all players with currency
+void InstanceScript::DoModifyPlayerCurrencies(uint32 id, int32 value, CurrencySource src)
+{
+    Map::PlayerList const &plrList = instance->GetPlayers();
+
+    if (!plrList.isEmpty())
+        for (Map::PlayerList::const_iterator i = plrList.begin(); i != plrList.end(); ++i)
+            if (Player* pPlayer = i->getSource())
+            {
+                pPlayer->ModifyCurrency(id, value, src);
+                pPlayer->SendCurrencies();
+            }
+}
+
 bool InstanceScript::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/ /*= NULL*/, uint32 /*miscvalue1*/ /*= 0*/)
 {
     sLog->outError("Achievement system call InstanceScript::CheckAchievementCriteriaMeet but instance script for map %u not have implementation for achievement criteria %u",

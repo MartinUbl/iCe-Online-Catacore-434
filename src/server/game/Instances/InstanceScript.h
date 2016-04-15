@@ -207,6 +207,9 @@ class InstanceScript : public ZoneScript
         void DoSetScriptedPowerToPlayers(int32 amount);
         void DoSetMaxScriptedPowerToPlayers(int32 amount);
 
+        // Reward all players with currency
+        void DoModifyPlayerCurrencies(uint32 id, int32 value, CurrencySource src);
+
         //add/remove boss frames (0=ADD,1=REMOVE)
         void SendEncounterUnit(uint32 type, Unit* unit, uint8 param1 = 0, uint8 param2 = 0);
 
