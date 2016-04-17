@@ -103,6 +103,8 @@ public:
             nethestraszGuid         = 0;
             teleportGUIDs.clear();
             ultraxionDrakesGUIDs.clear();
+
+            GetCorrUiEncounter();
         }
 
         std::string GetSaveData()
