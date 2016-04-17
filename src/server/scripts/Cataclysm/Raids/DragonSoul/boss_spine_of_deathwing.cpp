@@ -653,7 +653,8 @@ public:
                     if (pl && pl->IsInWorld() && pl->IsAlive() && !pl->IsGameMaster() && pl->GetPositionZ() >= rollPos[DEST_LEFT].GetPositionZ())
                     {
                         if (!pl->HasAura(SPELL_GRASPING_TENDRILS_10N) && !pl->HasAura(SPELL_GRASPING_TENDRILS_25N)
-                            && !pl->HasAura(SPELL_GRASPING_TENDRILS_10HC) && !pl->HasAura(SPELL_GRASPING_TENDRILS_25HC))
+                            && !pl->HasAura(SPELL_GRASPING_TENDRILS_10HC) && !pl->HasAura(SPELL_GRASPING_TENDRILS_25HC)
+                            && !pl->HasAuraType(SPELL_AURA_MOD_STUN))
                         {
                             if (side == ROLL_LEFT)
                                 pl->GetMotionMaster()->MoveJump(rollPos[DEST_LEFT].GetPositionX(), rollPos[DEST_LEFT].GetPositionY(), rollPos[DEST_LEFT].GetPositionZ(), 20.0f, 10.0f);
