@@ -475,17 +475,23 @@ public:
 
         void JustDied(Unit * /*who*/) override
         {
+            RunPlayableQuote(justDied);
+            summons.DespawnAll();
+            LightningStorm(true);
+
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_HAGARA, DONE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 if (IsHeroic())
                     instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_HAGARA);
-            }
 
-            RunPlayableQuote(justDied);
-            summons.DespawnAll();
-            LightningStorm(true);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_10N);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_25N);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_10HC);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_25HC);
+            }
         }
 
         void DoAction(const int32 param) override
