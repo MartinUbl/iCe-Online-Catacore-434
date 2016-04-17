@@ -290,6 +290,8 @@ struct ElementalAI : public ScriptedAI
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             if (IsHeroic())
                 instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_MORCHOK);
+
+            instance->DoModifyPlayerCurrencies(CURRENCY_MOTE_OF_DARKNESS, 1, CURRENCY_SOURCE_OTHER);
         }
 
         MorchokHelpers::RemoveBeamAuraFromPlayers(instance);

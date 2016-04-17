@@ -396,6 +396,8 @@ public:
 
                 if (IsHeroic())
                     instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_YORSAHJ);
+
+                instance->DoModifyPlayerCurrencies(CURRENCY_MOTE_OF_DARKNESS, 1, CURRENCY_SOURCE_OTHER);
             }
 
             summons.DespawnAll();

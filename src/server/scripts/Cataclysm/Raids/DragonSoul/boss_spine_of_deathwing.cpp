@@ -113,12 +113,6 @@ enum Spells
     ACHIEVEMENT_HEROIC_SPINE        = 6115,
 };
 
-enum Currencies
-{
-    CURRENCY_VALOR_POINTS           = 396,
-    CURRENCY_MOTE_OF_DARKNESS       = 614,
-};
-
 enum LootCache
 {
     GO_GREATER_CACHE_OF_THE_ASPECTS_10N     = 209894,

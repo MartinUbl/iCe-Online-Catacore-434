@@ -123,6 +123,13 @@ enum DragonsoulCreatureIds
     NPC_TWILIGHT_ASSAULTERESS           = 56250,
 };
 
+enum Currencies
+{
+    CURRENCY_VALOR_POINTS                   = 396,
+    CURRENCY_MOTE_OF_DARKNESS               = 614,
+    CURRENCY_ESSENCE_OF_CORRUPTED_DEATHWING = 615,
+};
+
 enum SharedSpells
 {
     SPELL_TELEPORT_VISUAL_ACTIVE                = 108203,

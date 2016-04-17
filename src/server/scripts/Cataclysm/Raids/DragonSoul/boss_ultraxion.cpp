@@ -518,6 +518,9 @@ public:
             {
                 instance->SetData(TYPE_BOSS_ULTRAXION, DONE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+                instance->DoModifyPlayerCurrencies(CURRENCY_VALOR_POINTS, IsHeroic() ? 140 : 120, CURRENCY_SOURCE_OTHER);
+                instance->DoModifyPlayerCurrencies(CURRENCY_MOTE_OF_DARKNESS, 1, CURRENCY_SOURCE_OTHER);
             }
         }
 

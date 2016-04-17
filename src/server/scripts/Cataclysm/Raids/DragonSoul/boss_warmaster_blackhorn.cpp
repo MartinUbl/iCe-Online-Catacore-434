@@ -285,6 +285,8 @@ public:
                     instance->DoCompleteAchievement(ACHIEVEMENT_HEROIC_WARMASTER);
                 if (achievement)
                     instance->DoCompleteAchievement(ACHIEVEMENT_DECK_DEFENDER);
+
+                instance->DoModifyPlayerCurrencies(CURRENCY_MOTE_OF_DARKNESS, 1, CURRENCY_SOURCE_OTHER);
             }
 
             if (Creature * pGoriona = me->FindNearestCreature(NPC_GORIONA, SEARCH_RANGE, true))
