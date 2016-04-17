@@ -1790,6 +1790,7 @@ enum MadnessSpells
     SPELL_FIRE_DRAGON_SOUL_ASPECTS      = 110067,
     SPELL_FIRE_DRAGON_SOUL              = 109971,
     SPELL_FIRE_DRAGON_SOUL_SCRIPT       = 110065,
+    SPELL_HOVER                         = 57764,
 
     // Jump Pad
     SPELL_CARRYING_WINDS_DUMMY          = 106678,
@@ -1856,6 +1857,7 @@ const Position jumpPadLandPos[6] =
 };
 
 const Position thrallPos = { -12061.8f, 12188.0f, 10.2f, 5.57f };
+const Position thrallPosIsland = { -12133.3f, 12252.3f, 7.8f, 5.90f };
 
 const Position alexstraszaPos = { -11957.3f, 12338.3f, 38.9f, 5.061f };
 const Position nozdormuPos = { -12093.8f, 12312.0f, 38.9f, 5.427f };
@@ -1973,6 +1975,32 @@ public:
         {
             intro = 0;
             quote = 0;
+
+            Dragonsoul();
+        }
+
+        void Dragonsoul(bool summon = true)
+        {
+            if (Vehicle * veh = me->GetVehicleKit())
+            {
+                if (summon == true)
+                {
+                    if (Creature * vehiclePassenger = me->SummonCreature(NPC_THE_DRAGON_SOUL_MADNESS, 0, 0, 0))
+                    {
+                        vehiclePassenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        vehiclePassenger->AddAura(110489, vehiclePassenger); // Dragon Soul Cosmetic
+                        vehiclePassenger->EnterVehicle(me, 0);
+                    }
+                }
+                else
+                {
+                    if (Unit * vehiclePassenger = veh->GetPassenger(0))
+                    {
+                        vehiclePassenger->ExitVehicle();
+                        vehiclePassenger->ToCreature()->DespawnOrUnsummon();
+                    }
+                }
+            }
         }
 
         void JustSummoned(Creature* summon) override
@@ -2061,6 +2089,7 @@ public:
 
                     me->GetMotionMaster()->MoveJump(thrallPos.GetPositionX(), thrallPos.GetPositionY(), thrallPos.GetPositionZ(), 100.0f, 100.0f);
                     me->NearTeleportTo(thrallPos.GetPositionX(), thrallPos.GetPositionY(), thrallPos.GetPositionZ(), thrallPos.GetOrientation());
+                    me->CastSpell(me, SPELL_HOVER, true);
 
                     scheduler.Schedule(Seconds(1), [this](TaskContext /*task context*/)
                     {
@@ -2073,6 +2102,7 @@ public:
                 {
                     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    me->RemoveAura(SPELL_HOVER);
                     quote = 0;
                     me->GetMotionMaster()->MoveJump(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ(), 100.0f, 100.0f);
                     me->NearTeleportTo(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ(), me->GetHomePosition().GetOrientation());
@@ -2094,6 +2124,17 @@ public:
                 }
                 break;
             case ACTION_ASPECTS_SECOND_PHASE:
+                Dragonsoul(false);
+                me->SetVisible(false);
+                me->GetMotionMaster()->MovePoint(0, thrallPosIsland.GetPositionX(), thrallPosIsland.GetPositionY(), thrallPosIsland.GetPositionZ());
+
+                scheduler.Schedule(Seconds(1), [this](TaskContext /*task context*/)
+                {
+                    Dragonsoul();
+                    me->SetVisible(true);
+                    me->SetFacingTo(thrallPos.GetOrientation());
+                });
+
                 if (pAlexstrasza && pKalecgos && pYsera && pNozdormu)
                 {
                     // Schedule raid buffs
@@ -2135,6 +2176,17 @@ public:
                 }
                 break;
             case ACTION_ASPECTS_OUTRO:
+                Dragonsoul(false);
+                me->SetVisible(false);
+                me->GetMotionMaster()->MovePoint(0, thrallPos.GetPositionX(), thrallPos.GetPositionY(), thrallPos.GetPositionZ());
+
+                scheduler.Schedule(Seconds(1), [this](TaskContext /*task context*/)
+                {
+                    Dragonsoul();
+                    me->SetVisible(true);
+                    me->SetFacingTo(thrallPos.GetOrientation());
+                });
+
                 scheduler.CancelGroup(1);
                 scheduler.Schedule(Seconds(5), [this, pAlexstrasza, pYsera, pNozdormu, pKalecgos](TaskContext quoteOutro)
                 {

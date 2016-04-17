@@ -83,7 +83,7 @@ enum DragonsoulCreatureIds
 
     // Dragon Soul
     NPC_THE_DRAGON_SOUL                 = 56668, // Ultraxion - Top of the Wyrmrest Temple
-    NPC_THE_DRAGON_SOUL_SPINE           = 56694, // After spine
+    NPC_THE_DRAGON_SOUL_MADNESS         = 56694, // After spine
 
     // Thrall
     NPC_THRALL                          = 56667, // Ultraxion - Top of the Wyrmrest Temple

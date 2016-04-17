@@ -201,12 +201,6 @@ enum Spells
     ACHIEVEMENT_REALM_FIRST_MADNESS     = 6126,
 };
 
-enum Currencies
-{
-    CURRENCY_VALOR_POINTS               = 396,
-    CURRENCY_MOTE_OF_DARKNESS           = 615,
-};
-
 enum MadnesGameobjects
 {
     GO_ELEMENTIUM_FRAGMENT_10N      = 210217,
@@ -224,7 +218,10 @@ enum Platforms
     PLATFORM_YSERA                  = 2,
     PLATFORM_KALECGOS               = 3,
     // Summon Elementium Bolt Position
-    ELEMENTIUM_BOLT                 = 4,
+    ELEMENTIUM_BOLT_SPAWN_ALEX      = 4,
+    ELEMENTIUM_BOLT_SPAWN_NOZDORMU  = 5,
+    ELEMENTIUM_BOLT_SPAWN_YSERA     = 6,
+    ELEMENTIUM_BOLT_SPAWN_KALECGOS  = 7,
 };
 
 enum MadnessActions
@@ -278,15 +275,18 @@ const Position platformPos[MAX_PLATFORMS] =
     { -12128.8f, 12077.4f,  2.3f, 2.21f },
 };
 
-#define MAX_BOLT_POSITIONS              5
+#define MAX_BOLT_POSITIONS              8
 
 const Position boltPos[MAX_BOLT_POSITIONS] =
 {
     { -11961.2f, 12286.0f,  1.3f, 0.0f }, // Alexstrasza land position
     { -12055.0f, 12239.0f, -6.1f, 0.0f }, // Nozdormu land position
-    { -12112.8f, 12170.2f, -2.7f, 0.0f }, // Ysera land position
+    { -12119.2f, 12174.9f, -2.7f, 0.0f }, // Ysera land position
     { -12149.8f, 12081.4f,  2.3f, 0.0f }, // Kalecgos land position
-    { -11929.8f, 12035.6f, 35.4f, 0.0f }, // Summon Location
+    { -11929.2f, 12187.1f, 17.5f, 0.2f }, // Summon Location Alexstrasza
+    { -11992.1f, 12155.8f, 16.2f, 0.6f }, // Summon Location Nozdormu
+    { -12027.6f, 12109.1f, 15.5f, 2.6f }, // Summon Location Ysera
+    { -12050.0f, 12053.0f, 22.6f, 2.7f }, // Summon Location Kalecgos
 };
 
 const Position mutatedcorruptionPos[MAX_PLATFORMS] =
@@ -455,7 +455,7 @@ public:
                     instance->SetData(TYPE_BOSS_MADNESS_OF_DEATHWING, NOT_STARTED);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
-                if (Creature * pThrall = me->FindNearestCreature(NPC_THRALL_MADNESS_START, SEARCH_RANGE, true))
+                if (Creature * pThrall = me->FindNearestCreature(NPC_THRALL_MADNESS_START, SEARCH_RANGE_FAR, true))
                     pThrall->AI()->DoAction(ACTION_TELEPORT_HOME);
             }
 
@@ -495,14 +495,16 @@ public:
 
         void SummonedCreatureDies(Creature* unit, Unit* /*killer*/) override
         {
-            // Cancel Cataclysm Quote
-            scheduler.CancelGroup(2);
-            // Set platform destroyed
-            platformDestroyed[activePlatform] = true;
             me->SendPlaySound(cataclysmQuotes[MAX_CATACLYSM_QUOTES - 1].GetSoundId(), false);
 
             if (unit->GetEntry() == NPC_WING_TENTACLE || unit->GetEntry() == NPC_ARM_TENTACLE_LEFT || unit->GetEntry() == NPC_ARM_TENTACLE_RIGHT)
             {
+                // Cancel Cataclysm Quote
+                scheduler.CancelGroup(2);
+
+                // Set platform destroyed
+                platformDestroyed[activePlatform] = true;
+
                 for (uint32 i = 0; i < MAX_PLATFORMS; i++)
                 {
                     if (unit->GetGUID() == limbGuids[i])
@@ -558,7 +560,7 @@ public:
                         break;
                 }
 
-                if (Creature* pLimb = me->SummonCreature(limbsEntryId, limbsPos[i]))
+                if (Creature* pLimb = me->SummonCreature(limbsEntryId, limbsPos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000))
                 {
                     pLimb->SendPlaySpellVisualKit(SPELL_EMERGE, 0);
                     limbGuids[i] = pLimb->GetGUID();
@@ -727,7 +729,7 @@ public:
                 instance->DoCompleteAchievement(ACHIEVEMENT_DESTROYERS_END);
 
                 instance->DoModifyPlayerCurrencies(CURRENCY_VALOR_POINTS, (IsHeroic() ? 140 : 120), CURRENCY_SOURCE_OTHER);
-                instance->DoModifyPlayerCurrencies(CURRENCY_MOTE_OF_DARKNESS, 1, CURRENCY_SOURCE_OTHER);
+                instance->DoModifyPlayerCurrencies(CURRENCY_ESSENCE_OF_CORRUPTED_DEATHWING, 1, CURRENCY_SOURCE_OTHER);
 
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENTER_THE_DREAM);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SPELLWEAVING);
@@ -945,7 +947,7 @@ public:
                 }
 
                 // Spawn Mutated Corruption
-                if (Creature * pMutatedCorruption = me->SummonCreature(NPC_MUTATED_CORRUPTION, mutatedcorruptionPos[activePlatform], TEMPSUMMON_MANUAL_DESPAWN))
+                if (Creature * pMutatedCorruption = me->SummonCreature(NPC_MUTATED_CORRUPTION, mutatedcorruptionPos[activePlatform], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000))
                 {
                     if (instance)
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, pMutatedCorruption);
@@ -962,16 +964,19 @@ public:
                 }
 
                 // Elementium Bolt
-                scheduler.Schedule(Seconds(45), 1, [this](TaskContext /* Elementium Bolt */)
+                scheduler.Schedule(Seconds(10), 1, [this](TaskContext /* Elementium Bolt */)
                 {
                     if (Creature * pElementiumBoltTarget = me->SummonCreature(NPC_CLAWK_MARK, boltPos[activePlatform], TEMPSUMMON_TIMED_DESPAWN, 13000))
                         pElementiumBoltTarget->CastSpell(pElementiumBoltTarget, SPELL_ELEMENTIUM_METEOR_TARGET, false);
 
-                    if (Creature * pElementiumBolt = me->SummonCreature(NPC_ELEMENTIUM_BOLT, boltPos[ELEMENTIUM_BOLT], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                    if (Creature * pElementiumBolt = me->SummonCreature(NPC_ELEMENTIUM_BOLT, boltPos[activePlatform + 4], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
                     {
                         pElementiumBolt->GetMotionMaster()->MovePoint(0, boltPos[activePlatform], false);
                         if (platformDestroyed[PLATFORM_NOZDORMU] == true)
+                        {
+                            pElementiumBolt->MonsterYell("Nozdormu platform is dead", LANG_UNIVERSAL, 0);
                             pElementiumBolt->AI()->SetData(0, 0);
+                        }
                     }
                     
                     uint32 randQuote = urand(0, MAX_ELEMENTIUM_BOLT_QUOTES - 1);
@@ -1260,12 +1265,13 @@ public:
 
                 for (uint8 i = 0; i < seats; i++)
                 {
-                    if (Creature * vehiclePassenger = me->SummonCreature(NPC_BLISTERING_TENTACLE, 0, 0, 0))
+                    if (Creature * vehiclePassenger = me->SummonCreature(NPC_BLISTERING_TENTACLE, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN))
                     {
                         vehiclePassenger->CastSpell(vehiclePassenger, SPELL_BLISTERING_HEAT, false);
                         vehiclePassenger->EnterVehicle(me, i);
                         vehiclePassenger->ClearUnitState(UNIT_STATE_UNATTACKABLE);
                         vehiclePassenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        vehiclePassenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                     }
                 }
             }
@@ -1360,21 +1366,25 @@ public:
             me->SetSpeed(MOVE_RUN, 50.0f, true);
             me->SetReactState(REACT_PASSIVE);
             platformNozdormuDestroyed = false;
-
+            me->MonsterYell("Nastavuju platformu Nozdormu jako live = false", LANG_UNIVERSAL, 0);
             // Slow
-            scheduler.Schedule(Milliseconds(5700), [this](TaskContext slow)
+            scheduler.Schedule(Milliseconds(2000), [this](TaskContext slow)
             {
+                me->MonsterYell("Scheduler", LANG_UNIVERSAL, 0);
                 if (platformNozdormuDestroyed == false)
                 {
+                    me->MonsterYell("Scheduler platforma Nozdormu neznicena", LANG_UNIVERSAL, 0);
                     if (slow.GetRepeatCounter() == 0)
                     {
-                        me->SetSpeed(MOVE_FLIGHT, 0.225f, true);
+                        me->MonsterYell("Nastaveni rychlosti na slow", LANG_UNIVERSAL, 0);
+                        me->SetSpeed(MOVE_FLIGHT, 0.325f, true);
                         me->SetSpeed(MOVE_WALK, 2.5f, true);
                         me->SetSpeed(MOVE_RUN, 2.5f, true);
                         slow.Repeat(Seconds(7));
                     }
                     else
                     {
+                        me->MonsterYell("Nastaveni rychlosti na fast", LANG_UNIVERSAL, 0);
                         me->SetSpeed(MOVE_FLIGHT, 5.0f, true);
                         me->SetSpeed(MOVE_WALK, 50.0f, true);
                         me->SetSpeed(MOVE_RUN, 50.0f, true);
@@ -1401,6 +1411,7 @@ public:
 
         void SetData(uint32 type, uint32 data) override
         {
+            me->MonsterYell("Nastavuju platformu Nozdormu jako dead = true", LANG_UNIVERSAL, 0);
             platformNozdormuDestroyed = true;
         }
 
@@ -1483,12 +1494,14 @@ public:
             }
             else crushTimer -= diff;
 
+            if (!me->GetVictim())
+                return;
+
             if (impaleTimer <= diff)
             {
                 if (IsCastingAllowed())
                 {
-                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 300.0f, true))
-                        me->CastSpell(pTarget, SPELL_IMPALE, false);
+                    me->CastSpell(me->GetVictim(), SPELL_IMPALE, false);
                     impaleTimer = 35000;
                     crushTimer += 8000;
                 }
