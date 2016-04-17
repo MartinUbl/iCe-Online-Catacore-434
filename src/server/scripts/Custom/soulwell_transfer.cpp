@@ -90,8 +90,8 @@ struct soulwell_reputation_record
 #define SOULWELL_TRANSFER_BATCH_SIZE 100
 #define SOULWELL_TRANSFER_TICK_SAVE_COUNT 5
 
-#define SOULWELL_AUTH_DB "soulwell_auth"
-#define SOULWELL_CHAR_DB "soulwell_char"
+#define SOULWELL_AUTH_DB "soulwell_cata_realmd_dump2"
+#define SOULWELL_CHAR_DB "soulwell_cata_characters_dump2"
 
 class soulwell_transfer_npc : public CreatureScript
 {
@@ -148,6 +148,8 @@ public:
         std::list<soulwell_skill_record*>::iterator skillsItr;
         std::list<soulwell_reputation_record*>::iterator reputationItr;
 
+        std::map<uint64, Bag*> bagMap;
+
         soulwell_transfer_npcAI(Creature* c) : ScriptedAI(c)
         {
             lockedPlayerGUID = 0;
@@ -169,7 +171,7 @@ public:
 
         bool LoadSoulwellCharacter()
         {
-            QueryResult res = CharacterDatabase.PQuery("SELECT id FROM " SOULWELL_AUTH_DB ".account WHERE username = '%s' AND sha_pass_hash = SHA1(CONCAT(UPPER('%s'), ':', UPPER('%s')))", username.c_str(), username.c_str(), password.c_str());
+            QueryResult res = CharacterDatabase.PQuery("SELECT id FROM " SOULWELL_AUTH_DB ".account WHERE UPPER(username) = UPPER('%s') AND UPPER(sha_pass_hash) = UPPER(SHA1(CONCAT(UPPER('%s'), ':', UPPER('%s'))))", username.c_str(), username.c_str(), password.c_str());
             if (!res)
                 return false;
 
@@ -226,7 +228,10 @@ public:
             transferPhase = SWT_BASIC;
             transferTimer = SOULWELL_TRANSFER_TICK_TIMER;
             transferTicks = 0;
-            ChatHandler(lockedPlayer).SendSysMessage("Starting basic stage...");
+            ChatHandler(dest).SendSysMessage("Starting basic stage...");
+
+            me->MonsterSay("Hang on, this process will take a while! I will let you know, when it's done.", LANG_UNIVERSAL, 0);
+            me->CastSpell(dest, 79536, false);
 
             return true;
         }
@@ -242,10 +247,13 @@ public:
             for (uint32 i = 0; i < KNOWN_TITLES_SIZE * 2; ++i)
                 lockedPlayer->SetUInt32Value(PLAYER__FIELD_KNOWN_TITLES + i, basicInfo.knownTitles[i]);
 
+            // temp, TODO: determine bank slot count?
+            lockedPlayer->SetBankBagSlotCount(7);
+
             lockedPlayer->SaveToDB();
 
             // load next stage
-            LoadItemsStage();
+            LoadSkillsStage();
         }
 
         void LoadItemsStage()
@@ -254,6 +262,15 @@ public:
             QueryResult res;
 
             ChatHandler(lockedPlayer).SendSysMessage("Starting items stage...");
+
+            ChatHandler(lockedPlayer).SendSysMessage("Removing current items...");
+
+            // remove all items
+            for (uint32 i = 0; i < 65535; i++)
+            {
+                if (Item* itm = lockedPlayer->GetItemByPos(i))
+                    lockedPlayer->DestroyItem((i >> 8) & 0xFF, (i & 0xFF), true, false);
+            }
 
             // at first, select inventory to decide, where to put which item
             res = CharacterDatabase.PQuery("SELECT bag, slot, item FROM " SOULWELL_CHAR_DB ".character_inventory WHERE guid = %u", soulwellGUID);
@@ -279,8 +296,10 @@ public:
                 } while (res->NextRow());
             }
 
+            std::set<uint64> bagGUIDs;
+
             // select bags
-            res = CharacterDatabase.PQuery("SELECT itemEntry, count, creatorGuid, flags, guid FROM " SOULWELL_CHAR_DB ".item_instance WHERE guid IN (SELECT bag FROM " SOULWELL_CHAR_DB ".character_inventory WHERE guid = %u AND bag != 0)", soulwellGUID);
+            res = CharacterDatabase.PQuery("SELECT ii.itemEntry, ii.count, ii.creatorGuid, ii.flags, ii.guid FROM " SOULWELL_CHAR_DB ".item_instance ii LEFT JOIN " SOULWELL_CHAR_DB ".character_inventory cci ON ii.guid = cci.bag WHERE cci.bag != 0 and cci.guid = %u GROUP BY cci.bag", soulwellGUID);
             soulwell_item_transfer_record* itm;
 
             if (res)
@@ -300,12 +319,13 @@ public:
                     itm->guid = f[4].GetUInt64();
 
                     items.push_back(itm);
+                    bagGUIDs.insert(itm->guid);
 
                 } while (res->NextRow());
             }
 
             // select other items
-            res = CharacterDatabase.PQuery("SELECT itemEntry, creatorGuid, count, duration, charges, flags, randomPropertyId, enchantments, durability, text, guid FROM " SOULWELL_CHAR_DB ".item_instance WHERE guid IN (SELECT item FROM " SOULWELL_CHAR_DB ".character_inventory WHERE guid = %u) AND guid NOT IN (SELECT bag FROM " SOULWELL_CHAR_DB ".character_inventory WHERE guid = %u)", soulwellGUID);
+            res = CharacterDatabase.PQuery("SELECT ii.itemEntry, ii.creatorGuid, ii.count, ii.duration, ii.charges, ii.flags, ii.randomPropertyId, ii.enchantments, ii.durability, ii.text, ii.guid FROM " SOULWELL_CHAR_DB ".item_instance ii LEFT JOIN " SOULWELL_CHAR_DB ".character_inventory cci ON ii.guid = cci.item WHERE cci.guid = %u", soulwellGUID);
 
             if (res)
             {
@@ -314,6 +334,13 @@ public:
                     f = res->Fetch();
                     if (!f)
                         break;
+
+                    // skip bags
+                    if (bagGUIDs.find(f[10].GetUInt64()) != bagGUIDs.end())
+                    {
+                        res->NextRow();
+                        continue;
+                    }
 
                     itm = new soulwell_item_transfer_record;
                     itm->id = f[0].GetUInt32();
@@ -338,7 +365,10 @@ public:
 
                     itm->durability = f[8].GetUInt32();
 
-                    itm->text = f[9].GetCString();
+                    if (f[9].GetCString())
+                        itm->text = f[9].GetCString();
+                    else
+                        itm->text = "";
 
                     itm->guid = f[10].GetUInt64();
 
@@ -355,20 +385,92 @@ public:
         {
             int procCount = 0;
             soulwell_item_transfer_record* it;
-            ItemPosCountVec dest;
-            uint32 nosp;
+
             while (itemsItr != items.end() && (procCount++) < SOULWELL_TRANSFER_BATCH_SIZE)
             {
                 // select item from list
                 it = *itemsItr;
 
-                uint8 msg = lockedPlayer->CanStoreNewItem(itemInventory[it->guid]->bag, itemInventory[it->guid]->slot, dest, it->id, it->count, &nosp);
-                if (msg == EQUIP_ERR_OK)
+                ItemPrototype const * proto = sObjectMgr->GetItemPrototype(it->id);
+                if (!proto)
                 {
-                    Item* nitem = lockedPlayer->StoreNewItem(dest, it->id, false, it->randomPropertyId);
+                    itemsItr++;
+                    continue;
+                }
 
-                    ItemPrototype const* proto = nitem->GetProto();
+                Item* nitem = NewItemOrBag(proto);
+                uint64_t item_guid = sObjectMgr->GenerateLowGuid(HIGHGUID_ITEM);
+                nitem->Create(item_guid, it->id, lockedPlayer);
+                nitem->SetCount(it->count);
 
+                uint32 slot = itemInventory[it->guid]->slot;
+
+                bool success = true;
+
+                if (!itemInventory[it->guid]->bag)
+                {
+                    // the item is not in a bag
+                    nitem->SetContainer(NULL);
+                    nitem->SetSlot(itemInventory[it->guid]->slot);
+
+                    if (lockedPlayer->IsInventoryPos(INVENTORY_SLOT_BAG_0, slot))
+                    {
+                        ItemPosCountVec dest;
+                        if (lockedPlayer->CanStoreItem(INVENTORY_SLOT_BAG_0, slot, dest, nitem, false) == EQUIP_ERR_OK)
+                            nitem = lockedPlayer->StoreItem(dest, nitem, true);
+                        else
+                            success = false;
+                    }
+                    else if (lockedPlayer->IsEquipmentPos(INVENTORY_SLOT_BAG_0, slot))
+                    {
+                        uint16 dest;
+                        if (lockedPlayer->CanEquipItem(slot, dest, nitem, false, false) == EQUIP_ERR_OK)
+                            lockedPlayer->QuickEquipItem(dest, nitem);
+                        else
+                            success = false;
+                    }
+                    else if (lockedPlayer->IsBankPos(INVENTORY_SLOT_BAG_0, slot))
+                    {
+                        ItemPosCountVec dest;
+                        if (lockedPlayer->CanBankItem(INVENTORY_SLOT_BAG_0, slot, dest, nitem, false, false) == EQUIP_ERR_OK)
+                            nitem = lockedPlayer->BankItem(dest, nitem, true);
+                        else
+                            success = false;
+                    }
+
+                    if (success)
+                    {
+                        // store bags that may contain items in them
+                        if (nitem->IsBag() && lockedPlayer->IsBagPos(nitem->GetPos()))
+                            bagMap[it->guid] = (Bag*)nitem;
+                    }
+                }
+                else
+                {
+                    nitem->SetSlot(NULL_SLOT);
+                    // the item is in a bag, find the bag
+                    std::map<uint64, Bag*>::iterator itr = bagMap.find(itemInventory[it->guid]->bag);
+                    if (itr != bagMap.end())
+                    {
+                        ItemPosCountVec dest;
+                        uint8 result = lockedPlayer->CanStoreItem(itr->second->GetSlot(), slot, dest, nitem);
+                        if (result == EQUIP_ERR_OK)
+                        {
+                            lockedPlayer->StoreItem(dest, nitem, false);
+                            //itr->second->StoreItem(slot, nitem, true);
+                        }
+                        else
+                        {
+                            sLog->outError("Cannot create item %u (orig. guid: %u)", it->id, it->guid);
+                            success = false;
+                        }
+                    }
+                    else
+                        success = false;
+                }
+
+                if (success)
+                {
                     if (it->creatorGuid)
                         nitem->SetUInt64Value(ITEM_FIELD_CREATOR, MAKE_NEW_GUID(it->creatorGuid, 0, HIGHGUID_PLAYER));
 
@@ -400,11 +502,14 @@ public:
 
                     if (it->text.length() > 0)
                         nitem->SetText(it->text);
+
+                    // do not do that, seriously
+                    //nitem->SetState(ITEM_NEW);
                 }
                 else
                 {
                     // TODO: log message!
-                    continue;
+                    sLog->outError("Something went wrong when creating item %u (orig. guid %u)", it->id, it->guid);
                 }
 
                 // delete item transfer record (not list record! that would come later)
@@ -605,9 +710,11 @@ public:
             {
                 cu = *currencyItr;
 
-                lockedPlayer->SetCurrency(cu->currency, cu->count);
-                lockedPlayer->SetCurrencyWeekCount(cu->currency, CURRENCY_SOURCE_ALL, cu->weekcount);
-                lockedPlayer->SetCurrencySeasonCount(cu->currency, cu->seasoncount);
+                int32 precision = GetCurrencyPrecision(cu->currency);
+
+                lockedPlayer->SetCurrency(cu->currency, cu->count / precision);
+                lockedPlayer->SetCurrencyWeekCount(cu->currency, CURRENCY_SOURCE_ALL, cu->weekcount / precision);
+                lockedPlayer->SetCurrencySeasonCount(cu->currency, cu->seasoncount / precision);
 
                 delete cu;
                 ++currencyItr;
@@ -615,7 +722,7 @@ public:
 
             if (currencyItr == currency.end())
             {
-                LoadSkillsStage();
+                FinishTransfer();
                 currency.clear();
             }
         }
@@ -734,7 +841,7 @@ public:
 
             if (reputationItr == reputation.end())
             {
-                FinishTransfer();
+                LoadItemsStage();
                 reputation.clear();
             }
         }
@@ -748,6 +855,9 @@ public:
             lockedPlayer->SetRooted(true);
 
             ChatHandler(lockedPlayer).SendSysMessage("You now have to log out and then back in. Please, check if everything's fine, and report all bugs to authorities.");
+
+            me->MonsterSay("You should now be fully transferred! Log out and back in, otherwise you may experience some nasty bugs. Trust me.", LANG_UNIVERSAL, 0);
+            me->InterruptNonMeleeSpells(true);
 
             transferPhase = SWT_END;
         }
