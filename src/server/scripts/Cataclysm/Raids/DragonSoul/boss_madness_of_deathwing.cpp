@@ -974,7 +974,6 @@ public:
                         pElementiumBolt->GetMotionMaster()->MovePoint(0, boltPos[activePlatform], false);
                         if (platformDestroyed[PLATFORM_NOZDORMU] == true)
                         {
-                            pElementiumBolt->MonsterYell("Nozdormu platform is dead", LANG_UNIVERSAL, 0);
                             pElementiumBolt->AI()->SetData(0, 0);
                         }
                     }
@@ -1366,17 +1365,13 @@ public:
             me->SetSpeed(MOVE_RUN, 50.0f, true);
             me->SetReactState(REACT_PASSIVE);
             platformNozdormuDestroyed = false;
-            me->MonsterYell("Nastavuju platformu Nozdormu jako live = false", LANG_UNIVERSAL, 0);
             // Slow
             scheduler.Schedule(Milliseconds(2000), [this](TaskContext slow)
             {
-                me->MonsterYell("Scheduler", LANG_UNIVERSAL, 0);
                 if (platformNozdormuDestroyed == false)
                 {
-                    me->MonsterYell("Scheduler platforma Nozdormu neznicena", LANG_UNIVERSAL, 0);
                     if (slow.GetRepeatCounter() == 0)
                     {
-                        me->MonsterYell("Nastaveni rychlosti na slow", LANG_UNIVERSAL, 0);
                         me->SetSpeed(MOVE_FLIGHT, 0.325f, true);
                         me->SetSpeed(MOVE_WALK, 2.5f, true);
                         me->SetSpeed(MOVE_RUN, 2.5f, true);
@@ -1384,7 +1379,6 @@ public:
                     }
                     else
                     {
-                        me->MonsterYell("Nastaveni rychlosti na fast", LANG_UNIVERSAL, 0);
                         me->SetSpeed(MOVE_FLIGHT, 5.0f, true);
                         me->SetSpeed(MOVE_WALK, 50.0f, true);
                         me->SetSpeed(MOVE_RUN, 50.0f, true);
@@ -1411,7 +1405,6 @@ public:
 
         void SetData(uint32 type, uint32 data) override
         {
-            me->MonsterYell("Nastavuju platformu Nozdormu jako dead = true", LANG_UNIVERSAL, 0);
             platformNozdormuDestroyed = true;
         }
 
