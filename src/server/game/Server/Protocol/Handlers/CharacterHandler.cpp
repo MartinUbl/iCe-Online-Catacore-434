@@ -1577,10 +1577,10 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
 {
     uint32 slot;      // bag slot
     uint32 reforgeID; // ID of reforge entry in ItemReforge.dbc
-    ObjectGuid guid; // NPC guid
-    uint32 unk2;      // mostly 0xFF
+    ObjectGuid guid;  // NPC guid
+    uint32 bag;       // bag identifier
 
-    recvPacket >> reforgeID >> slot >> unk2;
+    recvPacket >> reforgeID >> slot >> bag;
 
     guid[2] = recvPacket.ReadBit();
     guid[6] = recvPacket.ReadBit();
@@ -1607,7 +1607,7 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
         return;
     }
 
-    uint16 mslot = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
+    uint16 mslot = ((bag << 8) | slot);
     Item* dstItem = GetPlayer()->GetItemByPos(mslot >> 8, mslot & 255);
     if(!dstItem)
     {
