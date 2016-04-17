@@ -964,7 +964,7 @@ public:
                 }
 
                 // Elementium Bolt
-                scheduler.Schedule(Seconds(10), 1, [this](TaskContext /* Elementium Bolt */)
+                scheduler.Schedule(Seconds(45), 1, [this](TaskContext /* Elementium Bolt */)
                 {
                     if (Creature * pElementiumBoltTarget = me->SummonCreature(NPC_CLAWK_MARK, boltPos[activePlatform], TEMPSUMMON_TIMED_DESPAWN, 13000))
                         pElementiumBoltTarget->CastSpell(pElementiumBoltTarget, SPELL_ELEMENTIUM_METEOR_TARGET, false);
