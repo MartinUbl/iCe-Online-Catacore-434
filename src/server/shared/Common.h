@@ -121,6 +121,9 @@
 #define I32FMT "%08I32X"
 #define I64FMT "%016I64X"
 #define snprintf_com _snprintf
+#if defined WIN32 && _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
 #define atoll _atoi64
 #define strtoull _strtoui64
 #define vsnprintf _vsnprintf
