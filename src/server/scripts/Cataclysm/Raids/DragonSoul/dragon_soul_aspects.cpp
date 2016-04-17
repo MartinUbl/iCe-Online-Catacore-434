@@ -240,7 +240,7 @@ public:
             case DATA_ULTRAXION_DEFEATED:
                 me->SetWalk(true);
                 me->SetSpeed(MOVE_WALK, 1.2f);
-                scheduler.Schedule(Seconds(15), [this](TaskContext /*Jump Down*/)
+                scheduler.Schedule(Seconds(90), [this](TaskContext /*Jump Down*/)
                 {
                     me->InterruptNonMeleeSpells(true, 0, true);
                     me->RemoveAllAuras();
@@ -375,7 +375,7 @@ public:
             case DATA_ULTRAXION_DEFEATED:
                 me->SetWalk(true);
                 me->SetSpeed(MOVE_WALK, 1.2f);
-                scheduler.Schedule(Seconds(15), [this](TaskContext /*Jump Down*/)
+                scheduler.Schedule(Seconds(90), [this](TaskContext /*Jump Down*/)
                 {
                     me->InterruptNonMeleeSpells(true, 0, true);
                     me->RemoveAllAuras();
@@ -497,7 +497,7 @@ public:
             case DATA_ULTRAXION_DEFEATED:
                 me->SetWalk(true);
                 me->SetSpeed(MOVE_WALK, 1.2f);
-                scheduler.Schedule(Seconds(15), [this](TaskContext /*Jump Down*/)
+                scheduler.Schedule(Seconds(90), [this](TaskContext /*Jump Down*/)
                 {
                     me->InterruptNonMeleeSpells(true, 0, true);
                     me->RemoveAllAuras();
@@ -682,7 +682,7 @@ public:
             case DATA_ULTRAXION_DEFEATED:
                 me->SetWalk(true);
                 me->SetSpeed(MOVE_WALK, 1.2f);
-                scheduler.Schedule(Seconds(15), [this](TaskContext /*Jump Down*/)
+                scheduler.Schedule(Seconds(90), [this](TaskContext /*Jump Down*/)
                 {
                     me->InterruptNonMeleeSpells(true, 0, true);
                     me->RemoveAllAuras();
@@ -907,7 +907,7 @@ public:
                     me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), DEFAULT_Z_POS, 5.0f, 5.0f);
                     break;
                 case DATA_ULTRAXION_DEFEATED:
-                    scheduler.Schedule(Seconds(15), [this](TaskContext /*Jump Down*/)
+                    scheduler.Schedule(Seconds(90), [this](TaskContext /*Jump Down*/)
                     {
                         me->InterruptNonMeleeSpells(true, 0, true);
                         me->RemoveAllAuras();
