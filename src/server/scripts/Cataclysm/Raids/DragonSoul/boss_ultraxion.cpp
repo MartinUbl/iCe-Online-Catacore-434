@@ -484,7 +484,6 @@ public:
                     }
 
                     RemoveEncounterAuras();
-                    SummonCache(who);
 
                     CheckForAchievementCriteria();
                     if (instance)
@@ -502,10 +501,11 @@ public:
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
                     RunPlayableQuote(yell[QUOTE_DEATH], false);
+                    scheduler.CancelAll();
 
-                    scheduler.Schedule(Seconds(4), [this](TaskContext /* Task context */)
+                    scheduler.Schedule(Seconds(4), [this, who](TaskContext /* Task context */)
                     {
-                        scheduler.CancelAll();
+                        SummonCache(who);
                         me->Kill(me);
                     });
                 }
@@ -638,7 +638,9 @@ public:
             {
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_SHIFT);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_SHIFT_COSMETIC_EFFECT);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_HEROIC_WILL_COSMETIC_EFFECT);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_HEROIC_WILL_ACTION_BUTTON);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_HEROIC_WILL);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LOOMING_DARKNESS_DUMMY);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ULTRAXION_ACHIEVEMENT_AURA);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GIFT_OF_LIFE_AURA);
