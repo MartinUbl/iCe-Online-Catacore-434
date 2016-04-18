@@ -299,5 +299,9 @@ bool CharacterDatabaseConnection::Open()
 
     PrepareStatement(CHAR_SEL_GUID_RACE_ACC_BY_NAME, "SELECT guid, race, account FROM characters WHERE name = ?");
 
+    PrepareStatement(CHAR_SEL_VOID_STORAGE, "SELECT itemId, itemEntry, slot, creatorGuid, randomProperty, suffixFactor FROM character_void_storage WHERE playerGuid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_VOID_STORAGE_ITEM, "REPLACE INTO character_void_Storage (itemId, playerGuid, itemEntry, slot, creatorGuid, randomProperty, suffixFactor) VALUES (?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_VOID_STORAGE_ITEM_BY_SLOT, "DELETE FROM character_void_Storage WHERE slot = ? AND playerGuid = ?", CONNECTION_ASYNC);
+
     return true;
 }

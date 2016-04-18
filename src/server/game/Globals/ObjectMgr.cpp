@@ -74,6 +74,7 @@ enum GuidMapGranularity
     CORPSE_GRANULARITY         = 50000,
     GROUP_GRANULARITY          = 500,
     MO_GRANULARITY             = 25,
+    VOIDITEM_GRANULARITY       = 100,
 
     ARENA_TEAM_GRANULARITY     = 10000,
     AUCTION_GRANULARITY        = 20000,
@@ -310,6 +311,7 @@ ObjectMgr::ObjectMgr()
     m_corpseGuidMap.Init(CORPSE_GRANULARITY);
     m_groupGuidMap.Init(GROUP_GRANULARITY);
     m_moTransGuidMap.Init(MO_GRANULARITY);
+    m_voidItemIdMap.Init(VOIDITEM_GRANULARITY);
 
     m_arenaTeamGuidMap.Init(ARENA_TEAM_GRANULARITY);
     m_auctionGuidMap.Init(AUCTION_GRANULARITY);
@@ -6786,6 +6788,15 @@ void ObjectMgr::SetHighestGuids()
             m_groupGuidMap.SetBit((*result)[0].GetUInt32());
         } while (result->NextRow());
     }
+
+    result = CharacterDatabase.Query("SELECT itemId FROM character_void_storage");
+    if (result)
+    {
+        do
+        {
+            m_voidItemIdMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 }
 
 uint32 ObjectMgr::GenerateArenaTeamId()
@@ -6808,6 +6819,18 @@ uint32 ObjectMgr::GenerateAuctionID()
     {
         sLog->outError("Auctions ids overflow!! Can't continue, shutting down server. ");
         ASSERT("Auction ids overflow!" && false);
+    }
+    return id;
+}
+
+uint64 ObjectMgr::GenerateVoidStorageItemId()
+{
+    uint64 id = m_voidItemIdMap.UseEmpty();
+
+    if (id >= 0xFFFFFFFE)
+    {
+        sLog->outError("Void storage IDs overflow!! Can't continue, shutting down server.");
+        ASSERT("Void storage IDs overflow!" && false);
     }
     return id;
 }

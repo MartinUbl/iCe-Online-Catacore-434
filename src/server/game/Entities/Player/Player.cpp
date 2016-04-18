@@ -700,6 +700,8 @@ Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achie
     memset(_CUFProfiles, 0, MAX_CUF_PROFILES * sizeof(CUFProfile*));
 
     showInstanceBindQuery=false;
+
+    memset(_voidStorageItems, 0, VOID_STORAGE_MAX_SLOT * sizeof(VoidStorageItem*));
 }
 
 Player::~Player ()
@@ -743,6 +745,9 @@ Player::~Player ()
 
     for (std::list<SavedCastedAura*>::iterator itr = m_myCastedAuras.begin(); itr != m_myCastedAuras.end(); ++itr)
         delete (*itr);
+
+    for (uint8 i = 0; i < VOID_STORAGE_MAX_SLOT; ++i)
+        delete _voidStorageItems[i];
 
     sWorld->DecreasePlayerCount();
 }
@@ -18349,7 +18354,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     m_resetTalentsTime = time_t(fields[25].GetUInt64());
 
     // reserve some flags
-    uint32 old_safe_flags = GetUInt32Value(PLAYER_FLAGS) & (PLAYER_FLAGS_HIDE_CLOAK | PLAYER_FLAGS_HIDE_HELM);
+    uint32 old_safe_flags = GetUInt32Value(PLAYER_FLAGS) & (PLAYER_FLAGS_HIDE_CLOAK | PLAYER_FLAGS_HIDE_HELM | PLAYER_FLAGS_VOID_UNLOCKED);
 
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM))
         SetUInt32Value(PLAYER_FLAGS, 0 | old_safe_flags);
@@ -18463,6 +18468,9 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     m_reputationMgr.LoadFromDB(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADREPUTATION));
 
     _LoadInventory(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADINVENTORY), time_diff);
+
+    if (IsVoidStorageUnlocked())
+        _LoadVoidStorage(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADVOIDSTORAGE));
 
     // update items with duration and realtime
     UpdateItemDuration(time_diff, true);
@@ -19094,6 +19102,53 @@ void Player::_LoadMailedItems(Mail *mail)
     while (result->NextRow());
 
     CharacterDatabase.CommitTransaction(trans);
+}
+
+void Player::_LoadVoidStorage(PreparedQueryResult result)
+{
+    if (!result)
+        return;
+
+    do
+    {
+        // SELECT itemid, itemEntry, slot, creatorGuid FROM void_storage WHERE playerGuid = ?
+        Field* fields = result->Fetch();
+
+        uint64 itemId = fields[0].GetUInt64();
+        uint32 itemEntry = fields[1].GetUInt32();
+        uint8 slot = fields[2].GetUInt8();
+        uint32 creatorGuid = fields[3].GetUInt32();
+        uint32 randomProperty = fields[4].GetUInt32();
+        uint32 suffixFactor = fields[5].GetUInt32();
+
+        if (!itemId)
+        {
+            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid id (item id: %u, entry: %u).", GetGUIDLow(), GetName(), itemId, itemEntry);
+            continue;
+        }
+
+        if (!sObjectMgr->GetItemPrototype(itemEntry))
+        {
+            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid entry (item id: %u, entry: %u).", GetGUIDLow(), GetName(), itemId, itemEntry);
+            continue;
+        }
+
+        if (slot < 0 || slot > VOID_STORAGE_MAX_SLOT)
+        {
+            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid slot (item id: %u, entry: %u, slot: %u).", GetGUIDLow(), GetName(), itemId, itemEntry, slot);
+            continue;
+        }
+
+        std::string name;
+        if (creatorGuid && !sObjectMgr->GetPlayerNameByGUID(creatorGuid, name))
+        {
+            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid creator guid, set to 0 (item id: %u, entry: %u, creatorGuid: %u).", GetGUIDLow(), GetName(), itemId, itemEntry, creatorGuid);
+            creatorGuid = 0;
+        }
+
+        _voidStorageItems[slot] = new VoidStorageItem(itemId, itemEntry, creatorGuid, randomProperty, suffixFactor);
+    }
+    while (result->NextRow());
 }
 
 void Player::_LoadMailInit(PreparedQueryResult resultUnread, PreparedQueryResult resultDelivery)
@@ -20431,6 +20486,7 @@ bool Player::CreateInDB()
     _SaveBGData(trans);
     _SaveRatedBGData();
     _SaveInventory(trans);
+    _SaveVoidStorage(trans);
     _SaveQuestStatus(trans);
     _SaveDailyQuestStatus(trans);
     _SaveWeeklyQuestStatus(trans);
@@ -20647,6 +20703,7 @@ void Player::SaveToDB()
     trans = CharacterDatabase.BeginTransaction();
 
     _SaveInventory(trans);
+    _SaveVoidStorage(trans);
     _SaveTalents(trans);
     _SaveTalentBranchSpecs(trans);
 
@@ -20910,6 +20967,36 @@ void Player::_SaveInventory(SQLTransaction& trans)
     m_itemUpdateQueue.clear();
 }
 
+void Player::_SaveVoidStorage(SQLTransaction& trans)
+{
+    PreparedStatement* stmt = NULL;
+    uint32 lowGuid = GetGUIDLow();
+
+    for (uint8 i = 0; i < VOID_STORAGE_MAX_SLOT; ++i)
+    {
+        if (!_voidStorageItems[i]) // unused item
+        {
+            // DELETE FROM void_Storage WHERE slot = ? AND playerGuid = ?
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_VOID_STORAGE_ITEM_BY_SLOT);
+            stmt->setUInt8(0, i);
+            stmt->setUInt32(1, lowGuid);
+        }
+        else
+        {
+            // REPLACE INTO character_inventory (itemId, playerGuid, itemEntry, slot, creatorGuid) VALUES (?, ?, ?, ?, ?)
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_VOID_STORAGE_ITEM);
+            stmt->setUInt64(0, _voidStorageItems[i]->ItemId);
+            stmt->setUInt32(1, lowGuid);
+            stmt->setUInt32(2, _voidStorageItems[i]->ItemEntry);
+            stmt->setUInt8(3, i);
+            stmt->setUInt32(4, _voidStorageItems[i]->CreatorGuid);
+            stmt->setUInt32(5, _voidStorageItems[i]->ItemRandomPropertyId);
+            stmt->setUInt32(6, _voidStorageItems[i]->ItemSuffixFactor);
+        }
+
+        trans->Append(stmt);
+    }
+}
 
 void Player::_SaveCUFProfiles(SQLTransaction& trans)
 {

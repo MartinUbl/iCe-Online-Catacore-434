@@ -1140,6 +1140,7 @@ class ObjectMgr
         uint32 GenerateMailID();
         uint32 GeneratePetNumber();
         uint32 GenerateGuildNewsID();
+        uint64 GenerateVoidStorageItemId();
 
         typedef std::multimap<int32, uint32> ExclusiveQuestGroups;
         ExclusiveQuestGroups mExclusiveQuestGroups;
@@ -1447,6 +1448,7 @@ class ObjectMgr
         GuidMap m_corpseGuidMap;
         GuidMap m_groupGuidMap;
         GuidMap m_moTransGuidMap;
+        GuidMap m_voidItemIdMap;
 
         uint32 _hiAreaTriggerGuid;
 

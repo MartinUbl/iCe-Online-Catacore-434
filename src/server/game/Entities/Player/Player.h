@@ -913,7 +913,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY            = 35,
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY_WEEKCAP    = 36,
     PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES        = 37,
-    MAX_PLAYER_LOGIN_QUERY                      = 38
+    PLAYER_LOGIN_QUERY_LOADVOIDSTORAGE          = 38,
+    MAX_PLAYER_LOGIN_QUERY                      = 39
 };
 
 enum PlayerDelayedOperations
@@ -1106,6 +1107,33 @@ struct BGData
 
     void ClearTaxiPath()     { taxiPath[0] = taxiPath[1] = 0; }
     bool HasTaxiPath() const { return taxiPath[0] && taxiPath[1]; }
+};
+
+struct VoidStorageItem
+{
+    VoidStorageItem()
+    {
+        ItemId = 0;
+        ItemEntry = 0;
+        CreatorGuid = 0;
+        ItemRandomPropertyId = 0;
+        ItemSuffixFactor = 0;
+    }
+
+    VoidStorageItem(uint64 id, uint32 entry, uint32 creator, uint32 randomPropertyId, uint32 suffixFactor)
+    {
+        ItemId = id;
+        ItemEntry = entry;
+        CreatorGuid = creator;
+        ItemRandomPropertyId = randomPropertyId;
+        ItemSuffixFactor = suffixFactor;
+    }
+
+    uint64 ItemId;
+    uint32 ItemEntry;
+    uint32 CreatorGuid;
+    uint32 ItemRandomPropertyId;
+    uint32 ItemSuffixFactor;
 };
 
 class TradeData
@@ -2837,6 +2865,19 @@ class Player : public Unit, public GridObject<Player>
 
         bool showInstanceBindQuery;
 
+        // Void Storage
+        bool IsVoidStorageUnlocked() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_VOID_UNLOCKED); }
+        void UnlockVoidStorage() { SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_VOID_UNLOCKED); }
+        void LockVoidStorage() { RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_VOID_UNLOCKED); }
+        uint8 GetNextVoidStorageFreeSlot() const;
+        uint8 GetNumOfVoidStorageFreeSlots() const;
+        uint8 AddVoidStorageItem(const VoidStorageItem& item);
+        void AddVoidStorageItemAtSlot(uint8 slot, const VoidStorageItem& item);
+        void DeleteVoidStorageItem(uint8 slot);
+        bool SwapVoidStorageItem(uint8 oldSlot, uint8 newSlot);
+        VoidStorageItem* GetVoidStorageItem(uint8 slot) const;
+        VoidStorageItem* GetVoidStorageItem(uint64 id, uint8& slot) const;
+
     protected:
         uint32 m_AreaID;
         uint32 m_regenTimerCount;
@@ -2898,6 +2939,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadBoundInstances(PreparedQueryResult result);
         void _LoadBoundInstance(uint32 mapId);
         void _LoadInventory(PreparedQueryResult result, uint32 timediff);
+        void _LoadVoidStorage(PreparedQueryResult result);
         void _LoadMailInit(PreparedQueryResult resultUnread, PreparedQueryResult resultDelivery);
         void _LoadMail();
         void _LoadMailedItems(Mail *mail);
@@ -2931,6 +2973,7 @@ class Player : public Unit, public GridObject<Player>
         void _SaveActions(SQLTransaction& trans);
         void _SaveAuras(SQLTransaction& trans);
         void _SaveInventory(SQLTransaction& trans);
+        void _SaveVoidStorage(SQLTransaction& trans);
         void _SaveMail(SQLTransaction& trans);
         void _SaveQuestStatus(SQLTransaction& trans);
         void _SaveDailyQuestStatus(SQLTransaction& trans);
@@ -2979,6 +3022,8 @@ class Player : public Unit, public GridObject<Player>
         Item* m_items[PLAYER_SLOTS_COUNT];
         uint32 m_currentBuybackSlot;
         PlayerCurrenciesMap m_currencies;
+
+        VoidStorageItem* _voidStorageItems[VOID_STORAGE_MAX_SLOT];
 
         std::vector<Item*> m_itemUpdateQueue;
         bool m_itemUpdateQueueBlocked;

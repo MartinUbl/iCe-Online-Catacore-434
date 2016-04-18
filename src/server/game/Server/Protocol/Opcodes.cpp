@@ -1374,6 +1374,15 @@ void InitOpcodeTable()
     OPCODE( CMSG_MESSAGECHAT_ADDON_WHISPER,               STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
     OPCODE( CMSG_CLEAR_RAID_MARKER,                       STATUS_LOGGEDIN, &WorldSession::HandleClearRaidMarker           );
     OPCODE( SMSG_WORLD_SERVER_INFO,                       STATUS_LOGGEDIN, &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_VOID_STORAGE_UNLOCK,                     STATUS_LOGGEDIN, &WorldSession::HandleVoidStorageUnlock         );
+    OPCODE( CMSG_VOID_STORAGE_QUERY,                      STATUS_LOGGEDIN, &WorldSession::HandleVoidStorageQuery          );
+    OPCODE( CMSG_VOID_STORAGE_TRANSFER,                   STATUS_LOGGEDIN, &WorldSession::HandleVoidStorageTransfer       );
+    OPCODE( CMSG_VOID_SWAP_ITEM,                          STATUS_LOGGEDIN, &WorldSession::HandleVoidSwapItem              );
+    OPCODE( SMSG_VOID_ITEM_SWAP_RESPONSE,                 STATUS_LOGGEDIN, &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_VOID_STORAGE_CONTENTS,                   STATUS_LOGGEDIN, &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_VOID_STORAGE_TRANSFER_CHANGES,           STATUS_LOGGEDIN, &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_VOID_TRANSFER_RESULT,                    STATUS_LOGGEDIN, &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_VOID_STORAGE_FAILED,                     STATUS_LOGGEDIN, &WorldSession::Handle_ServerSide               );
 };
 
 void DestroyOpcodeTable()

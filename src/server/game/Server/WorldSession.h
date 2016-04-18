@@ -474,6 +474,13 @@ class WorldSession
 
         void HandleGameObjectQueryOpcode(WorldPacket& recvPacket);
 
+        // Void Storage
+        void HandleVoidStorageUnlock(WorldPacket& recvData);
+        void HandleVoidStorageQuery(WorldPacket& recvData);
+        void HandleVoidStorageTransfer(WorldPacket& recvData);
+        void HandleVoidSwapItem(WorldPacket& recvData);
+        void SendVoidStorageTransferResult(VoidTransferError result);
+
         void HandleMoveWorldportAckOpcode(WorldPacket& recvPacket);
         void HandleMoveWorldportAckOpcode();                // for server-side calls
 

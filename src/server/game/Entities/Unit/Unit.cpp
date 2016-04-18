@@ -15602,6 +15602,108 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
     }
 }
 
+uint8 Player::GetNextVoidStorageFreeSlot() const
+{
+    for (uint8 i = 0; i < VOID_STORAGE_MAX_SLOT; ++i)
+        if (!_voidStorageItems[i]) // unused item
+            return i;
+
+    return -1;
+}
+
+uint8 Player::GetNumOfVoidStorageFreeSlots() const
+{
+    uint8 count = 0;
+
+    for (uint8 i = 0; i < VOID_STORAGE_MAX_SLOT; ++i)
+        if (!_voidStorageItems[i])
+            count++;
+
+    return count;
+}
+
+uint8 Player::AddVoidStorageItem(const VoidStorageItem& item)
+{
+    uint8 slot = GetNextVoidStorageFreeSlot();
+
+    if (slot < 0 || slot > VOID_STORAGE_MAX_SLOT)
+    {
+        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_FULL);
+        return -1;
+    }
+    
+    _voidStorageItems[slot] = new VoidStorageItem(item.ItemId, item.ItemEntry, item.CreatorGuid, item.ItemRandomPropertyId, item.ItemSuffixFactor);
+    return slot;
+}
+
+void Player::AddVoidStorageItemAtSlot(uint8 slot, const VoidStorageItem& item)
+{
+    if (slot < 0 || slot > VOID_STORAGE_MAX_SLOT)
+    {
+        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_FULL);
+        return;
+    }
+
+    if (_voidStorageItems[slot])
+    {
+        sLog->outError("Player::AddVoidStorageItemAtSlot - Player (GUID: %u, name: %s) tried to add an item to an used slot (item id: %u, entry: %u, slot: %u).", GetGUIDLow(), GetName(), _voidStorageItems[slot]->ItemId, _voidStorageItems[slot]->ItemEntry, slot);
+        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
+        return;
+    }
+
+    _voidStorageItems[slot] = new VoidStorageItem(item.ItemId, item.ItemId, item.CreatorGuid, item.ItemRandomPropertyId, item.ItemSuffixFactor);
+}
+
+void Player::DeleteVoidStorageItem(uint8 slot)
+{
+    if (slot < 0 || slot > VOID_STORAGE_MAX_SLOT)
+    {
+        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
+        return;
+    }
+
+    delete _voidStorageItems[slot];
+    _voidStorageItems[slot] = NULL;
+}
+
+bool Player::SwapVoidStorageItem(uint8 oldSlot, uint8 newSlot)
+{
+    if (oldSlot < 0 || oldSlot > VOID_STORAGE_MAX_SLOT || newSlot < 0 || newSlot > VOID_STORAGE_MAX_SLOT || oldSlot == newSlot)
+    {
+        
+        return false;
+    }
+
+    // verify
+    std::swap(_voidStorageItems[newSlot], _voidStorageItems[oldSlot]);
+    return true;
+}
+
+VoidStorageItem* Player::GetVoidStorageItem(uint8 slot) const
+{
+    if (slot < 0 || slot > VOID_STORAGE_MAX_SLOT)
+    {
+        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
+        return NULL;
+    }
+
+    return _voidStorageItems[slot];
+}
+
+VoidStorageItem* Player::GetVoidStorageItem(uint64 id, uint8& slot) const
+{
+    for (uint8 i = 0; i < VOID_STORAGE_MAX_SLOT; ++i)
+    {
+        if (_voidStorageItems[i] && _voidStorageItems[i]->ItemId == id)
+        {
+            slot = i;
+            return _voidStorageItems[i];
+        }
+    }
+
+    return NULL;
+}
+
 void Unit::SetHover(bool on)
 {
     if (on)
