@@ -15626,7 +15626,7 @@ uint8 Player::AddVoidStorageItem(const VoidStorageItem& item)
 {
     uint8 slot = GetNextVoidStorageFreeSlot();
 
-    if (slot < 0 || slot > VOID_STORAGE_MAX_SLOT)
+    if (slot >= VOID_STORAGE_MAX_SLOT)
     {
         GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_FULL);
         return -1;
@@ -15638,7 +15638,7 @@ uint8 Player::AddVoidStorageItem(const VoidStorageItem& item)
 
 void Player::AddVoidStorageItemAtSlot(uint8 slot, const VoidStorageItem& item)
 {
-    if (slot < 0 || slot > VOID_STORAGE_MAX_SLOT)
+    if (slot >= VOID_STORAGE_MAX_SLOT)
     {
         GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_FULL);
         return;
@@ -15646,7 +15646,7 @@ void Player::AddVoidStorageItemAtSlot(uint8 slot, const VoidStorageItem& item)
 
     if (_voidStorageItems[slot])
     {
-        sLog->outError("Player::AddVoidStorageItemAtSlot - Player (GUID: %u, name: %s) tried to add an item to an used slot (item id: %u, entry: %u, slot: %u).", GetGUIDLow(), GetName(), _voidStorageItems[slot]->ItemId, _voidStorageItems[slot]->ItemEntry, slot);
+        sLog->outError("Player::AddVoidStorageItemAtSlot - Player (GUID: %u, name: %s) tried to add an item to an used slot (item id: " UI64FMTD ", entry: %u, slot: %u).", GetGUIDLow(), GetName(), _voidStorageItems[slot]->ItemId, _voidStorageItems[slot]->ItemEntry, slot);
         GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
         return;
     }
@@ -15656,7 +15656,7 @@ void Player::AddVoidStorageItemAtSlot(uint8 slot, const VoidStorageItem& item)
 
 void Player::DeleteVoidStorageItem(uint8 slot)
 {
-    if (slot < 0 || slot > VOID_STORAGE_MAX_SLOT)
+    if (slot >= VOID_STORAGE_MAX_SLOT)
     {
         GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
         return;
@@ -15668,7 +15668,7 @@ void Player::DeleteVoidStorageItem(uint8 slot)
 
 bool Player::SwapVoidStorageItem(uint8 oldSlot, uint8 newSlot)
 {
-    if (oldSlot < 0 || oldSlot > VOID_STORAGE_MAX_SLOT || newSlot < 0 || newSlot > VOID_STORAGE_MAX_SLOT || oldSlot == newSlot)
+    if (oldSlot >= VOID_STORAGE_MAX_SLOT || newSlot >= VOID_STORAGE_MAX_SLOT || oldSlot == newSlot)
     {
         
         return false;
@@ -15681,7 +15681,7 @@ bool Player::SwapVoidStorageItem(uint8 oldSlot, uint8 newSlot)
 
 VoidStorageItem* Player::GetVoidStorageItem(uint8 slot) const
 {
-    if (slot < 0 || slot > VOID_STORAGE_MAX_SLOT)
+    if (slot >= VOID_STORAGE_MAX_SLOT)
     {
         GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
         return NULL;

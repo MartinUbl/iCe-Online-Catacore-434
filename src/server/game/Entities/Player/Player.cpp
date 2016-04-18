@@ -19123,26 +19123,26 @@ void Player::_LoadVoidStorage(PreparedQueryResult result)
 
         if (!itemId)
         {
-            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid id (item id: %u, entry: %u).", GetGUIDLow(), GetName(), itemId, itemEntry);
+            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid id (item id: " UI64FMTD ", entry: %u).", GetGUIDLow(), GetName(), itemId, itemEntry);
             continue;
         }
 
         if (!sObjectMgr->GetItemPrototype(itemEntry))
         {
-            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid entry (item id: %u, entry: %u).", GetGUIDLow(), GetName(), itemId, itemEntry);
+            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid entry (item id: " UI64FMTD ", entry: %u).", GetGUIDLow(), GetName(), itemId, itemEntry);
             continue;
         }
 
-        if (slot < 0 || slot > VOID_STORAGE_MAX_SLOT)
+        if (slot >= VOID_STORAGE_MAX_SLOT)
         {
-            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid slot (item id: %u, entry: %u, slot: %u).", GetGUIDLow(), GetName(), itemId, itemEntry, slot);
+            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid slot (item id: " UI64FMTD ", entry: %u, slot: %u).", GetGUIDLow(), GetName(), itemId, itemEntry, slot);
             continue;
         }
 
         std::string name;
         if (creatorGuid && !sObjectMgr->GetPlayerNameByGUID(creatorGuid, name))
         {
-            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid creator guid, set to 0 (item id: %u, entry: %u, creatorGuid: %u).", GetGUIDLow(), GetName(), itemId, itemEntry, creatorGuid);
+            sLog->outError("Player::_LoadVoidStorage - Player (GUID: %u, name: %s) has an item with an invalid creator guid, set to 0 (item id: " UI64FMTD ", entry: %u, creatorGuid: %u).", GetGUIDLow(), GetName(), itemId, itemEntry, creatorGuid);
             creatorGuid = 0;
         }
 
