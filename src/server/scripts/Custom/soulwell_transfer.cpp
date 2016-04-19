@@ -20,6 +20,7 @@ struct soulwell_basic_record
     uint64 leveltime;
     uint8 speccount;
     uint32 knownTitles[KNOWN_TITLES_SIZE * 2];
+    uint32 talentBranches[2];
 };
 
 struct soulwell_item_transfer_record
@@ -136,6 +137,7 @@ public:
     {
         uint64 lockedPlayerGUID;
         Player* lockedPlayer; /* DO NOT use without retrieving pointer in UpdateAI (player may be offline, etc.) */
+        uint64 gossipPlayerGUID;
         uint32 soulwellGUID;
         bool loadingPhase;
         uint32 transferPhase = 0;
@@ -172,6 +174,7 @@ public:
         soulwell_transfer_npcAI(Creature* c) : ScriptedAI(c)
         {
             lockedPlayerGUID = 0;
+            gossipPlayerGUID = 0;
             loadingPhase = true;
             transferPhase = SWT_NONE;
             transferTicks = 0;
@@ -200,7 +203,7 @@ public:
 
             basicInfo.originalAccountId = f[0].GetUInt32();
 
-            res = CharacterDatabase.PQuery("SELECT level, race, class, money, totaltime, leveltime, speccount, knownTitles, guid FROM " SOULWELL_CHAR_DB ".characters WHERE account = %u AND name = '%s'", basicInfo.originalAccountId, charactername.c_str());
+            res = CharacterDatabase.PQuery("SELECT level, race, class, money, totaltime, leveltime, speccount, knownTitles, guid, talentTree FROM " SOULWELL_CHAR_DB ".characters WHERE account = %u AND name = '%s'", basicInfo.originalAccountId, charactername.c_str());
             if (!res)
                 return false;
 
@@ -218,6 +221,19 @@ public:
 
             const char* knownTitles = f[7].GetCString();
             soulwellGUID = f[8].GetUInt32();
+            const char* talentTree = f[9].GetCString();
+
+            Tokens taltoks(talentTree, ' ', 2);
+            if (taltoks.size() == 2)
+            {
+                basicInfo.talentBranches[0] = atol(taltoks[0]);
+                basicInfo.talentBranches[1] = atol(taltoks[1]);
+            }
+            else
+            {
+                basicInfo.talentBranches[0] = 0;
+                basicInfo.talentBranches[1] = 0;
+            }
 
             Tokens tokens(knownTitles, ' ', KNOWN_TITLES_SIZE * 2);
 
@@ -243,6 +259,8 @@ public:
             if (dest->getClass() != basicInfo.pclass)
                 return false;
 
+            dest->SetRooted(true);
+
             // basic info is already gathered, so start basic phase
             transferPhase = SWT_BASIC;
             transferTimer = SOULWELL_TRANSFER_TICK_TIMER;
@@ -262,7 +280,11 @@ public:
             lockedPlayer->ModifyMoney(basicInfo.money);
             lockedPlayer->m_Played_time[PLAYED_TIME_TOTAL] = basicInfo.totaltime;
             lockedPlayer->m_Played_time[PLAYED_TIME_LEVEL] = basicInfo.leveltime;
+            lockedPlayer->ResetTalents(true);
             lockedPlayer->SetSpecsCount(basicInfo.speccount);
+            for (uint32 i = 0; i < 2; i++)
+                if (basicInfo.talentBranches[i] != 0)
+                    lockedPlayer->SetTalentBranchSpec(basicInfo.talentBranches[i], i);
             for (uint32 i = 0; i < KNOWN_TITLES_SIZE * 2; ++i)
                 lockedPlayer->SetUInt32Value(PLAYER__FIELD_KNOWN_TITLES + i, basicInfo.knownTitles[i]);
 
@@ -270,7 +292,6 @@ public:
             lockedPlayer->SetBankBagSlotCount(7);
 
             lockedPlayer->SaveToDB();
-
             // load next stage
             LoadSkillsStage();
         }
@@ -644,7 +665,6 @@ public:
             if (spellsItr == spells.end())
             {
                 // transfer talents
-                lockedPlayer->ResetTalents(true);
                 for (soulwell_talent_record* trec : talents)
                 {
                     lockedPlayer->AddTalent(trec->spellId, trec->spec, true);
@@ -855,6 +875,9 @@ public:
                 } while (res->NextRow());
             }
 
+            if (voidstorage.size() > 0)
+                lockedPlayer->UnlockVoidStorage();
+
             voidstorageItr = voidstorage.begin();
             transferPhase = SWT_VOIDSTORAGE;
         }
@@ -1018,6 +1041,11 @@ public:
             me->MonsterSay("You should now be fully transferred! Log out and back in, otherwise you may experience some nasty bugs. Trust me.", LANG_UNIVERSAL, 0);
             me->InterruptNonMeleeSpells(true);
 
+            gossipPlayerGUID = 0;
+            username = "";
+            password = "";
+            charactername = "";
+
             transferPhase = SWT_END;
         }
 
@@ -1110,6 +1138,12 @@ public:
 
     void SendStageGossip(Player* player, Creature* creature, uint8 stage, const char* helperstr = nullptr)
     {
+        soulwell_transfer_npcAI* pAI = CAST_AI(soulwell_transfer_npc::soulwell_transfer_npcAI, creature->AI());
+        if (pAI->gossipPlayerGUID != 0 && pAI->gossipPlayerGUID != player->GetGUID())
+            return;
+
+        pAI->gossipPlayerGUID = player->GetGUID();
+
         switch (stage)
         {
             case 0:

@@ -15651,7 +15651,7 @@ void Player::AddVoidStorageItemAtSlot(uint8 slot, const VoidStorageItem& item)
         return;
     }
 
-    _voidStorageItems[slot] = new VoidStorageItem(item.ItemId, item.ItemId, item.CreatorGuid, item.ItemRandomPropertyId, item.ItemSuffixFactor);
+    _voidStorageItems[slot] = new VoidStorageItem(item.ItemId, item.ItemEntry, item.CreatorGuid, item.ItemRandomPropertyId, item.ItemSuffixFactor);
 }
 
 void Player::DeleteVoidStorageItem(uint8 slot)
