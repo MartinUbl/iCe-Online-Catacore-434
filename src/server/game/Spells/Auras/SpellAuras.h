@@ -54,14 +54,13 @@ class AuraApplication
         uint32 m_applySlot;                             // Aura apply slot - to determine order of application
         AuraRemoveMode m_removeMode:8;                  // Store info for know remove aura reason
         bool m_needClientUpdate:1;
-
-        explicit AuraApplication(Unit * target, Unit * caster, Aura * base, uint8 effMask);
         void _Remove();
     private:
         void _InitFlags(Unit * caster, uint8 effMask);
         void _HandleEffect(uint8 effIndex, bool apply);
     public:
 
+        explicit AuraApplication(Unit * target, Unit * caster, Aura * base, uint8 effMask);
         Unit * GetTarget() const { return m_target; }
         Aura * GetBase() const { return m_base; }
 
@@ -227,9 +226,8 @@ class Aura
 class UnitAura : public Aura
 {
     friend Aura * Aura::Create(SpellEntry const* spellproto, uint8 effMask, WorldObject * owner, Unit * caster, int32 *baseAmount, int32 *scriptedAmount, Item * castItem, uint64 casterGUID);
-    protected:
-        explicit UnitAura(SpellEntry const* spellproto, uint8 effMask, WorldObject * owner, Unit * caster, int32 *baseAmount, int32 *scriptedAmount, Item * castItem, uint64 casterGUID);
     public:
+        explicit UnitAura(SpellEntry const* spellproto, uint8 effMask, WorldObject * owner, Unit * caster, int32 *baseAmount, int32 *scriptedAmount, Item * castItem, uint64 casterGUID);
         void _ApplyForTarget(Unit * target, Unit * caster, AuraApplication * aurApp);
         void _UnapplyForTarget(Unit * target, Unit * caster, AuraApplication * aurApp);
 

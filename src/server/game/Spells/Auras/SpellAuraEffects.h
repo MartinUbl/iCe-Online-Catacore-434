@@ -36,10 +36,9 @@ class AuraEffect
 {
     friend void Aura::_InitEffects(uint8 effMask, Unit * caster, int32 *baseAmount, int32* scriptedAmount);
     friend Aura::~Aura();
-    private:
-        ~AuraEffect();
-        explicit AuraEffect(Aura * base, uint8 effIndex, int32 *baseAmount, int32 *scriptedAmount, Unit * caster);
     public:
+        explicit AuraEffect(Aura * base, uint8 effIndex, int32 *baseAmount, int32 *scriptedAmount, Unit * caster);
+        ~AuraEffect();
         Unit * GetCaster() const { return GetBase()->GetCaster(); }
         uint64 GetCasterGUID() const { return GetBase()->GetCasterGUID(); }
         Aura * GetBase() const { return m_base; }
