@@ -1364,6 +1364,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->RemoveAura(74434); // Remove Soulburn
                     }
                     break;
+                    case 74434: // Soulburn
+                    {
+                        // T13 4p set bonus
+                        if (caster && caster->HasAura(105787))
+                            caster->CastSpell(caster, 105786, true); // cast Temporal Ruin (+10% damage)
+                        break;
+                    }
                 }
                 break;
             case SPELLFAMILY_PRIEST:

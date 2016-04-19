@@ -819,6 +819,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     }
                 }
 
+                // T13 4p set bonus; Soul Fire should refresh Soul Shard when used in conjunction with Soulburn
+                if (m_spellInfo->Id == 6353 && m_caster->HasAura(105787) && m_caster->HasAura(74434))
+                    m_caster->CastSpell(m_caster, 101977, true);
+
                 // Conflagrate
                 if (m_spellInfo->TargetAuraState == AURA_STATE_CONFLAGRATE)
                 {
