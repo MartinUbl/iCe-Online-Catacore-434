@@ -86,6 +86,15 @@ struct soulwell_reputation_record
     uint32 flags;
 };
 
+struct soulwell_voidstorage_record
+{
+    uint32 itemEntry;
+    uint8 slot;
+    uint32 creatorGuid;
+    uint32 randomProperty;
+    uint32 suffixFactor;
+};
+
 #define SOULWELL_TRANSFER_TICK_TIMER 1000
 #define SOULWELL_TRANSFER_BATCH_SIZE 100
 #define SOULWELL_TRANSFER_TICK_SAVE_COUNT 5
@@ -112,6 +121,7 @@ public:
         SWT_CURRENCY = 5,
         SWT_SKILLS = 6,
         SWT_REPUTATION = 7,
+        SWT_VOIDSTORAGE = 8,
 
         SWT_END
     };
@@ -139,6 +149,7 @@ public:
         std::list<soulwell_currency_record*> currency;
         std::list<soulwell_skill_record*> skills;
         std::list<soulwell_reputation_record*> reputation;
+        std::list<soulwell_voidstorage_record*> voidstorage;
 
         std::list<soulwell_item_transfer_record*>::iterator itemsItr;
         std::list<soulwell_spell_transfer_record*>::iterator spellsItr;
@@ -147,6 +158,7 @@ public:
         std::list<soulwell_currency_record*>::iterator currencyItr;
         std::list<soulwell_skill_record*>::iterator skillsItr;
         std::list<soulwell_reputation_record*>::iterator reputationItr;
+        std::list<soulwell_voidstorage_record*>::iterator voidstorageItr;
 
         std::map<uint64, Bag*> bagMap;
 
@@ -722,6 +734,7 @@ public:
             // select all currencies
             res = CharacterDatabase.PQuery("SELECT currency, total_count, week_count, season_count FROM " SOULWELL_CHAR_DB ".character_currency WHERE guid = %u", soulwellGUID);
             soulwell_currency_record* rec;
+            uint32 currId;
             if (res)
             {
                 do
@@ -730,8 +743,15 @@ public:
                     if (!f)
                         break;
 
+                    currId = f[0].GetUInt32();
+
+                    // do not transfer main PvP and PvE currencies
+                    if (currId == CURRENCY_TYPE_HONOR_POINTS || currId == CURRENCY_TYPE_CONQUEST_POINTS ||
+                        currId == CURRENCY_TYPE_JUSTICE_POINTS || currId == CURRENCY_TYPE_VALOR_POINTS)
+                        continue;
+
                     rec = new soulwell_currency_record;
-                    rec->currency = f[0].GetUInt32();
+                    rec->currency = currId;
                     rec->count = f[1].GetUInt32();
                     rec->weekcount = f[2].GetUInt32();
                     rec->seasoncount = f[3].GetUInt32();
@@ -765,8 +785,68 @@ public:
 
             if (currencyItr == currency.end())
             {
-                FinishTransfer();
+                LoadVoidStorageStage();
                 currency.clear();
+            }
+        }
+
+        void LoadVoidStorageStage()
+        {
+            Field *f;
+            QueryResult res;
+
+            ChatHandler(lockedPlayer).SendSysMessage("Starting void storage stage...");
+
+            res = CharacterDatabase.PQuery("SELECT itemEntry, slot, creatorGuid, randomProperty, suffixFactor FROM " SOULWELL_CHAR_DB ".character_void_storage WHERE playerGuid = %u", soulwellGUID);
+            soulwell_voidstorage_record* rec;
+            if (res)
+            {
+                do
+                {
+                    f = res->Fetch();
+                    if (!f)
+                        break;
+
+                    rec = new soulwell_voidstorage_record;
+                    rec->itemEntry = f[0].GetUInt32();
+                    rec->slot = f[1].GetUInt8();
+                    rec->creatorGuid = f[2].GetUInt32();
+                    rec->randomProperty = f[3].GetUInt32();
+                    rec->suffixFactor = f[4].GetUInt32();
+
+                    voidstorage.push_back(rec);
+
+                } while (res->NextRow());
+            }
+
+            voidstorageItr = voidstorage.begin();
+            transferPhase = SWT_VOIDSTORAGE;
+        }
+        void ProceedVoidStorageStage()
+        {
+            int procCount = 0;
+            soulwell_voidstorage_record* vs;
+            while (voidstorageItr != voidstorage.end() && (procCount++) < SOULWELL_TRANSFER_BATCH_SIZE)
+            {
+                vs = *voidstorageItr;
+
+                VoidStorageItem vsitem;
+                vsitem.ItemId = sObjectMgr->GenerateVoidStorageItemId();
+                vsitem.CreatorGuid = vs->creatorGuid;
+                vsitem.ItemEntry = vs->itemEntry;
+                vsitem.ItemRandomPropertyId = vs->randomProperty;
+                vsitem.ItemSuffixFactor = vs->suffixFactor;
+
+                lockedPlayer->AddVoidStorageItemAtSlot(vs->slot, vsitem);
+
+                delete vs;
+                ++voidstorageItr;
+            }
+
+            if (voidstorageItr == voidstorage.end())
+            {
+                FinishTransfer();
+                voidstorage.clear();
             }
         }
 
@@ -950,6 +1030,9 @@ public:
                     break;
                 case SWT_REPUTATION:
                     ProceedReputationStage();
+                    break;
+                case SWT_VOIDSTORAGE:
+                    ProceedVoidStorageStage();
                     break;
             }
 
