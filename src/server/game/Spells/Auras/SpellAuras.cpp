@@ -1714,6 +1714,22 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         if (caster->HasAura(105735)) // T13 4p bonus
                             caster->CastSpell(caster, 105737, true); // apply Mass Regeneration
                     }
+                    else if (GetId() == 5217) // Tiger's Fury
+                    {
+                        if (caster->HasAura(105735)) // T13 4p bonus
+                        {
+                            if (caster->HasAura(78893)) // Stampede talent rank 2
+                            {
+                                caster->CastSpell(caster, 109881, true); // Ravage! (Stampede) enabler spell: Stampede Ravage Marker
+                                caster->CastSpell(caster, 81022, true);  // Stampede rank 2
+                            }
+                            else if (caster->HasAura(78892)) // Stampede talent rank 1
+                            {
+                                caster->CastSpell(caster, 109881, true); // Ravage! (Stampede) enabler spell: Stampede Ravage Marker
+                                caster->CastSpell(caster, 81021, true);  // Stampede rank 1
+                            }
+                        }
+                    }
 
                     // Rejuvenation
                     if (target && GetId() == 774)
