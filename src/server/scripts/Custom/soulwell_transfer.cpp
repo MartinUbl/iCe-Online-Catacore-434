@@ -494,6 +494,8 @@ public:
                         nitem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET, it->enchantments[slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET]);
                     }
 
+                    nitem->SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, it->randomPropertyId);
+
                     if (nitem->GetItemRandomPropertyId() < 0)
                         nitem->UpdateItemSuffixFactor();
 
