@@ -95,6 +95,12 @@ struct soulwell_voidstorage_record
     uint32 suffixFactor;
 };
 
+struct soulwell_talent_record
+{
+    uint32 spellId;
+    uint8 spec;
+};
+
 #define SOULWELL_TRANSFER_TICK_TIMER 1000
 #define SOULWELL_TRANSFER_BATCH_SIZE 100
 #define SOULWELL_TRANSFER_TICK_SAVE_COUNT 5
@@ -150,6 +156,7 @@ public:
         std::list<soulwell_skill_record*> skills;
         std::list<soulwell_reputation_record*> reputation;
         std::list<soulwell_voidstorage_record*> voidstorage;
+        std::list<soulwell_talent_record*> talents;
 
         std::list<soulwell_item_transfer_record*>::iterator itemsItr;
         std::list<soulwell_spell_transfer_record*>::iterator spellsItr;
@@ -595,6 +602,26 @@ public:
                 } while (res->NextRow());
             }
 
+            res = CharacterDatabase.PQuery("SELECT spell, spec FROM " SOULWELL_CHAR_DB ".character_talent WHERE guid = %u", soulwellGUID);
+            soulwell_talent_record* trec;
+            if (res)
+            {
+                do
+                {
+                    f = res->Fetch();
+                    if (!f)
+                        break;
+
+                    // there are only few fields we are fancy when looking for bags
+                    trec = new soulwell_talent_record;
+                    trec->spellId = f[0].GetUInt32();
+                    trec->spec = f[1].GetUInt8();
+
+                    talents.push_back(trec);
+
+                } while (res->NextRow());
+            }
+
             // set spells iterator to point at the beginning of list
             spellsItr = spells.begin();
             transferPhase = SWT_SPELLS;
@@ -616,8 +643,17 @@ public:
 
             if (spellsItr == spells.end())
             {
+                // transfer talents
+                lockedPlayer->ResetTalents(true);
+                for (soulwell_talent_record* trec : talents)
+                {
+                    lockedPlayer->AddTalent(trec->spellId, trec->spec, true);
+                    delete trec;
+                }
+
                 LoadAchievementsStage();
                 spells.clear();
+                talents.clear();
             }
         }
 
