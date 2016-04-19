@@ -1597,6 +1597,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             target->ToPlayer()->RemoveSpellCooldown(20252, true);
                         break;
+                    case 871: // Shield Wall
+                        // T13 4p set bonus
+                        if (caster && caster->HasAura(105911))
+                        {
+                            int bp0 = -20;
+                            // Glyph of Shield Wall increases this effect as well
+                            if (caster->HasAura(63329))
+                                bp0 += -10;
+                            caster->CastCustomSpell(caster, 105914, &bp0, nullptr, nullptr, true);
+                        }
+                        break;
                 }
                 break;
 

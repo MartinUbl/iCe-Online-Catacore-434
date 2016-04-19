@@ -3208,6 +3208,20 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             unitList.push_back(m_caster);
                         else
                             m_caster->GetRaidMember(unitList, radius);
+
+                        // Shield Fortress - exclude self
+                        // TODO: generic fix based on SPELL_ATTR1_CANT_TARGET_SELF
+                        if (m_spellInfo->Id == 105914)
+                        {
+                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                            {
+                                if (*itr == m_caster)
+                                    itr = unitList.erase(itr);
+                                else
+                                    ++itr;
+                            }
+                        }
+
                         break;
                     case TARGET_UNIT_CLASS_TARGET:
                     {
