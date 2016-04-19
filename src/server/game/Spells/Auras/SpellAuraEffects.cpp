@@ -3145,6 +3145,11 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     int32 regen = target->GetMaxHealth() * ((mod * (points / 100.0f)) / 100.0f); // its 0.15% as of cataclysm, so we need 0.0015 coef
                     target->CastCustomSpell(target, 22845, &regen, 0, 0, true, 0, this);
                     target->SetPower(POWER_RAGE, (rage-mod)*10.0f); // multiply our modified rage by 10 also
+
+                    // T13 4p set bonus
+                    if (target->HasAura(105735))
+                        target->CastCustomSpell(target, 105739, &regen, 0, 0, true); // tick Mass Regeneration
+
                     break;
                 }
                 // Force of Nature

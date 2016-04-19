@@ -1709,6 +1709,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         if (caster->HasAura(63057)) // Glyph of Barkskin
                             caster->CastSpell(caster, 63058, true);
                     }
+                    else if (GetId() == 22842) // Frenzied Regeneration
+                    {
+                        if (caster->HasAura(105735)) // T13 4p bonus
+                            caster->CastSpell(caster, 105737, true); // apply Mass Regeneration
+                    }
 
                     // Rejuvenation
                     if (target && GetId() == 774)

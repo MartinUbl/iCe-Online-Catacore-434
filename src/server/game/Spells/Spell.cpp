@@ -3209,9 +3209,9 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         else
                             m_caster->GetRaidMember(unitList, radius);
 
-                        // Shield Fortress - exclude self
+                        // Shield Fortress, Mass Regeneration, Mass Regeneration effect - exclude self
                         // TODO: generic fix based on SPELL_ATTR1_CANT_TARGET_SELF
-                        if (m_spellInfo->Id == 105914)
+                        if (m_spellInfo->Id == 105914 || m_spellInfo->Id == 105737 || m_spellInfo->Id == 105739)
                         {
                             for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
                             {
