@@ -16121,6 +16121,10 @@ int32 Unit::CalcSpellDuration(SpellEntry const* spellProto)
     else
         duration = minduration;
 
+    // Druid restoration T13 4p bonus - double the base duration of Rejuvenation and Regrowth with 10% chance
+    if ((spellProto->Id == 774 || spellProto->Id == 8936) && HasAura(105770) && urand(0, 100) <= 10)
+        duration *= 2;
+
     return duration;
 }
 
