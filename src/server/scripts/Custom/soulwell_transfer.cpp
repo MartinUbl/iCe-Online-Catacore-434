@@ -299,7 +299,7 @@ public:
             std::set<uint64> bagGUIDs;
 
             // select bags
-            res = CharacterDatabase.PQuery("SELECT ii.itemEntry, ii.count, ii.creatorGuid, ii.flags, ii.guid FROM " SOULWELL_CHAR_DB ".item_instance ii LEFT JOIN " SOULWELL_CHAR_DB ".character_inventory cci ON ii.guid = cci.bag WHERE cci.bag != 0 and cci.guid = %u GROUP BY cci.bag", soulwellGUID);
+            res = CharacterDatabase.PQuery("SELECT ii.itemEntry, ii.creatorGuid, ii.count, ii.duration, ii.charges, ii.flags, ii.randomPropertyId, ii.enchantments, ii.durability, ii.text, ii.guid FROM " SOULWELL_CHAR_DB ".item_instance ii LEFT JOIN " SOULWELL_CHAR_DB ".character_inventory cci ON ii.guid = cci.bag WHERE cci.bag != 0 and cci.guid = %u GROUP BY cci.bag", soulwellGUID);
             soulwell_item_transfer_record* itm;
 
             if (res)
@@ -313,10 +313,33 @@ public:
                     // there are only few fields we are fancy when looking for bags
                     itm = new soulwell_item_transfer_record;
                     itm->id = f[0].GetUInt32();
-                    itm->count = f[1].GetUInt32();
-                    itm->creatorGuid = f[2].GetUInt32();
-                    itm->flags = f[3].GetUInt32();
-                    itm->guid = f[4].GetUInt64();
+                    itm->creatorGuid = f[1].GetUInt32();
+                    itm->count = f[2].GetUInt32();
+                    itm->duration = f[3].GetUInt32();
+
+                    // parse charges string
+                    std::string chargesStr = f[4].GetCString();
+                    Tokens tk(chargesStr, ' ', MAX_ITEM_PROTO_SPELLS);
+                    for (uint32 i = 0; i < MAX_ITEM_PROTO_SPELLS && i < tk.size(); i++)
+                        itm->charges[i] = atol(tk[i]);
+
+                    itm->flags = f[5].GetUInt32();
+                    itm->randomPropertyId = f[6].GetUInt32();
+
+                    // parse enchantments string
+                    std::string enchStr = f[7].GetCString();
+                    Tokens tke(enchStr, ' ');
+                    for (uint32 i = 0; i < MAX_ENCHANTMENT_SLOT * 3 && i < tke.size(); i++)
+                        itm->enchantments[i] = atol(tke[i]);
+
+                    itm->durability = f[8].GetUInt32();
+
+                    if (f[9].GetCString())
+                        itm->text = f[9].GetCString();
+                    else
+                        itm->text = "";
+
+                    itm->guid = f[10].GetUInt64();
 
                     items.push_back(itm);
                     bagGUIDs.insert(itm->guid);
@@ -596,6 +619,7 @@ public:
             // select all achievements
             res = CharacterDatabase.PQuery("SELECT achievement, date FROM " SOULWELL_CHAR_DB ".character_achievement WHERE guid = %u", soulwellGUID);
             soulwell_achievement_record* rec;
+            AchievementEntry* ach;
             if (res)
             {
                 do
@@ -603,6 +627,13 @@ public:
                     f = res->Fetch();
                     if (!f)
                         break;
+
+                    ach = sAchievementStore.LookupEntryNoConst(f[0].GetUInt32());
+                    if (!ach)
+                        continue;
+                    // do not transfer "realm first" achievements
+                    if (ach->flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL || ach->flags & ACHIEVEMENT_FLAG_REALM_FIRST_REACH || ach->flags & ACHIEVEMENT_FLAG_GUILD_ACHIEVEMENT)
+                        continue;
 
                     rec = new soulwell_achievement_record;
                     rec->achievementId = f[0].GetUInt32();
@@ -616,6 +647,7 @@ public:
             // select all achievement progress
             res = CharacterDatabase.PQuery("SELECT criteria, counter, date FROM " SOULWELL_CHAR_DB ".character_achievement_progress WHERE guid = %u", soulwellGUID);
             soulwell_achievement_progress_record* prec;
+            AchievementCriteriaEntry* crent;
             if (res)
             {
                 do
@@ -623,6 +655,15 @@ public:
                     f = res->Fetch();
                     if (!f)
                         break;
+
+                    crent = sAchievementCriteriaStore.LookupEntryNoConst(f[0].GetUInt32());
+                    if (!crent)
+                        continue;
+                    ach = sAchievementStore.LookupEntryNoConst(crent->referredAchievement);
+                    if (!ach)
+                        continue;
+                    if (ach->flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL || ach->flags & ACHIEVEMENT_FLAG_REALM_FIRST_REACH || ach->flags & ACHIEVEMENT_FLAG_GUILD_ACHIEVEMENT)
+                        continue;
 
                     prec = new soulwell_achievement_progress_record;
                     prec->criteriaId = f[0].GetUInt32();
