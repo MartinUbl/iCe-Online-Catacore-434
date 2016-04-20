@@ -1685,6 +1685,15 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
     if(Aura *uw = GetAura(73681))
         uw->DropCharge();
 
+    // Feral Spirit; T13 4p set bonus implementation
+    if (ToCreature() && GetEntry() == 29264)
+    {
+        Unit* owner = GetCharmerOrOwner();
+        // 45% chance to trigger Maelstrom Weapon
+        if (owner && owner->HasAura(105872) && urand(0, 100) < 45)
+            owner->CastSpell(owner, 53817, true);
+    }
+
     // Do effect if any damage done to target
     if (damageInfo->damage)
     {
