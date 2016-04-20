@@ -8435,6 +8435,11 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     }
                     else
                         CastCustomSpell(this, 51460, &bp, 0, 0, true);
+
+                    // T13 4p set bonus - trigger mastery bonus spell
+                    if (HasAura(105646) && urand(0, 100) < 40)
+                        CastSpell(this, 105647, true);
+
                     return true;
                 }
 
@@ -8472,6 +8477,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     // Also cast spell originally used for Empower Rune Weapon
                     // It allows us to tell client that one single rune was refreshed
                     CastSpell(this, 89831, true);
+
+                    // T13 4p set bonus - trigger mastery bonus spell
+                    if (HasAura(105646) && urand(0, 100) < 25)
+                        CastSpell(this, 105647, true);
                 }
                 return true;
             }
