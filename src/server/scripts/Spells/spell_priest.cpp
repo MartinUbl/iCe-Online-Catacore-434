@@ -314,8 +314,20 @@ class mob_shadowy_apparition: public CreatureScript
                     if (me->IsWithinMeleeRange(me->GetVictim()))
                     {
                         me->CastSpell(me, 87529, true);
-                        if (me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        Unit* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself();
+                        if (owner)
                         {
+                            // T13 4p set bonus implementation
+                            if (owner->HasAura(105844))
+                            {
+                                Aura* aurtarget = owner->GetAura(77487);
+                                if (!aurtarget)
+                                    aurtarget = owner->AddAura(77487, owner);
+
+                                if (aurtarget)
+                                    aurtarget->SetStackAmount(3);
+                            }
+
                             me->CastSpell(me->GetVictim(), 87532, true, 0, 0, me->GetCharmerOrOwnerPlayerOrPlayerItself()->GetGUID());
                             me->Kill(me);
                             me->ForcedDespawn(100);

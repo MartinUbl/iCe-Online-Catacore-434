@@ -1694,6 +1694,21 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
             owner->CastSpell(owner, 53817, true);
     }
 
+    // Shadowfiend; T13 4p set bonus implementation
+    if (ToCreature() && GetEntry() == 19668)
+    {
+        Unit* owner = GetCharmerOrOwner();
+        if (owner && owner->HasAura(105844))
+        {
+            Aura* aurtarget = owner->GetAura(77487);
+            if (!aurtarget)
+                aurtarget = owner->AddAura(77487, owner);
+
+            if (aurtarget)
+                aurtarget->SetStackAmount(3);
+        }
+    }
+
     // Do effect if any damage done to target
     if (damageInfo->damage)
     {
