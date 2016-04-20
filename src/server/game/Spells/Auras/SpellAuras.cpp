@@ -2198,6 +2198,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             float multiplier = (float)aurEff->GetAmount();
 
                             int32 basepoints0 = int32(multiplier * caster->GetMaxPower(POWER_MANA) / 100);
+                            // second part of T13 4p set bonus implementation - double the amount
+                            if (GetEffect(0) && GetEffect(0)->GetScriptedAmount() == 1)
+                                basepoints0 *= 2;
                             caster->CastCustomSpell(caster, 47755, &basepoints0, NULL, NULL, true);
                         }
                     }

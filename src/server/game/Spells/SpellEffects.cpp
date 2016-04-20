@@ -4099,6 +4099,21 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                         aurEff->ChangeAmount(aurEff->GetAmount()*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f));
                 }
             }
+
+            // Power Word: Shield, T13 4p mastery bonus
+            if (m_spellInfo->Id == 17 && m_caster->HasAura(105832))
+            {
+                // 10% chance to absorb 100% additional damage
+                if (urand(0, 100) < 10)
+                {
+                    if (AuraEffect* aurEff = m_spellAura->GetEffect(effIndex))
+                    {
+                        aurEff->ChangeAmount(aurEff->GetAmount()*2.0f);
+                        // "flag" for Rapture to restore twice as much mana
+                        aurEff->SetScriptedAmount(1);
+                    }
+                }
+            }
             break;
         }
         case SPELLFAMILY_SHAMAN:
