@@ -7128,6 +7128,7 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const *aurApp, uint
     {
         // Increase percents of health instead of health value
         case 22842: // Frenzied Regeneration
+        case 105737: // Mass Regeneration (T13 4p druid bonus, similar to Frenzied Regeneration)
         case 79437: // Soulburn: Healthstone
             target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, float(amount), apply);
             amount = 0;

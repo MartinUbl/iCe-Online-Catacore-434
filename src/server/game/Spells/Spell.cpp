@@ -3222,6 +3222,18 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             }
                         }
 
+                        // Mass Regeneration healing spell - exclude targets not having Mass Regeneration base spell
+                        if (m_spellInfo->Id == 105739)
+                        {
+                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                            {
+                                if (!(*itr)->HasAura(105737))
+                                    itr = unitList.erase(itr);
+                                else
+                                    ++itr;
+                            }
+                        }
+
                         break;
                     case TARGET_UNIT_CLASS_TARGET:
                     {

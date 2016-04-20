@@ -48,6 +48,7 @@ m_effectsToApply(effMask), m_removeMode(AURA_REMOVE_NONE), m_needClientUpdate(fa
     ASSERT(GetTarget() && GetBase());
 
     m_applySlot = 0;
+    m_created = getMSTime();
 
     if (GetBase()->CanBeSentToClient())
     {
@@ -1719,7 +1720,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     else if (GetId() == 22842) // Frenzied Regeneration
                     {
                         if (caster->HasAura(105735)) // T13 4p bonus
-                            caster->CastSpell(caster, 105737, true); // apply Mass Regeneration
+                        {
+                            // get Bear Form aura application
+                            if (AuraApplication* app = caster->GetAuraApplication(5487))
+                            {
+                                // must have Bear Form for longer than 15s
+                                if (getMSTimeDiff(app->GetCreateTime(), getMSTime()) > 15000)
+                                    caster->CastSpell(caster, 105737, true); // apply Mass Regeneration
+                            }
+                        }
                     }
                     else if (GetId() == 5217) // Tiger's Fury
                     {

@@ -52,6 +52,7 @@ class AuraApplication
         uint8 m_flags;                                  // Aura info flag
         uint8 m_effectsToApply;                         // Used only at spell hit to determine which effect should be applied
         uint32 m_applySlot;                             // Aura apply slot - to determine order of application
+        uint32 m_created;                               // Aura application create time
         AuraRemoveMode m_removeMode:8;                  // Store info for know remove aura reason
         bool m_needClientUpdate:1;
         void _Remove();
@@ -78,6 +79,7 @@ class AuraApplication
         void SetRemoveMode(AuraRemoveMode mode) { m_removeMode = mode; }
         AuraRemoveMode GetRemoveMode() const {return m_removeMode;}
 
+        uint32 GetCreateTime() { return m_created; };
         void SetNeedClientUpdate() { m_needClientUpdate = true;}
         bool IsNeedClientUpdate() const { return m_needClientUpdate;}
         void BuildUpdatePacket(ByteBuffer &data, bool remove) const;
