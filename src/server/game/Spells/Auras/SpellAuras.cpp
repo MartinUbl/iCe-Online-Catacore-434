@@ -1864,6 +1864,43 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     if (caster && target)
                         caster->AddAura(55095, target); // Enemies should be also afflicted by Forst Fever
                 }
+                else if (GetId() == 55233) // Vampiric Blood
+                {
+                    // T13 4p set bonus
+                    if (caster && caster->HasAura(105587) && caster->ToPlayer() && caster->ToPlayer()->GetGroup())
+                    {
+                        int32 bp0 = 12;
+                        int32 bp1 = 7;
+                        // Glyph of Vampiric Blood cancels "increase HP" bonus and increases healing
+                        if (caster->HasAura(58676))
+                        {
+                            bp0 = 20;
+                            bp1 = 0;
+                        }
+
+                        // something's really fucked up in targetting system, so this spell won't target the caster
+                        // itself, probably because of ExcludeAura, but then we would miss several checks
+                        // Choose closest member instead, this is probably the fastest way around
+                        Group* gr = caster->ToPlayer()->GetGroup();
+                        Unit* closest = nullptr;
+                        float dist = 10000.0f;
+                        GroupReference* ref = gr->GetFirstMember();
+                        if (ref)
+                        {
+                            do
+                            {
+                                if (ref->getSource() && ref->getSource() != caster && ref->getSource()->IsAlive() && (closest == nullptr || ref->getSource()->GetDistance2d(caster) < dist))
+                                {
+                                    closest = ref->getSource();
+                                    dist = ref->getSource()->GetDistance2d(caster);
+                                }
+                            } while (ref->hasNext() && (ref = ref->next()));
+                        }
+
+                        if (closest)
+                            caster->CastCustomSpell(closest, 105588, &bp0, &bp1, nullptr, true);
+                    }
+                }
                 break;
         }
 

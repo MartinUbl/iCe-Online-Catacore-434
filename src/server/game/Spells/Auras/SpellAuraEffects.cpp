@@ -931,8 +931,8 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             break;
         }
         case SPELL_AURA_MOD_INCREASE_HEALTH:
-            // Vampiric Blood
-            if (GetId() == 55233)
+            // Vampiric Blood and Vampiric Brood (T13 4p set bonus)
+            if (GetId() == 55233 || GetId() == 105588)
                 amount = GetBase()->GetUnitOwner()->CountPctFromMaxHealth(amount);
             break;
         case SPELL_AURA_MOD_INCREASE_ENERGY:
