@@ -1133,7 +1133,7 @@ public:
         {
             Unit * victim = GetTarget();
 
-            if (dmgInfo.GetDamage() >= victim->GetHealth())
+            if (dmgInfo.GetDamage() >= victim->GetHealth() && dmgInfo.GetSpellInfo()->Id != SPELL_TWILIGHT_ERUPTION)
             {
                 int32 healAmount = victim->GetMaxHealth();
                 victim->CastCustomSpell(victim, SPELL_TIMELOOP_HEAL, &healAmount, nullptr, nullptr, true);
