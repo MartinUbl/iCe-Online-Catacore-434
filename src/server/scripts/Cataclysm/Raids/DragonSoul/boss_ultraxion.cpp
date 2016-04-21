@@ -412,6 +412,7 @@ public:
                 {
                     if (!player->IsGameMaster())
                     {
+                        player->RemoveAurasDueToSpell(SPELL_HEROIC_WILL_ACTION_BUTTON);
                         player->CastSpell(player, SPELL_TWILIGHT_SHIFT_COSMETIC_EFFECT, true);
                         player->CastSpell(player, SPELL_HEROIC_WILL_ACTION_BUTTON, true);
                     }
