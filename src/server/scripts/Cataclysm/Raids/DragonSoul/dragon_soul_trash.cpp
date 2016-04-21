@@ -2444,7 +2444,10 @@ public:
                 // Maelstrom teleporter
             case GO_TRAVEL_TO_MAELSTROM:
                 if (pInstance->GetData(TYPE_BOSS_SPINE_OF_DEATHWING) == DONE)
+                {
                     pPlayer->NearTeleportTo(telePos[6].GetPositionX(), telePos[6].GetPositionY(), telePos[6].GetPositionZ(), telePos[6].GetOrientation());
+                    pPlayer->CastSpell(pPlayer, SPELL_PARACHUTE, true);
+                }
                 break;
             default:
                 break;
