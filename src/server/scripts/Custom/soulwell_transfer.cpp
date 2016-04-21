@@ -83,7 +83,7 @@ struct soulwell_skill_record
 struct soulwell_reputation_record
 {
     uint32 factionId;
-    uint32 standing;
+    int32 standing;
     uint32 flags;
 };
 
@@ -296,6 +296,29 @@ public:
             LoadSkillsStage();
         }
 
+        uint32 ConvertItemId(uint32 itemId)
+        {
+            switch (itemId)
+            {
+                // faction bags - Soulwell didn't have reputation set, convert to Netherweave bag
+                case 67528:
+                case 67531:
+                case 67533:
+                case 67529:
+                case 67535:
+                case 67527:
+                case 67526:
+                case 67532:
+                case 67530:
+                case 67534:
+                case 67525:
+                case 67536:
+                    return 21841;
+                default:
+                    return itemId;
+            }
+        }
+
         void LoadItemsStage()
         {
             Field *f;
@@ -352,7 +375,7 @@ public:
 
                     // there are only few fields we are fancy when looking for bags
                     itm = new soulwell_item_transfer_record;
-                    itm->id = f[0].GetUInt32();
+                    itm->id = ConvertItemId(f[0].GetUInt32());
                     itm->creatorGuid = f[1].GetUInt32();
                     itm->count = f[2].GetUInt32();
                     itm->duration = f[3].GetUInt32();
@@ -406,7 +429,7 @@ public:
                     }
 
                     itm = new soulwell_item_transfer_record;
-                    itm->id = f[0].GetUInt32();
+                    itm->id = ConvertItemId(f[0].GetUInt32());
                     itm->creatorGuid = f[1].GetUInt32();
                     itm->count = f[2].GetUInt32();
                     itm->duration = f[3].GetUInt32();
@@ -479,26 +502,38 @@ public:
                     if (lockedPlayer->IsInventoryPos(INVENTORY_SLOT_BAG_0, slot))
                     {
                         ItemPosCountVec dest;
-                        if (lockedPlayer->CanStoreItem(INVENTORY_SLOT_BAG_0, slot, dest, nitem, false) == EQUIP_ERR_OK)
+                        uint8 res = lockedPlayer->CanStoreItem(INVENTORY_SLOT_BAG_0, slot, dest, nitem, false);
+                        if (res == EQUIP_ERR_OK)
                             nitem = lockedPlayer->StoreItem(dest, nitem, true);
                         else
+                        {
+                            sLog->outError("Item inventory store error: %u", res);
                             success = false;
+                        }
                     }
                     else if (lockedPlayer->IsEquipmentPos(INVENTORY_SLOT_BAG_0, slot))
                     {
                         uint16 dest;
-                        if (lockedPlayer->CanEquipItem(slot, dest, nitem, false, false) == EQUIP_ERR_OK)
+                        uint8 res = lockedPlayer->CanEquipItem(slot, dest, nitem, false, false);
+                        if (res == EQUIP_ERR_OK)
                             lockedPlayer->QuickEquipItem(dest, nitem);
                         else
+                        {
+                            sLog->outError("Item equipment store error: %u", res);
                             success = false;
+                        }
                     }
                     else if (lockedPlayer->IsBankPos(INVENTORY_SLOT_BAG_0, slot))
                     {
                         ItemPosCountVec dest;
-                        if (lockedPlayer->CanBankItem(INVENTORY_SLOT_BAG_0, slot, dest, nitem, false, false) == EQUIP_ERR_OK)
+                        uint8 res = lockedPlayer->CanBankItem(INVENTORY_SLOT_BAG_0, slot, dest, nitem, false, false);
+                        if (res == EQUIP_ERR_OK)
                             nitem = lockedPlayer->BankItem(dest, nitem, true);
                         else
+                        {
+                            sLog->outError("Item bank store error: %u", res);
                             success = false;
+                        }
                     }
 
                     if (success)
@@ -529,7 +564,10 @@ public:
                         }
                     }
                     else
+                    {
+                        sLog->outError("Cannot find bag for item %u", it->id);
                         success = false;
+                    }
                 }
 
                 if (success)
@@ -949,6 +987,12 @@ public:
                 sr = *skillsItr;
 
                 SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(sr->skillId);
+                if (!pSkill)
+                {
+                    delete sr;
+                    ++skillsItr;
+                    continue;
+                }
                 step = 0;
                 if (pSkill->categoryId == SKILL_CATEGORY_SECONDARY || pSkill->categoryId == SKILL_CATEGORY_PROFESSION)
                     step = sr->max / 75;
@@ -985,7 +1029,7 @@ public:
 
                     rec = new soulwell_reputation_record;
                     rec->factionId = f[0].GetUInt32();
-                    rec->standing = f[1].GetUInt32();
+                    rec->standing = f[1].GetInt32();
                     rec->flags = f[2].GetUInt32();
 
                     reputation.push_back(rec);
@@ -1005,8 +1049,14 @@ public:
                 sr = *reputationItr;
 
                 FactionEntry const* fe = sFactionStore.LookupEntry(sr->factionId);
+                if (!fe)
+                {
+                    delete sr;
+                    ++reputationItr;
+                    continue;
+                }
 
-                lockedPlayer->SetReputation(sr->factionId, sr->standing);
+                lockedPlayer->GetReputationMgr().SetOneFactionReputation(fe, sr->standing + lockedPlayer->GetReputationMgr().GetBaseReputation(fe), false);
 
                 if (sr->flags & FACTION_FLAG_VISIBLE)
                     lockedPlayer->GetReputationMgr().SetVisible(fe);
