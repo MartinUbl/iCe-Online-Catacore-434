@@ -2475,6 +2475,22 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 break;
             }
             break;
+        case SPELLFAMILY_SHAMAN:
+        {
+            if (caster)
+            {
+                // Spiritwalker's Grace
+                if (GetId() == 79206 && caster->HasAura(105876))
+                {
+                    // T13 4p set bonus implementation
+                    if (apply)
+                        caster->CastSpell(caster, 105877, true);
+                    else
+                        caster->RemoveAurasDueToSpell(105877);
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_DRUID:
             {
                 // Tree of Life, passive auras
