@@ -1822,7 +1822,7 @@ public:
             float damage = 0.0f;
 
             if (caster->GetHealthPct() < 21)
-                damage = GetHitDamage() * ((21 - caster->GetHealthPct()) * 0.5);
+                damage = GetHitDamage() * ((21 - caster->GetHealthPct()) * 0.5) * 1.3;
 
             SetHitDamage((int32)damage);
         }
