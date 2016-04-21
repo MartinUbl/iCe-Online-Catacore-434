@@ -5103,9 +5103,13 @@ void Spell::SendSpellGo()
 
     uint32 castFlags = CAST_FLAG_UNKNOWN_9;
 
+    // Note by Gregory: I suspect this is not exactly correct behaviour, because lots of triggered spells
+    // have spell visuals and with this flag, client expects some more info elsewhere about targetting, etc.
+    // Removing this (but leaving in SMSG_SPELL_START, where it has its place) fixes client crash after
+    // escape has been hit
     // triggered spells with spell visual != 0
-    if ((m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo)) || m_triggeredByAuraSpell)
-        castFlags |= CAST_FLAG_PENDING;
+    /*if ((m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo)) || m_triggeredByAuraSpell)
+        castFlags |= CAST_FLAG_PENDING;*/
 
     if (m_spellInfo->Attributes & SPELL_ATTR0_REQ_AMMO)
         castFlags |= CAST_FLAG_AMMO;                        // arrows/bullets visual
@@ -5147,7 +5151,7 @@ void Spell::SendSpellGo()
     data << uint8(m_cast_count);                            // pending spell cast?
     data << uint32(m_spellInfo->Id);                        // spellId
     data << uint32(castFlags);                              // cast flags
-    data << uint32(0);                                      // unk 4.3.4
+    data << uint32(m_timer);                                // unk 4.3.4
     data << uint32(getMSTime());                            // timestamp
 
     /*
