@@ -2075,6 +2075,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         if (target->HasAura(70752)) //Item - Mage T10 2P Bonus
                             target->CastSpell(target, 70753, true);
                         break;
+                    case 12042: // Arcane Power
+                    case 12472: // Icy Veins
+                        target->RemoveAurasDueToSpell(105785);
+                        target->RemoveAurasDueToSpell(105791);
+                        break;
+                    case 83853: // Combustion
+                        if (caster)
+                        {
+                            caster->RemoveAurasDueToSpell(105785);
+                            caster->RemoveAurasDueToSpell(105791);
+                        }
+                        break;
                     default:
                         break;
                 }

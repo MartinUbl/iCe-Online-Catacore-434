@@ -10595,6 +10595,32 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             target = pVictim;
             break;
         }
+        // Stolen Time T13 2p aura bonus
+        case 105785:
+        {
+            if (!procSpell)
+                return false;
+
+            // Fireball, Pyroblast, Frostfire bolt, Frostbolt - 50% chance
+            if (procSpell->Id == 133 || procSpell->Id == 11366 || procSpell->Id == 44614 || procSpell->Id == 116)
+            {
+                if (!roll_chance_i(50))
+                    return false;
+            }
+            // Arcane Blast - 100% chance
+            else if (procSpell->Id == 30451)
+            {
+                // probably nothing here, just exclusion
+            }
+            else
+                return false;
+
+            // T13 4p set bonus - reduce cooldown aura
+            if (HasAura(105790))
+                CastSpell(this, 105791, true);
+
+            break;
+        }
         // Death's Advance proc
         case 96268:
         {
