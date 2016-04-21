@@ -2578,10 +2578,9 @@ public:
         {
             if (action == ACTION_REMOVE_FLAG)
             {
-                scheduler.Schedule(Seconds(2), [this](TaskContext removeFlag)
+                scheduler.Schedule(Seconds(5), [this](TaskContext removeFlag)
                 {
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    removeFlag.Repeat(Seconds(2));
                 });
             }
         }
