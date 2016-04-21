@@ -132,6 +132,7 @@ enum Spells
     SPELL_BLISTERING_TENTACLE_VEHICLE   = 105550,
     SPELL_BLISTERING_HEAT               = 105444,
     SPELL_BLISTERING_HEAT_DMG           = 105445,
+    SPELL_AVOIDANCE                     = 65220,
 
     // Hemorrhage
     SPELL_HEMORRHAGE_SUMMON_AOE         = 105853,
@@ -1261,12 +1262,14 @@ public:
             if (Vehicle * veh = me->GetVehicleKit())
             {
                 uint8 seats = veh->m_Seats.size();
+                int bp0 = -100;
 
                 for (uint8 i = 0; i < seats; i++)
                 {
                     if (Creature * vehiclePassenger = me->SummonCreature(NPC_BLISTERING_TENTACLE, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN))
                     {
                         vehiclePassenger->CastSpell(vehiclePassenger, SPELL_BLISTERING_HEAT, false);
+                        vehiclePassenger->CastCustomSpell(vehiclePassenger, SPELL_AVOIDANCE, &bp0, nullptr, nullptr, true);
                         vehiclePassenger->EnterVehicle(me, i);
                         vehiclePassenger->ClearUnitState(UNIT_STATE_UNATTACKABLE);
                         vehiclePassenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -1335,6 +1338,10 @@ public:
         }
 
         void UpdateAI(const uint32 diff) override {}
+        void EnterEvadeMode() override { }
+        void EnterCombat(Unit* /*enemy*/) override {}
+        void AttackStart(Unit * who) override {}
+        void MoveInLineOfSight(Unit* /*who*/) override { }
     };
 };
 
