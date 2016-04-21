@@ -1726,7 +1726,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             {
                                 // must have Bear Form for longer than 15s
                                 if (getMSTimeDiff(app->GetCreateTime(), getMSTime()) > 15000)
-                                    caster->CastSpell(caster, 105737, true); // apply Mass Regeneration
+                                {
+                                    int32 bp0 = 30; // dunno what's this for
+                                    int32 bp1 = 30;
+
+                                    caster->CastCustomSpell(caster, 105737, &bp0, &bp1, nullptr, true); // apply Mass Regeneration
+                                }
                             }
                         }
                     }
