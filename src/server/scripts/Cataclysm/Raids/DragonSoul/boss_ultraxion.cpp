@@ -1134,6 +1134,9 @@ public:
         {
             Unit * victim = GetTarget();
 
+            if (dmgInfo.GetSpellInfo() == nullptr)
+                return;
+
             if (dmgInfo.GetDamage() >= victim->GetHealth() && dmgInfo.GetSpellInfo()->Id != SPELL_TWILIGHT_ERUPTION)
             {
                 int32 healAmount = victim->GetMaxHealth();
