@@ -493,7 +493,9 @@
 #cmakedefine ssize_t @ssize_t@
 #cmakedefine strcasecmp @strcasecmp@
 #cmakedefine strncasecmp @strncasecmp@
+#if defined WIN32 && (_MSC_VER < 1900)
 #cmakedefine snprintf @snprintf@
+#endif
 #cmakedefine strtok_r @strtok_r@
 #cmakedefine strtoll @strtoll@
 #cmakedefine strtoull @strtoull@
