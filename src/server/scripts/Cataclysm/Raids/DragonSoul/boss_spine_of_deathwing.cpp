@@ -614,6 +614,9 @@ public:
                     }
                     else if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 3)
                     {
+                        nextSpawnTimer = 30000;
+                        rollCheckTimer = 30000;
+                        scheduler.CancelAll();
                         Summons.DespawnAll();
                         PlayMovieToPlayers(SPINE_OF_DEATHWING_DEFEAT_CINEMATIC);
                         scheduler.Schedule(Seconds(25), [this](TaskContext /* Task context */)
@@ -630,6 +633,10 @@ public:
 
         void DoRoll(uint8 side /* 1 - left, 2 - right */)
         {
+            // Don`t roll when players are watching cinematic
+            if (instance && instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 3)
+                return;
+
             if (previousRoll != side)
                 achievementCount++;
             else
