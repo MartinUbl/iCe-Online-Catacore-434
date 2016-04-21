@@ -555,14 +555,18 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             RemoveCamouflage();
 
         // Tricks of the Trade
-        if (pVictim->HasAura(57934) && !pVictim->HasAura(59628) && !HasAura(57933))
+        if (HasAura(57934) && !HasAura(59628))
         {
             if (!(spellProto && (spellProto->AttributesEx & SPELL_ATTR1_NO_THREAT)))
             {
-                pVictim->CastSpell(pVictim, 59628, true);
-                CastSpell(this, 57933, true);
+                CastSpell(this, 59628, true);
 
-                //Rogue T13 2P Bonus (Tricks of the Trade)
+                Unit* tgt = GetMisdirectionTarget();
+                if (tgt)
+                    tgt->CastSpell(tgt, 57933, true);
+                RemoveAurasDueToSpell(57934);
+
+                // Rogue T13 2P Bonus (Tricks of the Trade)
                 if (HasAura(105849))
                     CastSpell(this, 105864, true);
             }
