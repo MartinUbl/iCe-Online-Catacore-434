@@ -1630,6 +1630,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             default:
                                 break;
                         }
+
+                        // T13 4p elemental set bonus
+                        if (m_caster->HasAura(105816))
+                            m_caster->CastSpell(m_caster, 105821, true);
                     }
                 }
                 break;
