@@ -5103,13 +5103,10 @@ void Spell::SendSpellGo()
 
     uint32 castFlags = CAST_FLAG_UNKNOWN_9;
 
-    // Note by Gregory: I suspect this is not exactly correct behaviour, because lots of triggered spells
-    // have spell visuals and with this flag, client expects some more info elsewhere about targetting, etc.
-    // Removing this (but leaving in SMSG_SPELL_START, where it has its place) fixes client crash after
-    // escape has been hit
-    // triggered spells with spell visual != 0
-    /*if ((m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo)) || m_triggeredByAuraSpell)
-        castFlags |= CAST_FLAG_PENDING;*/
+    // triggered spells should be marked as pending only when some non-triggered spell is being casted right now
+    // (being casted = has cast time)
+    if (m_caster && m_caster->IsNonMeleeSpellCasted(true, false, true, true, true) && ((m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo)) || m_triggeredByAuraSpell))
+        castFlags |= CAST_FLAG_PENDING;
 
     if (m_spellInfo->Attributes & SPELL_ATTR0_REQ_AMMO)
         castFlags |= CAST_FLAG_AMMO;                        // arrows/bullets visual
