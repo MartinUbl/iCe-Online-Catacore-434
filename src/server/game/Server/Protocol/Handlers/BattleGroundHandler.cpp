@@ -42,6 +42,8 @@
 #include "Opcodes.h"
 #include "DisableMgr.h"
 #include "PvpAnnouncer.h"
+#include "Transport.h"
+#include "DynamicTransport.h"
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket & recv_data)
 {
@@ -295,7 +297,7 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket &recv_dat
     if (!bg)                                                 // can't be received if player not in battleground
         return;
 
-    uint32 unkcount = 0;
+    uint32 extracount = 0;
     uint32 flaggercount = 0;
     Player *aplr = NULL;
     Player *hplr = NULL;
@@ -317,21 +319,50 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket &recv_dat
     ObjectGuid aguid = aplr ? aplr->GetGUID() : 0;
     ObjectGuid hguid = hplr ? hplr->GetGUID() : 0;
 
+    std::set<uint64>* extraGUIDs = bg->GetExtraUpdateGUIDSet();
+    std::list<WorldObject*> extraObjects;
+
+    if (extraGUIDs)
+    {
+        for (std::set<uint64>::iterator itr = extraGUIDs->begin(); itr != extraGUIDs->end(); ++itr)
+        {
+            uint64 gd = *itr;
+            WorldObject* tobj = nullptr;
+            if (IS_CREATURE_GUID(gd))
+                tobj = bg->GetBgMap()->GetCreature(gd);
+            else if (IS_PLAYER_GUID(gd))
+                tobj = ObjectAccessor::FindPlayer(gd);
+            else if (IS_GAMEOBJECT_GUID(gd))
+                tobj = bg->GetBgMap()->GetGameObject(gd);
+            else if (IS_TRANSPORT(gd))
+                tobj = ((TransportBase*)bg->GetBgMap()->GetTransport(gd))->ToGameObject();
+            else if (IS_MO_TRANSPORT(gd))
+                tobj = bg->GetBgMap()->GetGameObject(gd);
+
+            if (tobj)
+            {
+                extraObjects.push_back(tobj);
+                extracount++;
+            }
+        }
+    }
+
     WorldPacket data(SMSG_BATTLEFIELD_PLAYER_POSITIONS);
 
-    data.WriteBits(unkcount, 22);
+    data.WriteBits(extracount, 22);
 
-    /*for (uint8 i = 0; i < unkcount; i++)
+    for (std::list<WorldObject*>::iterator itr = extraObjects.begin(); itr != extraObjects.end(); ++itr)
     {
-        data.WriteBit(unkguid[3]);
-        data.WriteBit(unkguid[5]);
-        data.WriteBit(unkguid[1]);
-        data.WriteBit(unkguid[6]);
-        data.WriteBit(unkguid[7]);
-        data.WriteBit(unkguid[0]);
-        data.WriteBit(unkguid[2]);
-        data.WriteBit(unkguid[4]);
-    }*/
+        ObjectGuid exguid = (*itr)->GetGUID();
+        data.WriteBit(exguid[3]);
+        data.WriteBit(exguid[5]);
+        data.WriteBit(exguid[1]);
+        data.WriteBit(exguid[6]);
+        data.WriteBit(exguid[7]);
+        data.WriteBit(exguid[0]);
+        data.WriteBit(exguid[2]);
+        data.WriteBit(exguid[4]);
+    }
 
     data.WriteBits(flaggercount, 22);
     if (aplr)
@@ -386,19 +417,20 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket &recv_dat
         data << float(hplr->GetPositionX());
     }
 
-    /*for (uint8 i = 0; i < unkcount; i++)
+    for (std::list<WorldObject*>::iterator itr = extraObjects.begin(); itr != extraObjects.end(); ++itr)
     {
-        data.WriteByteSeq(unkguid[6]);
-        data << float(unkplr->GetPositionX());
-        data.WriteByteSeq(unkguid[5]);
-        data.WriteByteSeq(unkguid[3]);
-        data << float(unkplr->GetPositionY());
-        data.WriteByteSeq(unkguid[1]);
-        data.WriteByteSeq(unkguid[7]);
-        data.WriteByteSeq(unkguid[0]);
-        data.WriteByteSeq(unkguid[2]);
-        data.WriteByteSeq(unkguid[4]);
-    }*/
+        ObjectGuid exguid = (*itr)->GetGUID();
+        data.WriteByteSeq(exguid[6]);
+        data << float((*itr)->GetPositionX());
+        data.WriteByteSeq(exguid[5]);
+        data.WriteByteSeq(exguid[3]);
+        data << float((*itr)->GetPositionY());
+        data.WriteByteSeq(exguid[1]);
+        data.WriteByteSeq(exguid[7]);
+        data.WriteByteSeq(exguid[0]);
+        data.WriteByteSeq(exguid[2]);
+        data.WriteByteSeq(exguid[4]);
+    }
 
     SendPacket(&data);
 }

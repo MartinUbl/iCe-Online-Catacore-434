@@ -648,6 +648,10 @@ class Battleground
         int32 GetBattlegroundRatingChangeForPlayer(uint64 guid) { return m_bgRatingChange[guid]; }
         void SetBattlegroundRatingChangeForPlayer(uint64 guid, int32 change) { m_bgRatingChange[guid] = change; }
 
+        void AddExtraUpdateGUID(uint64 guid) { m_extraPositionUpdateGUIDs.insert(guid); };
+        void RemoveExtraUpdateGUID(uint64 guid) { m_extraPositionUpdateGUIDs.erase(guid); };
+        std::set<uint64>* GetExtraUpdateGUIDSet() { return &m_extraPositionUpdateGUIDs; };
+
         void RatedBattlegroundWon(Player *player);
         void RatedBattlegroundLost(Player *player);
         void RatedBattlegroundLostOffline(uint64 guid);
@@ -724,6 +728,8 @@ class Battleground
         // Player lists
         std::vector<uint64> m_ResurrectQueue;               // Player GUID
         std::deque<uint64> m_OfflineQueue;                  // Player GUID
+
+        std::set<uint64> m_extraPositionUpdateGUIDs;       // extra guids for update
 
         // Invited counters are useful for player invitation to BG - do not allow, if BG is started to one faction to have 2 more players than another faction
         // Invited counters will be changed only when removing already invited player from queue, removing player from battleground and inviting player to BG
