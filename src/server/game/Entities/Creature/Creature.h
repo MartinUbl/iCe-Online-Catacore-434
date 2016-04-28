@@ -373,6 +373,8 @@ struct TrainerSpell
     {
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS ; ++i)
             learnedSpell[i] = 0;
+        for (uint8 i = 0; i < 3; i++)
+            reqSpell[i] = 0;
     }
 
     uint32 spell;
@@ -380,6 +382,7 @@ struct TrainerSpell
     uint32 reqSkill;
     uint32 reqSkillValue;
     uint32 reqLevel;
+    uint32 reqSpell[3];
     uint32 learnedSpell[3];
 
     // helpers

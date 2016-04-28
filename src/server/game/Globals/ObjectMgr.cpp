@@ -8874,7 +8874,7 @@ void ObjectMgr::LoadMailLevelRewards()
     sLog->outString(">> Loaded %u level dependent mail rewards,", count);
 }
 
-void ObjectMgr::AddSpellToTrainer( uint32 entry, uint32 spell, uint32 spellCost, uint32 reqSkill, uint32 reqSkillValue, uint32 reqLevel)
+void ObjectMgr::AddSpellToTrainer( uint32 entry, uint32 spell, uint32 spellCost, uint32 reqSkill, uint32 reqSkillValue, uint32 reqLevel, uint32 reqSpell1, uint32 reqSpell2, uint32 reqSpell3)
 {
     if (entry >= TRINITY_TRAINER_START_REF)
         return;
@@ -8919,6 +8919,9 @@ void ObjectMgr::AddSpellToTrainer( uint32 entry, uint32 spell, uint32 spellCost,
     trainerSpell.reqSkill      = reqSkill;
     trainerSpell.reqSkillValue = reqSkillValue;
     trainerSpell.reqLevel      = reqLevel;
+    trainerSpell.reqSpell[0]   = reqSpell1;
+    trainerSpell.reqSpell[1]   = reqSpell2;
+    trainerSpell.reqSpell[2]   = reqSpell3;
 
     if (!trainerSpell.reqLevel)
         trainerSpell.reqLevel = spellinfo->spellLevel;
@@ -8955,7 +8958,7 @@ void ObjectMgr::LoadTrainerSpell()
 
     std::set<uint32> skip_trainers;
 
-    QueryResult result = WorldDatabase.Query("SELECT b.entry, a.spell, a.spellcost, a.reqskill, a.reqskillvalue, a.reqlevel FROM npc_trainer AS a "
+    QueryResult result = WorldDatabase.Query("SELECT b.entry, a.spell, a.spellcost, a.reqskill, a.reqskillvalue, a.reqlevel, a.reqspell1, a.reqspell2, a.reqspell3 FROM npc_trainer AS a "
                                              "INNER JOIN npc_trainer AS b ON a.entry = -(b.spell) "
                                              "UNION SELECT * FROM npc_trainer WHERE spell > 0");
 
@@ -8977,8 +8980,11 @@ void ObjectMgr::LoadTrainerSpell()
         uint32 reqSkill      = fields[3].GetUInt32();
         uint32 reqSkillValue = fields[4].GetUInt32();
         uint32 reqLevel      = fields[5].GetUInt32();
+        uint32 reqSpell1     = fields[6].GetUInt32();
+        uint32 reqSpell2     = fields[7].GetUInt32();
+        uint32 reqSpell3     = fields[8].GetUInt32();
 
-        AddSpellToTrainer(entry, spell, spellCost, reqSkill, reqSkillValue, reqLevel);
+        AddSpellToTrainer(entry, spell, spellCost, reqSkill, reqSkillValue, reqLevel, reqSpell1, reqSpell2, reqSpell3);
 
         count++;
 

@@ -153,7 +153,7 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
     WorldPacket data(SMSG_TRAINER_LIST, 8 + 4 + 4 + trainer_spells->spellList.size() * 38 + strTitle.size() + 1);
     data << guid;
     data << uint32(trainer_spells->trainerType);
-    data << uint32(1);
+    data << uint32(1); // this value is only sent back in TrainerBuySpell opcode
 
     size_t count_pos = data.wpos();
     data << uint32(trainer_spells->spellList.size());
@@ -174,9 +174,8 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         data << uint8(tSpell->reqLevel);
         data << uint32(tSpell->reqSkill);
         data << uint32(tSpell->reqSkillValue);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
+        for (int i = 0; i < 3; i++)
+            data << uint32(tSpell->reqSpell[i]);
         data << uint32(0);
 
         ++count;

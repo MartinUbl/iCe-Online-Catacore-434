@@ -4816,6 +4816,16 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     if (getLevel() < trainer_spell->reqLevel)
         return TRAINER_SPELL_CANT_LEARN;
 
+    // verify required spells to learn this spell
+    for (int i = 0; i < 3; i++)
+    {
+        if (trainer_spell->reqSpell[i] > 0)
+        {
+            if (!HasSpell(trainer_spell->reqSpell[i]))
+                return TRAINER_SPELL_CANT_LEARN;
+        }
+    }
+
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS ; ++i)
     {
         if (!trainer_spell->learnedSpell[i])
@@ -27191,6 +27201,9 @@ void Player::_LoadSkills(PreparedQueryResult result)
 {
     //                                                           0      1      2
     // SetPQuery(PLAYER_LOGIN_QUERY_LOADSKILLS,          "SELECT skill, value, max FROM character_skills WHERE guid = '%u'", GUID_LOPART(m_guid));
+
+    SetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 0, 0);
+    SetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 1, 0);
 
     uint32 count = 0;
     uint8 professionCount = 0;
