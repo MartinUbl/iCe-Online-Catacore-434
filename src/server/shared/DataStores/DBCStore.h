@@ -170,6 +170,10 @@ class DBCStorage
                                         *((uint32*)(&sqlDataTable[offset]))=uint32(0);
                                         offset+=4;
                                         break;
+                                    case FT_LONGINT:
+                                        *((uint64*)(&sqlDataTable[offset])) = uint64(0);
+                                        offset += 8;
+                                        break;
                                     case FT_BYTE:
                                         *((uint8*)(&sqlDataTable[offset]))=uint8(0);
                                         offset+=1;
@@ -194,6 +198,10 @@ class DBCStorage
                                     case FT_INT:
                                         *((uint32*)(&sqlDataTable[offset]))=fields[sqlColumnNumber].GetUInt32();
                                         offset+=4;
+                                        break;
+                                    case FT_LONGINT:
+                                        *((uint64*)(&sqlDataTable[offset])) = fields[sqlColumnNumber].GetUInt64();
+                                        offset += 8;
                                         break;
                                     case FT_BYTE:
                                         *((uint8*)(&sqlDataTable[offset]))=fields[sqlColumnNumber].GetUInt8();

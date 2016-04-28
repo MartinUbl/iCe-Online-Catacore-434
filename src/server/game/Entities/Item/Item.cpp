@@ -1447,7 +1447,7 @@ void Item::SaveRefundDataToDB()
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     trans->PAppend("DELETE FROM item_refund_instance WHERE item_guid = '%u'", GetGUIDLow());
     trans->PAppend("INSERT INTO item_refund_instance (`item_guid`,`player_guid`,`paidMoney`,`paidExtendedCost`)"
-    " VALUES('%u','%u','%u','%u')", GetGUIDLow(), GetRefundRecipient(), GetPaidMoney(), GetPaidExtendedCost());
+    " VALUES('%u','%u','" UI64FMTD "','%u')", GetGUIDLow(), GetRefundRecipient(), GetPaidMoney(), GetPaidExtendedCost());
     CharacterDatabase.CommitTransaction(trans);
 }
 
@@ -1662,7 +1662,7 @@ bool Item::CanTransmogrifyItemWithItem(Item const* transmogrified, Item const* t
 }
 
 // used by mail items, transmog cost, stationeryinfo, etc..
-uint32 Item::GetSellPrice(ItemPrototype const* pProto, bool& normalSellPrice)
+uint64 Item::GetSellPrice(ItemPrototype const* pProto, bool& normalSellPrice)
 {
     normalSellPrice = true;
 
@@ -1780,13 +1780,14 @@ uint32 Item::GetSellPrice(ItemPrototype const* pProto, bool& normalSellPrice)
         }
 
         normalSellPrice = false;
-        return (uint32)(qualityFactor * typeFactor * baseFactor);
+        return (uint64)(qualityFactor * typeFactor * baseFactor);
     }
 }
-uint32 Item::GetTransmogrifyCost() const
+
+uint64 Item::GetTransmogrifyCost() const
 {
     ItemPrototype const* pProto = GetProto();
-    uint32 cost = 0;
+    uint64 cost = 0;
 
     if (pProto->Flags2 & ITEM_FLAGS_EXTRA_HAS_NORMAL_PRICE)
         cost = pProto->SellPrice;

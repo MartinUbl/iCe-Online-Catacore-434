@@ -855,7 +855,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
 
     InitRunes();
 
-    SetUInt32Value(PLAYER_FIELD_COINAGE, sWorld->getIntConfig(CONFIG_START_PLAYER_MONEY));
+    SetUInt64Value(PLAYER_FIELD_COINAGE, sWorld->getIntConfig(CONFIG_START_PLAYER_MONEY));
 	SetCurrency(CURRENCY_TYPE_HONOR_POINTS, sWorld->getIntConfig(CONFIG_START_HONOR_POINTS));
 	SetCurrency(CURRENCY_TYPE_JUSTICE_POINTS, sWorld->getIntConfig(CONFIG_START_JUSTICE_POINTS));
 
@@ -4532,7 +4532,7 @@ void Player::_SaveSpellCooldowns(SQLTransaction& trans)
         trans->Append(ss.str().c_str());
 }
 
-uint32 Player::ResetTalentsCost() const
+uint64 Player::ResetTalentsCost() const
 {
     // The first time reset costs 1 gold
     if (m_resetTalentsCost < 1*GOLD)
@@ -4549,14 +4549,14 @@ uint32 Player::ResetTalentsCost() const
         if (months > 0)
         {
             // This cost will be reduced by a rate of 5 gold per month
-            int32 new_cost = int32(m_resetTalentsCost - 5*GOLD*months);
+            int64 new_cost = int64(m_resetTalentsCost - 5*GOLD*months);
             // to a minimum of 10 gold.
             return (new_cost < 10*GOLD ? 10*GOLD : new_cost);
         }
         else
         {
             // After that it increases in increments of 5 gold
-            int32 new_cost = m_resetTalentsCost + 5*GOLD;
+            int64 new_cost = m_resetTalentsCost + 5*GOLD;
             // until it hits a cap of 50 gold.
             if (new_cost > 50*GOLD)
                 new_cost = 50*GOLD;
@@ -4581,7 +4581,7 @@ bool Player::ResetTalents(bool no_cost)
         return false;
     }
 
-    uint32 cost = 0;
+    uint64 cost = 0;
 
     if (!no_cost && !sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST))
     {
@@ -4660,7 +4660,7 @@ bool Player::ResetTalents(bool no_cost)
 
     if (!no_cost)
     {
-        ModifyMoney(-(int32)cost);
+        ModifyMoney(-(int64)cost);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TALENTS, cost);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_NUMBER_OF_TALENT_RESETS, 1);
 
@@ -4935,7 +4935,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
                     uint32 sender        = fields[3].GetUInt32();
                     std::string subject  = fields[4].GetString();
                     std::string body     = fields[5].GetString();
-                    uint32 money         = fields[6].GetUInt32();
+                    uint64 money         = fields[6].GetUInt64();
                     bool has_items       = fields[7].GetBool();
 
                     // We can return mail now
@@ -5553,9 +5553,9 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
             }
 
             uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class,ditemProto->SubClass)];
-            uint32 costs = uint32(LostDurability*dmultiplier*double(dQualitymodEntry->quality_mod));
+            uint64 costs = uint64(LostDurability*dmultiplier*double(dQualitymodEntry->quality_mod));
 
-            costs = uint32(costs * discountMod * sWorld->getRate(RATE_REPAIRCOST));
+            costs = uint64(costs * discountMod * sWorld->getRate(RATE_REPAIRCOST));
 
             if (costs == 0)                                   //fix for ITEM_QUALITY_ARTIFACT
                 costs = 1;
@@ -5583,7 +5583,7 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
                 return TotalCost;
             }
             else
-                ModifyMoney(-int32(costs));
+                ModifyMoney(-int64(costs));
         }
     }
 
@@ -9431,7 +9431,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     loot->FillLoot(1, LootTemplates_Creature, this, true);
             // It may need a better formula
             // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
-            bones->loot.gold = uint32(urand(50, 150) * 0.016f * pow(float(pLevel)/5.76f, 2.5f) * sWorld->getRate(RATE_DROP_MONEY));
+            bones->loot.gold = uint64(urand(50, 150) * 0.016f * pow(float(pLevel)/5.76f, 2.5f) * sWorld->getRate(RATE_DROP_MONEY));
         }
 
         if (bones->lootRecipient != this)
@@ -9469,9 +9469,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     loot->FillLoot(lootid, LootTemplates_Pickpocketing, this, true);
 
                 // Generate extra money for pick pocket loot
-                const uint32 a = urand(0, creature->getLevel()/2);
-                const uint32 b = urand(0, getLevel()/2);
-                loot->gold = uint32(10 * (a + b) * sWorld->getRate(RATE_DROP_MONEY));
+                const uint64 a = urand(0, creature->getLevel()/2);
+                const uint64 b = urand(0, getLevel()/2);
+                loot->gold = uint64(10 * (a + b) * sWorld->getRate(RATE_DROP_MONEY));
                 permission = OWNER_PERMISSION;
             }
         }
@@ -15537,7 +15537,8 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
         case GOSSIP_OPTION_LEARNDUALSPEC:
             if (GetSpecsCount() == 1 && getLevel() >= sWorld->getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL))
             {
-                if (!HasEnoughMoney(100000))
+                int64 cost = 100000;
+                if (!HasEnoughMoney(cost))
                 {
                     SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
                     PlayerTalkClass->CloseGossip();
@@ -15545,7 +15546,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                 }
                 else
                 {
-                    ModifyMoney(-100000);
+                    ModifyMoney(-cost);
 
                     // Cast spells that teach dual spec
                     // Both are also ImplicitTarget self and must be cast by player
@@ -16264,11 +16265,11 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
     for (Unit::AuraEffectList::const_iterator i = ModXPPctAuras.begin(); i != ModXPPctAuras.end(); ++i)
         XP = uint32(XP*(1.0f + (*i)->GetAmount() / 100.0f));
 
-    int32 moneyRew = 0;
+    int64 moneyRew = 0;
     if (getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
         GiveXP(XP, NULL);
     else
-        moneyRew = int32(pQuest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY));
+        moneyRew = int64(pQuest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY));
 
     // If the player has a guild, it should gain 1/4 of his experience.
     // Despite of him being at max level or not.
@@ -16305,7 +16306,7 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
         ModifyMoney(moneyRew);
 
         if (moneyRew > 0)
-            GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD, uint32(moneyRew));
+            GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD, uint64(moneyRew));
     }
 
     // honor reward
@@ -17413,7 +17414,7 @@ uint32 Player::GetQuestObjectiveProgress(uint32 quest_id, uint8 objective_index)
     return mQuestStatus[quest_id].m_creatureOrGOcount[objective_index];
 }
 
-void Player::MoneyChanged(uint32 count)
+void Player::MoneyChanged(uint64 count)
 {
     for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
     {
@@ -17428,7 +17429,7 @@ void Player::MoneyChanged(uint32 count)
 
             if (q_status.m_status == QUEST_STATUS_INCOMPLETE)
             {
-                if (int32(count) >= -qInfo->GetRewOrReqMoney())
+                if (int64(count) >= -qInfo->GetRewOrReqMoney())
                 {
                     if (CanCompleteQuest(questid))
                         CompleteQuest(questid);
@@ -17436,7 +17437,7 @@ void Player::MoneyChanged(uint32 count)
             }
             else if (q_status.m_status == QUEST_STATUS_COMPLETE)
             {
-                if (int32(count) < -qInfo->GetRewOrReqMoney())
+                if (int64(count) < -qInfo->GetRewOrReqMoney())
                     IncompleteQuest(questid);
             }
         }
@@ -17575,7 +17576,7 @@ void Player::SendQuestReward(Quest const *pQuest, uint32 XP, Object * questGiver
     sGameEventMgr->HandleQuestComplete(questid);
 
     uint32 xp;
-    uint32 moneyReward;
+    uint64 moneyReward;
 
     if (getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
     {
@@ -17585,7 +17586,7 @@ void Player::SendQuestReward(Quest const *pQuest, uint32 XP, Object * questGiver
     else // At max level, increase gold reward
     {
         xp = 0;
-        moneyReward = uint32(pQuest->GetRewOrReqMoney() + int32(pQuest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY)));
+        moneyReward = uint64(pQuest->GetRewOrReqMoney() + int64(pQuest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY)));
     }
 
     WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, (4+4+4+4+4));
@@ -18016,7 +18017,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     // load achievements before anything else to prevent multiple gains for the same achievement/criteria on every loading (as loading does call UpdateAchievementCriteria)
     m_achievementMgr.LoadFromDB(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADACHIEVEMENTS), holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADCRITERIAPROGRESS));
 
-    uint32 money = fields[8].GetUInt32();
+    uint64 money = fields[8].GetUInt64();
     if (money > MAX_MONEY_AMOUNT)
         money = MAX_MONEY_AMOUNT;
     SetMoney(money);
@@ -18925,7 +18926,7 @@ void Player::_LoadInventory(PreparedQueryResult result, uint32 timediff)
                     {
                         Field* fields2 = result2->Fetch();
                         item->SetRefundRecipient(fields2[0].GetUInt32());
-                        item->SetPaidMoney(fields2[1].GetUInt32());
+                        item->SetPaidMoney(fields2[1].GetUInt64());
                         item->SetPaidExtendedCost(fields2[2].GetUInt32());
                         AddRefundReference(item->GetGUIDLow());
                     }
@@ -19184,8 +19185,8 @@ void Player::_LoadMail()
             bool has_items = fields[6].GetBool();
             m->expire_time = (time_t)fields[7].GetUInt64();
             m->deliver_time = (time_t)fields[8].GetUInt64();
-            m->money = fields[9].GetUInt32();
-            m->COD = fields[10].GetUInt32();
+            m->money = fields[9].GetUInt64();
+            m->COD = fields[10].GetUInt64();
             m->checked = fields[11].GetUInt32();
             m->stationery = fields[12].GetUInt8();
             m->mailTemplateId = fields[13].GetInt16();
@@ -20769,7 +20770,7 @@ void Player::SaveInventoryAndGoldToDB(SQLTransaction& trans)
 
 void Player::SaveGoldToDB(SQLTransaction& trans)
 {
-    trans->PAppend("UPDATE characters SET money = '%u' WHERE guid = '%u'", GetMoney(), GetGUIDLow());
+    trans->PAppend("UPDATE characters SET money = '" UI64FMTD "' WHERE guid = '%u'", GetMoney(), GetGUIDLow());
 }
 
 void Player::_SaveActions(SQLTransaction& trans)
@@ -21046,7 +21047,7 @@ void Player::_SaveMail(SQLTransaction& trans)
         Mail *m = (*itr);
         if (m->state == MAIL_STATE_CHANGED)
         {
-            trans->PAppend("UPDATE mail SET has_items = '%u',expire_time = '" UI64FMTD "', deliver_time = '" UI64FMTD "',money = '%u',cod = '%u',checked = '%u' WHERE id = '%u'",
+            trans->PAppend("UPDATE mail SET has_items = '%u',expire_time = '" UI64FMTD "', deliver_time = '" UI64FMTD "',money = '" UI64FMTD "',cod = '" UI64FMTD "',checked = '%u' WHERE id = '%u'",
                 m->HasItems() ? 1 : 0, (uint64)m->expire_time, (uint64)m->deliver_time, m->money, m->COD, m->checked, m->messageID);
             if (m->removedItems.size())
             {
@@ -22579,7 +22580,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     // fill destinations path tail
     uint32 sourcepath = 0;
-    uint32 totalcost = 0;
+    uint64 totalcost = 0;
 
     uint32 prevnode = sourcenode;
     uint32 lastnode = 0;
@@ -22627,10 +22628,10 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
         return false;
     }
 
-    uint32 money = GetMoney();
+    uint64 money = GetMoney();
 
     if (npc)
-        totalcost = (uint32)ceil(totalcost*GetReputationPriceDiscount(npc));
+        totalcost = (uint64)ceil(totalcost*GetReputationPriceDiscount(npc));
 
     if (money < totalcost)
     {
@@ -22642,7 +22643,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     }
 
     //Checks and preparations done, DO FLIGHT
-    ModifyMoney(-(int32)totalcost);
+    ModifyMoney(-(int64)totalcost);
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TRAVELLING, totalcost);
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_FLIGHT_PATHS_TAKEN, 1);
 
@@ -22870,7 +22871,7 @@ void Player::ViolateSpectatorWaitTime()
         sBattlegroundMgr->RemoveArenaSpectator(this);
 }
 
-inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemPrototype const *pProto, Creature *pVendor, VendorItem const* crItem, bool bStore)
+inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int64 price, ItemPrototype const *pProto, Creature *pVendor, VendorItem const* crItem, bool bStore)
 {
     ItemPosCountVec vDest;
     uint16 uiDest;
@@ -23003,7 +23004,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         return false;
     }
 
-    uint32 price = 0;
+    uint64 price = 0;
 
     if ((crItem->IsGoldRequired(pProto) && pProto->BuyPrice > 0) || Guild::IsListedAsGuildReward(pProto->ItemId))
     {
@@ -23037,7 +23038,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         else
             price = pProto->BuyPrice;
 
-        uint32 maxCount = MAX_MONEY_AMOUNT / (price > 0 ? price : 1);
+        uint64 maxCount = MAX_MONEY_AMOUNT / (price > 0 ? price : 1);
         // this check will avoid buying more items of the same kind, that will exceed limit and cause gold overflow
         if ((uint32)count > maxCount)
         {
@@ -24426,7 +24427,7 @@ bool Player::HasQueuedSpell()
     return m_queuedSpell;
 }
 
-void Player::ModifyMoney(int32 d)
+void Player::ModifyMoney(int64 d)
 {
     sScriptMgr->OnPlayerMoneyChanged(this, d);
 
@@ -24435,7 +24436,7 @@ void Player::ModifyMoney(int32 d)
     else
     {
         uint64 newAmount = 0;
-        if (GetMoney() < uint32(MAX_MONEY_AMOUNT - d))
+        if (GetMoney() < uint64(MAX_MONEY_AMOUNT - d))
             newAmount = GetMoney() + d;
         else
         {
@@ -24444,7 +24445,7 @@ void Player::ModifyMoney(int32 d)
             if (d)
                 SendEquipError(EQUIP_ERR_TOO_MUCH_GOLD, NULL, NULL);
         }
-        SetMoney (newAmount);
+        SetMoney(newAmount);
     }
 }
 
@@ -28965,7 +28966,7 @@ void Player::RefundItem(Item *item)
     }
 
     // Grant back money
-    if (uint32 moneyRefund = item->GetPaidMoney())
+    if (uint64 moneyRefund = item->GetPaidMoney())
         ModifyMoney(moneyRefund);
 
 }

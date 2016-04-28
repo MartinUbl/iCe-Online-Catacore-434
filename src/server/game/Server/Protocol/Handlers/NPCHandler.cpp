@@ -232,7 +232,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket & recv_data)
     }
 
     // apply reputation discount
-    uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
+    uint64 nSpellCost = uint64(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
 
     // check money requirement
     if (!_player->HasEnoughMoney(nSpellCost)) {
@@ -243,7 +243,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket & recv_data)
 
     if(result == ERR_TRAINER_OK)
     {
-        _player->ModifyMoney(-int32(nSpellCost));
+        _player->ModifyMoney(-int64(nSpellCost));
 
         unit->SendPlaySpellVisualKit(179, 0, 0);       // 53 SpellCastDirected
         _player->SendPlaySpellVisualKit(362, 1, 0);    // 113 EmoteSalute

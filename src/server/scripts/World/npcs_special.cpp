@@ -1325,7 +1325,8 @@ public:
             case GOSSIP_OPTION_LEARNDUALSPEC:
                 if (pPlayer->GetSpecsCount() == 1 && !(pPlayer->getLevel() < sWorld->getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL)))
                 {
-                    if (!pPlayer->HasEnoughMoney(100000))
+                    int64 cost = 1000000;
+                    if (!pPlayer->HasEnoughMoney(cost))
                     {
                         pPlayer->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
                         pPlayer->PlayerTalkClass->CloseGossip();
@@ -1333,7 +1334,7 @@ public:
                     }
                     else
                     {
-                        pPlayer->ModifyMoney(-100000);
+                        pPlayer->ModifyMoney(-cost);
 
                         // Cast spells that teach dual spec
                         // Both are also ImplicitTarget self and must be cast by player
@@ -3009,7 +3010,8 @@ public:
         }
         if (doSwitch)
         {
-            if (!pPlayer->HasEnoughMoney(EXP_COST))
+            int64 cost = EXP_COST;
+            if (!pPlayer->HasEnoughMoney(cost))
                 pPlayer->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
             // allow only if the player is not in the battleground queue
             // TODO: remove the player from the queues instead of this check
@@ -3017,12 +3019,12 @@ public:
             {
                 if (noXPGain)
                 {
-                    pPlayer->ModifyMoney(-EXP_COST);
+                    pPlayer->ModifyMoney(-cost);
                     pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
                 }
                 else if (!noXPGain)
                 {
-                    pPlayer->ModifyMoney(-EXP_COST);
+                    pPlayer->ModifyMoney(-cost);
                     pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
                 }
             }
@@ -4488,7 +4490,8 @@ class npc_gender_changer : public CreatureScript
         {
             if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
             {
-                if (pPlayer->HasEnoughMoney(3000*GOLD))
+                int64 cost = 3000*GOLD;
+                if (pPlayer->HasEnoughMoney(cost))
                 {
                     PlayerInfo const* info = sObjectMgr->GetPlayerInfo(pPlayer->getRace(), pPlayer->getClass());
                     if (info)
@@ -4509,7 +4512,7 @@ class npc_gender_changer : public CreatureScript
                         pPlayer->SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);
                         pPlayer->SetByteValue(PLAYER_BYTES_3, 0, gender);
                         pPlayer->InitDisplayIds();
-                        pPlayer->ModifyMoney(-3000*GOLD);
+                        pPlayer->ModifyMoney(-cost);
                         pCreature->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
                     }
                  }

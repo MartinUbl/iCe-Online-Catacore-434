@@ -315,9 +315,9 @@ class npc_teleporter_fozlebub: public CreatureScript
             // Teleport
             if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
             {
-                if (pPlayer->HasEnoughMoney(FOZLEBUB_TELEPORT_COST))
+                if (pPlayer->HasEnoughMoney((uint64)FOZLEBUB_TELEPORT_COST))
                 {
-                    pPlayer->ModifyMoney(-FOZLEBUB_TELEPORT_COST);
+                    pPlayer->ModifyMoney(-int64(FOZLEBUB_TELEPORT_COST));
                     pCreature->CastSpell(pPlayer, SPELL_CANNONBALL_TELEPORT_BACK, true);
                 }
                 else if (pPlayer->GetSession())

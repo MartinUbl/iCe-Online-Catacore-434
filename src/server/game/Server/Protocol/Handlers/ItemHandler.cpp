@@ -246,7 +246,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket & recv_data)
     // Read data
 
     uint32 count = recv_data.ReadBits(22);
-    int32 cost = 0;
+    int64 cost = 0;
 
     if (count >= EQUIPMENT_SLOT_END)
     {
@@ -394,7 +394,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket & recv_data)
                     return;
                 }
                 else
-                    pPlayer->ModifyMoney(-int32(cost));
+                    pPlayer->ModifyMoney(-int64(cost));
             }
 
             itemTransmogrified->SetEnchantment(TRANSMOGRIFY_ENCHANTMENT_SLOT, newEntries[i], 0, 0);
@@ -899,7 +899,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
     Item *pItem = _player->GetItemFromBuyBackSlot(slot);
     if (pItem)
     {
-        uint32 price = _player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START);
+        uint64 price = _player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START);
         if (!_player->HasEnoughMoney(price))
         {
             _player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
@@ -910,7 +910,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
         uint8 msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
         if (msg == EQUIP_ERR_OK)
         {
-            _player->ModifyMoney(-(int32)price);
+            _player->ModifyMoney(-(int64)price);
             _player->RemoveItemFromBuyBackSlot(slot, false);
             _player->ItemAddedQuestCheck(pItem->GetEntry(), pItem->GetCount());
             _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_RECEIVE_EPIC_ITEM, pItem->GetEntry(), pItem->GetCount());
@@ -918,7 +918,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
 
             if (pItem->GetProto()->Quality >= ITEM_QUALITY_EPIC)
             {
-                sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) count:(%u) moneylost:(%u)",
+                sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) count:(%u) moneylost:(" UI64FMTD ")",
                              _player->GetSession()->GetRemoteAddress().c_str(),
                              _player->GetSession()->GetAccountId(),
                              _player->GetName(),
@@ -1291,7 +1291,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    uint32 price = slotEntry->price;
+    uint64 price = slotEntry->price;
 
     if (!_player->HasEnoughMoney(price))
     {
@@ -1301,7 +1301,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
     }
 
     _player->SetBankBagSlotCount(slot);
-    _player->ModifyMoney(-int32(price));
+    _player->ModifyMoney(-int64(price));
 
      data << uint32(ERR_BANKSLOT_OK);
      SendPacket(&data);

@@ -93,19 +93,20 @@ class npc_gh: public CreatureScript
                     {
                         pPlayer->CLOSE_GOSSIP_MENU();
                         int32 cislo = atoi(code);
+                        int64 cost = 500 * GOLD;
                         // Process
-                        if (pPlayer->HasEnoughMoney(500*GOLD)) // Check, if player has 500 gold
+                        if (pPlayer->HasEnoughMoney(cost)) // Check, if player has 500 gold
                         {
                             if (cislo == -1)
                             {
                                 ScriptDatabase.PExecute("UPDATE gh_system SET rank = %i WHERE guildid = %u", cislo, pPlayer->GetGuildId());
-                                pPlayer->ModifyMoney(-500*GOLD);
+                                pPlayer->ModifyMoney(-cost);
                                 ChatHandler(pPlayer).PSendSysMessage("Modified 500g money.");
                             }
                             else if (cislo > 0)
                             {
                                 ScriptDatabase.PExecute("UPDATE gh_system SET rank = %i WHERE guildid = %u", cislo-1, pPlayer->GetGuildId());
-                                pPlayer->ModifyMoney(-500*GOLD);
+                                pPlayer->ModifyMoney(-cost);
                                 ChatHandler(pPlayer).PSendSysMessage("Modified 500g money.");
                             }
                             else
@@ -119,11 +120,12 @@ class npc_gh: public CreatureScript
                     {
                         pPlayer->CLOSE_GOSSIP_MENU();
                         // Process
-                        if (pPlayer->HasEnoughMoney(1000*GOLD)) // Check, if player has 1K gold
+                        int64 cost = 1000 * GOLD;
+                        if (pPlayer->HasEnoughMoney(cost)) // Check, if player has 1K gold
                         {
                             std::string old_pw = password.c_str();
                             ScriptDatabase.PExecute("UPDATE gh_system SET password = '%s' WHERE guildid = %u", code, pPlayer->GetGuildId());
-                            pPlayer->ModifyMoney(-1000*GOLD);
+                            pPlayer->ModifyMoney(-cost);
                             ChatHandler(pPlayer).PSendSysMessage("Modified 1000g money.");
                             pPlayer->GetSession()->SendNotification("Okay, password was changed from %s to %s", old_pw.c_str(), code);
                         }

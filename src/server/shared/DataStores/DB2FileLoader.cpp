@@ -199,6 +199,9 @@ uint32 DB2FileLoader::GetFormatRecordSize(const char * format, int32* index_pos)
             case FT_INT:
                 recordsize += 4;
                 break;
+            case FT_LONGINT: // not seen in any DBC file
+                recordsize += 8;
+                break;
             case FT_STRING:
                 recordsize += sizeof(char*);
                 break;
@@ -290,6 +293,10 @@ char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**
                     *((uint32*)(&dataTable[offset])) = getRecord(y).getUInt(x);
                     offset += 4;
                     break;
+                case FT_LONGINT:
+                    *((uint64*)(&dataTable[offset])) = getRecord(y).getULong(x);
+                    offset += 8;
+                    break;
                 case FT_BYTE:
                     *((uint8*)(&dataTable[offset])) = getRecord(y).getUInt8(x);
                     offset += 1;
@@ -340,6 +347,9 @@ char* DB2FileLoader::AutoProduceStringsArrayHolders(const char* format, char* da
                 case FT_INT:
                     offset += 4;
                     break;
+                case FT_LONGINT:
+                    offset += 8;
+                    break;
                 case FT_BYTE:
                     offset += 1;
                     break;
@@ -384,6 +394,9 @@ char* DB2FileLoader::AutoProduceStrings(const char* format, char* dataTable)
             case FT_IND:
             case FT_INT:
                 offset += 4;
+                break;
+            case FT_LONGINT:
+                offset += 8;
                 break;
             case FT_BYTE:
                 offset += 1;

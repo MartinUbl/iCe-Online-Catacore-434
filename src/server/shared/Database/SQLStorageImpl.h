@@ -81,6 +81,10 @@ void SQLStorageLoaderBase<T>::storeValue(V value, SQLStorage& store, char* p, in
             subclass->convert(x, value, *((uint32*)(&p[offset])) );
             offset+=sizeof(uint32);
             break;
+        case FT_LONGINT:
+            subclass->convert(x, value, *((uint64*)(&p[offset])));
+            offset += sizeof(uint64);
+            break;
         case FT_FLOAT:
             subclass->convert(x, value, *((float*)(&p[offset])) );
             offset+=sizeof(float);
@@ -109,6 +113,10 @@ void SQLStorageLoaderBase<T>::storeValue(char* value, SQLStorage& store, char* p
         case FT_INT:
             subclass->convert_from_str(x, value, *((uint32*)(&p[offset])) );
             offset+=sizeof(uint32);
+            break;
+        case FT_LONGINT:
+            subclass->convert_from_str(x, value, *((uint64*)(&p[offset])));
+            offset += sizeof(uint64);
             break;
         case FT_FLOAT:
             subclass->convert_from_str(x, value, *((float*)(&p[offset])) );
@@ -167,14 +175,17 @@ void SQLStorageLoaderBase<T>::Load(SQLStorage& store)
     uint32 sc=0;
     uint32 bo=0;
     uint32 bb=0;
+    uint32 lo=0;
     for (uint32 x=0; x< store.iNumFields; x++)
-        if(store.dst_format[x]==FT_STRING)
+        if(store.dst_format[x] == FT_STRING)
             ++sc;
-        else if (store.dst_format[x]==FT_LOGIC)
+        else if (store.dst_format[x] == FT_LOGIC)
             ++bo;
-        else if (store.dst_format[x]==FT_BYTE)
+        else if (store.dst_format[x] == FT_BYTE)
             ++bb;
-    recordsize=(store.iNumFields-sc-bo-bb)*4+sc*sizeof(char*)+bo*sizeof(bool)+bb*sizeof(char);
+        else if (store.dst_format[x] == FT_LONGINT)
+            ++lo;
+    recordsize=(store.iNumFields-sc-bo-bb-lo)*4+sc*sizeof(char*)+bo*sizeof(bool)+bb*sizeof(char)+lo*sizeof(uint64);
 
     char** newIndex=new char*[maxi];
     memset(newIndex,0,maxi*sizeof(char*));
@@ -197,6 +208,8 @@ void SQLStorageLoaderBase<T>::Load(SQLStorage& store)
                     storeValue((char)fields[x].GetUInt8(), store, p, x, offset); break;
                 case FT_INT:
                     storeValue((uint32)fields[x].GetUInt32(), store, p, x, offset); break;
+                case FT_LONGINT:
+                    storeValue((uint64)fields[x].GetUInt64(), store, p, x, offset); break;
                 case FT_FLOAT:
                     storeValue((float)fields[x].GetFloat(), store, p, x, offset); break;
                 case FT_STRING:

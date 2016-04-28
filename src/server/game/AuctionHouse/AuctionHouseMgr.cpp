@@ -72,14 +72,14 @@ AuctionHouseObject * AuctionHouseMgr::GetAuctionsMap(uint32 factionTemplateId)
 
 uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, ItemPrototype const *pItem, uint32 count)
 {
-    uint32 MSV = pItem->SellPrice;
+    uint64 MSV = pItem->SellPrice;
 
     if (MSV <= 0)
         return AH_MINIMUM_DEPOSIT;
 
     uint32 timeHr = (((time / 60) / 60) /12);
     float multiplier = (float)(entry->depositPercent * 3) / 100.0f;
-    uint32 deposit = ((uint32)((float)MSV * multiplier * (float)count)/3) * 3 * timeHr;
+    uint64 deposit = ((uint64)((float)MSV * multiplier * (float)count)/3) * 3 * timeHr;
 
     sLog->outDebug("MSV:        %u", MSV);
     sLog->outDebug("Items:      %u", count);
@@ -416,12 +416,12 @@ void AuctionHouseMgr::LoadAuctions()
         aItem->item_guidlow = fields[2].GetUInt32();
         aItem->itemEntry = fields[3].GetUInt32();
         aItem->owner = fields[4].GetUInt32();
-        aItem->buyout = fields[5].GetUInt32();
+        aItem->buyout = fields[5].GetUInt64();
         aItem->expire_time = fields[6].GetUInt32();
         aItem->bidder = fields[7].GetUInt32();
-        aItem->bid = fields[8].GetUInt32();
-        aItem->startbid = fields[9].GetUInt32();
-        aItem->deposit = fields[10].GetUInt32();
+        aItem->bid = fields[8].GetUInt64();
+        aItem->startbid = fields[9].GetUInt64();
+        aItem->deposit = fields[10].GetUInt64();
 
         aItem = new AuctionEntry();
         if (!aItem->LoadFromDB(fields))
@@ -539,9 +539,9 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket & data) const
     return true;
 }
 
-uint32 AuctionEntry::GetAuctionCut() const
+uint64 AuctionEntry::GetAuctionCut() const
 {
-    int32 cut = int32(((double)auctionHouseEntry->cutPercent / 100.0f) * (double)sWorld->getRate(RATE_AUCTION_CUT)) * bid;
+    int64 cut = int64(((double)auctionHouseEntry->cutPercent / 100.0f) * (double)sWorld->getRate(RATE_AUCTION_CUT)) * bid;
     if (cut > 0)
         return cut;
     else
@@ -571,12 +571,12 @@ void AuctionEntry::SaveToDB(SQLTransaction& trans) const
     stmt->setUInt32(1, auctioneer);
     stmt->setUInt32(2, item_guidlow);
     stmt->setUInt64(3, owner);
-    stmt->setInt32 (4, int32(buyout));
+    stmt->setInt64 (4, int64(buyout));
     stmt->setUInt64(5, uint64(expire_time));
     stmt->setUInt64(6, bidder);
-    stmt->setInt32 (7, int32(bid));
-    stmt->setInt32 (8, int32(startbid));
-    stmt->setInt32 (9, int32(deposit));
+    stmt->setInt64 (7, int64(bid));
+    stmt->setInt64 (8, int64(startbid));
+    stmt->setInt64 (9, int64(deposit));
     trans->Append(stmt);
 }
 
@@ -587,12 +587,12 @@ bool AuctionEntry::LoadFromDB(Field* fields)
     item_guidlow = fields[2].GetUInt32();
     itemEntry = fields[3].GetUInt32();
     owner = fields[4].GetUInt32();
-    buyout = fields[5].GetUInt32();
+    buyout = fields[5].GetUInt64();
     expire_time = fields[6].GetUInt32();
     bidder = fields[7].GetUInt32();
-    bid = fields[8].GetUInt32();
-    startbid = fields[9].GetUInt32();
-    deposit = fields[10].GetUInt32();
+    bid = fields[8].GetUInt64();
+    startbid = fields[9].GetUInt64();
+    deposit = fields[10].GetUInt64();
 
     CreatureData const* auctioneerData = sObjectMgr->GetCreatureData(auctioneer);
     if (!auctioneerData && auctioneer != 258134)

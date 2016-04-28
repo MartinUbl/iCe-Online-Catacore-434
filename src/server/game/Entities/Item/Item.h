@@ -346,10 +346,10 @@ class Item : public Object
         // Item Refund system
         void SetNotRefundable(Player *owner, bool changestate = true);
         void SetRefundRecipient(uint32 pGuidLow) { m_refundRecipient = pGuidLow; }
-        void SetPaidMoney(uint32 money) { m_paidMoney = money; }
+        void SetPaidMoney(uint64 money) { m_paidMoney = money; }
         void SetPaidExtendedCost(uint32 iece) { m_paidExtendedCost = iece; }
         uint32 GetRefundRecipient() { return m_refundRecipient; }
-        uint32 GetPaidMoney() { return m_paidMoney; }
+        uint64 GetPaidMoney() { return m_paidMoney; }
         uint32 GetPaidExtendedCost() { return m_paidExtendedCost; }
 
         void UpdatePlayedTime(Player *owner);
@@ -370,7 +370,7 @@ class Item : public Object
         bool CanBeTransmogrified() const;
         bool CanTransmogrify() const;
         static bool CanTransmogrifyItemWithItem(Item const* transmogrified, Item const* transmogrifier);
-        uint32 GetTransmogrifyCost() const;
+        uint64 GetTransmogrifyCost() const;
 
         uint32 GetVisibleEntry() const
         {
@@ -378,7 +378,7 @@ class Item : public Object
                 return transmogrification;
             return GetEntry();
         }
-        static uint32 GetSellPrice(ItemPrototype const* pProto, bool& success);
+        static uint64 GetSellPrice(ItemPrototype const* pProto, bool& success);
 
     private:
         std::string m_text;
@@ -390,7 +390,7 @@ class Item : public Object
         uint32 m_playedTime;                                // played time the item does exist
         time_t m_lastPlayedTimeUpdate;
         uint32 m_refundRecipient;
-        uint32 m_paidMoney;
+        uint64 m_paidMoney;
         uint32 m_paidExtendedCost;
         uint32 m_reforgeId;
         AllowedLooterSet allowedGUIDs;

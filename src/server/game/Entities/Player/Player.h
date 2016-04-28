@@ -931,7 +931,8 @@ enum PlayerDelayedOperations
 
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
-#define MAX_MONEY_AMOUNT                       (0x7FFFFFFF-1)
+#define MAX_MONEY_AMOUNT                       9999999999 // 999'999g 99s 99c
+// OLD_MAX_MONEY_AMOUNT                        2147483647
 
 struct InstancePlayerBind
 {
@@ -1514,7 +1515,7 @@ class Player : public Unit, public GridObject<Player>
         void SendNewItem(Item *item, uint32 count, bool received, bool created, bool broadcast = false);
         bool BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot);
         bool BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uint32 currency, uint32 count);
-        bool _StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemPrototype const *pProto, Creature *pVendor, VendorItem const* crItem, bool bStore);
+        bool _StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int64 price, ItemPrototype const *pProto, Creature *pVendor, VendorItem const* crItem, bool bStore);
         void CheckArmorSpecialization();
 
         float GetReputationPriceDiscount(Creature const* pCreature) const;
@@ -1659,7 +1660,7 @@ class Player : public Unit, public GridObject<Player>
         void TalkedToCreature(uint32 entry, uint64 guid);
         void AddQuestObjectiveProgress(uint32 quest_id, uint8 objective_index, uint16 addvalue);
         uint32 GetQuestObjectiveProgress(uint32 quest_id, uint8 objective_index);
-        void MoneyChanged(uint32 value);
+        void MoneyChanged(uint64 value);
         void ReputationChanged(FactionEntry const* factionEntry);
         void ReputationChanged2(FactionEntry const* factionEntry);
         bool HasQuestForItem(uint32 itemid) const;
@@ -1748,19 +1749,19 @@ class Player : public Unit, public GridObject<Player>
         void setRegenTimerCount(uint32 time) {m_regenTimerCount = time;}
         void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
 
-        uint32 GetMoney() const { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
-        void ModifyMoney(int32 d);
-        bool HasEnoughMoney(uint32 amount) const { return (GetMoney() >= amount); }
-        bool HasEnoughMoney(int32 amount) const
+        uint64 GetMoney() const { return GetUInt64Value (PLAYER_FIELD_COINAGE); }
+        void ModifyMoney(int64 d);
+        bool HasEnoughMoney(uint64 amount) const { return (GetMoney() >= amount); }
+        bool HasEnoughMoney(int64 amount) const
         {
             if (amount > 0)
-                return (GetMoney() >= uint32(amount));
+                return (GetMoney() >= uint64(amount));
             return true;
         }
 
-        void SetMoney(uint32 value)
+        void SetMoney(uint64 value)
         {
-            SetUInt32Value (PLAYER_FIELD_COINAGE, value);
+            SetUInt64Value (PLAYER_FIELD_COINAGE, value);
             MoneyChanged(value);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_GOLD_VALUE_OWNED);
         }
@@ -1853,7 +1854,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetFreeTalentPoints() const { return m_freeTalentPoints; }
         void SetFreeTalentPoints(uint32 points) { m_freeTalentPoints = points; }
         bool ResetTalents(bool no_cost = false);
-        uint32 ResetTalentsCost() const;
+        uint64 ResetTalentsCost() const;
         void InitTalentForLevel();
         void BuildPlayerTalentsInfoData(WorldPacket *data);
         void BuildPetTalentsInfoData(WorldPacket *data);
@@ -3157,7 +3158,7 @@ class Player : public Unit, public GridObject<Player>
         float m_rest_bonus;
         RestType rest_type;
         ////////////////////Rest System/////////////////////
-        uint32 m_resetTalentsCost;
+        uint64 m_resetTalentsCost;
         time_t m_resetTalentsTime;
         uint32 m_usedTalentCount;
         uint32 m_questRewardTalentCount;

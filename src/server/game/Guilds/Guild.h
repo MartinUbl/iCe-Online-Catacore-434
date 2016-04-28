@@ -558,11 +558,11 @@ private:
             return IsMoneyEvent(m_eventType);
         }
 
-        BankEventLogEntry(uint32 guildId, uint32 guid, GuildBankEventLogTypes eventType, uint8 tabId, uint32 playerGuid, uint32 itemOrMoney, uint16 itemStackCount, uint8 destTabId) : 
+        BankEventLogEntry(uint32 guildId, uint32 guid, GuildBankEventLogTypes eventType, uint8 tabId, uint32 playerGuid, uint64 itemOrMoney, uint16 itemStackCount, uint8 destTabId) : 
             LogEntry(guildId, guid), m_eventType(eventType), m_bankTabId(tabId), m_playerGuid(playerGuid), 
             m_itemOrMoney(itemOrMoney), m_itemStackCount(itemStackCount), m_destTabId(destTabId) { }
 
-        BankEventLogEntry(uint32 guildId, uint32 guid, time_t timestamp, uint8 tabId, GuildBankEventLogTypes eventType, uint32 playerGuid, uint32 itemOrMoney, uint16 itemStackCount, uint8 destTabId) : 
+        BankEventLogEntry(uint32 guildId, uint32 guid, time_t timestamp, uint8 tabId, GuildBankEventLogTypes eventType, uint32 playerGuid, uint64 itemOrMoney, uint16 itemStackCount, uint8 destTabId) : 
             LogEntry(guildId, guid, timestamp), m_eventType(eventType), m_bankTabId(tabId), m_playerGuid(playerGuid), 
             m_itemOrMoney(itemOrMoney), m_itemStackCount(itemStackCount), m_destTabId(destTabId) { }
 
@@ -575,7 +575,7 @@ private:
         GuildBankEventLogTypes m_eventType;
         uint8  m_bankTabId;
         uint32 m_playerGuid;
-        uint32 m_itemOrMoney;
+        uint64 m_itemOrMoney;
         uint16 m_itemStackCount;
         uint8  m_destTabId;
     };
@@ -611,7 +611,7 @@ private:
     {
     public:
         RankInfo(uint32 guildId) : m_guildId(guildId), m_rankId(GUILD_RANK_NONE), m_rights(GR_RIGHT_EMPTY), m_bankMoneyPerDay(0) { }
-        RankInfo(uint32 guildId, uint8 rankId, const std::string& name, uint32 rights, uint32 money) : 
+        RankInfo(uint32 guildId, uint8 rankId, const std::string& name, uint32 rights, uint64 money) : 
             m_guildId(guildId), m_rankId(rankId), m_name(name), m_rights(rights), m_bankMoneyPerDay(money) { }
 
         bool LoadFromDB(Field* fields);
@@ -627,8 +627,8 @@ private:
         uint32 GetRights() const { return m_rights; }
         void SetRights(uint32 rights);
 
-        uint32 GetBankMoneyPerDay() const { return m_rankId == GR_GUILDMASTER ? GUILD_WITHDRAW_MONEY_UNLIMITED : m_bankMoneyPerDay; }
-        void SetBankMoneyPerDay(uint32 money);
+        uint64 GetBankMoneyPerDay() const { return m_rankId == GR_GUILDMASTER ? GUILD_WITHDRAW_MONEY_UNLIMITED : m_bankMoneyPerDay; }
+        void SetBankMoneyPerDay(uint64 money);
 
         inline uint8 GetBankTabRights(uint8 tabId) const { return tabId < GUILD_BANK_MAX_TABS ? m_bankTabRightsAndSlots[tabId].rights : 0; }
         inline uint32 GetBankTabSlotsPerDay(uint8 tabId) const
@@ -644,7 +644,7 @@ private:
         uint8  m_rankId;
         std::string m_name;
         uint32 m_rights;
-        uint32 m_bankMoneyPerDay;
+        uint64 m_bankMoneyPerDay;
         GuildBankRightsAndSlots m_bankTabRightsAndSlots[GUILD_BANK_MAX_TABS];
     };
 
@@ -807,7 +807,7 @@ public:
     void HandleSetLeader(WorldSession* session, const std::string& name);
     void HandleSetBankTabInfo(WorldSession* session, uint8 tabId, const std::string& name, const std::string& icon);
     void HandleSetMemberNote(WorldSession* session, uint64 guid, const std::string& note, bool officer);
-    void HandleSetRankInfo(WorldSession* session, uint8 rankId, const std::string& name, uint32 rights, uint32 moneyPerDay, GuildBankRightsAndSlotsVec rightsAndSlots);
+    void HandleSetRankInfo(WorldSession* session, uint8 rankId, const std::string& name, uint32 rights, uint64 moneyPerDay, GuildBankRightsAndSlotsVec rightsAndSlots);
     void HandleBuyBankTab(WorldSession* session, uint8 tabId);
     void HandleInviteMember(WorldSession* session, const std::string& name);
     void HandleAcceptMember(WorldSession* session);
@@ -818,13 +818,13 @@ public:
     void HandleSwitchRank(WorldSession* session, uint8 rankId, bool up);
     void HandleRemoveRank(WorldSession* session, uint8 rankId);
     void HandleSetMemberRank(WorldSession *session, uint64 targetGuid, uint64 setterGuid, uint32 rank);
-    void HandleMemberDepositMoney(WorldSession* session, uint32 amount);
-    bool HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool repair = false);
+    void HandleMemberDepositMoney(WorldSession* session, uint64 amount);
+    bool HandleMemberWithdrawMoney(WorldSession* session, uint64 amount, bool repair = false);
     void HandleMemberLogout(WorldSession* session);
     void HandleDisband(WorldSession* session);
     void HandleGuildPartyRequest(WorldSession* session);
 
-    void DepositBankMoney(uint32 amount);
+    void DepositBankMoney(uint64 amount);
 
     void UpdateMemberData(Player* plr, uint8 dataid, uint32 value);
     void OnPlayerStatusChange(Player* plr, uint32 flag, bool state);
@@ -1011,7 +1011,7 @@ private:
     bool _ModifyBankMoney(SQLTransaction& trans, const uint64& amount, bool add);
     void _SetLeaderGUID(Member* pLeader);
 
-    void _SetRankBankMoneyPerDay(uint8 rankId, uint32 moneyPerDay);
+    void _SetRankBankMoneyPerDay(uint8 rankId, uint64 moneyPerDay);
     void _SetRankBankTabRightsAndSlots(uint8 rankId, uint8 tabId, GuildBankRightsAndSlots rightsAndSlots, bool saveToDB = true);
     uint8 _GetRankBankTabRights(uint8 rankId, uint8 tabId) const;
     uint32 _GetRankRights(uint8 rankId) const;
@@ -1026,7 +1026,7 @@ private:
     bool _MemberHasTabRights(const uint64& guid, uint8 tabId, uint32 rights) const;
 
     void _LogEvent(GuildEventLogTypes eventType, uint32 playerGuid1, uint32 playerGuid2 = 0, uint8 newRank = 0);
-    void _LogBankEvent(SQLTransaction& trans, GuildBankEventLogTypes eventType, uint8 tabId, uint32 playerGuid, uint32 itemOrMoney, uint16 itemStackCount = 0, uint8 destTabId = 0);
+    void _LogBankEvent(SQLTransaction& trans, GuildBankEventLogTypes eventType, uint8 tabId, uint32 playerGuid, uint64 itemOrMoney, uint16 itemStackCount = 0, uint8 destTabId = 0);
 
     Item* _GetItem(uint8 tabId, uint8 slotId) const;
     void _RemoveItem(SQLTransaction& trans, uint8 tabId, uint8 slotId);

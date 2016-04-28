@@ -129,8 +129,8 @@ struct CreatureInfo
     uint32  spells[CREATURE_MAX_SPELLS];
     uint32  PetSpellDataId;
     uint32  VehicleId;
-    uint32  mingold;
-    uint32  maxgold;
+    uint64  mingold;
+    uint64  maxgold;
     char const* AIName;
     uint32  MovementType;
     uint32  InhabitType;
@@ -376,7 +376,7 @@ struct TrainerSpell
     }
 
     uint32 spell;
-    uint32 spellCost;
+    uint64 spellCost;
     uint32 reqSkill;
     uint32 reqSkillValue;
     uint32 reqLevel;

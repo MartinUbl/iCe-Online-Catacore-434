@@ -97,7 +97,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     GetPlayer()->RemoveFakeDeath();
 
     uint32 charterid = GUILD_CHARTER;
-    uint32 cost = GUILD_CHARTER_COST;
+    uint64 cost = GUILD_CHARTER_COST;
 
     if (sObjectMgr->GetGuildByName(name))
     {
@@ -131,7 +131,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         return;
     }
 
-    _player->ModifyMoney(-(int32)cost);
+    _player->ModifyMoney(-(int64)cost);
     Item *charter = _player->StoreNewItem(dest, charterid, true);
     if (!charter)
         return;

@@ -288,13 +288,13 @@ struct Loot
     QuestItemMap const& GetPlayerNonQuestNonFFAConditionalItems() const { return PlayerNonQuestNonFFAConditionalItems; }
 
     std::vector<LootItem> items;
-    uint32 gold;
+    uint64 gold;
     uint8 unlootedCount;
     uint64 roundRobinPlayer;                                // GUID of the player having the Round-Robin ownership for the loot. If 0, round robin owner has released.
     LootType loot_type;                                     // required for achievement system
     Map* lootMap;
 
-    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), loot_type(LOOT_CORPSE), lootMap(NULL){}
+    Loot(uint64 _gold = 0) : gold(_gold), unlootedCount(0), loot_type(LOOT_CORPSE), lootMap(NULL){}
     ~Loot() { clear(); }
 
     // if loot becomes invalid this reference is used to inform the listener
@@ -338,7 +338,7 @@ struct Loot
     void AddLooter(uint64 GUID) { PlayersLooting.insert(GUID); }
     void RemoveLooter(uint64 GUID) { PlayersLooting.erase(GUID); }
 
-    void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
+    void generateMoneyLoot(uint64 minAmount, uint64 maxAmount);
     bool FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false, uint16 lootMode = LOOT_MODE_DEFAULT);
 
     // Inserts the item into the loot (called by LootTemplate processors)

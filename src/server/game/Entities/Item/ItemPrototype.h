@@ -633,8 +633,8 @@ struct ItemPrototype
     uint32 Flags;
     uint32 Flags2;
     uint32 BuyCount;
-    int32  BuyPrice;
-    uint32 SellPrice;
+    int64  BuyPrice;
+    uint64 SellPrice;
     uint32 InventoryType;
     uint32 AllowableClass;
     uint32 AllowableRace;
@@ -686,8 +686,8 @@ struct ItemPrototype
     uint32 ScriptId;
     uint32 DisenchantID;
     uint32 FoodType;
-    uint32 MinMoneyLoot;
-    uint32 MaxMoneyLoot;
+    uint64 MinMoneyLoot;
+    uint64 MaxMoneyLoot;
     uint32 WDBVerified;
 
     // helpers

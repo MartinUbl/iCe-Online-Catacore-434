@@ -37,7 +37,7 @@
 #define MAX_GUILD_BANK_TAB_TEXT_LEN 500
 #define EMBLEM_PRICE 10 * GOLD
 
-inline uint32 _GetGuildBankTabPrice(uint8 tabId)
+inline uint64 _GetGuildBankTabPrice(uint8 tabId)
 {
     switch (tabId)
     {
@@ -953,7 +953,7 @@ void Guild::BankEventLogEntry::SaveToDB(SQLTransaction& trans) const
     stmt->setUInt8 (++index, m_bankTabId);
     stmt->setUInt8 (++index, uint8(m_eventType));
     stmt->setUInt32(++index, m_playerGuid);
-    stmt->setUInt32(++index, m_itemOrMoney);
+    stmt->setUInt64(++index, m_itemOrMoney);
     stmt->setUInt16(++index, m_itemStackCount);
     stmt->setUInt8 (++index, m_destTabId);
     stmt->setUInt64(++index, m_timestamp);
@@ -1015,7 +1015,7 @@ bool Guild::RankInfo::LoadFromDB(Field* fields)
     m_rankId            = fields[1].GetUInt8();
     m_name              = fields[2].GetString();
     m_rights            = fields[3].GetUInt32();
-    m_bankMoneyPerDay   = fields[4].GetUInt32();
+    m_bankMoneyPerDay   = fields[4].GetUInt64();
     if (m_rankId == GR_GUILDMASTER)                     // Prevent loss of leader rights
         m_rights |= GR_RIGHT_ALL;
     return true;
@@ -1073,7 +1073,7 @@ void Guild::RankInfo::SetRights(uint32 rights)
     CharacterDatabase.Execute(stmt);
 }
 
-void Guild::RankInfo::SetBankMoneyPerDay(uint32 money)
+void Guild::RankInfo::SetBankMoneyPerDay(uint64 money)
 {
     if (m_rankId == GR_GUILDMASTER)                     // Prevent loss of leader rights
         money = GUILD_WITHDRAW_MONEY_UNLIMITED;
@@ -1085,7 +1085,7 @@ void Guild::RankInfo::SetBankMoneyPerDay(uint32 money)
 
     PreparedStatement* stmt = NULL;
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SET_GUILD_RANK_BANK_MONEY);
-    stmt->setUInt32(0, money);
+    stmt->setUInt64(0, money);
     stmt->setUInt8 (1, m_rankId);
     stmt->setUInt32(2, m_guildId);
     CharacterDatabase.Execute(stmt);
@@ -1474,7 +1474,7 @@ bool Guild::Member::LoadFromDB(Field* fields)
     m_publicNote    = fields[3].GetString();
     m_officerNote   = fields[4].GetString();
     m_bankRemaining[GUILD_BANK_MAX_TABS].resetTime  = fields[5].GetUInt32();
-    m_bankRemaining[GUILD_BANK_MAX_TABS].value      = fields[6].GetUInt32();
+    m_bankRemaining[GUILD_BANK_MAX_TABS].value      = fields[6].GetUInt64();
     for (uint8 i = 0; i < GUILD_BANK_MAX_TABS; ++i)
     {
         m_bankRemaining[i].resetTime                = fields[7 + i * 2].GetUInt32();
@@ -2332,7 +2332,8 @@ void Guild::CompleteChallenge(Group* pSource, GuildChallengeType type)
         }
     }
 
-    uint32 xprew = 0, moneyrew = 0;
+    uint32 xprew = 0;
+    uint64 moneyrew = 0;
     // choose reward
     if (m_level >= 5 && m_level <= 24)
     {
@@ -2380,7 +2381,7 @@ void Guild::SendChallengeCompleted(WorldSession* session, GuildChallengeType typ
     WorldPacket data(SMSG_GUILD_CHALLENGE_COMPLETED);
 
     uint32 xprew = 0;
-    uint32 moneyrew = 0;
+    uint64 moneyrew = 0;
     uint32 totalCount = 0;
 
     if (m_level >= 5 && m_level <= 24)
@@ -2672,12 +2673,12 @@ void Guild::HandleSetEmblem(WorldSession* session, const EmblemInfo& emblemInfo)
     if (!_IsLeader(player))
         // "Only pGuild leaders can create emblems."
         SendSaveEmblemResult(session, ERR_GUILDEMBLEM_NOTGUILDMASTER);
-    else if (!player->HasEnoughMoney(EMBLEM_PRICE))
+    else if (!player->HasEnoughMoney((int64)EMBLEM_PRICE))
         // "You can't afford to do that."
         SendSaveEmblemResult(session, ERR_GUILDEMBLEM_NOTENOUGHMONEY);
     else
     {
-        player->ModifyMoney(-int32(EMBLEM_PRICE));
+        player->ModifyMoney(-int64(EMBLEM_PRICE));
 
         m_emblemInfo = emblemInfo;
         m_emblemInfo.SaveToDB(m_id);
@@ -2738,7 +2739,7 @@ void Guild::HandleSetMemberNote(WorldSession* session, uint64 guid, const std::s
     }
 }
 
-void Guild::HandleSetRankInfo(WorldSession* session, uint8 rankId, const std::string& name, uint32 rights, uint32 moneyPerDay, GuildBankRightsAndSlotsVec rightsAndSlots)
+void Guild::HandleSetRankInfo(WorldSession* session, uint8 rankId, const std::string& name, uint32 rights, uint64 moneyPerDay, GuildBankRightsAndSlotsVec rightsAndSlots)
 {
     // Only leader can modify ranks
     if (!_IsLeader(session->GetPlayer()))
@@ -2766,7 +2767,7 @@ void Guild::HandleBuyBankTab(WorldSession* session, uint8 tabId)
     if (tabId != _GetPurchasedTabsSize())
         return;
 
-    uint32 tabCost = _GetGuildBankTabPrice(tabId) * GOLD;
+    uint64 tabCost = _GetGuildBankTabPrice(tabId) * GOLD;
     // tabs 6 and 7 (7 and 8 in game numbering) is bought by items and has no cost at all)
     if (!tabCost && tabId != 6 && tabId != 7)
         return;
@@ -2781,7 +2782,7 @@ void Guild::HandleBuyBankTab(WorldSession* session, uint8 tabId)
     // achievements retains tab in natural numbering (1, 2, .., 8), not in internal numbering (0, 1, .., 7)
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_BANK_SLOTS, tabId + 1);
 
-    player->ModifyMoney(-int32(tabCost));
+    player->ModifyMoney(-int64(tabCost));
 
     _BroadcastEvent(GE_BANK_TAB_PURCHASED, 0);
     SendPermissions(session); /// Hack to force client to update permissions
@@ -3157,7 +3158,7 @@ void Guild::HandleRemoveRank(WorldSession* session, uint8 rankId)
     }
 }
 
-void Guild::DepositBankMoney(uint32 amount)
+void Guild::DepositBankMoney(uint64 amount)
 {
     if (!_GetPurchasedTabsSize())
         return;
@@ -3169,7 +3170,7 @@ void Guild::DepositBankMoney(uint32 amount)
     CharacterDatabase.CommitTransaction(trans);
 }
 
-void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
+void Guild::HandleMemberDepositMoney(WorldSession* session, uint64 amount)
 {
     if (!_GetPurchasedTabsSize())
         return;                                                     // No guild bank tabs - no money in bank
@@ -3183,7 +3184,7 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
     // Add money to bank
     _ModifyBankMoney(trans, amount, true);
     // Remove money from player
-    player->ModifyMoney(-int32(amount));
+    player->ModifyMoney(-int64(amount));
     player->SaveGoldToDB(trans);
     // Log GM action (TODO: move to scripts)
     if (player->GetSession()->GetSecurity() > SEC_PLAYER && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
@@ -3209,7 +3210,7 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
     _BroadcastEvent(GE_BANK_MONEY_CHANGED, 0, aux.c_str());
 }
 
-bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool repair)
+bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint64 amount, bool repair)
 {
     if (!_GetPurchasedTabsSize())
         return false;                                       // No guild bank tabs - no money
@@ -3802,7 +3803,7 @@ bool Guild::LoadBankEventLogFromDB(Field* fields)
                 dbTabId,                                // tab id
                 eventType,                              // event type
                 fields[4].GetUInt32(),                  // player guid
-                fields[5].GetUInt32(),                  // item or money
+                fields[5].GetUInt64(),                  // item or money
                 fields[6].GetUInt16(),                  // itam stack count
                 fields[7].GetUInt8()));                 // dest tab id
         }
@@ -4380,7 +4381,7 @@ void Guild::_SetLeaderGUID(Member* pLeader)
     CharacterDatabase.Execute(stmt);
 }
 
-void Guild::_SetRankBankMoneyPerDay(uint8 rankId, uint32 moneyPerDay)
+void Guild::_SetRankBankMoneyPerDay(uint8 rankId, uint64 moneyPerDay)
 {
     if (RankInfo* rankInfo = GetRankInfo(rankId))
     {
@@ -4497,7 +4498,7 @@ inline void Guild::_LogEvent(GuildEventLogTypes eventType, uint32 playerGuid1, u
 }
 
 // Add new bank event log record
-void Guild::_LogBankEvent(SQLTransaction& trans, GuildBankEventLogTypes eventType, uint8 tabId, uint32 lowguid, uint32 itemOrMoney, uint16 itemStackCount, uint8 destTabId)
+void Guild::_LogBankEvent(SQLTransaction& trans, GuildBankEventLogTypes eventType, uint8 tabId, uint32 lowguid, uint64 itemOrMoney, uint16 itemStackCount, uint8 destTabId)
 {
     if (tabId > GUILD_BANK_MAX_TABS)
         return;

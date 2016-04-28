@@ -274,7 +274,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(pCreature->getFaction());
 
     //we have to take deposit :
-    uint32 deposit = sAuctionMgr->GetAuctionDeposit(auctionHouseEntry, etime, proto, totalCount);
+    uint64 deposit = sAuctionMgr->GetAuctionDeposit(auctionHouseEntry, etime, proto, totalCount);
     if (!pl->HasEnoughMoney(deposit))
     {
         SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_NOT_ENOUGHT_MONEY);
@@ -297,8 +297,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
                    proto->ItemId,
                    totalCount);
 
-    pl->ModifyMoney(-int32(deposit));
-
+    pl->ModifyMoney(-int64(deposit));
 
     Item *it = NULL;
     for (uint32 i = 0; i < items.size(); i++)
@@ -418,7 +417,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket & recv_data)
         return;
     }
 
-    if (!pl->HasEnoughMoney(uint32(price)))
+    if (!pl->HasEnoughMoney(price))
     {
         //you don't have enought money!, client tests!
         //SendAuctionCommandResult(auction->auctionId, AUCTION_PLACE_BID, ???);
@@ -432,16 +431,16 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket & recv_data)
         if (auction->bidder > 0)
         {
             if (auction->bidder == pl->GetGUIDLow())
-                pl->ModifyMoney(-int32(price - auction->bid));
+                pl->ModifyMoney(-int64(price - auction->bid));
             else
             {
                 // mail to last bidder and return money
                 sAuctionMgr->SendAuctionOutbiddedMail(auction, price, GetPlayer(), trans);
-                pl->ModifyMoney(-int32(price));
+                pl->ModifyMoney(-int64(price));
             }
         }
         else
-            pl->ModifyMoney(-int32(price));
+            pl->ModifyMoney(-int64(price));
 
         auctionHouse->UpdateBidSorting(auction, std::max(auction->bid, auction->startbid), price);
         auction->bidder = pl->GetGUIDLow();
@@ -456,10 +455,10 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket & recv_data)
     {
         //buyout:
         if (pl->GetGUIDLow() == auction->bidder)
-            pl->ModifyMoney(-int32(auction->buyout - auction->bid));
+            pl->ModifyMoney(-(int64(auction->buyout) - int64(auction->bid)));
         else
         {
-            pl->ModifyMoney(-int32(auction->buyout));
+            pl->ModifyMoney(-int64(auction->buyout));
             if (auction->bidder)                          //buyout for bidded auction ..
                 sAuctionMgr->SendAuctionOutbiddedMail(auction, auction->buyout, GetPlayer(), trans);
         }
@@ -516,12 +515,12 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket & recv_data)
         {
             if (auction->bidder > 0)                        // If we have a bidder, we have to send him the money he paid
             {
-                uint32 auctionCut = auction->GetAuctionCut();
+                int64 auctionCut = auction->GetAuctionCut();
                 if (!pl->HasEnoughMoney(auctionCut))          //player doesn't have enough money, maybe message needed
                     return;
                 //some auctionBidderNotification would be needed, but don't know that parts..
                 sAuctionMgr->SendAuctionCancelledToBidderMail(auction, trans, pItem);
-                pl->ModifyMoney(-int32(auctionCut));
+                pl->ModifyMoney(-int64(auctionCut));
             }
             // Return the item by mail
             std::ostringstream msgAuctionCanceledOwner;

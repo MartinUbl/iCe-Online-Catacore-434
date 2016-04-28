@@ -179,11 +179,11 @@ struct LfgReward
     struct
     {
         uint32 questId;
-        uint32 variableMoney;
+        uint64 variableMoney;
         uint32 variableXP;
     } reward[2];
 
-    LfgReward(uint32 _maxLevel = 0, uint32 firstQuest = 0, uint32 firstVarMoney = 0, uint32 firstVarXp = 0, uint32 otherQuest = 0, uint32 otherVarMoney = 0, uint32 otherVarXp = 0)
+    LfgReward(uint32 _maxLevel = 0, uint32 firstQuest = 0, uint64 firstVarMoney = 0, uint32 firstVarXp = 0, uint32 otherQuest = 0, uint64 otherVarMoney = 0, uint32 otherVarXp = 0)
         : maxLevel(_maxLevel)
     {
         reward[0].questId = firstQuest;

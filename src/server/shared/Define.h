@@ -84,6 +84,7 @@ enum
 	FT_STRING='s',                                          //char*
 	FT_FLOAT='f',                                           //float
 	FT_INT='i',                                             //uint32
+	FT_LONGINT='j',                                         //uint64
 	FT_BYTE='b',                                            //uint8
 	FT_SORT='d',                                            //sorted by this field, field is not included
 	FT_IND='n',                                             //the same,but parsed to data

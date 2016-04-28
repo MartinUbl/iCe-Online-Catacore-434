@@ -116,8 +116,8 @@ Quest::Quest(Field * questRecord)
 
     RewHonorAddition = questRecord[112].GetUInt32();
     RewHonorMultiplier = questRecord[113].GetFloat();
-    RewOrReqMoney = questRecord[114].GetInt32();
-    RewMoneyMaxLevel = questRecord[115].GetUInt32();
+    RewOrReqMoney = questRecord[114].GetInt64();
+    RewMoneyMaxLevel = questRecord[115].GetUInt64();
     RewSpell = questRecord[116].GetUInt32();
     RewSpellCast = questRecord[117].GetInt32();
     RewMailTemplateId = questRecord[118].GetUInt32();
@@ -227,12 +227,12 @@ uint32 Quest::XPValue(Player *pPlayer) const
     return 0;
 }
 
-int32  Quest::GetRewOrReqMoney() const
+int64 Quest::GetRewOrReqMoney() const
 {
     if (RewOrReqMoney <= 0)
         return RewOrReqMoney;
 
-    return int32(RewOrReqMoney * sWorld->getRate(RATE_DROP_MONEY));
+    return int64(RewOrReqMoney * sWorld->getRate(RATE_DROP_MONEY));
 }
 
 bool Quest::IsAllowedInRaid() const

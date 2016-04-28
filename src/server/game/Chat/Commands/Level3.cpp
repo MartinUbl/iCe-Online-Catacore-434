@@ -433,8 +433,8 @@ bool ChatHandler::HandleReloadCreatureTemplateCommand(const char* args)
     const_cast<CreatureInfo*>(cInfo)->spells[7] = fields[59].GetUInt32();
     const_cast<CreatureInfo*>(cInfo)->PetSpellDataId = fields[60].GetUInt32();
     const_cast<CreatureInfo*>(cInfo)->VehicleId = fields[61].GetUInt32();
-    const_cast<CreatureInfo*>(cInfo)->mingold = fields[62].GetUInt32();
-    const_cast<CreatureInfo*>(cInfo)->maxgold = fields[63].GetUInt32();
+    const_cast<CreatureInfo*>(cInfo)->mingold = fields[62].GetUInt64();
+    const_cast<CreatureInfo*>(cInfo)->maxgold = fields[63].GetUInt64();
     if (const char* temp = fields[64].GetCString())
     {
         delete[] cInfo->AIName;

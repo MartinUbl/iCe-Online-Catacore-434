@@ -563,7 +563,7 @@ typedef std::pair<GossipMenuItemsMap::iterator, GossipMenuItemsMap::iterator> Go
 struct GuildRewardsEntry
 {
     uint32 item;
-    uint32 price;
+    uint64 price;
     uint32 achievement;
     uint32 standing;
 };

@@ -3973,7 +3973,7 @@ void ObjectMgr::LoadGuildRewards()
 
         GuildRewardsEntry* ptr = new GuildRewardsEntry;
         ptr->item = fields[0].GetUInt32();
-        ptr->price = fields[1].GetUInt32();
+        ptr->price = fields[1].GetUInt64();
         ptr->achievement = fields[2].GetUInt32();
         ptr->standing = fields[3].GetUInt32();
 

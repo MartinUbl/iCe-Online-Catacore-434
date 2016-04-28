@@ -65,17 +65,17 @@ struct AuctionEntry
     uint64 owner;
     uint64 startbid;                                        //maybe useless
     uint64 bid;
-    uint32 buyout;
+    uint64 buyout;
     time_t expire_time;
     uint64 bidder;
-    uint32 deposit;                                         //deposit can be calculated only when creating auction
+    uint64 deposit;                                         //deposit can be calculated only when creating auction
     AuctionHouseEntry const* auctionHouseEntry;             // in AuctionHouse.dbc
     uint32 factionTemplateId;
 
     // helpers
     uint32 GetHouseId() const { return auctionHouseEntry->houseId; }
     uint32 GetHouseFaction() const { return auctionHouseEntry->faction; }
-    uint32 GetAuctionCut() const;
+    uint64 GetAuctionCut() const;
     uint64 GetAuctionOutBid() const;
     bool BuildAuctionInfo(WorldPacket & data) const;
     void DeleteFromDB(SQLTransaction& trans) const;
