@@ -435,6 +435,8 @@ void Battlefield::StartBattle()
 
     sPvPAnnouncer->Announce(PVPANNOUNCE_BATTLEFIELD_STARTED, BATTLEGROUND_TYPE_NONE, 0, GetBattleId());
 
+    sBattlefieldMgr.UpdateBattlefieldState();
+
     OnBattleStart();
 }
 
@@ -458,6 +460,8 @@ void Battlefield::EndBattle(bool endbytimer)
     m_Timer = m_NoWarBattleTime;
     m_timerAnnounced = false;
     SendInitWorldStatesToAll();
+
+    sBattlefieldMgr.UpdateBattlefieldState();
 }
 
 void Battlefield::PlaySoundToAll(uint32 SoundID)

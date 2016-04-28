@@ -141,6 +141,44 @@ void BattlefieldMgr::Update(uint32 diff)
     }
 }
 
+void BattlefieldMgr::UpdateBattlefieldState()
+{
+    Battlefield* bf;
+
+    bf = GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
+    WorldPacket wgprogress;
+    BuildWorldStateUpdate(wgprogress, WS_WG_INPROGRESS, bf->IsWarTime() ? 1 : 0);
+
+    WorldPacket wgtimer;
+    BuildWorldStateUpdate(wgtimer, WS_WG_TIMER, bf->IsWarTime() ? 0 : time(nullptr) + bf->GetTimer() / 1000);
+
+    sWorld->SendGlobalMessage(&wgprogress);
+    sWorld->SendGlobalMessage(&wgtimer);
+}
+
+void BattlefieldMgr::UpdateBattlefieldStateFor(Player* plr)
+{
+    Battlefield* bf;
+
+    bf = GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
+    WorldPacket wgprogress;
+    BuildWorldStateUpdate(wgprogress, WS_WG_INPROGRESS, bf->IsWarTime() ? 1 : 0);
+
+    WorldPacket wgtimer;
+    BuildWorldStateUpdate(wgtimer, WS_WG_TIMER, bf->IsWarTime() ? 0 : time(nullptr) + bf->GetTimer() / 1000);
+
+    plr->GetSession()->SendPacket(&wgprogress);
+    plr->GetSession()->SendPacket(&wgtimer);
+}
+
+void BattlefieldMgr::BuildWorldStateUpdate(WorldPacket &pkt, uint32 state, uint32 value)
+{
+    pkt.SetOpcode(SMSG_UPDATE_WORLD_STATE);
+    pkt << state;
+    pkt << value;
+    pkt << uint8(0);
+}
+
 ZoneScript *BattlefieldMgr::GetZoneScript(uint32 zoneId)
 {
     BattlefieldMap::iterator itr = m_BattlefieldMap.find(zoneId);

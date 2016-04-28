@@ -23,6 +23,14 @@
 #include "Battlefield.h"
 #include "ace/Singleton.h"
 
+enum BattlefieldWorldStates
+{
+    WS_WG_INPROGRESS        = 3781,
+    WS_WG_TIMER             = 4354,
+    WS_TB_INPROGRESS        = 5333,
+    WS_TB_TIMER             = 5332,
+};
+
 class Player;
 class GameObject;
 class Creature;
@@ -58,6 +66,9 @@ class BattlefieldMgr
 
     void Update(uint32 diff);
 
+    void UpdateBattlefieldState();
+    void UpdateBattlefieldStateFor(Player* plr);
+
     void HandleGossipOption(Player* player, uint64 guid, uint32 gossipid);
 
     bool CanTalkTo(Player* player, Creature * creature, GossipMenuItems gso);
@@ -67,6 +78,7 @@ class BattlefieldMgr
     typedef std::vector < Battlefield * >BattlefieldSet;
     typedef std::map < uint32 /* zoneid */ , Battlefield * >BattlefieldMap;
   private:
+      void BuildWorldStateUpdate(WorldPacket &pkt, uint32 state, uint32 value);
     // contains all initiated battlefield events
     // used when initing / cleaning up
       BattlefieldSet m_BattlefieldSet;

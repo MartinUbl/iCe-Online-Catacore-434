@@ -169,6 +169,7 @@ public:
         bf->SendInitWorldStatesToAll();
         if (battleid == 1)
             handler->SendGlobalGMSysMessage("Wintergrasp (Command timer used)");
+        sBattlefieldMgr.UpdateBattlefieldState();
 
         return true;
     }

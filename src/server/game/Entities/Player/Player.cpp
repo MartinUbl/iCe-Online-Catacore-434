@@ -24637,6 +24637,7 @@ void Player::SendInitialPacketsAfterAddToMap()
     uint32 newzone, newarea;
     GetZoneAndAreaId(newzone,newarea);
     SendInitWorldStates(newzone, newarea);
+    sBattlefieldMgr.UpdateBattlefieldStateFor(this);
     UpdateZone(newzone,newarea);
 
     ResetTimeSync();
