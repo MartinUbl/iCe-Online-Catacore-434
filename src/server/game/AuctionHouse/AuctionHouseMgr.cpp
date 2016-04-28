@@ -81,10 +81,10 @@ uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32
     float multiplier = (float)(entry->depositPercent * 3) / 100.0f;
     uint64 deposit = ((uint64)((float)MSV * multiplier * (float)count)/3) * 3 * timeHr;
 
-    sLog->outDebug("MSV:        %u", MSV);
+    sLog->outDebug("MSV:        " UI64FMTD, MSV);
     sLog->outDebug("Items:      %u", count);
     sLog->outDebug("Multiplier: %f", multiplier);
-    sLog->outDebug("Deposit:    %u", deposit);
+    sLog->outDebug("Deposit:    " UI64FMTD, deposit);
 
     if (deposit < AH_MINIMUM_DEPOSIT)
         return AH_MINIMUM_DEPOSIT;

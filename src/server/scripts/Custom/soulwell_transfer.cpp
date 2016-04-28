@@ -331,7 +331,7 @@ public:
             // remove all items
             for (uint32 i = 0; i < 65535; i++)
             {
-                if (Item* itm = lockedPlayer->GetItemByPos(i))
+                if (lockedPlayer->GetItemByPos(i))
                     lockedPlayer->DestroyItem((i >> 8) & 0xFF, (i & 0xFF), true, false);
             }
 
@@ -559,7 +559,7 @@ public:
                         }
                         else
                         {
-                            sLog->outError("Cannot create item %u (orig. guid: %u)", it->id, it->guid);
+                            sLog->outError("Cannot create item %u (orig. guid: " UI64FMTD ")", it->id, it->guid);
                             success = false;
                         }
                     }
@@ -612,7 +612,7 @@ public:
                 else
                 {
                     // TODO: log message!
-                    sLog->outError("Something went wrong when creating item %u (orig. guid %u)", it->id, it->guid);
+                    sLog->outError("Something went wrong when creating item %u (orig. guid " UI64FMTD ")", it->id, it->guid);
                 }
 
                 // delete item transfer record (not list record! that would come later)

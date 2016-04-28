@@ -39,11 +39,12 @@ enum GuildMisc
     GUILD_BANK_MONEY_LOGS_TAB           = 100,                  // used for money log in DB
     GUILD_RANKS_MIN_COUNT               = 2,
     GUILD_RANKS_MAX_COUNT               = 10,
-    GUILD_RANK_NONE                     = 0xFF,
-    GUILD_WITHDRAW_MONEY_UNLIMITED      = 0xFFFFFFFF,
-    GUILD_WITHDRAW_SLOT_UNLIMITED       = 0xFFFFFFFF,
-    GUILD_EVENT_LOG_GUID_UNDEFINED      = 0xFFFFFFFF,
+    GUILD_RANK_NONE                     = 0xFF
 };
+
+#define GUILD_WITHDRAW_MONEY_UNLIMITED    0xFFFFFFFF
+#define GUILD_WITHDRAW_SLOT_UNLIMITED     0xFFFFFFFF
+#define GUILD_EVENT_LOG_GUID_UNDEFINED    0xFFFFFFFF
 
 enum GuildMemberFlags
 {
@@ -627,7 +628,7 @@ private:
         uint32 GetRights() const { return m_rights; }
         void SetRights(uint32 rights);
 
-        uint64 GetBankMoneyPerDay() const { return m_rankId == GR_GUILDMASTER ? GUILD_WITHDRAW_MONEY_UNLIMITED : m_bankMoneyPerDay; }
+        uint64 GetBankMoneyPerDay() const { return (m_rankId == GR_GUILDMASTER) ? (uint64)GUILD_WITHDRAW_MONEY_UNLIMITED : m_bankMoneyPerDay; }
         void SetBankMoneyPerDay(uint64 money);
 
         inline uint8 GetBankTabRights(uint8 tabId) const { return tabId < GUILD_BANK_MAX_TABS ? m_bankTabRightsAndSlots[tabId].rights : 0; }

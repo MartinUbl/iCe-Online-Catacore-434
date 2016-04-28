@@ -3190,10 +3190,10 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint64 amount)
     if (player->GetSession()->GetSecurity() > SEC_PLAYER && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
     {
         sLog->outCommand(player->GetSession()->GetAccountId(),
-            "GM %s (Account: %u) deposit money (Amount: %u) to pGuild bank (Guild ID %u)",
+            "GM %s (Account: %u) deposit money (Amount: " UI64FMTD ") to pGuild bank (Guild ID %u)",
             player->GetName(), player->GetSession()->GetAccountId(), amount, m_id);
     }
-    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:(%u) guild_id:(%u)",
+    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:(" UI64FMTD ") guild_id:(%u)",
                  player->GetSession()->GetRemoteAddress().c_str(),
                  player->GetSession()->GetAccountId(),
                  player->GetName(),
@@ -3249,7 +3249,7 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint64 amount, bool
     _LogBankEvent(trans, repair ? GUILD_BANK_LOG_REPAIR_MONEY : GUILD_BANK_LOG_WITHDRAW_MONEY, uint8(0), player->GetGUIDLow(), amount);
     CharacterDatabase.CommitTransaction(trans);
 
-    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:(%u) guild_id:(%u)",
+    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:(" UI64FMTD ") guild_id:(%u)",
                  player->GetSession()->GetRemoteAddress().c_str(),
                  player->GetSession()->GetAccountId(),
                  player->GetName(),
