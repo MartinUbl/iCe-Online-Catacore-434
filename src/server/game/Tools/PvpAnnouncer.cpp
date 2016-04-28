@@ -95,6 +95,11 @@ void PvPAnnouncer::Announce(PvPAnnounceType type, BattlegroundTypeId bgTypeId, u
             levelMax = DEFAULT_MAX_LEVEL;
             toannounce = std::string("The battle for ") + std::string(GetBattlefieldName((BattlefieldIDs)param1)) + std::string(" will begin in 30 minutes!");
             break;
+        case PVPANNOUNCE_BATTLEFIELD_IN_15MINS:
+            levelMin = GetBattlefieldMinLevel((BattlefieldIDs)param1);
+            levelMax = DEFAULT_MAX_LEVEL;
+            toannounce = std::string("The battle for ") + std::string(GetBattlefieldName((BattlefieldIDs)param1)) + std::string(" will begin in 15 minutes!");
+            break;
         case PVPANNOUNCE_BATTLEFIELD_STARTED:
             levelMin = GetBattlefieldMinLevel((BattlefieldIDs)param1);
             levelMax = DEFAULT_MAX_LEVEL;

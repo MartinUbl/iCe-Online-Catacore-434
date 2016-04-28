@@ -72,7 +72,7 @@ Battlefield::Battlefield()
     m_Timer                    = 0;
     m_enable                   = true;
     m_BattlefieldActive        = false;
-    m_timerAnnounced           = false;
+    m_timerAnnounced           = 0;
     m_DefenderTeam             = TEAM_NEUTRAL;
 
     m_TypeId                   = 0;
@@ -182,12 +182,17 @@ bool Battlefield::Update(uint32 diff)
     else
         m_Timer -= diff;
 
-    if (!IsWarTime() && !m_timerAnnounced)
+    if (!IsWarTime() && m_timerAnnounced < 2)
     {
-        if (m_Timer <= 30 * MINUTE * IN_MILLISECONDS)
+        if (m_Timer <= 30 * MINUTE * IN_MILLISECONDS && m_timerAnnounced == 0)
         {
-            m_timerAnnounced = true;
+            m_timerAnnounced = 1;
             sPvPAnnouncer->Announce(PVPANNOUNCE_BATTLEFIELD_IN_30MINS, BATTLEGROUND_TYPE_NONE, 0, GetBattleId());
+        }
+        if (m_Timer <= 15 * MINUTE * IN_MILLISECONDS && m_timerAnnounced == 1)
+        {
+            m_timerAnnounced = 2;
+            sPvPAnnouncer->Announce(PVPANNOUNCE_BATTLEFIELD_IN_15MINS, BATTLEGROUND_TYPE_NONE, 0, GetBattleId());
         }
     }
 
@@ -458,7 +463,7 @@ void Battlefield::EndBattle(bool endbytimer)
 
     // reset bf timer
     m_Timer = m_NoWarBattleTime;
-    m_timerAnnounced = false;
+    m_timerAnnounced = 0;
     SendInitWorldStatesToAll();
 
     sBattlefieldMgr.UpdateBattlefieldState();

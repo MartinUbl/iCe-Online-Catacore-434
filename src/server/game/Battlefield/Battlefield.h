@@ -338,7 +338,7 @@ class Battlefield:public ZoneScript
 protected:
     uint64 StalkerGuid;
     uint32 m_Timer;                                         // Global timer for event
-    bool m_timerAnnounced;
+    uint8 m_timerAnnounced;
     bool m_enable;
     bool m_BattlefieldActive;
     TeamId m_DefenderTeam;
