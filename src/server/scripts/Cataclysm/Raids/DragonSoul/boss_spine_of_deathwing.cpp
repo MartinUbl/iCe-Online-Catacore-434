@@ -317,6 +317,8 @@ public:
         {
             if (instance)
                 instance->SetData(TYPE_BOSS_SPINE_OF_DEATHWING, IN_PROGRESS);
+
+            me->SetFullHealth();
         }
 
         void SaySomething()
