@@ -4100,6 +4100,19 @@ bool Spell::CanCancel()
         case 103754:
         case 103565:
         case 103767:
+        // Argaloth
+        case 88972:
+        // Hagara the Stormbinder
+        case 105256:
+        case 109552:
+        case 109553:
+        case 109554:
+        case 105409:
+        case 109560:
+        case 109561:
+        case 109562:
+        // Warmaster Blackhorn
+        case 108046:
             return false;
     }
     return true;
