@@ -2845,12 +2845,14 @@ public:
 #define GOSSIP_GUNSHIP_READY                       "We are the Alliance. We are always ready."
 #define GOSSIP_START_BLACKHORN_ENCOUNTER           "Bring us in closer!"
 #define GOSSIP_SPINE_OF_DEATHWING                  "JUSTICE AND GLORY!"
+#define GOSSIP_TELEPORT_TO_MAELSTROM               "Teleport to Maelstrom."
 
 enum gunshipActions
 {
     ACTION_READY_TO_FOLLOW_DEATHWING = 0,
     ACTION_START_BLACKHORN_ENCOUNTER = 1,
     ACTION_SPINE_OF_DEATHWING        = 2,
+    ACTION_TELEPORT_TO_MAELSTROM     = 3,
     ACTION_START_ENCOUNTER           = 0,
 };
 
@@ -2864,6 +2866,10 @@ public:
         if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
+        if (pCreature->GetInstanceScript()->GetData(TYPE_BOSS_SPINE_OF_DEATHWING) == DONE)
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TELEPORT_TO_MAELSTROM, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+        }
         if (pCreature->GetInstanceScript()->GetData(TYPE_BOSS_BLACKHORN) == DONE)
         {
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SPINE_OF_DEATHWING, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
@@ -2898,6 +2904,10 @@ public:
         {
             pCreature->AI()->DoAction(ACTION_SPINE_OF_DEATHWING);
             pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        }
+        else if (uiAction == GOSSIP_ACTION_INFO_DEF + 4)
+        {
+            pCreature->AI()->DoAction(ACTION_TELEPORT_TO_MAELSTROM);
         }
         pPlayer->CLOSE_GOSSIP_MENU();
         return true;
@@ -2943,6 +2953,8 @@ public:
                             player->NearTeleportTo(telePos[3].GetPositionX(), telePos[3].GetPositionY(), telePos[3].GetPositionZ(), telePos[3].GetOrientation());
                         else if (action == ACTION_SPINE_OF_DEATHWING)
                             player->NearTeleportTo(telePos[4].GetPositionX(), telePos[4].GetPositionY(), telePos[4].GetPositionZ(), telePos[4].GetOrientation());
+                        else if (action == ACTION_TELEPORT_TO_MAELSTROM)
+                            player->NearTeleportTo(telePos[6].GetPositionX(), telePos[5].GetPositionY(), telePos[5].GetPositionZ(), telePos[5].GetOrientation());
 
                         if (withParachute == true)
                             player->AddAura(SPELL_PARACHUTE, player);
@@ -3009,6 +3021,10 @@ public:
                         TeleportAllPlayers(ACTION_SPINE_OF_DEATHWING, true);
                         me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     });
+                }
+                else if (action == ACTION_TELEPORT_TO_MAELSTROM)
+                {
+                    TeleportAllPlayers(ACTION_TELEPORT_TO_MAELSTROM, true);
                 }
             }
         }
