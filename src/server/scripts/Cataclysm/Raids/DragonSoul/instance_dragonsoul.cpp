@@ -157,10 +157,13 @@ public:
         {
             if (InstanceScript * pInstance = player->GetInstanceScript())
             {
-                if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
+                if (!player->IsGameMaster())
                 {
-                    player->RepopAtGraveyard();
-                    return;
+                    if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
+                    {
+                        player->RepopAtGraveyard();
+                        return;
+                    }
                 }
             }
         }
