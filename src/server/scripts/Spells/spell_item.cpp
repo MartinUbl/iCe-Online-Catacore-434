@@ -1199,6 +1199,109 @@ public:
     }
 };
 
+// Elementium Coated Geode   = 109947
+enum Geodes
+{
+    // Common
+    CARNELIAN       = 52177,
+    HESSONITE       = 52181,
+    JASPER          = 52182,
+    NIGHTSTONE      = 52180,
+    ZEPHYRITE       = 52178,
+    ALICITE         = 52179,
+    // Rare
+    AMBERJEWEL      = 52195,
+    DEMONSEYE       = 52194,
+    DREAM_EMERALND  = 52192,
+    EMBER_TOPAZ     = 52193,
+    INFERNO_RUBY    = 52190,
+    OCEAN_SAPPHIRE  = 52191,
+    // Epic
+    DEEPHOLM_IOLITE = 71807,
+    ELVEN_PERIDOT   = 71810,
+    LIGHT_STONE     = 71806, // Yellow
+    LAVA_CORAL      = 71808, // Orange
+    QUEENS_GARNET   = 71805, // Red
+    SHADOW_SPINEL   = 71809, // Purple
+};
+
+class spell_elementium_coated_geode : public SpellScriptLoader
+{
+public:
+    spell_elementium_coated_geode() : SpellScriptLoader("spell_elementium_coated_geode") { }
+
+    class spell_elementium_coated_geode_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_elementium_coated_geode_SpellScript)
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* pCaster = GetCaster();
+            if (!pCaster || pCaster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            uint32 gems[3] = { LAVA_CORAL, QUEENS_GARNET, SHADOW_SPINEL };
+            pCaster->ToPlayer()->AddItem(gems[urand(0, 2)], 1);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_elementium_coated_geode_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_CREATE_ITEM_2);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_elementium_coated_geode_SpellScript();
+    }
+};
+
+// Crystalline Geode         = 109946
+
+
+class spell_crystalline_geode : public SpellScriptLoader
+{
+public:
+    spell_crystalline_geode() : SpellScriptLoader("spell_crystalline_geode") { }
+
+    class spell_crystalline_geode_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_crystalline_geode_SpellScript)
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* pCaster = GetCaster();
+            if (!pCaster || pCaster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            uint32 commonGems[6] = { CARNELIAN, HESSONITE, JASPER, NIGHTSTONE, ZEPHYRITE, ALICITE };
+            uint32 rareGems[6] = { AMBERJEWEL, DEMONSEYE, DREAM_EMERALND, EMBER_TOPAZ, INFERNO_RUBY, OCEAN_SAPPHIRE };
+            uint32 epicGems[6] = { DEEPHOLM_IOLITE, ELVEN_PERIDOT, LIGHT_STONE, LAVA_CORAL, QUEENS_GARNET, SHADOW_SPINEL };
+
+            // 100% common gem
+            pCaster->ToPlayer()->AddItem(commonGems[urand(0, 5)], 1);
+            // 25% rare gem
+            if (roll_chance_i(25))
+                pCaster->ToPlayer()->AddItem(rareGems[urand(0, 5)], 1);
+            // 5% rare gem
+            if (roll_chance_i(5))
+                pCaster->ToPlayer()->AddItem(epicGems[urand(0, 5)], 1);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_crystalline_geode_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_CREATE_ITEM_2);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_crystalline_geode_SpellScript();
+    }
+};
+
 enum eGenericData
 {
     SPELL_ARCANITE_DRAGONLING           = 19804,
@@ -1228,7 +1331,8 @@ void AddSC_item_spell_scripts()
     new spell_item_apparatus_of_khazgoroth_hc();
     new go_food_feast_cataclysm();
     new spell_item_fandrals_flamescythe();
-
+    new spell_elementium_coated_geode();
+    new spell_crystalline_geode();
     new spell_action_free();
     new spell_item_flask_of_battle();
     new go_cauldron_of_battle();
