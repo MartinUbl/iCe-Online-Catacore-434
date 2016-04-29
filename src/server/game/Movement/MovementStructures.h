@@ -5275,14 +5275,14 @@ MovementStatusElements const* GetMovementStatusElementsSequence(uint32 opcode)
             return MovementGravityDisableAck;
         case CMSG_MOVE_GRAVITY_ENABLE_ACK:
             return MovementGravityEnableAck;
-        case CMSG_MOVE_HOVER_ACK:
-            return MovementHoverAck;
+        //case CMSG_MOVE_HOVER_ACK:
+        //    return MovementHoverAck;
         case CMSG_MOVE_KNOCK_BACK_ACK:
             return MovementKnockBackAck;
         case CMSG_MOVE_SET_CAN_FLY:
             return MovementSetCanFly;
-        case CMSG_MOVE_SET_CAN_FLY_ACK:
-            return MovementSetCanFlyAck;
+        //case CMSG_MOVE_SET_CAN_FLY_ACK:
+        //    return MovementSetCanFlyAck;
         //case CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK:
         //    return MovementSetCanTransitionBetweenSwimAndFlyAck;
         case SMSG_MOVE_SET_COLLISION_HEIGHT:
@@ -5291,8 +5291,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(uint32 opcode)
             return MovementSetCollisionHeightAck;
         case SMSG_MOVE_UPDATE_COLLISION_HEIGHT:
             return MovementUpdateCollisionHeight;
-        case CMSG_MOVE_WATER_WALK_ACK:
-            return MovementWaterWalkAck;
+        //case CMSG_MOVE_WATER_WALK_ACK:
+        //    return MovementWaterWalkAck;
         case MSG_MOVE_SET_RUN_MODE:
             return MovementSetRunMode;
         case MSG_MOVE_SET_WALK_MODE:
