@@ -506,8 +506,8 @@ public:
 
                     scheduler.Schedule(Seconds(4), [this, who](TaskContext /* Task context */)
                     {
-                        SummonCache(who);
                         me->Kill(me);
+                        SummonCache(who);
                     });
                 }
             }
