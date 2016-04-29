@@ -404,6 +404,12 @@ public:
                 if (instance->GetData(TYPE_BOSS_HAGARA) != DONE)
                     instance->SetData(TYPE_BOSS_HAGARA, NOT_STARTED);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_10N);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_25N);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_10HC);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHTNING_CONDUIT_25HC);
             }
 
             if (instance && instance->GetData(DATA_HAGARA_INTRO_TRASH) >= MAX_TRASH)
