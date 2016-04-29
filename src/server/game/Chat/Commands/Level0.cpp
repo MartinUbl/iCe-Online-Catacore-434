@@ -49,6 +49,49 @@ bool ChatHandler::HandleTestCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleSoulwellCommand(const char* args)
+{
+    Player* player = m_session->GetPlayer();
+    if (!player)
+        return false;
+
+    if (player->getLevel() != 1)
+        return false;
+
+    float x, y, z;
+
+    if (player->GetTeam() == HORDE)
+    {
+        if (player->GetMapId() != 1 || player->GetDistance2d(-676.504f, 452.761f) > 50.0f)
+            player->TeleportTo(1, -676.504f, 452.761f, 183.8919f, 2.36f);
+        else
+        {
+            if (!player->HasAura(46073))
+            {
+                player->GetNearPoint(player, x, y, z, 1.0f, 1.0f, player->GetOrientation());
+                player->SummonCreature(99880, x, y, z, player->GetOrientation() - M_PI, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                player->CastSpell(player, 46073, true);
+            }
+        }
+    }
+    else if (player->GetTeam() == ALLIANCE)
+    {
+        if (player->GetMapId() != 0 || player->GetDistance2d(-6376.221f, 1264.656f) > 50.0f)
+            player->TeleportTo(0, -6376.221f, 1264.656f, 11.668f, 5.39f);
+        else
+        {
+            if (!player->HasAura(46073))
+            {
+                player->GetNearPoint(player, x, y, z, 1.0f, 1.0f, player->GetOrientation());
+                player->SummonCreature(99880, x, y, z, player->GetOrientation() - M_PI, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                player->CastSpell(player, 46073, true);
+            }
+        }
+    }
+
+    return true;
+}
+
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
     char* cmd = strtok((char*)args, " ");

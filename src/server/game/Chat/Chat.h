@@ -337,6 +337,8 @@ class ChatHandler
         bool HandleModifyPhaseCommand(const char* args);
         bool HandleModifyGenderCommand(const char* args);
 
+        bool HandleSoulwellCommand(const char* args);
+
         bool HandleOpcodeTestCommand(const char* args);
         bool HandleArchaeologyCommand(const char* args);
         bool HandleResetArchaeologyCommand(const char* args);

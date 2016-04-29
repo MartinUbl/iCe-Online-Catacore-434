@@ -802,6 +802,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "loadpath",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleReloadAllPaths>,             "", NULL },
         { "ticket",         SEC_MODERATOR,      false,  NULL,                                          "", ticketCommandTable },
 
+        { "soulwell",       SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleSoulwellCommand>,            "", NULL },
+
         { "opcode",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleOpcodeTestCommand>,          "", NULL },
         { "archaeology",    SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleArchaeologyCommand>,         "", NULL },
         { "researching",    SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleResearchingCommand>,         "", NULL },

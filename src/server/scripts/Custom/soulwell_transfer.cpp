@@ -169,6 +169,8 @@ public:
         std::list<soulwell_reputation_record*>::iterator reputationItr;
         std::list<soulwell_voidstorage_record*>::iterator voidstorageItr;
 
+        std::list<std::string> transferLog;
+
         std::map<uint64, Bag*> bagMap;
 
         soulwell_transfer_npcAI(Creature* c) : ScriptedAI(c)
@@ -191,25 +193,57 @@ public:
             lockedPlayerGUID = guid;
         }
 
-        bool LoadSoulwellCharacter()
+        void LogMessage(const char* fmt, ...)
+        {
+            char dest[1024];
+
+            va_list ap;
+            va_start(ap, fmt);
+            vsnprintf(dest, 1024, fmt, ap);
+            va_end(ap);
+
+            // "escape" log strings
+            for (int i = 0; i < 1024; i++)
+            {
+                if (dest[i] == '\0')
+                    break;
+
+                if (dest[i] == '\'')
+                    dest[i] = '-';
+                else if (dest[i] == '%')
+                    dest[i] = '#';
+                else if (dest[i] == '\"')
+                    dest[i] = '_';
+            }
+
+            transferLog.push_back(dest);
+        }
+
+        uint8 LoadSoulwellCharacter()
         {
             QueryResult res = CharacterDatabase.PQuery("SELECT id FROM " SOULWELL_AUTH_DB ".account WHERE UPPER(username) = UPPER('%s') AND UPPER(sha_pass_hash) = UPPER(SHA1(CONCAT(UPPER('%s'), ':', UPPER('%s'))))", username.c_str(), username.c_str(), password.c_str());
             if (!res)
-                return false;
+                return 1;
+
+            transferLog.clear();
+
+            LogMessage("Successfully authenticated user %s", username.c_str());
 
             Field* f = res->Fetch();
             if (!f)
-                return false;
+                return 1;
 
             basicInfo.originalAccountId = f[0].GetUInt32();
 
             res = CharacterDatabase.PQuery("SELECT level, race, class, money, totaltime, leveltime, speccount, knownTitles, guid, talentTree FROM " SOULWELL_CHAR_DB ".characters WHERE account = %u AND name = '%s'", basicInfo.originalAccountId, charactername.c_str());
             if (!res)
-                return false;
+                return 2;
 
             f = res->Fetch();
             if (!f)
-                return false;
+                return 2;
+
+            LogMessage("Selected character %s from account %u", charactername.c_str(), basicInfo.originalAccountId);
 
             basicInfo.level = f[0].GetUInt8();
             basicInfo.race = f[1].GetUInt8();
@@ -223,28 +257,35 @@ public:
             soulwellGUID = f[8].GetUInt32();
             const char* talentTree = f[9].GetCString();
 
+            // check whether the player was already transfered
+            QueryResult sanityRes = CharacterDatabase.PQuery("SELECT guid_old FROM soulwell_character_transfer WHERE guid_old = %u", soulwellGUID);
+            if (sanityRes && sanityRes->GetRowCount() > 0)
+                return 3;
+
             Tokens taltoks(talentTree, ' ', 2);
             if (taltoks.size() == 2)
             {
                 basicInfo.talentBranches[0] = atol(taltoks[0]);
                 basicInfo.talentBranches[1] = atol(taltoks[1]);
+                LogMessage("Retrieved branch specs %u and %u", basicInfo.talentBranches[0], basicInfo.talentBranches[1]);
             }
             else
             {
                 basicInfo.talentBranches[0] = 0;
                 basicInfo.talentBranches[1] = 0;
+                LogMessage("No talent branches retrieved");
             }
 
             Tokens tokens(knownTitles, ' ', KNOWN_TITLES_SIZE * 2);
 
             // this may mean the player does not have any titles at all
             if (tokens.size() != KNOWN_TITLES_SIZE * 2)
-                return true;
+                return 0;
 
             for (uint32 index = 0; index < KNOWN_TITLES_SIZE * 2; ++index)
                 basicInfo.knownTitles[index] = atol(tokens[index]);
 
-            return true;
+            return 0;
         }
 
         bool StartTransfer()
@@ -258,6 +299,8 @@ public:
 
             if (dest->getClass() != basicInfo.pclass)
                 return false;
+
+            LogMessage("Begin of transfer");
 
             dest->SetRooted(true);
 
@@ -275,6 +318,9 @@ public:
 
         void ProceedBasicStage()
         {
+            LogMessage("Proceeding basic stage: level %u, " UI64FMTD " money, totaltime %u, leveltime %u, speccount %u",
+                basicInfo.level, basicInfo.money, basicInfo.totaltime, basicInfo.leveltime, basicInfo.speccount);
+
             // transfer all basic stuff
             lockedPlayer->GiveLevel(basicInfo.level);
             lockedPlayer->ModifyMoney(basicInfo.money);
@@ -313,6 +359,7 @@ public:
                 case 67534:
                 case 67525:
                 case 67536:
+                    LogMessage("Changing item %u to %u", itemId, 21841);
                     return 21841;
                 default:
                     return itemId;
@@ -358,6 +405,8 @@ public:
 
                 } while (res->NextRow());
             }
+
+            LogMessage("Loaded %u character_inventory records", itemInventory.size());
 
             std::set<uint64> bagGUIDs;
 
@@ -409,6 +458,8 @@ public:
 
                 } while (res->NextRow());
             }
+
+            LogMessage("Loaded %u bags", bagGUIDs.size());
 
             // select other items
             res = CharacterDatabase.PQuery("SELECT ii.itemEntry, ii.creatorGuid, ii.count, ii.duration, ii.charges, ii.flags, ii.randomPropertyId, ii.enchantments, ii.durability, ii.text, ii.guid FROM " SOULWELL_CHAR_DB ".item_instance ii LEFT JOIN " SOULWELL_CHAR_DB ".character_inventory cci ON ii.guid = cci.item WHERE cci.guid = %u", soulwellGUID);
@@ -463,6 +514,8 @@ public:
                 } while (res->NextRow());
             }
 
+            LogMessage("Loaded %u items (excluding bags)", items.size() - bagGUIDs.size());
+
             // set items iterator to point at the beginning of list
             itemsItr = items.begin();
             transferPhase = SWT_ITEMS;
@@ -507,7 +560,7 @@ public:
                             nitem = lockedPlayer->StoreItem(dest, nitem, true);
                         else
                         {
-                            sLog->outError("Item inventory store error: %u", res);
+                            LogMessage("Item %u could not be stored to inventory; error: %u", it->id, res);
                             success = false;
                         }
                     }
@@ -519,7 +572,7 @@ public:
                             lockedPlayer->QuickEquipItem(dest, nitem);
                         else
                         {
-                            sLog->outError("Item equipment store error: %u", res);
+                            LogMessage("Item %u could not be stored to equipment slot; error: %u", it->id, res);
                             success = false;
                         }
                     }
@@ -531,7 +584,7 @@ public:
                             nitem = lockedPlayer->BankItem(dest, nitem, true);
                         else
                         {
-                            sLog->outError("Item bank store error: %u", res);
+                            LogMessage("Item %u could not be stored to bank; error: %u", it->id, res);
                             success = false;
                         }
                     }
@@ -559,13 +612,13 @@ public:
                         }
                         else
                         {
-                            sLog->outError("Cannot create item %u (orig. guid: " UI64FMTD ")", it->id, it->guid);
+                            LogMessage("Item %u (orig. guid " UI64FMTD ") could not be stored to bag; error: %u", it->id, it->guid, result);
                             success = false;
                         }
                     }
                     else
                     {
-                        sLog->outError("Cannot find bag for item %u", it->id);
+                        LogMessage("Item %u (orig. guid " UI64FMTD ") could not be stored to bag; the bag could not be found", it->id, it->guid);
                         success = false;
                     }
                 }
@@ -611,8 +664,7 @@ public:
                 }
                 else
                 {
-                    // TODO: log message!
-                    sLog->outError("Something went wrong when creating item %u (orig. guid " UI64FMTD ")", it->id, it->guid);
+                    // nothing
                 }
 
                 // delete item transfer record (not list record! that would come later)
@@ -661,6 +713,8 @@ public:
                 } while (res->NextRow());
             }
 
+            LogMessage("Loaded %u spells", spells.size());
+
             res = CharacterDatabase.PQuery("SELECT spell, spec FROM " SOULWELL_CHAR_DB ".character_talent WHERE guid = %u", soulwellGUID);
             soulwell_talent_record* trec;
             if (res)
@@ -681,6 +735,8 @@ public:
                 } while (res->NextRow());
             }
 
+            LogMessage("Loaded %u talents", talents.size());
+
             // set spells iterator to point at the beginning of list
             spellsItr = spells.begin();
             transferPhase = SWT_SPELLS;
@@ -694,7 +750,8 @@ public:
                 sp = *spellsItr;
 
                 // is "learning" attribute correct?
-                lockedPlayer->AddSpell(sp->spell, sp->active, true, false, sp->disabled);
+                if (!lockedPlayer->AddSpell(sp->spell, sp->active, true, false, sp->disabled))
+                    LogMessage("Spell %u could not be taught for some reason", sp->spell);
 
                 delete sp;
                 ++spellsItr;
@@ -705,7 +762,8 @@ public:
                 // transfer talents
                 for (soulwell_talent_record* trec : talents)
                 {
-                    lockedPlayer->AddTalent(trec->spellId, trec->spec, true);
+                    if (!lockedPlayer->AddTalent(trec->spellId, trec->spec, true))
+                        LogMessage("Talent %u (spec %u) could not be added for some reason", trec->spellId, trec->spec);
                     delete trec;
                 }
 
@@ -750,6 +808,8 @@ public:
                 } while (res->NextRow());
             }
 
+            LogMessage("Loaded %u achievements", achievements.size());
+
             // select all achievement progress
             res = CharacterDatabase.PQuery("SELECT criteria, counter, date FROM " SOULWELL_CHAR_DB ".character_achievement_progress WHERE guid = %u", soulwellGUID);
             soulwell_achievement_progress_record* prec;
@@ -780,6 +840,8 @@ public:
 
                 } while (res->NextRow());
             }
+
+            LogMessage("Loaded %u achievement criterias", achievementProgress.size());
 
             achievementsItr = achievements.begin();
             achievementProgressItr = achievementProgress.begin();
@@ -842,7 +904,10 @@ public:
                     // do not transfer main PvP and PvE currencies
                     if (currId == CURRENCY_TYPE_HONOR_POINTS || currId == CURRENCY_TYPE_CONQUEST_POINTS ||
                         currId == CURRENCY_TYPE_JUSTICE_POINTS || currId == CURRENCY_TYPE_VALOR_POINTS)
+                    {
+                        LogMessage("Not transfered %u currency of ID %u", f[1].GetUInt32(), currId);
                         continue;
+                    }
 
                     rec = new soulwell_currency_record;
                     rec->currency = currId;
@@ -854,6 +919,8 @@ public:
 
                 } while (res->NextRow());
             }
+
+            LogMessage("Loaded %u currency records", currency.size());
 
             currencyItr = currency.begin();
             transferPhase = SWT_CURRENCY;
@@ -912,6 +979,8 @@ public:
 
                 } while (res->NextRow());
             }
+
+            LogMessage("Loaded %u items in void storage", voidstorage.size());
 
             if (voidstorage.size() > 0)
                 lockedPlayer->UnlockVoidStorage();
@@ -974,6 +1043,8 @@ public:
                 } while (res->NextRow());
             }
 
+            LogMessage("Loaded %u skill records", skills.size());
+
             skillsItr = skills.begin();
             transferPhase = SWT_SKILLS;
         }
@@ -989,13 +1060,17 @@ public:
                 SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(sr->skillId);
                 if (!pSkill)
                 {
+                    LogMessage("Could not transfer skill %u, the skill ID was not found", sr->skillId);
                     delete sr;
                     ++skillsItr;
                     continue;
                 }
                 step = 0;
                 if (pSkill->categoryId == SKILL_CATEGORY_SECONDARY || pSkill->categoryId == SKILL_CATEGORY_PROFESSION)
+                {
                     step = sr->max / 75;
+                    LogMessage("Found profession %u (%s), skill value %u, step %u", pSkill->id, pSkill->name, sr->skillId, step);
+                }
 
                 lockedPlayer->SetSkill(sr->skillId, step, sr->value, sr->max);
 
@@ -1037,6 +1112,8 @@ public:
                 } while (res->NextRow());
             }
 
+            LogMessage("Loaded %u reputations", reputation.size());
+
             reputationItr = reputation.begin();
             transferPhase = SWT_REPUTATION;
         }
@@ -1051,6 +1128,7 @@ public:
                 FactionEntry const* fe = sFactionStore.LookupEntry(sr->factionId);
                 if (!fe)
                 {
+                    LogMessage("Could not find faction id %u", sr->factionId);
                     delete sr;
                     ++reputationItr;
                     continue;
@@ -1080,11 +1158,22 @@ public:
 
         void FinishTransfer()
         {
+            LogMessage("End of transfer");
             ChatHandler(lockedPlayer).SendSysMessage("Finishing transfer...");
 
+            LogMessage("Saving character do DB");
             lockedPlayer->SaveToDB();
 
             lockedPlayer->SetRooted(true);
+
+            // save log and transfer record to database
+            std::string loglong = "";
+            for (std::string& str : transferLog)
+                loglong += str + "\n";
+
+            CharacterDatabase.PQuery("INSERT INTO soulwell_character_transfer (guid_old, guid_new, name_old, name_new, date, transfer_log) VALUES (%u, %u, '%s', '%s', %u, '%s')",
+                soulwellGUID, GUID_LOPART(lockedPlayerGUID), charactername.c_str(), lockedPlayer->GetName(), (uint32)time(nullptr), loglong.c_str());
+
 
             ChatHandler(lockedPlayer).SendSysMessage("You now have to log out and then back in. Please, check if everything's fine, and report all bugs to authorities.");
 
@@ -1096,7 +1185,12 @@ public:
             password = "";
             charactername = "";
 
+            LogMessage("Finished");
+
             transferPhase = SWT_END;
+
+            // despawn in 3 seconds
+            me->ForcedDespawn(3000);
         }
 
         void UpdateAI(const uint32 diff)
@@ -1228,7 +1322,8 @@ public:
 
         if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
         {
-            if (pAI->LoadSoulwellCharacter())
+            uint8 res = pAI->LoadSoulwellCharacter();
+            if (res == 0) // OK
             {
                 ChatHandler(player).PSendSysMessage("Sucessfully authenticated with username %s. Character selected: %s", pAI->username.c_str(), pAI->charactername.c_str());
                 if (pAI->StartTransfer())
@@ -1236,8 +1331,14 @@ public:
                 else
                     ChatHandler(player).SendSysMessage("Race and class pair must match with newly created character!");
             }
+            else if (res == 1)
+                ChatHandler(player).PSendSysMessage("Invalid username or password!");
+            else if (res == 2)
+                ChatHandler(player).PSendSysMessage("Character not found!");
+            else if (res == 3)
+                ChatHandler(player).PSendSysMessage("This character is already transfered!");
             else
-                ChatHandler(player).PSendSysMessage("Invalid username, password, or character name!");
+                ChatHandler(player).PSendSysMessage("Generic error: %u! Contact developers", res);
         }
         else if (uiAction == GOSSIP_ACTION_INFO_DEF + 99)
         {
