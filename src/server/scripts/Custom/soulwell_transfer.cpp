@@ -11,7 +11,6 @@
 struct soulwell_basic_record
 {
     uint32 originalAccountId;
-    std::string name;
     uint8 level;
     uint8 race;
     uint8 pclass;
@@ -142,6 +141,7 @@ public:
         bool loadingPhase;
         uint32 transferPhase = 0;
         uint32 transferTimer = 0;
+        uint32 posttransferTimer = 0;
         uint32 transferTicks;
 
         std::string username;
@@ -1189,12 +1189,23 @@ public:
 
             transferPhase = SWT_END;
 
-            // despawn in 3 seconds
-            me->ForcedDespawn(3000);
+            // hide NPC after 3s
+            posttransferTimer = 3000;
         }
 
         void UpdateAI(const uint32 diff)
         {
+            if (posttransferTimer)
+            {
+                if (posttransferTimer < diff)
+                {
+                    me->SetVisibility(VISIBILITY_OFF);
+                    posttransferTimer = 0;
+                }
+                else
+                    posttransferTimer -= diff;
+            }
+
             // no phase, or we've ended - do nothing
             if (transferPhase == SWT_NONE || transferPhase == SWT_END)
                 return;
