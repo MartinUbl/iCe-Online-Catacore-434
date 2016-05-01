@@ -55,8 +55,24 @@ bool ChatHandler::HandleSoulwellCommand(const char* args)
     if (!player)
         return false;
 
-    if (player->getLevel() != 1)
+    if (player->getLevel() != 1 && player->getLevel() != 55)
         return false;
+
+    player->RemoveAurasByType(SPELL_AURA_PHASE);
+
+    // DKs should learn spell Death Gate to be transferred to Soulwell zone
+    if (player->getLevel() == 55 && player->getClass() == CLASS_DEATH_KNIGHT)
+        player->LearnSpell(50977, false);
+
+    // worgens should have quest 14434 complete to be teleported out of Gilneas
+    if (player->getRace() == RACE_WORGEN)
+        player->SetQuestStatus(14434, QUEST_STATUS_COMPLETE);
+    // goblins should have quests 25266 and 14126 complete to be teleported out of Lost Isles
+    else if (player->getRace() == RACE_GOBLIN)
+    {
+        player->SetQuestStatus(25266, QUEST_STATUS_COMPLETE);
+        player->SetQuestStatus(14126, QUEST_STATUS_COMPLETE);
+    }
 
     float x, y, z;
 
