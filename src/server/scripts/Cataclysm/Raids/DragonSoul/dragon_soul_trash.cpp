@@ -2954,7 +2954,7 @@ public:
                         else if (action == ACTION_SPINE_OF_DEATHWING)
                             player->NearTeleportTo(telePos[4].GetPositionX(), telePos[4].GetPositionY(), telePos[4].GetPositionZ(), telePos[4].GetOrientation());
                         else if (action == ACTION_TELEPORT_TO_MAELSTROM)
-                            player->NearTeleportTo(telePos[6].GetPositionX(), telePos[5].GetPositionY(), telePos[5].GetPositionZ(), telePos[5].GetOrientation());
+                            player->NearTeleportTo(telePos[5].GetPositionX(), telePos[5].GetPositionY(), telePos[5].GetPositionZ(), telePos[5].GetOrientation());
 
                         if (withParachute == true)
                             player->AddAura(SPELL_PARACHUTE, player);
