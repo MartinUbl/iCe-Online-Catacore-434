@@ -6881,6 +6881,8 @@ uint32 ObjectMgr::GenerateMailID()
 
 uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
 {
+    TRINITY_GUARD(ACE_Thread_Mutex, m_guidMutex);
+
     uint32 id;
 
     switch(guidhigh)

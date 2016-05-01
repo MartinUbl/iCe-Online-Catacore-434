@@ -1436,6 +1436,8 @@ class ObjectMgr
         // first free low guid for selected guid type
         uint32 m_hiTempCreatureGuid;
 
+        ACE_Thread_Mutex m_guidMutex;
+
         // guid maps used for storing existing guids
         // and generating free guids for new entities
         GuidMap m_charGuidMap;
