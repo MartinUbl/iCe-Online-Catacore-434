@@ -4113,6 +4113,8 @@ bool Spell::CanCancel()
         case 109562:
         // Warmaster Blackhorn
         case 108046:
+        // Lord Hiram Creed
+        case 109669:
             return false;
     }
     return true;

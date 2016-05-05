@@ -5356,6 +5356,12 @@ void Spell::EffectEnergizePct(SpellEffIndex effIndex)
     if (!unitTarget->IsAlive())
         return;
 
+    if (m_spellInfo->Id == 109664) // Blackowl's Will
+    {
+        m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, -100, POWER_ENERGY);
+        return;
+    }
+
     if (m_spellInfo->EffectMiscValue[effIndex] < 0 || m_spellInfo->EffectMiscValue[effIndex] >= int8(MAX_POWERS))
         return;
 

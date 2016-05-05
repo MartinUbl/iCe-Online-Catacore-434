@@ -4922,6 +4922,9 @@ void SpellMgr::LoadSpellCustomAttr()
 
 /********************-------- WELL OF ETERNITY END -----------********************/
 
+        case 109669: // Shadow Breath
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            break;
         // Heart of the Crusader
         case 20335:
         case 20336:

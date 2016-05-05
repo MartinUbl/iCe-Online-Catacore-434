@@ -47,6 +47,7 @@ EndContentData */
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "World.h"
+#include "TaskScheduler.h"
 
 /*########
 # npc_air_force_bots
@@ -5055,6 +5056,308 @@ public:
     }
 };
 
+enum RavenholdtSpells
+{
+    SPELL_INFILTRATING_RAVENHOLDT     = 106067,
+    SPELL_INFILTRATING_GILNEAS_CITY   = 109157,
+    SPELL_MOSTRASZ_VISION             = 106015,
+    SPELL_EYE_OF_ZAZZO                = 109156,
+    SPELL_HIGH_ALERT                  = 106198,
+    SPELL_SAP                         = 6770,
+    SPELL_STEALTH                     = 1784,
+
+    // Lord Hiram Creed
+    SPELL_CONSUMING_DARKNESS          = 109196,
+    SPELL_BLACKHOWLS_WILL             = 109664,
+    SPELL_SHADOW_BREATH               = 109669,
+    SPELL_SHADOW_BREATH_NPC           = 109673,
+    SPELL_BLACKHOWLS_RAGE             = 109706,
+    SPELL_ENRAGE                      = 110055,
+    SPELL_TRANSFORM_DRAGONKIN         = 109232,
+
+    NPC_SHADOW_BREATH                 = 58002,
+};
+
+static const Position MostraszPos = { 14.9f, -1447.1f, 175.3f, 0.04f };
+static const Position ZazzoPos = { -1392.0f , 1232.1f, 35.5f,  0.83f };
+
+class npc_ravenholdt_guards : public CreatureScript
+{
+public:
+    npc_ravenholdt_guards() : CreatureScript("npc_ravenholdt_guards") { }
+
+    CreatureAI* GetAI(Creature *_Creature) const
+    {
+        return new npc_ravenholdt_guardsAI(_Creature);
+    }
+
+    struct npc_ravenholdt_guardsAI : public ScriptedAI
+    {
+        npc_ravenholdt_guardsAI(Creature *c) : ScriptedAI(c) {}
+
+        TaskScheduler scheduler;
+
+        void Reset()
+        {
+            me->CastSpell(me, SPELL_HIGH_ALERT, true);
+        }
+
+        void MoveInLineOfSight(Unit *who) override
+        {
+            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster())
+            {
+                if (!me->HasAura(6770))
+                {
+                    if (me->GetExactDist2d(who) < 7.0f)
+                    {
+                        who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                        who->RemoveAura(SPELL_INFILTRATING_RAVENHOLDT);
+                        who->RemoveAura(SPELL_MOSTRASZ_VISION);
+                        me->canAttack(who, true);
+                        me->GetMotionMaster()->MoveChase(who);
+                        me->Attack(who, true);
+                    }
+                }
+            }
+        }
+
+        void EnterCombat(Unit * /*who*/) override
+        {
+            Unit * target = me->GetVictim();
+            if (!target)
+                return;
+
+            scheduler.Schedule(Seconds(6), [this, target](TaskContext /*context*/)
+            {
+                target->NearTeleportTo(MostraszPos.GetPositionX(), MostraszPos.GetPositionY(), MostraszPos.GetPositionZ(), MostraszPos.GetOrientation());
+                target->CastSpell(target, SPELL_STEALTH, true);
+                target->CastSpell(target, SPELL_MOSTRASZ_VISION, true);
+                target->CastSpell(target, SPELL_INFILTRATING_RAVENHOLDT, true);
+                ScriptedAI::EnterEvadeMode();
+            });
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            scheduler.Update(diff);
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_gilneas_guards : public CreatureScript
+{
+public:
+    npc_gilneas_guards() : CreatureScript("npc_gilneas_guards") { }
+
+    CreatureAI* GetAI(Creature *_Creature) const
+    {
+        return new npc_gilneas_guardsAI(_Creature);
+    }
+
+    struct npc_gilneas_guardsAI : public ScriptedAI
+    {
+        npc_gilneas_guardsAI(Creature *c) : ScriptedAI(c) {}
+
+        TaskScheduler scheduler;
+
+        void Reset()
+        {
+            me->CastSpell(me, SPELL_HIGH_ALERT, true);
+        }
+
+        void MoveInLineOfSight(Unit *who) override
+        {
+            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster())
+            {
+                if (!me->HasAura(6770))
+                {
+                    if (me->GetExactDist2d(who) < 7.0f)
+                    {
+                        who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                        who->RemoveAura(SPELL_INFILTRATING_GILNEAS_CITY);
+                        who->RemoveAura(SPELL_EYE_OF_ZAZZO);
+                        me->canAttack(who, true);
+                        me->GetMotionMaster()->MoveChase(who);
+                        me->Attack(who, true);
+                    }
+                }
+            }
+        }
+
+        void EnterCombat(Unit * /*who*/) override
+        {
+            Unit * target = me->GetVictim();
+            if (!target)
+                return;
+
+            scheduler.Schedule(Seconds(6), [this, target](TaskContext /*context*/)
+            {
+                target->NearTeleportTo(ZazzoPos.GetPositionX(), ZazzoPos.GetPositionY(), ZazzoPos.GetPositionZ(), ZazzoPos.GetOrientation());
+                target->CastSpell(target, SPELL_STEALTH, true);
+                target->CastSpell(target, SPELL_EYE_OF_ZAZZO, true);
+                target->CastSpell(target, SPELL_INFILTRATING_GILNEAS_CITY, true);
+                ScriptedAI::EnterEvadeMode();
+            });
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            scheduler.Update(diff);
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_lord_hiram_creed : public CreatureScript
+{
+public:
+    npc_lord_hiram_creed() : CreatureScript("npc_lord_hiram_creed") {}
+
+    CreatureAI * GetAI(Creature * pCreature) const
+    {
+        return new npc_lord_hiram_creedAI(pCreature);
+    }
+
+    struct npc_lord_hiram_creedAI : public ScriptedAI
+    {
+        npc_lord_hiram_creedAI(Creature * creature) : ScriptedAI(creature) {}
+
+        TaskScheduler scheduler;
+        uint32 consumingDarknessTimer;
+        uint32 blackhowlsWillTimer;
+        uint32 shadowBreathTimer;
+        uint32 blackhowlsRageTimer;
+        bool phaseChange;
+        bool enrage;
+        bool shadowBreath;
+
+        inline bool IsCastingAllowed()
+        {
+            return !me->IsNonMeleeSpellCasted(false);
+        }
+
+        void Reset() override
+        {
+            consumingDarknessTimer = 7000;
+            blackhowlsWillTimer = 10000;
+            blackhowlsRageTimer = 120000;
+            enrage = false;
+            phaseChange = false;
+            me->RemoveAura(SPELL_TRANSFORM_DRAGONKIN);
+            me->RemoveAura(SPELL_ENRAGE);
+        }
+
+        void EnterCombat(Unit * /*who*/) override
+        {
+            me->MonsterSay("An assassin, eh ? Who sent you ? Speak, or I will carve the answer from your skull!", LANG_UNIVERSAL, 0);
+        }
+
+        void JustDied(Unit * /*who*/) override
+        {
+            me->MonsterSay("Who... ordered... this?", LANG_UNIVERSAL, 0);
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            scheduler.Update(diff);
+
+            if (!UpdateVictim())
+                return;
+
+            if (me->GetHealthPct() <= 75 && phaseChange == false)
+            {
+                phaseChange = true;
+                shadowBreathTimer = 10000;
+                shadowBreath = true;
+                me->CastSpell(me, SPELL_TRANSFORM_DRAGONKIN, false);
+                me->MonsterSay("I tire of this disguise. Now we finish this!", LANG_UNIVERSAL, 0);
+            }
+
+            // Timers
+            if (consumingDarknessTimer <= diff)
+            {
+                if (IsCastingAllowed())
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_CONSUMING_DARKNESS, false);
+                    consumingDarknessTimer = 10000;
+                }
+            }
+            else consumingDarknessTimer -= diff;
+
+            if (blackhowlsWillTimer <= diff)
+            {
+                if (IsCastingAllowed())
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_BLACKHOWLS_WILL, false);
+                    blackhowlsWillTimer = 12000;
+                }
+            }
+            else blackhowlsWillTimer -= diff;
+
+            if (blackhowlsRageTimer <= diff)
+            {
+                if (!enrage)
+                {
+                    me->CastSpell(me, SPELL_BLACKHOWLS_RAGE, true);
+                    enrage = true;
+                }
+                else
+                    me->CastSpell(me, SPELL_ENRAGE, true);
+                blackhowlsRageTimer = 120000;
+            }
+            else blackhowlsRageTimer -= diff;
+
+            if (phaseChange)
+            {
+                if (shadowBreathTimer <= diff)
+                {
+                    if (IsCastingAllowed())
+                    {
+                        me->CastSpell(me->GetVictim(), SPELL_SHADOW_BREATH_NPC, false);
+                        consumingDarknessTimer += 1500;
+                        blackhowlsWillTimer += 1500;
+                        scheduler.Schedule(Milliseconds(1100), [this](TaskContext /*context*/)
+                        {
+                            if (Creature * pShadowBreath = me->FindNearestCreature(NPC_SHADOW_BREATH, 200.0f, true))
+                                me->CastSpell(pShadowBreath, SPELL_SHADOW_BREATH, false);
+                        });
+                        shadowBreathTimer = 10000;
+                    }
+                }
+                else shadowBreathTimer -= diff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+// SHADOW BREATH
+class npc_lord_hiram_creed_shadow_breath : public CreatureScript
+{
+public:
+    npc_lord_hiram_creed_shadow_breath() : CreatureScript("npc_lord_hiram_creed_shadow_breath") {}
+
+    CreatureAI * GetAI(Creature * pCreature) const
+    {
+        return new npc_lord_hiram_creed_shadow_breathAI(pCreature);
+    }
+
+    struct npc_lord_hiram_creed_shadow_breathAI : public ScriptedAI
+    {
+        npc_lord_hiram_creed_shadow_breathAI(Creature * creature) : ScriptedAI(creature) {}
+
+        void Reset() override
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_PASSIVE);
+        }
+    };
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -5114,4 +5417,8 @@ void AddSC_npcs_special()
     new npc_pet_repairer;
     new npc_thaumaturge_altha_and_rafir;
     new npc_corastrasza_rogue_quest;
+    new npc_ravenholdt_guards;
+    new npc_gilneas_guards;
+    new npc_lord_hiram_creed();
+    new npc_lord_hiram_creed_shadow_breath();
 }
