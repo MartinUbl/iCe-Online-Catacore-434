@@ -40,6 +40,7 @@
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "GameObjectAI.h"
+#include "SpellMgr.h"
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket & recv_data)
 {
@@ -417,6 +418,19 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
             _player->TakeQuestSourceItem(quest, true); // remove quest src item from player
             _player->SetQuestStatus(quest, QUEST_STATUS_NONE);
             _player->GetAchievementMgr().RemoveTimedAchievement(ACHIEVEMENT_TIMED_TYPE_QUEST, quest);
+
+            // Some spells applied at quest activation - remove them when abandoning
+            SpellAreaForQuestMapBounds saBounds = sSpellMgr->GetSpellAreaForQuestMapBounds(quest, true);
+            if (saBounds.first != saBounds.second)
+            {
+                uint32 zone, area;
+                _player->GetZoneAndAreaId(zone, area);
+
+                for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+                    if (itr->second->autocast && !itr->second->IsFitToRequirements(_player, zone, area))
+                        if (_player->HasAura(itr->second->spellId))
+                            _player->RemoveAurasDueToSpell(itr->second->spellId);
+            }
         }
 
         _player->SetQuestSlot(slot, 0);
