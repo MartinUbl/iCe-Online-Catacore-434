@@ -391,7 +391,7 @@ public:
             }
 
             // force player save before item addition
-            //lockedPlayer->SaveToDB();
+            lockedPlayer->SaveToDB();
 
             // at first, select inventory to decide, where to put which item
             res = CharacterDatabase.PQuery("SELECT bag, slot, item FROM " SOULWELL_CHAR_DB ".character_inventory WHERE guid = %u", soulwellGUID);
@@ -545,6 +545,7 @@ public:
                 ItemPrototype const * proto = sObjectMgr->GetItemPrototype(it->id);
                 if (!proto)
                 {
+                    LogMessage("Item guid " UI64FMTD " with entry %u cannot be transferred (item not found)", it->guid, it->id);
                     itemsItr++;
                     continue;
                 }
@@ -555,6 +556,13 @@ public:
                 nitem->SetCount(it->count);
 
                 uint32 slot = itemInventory[it->guid]->slot;
+
+                if (!itemInventory[it->guid]->bag && !lockedPlayer->IsValidPos(INVENTORY_SLOT_BAG_0, slot, false))
+                {
+                    LogMessage("Item guid " UI64FMTD " with entry %u (%s), slot %u cannot be transferred (invalid slot)", it->guid, it->id, proto->Name1, slot);
+                    itemsItr++;
+                    continue;
+                }
 
                 bool success = true;
 
