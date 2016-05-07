@@ -2879,6 +2879,9 @@ class Player : public Unit, public GridObject<Player>
         VoidStorageItem* GetVoidStorageItem(uint8 slot) const;
         VoidStorageItem* GetVoidStorageItem(uint64 id, uint8& slot) const;
 
+        void SetItemUpdateQueueState(bool state) { m_itemUpdateQueueBlocked = state; };
+        bool GetItemUpdateQueueState() { return m_itemUpdateQueueBlocked; };
+
     protected:
         uint32 m_AreaID;
         uint32 m_regenTimerCount;

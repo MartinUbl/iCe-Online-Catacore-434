@@ -327,6 +327,14 @@ public:
             lockedPlayer->m_Played_time[PLAYED_TIME_TOTAL] = basicInfo.totaltime;
             lockedPlayer->m_Played_time[PLAYED_TIME_LEVEL] = basicInfo.leveltime;
             lockedPlayer->ResetTalents(true);
+
+            // Teach secondary talent spec
+            if (basicInfo.speccount > 1)
+            {
+                lockedPlayer->CastSpell(lockedPlayer, 63680, true, NULL, NULL, lockedPlayer->GetGUID());
+                lockedPlayer->CastSpell(lockedPlayer, 63624, true, NULL, NULL, lockedPlayer->GetGUID());
+            }
+
             lockedPlayer->SetSpecsCount(basicInfo.speccount);
             for (uint32 i = 0; i < 2; i++)
                 if (basicInfo.talentBranches[i] != 0)
@@ -381,6 +389,9 @@ public:
                 if (lockedPlayer->GetItemByPos(i))
                     lockedPlayer->DestroyItem((i >> 8) & 0xFF, (i & 0xFF), true, false);
             }
+
+            // force player save before item addition
+            //lockedPlayer->SaveToDB();
 
             // at first, select inventory to decide, where to put which item
             res = CharacterDatabase.PQuery("SELECT bag, slot, item FROM " SOULWELL_CHAR_DB ".character_inventory WHERE guid = %u", soulwellGUID);
@@ -518,6 +529,7 @@ public:
 
             // set items iterator to point at the beginning of list
             itemsItr = items.begin();
+            //lockedPlayer->SetItemUpdateQueueState(true);
             transferPhase = SWT_ITEMS;
         }
         void ProceedItemsStage()
@@ -659,8 +671,7 @@ public:
                     if (it->text.length() > 0)
                         nitem->SetText(it->text);
 
-                    // do not do that, seriously
-                    //nitem->SetState(ITEM_NEW);
+                    nitem->SetState(ITEM_NEW, lockedPlayer);
                 }
                 else
                 {
@@ -675,6 +686,8 @@ public:
 
             if (itemsItr == items.end())
             {
+                lockedPlayer->SaveToDB();
+                //lockedPlayer->SetItemUpdateQueueState(false);
                 LoadSpellsStage();
                 items.clear();
 
@@ -767,6 +780,7 @@ public:
                     delete trec;
                 }
 
+                lockedPlayer->SaveToDB();
                 LoadAchievementsStage();
                 spells.clear();
                 talents.clear();
@@ -874,6 +888,7 @@ public:
 
             if (achievementsItr == achievements.end() && achievementProgressItr == achievementProgress.end())
             {
+                lockedPlayer->SaveToDB();
                 LoadCurrencyStage();
                 achievements.clear();
                 achievementProgress.clear();
@@ -946,6 +961,7 @@ public:
 
             if (currencyItr == currency.end())
             {
+                lockedPlayer->SaveToDB();
                 LoadVoidStorageStage();
                 currency.clear();
             }
@@ -1011,6 +1027,8 @@ public:
 
             if (voidstorageItr == voidstorage.end())
             {
+                // No need to save, FinishTransfer will do it for us
+                //lockedPlayer->SaveToDB();
                 FinishTransfer();
                 voidstorage.clear();
             }
@@ -1080,6 +1098,7 @@ public:
 
             if (skillsItr == skills.end())
             {
+                lockedPlayer->SaveToDB();
                 LoadReputationStage();
                 skills.clear();
             }
@@ -1151,6 +1170,7 @@ public:
 
             if (reputationItr == reputation.end())
             {
+                lockedPlayer->SaveToDB();
                 LoadItemsStage();
                 reputation.clear();
             }

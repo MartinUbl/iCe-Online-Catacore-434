@@ -28465,6 +28465,13 @@ void Player::UpdateSpecCount(uint8 count)
     if (m_activeSpec >= count)
         ActivateSpec(0);
 
+    // If the player is activating secondary spec (has speccount > 1) and does not know spells, teach him
+    if (!HasSpell(63644) || !HasSpell(63645))
+    {
+        CastSpell(this, 63680, true, NULL, NULL, GetGUID());
+        CastSpell(this, 63624, true, NULL, NULL, GetGUID());
+    }
+
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
     // Copy spec data

@@ -431,6 +431,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             mover->RemoveAura(107837); // Remove also Throw Totem aura (Echo of Baine encounter)
             IgnoreDontKnowSpell = true;
         }
+        else if (spellInfo->HasSpellEffect(SPELL_EFFECT_TALENT_SPEC_SELECT)) // Switch talent branch spec, sanity checks are implemented elsewhere
+            IgnoreDontKnowSpell = true;
 
         // not have spell in spellbook or spell passive and not casted by client
         if ((!mover->ToPlayer()->HasActiveSpell (spellId) || IsPassiveSpell(spellId)) && !IgnoreDontKnowSpell)
