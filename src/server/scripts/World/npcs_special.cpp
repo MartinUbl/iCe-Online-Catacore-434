@@ -5104,7 +5104,7 @@ public:
 
         void MoveInLineOfSight(Unit *who) override
         {
-            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster())
+            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0)
             {
                 if (!me->HasAura(6770))
                 {
@@ -5133,7 +5133,7 @@ public:
                 target->CastSpell(target, SPELL_STEALTH, true);
                 target->CastSpell(target, SPELL_MOSTRASZ_VISION, true);
                 target->CastSpell(target, SPELL_INFILTRATING_RAVENHOLDT, true);
-                ScriptedAI::EnterEvadeMode();
+                me->CombatStop(true);
             });
         }
 
@@ -5169,7 +5169,7 @@ public:
 
         void MoveInLineOfSight(Unit *who) override
         {
-            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster())
+            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0)
             {
                 if (!me->HasAura(6770))
                 {
@@ -5198,7 +5198,7 @@ public:
                 target->CastSpell(target, SPELL_STEALTH, true);
                 target->CastSpell(target, SPELL_EYE_OF_ZAZZO, true);
                 target->CastSpell(target, SPELL_INFILTRATING_GILNEAS_CITY, true);
-                ScriptedAI::EnterEvadeMode();
+                me->CombatStop(true);
             });
         }
 
