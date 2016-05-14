@@ -279,6 +279,22 @@ class GS_CreatureScript : public CreatureScript
             }
         };
 
+        struct GS_ScriptSettings
+        {
+            uint32 flags;
+            uint32 cooldown;
+        };
+
+        struct GS_ScriptQueueRecord
+        {
+            GS_ScriptQueueRecord() { };
+            GS_ScriptQueueRecord(GScriptType ptype, int32 pparam = 0, uint64 pinvokerGUID = 0) : type(ptype), param(pparam), invokerGUID(pinvokerGUID) { };
+
+            GScriptType type;
+            int32 param;
+            uint64 invokerGUID;
+        };
+
         struct GS_ScriptedAI : public ScriptedAI
         {
             // vector of commands to be executed
@@ -305,8 +321,21 @@ class GS_CreatureScript : public CreatureScript
             // map of script IDs for spellcasts received
             std::map<int32, int32> m_spellReceivedScripts;
 
+            // map of script settings (key = script ID, value = settings struct)
+            std::map<int, GS_ScriptSettings> m_scriptSettings;
+            // current script settings we use
+            GS_ScriptSettings* m_currScriptSettings = nullptr;
+
             // current type of script being executed
             GScriptType m_currentScriptType = GS_TYPE_NONE;
+            // current param of script
+            int32 m_currentScriptParam = 0;
+
+            // primary key = TYPE:PARAM pair, secondary key = unit GUID, value = time of cooldown end
+            std::map<uint64, std::map<uint64, uint32>> m_scriptCooldownMap;
+
+            // script triggers waiting in queue to be started
+            std::queue<GS_ScriptQueueRecord> m_scriptQueue;
 
             // flag for disabling melee combat
             bool disable_melee;
@@ -412,13 +441,8 @@ class GS_CreatureScript : public CreatureScript
                 player->CLOSE_GOSSIP_MENU();
                 if (m_currentScriptType != GS_TYPE_COMBAT)
                 {
-                    if (m_gossipSelectScripts[action] >= 0)
-                    {
+                    if (GS_SelectScript(GS_TYPE_GOSSIP_SELECT, action, player))
                         ResetState();
-                        m_scriptInvoker = player;
-                        my_commands = sGSMgr->GetScript(m_gossipSelectScripts[action]);
-                        m_currentScriptType = GS_TYPE_GOSSIP_SELECT;
-                    }
                 }
             }
 
@@ -427,13 +451,8 @@ class GS_CreatureScript : public CreatureScript
                 if (m_currentScriptType != GS_TYPE_COMBAT)
                 {
                     uint32 questId = quest->GetQuestId();
-                    if (m_questScripts.find(questId) != m_questScripts.end() && m_questScripts[questId].acceptScriptId >= 0)
-                    {
+                    if (GS_SelectScript(GS_TYPE_QUEST_ACCEPT, questId, player))
                         ResetState();
-                        m_scriptInvoker = player;
-                        my_commands = sGSMgr->GetScript(m_questScripts[questId].acceptScriptId);
-                        m_currentScriptType = GS_TYPE_QUEST_ACCEPT;
-                    }
                 }
             }
 
@@ -442,13 +461,8 @@ class GS_CreatureScript : public CreatureScript
                 if (m_currentScriptType != GS_TYPE_COMBAT)
                 {
                     uint32 questId = quest->GetQuestId();
-                    if (m_questScripts.find(questId) != m_questScripts.end() && m_questScripts[questId].completeScriptId >= 0)
-                    {
+                    if (GS_SelectScript(GS_TYPE_QUEST_COMPLETE, questId, player))
                         ResetState();
-                        m_scriptInvoker = player;
-                        my_commands = sGSMgr->GetScript(m_questScripts[questId].completeScriptId);
-                        m_currentScriptType = GS_TYPE_QUEST_COMPLETE;
-                    }
                 }
             }
 
@@ -456,13 +470,8 @@ class GS_CreatureScript : public CreatureScript
             {
                 if (m_currentScriptType != GS_TYPE_COMBAT && m_currentScriptType != GS_TYPE_VEHICLE_ENTER && apply)
                 {
-                    if (m_vehicleEnterScriptId >= 0)
-                    {
+                    if (GS_SelectScript(GS_TYPE_VEHICLE_ENTER, 0, who))
                         ResetState();
-                        m_scriptInvoker = who;
-                        my_commands = sGSMgr->GetScript(m_vehicleEnterScriptId);
-                        m_currentScriptType = GS_TYPE_VEHICLE_ENTER;
-                    }
                 }
 
                 // if we are doing vehicle entered script, and passenger is leaving, reset state if it's last passenger
@@ -479,13 +488,8 @@ class GS_CreatureScript : public CreatureScript
                 {
                     if (m_currentScriptType != GS_TYPE_COMBAT)
                     {
-                        if (m_spellReceivedScripts[spell->Id] >= 0)
-                        {
+                        if (GS_SelectScript(GS_TYPE_SPELL_RECEIVED, spell->Id, who))
                             ResetState();
-                            m_scriptInvoker = who;
-                            my_commands = sGSMgr->GetScript(m_spellReceivedScripts[spell->Id]);
-                            m_currentScriptType = GS_TYPE_SPELL_RECEIVED;
-                        }
                     }
                 }
             }
@@ -505,7 +509,7 @@ class GS_CreatureScript : public CreatureScript
                 m_spellReceivedScripts.clear();
 
                 // select everything for this creature from database
-                QueryResult res = ScriptDatabase.PQuery("SELECT script_type, script_type_param, script_id FROM creature_gscript WHERE creature_entry = %u", me->GetEntry());
+                QueryResult res = ScriptDatabase.PQuery("SELECT script_type, script_type_param, script_cooldown, flags, script_id FROM creature_gscript WHERE creature_entry = %u", me->GetEntry());
 
                 if (res)
                 {
@@ -515,7 +519,9 @@ class GS_CreatureScript : public CreatureScript
                         f = res->Fetch();
 
                         uint16 type = f[0].GetUInt16();
-                        int32 scriptId = f[2].GetInt32();
+                        int32 cooldown = f[2].GetInt32();
+                        uint32 flags = f[3].GetUInt32();
+                        int32 scriptId = f[4].GetInt32();
                         int32 scriptParam = f[1].GetInt32();
 
                         switch (type)
@@ -550,6 +556,9 @@ class GS_CreatureScript : public CreatureScript
                                 break;
                         }
 
+                        m_scriptSettings[scriptId].cooldown = cooldown;
+                        m_scriptSettings[scriptId].flags = flags;
+
                     } while (res->NextRow());
                 }
             }
@@ -561,7 +570,6 @@ class GS_CreatureScript : public CreatureScript
                 is_waiting = false;
                 disable_melee = false;
                 is_moving = false;
-                m_scriptInvoker = nullptr;
                 m_lastSummonedUnit = nullptr;
 
                 timer_map.clear();
@@ -606,16 +614,8 @@ class GS_CreatureScript : public CreatureScript
 
                 if (!is_script_locked && m_currentScriptType != GS_TYPE_OUT_OF_COMBAT)
                 {
-                    if (m_outOfCombatScriptId >= 0)
-                    {
-                        my_commands = sGSMgr->GetScript(m_outOfCombatScriptId);
-                        m_currentScriptType = GS_TYPE_OUT_OF_COMBAT;
-                    }
-                    else
-                    {
-                        my_commands = nullptr;
-                        m_currentScriptType = GS_TYPE_NONE;
-                    }
+                    // will fall back to GS_TYPE_NONE if not found
+                    GS_SelectScript(GS_TYPE_OUT_OF_COMBAT);
                 }
 
                 ScriptedAI::Reset();
@@ -627,13 +627,7 @@ class GS_CreatureScript : public CreatureScript
                 {
                     ResetState();
 
-                    my_commands = nullptr;
-                    m_currentScriptType = GS_TYPE_NONE;
-                    if (m_outOfCombatScriptId >= 0)
-                    {
-                        my_commands = sGSMgr->GetScript(m_outOfCombatScriptId);
-                        m_currentScriptType = GS_TYPE_OUT_OF_COMBAT;
-                    }
+                    GS_SelectScript(GS_TYPE_OUT_OF_COMBAT);
                 }
 
                 ScriptedAI::EnterEvadeMode();
@@ -646,17 +640,157 @@ class GS_CreatureScript : public CreatureScript
                 disable_melee = false;
                 is_moving = false;
                 if (!is_script_locked)
-                {
-                    my_commands = nullptr;
-                    m_currentScriptType = GS_TYPE_NONE;
-                    if (m_combatScriptId >= 0)
-                    {
-                        my_commands = sGSMgr->GetScript(m_combatScriptId);
-                        m_currentScriptType = GS_TYPE_COMBAT;
-                    }
-                }
+                    GS_SelectScript(GS_TYPE_COMBAT);
 
                 ScriptedAI::EnterCombat(who);
+            }
+
+            uint64 GS_MakeTypeParamPair(GScriptType type, int32 param)
+            {
+                return ((uint64)type << 32) | ((uint64)param);
+            }
+
+            uint32 GS_GetScriptCooldownFor(GScriptType type, int32 param = 0, Unit* target = nullptr)
+            {
+                int scriptId = GS_GetScriptByType(type, param);
+                // script has no cooldown => no cooldown may be present in cooldown map
+                if (m_scriptSettings.find(scriptId) == m_scriptSettings.end() || m_scriptSettings[scriptId].cooldown == 0)
+                    return 0;
+
+                uint64 tppair = GS_MakeTypeParamPair(type, param);
+
+                if (m_scriptCooldownMap.find(tppair) == m_scriptCooldownMap.end())
+                    return 0;
+
+                uint32 cdval = 0;
+
+                if ((m_scriptSettings[scriptId].flags & GSFLAG_COOLDOWN_PER_PLAYER) && target)
+                {
+                    if (m_scriptCooldownMap[tppair].find(target->GetGUID()) != m_scriptCooldownMap[tppair].end())
+                        cdval = m_scriptCooldownMap[tppair][target->GetGUID()];
+                }
+                else
+                {
+                    if (m_scriptCooldownMap[tppair].find(0) != m_scriptCooldownMap[tppair].end())
+                        cdval = m_scriptCooldownMap[tppair][0];
+                }
+
+                // if cooldown has already passed, no cooldown is returned
+                if (cdval < time(nullptr))
+                    cdval = 0;
+
+                return cdval;
+            }
+
+            void GS_SetScriptCooldownFor(GScriptType type, int32 param = 0, Unit* target = nullptr)
+            {
+                int scriptId = GS_GetScriptByType(type, param);
+                // script has no cooldown => no cooldown may be present in cooldown map
+                if (m_scriptSettings.find(scriptId) == m_scriptSettings.end() || m_scriptSettings[scriptId].cooldown == 0)
+                    return;
+
+                uint64 tppair = GS_MakeTypeParamPair(type, param);
+
+                if ((m_scriptSettings[scriptId].flags & GSFLAG_COOLDOWN_PER_PLAYER) && target)
+                    m_scriptCooldownMap[tppair][target->GetGUID()] = time(nullptr) + m_scriptSettings[scriptId].cooldown;
+                else
+                    m_scriptCooldownMap[tppair][0] = time(nullptr) + m_scriptSettings[scriptId].cooldown;
+            }
+
+            bool GS_HasScriptCooldownFor(GScriptType type, int32 param = 0, Unit* target = nullptr)
+            {
+                return (GS_GetScriptCooldownFor(type, param, target) != 0);
+            }
+
+            int GS_GetScriptByType(GScriptType type, int32 param)
+            {
+                // select proper script
+                switch (type)
+                {
+                    case GS_TYPE_COMBAT:
+                        return m_combatScriptId;
+                        break;
+                    case GS_TYPE_OUT_OF_COMBAT:
+                        return m_outOfCombatScriptId;
+                        break;
+                    case GS_TYPE_GOSSIP_SELECT:
+                        if (param >= 0 && param < 10)
+                            return m_gossipSelectScripts[param];
+                        break;
+                    case GS_TYPE_QUEST_ACCEPT:
+                        if (m_questScripts.find(param) != m_questScripts.end())
+                            return m_questScripts[param].acceptScriptId;
+                        break;
+                    case GS_TYPE_QUEST_COMPLETE:
+                        if (m_questScripts.find(param) != m_questScripts.end())
+                            return m_questScripts[param].completeScriptId;
+                        break;
+                    case GS_TYPE_VEHICLE_ENTER:
+                        return m_vehicleEnterScriptId;
+                        break;
+                    case GS_TYPE_SPELL_RECEIVED:
+                        if (m_spellReceivedScripts.find(param) != m_spellReceivedScripts.end())
+                            return m_spellReceivedScripts[param];
+                        break;
+                }
+
+                return -1;
+            }
+
+            bool GS_SelectScript(GScriptType type, int32 param = 0, Unit* invoker = nullptr, bool fromQueue = false)
+            {
+                // if not retaining script from queue and we are trying to start the same type
+                if (!fromQueue && m_currentScriptType == type)
+                {
+                    // if even the same parameter, it is the same script, so determine shared cooldowns
+                    if (m_currentScriptParam == param)
+                    {
+                        int scriptId = GS_GetScriptByType(type, param);
+                        if (scriptId > -1)
+                        {
+                            uint32 needflags = (GSFLAG_SHARED_COOLDOWN | GSFLAG_COOLDOWN_PER_PLAYER);
+                            if (invoker && (m_scriptSettings[scriptId].flags & needflags) == needflags)
+                            {
+                                GS_SetScriptCooldownFor(type, param, invoker);
+                                return false;
+                            }
+                        }
+                    }
+                    m_scriptQueue.push(GS_ScriptQueueRecord(type, param, invoker ? invoker->GetGUID() : 0));
+                    return false;
+                }
+
+                int scriptId = GS_GetScriptByType(type, param);
+
+                // if the script is present, use it
+                if (scriptId > -1)
+                {
+                    if (GS_HasScriptCooldownFor(type, param, invoker))
+                        return false;
+
+                    my_commands = sGSMgr->GetScript(scriptId);
+                    m_currentScriptType = type;
+                    m_scriptInvoker = invoker;
+                    m_currentScriptParam = param;
+
+                    if (m_scriptSettings.find(scriptId) != m_scriptSettings.end())
+                        m_currScriptSettings = &m_scriptSettings[scriptId];
+
+                    GS_SetScriptCooldownFor(type, param, invoker);
+
+                    return true;
+                }
+                else
+                {
+                    // reset state
+                    my_commands = nullptr;
+                    m_currentScriptType = GS_TYPE_NONE;
+                    m_currScriptSettings = nullptr;
+                    m_scriptInvoker = nullptr;
+                    m_currentScriptParam = 0;
+                }
+
+                return false;
             }
 
             void GS_SetTimer(int timer, uint32 time)
@@ -956,7 +1090,34 @@ class GS_CreatureScript : public CreatureScript
                     // gossip/quest accept/quest complete script has passed to end
                     if (m_currentScriptType == GS_TYPE_GOSSIP_SELECT || m_currentScriptType == GS_TYPE_QUEST_ACCEPT || m_currentScriptType == GS_TYPE_QUEST_COMPLETE
                         || m_currentScriptType == GS_TYPE_VEHICLE_ENTER || m_currentScriptType == GS_TYPE_SPELL_RECEIVED)
-                        EnterEvadeMode();
+                    {
+                        // if there's something in script queue
+                        if (!m_scriptQueue.empty())
+                        {
+                            // retrieve last waiting script
+                            GS_ScriptQueueRecord qscr = m_scriptQueue.front();
+                            m_scriptQueue.pop();
+
+                            // if there's invoker stored, retrieve pointer using its GUID
+                            if (qscr.invokerGUID)
+                            {
+                                Unit* invoker = sObjectAccessor->FindUnit(qscr.invokerGUID);
+
+                                // we have to be sure the invoker is present
+                                if (invoker)
+                                    if (GS_SelectScript(qscr.type, qscr.param, invoker, true))
+                                        ResetState();
+                            }
+                            else
+                            {
+                                // otherwise start script without invoker
+                                if (GS_SelectScript(qscr.type, qscr.param, nullptr, true))
+                                    ResetState();
+                            }
+                        }
+                        else
+                            EnterEvadeMode();
+                    }
 
                     return;
                 }

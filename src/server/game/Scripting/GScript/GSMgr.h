@@ -18,6 +18,13 @@ enum GScriptType
     GS_TYPE_SPELL_RECEIVED = 7,
 };
 
+enum GScriptFlags
+{
+    GSFLAG_COOLDOWN_PER_PLAYER  = 0x00000001,   // cooldown is not global, but per player
+    GSFLAG_SHARED_COOLDOWN      = 0x00000002,   // script is run for group of players that "would start it" only once within cooldown period
+    GSFLAG_QUEUE_PERSISTENT     = 0x00000004,   // if the player no longer fits the conditions to start the script, but is in queue for starting it, leave him here
+};
+
 enum GSAISignals
 {
     GSAI_SIGNAL_UNHOOK = 1,
