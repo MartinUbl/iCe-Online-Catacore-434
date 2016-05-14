@@ -316,6 +316,10 @@ class GS_CreatureScript : public CreatureScript
             int m_gossipSelectScripts[10];
             // script ID when vehicle entered
             int m_vehicleEnterScriptId = -1;
+            // script ID when player comes to range
+            int m_playerInRangeScriptId = -1;
+            // distance parameter for player in range script
+            float m_playerInRangeScriptDistance = 0.0f;
             // map of script IDs for quests
             std::map<uint32, GS_QuestScriptRecord> m_questScripts;
             // map of script IDs for spellcasts received
@@ -551,6 +555,9 @@ class GS_CreatureScript : public CreatureScript
                                 break;
                             case GS_TYPE_SPELL_RECEIVED:
                                 m_spellReceivedScripts[scriptParam] = scriptId;
+                            case GS_TYPE_PLAYER_IN_RANGE:
+                                m_playerInRangeScriptId = scriptId;
+                                m_playerInRangeScriptDistance = scriptParam;
                             default:
                             case GS_TYPE_NONE:
                                 break;
@@ -709,10 +716,8 @@ class GS_CreatureScript : public CreatureScript
                 {
                     case GS_TYPE_COMBAT:
                         return m_combatScriptId;
-                        break;
                     case GS_TYPE_OUT_OF_COMBAT:
                         return m_outOfCombatScriptId;
-                        break;
                     case GS_TYPE_GOSSIP_SELECT:
                         if (param >= 0 && param < 10)
                             return m_gossipSelectScripts[param];
@@ -727,10 +732,13 @@ class GS_CreatureScript : public CreatureScript
                         break;
                     case GS_TYPE_VEHICLE_ENTER:
                         return m_vehicleEnterScriptId;
-                        break;
                     case GS_TYPE_SPELL_RECEIVED:
                         if (m_spellReceivedScripts.find(param) != m_spellReceivedScripts.end())
                             return m_spellReceivedScripts[param];
+                        break;
+                    case GS_TYPE_PLAYER_IN_RANGE:
+                        return m_playerInRangeScriptId;
+                    default:
                         break;
                 }
 
@@ -1009,6 +1017,15 @@ class GS_CreatureScript : public CreatureScript
                 return false;
             }
 
+            void MoveInLineOfSight(Unit* who) override
+            {
+                if (m_playerInRangeScriptId > -1 && me->GetDistance(who) <= m_playerInRangeScriptDistance)
+                {
+                    if (GS_SelectScript(GS_TYPE_PLAYER_IN_RANGE, (int32)m_playerInRangeScriptDistance, who))
+                        ResetState();
+                }
+            }
+
             void MovementInform(uint32 type, uint32 id) override
             {
                 if (id == 100)
@@ -1089,7 +1106,7 @@ class GS_CreatureScript : public CreatureScript
 
                     // gossip/quest accept/quest complete script has passed to end
                     if (m_currentScriptType == GS_TYPE_GOSSIP_SELECT || m_currentScriptType == GS_TYPE_QUEST_ACCEPT || m_currentScriptType == GS_TYPE_QUEST_COMPLETE
-                        || m_currentScriptType == GS_TYPE_VEHICLE_ENTER || m_currentScriptType == GS_TYPE_SPELL_RECEIVED)
+                        || m_currentScriptType == GS_TYPE_VEHICLE_ENTER || m_currentScriptType == GS_TYPE_SPELL_RECEIVED || m_currentScriptType == GS_TYPE_PLAYER_IN_RANGE)
                     {
                         // if there's something in script queue
                         if (!m_scriptQueue.empty())

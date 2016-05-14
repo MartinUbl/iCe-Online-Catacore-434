@@ -16,6 +16,7 @@ enum GScriptType
     GS_TYPE_QUEST_COMPLETE = 5,
     GS_TYPE_VEHICLE_ENTER = 6,
     GS_TYPE_SPELL_RECEIVED = 7,
+    GS_TYPE_PLAYER_IN_RANGE = 8,
 };
 
 enum GScriptFlags
