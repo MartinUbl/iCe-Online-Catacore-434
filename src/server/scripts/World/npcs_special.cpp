@@ -5127,12 +5127,19 @@ public:
             if (!target)
                 return;
 
-            scheduler.Schedule(Seconds(6), [this, target](TaskContext /*context*/)
+            uint64 targetGUID = target->GetGUID();
+
+            scheduler.Schedule(Seconds(6), [this, targetGUID](TaskContext /*context*/)
             {
-                target->NearTeleportTo(MostraszPos.GetPositionX(), MostraszPos.GetPositionY(), MostraszPos.GetPositionZ(), MostraszPos.GetOrientation());
-                target->CastSpell(target, SPELL_STEALTH, true);
-                target->CastSpell(target, SPELL_MOSTRASZ_VISION, true);
-                target->CastSpell(target, SPELL_INFILTRATING_RAVENHOLDT, true);
+                Unit* target = sObjectAccessor->FindUnit(targetGUID);
+
+                if (target)
+                {
+                    target->NearTeleportTo(MostraszPos.GetPositionX(), MostraszPos.GetPositionY(), MostraszPos.GetPositionZ(), MostraszPos.GetOrientation());
+                    target->CastSpell(target, SPELL_STEALTH, true);
+                    target->CastSpell(target, SPELL_MOSTRASZ_VISION, true);
+                    target->CastSpell(target, SPELL_INFILTRATING_RAVENHOLDT, true);
+                }
                 me->CombatStop(true);
             });
         }
@@ -5192,12 +5199,19 @@ public:
             if (!target)
                 return;
 
-            scheduler.Schedule(Seconds(6), [this, target](TaskContext /*context*/)
+            uint64 targetGUID = target->GetGUID();
+
+            scheduler.Schedule(Seconds(6), [this, targetGUID](TaskContext /*context*/)
             {
-                target->NearTeleportTo(ZazzoPos.GetPositionX(), ZazzoPos.GetPositionY(), ZazzoPos.GetPositionZ(), ZazzoPos.GetOrientation());
-                target->CastSpell(target, SPELL_STEALTH, true);
-                target->CastSpell(target, SPELL_EYE_OF_ZAZZO, true);
-                target->CastSpell(target, SPELL_INFILTRATING_GILNEAS_CITY, true);
+                Unit* target = sObjectAccessor->FindUnit(targetGUID);
+
+                if (target)
+                {
+                    target->NearTeleportTo(ZazzoPos.GetPositionX(), ZazzoPos.GetPositionY(), ZazzoPos.GetPositionZ(), ZazzoPos.GetOrientation());
+                    target->CastSpell(target, SPELL_STEALTH, true);
+                    target->CastSpell(target, SPELL_EYE_OF_ZAZZO, true);
+                    target->CastSpell(target, SPELL_INFILTRATING_GILNEAS_CITY, true);
+                }
                 me->CombatStop(true);
             });
         }

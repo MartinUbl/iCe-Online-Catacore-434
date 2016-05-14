@@ -370,13 +370,14 @@ void Unit::UpdateSplinePosition()
 
 bool Unit::IsSplineEnabled() const
 {
-    return movespline->Initialized() && !movespline->Finalized();
+    return movespline && movespline->Initialized() && !movespline->Finalized();
 }
 
 void Unit::DisableSpline()
 {
     m_movementInfo.RemoveMovementFlag(MOVEMENTFLAG_FORWARD);
-    movespline->_Interrupt();
+    if (movespline)
+        movespline->_Interrupt();
 }
 
 void Unit::SendMonsterMoveTransport(Unit *vehicleOwner)
