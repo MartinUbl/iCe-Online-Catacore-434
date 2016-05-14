@@ -138,7 +138,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 break;
             }
             case CHAT_MSG_GUILD:
-            case CHAT_MSG_BATTLEGROUND:
             {
                 msgLen = recv_data.ReadBits(9);
                 prefixLen = recv_data.ReadBits(5);
@@ -146,6 +145,16 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                     message = recv_data.ReadString(msgLen);
                 if (prefixLen > 0)
                     prefix = recv_data.ReadString(prefixLen);
+                break;
+            }
+            case CHAT_MSG_BATTLEGROUND:
+            {
+                prefixLen = recv_data.ReadBits(5);
+                msgLen = recv_data.ReadBits(9);
+                if (prefixLen > 0)
+                    prefix = recv_data.ReadString(prefixLen);
+                if (msgLen > 0)
+                    message = recv_data.ReadString(msgLen);
                 break;
             }
             default:
