@@ -673,6 +673,21 @@ void Loot::NotifyMoneyRemoved()
     }
 }
 
+void Loot::NotifyReleaseGlobal()
+{
+    // notify all players that are looting this that they are not looting this anymore
+    std::set<uint64>::iterator i_next;
+    for (std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); i = i_next)
+    {
+        i_next = i;
+        ++i_next;
+        if (Player* pl = ObjectAccessor::FindPlayer(*i))
+            pl->SendLootRelease(pl->GetLootGUID());
+        else
+            PlayersLooting.erase(i);
+    }
+}
+
 void Loot::NotifyQuestItemRemoved(uint8 questIndex)
 {
     // when a free for all questitem is looted

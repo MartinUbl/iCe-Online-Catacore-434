@@ -841,6 +841,9 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
 
         GameObjectModel * m_model;
 
+        void SetLootAbandonTime(time_t abtime);
+        time_t GetLootAbandonTime();
+
         void UpdateModelPosition(float x, float y, float z, bool gridChange = false);
     protected:
         bool AIM_Initialize();
@@ -852,6 +855,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         time_t      m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
                                                             // For traps this: spell casting cooldown, for doors/buttons: reset time.
         std::list<uint32> m_SkillupList;
+
+        time_t      m_lootAbandonTime;                      // (secs) time of automatic loot abandon (used fot herbs/veins/..)
 
         Player* m_ritualOwner;                              // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
         std::set<uint32> m_unique_users;

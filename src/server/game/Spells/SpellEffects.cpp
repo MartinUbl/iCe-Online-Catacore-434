@@ -5560,6 +5560,9 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
                         }
                     }
                 }
+
+                // 120 seconds to abandon all loot and start respawn time period
+                gameObjTarget->SetLootAbandonTime(time(nullptr) + 120);
             }
             else if (itemTarget)
             {

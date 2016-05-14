@@ -75,6 +75,7 @@ GameObject::GameObject() : WorldObject(), m_model(NULL), m_goValue(new GameObjec
 
     m_groupLootTimer = 0;
     lootingGroupLowGUID = 0;
+    m_lootAbandonTime = 0;
 
     ResetLootMode(); // restore default loot mode
 }
@@ -541,6 +542,11 @@ void GameObject::Update(uint32 diff)
                 default:
                     break;
             }
+
+            // if it's time to abandon loot (i.e. veins, herbs, ..), abandon it and start respawn routine
+            if (m_lootAbandonTime != 0 && time(nullptr) > m_lootAbandonTime)
+                SetLootState(GO_JUST_DEACTIVATED);
+
             break;
         }
         case GO_JUST_DEACTIVATED:
@@ -588,8 +594,10 @@ void GameObject::Update(uint32 diff)
                 SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
             }
 
+            loot.NotifyReleaseGlobal();
             loot.clear();
             SetLootState(GO_READY);
+            m_lootAbandonTime = 0;
 
             if (!m_respawnDelayTime)
                 return;
@@ -1899,6 +1907,16 @@ const char* GameObject::GetNameForLocaleIdx(LocaleConstant loc_idx) const
     }
 
     return GetName();
+}
+
+void GameObject::SetLootAbandonTime(time_t abtime)
+{
+    m_lootAbandonTime = abtime;
+}
+
+time_t GameObject::GetLootAbandonTime()
+{
+    return m_lootAbandonTime;
 }
 
 void GameObject::UpdateRotationFields(float rotation2 /*=0.0f*/, float rotation3 /*=0.0f*/)
