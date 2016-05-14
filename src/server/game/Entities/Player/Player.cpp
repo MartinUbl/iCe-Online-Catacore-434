@@ -18707,8 +18707,6 @@ void Player::_LoadActions(PreparedQueryResult result)
                 ab->uState = ACTIONBUTTON_UNCHANGED;
             else
             {
-                sLog->outError("  ...at loading, and will deleted in DB also");
-
                 // Will deleted in DB at next save (it can create data until save but marked as deleted)
                 m_actionButtons[button].uState = ACTIONBUTTON_DELETED;
             }
