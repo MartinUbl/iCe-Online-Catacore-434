@@ -4813,6 +4813,12 @@ void Spell::EffectHealthLeech(SpellEffIndex effIndex)
 
     float healMultiplier = SpellMgr::CalculateSpellEffectValueMultiplier(m_spellInfo, effIndex, m_originalCaster, this);
 
+    // Souldrinker effect - Drain Health
+    if (m_spellInfo->Id == 108022)
+        damage = m_caster->GetMaxHealth() * 0.015;
+    else if (m_spellInfo->Id == 109832)
+        damage = m_caster->GetMaxHealth() * 0.017;
+
     // Leeching spells coming from player also counts spell power bonus
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         damage = m_caster->SpellDamageBonus(unitTarget, m_spellInfo, effIndex, damage, SPELL_DIRECT_DAMAGE);
