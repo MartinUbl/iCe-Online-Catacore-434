@@ -90,6 +90,7 @@ public:
 
         uint32 absorbPct, hpPct, absorbed;
         uint32 suppressionAmount;
+
         bool Load()
         {
             Unit* caster = GetCaster();
@@ -98,8 +99,8 @@ public:
                 return false;
 
             absorbed = 0;
-            absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
-            hpPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_1, GetCaster());
+            absorbPct = (uint32)GetSpellProto()->EffectBasePoints[EFFECT_0];
+            hpPct = (uint32)GetSpellProto()->EffectBasePoints[EFFECT_1];
 
             suppressionAmount = 0;
             // Magic Suppression profit from damage absorbed
@@ -126,7 +127,8 @@ public:
 
         void Absorb(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
         {
-            absorbAmount = std::min(CalculatePctN(dmgInfo.GetDamage(), absorbPct), GetTarget()->CountPctFromMaxHealth(hpPct));
+            uint32 damage = dmgInfo.GetDamage();
+            absorbAmount = damage / 100 * absorbPct;
             absorbed += absorbAmount;
 
             if (absorbed >= GetTarget()->CountPctFromMaxHealth(hpPct))
