@@ -946,6 +946,42 @@ public:
     }
 };
 
+// Deep Freeze
+class spell_mage_deep_freeze_dmg : public SpellScriptLoader
+{
+public:
+    spell_mage_deep_freeze_dmg() : SpellScriptLoader("spell_mage_deep_freeze_dmg") { }
+
+    class spell_mage_deep_freeze_dmg_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_deep_freeze_dmg_SpellScript);
+
+        void HandleEffect(SpellEffIndex /*effIndex*/)
+        {
+            Unit * caster = GetCaster();
+            Unit * target = GetHitUnit();
+
+            if (!caster || !target)
+                return;
+
+            if (target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->isWorldBoss())
+            {
+                caster->CastSpell(target, 71757, true);
+            }
+        }
+
+        void Register() override
+        {
+            OnEffect += SpellEffectFn(spell_mage_deep_freeze_dmg_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_mage_deep_freeze_dmg_SpellScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_cold_snap();
@@ -959,4 +995,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_reactive_barrier();
     new spell_mage_blast_wave(); // 11113
     new npc_flame_orb();
+    new spell_mage_deep_freeze_dmg();
 }
