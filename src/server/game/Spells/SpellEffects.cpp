@@ -10645,6 +10645,10 @@ void Spell::EffectStealBeneficialBuff(SpellEffIndex effIndex)
         dataSuccess << uint32(itr->first);          // Spell Id
         dataSuccess << uint8(0);                    // 0 - steals !=0 transfers
         unitTarget->RemoveAurasDueToSpellBySteal(itr->first, itr->second, m_caster);
+
+        // Remove Sanctified Wrath from target when spellstealing Avenging Wrath
+        if (itr->first == 31884)
+            unitTarget->RemoveAurasDueToSpell(57318);
     }
     m_caster->SendMessageToSet(&dataSuccess, true);
 }
