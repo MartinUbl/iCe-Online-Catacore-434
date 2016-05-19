@@ -1714,6 +1714,23 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
         }
     }
 
+    // No'Kaled weapon
+    if (ToPlayer() && roll_chance_i(7))
+    {
+        // Normal
+        if (ToPlayer()->HasAura(107786))
+        {
+            uint32 noKaledSpecialSpell[3] = { 107785, 107789, 107787 };
+            ToPlayer()->CastSpell(pVictim, noKaledSpecialSpell[urand(0, 2)], true);
+        }
+        // Heroic
+        if (ToPlayer()->HasAura(109873))
+        {
+            uint32 noKaledSpecialSpell[3] = { 109872, 109870, 109868 };
+            ToPlayer()->CastSpell(pVictim, noKaledSpecialSpell[urand(0, 2)], true);
+        }
+    }
+
     // Do effect if any damage done to target
     if (damageInfo->damage)
     {
