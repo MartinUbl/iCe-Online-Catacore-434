@@ -4741,6 +4741,67 @@ class npc_summon_infernal: public CreatureScript
         }
 };
 
+// Gurthalak - Tentacle of the Old One
+class npc_tentacle_of_the_old_one : public CreatureScript
+{
+public:
+    npc_tentacle_of_the_old_one() : CreatureScript("npc_tentacle_of_the_old_one") {}
+
+    struct npc_tentacle_of_the_old_oneAI : ScriptedAI
+    {
+        npc_tentacle_of_the_old_oneAI(Creature* c) : ScriptedAI(c) {}
+
+        Unit * owner;
+        uint32 mindFlyTimer;
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->CastSpell(me, 65220, false);
+            mindFlyTimer = 0;
+            owner = GetSummoner<Unit>();
+            if (owner)
+                me->SetMaxHealth(owner->GetMaxHealth() * 0.1);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (mindFlyTimer <= diff)
+            {
+                if (!owner)
+                    return;
+
+                int32 bp0 = urand(500, 520);
+
+                // Unholy Death knight - dmg affected by Dreadblade mastery
+                if (owner->ToPlayer()->GetActiveTalentBranchSpec() == SPEC_DK_UNHOLY)
+                    bp0 *= (1 + (owner->ToPlayer()->GetMasteryPoints() * 2.5f / 100.0f));
+                // Base dmg of Mind Flay should be affected by auras from owner
+                float dmg_bonus = (float)owner->GetTotalAuraModifier(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+                if (dmg_bonus != 0)
+                    bp0 = int32(bp0 * float((100.0f + dmg_bonus) / 100.0f));
+
+                // Cast Mind Flay
+                if (owner->GetVictim())
+                    me->CastCustomSpell(owner->GetVictim(), 78751, &bp0, 0, 0, false);
+                else
+                {
+                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_NEAREST, 0, 20.0f, false))
+                        me->CastCustomSpell(pTarget, 78751, &bp0, 0, 0, false);
+                }
+
+                mindFlyTimer = 4000;
+            }
+            else mindFlyTimer -= diff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* c) const
+    {
+        return new npc_tentacle_of_the_old_oneAI(c);
+    }
+};
+
 // NPC spawned by item Moonwell Chalice (70142)
 class npc_moonwell_chalice: public CreatureScript
 {
@@ -5424,6 +5485,7 @@ void AddSC_npcs_special()
     new npc_title_map_restorer;
     new npc_summon_doomguard;
     new npc_summon_infernal;
+    new npc_tentacle_of_the_old_one();
     new npc_moonwell_chalice;
     new npc_burning_treant;
     new npc_fiery_imp;

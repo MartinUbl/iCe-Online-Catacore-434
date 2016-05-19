@@ -9946,6 +9946,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             else
                 return false;
         }
+        case 107810: // Gurthalak
+        case 109841:
+        {
+            // Don`t proc from  Censure, Seal of Truth and Seals of Command
+            if (procSpell->Id == 31803 || procSpell->Id == 31801 || procSpell->Id == 42463 || procSpell->Id == 85126 || procSpell->Id == 20424)
+                return false;
+            break;
+        }
         case 20784: // Tamed Pet Passive ( Frenzy only)
         {
             // Proc only from basic attacks abilities
