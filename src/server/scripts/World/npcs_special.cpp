@@ -5194,14 +5194,16 @@ public:
             {
                 Unit* target = sObjectAccessor->FindUnit(targetGUID);
 
-                if (target)
+                if (target && me->GetDistance2d(target) < 10.0f)
                 {
                     target->NearTeleportTo(MostraszPos.GetPositionX(), MostraszPos.GetPositionY(), MostraszPos.GetPositionZ(), MostraszPos.GetOrientation());
+                    target->ToPlayer()->RemoveSpellCooldown(SPELL_STEALTH);
                     target->CastSpell(target, SPELL_STEALTH, true);
                     target->CastSpell(target, SPELL_MOSTRASZ_VISION, true);
                     target->CastSpell(target, SPELL_INFILTRATING_RAVENHOLDT, true);
                 }
                 me->CombatStop(true);
+                target->CombatStop(true);
             });
         }
 
@@ -5266,14 +5268,16 @@ public:
             {
                 Unit* target = sObjectAccessor->FindUnit(targetGUID);
 
-                if (target)
+                if (target && me->GetDistance2d(target) < 10.0f)
                 {
                     target->NearTeleportTo(ZazzoPos.GetPositionX(), ZazzoPos.GetPositionY(), ZazzoPos.GetPositionZ(), ZazzoPos.GetOrientation());
+                    target->ToPlayer()->RemoveSpellCooldown(SPELL_STEALTH);
                     target->CastSpell(target, SPELL_STEALTH, true);
                     target->CastSpell(target, SPELL_EYE_OF_ZAZZO, true);
                     target->CastSpell(target, SPELL_INFILTRATING_GILNEAS_CITY, true);
                 }
                 me->CombatStop(true);
+                target->CombatStop(true);
             });
         }
 
