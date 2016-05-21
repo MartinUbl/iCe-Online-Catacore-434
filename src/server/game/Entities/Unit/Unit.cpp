@@ -9924,6 +9924,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 53259:
         case 53260:
         {
+            if (!procSpell)
+                break;
+
             if (procSpell->Id != 3044) // Arcane Shot
                 return false;
 
@@ -9933,6 +9936,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 85043: // Grand Crusader
         case 75806:
         {
+            if (!procSpell)
+                break;
+
             // Proc only from  Crusader Strike or Hammer of the Righteous
             if (procSpell->Id != 35395 && procSpell->Id != 53595)
                 return false;
@@ -9949,6 +9955,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 107810: // Gurthalak
         case 109841:
         {
+            if (!procSpell)
+                break;
+
             // Don`t proc from  Censure, Seal of Truth and Seals of Command
             if (procSpell->Id == 31803 || procSpell->Id == 31801 || procSpell->Id == 42463 || procSpell->Id == 85126 || procSpell->Id == 20424)
                 return false;
