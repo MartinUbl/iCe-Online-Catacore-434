@@ -522,29 +522,28 @@ public:
             {
                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_USESTANDING);
             }
-            else
-                if (m_uiPhase)
+            else if (m_uiPhase)
+            {
+                if (m_uiTimer <= uiDiff)
                 {
-                    if (m_uiTimer <= uiDiff)
+                    switch(m_uiPhase)
                     {
-                        switch(m_uiPhase)
-                        {
-                            case 1:
-                                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_LOOT);
-                                m_uiTimer = 3000;
-                                m_uiPhase = 2;
-                                break;
-                            case 2:
-                                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_ATTACK1H);
-                                m_uiTimer = 4000;
-                                m_uiPhase = 1;
-                                break;
-                        }
+                        case 1:
+                            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_LOOT);
+                            m_uiTimer = 3000;
+                            m_uiPhase = 2;
+                            break;
+                        case 2:
+                            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_ATTACK1H);
+                            m_uiTimer = 4000;
+                            m_uiPhase = 1;
+                            break;
                     }
-                    else
-                    m_uiTimer -= uiDiff;
                 }
-                ScriptedAI::UpdateAI(uiDiff);
+                else
+                    m_uiTimer -= uiDiff;
+            }
+            ScriptedAI::UpdateAI(uiDiff);
 
             UpdateVictim();
         }

@@ -223,12 +223,15 @@ struct boss_twin_baseAI : public ScriptedAI
                 for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
                 {
                     Unit* pPlayer = itr->getSource();
-                    if (!pPlayer) continue;
+                    if (!pPlayer)
+                        continue;
                     if (pPlayer->IsAlive())
+                    {
                         if (pSummoned->GetEntry() == NPC_LIGHT_ESSENCE)
                             pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
                         if (pSummoned->GetEntry() == NPC_DARK_ESSENCE)
                             pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE);
+                    }
                 }
                 break;
         }

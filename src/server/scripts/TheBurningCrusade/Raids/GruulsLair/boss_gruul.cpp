@@ -227,7 +227,7 @@ public:
                     if (m_uiCaveIn_StaticTimer >= 4000)
                         m_uiCaveIn_StaticTimer -= 2000;
 
-                        m_uiCaveIn_Timer = m_uiCaveIn_StaticTimer;
+                    m_uiCaveIn_Timer = m_uiCaveIn_StaticTimer;
                 }
                 else
                     m_uiCaveIn_Timer -= uiDiff;

@@ -799,11 +799,14 @@ public:
 
         void Despawn()
         {
-            if (!debuffGUID) return;
+            if (!debuffGUID)
+                return;
+
             Unit *debuff = Unit::GetUnit((*me),debuffGUID);
             if (debuff)
                 debuff->SetVisibility(VISIBILITY_OFF);
-                debuffGUID = 0;
+
+            debuffGUID = 0;
         }
 
         void JustDied(Unit * /*killer*/) { if (!sprouted) Despawn(); }

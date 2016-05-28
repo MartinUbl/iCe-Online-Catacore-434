@@ -243,117 +243,122 @@ public:
         {
             if (Creature* Protos = me->SummonCreature(44687, -277.34f, -753.7f, 910.922f, 2.0f, TEMPSUMMON_MANUAL_DESPAWN))
                 DragonList.push_back(Protos);
+
             if (Creature* Summoned2 = me->SummonCreature(44650, -321.283f, -727.229f, 888.086f, 2.82752f, TEMPSUMMON_MANUAL_DESPAWN))
+            {
+                Summoned2->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                DragonList.push_back(Summoned2);
+                if (!IsHeroic() && instance->GetData(DATA_STORM_RIDER) != 1)
                 {
-                    Summoned2->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    DragonList.push_back(Summoned2);
-                    if (!IsHeroic())
-                        if (!instance->GetData(DATA_STORM_RIDER) == 1)
-                            {
-                                Summoned2->AddAura(SPELL_UNRESPONSIVE, Summoned2);
-                                Summoned2->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                            }
-                };
+                    Summoned2->AddAura(SPELL_UNRESPONSIVE, Summoned2);
+                    Summoned2->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                }
+            }
+
             if (Creature* Summoned3 = me->SummonCreature(44645, -282.774f, -668.748f, 888.089f, 1.94274f, TEMPSUMMON_MANUAL_DESPAWN))
+            {
+                Summoned3->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                DragonList.push_back(Summoned3);
+                if (!IsHeroic() && instance->GetData(DATA_NETHER_SCION) != 1)
                 {
-                    Summoned3->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    DragonList.push_back(Summoned3);
-                    if (!IsHeroic())
-                        if (!instance->GetData(DATA_NETHER_SCION) == 1)
-                            {
-                                Summoned3->AddAura(SPELL_UNRESPONSIVE, Summoned3);
-                                Summoned3->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                            }
-                };
+                    Summoned3->AddAura(SPELL_UNRESPONSIVE, Summoned3);
+                    Summoned3->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                }
+            }
+
             if (Creature* Summoned4 = me->SummonCreature(44652, -279.755f, -696.075f, 888.087f, 2.76976f, TEMPSUMMON_MANUAL_DESPAWN))
+            {
+                Summoned4->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                DragonList.push_back(Summoned4);
+                if (!IsHeroic() && instance->GetData(DATA_THE_SLATE_DRAGON) != 1)
                 {
-                    Summoned4->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    DragonList.push_back(Summoned4);
-                    if (!IsHeroic())
-                        if (!instance->GetData(DATA_THE_SLATE_DRAGON) == 1)
-                            {
-                                Summoned4->AddAura(SPELL_UNRESPONSIVE, Summoned4);
-                                Summoned4->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                            }
-                };
+                    Summoned4->AddAura(SPELL_UNRESPONSIVE, Summoned4);
+                    Summoned4->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                }
+            }
+
             if (Creature* Summoned5 = me->SummonCreature(44797, -353.06f, -699.021f, 888.105f, 5.52467f, TEMPSUMMON_MANUAL_DESPAWN))
+            {
+                Summoned5->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                DragonList.push_back(Summoned5);
+                if (!IsHeroic() && instance->GetData(DATA_THE_TIME_WARDEN) != 1)
                 {
-                    Summoned5->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    DragonList.push_back(Summoned5);
-                    if (!IsHeroic())
-                        if (!instance->GetData(DATA_THE_TIME_WARDEN) == 1)
-                            {
-                                Summoned5->AddAura(SPELL_UNRESPONSIVE, Summoned5);
-                                Summoned5->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                            }
-                };
+                    Summoned5->AddAura(SPELL_UNRESPONSIVE, Summoned5);
+                    Summoned5->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                }
+            }
+
         };
 
         void RemoveDoors()
-            {
-                if (DoorList.empty())
-                    return;
+        {
+            if (DoorList.empty())
+                return;
 
-                for (std::list<GameObject*>::const_iterator itr = DoorList.begin(); itr != DoorList.end(); ++itr)
-                    if ((*itr)->IsInWorld())
-                        (*itr)->RemoveFromWorld();
+            for (std::list<GameObject*>::const_iterator itr = DoorList.begin(); itr != DoorList.end(); ++itr)
+                if ((*itr)->IsInWorld())
+                    (*itr)->RemoveFromWorld();
 
-                  DoorList.clear();
-             };
+            DoorList.clear();
+        }
 
         void RemoveDragon()
-            {
-                if (DragonList.empty())
-                    return;
+        {
+            if (DragonList.empty())
+                return;
 
-                for (std::list<Creature*>::const_iterator itr = DragonList.begin(); itr != DragonList.end(); ++itr)
-                    if (*itr)
-                        if ((*itr)->IsInWorld())
-                            (*itr)->DisappearAndDie();
+            for (std::list<Creature*>::const_iterator itr = DragonList.begin(); itr != DragonList.end(); ++itr)
+                if (*itr)
+                    if ((*itr)->IsInWorld())
+                        (*itr)->DisappearAndDie();
 
-                  DragonList.clear();
-             };
+            DragonList.clear();
+        }
 
         void SummonedCreatureDies(Creature* summon, Unit* /*killer*/)
+        {
+            for (std::list<Creature*>::iterator itr = DragonList.begin(); itr != DragonList.end();)
             {
-                for (std::list<Creature*>::iterator itr = DragonList.begin(); itr != DragonList.end();)
-                    if ((*itr)->GetEntry() == summon->GetEntry())
-                        itr = DragonList.erase(itr);
-                    else itr++;
+                if ((*itr)->GetEntry() == summon->GetEntry())
+                    itr = DragonList.erase(itr);
+                else itr++;
             }
+        }
 
         void DespawnCreatures(uint32 entry)
-            {
-                std::list<Creature*> creatures;
-                GetCreatureListWithEntryInGrid(creatures, me, entry, 200.0f);
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, entry, 200.0f);
 
-                if (creatures.empty())
-                    return;
+            if (creatures.empty())
+                return;
 
-                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                    (*iter)->DespawnOrUnsummon();
-            }
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                (*iter)->DespawnOrUnsummon();
+        }
 
         uint32 GetData(uint32 type)
+        {
+            switch (type)
             {
-                switch (type)
-                {
-                    case DATA_ACHIEVEMENT:
-                        return Achievement;
-                        break;
-                }
-                return 0;
+                case DATA_ACHIEVEMENT:
+                    return Achievement;
+                default:
+                    break;
             }
+            return 0;
+        }
 
         void SpellHit(Unit* target, const SpellEntry* spell)
         {
-            if(!spell)
+            if (!spell)
                 return;
 
-            for(uint8 i = 0; i < 3; i++) {
-                if(spell->Effect[i] == SPELL_EFFECT_INTERRUPT_CAST)
+            for (uint8 i = 0; i < 3; i++)
+            {
+                if (spell->Effect[i] == SPELL_EFFECT_INTERRUPT_CAST)
                 {
-                    if(Interruptable)
+                    if (Interruptable)
                     {
                         me->InterruptNonMeleeSpells(true);
                         Interruptable = false;
@@ -379,7 +384,7 @@ public:
             DoZoneInCombat(me);
             
             Interruptable = false;
-        };
+        }
 
         void JustDied(Unit* /*Killer*/)
         {
@@ -392,14 +397,14 @@ public:
             RemoveDoors();
             DoPlaySoundToSet(me, SAY_DEATH2);
             if (Creature* Summoned = me->SummonCreature(51599, -437.9f, -684.63f, 894.6f, 0, TEMPSUMMON_TIMED_DESPAWN, 10000))
-                {
-                    Summoned->MonsterYell("Flesh and sinew, weak but proud. Dare they part the Master's shroud? They stumble fumble groping blind, Finding fate and chaos intertwined.", LANG_UNIVERSAL, 0);
-                    DoPlaySoundToSet(Summoned, SAY_DEATH);
-                    Summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                };
+            {
+                Summoned->MonsterYell("Flesh and sinew, weak but proud. Dare they part the Master's shroud? They stumble fumble groping blind, Finding fate and chaos intertwined.", LANG_UNIVERSAL, 0);
+                DoPlaySoundToSet(Summoned, SAY_DEATH);
+                Summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            }
             instance->SetData(DATA_HALFUS, DONE);
             RemoveDragon();
-        };
+        }
 
         void UpdateAI(const uint32 diff)
         {
@@ -410,19 +415,23 @@ public:
                 CycloneWinds = true;
 
             if (instance)
+            {
+                Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                 {
-                    Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
-                        for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-                            if (Player* player = i->getSource())
-                                if (player->IsWithinDistInMap(me, 100) && Intro == 1)
-                                    if (Creature* Summoned = me->SummonCreature(51599, -437.9f, -684.63f, 894.6f, 0, TEMPSUMMON_TIMED_DESPAWN, 15000))
-                                        {
-                                            Intro = 0;
-                                            Summoned->MonsterYell("Halfus! Hear me! (The Master calls, the Master wants) Protect our secrets, Halfus. Destroy the intruders. (Murder for His glory. Murder for His hunger.)", LANG_UNIVERSAL, 0);
-                                            DoPlaySoundToSet(me, SAY_INTRO);
-                                            Summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                        };
-                };
+                    Player* player = i->getSource();
+                    if (player && player->IsWithinDistInMap(me, 100) && Intro == 1)
+                    {
+                        if (Creature* Summoned = me->SummonCreature(51599, -437.9f, -684.63f, 894.6f, 0, TEMPSUMMON_TIMED_DESPAWN, 15000))
+                        {
+                            Intro = 0;
+                            Summoned->MonsterYell("Halfus! Hear me! (The Master calls, the Master wants) Protect our secrets, Halfus. Destroy the intruders. (Murder for His glory. Murder for His hunger.)", LANG_UNIVERSAL, 0);
+                            DoPlaySoundToSet(me, SAY_INTRO);
+                            Summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        }
+                    }
+                }
+            }
 
             if (Aura* vengeance = me->GetAura(SPELL_DRAGON_VENGEANCE))
             {
@@ -437,10 +446,9 @@ public:
             }
 
             if (AchievementTimer <= diff && AchievementCheck)
-            {
                 AchievementCheck = false;
-            }
-            else AchievementTimer -= diff;
+            else
+                AchievementTimer -= diff;
 
             if (!UpdateVictim())
                 return;
@@ -448,17 +456,16 @@ public:
             if (StormRider)
             {
                 if (ShadowNovaTimer <= diff)
-                    {
-                        if (me->GetAura(SPELL_PETRIFICATION))
-                            {
-                                ShadowNovaTimer = urand(15*IN_MILLISECONDS, 17*IN_MILLISECONDS);
-                            };
-                        Interruptable = true;
-                        DoCast(SPELL_SHADOW_NOVA);
+                {
+                    if (me->GetAura(SPELL_PETRIFICATION))
+                        ShadowNovaTimer = urand(15*IN_MILLISECONDS, 17*IN_MILLISECONDS);
+                    Interruptable = true;
+                    DoCast(SPELL_SHADOW_NOVA);
 
-                        if (me->GetAura(SPELL_CYCLONE_WINDS))
-                            InterruptTimer = 1500;
-                        else InterruptTimer = 375;
+                    if (me->GetAura(SPELL_CYCLONE_WINDS))
+                        InterruptTimer = 1500;
+                    else
+                        InterruptTimer = 375;
                     ShadowNovaTimer = urand(15*IN_MILLISECONDS, 17*IN_MILLISECONDS);
                 }
                 else
@@ -467,7 +474,8 @@ public:
 
             if (InterruptTimer <= diff && Interruptable)
                 Interruptable = false;
-            else InterruptTimer -= diff;
+            else
+                InterruptTimer -= diff;
 
             if (BerserkTimer <= diff)
             {
@@ -483,35 +491,35 @@ public:
             if (Phase == PHASE_2)
             {
                 if (FuriousRoarTimer <= diff)
+                {
+                    Interruptable = false;
+                    if (me->GetAura(SPELL_PETRIFICATION))
                     {
-                        Interruptable = false;
-                        if (me->GetAura(SPELL_PETRIFICATION))
-                        {
-                            FuriousRoarTimer = urand(2*IN_MILLISECONDS, 5*IN_MILLISECONDS);
-                            return;
-                        };
-                        ShadowNovaTimer = urand(15*IN_MILLISECONDS, 17*IN_MILLISECONDS);
-
-                        if (FuriousRoarCount < 3)
-                            {
-                                if (Aura* Cyclone = me->GetAura(SPELL_CYCLONE_WINDS))
-                                    {
-                                        CycloneWinds = true;
-                                        me->RemoveAura(Cyclone);
-                                    };
-                                DoCast(SPELL_FURIOUS_ROAR);
-                                if (CycloneWinds)
-                                    me->AddAura(SPELL_CYCLONE_WINDS, me);
-                                ++FuriousRoarCount;
-                                FuriousRoarTimer = 1500;
-                            }
-                        else
-                            {
-                                DoCast(SPELL_SHADOW_NOVA);
-                                FuriousRoarCount = 0;
-                                FuriousRoarTimer = 30*IN_MILLISECONDS;
-                            }
+                        FuriousRoarTimer = urand(2*IN_MILLISECONDS, 5*IN_MILLISECONDS);
+                        return;
                     }
+                    ShadowNovaTimer = urand(15*IN_MILLISECONDS, 17*IN_MILLISECONDS);
+
+                    if (FuriousRoarCount < 3)
+                    {
+                        if (Aura* Cyclone = me->GetAura(SPELL_CYCLONE_WINDS))
+                        {
+                            CycloneWinds = true;
+                            me->RemoveAura(Cyclone);
+                        }
+                        DoCast(SPELL_FURIOUS_ROAR);
+                        if (CycloneWinds)
+                            me->AddAura(SPELL_CYCLONE_WINDS, me);
+                        ++FuriousRoarCount;
+                        FuriousRoarTimer = 1500;
+                    }
+                    else
+                    {
+                        DoCast(SPELL_SHADOW_NOVA);
+                        FuriousRoarCount = 0;
+                        FuriousRoarTimer = 30*IN_MILLISECONDS;
+                    }
+                }
                 else
                     FuriousRoarTimer -= diff;
             }
@@ -547,18 +555,16 @@ public:
             if (Is25ManRaid())
             {
                 if (IsHeroic())
-                {
                     me->SetMaxHealth(20705640);
-                }
-                else me->SetMaxHealth(14941360);
+                else
+                    me->SetMaxHealth(14941360);
             }
             else 
             {
                 if (IsHeroic())
-                {
                     me->SetMaxHealth(5807580);
-                }
-                else me->SetMaxHealth(3979640);
+                else
+                    me->SetMaxHealth(3979640);
             }
             me->SetHealth(me->GetMaxHealth());
         }
@@ -573,92 +579,94 @@ public:
         bool Active;
 
         void Reset()
-            {
-                me->SetFloatValue(UNIT_FIELD_COMBATREACH, 8.0f);
-                Active = false;
-                SummonChains();
-            };
+        {
+            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 8.0f);
+            Active = false;
+            SummonChains();
+        }
 
         void RemoveSummons()
-            {
-                if (SummonList.empty())
-                    return;
+        {
+            if (SummonList.empty())
+                return;
 
-                for (std::list<Creature*>::const_iterator itr = SummonList.begin(); itr != SummonList.end(); ++itr)
-                    if (*itr)
-                        if ((*itr)->IsInWorld())
-                            (*itr)->DisappearAndDie();
+            for (std::list<Creature*>::const_iterator itr = SummonList.begin(); itr != SummonList.end(); ++itr)
+                if ((*itr) && (*itr)->IsInWorld())
+                    (*itr)->DisappearAndDie();
 
-                 SummonList.clear();
-             };
+            SummonList.clear();
+        }
 
         void JustDied(Unit* /*Killer*/)
         {
             if (instance)
+            {
+                RemoveSummons();
+                if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
                 {
-                    RemoveSummons();
-                    if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
-                    {
-                        if (Aura* aura = halfus->GetAura(87683))
-                            aura->SetStackAmount(aura->GetStackAmount() + 1);
-                        else
-                            me->AddAura(87683, halfus);
-                    }
+                    if (Aura* aura = halfus->GetAura(87683))
+                        aura->SetStackAmount(aura->GetStackAmount() + 1);
+                    else
+                        me->AddAura(87683, halfus);
                 }
+            }
         }
 
         void SummonChains()
         {
-            switch(me->GetEntry())
+            switch (me->GetEntry())
             {
-            case NPC_STORM_RIDER:
-                Dragon = 0;
-                break;
-            case NPC_NETHER_SCION:
-                Dragon = 1;
-                break;
-            case NPC_THE_TIME_WARDEN:
-                Dragon = 2;
-                break;
-            case NPC_THE_SLATE_DRAGON:
-                Dragon = 3;
-                break;
+                case NPC_STORM_RIDER:
+                    Dragon = 0;
+                    break;
+                case NPC_NETHER_SCION:
+                    Dragon = 1;
+                    break;
+                case NPC_THE_TIME_WARDEN:
+                    Dragon = 2;
+                    break;
+                case NPC_THE_SLATE_DRAGON:
+                    Dragon = 3;
+                    break;
             };
 
-            for(uint8 i=0; i<5 ; i++)
+            for (uint8 i = 0; i < 5; i++)
+            {
+                if (Creature* Summoned = me->SummonCreature(NPC_SPIKE, ChainPositions[Dragon][i].GetPositionX(), ChainPositions[Dragon][i].GetPositionY(), ChainPositions[Dragon][i].GetPositionZ(), urand(0,6.28), TEMPSUMMON_MANUAL_DESPAWN))
                 {
-                    if (Creature* Summoned = me->SummonCreature(NPC_SPIKE, ChainPositions[Dragon][i].GetPositionX(), ChainPositions[Dragon][i].GetPositionY(), ChainPositions[Dragon][i].GetPositionZ(), urand(0,6.28), TEMPSUMMON_MANUAL_DESPAWN))
-                    {
-                        Summoned->CastSpell(me, SPELL_SPIKE_VISUAL, true);
-                        Summoned->CastSpell(me, SPELL_CHAINS, true);
-                        Summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        SummonList.push_back(Summoned);
-                    };
-                };
+                    Summoned->CastSpell(me, SPELL_SPIKE_VISUAL, true);
+                    Summoned->CastSpell(me, SPELL_CHAINS, true);
+                    Summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    SummonList.push_back(Summoned);
+                }
+            }
         };
 
         void SpellHit(Unit* /*pCaster*/, const SpellEntry* spell)
         {
             if (spell->Id == SPELL_FREE_DRAGON)
-                {   
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))       
-                        DoZoneInCombat(halfus, 200.0f);
-                    me->SetFlying(true);
-                    RemoveSummons();
-                    if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
+            {   
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
+                    DoZoneInCombat(halfus, 200.0f);
+
+                me->SetFlying(true);
+                RemoveSummons();
+
+                if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
                     me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), halfus->GetPositionZ()+7.0f);
-                    me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
-                    BuffTimer = 2000;
-                    FlyTimer = 3000;
-                    Active = true;
-                }
+
+                me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+                BuffTimer = 2000;
+                FlyTimer = 3000;
+                Active = true;
+            }
 
             if (spell->Id == SPELL_BIND_WILL)
-                {   
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    DoZoneInCombat(me, 50000.0f);
-                };
+            {   
+                me->SetReactState(REACT_AGGRESSIVE);
+                DoZoneInCombat(me, 50000.0f);
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -671,64 +679,61 @@ public:
                     halfus->CombatStop(true);
 
             if (BuffTimer <= diff && Active)
-                {
-                    if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
-                        {
-                            me->SetFacingToObject(halfus);
-                            if (me->GetEntry() == NPC_STORM_RIDER)
-                                {
-                                    me->CastSpell(halfus, SPELL_CYCLONE_WINDS, false);
-                                };
-                            if (me->GetEntry() == NPC_THE_SLATE_DRAGON)
-                                {
-                                    me->CastSpell(halfus, SPELL_STONE_GRID, false);
-                                };
-                            if (me->GetEntry() == NPC_THE_TIME_WARDEN)
-                                {
-                                    if (Creature* protos = Unit::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
-                                    {
-                                        me->CastSpell(protos, SPELL_TIME_DILATION, false);
-                                        me->SetFacingToObject(protos);
-                                    };
-                                };
-                            if (me->GetEntry() == NPC_NETHER_SCION)
-                                {
-                                    me->CastSpell(halfus, SPELL_NETHER_BLINDNESS, false);
-                                };
-                        };
-                    BuffTimer = 50000;
-                }
-            else BuffTimer -= diff;
-
-        if (Active)
             {
                 if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
+                {
+                    me->SetFacingToObject(halfus);
+                    if (me->GetEntry() == NPC_STORM_RIDER)
+                        me->CastSpell(halfus, SPELL_CYCLONE_WINDS, false);
+                    if (me->GetEntry() == NPC_THE_SLATE_DRAGON)
+                        me->CastSpell(halfus, SPELL_STONE_GRID, false);
+                    if (me->GetEntry() == NPC_THE_TIME_WARDEN)
                     {
+                        if (Creature* protos = Unit::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
+                        {
+                            me->CastSpell(protos, SPELL_TIME_DILATION, false);
+                            me->SetFacingToObject(protos);
+                        }
+                    }
+                    if (me->GetEntry() == NPC_NETHER_SCION)
+                        me->CastSpell(halfus, SPELL_NETHER_BLINDNESS, false);
+                }
+                BuffTimer = 50000;
+            }
+            else
+                BuffTimer -= diff;
+
+            if (Active)
+            {
+                if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
+                {
                     if (halfus->GetAura(SPELL_CYCLONE_WINDS) && me->GetEntry() == NPC_STORM_RIDER)
-                        {
-                            halfus->CastSpell(me, SPELL_BIND_WILL, true);
-                            Active = false;
-                        };
+                    {
+                        halfus->CastSpell(me, SPELL_BIND_WILL, true);
+                        Active = false;
+                    }
                     if (halfus->GetAura(SPELL_STONE_GRID) && me->GetEntry() == NPC_THE_SLATE_DRAGON)
-                        {
-                            halfus->CastSpell(me, SPELL_BIND_WILL, true);
-                            Active = false;
-                        };
+                    {
+                        halfus->CastSpell(me, SPELL_BIND_WILL, true);
+                        Active = false;
+                    }
                     if (Creature* protos = Unit::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
+                    {
                         if (protos->GetAura(SPELL_TIME_DILATION) && me->GetEntry() == NPC_THE_TIME_WARDEN)
-                            {
-                                halfus->CastSpell(me, SPELL_BIND_WILL, true);
-                                Active = false;
-                            };
-                    if (halfus->GetAura(SPELL_NETHER_BLINDNESS) && me->GetEntry() == NPC_NETHER_SCION)
                         {
                             halfus->CastSpell(me, SPELL_BIND_WILL, true);
                             Active = false;
-                        };
+                        }
+                    }
+                    if (halfus->GetAura(SPELL_NETHER_BLINDNESS) && me->GetEntry() == NPC_NETHER_SCION)
+                    {
+                        halfus->CastSpell(me, SPELL_BIND_WILL, true);
+                        Active = false;
+                    }
                     if (UpdateVictim())
                         me->GetMotionMaster()->MovePoint(0, me->GetVictim()->GetPositionX(), me->GetVictim()->GetPositionY(), me->GetVictim()->GetPositionZ()+7.0f);
-                    };
-            };
+                }
+            }
 
             if (!UpdateVictim())
                 return;
@@ -745,13 +750,13 @@ public:
 
             if (me->isAttackReady() && !me->IsNonMeleeSpellCasted(false))
             {
-               if (me->GetDistance(me->GetVictim()) < 2.0f)
+                if (me->GetDistance(me->GetVictim()) < 2.0f)
                 {
                     FlyTimer = 500;
                     me->AttackerStateUpdate(me->GetVictim());
                     me->resetAttackTimer();
                 }
-             }
+            }
         }
     };
 };
@@ -817,65 +822,74 @@ public:
             SummonWhelp();
 
             if (instance)
+            {
+                if (IsHeroic())
                 {
-                    if (IsHeroic())
-                        {
-                            Whelp = true;
-                            DoCast(me, SPELL_DANCING_FLAMES);
-                            Warden = true;
-                        }
-                    else if (instance->GetData(DATA_ORPHANED_EMERALD_WHELP) == 1)
-                            Whelp = true;
-                    else Whelp = false;
+                    Whelp = true;
+                    DoCast(me, SPELL_DANCING_FLAMES);
+                    Warden = true;
+                }
+                else if (instance->GetData(DATA_ORPHANED_EMERALD_WHELP) == 1)
+                    Whelp = true;
+                else
+                    Whelp = false;
 
-                    if (!IsHeroic())
-                        if (instance->GetData(DATA_THE_TIME_WARDEN) == 1)
+                if (!IsHeroic())
+                {
+                    if (instance->GetData(DATA_THE_TIME_WARDEN) == 1)
+                    {
+                        DoCast(me, SPELL_DANCING_FLAMES);
+                        Warden = true;
+                    }
+                    else
+                        Warden = false;
+                }
+                else
+                    Warden = true;
+
+                if (Whelp)
+                {
+                    me->CastSpell(me, SPELL_SUPERHEATED_BREATH, false);
+                    for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
+                    {
+                        if (CageOpen)
+                        {
+                            if (Creature* Summoned = me->SummonCreature(NPC_SPIKE, -345.997f, -721.726f, 888.095f, 0, TEMPSUMMON_MANUAL_DESPAWN))
                             {
-                                DoCast(me, SPELL_DANCING_FLAMES);
-                                Warden = true;
+                                Summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                GameObject* Obje2 = Summoned->SummonGameObject(182943, -345.997f, -721.726f, 888.095f, 5.7f, 0, 0, 0, 0, 0); //base
+                                Cage.push_back(Obje2);
+                                GameObject* Obje = Summoned->SummonGameObject(182942, -345.997f, -721.726f, 888.00f, 5.7f, 0, 0, 0, 0, 0);//cage;
+                                Cage.push_back(Obje);
+                                CageOpen = false;
                             }
-                        else Warden = false;
-                    else Warden = true;
-
-                    if (Whelp)
-                        {
-                            me->CastSpell(me, SPELL_SUPERHEATED_BREATH, false);
-                            for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
-                                if (CageOpen)
-                                        {
-                                            if (Creature* Summoned = me->SummonCreature(NPC_SPIKE, -345.997f, -721.726f, 888.095f, 0,TEMPSUMMON_MANUAL_DESPAWN))
-                                            {
-                                                Summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                                GameObject* Obje2 = Summoned->SummonGameObject(182943, -345.997f, -721.726f, 888.095f, 5.7f, 0, 0, 0, 0, 0); //base
-                                                Cage.push_back(Obje2);
-                                                GameObject* Obje = Summoned->SummonGameObject(182942, -345.997f, -721.726f, 888.00f, 5.7f, 0, 0, 0, 0, 0);//cage;
-                                                Cage.push_back(Obje);
-                                                CageOpen = false;
-                                            };
-                                        };
-                        } else
-                                {
-                                    GameObject* Obje2 = me->SummonGameObject(182943, -345.997f, -721.726f, 888.095f, 5.7f, 0, 0, 0, 0, 0);
-                                    Cage.push_back(Obje2);
-                                    GameObject* Obje = me->SummonGameObject(182942, -345.997f, -721.726f, 888.00f, 5.7f, 0, 0, 0, 0, 0);
-                                    Cage.push_back(Obje);
-                                    for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
-                                            (*itr)->CastSpell((*itr), SPELL_WHELP_UNRESPONSIVE,true);
-                                };
+                        }
+                    }
+                }
+                else
+                {
+                    GameObject* Obje2 = me->SummonGameObject(182943, -345.997f, -721.726f, 888.095f, 5.7f, 0, 0, 0, 0, 0);
+                    Cage.push_back(Obje2);
+                    GameObject* Obje = me->SummonGameObject(182942, -345.997f, -721.726f, 888.00f, 5.7f, 0, 0, 0, 0, 0);
+                    Cage.push_back(Obje);
+                    for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
+                        (*itr)->CastSpell((*itr), SPELL_WHELP_UNRESPONSIVE, true);
+                }
             }
         }
 
         void EnterCombat(Unit* /*who*/)
-            {
-                FireballTimer = 4*IN_MILLISECONDS;
-                BarrageTimer = 23*IN_MILLISECONDS;
-                BreathTimer = 10*IN_MILLISECONDS;
-            };
+        {
+            FireballTimer = 4 * IN_MILLISECONDS;
+            BarrageTimer = 23 * IN_MILLISECONDS;
+            BreathTimer = 10 * IN_MILLISECONDS;
+        }
 
         void SummonWhelp()
-        {    
-            for(uint8 i=0; i<8 ; i++)
-            if (Creature* Whelps = me->SummonCreature(44641, WhelpPositions[i].GetPositionX(), WhelpPositions[i].GetPositionY(), WhelpPositions[i].GetPositionZ(), urand(0,6), TEMPSUMMON_MANUAL_DESPAWN))
+        {
+            for (uint8 i = 0; i < 8; i++)
+            {
+                if (Creature* Whelps = me->SummonCreature(44641, WhelpPositions[i].GetPositionX(), WhelpPositions[i].GetPositionY(), WhelpPositions[i].GetPositionZ(), urand(0, 6), TEMPSUMMON_MANUAL_DESPAWN))
                 {
                     Whelps->setFaction(35);
                     WhelpsList.push_back(Whelps);
@@ -884,135 +898,138 @@ public:
                     if (Is25ManRaid())
                     {
                         if (IsHeroic())
-                        {
                             Whelps->SetMaxHealth(20705640);
-                        }
-                        else Whelps->SetMaxHealth(14941360);
+                        else
+                            Whelps->SetMaxHealth(14941360);
                     }
-                    else 
+                    else
                     {
                         if (IsHeroic())
-                        {
                             Whelps->SetMaxHealth(5807580);
-                        }
-                        else Whelps->SetMaxHealth(3979640);
+                        else
+                            Whelps->SetMaxHealth(3979640);
                     }
-                    Whelps->SetMaxHealth(Whelps->GetMaxHealth()/8);
+                    Whelps->SetMaxHealth(Whelps->GetMaxHealth() / 8);
                     Whelps->SetHealth(Whelps->GetMaxHealth());
-                };
-        };
+                }
+            }
+        }
 
         void DespawnCreatures(uint32 entry)
-            {
-                std::list<Creature*> creatures;
-                GetCreatureListWithEntryInGrid(creatures, me, entry, 1000.0f);
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, entry, 1000.0f);
 
-                if (creatures.empty())
-                    return;
+            if (creatures.empty())
+                return;
 
-                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                    (*iter)->DespawnOrUnsummon();
-            }
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                (*iter)->DespawnOrUnsummon();
+        }
 
         void SummonedCreatureDies(Creature* summon, Unit* /*killer*/)
+        {
+            if (summon->GetEntry() == 44641)
             {
-                if (summon->GetEntry() == 44641)
-                {
-                    WhelpsList.remove(summon);
-                    ++WhelpDebuff;
-                };
+                WhelpsList.remove(summon);
+                ++WhelpDebuff;
             }
+        }
 
         void UpdateAI(const uint32 diff)
         {
             if (WhelpDebuff == 8)
+            {
+                if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
+                {
+                    if (Aura* aura = halfus->GetAura(87683))
+                        aura->SetStackAmount(aura->GetStackAmount() + 1);
+                    else
+                        me->AddAura(87683, halfus);
+                }
+                WhelpDebuff = 0;
+            }
+
+            if (!Cage.empty())
+            {
+                Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS));
+
+                for (std::list<GameObject*>::const_iterator itr = Cage.begin(); itr != Cage.end(); ++itr)
+                {
+                    if ((*itr)->IsInWorld() && (*itr)->GetGoState() == 0 && !CageOpen && halfus)
+                    {
+                        for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
+                        {
+                            if (PosX == 0.0f || PosX == -338.9981f + 6.0f)
+                                PosX = -338.9981f;
+                            if (PosY == 0.0f)
+                                PosY = -711.216675f;
+                            if ((*itr)->IsAlive())
+                                (*itr)->GetMotionMaster()->MovePoint(3, PosX, PosY, 888.096802f);
+
+                            if (Position < 6)
+                                PosY = -713.22f;
+                            else if (Position < 9)
+                                PosY = -715.22f;
+
+                            PosX += 2.0f;
+                            DoZoneInCombat(halfus);
+                            CageOpen = true;
+                            Free = true;
+                            ControlTimer = 2 * IN_MILLISECONDS;
+                            ++Position;
+                        }
+                    }
+                }
+            }
+
+            if (Free)
+            {
+                if (WhelpsList.empty())
+                {
+                    Free = false;
+                    return;
+                };
+                for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
+                    if (!(*itr))
+                    {
+                        Free = false;
+                        return;
+                    };
+
+                for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
+                    if (!(*itr)->IsAlive() || !(*itr)->IsInWorld())
+                    {
+                        Free = false;
+                        return;
+                    };
+
+                if (!me->GetAura(SPELL_ATROPHIC_POISON) && ControlTimer <= diff)
+                {
+                    for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
+                    {
+                        (*itr)->SetFacingToObject(me);
+                        (*itr)->CastSpell(me, SPELL_ATROPHIC_POISON, false);
+                    }
+                    ControlTimer = 100 * IN_MILLISECONDS;
+                }
+                else
+                    ControlTimer -= diff;
+
+                for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
                 {
                     if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
                     {
-                        if (Aura* aura = halfus->GetAura(87683))
-                            aura->SetStackAmount(aura->GetStackAmount() + 1);
-                        else
-                            me->AddAura(87683, halfus);
-                    }
-                    WhelpDebuff = 0;
-                 };
-            if (!Cage.empty())
-            for (std::list<GameObject*>::const_iterator itr = Cage.begin(); itr != Cage.end(); ++itr)
-                if ((*itr)->IsInWorld())
-                    if ((*itr)->GetGoState() == 0 && !CageOpen)
-                        for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
-                            if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
-                                {
-                                    if (PosX == 0.0f || PosX == -338.9981f+6.0f)
-                                        PosX = -338.9981f;
-                                    if (PosY == 0.0f)
-                                        PosY = -711.216675f;
-                                    if ((*itr)->IsAlive())
-                                        (*itr)->GetMotionMaster()->MovePoint(3, PosX, PosY, 888.096802f);
-                                    if (Position < 6)
-                                    {
-                                        PosY = -713.22f;
-                                    }
-                                    else if (Position < 9)
-                                    {
-                                        PosY = -715.22f;
-                                    };
-                                    PosX += 2.0f;
-                                    DoZoneInCombat(halfus);
-                                    CageOpen = true;
-                                    Free = true;
-                                    ControlTimer = 2*IN_MILLISECONDS;
-                                    ++Position;
-                                };
-
-            if (Free)
-                {
-                    if (WhelpsList.empty())
+                        if (me->HasAura(SPELL_ATROPHIC_POISON) && !(*itr)->GetAura(SPELL_BIND_WILL, halfus->GetGUID()))
                         {
+                            halfus->CastSpell((*itr), SPELL_BIND_WILL, false);
+                            DoZoneInCombat((*itr));
+                            (*itr)->ClearUnitState(UNIT_STATE_EVADE);
                             Free = false;
-                            return;
-                        };
-                    for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
-                        if (!(*itr))
-                        {
-                            Free = false;
-                            return;
-                        };
-
-                    for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
-                        if (!(*itr)->IsAlive() || !(*itr)->IsInWorld())
-                        {
-                            Free = false;
-                            return;
-                        };
-
-                    if (!me->GetAura(SPELL_ATROPHIC_POISON) && ControlTimer <= diff)
-                        {
-                            for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
-                                {
-                                    (*itr)->SetFacingToObject(me);
-                                    (*itr)->CastSpell(me, SPELL_ATROPHIC_POISON, false);
-                                }
-                            ControlTimer = 100*IN_MILLISECONDS;
                         }
-                    else
-                        ControlTimer -= diff;
-
-                    for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
-                            {
-                                if (me->HasAura(SPELL_ATROPHIC_POISON))
-                                {
-                                    if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
-                                        if (!(*itr)->GetAura(SPELL_BIND_WILL, halfus->GetGUID()))
-                                        {
-                                            halfus->CastSpell((*itr), SPELL_BIND_WILL, false);
-                                            DoZoneInCombat((*itr));
-                                            (*itr)->ClearUnitState(UNIT_STATE_EVADE);
-                                            Free = false;
-                                        };
-                                };
-                            };
+                    }
                 }
+            }
 
             if (!UpdateVictim())
                 return;
@@ -1021,71 +1038,73 @@ public:
             {
                 if (Poison->GetStackAmount() < 8)
                     Poison->SetStackAmount(8);
-            };
+            }
 
             if (Warden)
+            {
+                if (BarrageTimer <= diff)
                 {
-                    if (BarrageTimer <= diff)
-                        {
-                            BreathTimer = 15*IN_MILLISECONDS;
-                            FireballTimer = 11*IN_MILLISECONDS;
-                            BallTimer = 500;
-                            me->CastSpell(me->GetVictim(), SPELL_FIREBALL_BARRAGE, false);
-                            BarrageTimer = 30*IN_MILLISECONDS;
-                        }
-                    else
-                        BarrageTimer -= diff;
-                };
+                    BreathTimer = 15 * IN_MILLISECONDS;
+                    FireballTimer = 11 * IN_MILLISECONDS;
+                    BallTimer = 500;
+                    me->CastSpell(me->GetVictim(), SPELL_FIREBALL_BARRAGE, false);
+                    BarrageTimer = 30 * IN_MILLISECONDS;
+                }
+                else
+                    BarrageTimer -= diff;
+            }
+
             if (!Warden)
             {
                 if (FireballTimer <= diff)
+                {
+                    if (Is25ManRaid())
                     {
-                        if (Is25ManRaid())
-                        {
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
-                                if (!me->HasUnitState(UNIT_STATE_CASTING))
-                                    me->CastSpell(target, SPELL_FIREBALL, false);
-                            BallTimer = 1400;
-                            FireballTimer = 1520;
-                        }
-                        else 
-                        {
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
-                                if (!me->HasUnitState(UNIT_STATE_CASTING))
-                                    me->CastSpell(target, SPELL_FIREBALL2, false);
-                            BallTimer = 2900;
-                            FireballTimer = 3020;
-                        };
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                            if (!me->HasUnitState(UNIT_STATE_CASTING))
+                                me->CastSpell(target, SPELL_FIREBALL, false);
+                        BallTimer = 1400;
+                        FireballTimer = 1520;
                     }
                     else
-                        FireballTimer -= diff;
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                            if (!me->HasUnitState(UNIT_STATE_CASTING))
+                                me->CastSpell(target, SPELL_FIREBALL2, false);
+                        BallTimer = 2900;
+                        FireballTimer = 3020;
+                    }
+                }
+                else
+                    FireballTimer -= diff;
             }
 
             if (BallTimer <= diff && me->HasUnitState(UNIT_STATE_CASTING))
+            {
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 10000, true))
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 10000, true))
+                    if (me->GetAura(SPELL_TIME_DILATION))
                     {
-                        if (me->GetAura(SPELL_TIME_DILATION))
-                            {
-                                me->CastSpell(target, SPELL_BALL_SLOW, true);
-                                BallTimer = 500;
-                            }
-                        else {
-                                me->CastSpell(target, SPELL_BALL_FAST, true);
-                                BallTimer = 500;
-                            };
+                        me->CastSpell(target, SPELL_BALL_SLOW, true);
+                        BallTimer = 500;
                     }
+                    else {
+                        me->CastSpell(target, SPELL_BALL_FAST, true);
+                        BallTimer = 500;
+                    };
                 }
-            else BallTimer -= diff;
+            }
+            else
+                BallTimer -= diff;
 
             if (BreathTimer <= diff && Whelp)
-                {
-                    BallTimer = 30*IN_MILLISECONDS;
-                    FireballTimer = 11*IN_MILLISECONDS;
-                    BarrageTimer = 15*IN_MILLISECONDS;
-                    me->CastSpell(me->GetVictim(), SPELL_SCORCHING_BREATH, true);
-                    BreathTimer = 30*IN_MILLISECONDS;
-                }
+            {
+                BallTimer = 30 * IN_MILLISECONDS;
+                FireballTimer = 11 * IN_MILLISECONDS;
+                BarrageTimer = 15 * IN_MILLISECONDS;
+                me->CastSpell(me->GetVictim(), SPELL_SCORCHING_BREATH, true);
+                BreathTimer = 30 * IN_MILLISECONDS;
+            }
              else
                  BreathTimer -= diff;
         }

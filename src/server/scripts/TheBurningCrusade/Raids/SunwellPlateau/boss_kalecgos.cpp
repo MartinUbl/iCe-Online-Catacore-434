@@ -720,7 +720,7 @@ public:
                 {
                     if (Creature *Kalecgos = Unit::GetCreature(*me, KalecgosGUID))
                         Kalecgos->AI()->EnterEvadeMode();
-                        return;
+                    return;
                 }
                 if (HealthBelowPct(10) && !isEnraged)
                 {

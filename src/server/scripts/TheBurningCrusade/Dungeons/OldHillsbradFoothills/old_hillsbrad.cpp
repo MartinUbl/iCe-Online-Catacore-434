@@ -552,12 +552,12 @@ public:
             if (!UpdateVictim())
                 return;
 
-                 //TODO: add his abilities'n-crap here
-                if (!LowHp && HealthBelowPct(20))
-                {
-                    DoScriptText(RAND(SAY_TH_RANDOM_LOW_HP1,SAY_TH_RANDOM_LOW_HP2), me);
-                    LowHp = true;
-                }
+            //TODO: add his abilities'n-crap here
+            if (!LowHp && HealthBelowPct(20))
+            {
+                DoScriptText(RAND(SAY_TH_RANDOM_LOW_HP1,SAY_TH_RANDOM_LOW_HP2), me);
+                LowHp = true;
+            }
         }
     };
 

@@ -1865,11 +1865,15 @@ void Spell::DoTriggersOnSpellHit(Unit *unit)
     if (m_customAttr & SPELL_ATTR0_CU_LINK_HIT)
     {
         if (const std::vector<int32> *spell_triggered = sSpellMgr->GetSpellLinked(m_spellInfo->Id + SPELL_LINK_HIT))
+        {
             for (std::vector<int32>::const_iterator i = spell_triggered->begin(); i != spell_triggered->end(); ++i)
+            {
                 if (*i < 0)
                     unit->RemoveAurasDueToSpell(-(*i));
                 else
                     unit->CastSpell(unit, *i, true, 0, 0, m_caster->GetGUID());
+            }
+        }
     }
 }
 
@@ -7555,43 +7559,43 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         return SPELL_FAILED_AFFECTING_COMBAT;
 
                                                             //dead owner (pets still alive when owners ressed?)
-        if (Unit *owner = m_caster->GetCharmerOrOwner())
-            if (!owner->IsAlive())
-                return SPELL_FAILED_CASTER_DEAD;
+    if (Unit *owner = m_caster->GetCharmerOrOwner())
+        if (!owner->IsAlive())
+            return SPELL_FAILED_CASTER_DEAD;
 
-        if (!target && m_targets.getUnitTarget())
-            target = m_targets.getUnitTarget();
+    if (!target && m_targets.getUnitTarget())
+        target = m_targets.getUnitTarget();
 
-        for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        if (SpellTargetType[m_spellInfo->EffectImplicitTargetA[i]] == TARGET_TYPE_UNIT_TARGET
+            || SpellTargetType[m_spellInfo->EffectImplicitTargetA[i]] == TARGET_TYPE_DEST_TARGET)
         {
-            if (SpellTargetType[m_spellInfo->EffectImplicitTargetA[i]] == TARGET_TYPE_UNIT_TARGET
-                || SpellTargetType[m_spellInfo->EffectImplicitTargetA[i]] == TARGET_TYPE_DEST_TARGET)
-            {
-                if (!target)
-                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-                m_targets.setUnitTarget(target);
-                break;
-            }
+            if (!target)
+                return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+            m_targets.setUnitTarget(target);
+            break;
         }
+    }
 
-        Unit* _target = m_targets.getUnitTarget();
+    Unit* _target = m_targets.getUnitTarget();
 
-        if (_target)                                         //for target dead/target not valid
-        {
-            if (!_target->IsAlive())
-                return SPELL_FAILED_BAD_TARGETS;
+    if (_target)                                         //for target dead/target not valid
+    {
+        if (!_target->IsAlive())
+            return SPELL_FAILED_BAD_TARGETS;
 
-            if (!IsValidSingleTargetSpell(_target))
-                return SPELL_FAILED_BAD_TARGETS;
-        }
-                                                            //cooldown
-        if (m_caster->ToCreature()->HasSpellCooldown(m_spellInfo->Id))
-            return SPELL_FAILED_NOT_READY;
+        if (!IsValidSingleTargetSpell(_target))
+            return SPELL_FAILED_BAD_TARGETS;
+    }
+                                                        //cooldown
+    if (m_caster->ToCreature()->HasSpellCooldown(m_spellInfo->Id))
+        return SPELL_FAILED_NOT_READY;
 
-        if (m_caster->IsPet())
-            if (Unit* owner = m_caster->GetOwner())
-                if (owner->GetTypeId() == TYPEID_PLAYER && owner->ToPlayer()->HasPetSpellCooldown(m_spellInfo->Id))
-                    return SPELL_FAILED_NOT_READY;
+    if (m_caster->IsPet())
+        if (Unit* owner = m_caster->GetOwner())
+            if (owner->GetTypeId() == TYPEID_PLAYER && owner->ToPlayer()->HasPetSpellCooldown(m_spellInfo->Id))
+                return SPELL_FAILED_NOT_READY;
 
     return CheckCast(true);
 }

@@ -357,7 +357,9 @@ public:
                 case DATA_SHIELDGENERATOR3:         return ShieldGeneratorDeactivated[2];
                 case DATA_SHIELDGENERATOR4:         return ShieldGeneratorDeactivated[3];
                 case DATA_CANSTARTPHASE3:
-                    if (ShieldGeneratorDeactivated[0] && ShieldGeneratorDeactivated[1] && ShieldGeneratorDeactivated[2] && ShieldGeneratorDeactivated[3])return 1;break;
+                    if (ShieldGeneratorDeactivated[0] && ShieldGeneratorDeactivated[1] && ShieldGeneratorDeactivated[2] && ShieldGeneratorDeactivated[3])
+                        return 1;
+                    break;
                 case DATA_STRANGE_POOL:             return StrangePool;
                 case DATA_WATER:                    return Water;
             }

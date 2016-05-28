@@ -59,15 +59,15 @@ public:
            case 24538:
                 if (pPlayer->GetAreaId() != 3628)
                     disabled = true;
-                    break;
+                break;
            case 34489:
                 if (pPlayer->GetZoneId() != 4080)
                     disabled = true;
-                    break;
+                break;
            case 34475:
                 if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(SPELL_ARCANE_CHARGES))
                     Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_NOT_ON_GROUND);
-                    break;
+                break;
         }
 
         // allow use in flight only

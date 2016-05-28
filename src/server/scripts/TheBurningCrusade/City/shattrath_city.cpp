@@ -683,7 +683,7 @@ public:
         if (!pPlayer->hasQuest(10211))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, KHADGAR_GOSSIP_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-            pPlayer->SEND_GOSSIP_MENU(9243, pCreature->GetGUID());
+        pPlayer->SEND_GOSSIP_MENU(9243, pCreature->GetGUID());
 
         return true;
     }

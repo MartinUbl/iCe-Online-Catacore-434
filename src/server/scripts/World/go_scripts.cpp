@@ -1101,27 +1101,26 @@ public:
         {
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_USE_OUTHOUSE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             pPlayer->SEND_GOSSIP_MENU(GOSSIP_OUTHOUSE_VACANT, pGO->GetGUID());
-            return true;
         }
         else
             pPlayer->SEND_GOSSIP_MENU(GOSSIP_OUTHOUSE_INUSE, pGO->GetGUID());
-            return true;
+        return true;
     }
 
     bool OnGossipSelect(Player *pPlayer, GameObject *pGO, uint32 /*uiSender*/, uint32 uiAction)
     {
         pPlayer->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF +1)
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
         {
             pPlayer->CLOSE_GOSSIP_MENU();
             Creature* pTarget = GetClosestCreatureWithEntry(pPlayer, NPC_OUTHOUSE_BUNNY, 3.0f);
             if (pTarget)
             {
-                pTarget->AI()->SetData(1,pPlayer->getGender());
+                pTarget->AI()->SetData(1, pPlayer->getGender());
                 pGO->CastSpell(pTarget, SPELL_INDISPOSED_III);
             }
             pGO->CastSpell(pPlayer, SPELL_INDISPOSED);
-            if (pPlayer->HasItemCount(ITEM_ANDERHOLS_SLIDER_CIDER,1))
+            if (pPlayer->HasItemCount(ITEM_ANDERHOLS_SLIDER_CIDER, 1))
                 pGO->CastSpell(pPlayer, SPELL_CREATE_AMBERSEEDS);
             return true;
         }

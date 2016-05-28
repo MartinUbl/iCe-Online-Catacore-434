@@ -2430,7 +2430,8 @@ class npc_Voracious_Hatchling : public CreatureScript
                 }
                 else GushingWoundTimer -= diff;
 
-                if (Creature* Worm = me->FindNearestCreature(NPC_PLUMP_LAVA_WORM,10.0f))
+                if (Creature* Worm = me->FindNearestCreature(NPC_PLUMP_LAVA_WORM, 10.0f))
+                {
                     if (me->IsWithinDistInMap(Worm, 2))
                     {
                         me->RemoveAura(SPELL_HUNGRY);
@@ -2447,8 +2448,9 @@ class npc_Voracious_Hatchling : public CreatureScript
                             Target->ForcedDespawn();
                         Worm->ForcedDespawn(2000);
                     }
+                }
 
-                    DoMeleeAttackIfReady();
+                DoMeleeAttackIfReady();
             }
         };
 

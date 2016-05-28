@@ -69,16 +69,22 @@ public:
             {
                 DoCast(me->GetVictim(), SPELL_WATERBOLT);
                 uiWaterBoltTimer = 5*IN_MILLISECONDS;
-            } else uiWaterBoltTimer -= diff;
+            }
+            else
+                uiWaterBoltTimer -= diff;
 
             // check if creature is not outside of building
             if (uiResetTimer < diff)
             {
                 if (Creature *pBalinda = Unit::GetCreature(*me, uiBalindaGUID))
+                {
                     if (me->GetDistance2d(pBalinda->GetHomePosition().GetPositionX(), pBalinda->GetHomePosition().GetPositionY()) > 50)
                         EnterEvadeMode();
-                    uiResetTimer = 5*IN_MILLISECONDS;
-            } else uiResetTimer -= diff;
+                }
+                uiResetTimer = 5*IN_MILLISECONDS;
+            }
+            else
+                uiResetTimer -= diff;
 
             DoMeleeAttackIfReady();
         }

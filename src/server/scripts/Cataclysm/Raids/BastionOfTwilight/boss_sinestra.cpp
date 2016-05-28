@@ -89,7 +89,7 @@ enum actions
     DO_WIN          = 70003,
 };
 
-# define NEVER  (0xffffffff) // used as "delayed" timer ( max uint32 value)
+#define NEVER  (0xffffffff) // used as "delayed" timer ( max uint32 value)
 
 class boss_sinestra : public CreatureScript
 {
@@ -155,7 +155,7 @@ public:
             me->ResetPlayerDamageReq();
             me->CastSpell(me,SPELL_DRAINED,true);
             me->SetVisible(false);
-            if(instance)
+            if (instance)
                 instance->SetData(DATA_SINESTRA_INTRO,0);
             Reset();
         }
@@ -177,9 +177,9 @@ public:
             eggs_dead = 0;
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,0.001f); // Avoid aggro on wipe
 
-            if(instance)
+            if (instance)
             {
-                if(instance->GetData(DATA_SINESTRA_INTRO) == 0 )
+                if (instance->GetData(DATA_SINESTRA_INTRO) == 0)
                 {
                     me->SetVisible(false);
                     Animation_timer = 11000;// Emerge animation time
@@ -210,19 +210,12 @@ public:
 
         void DoAction(const int32 param) // Change phase after both eggs are dead
         {
-            if(param == DO_CHANGE_PHASE)
-            {
-                eggs_dead ++;
-            }
+            if (param == DO_CHANGE_PHASE)
+                eggs_dead++;
             else if (param == DO_CALEN_DIED)
-            {
                 eggs_dead = 2; // Lets continue to PHASE 3 if Calen died
-            }
-            else // Set duration for wrack
-            {
-                if(param)
-                    spreadVector.push_back((uint32)param);
-            }
+            else if (param) // Set duration for wrack
+                spreadVector.push_back((uint32)param);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -230,12 +223,12 @@ public:
             if (PHASE == 3)
                 damage = damage * 1.2;
 
-            if(!me->HasAura(SPELL_MANA_BARRIER)) // No barrier no deal
+            if (!me->HasAura(SPELL_MANA_BARRIER)) // No barrier no deal
                 return;
 
             me->ModifyPower(POWER_MANA,- ((int32)damage) );
 
-            if(me->GetPower(POWER_MANA) <= (me->GetMaxPower(POWER_MANA)*0.27) ) // If under 27 % of mana
+            if (me->GetPower(POWER_MANA) <= (me->GetMaxPower(POWER_MANA)*0.27) ) // If under 27 % of mana
             {
                 me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
                 Repeat_timer = 30000;
@@ -257,9 +250,9 @@ public:
             //me->DealDamage(me,me->GetMaxHealth()*0.4);
             //me->ResetPlayerDamageReq();
 
-            if(instance)
+            if (instance)
             {
-                if(instance->GetData(DATA_SINESTRA_INTRO) == 0)
+                if (instance->GetData(DATA_SINESTRA_INTRO) == 0)
                 {
                     me->SendPlaySound(20429, false);
                     me->CastSpell(me,75764,true); // Visual emerge animation
@@ -283,7 +276,7 @@ public:
             me->SummonGameObject(208045,-964.64f,-752.1f,438.6f,4.18f,0,0,0,0,0);// Summon Cache for loot
 
             GameObject * gowall = me->FindNearestGameObject(207679,200.0f); // Remove Fire wall
-            if(gowall)
+            if (gowall)
                 gowall->Delete();
 
             if (instance)
@@ -303,7 +296,7 @@ public:
             std::list<HostileReference*> t_list = me->getThreatManager().getThreatList();
             for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
             {
-                if ( Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
+                if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
                 {
                     Player * p = unit->ToPlayer();
                     if (p && p->IsAlive())
@@ -321,25 +314,25 @@ public:
 
             uint8 valid_players = 0;
 
-            if(!spread_targets.empty())
+            if (!spread_targets.empty())
             {
                 for (std::list<Player*>::const_iterator itr = spread_targets.begin(); itr!= spread_targets.end(); ++itr)
                 {
-                    if(valid_players == 2)
+                    if (valid_players == 2)
                         break;
 
                     if ((*itr) && (*itr)->IsInWorld())
                     {
                         valid_players++;
                         me->CastSpell((*itr),89421,true); // Wrack
-                        Aura * a = (*itr)->GetAura(89421);
+                        Aura* a = (*itr)->GetAura(89421);
                         if(a)
                             a->SetDuration(restDuration);
                     }
                 }
             }
 
-            if(!backup_targets.empty() && valid_players < 2)
+            if (!backup_targets.empty() && valid_players < 2)
             {
                 for (std::list<Player*>::const_iterator itr = backup_targets.begin(); itr!= backup_targets.end(); ++itr)
                 {
@@ -361,10 +354,10 @@ public:
 
         void KilledUnit(Unit * victim)
         {
-            if(!victim && !victim->ToPlayer())
+            if (!victim && !victim->ToPlayer())
                 return;
 
-            if(urand(0,1))
+            if (urand(0,1))
             {
                 me->MonsterYell("My brood will feed on your bones!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20201, false);
@@ -384,7 +377,7 @@ public:
 
             Summons.DespawnAll();
 
-            GameObject * gowall = me->FindNearestGameObject(207679,200.0f); // Remove Fire wall
+            GameObject* gowall = me->FindNearestGameObject(207679,200.0f); // Remove Fire wall
             if(gowall)
                 gowall->Delete();
 
@@ -418,7 +411,7 @@ public:
                 }
             }
 
-            if(!wrack_targets.empty() && wrack_targets.size() >= 2 )
+            if (!wrack_targets.empty() && wrack_targets.size() >= 2)
             {
                 std::list<Player*>::iterator j = wrack_targets.begin();
                 advance(j, rand()%wrack_targets.size());
@@ -437,7 +430,7 @@ public:
             {
                  Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true);
 
-                 if(player)
+                 if (player)
                  {
                     me->SummonCreature(CREATURE_SHADOW_ORB1,player->GetPositionX(),player->GetPositionY() + urand(0,5),player->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN,0);
                     me->SummonCreature(CREATURE_SHADOW_ORB2,player->GetPositionX() + urand(0,5),player->GetPositionY(),player->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN,0);
@@ -465,7 +458,7 @@ public:
                 }
             }
 
-            if(!wrack_targets.empty())
+            if (!wrack_targets.empty())
             {
                 std::list<Player*>::const_iterator j = wrack_targets.begin();
                 advance(j, rand()%wrack_targets.size());
@@ -491,330 +484,332 @@ public:
                 }
                 spreadTimer = 100;
             }
-            else spreadTimer -= Diff;
+            else
+                spreadTimer -= Diff;
 
-            if (Animation_timer <= Diff && PHASE==0)
+            if (Animation_timer <= Diff && PHASE == 0)
             {
-                me->SetFloatValue(UNIT_FIELD_COMBATREACH,45.0f);
-                me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,60.0f);
-                me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+                me->SetFloatValue(UNIT_FIELD_COMBATREACH, 45.0f);
+                me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 60.0f);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
                 me->MonsterYell("We were fools to entrust an imbecile like Cho'gall with such a sacred duty. I will deal with you intruders myself!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20199, false);
 
-                me->CastSpell(me,95855,false); // Visual call flames
-                me->SummonCreature(CREATURE_PULSING_TWILIGHT_EGG,-900.450867f, -767.153381f, 441.451935f,3.45f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                me->SummonCreature(CREATURE_PULSING_TWILIGHT_EGG,-995.201843f, -674.263855f, 440.069366f, 4.62f , TEMPSUMMON_CORPSE_DESPAWN, 0);
+                me->CastSpell(me, 95855, false); // Visual call flames
+                me->SummonCreature(CREATURE_PULSING_TWILIGHT_EGG, -900.450867f, -767.153381f, 441.451935f, 3.45f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                me->SummonCreature(CREATURE_PULSING_TWILIGHT_EGG, -995.201843f, -674.263855f, 440.069366f, 4.62f, TEMPSUMMON_CORPSE_DESPAWN, 0);
 
-                me->SummonCreature(CREATURE_TWILIGHT_FLAMES,-904.473755f,-769.9f, 441.850739f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                me->SummonCreature(CREATURE_TWILIGHT_FLAMES,-928.732f, -774.8344f, 441.019073f, 0.0f , TEMPSUMMON_CORPSE_DESPAWN, 0);
-                me->SummonCreature(CREATURE_TWILIGHT_FLAMES,-995.78f,-731.838f,439.27356f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                me->SummonCreature(CREATURE_TWILIGHT_FLAMES,-998.61f,-699.241f,441.598297f, 0.0f , TEMPSUMMON_CORPSE_DESPAWN, 0);
+                me->SummonCreature(CREATURE_TWILIGHT_FLAMES, -904.473755f, -769.9f, 441.850739f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                me->SummonCreature(CREATURE_TWILIGHT_FLAMES, -928.732f, -774.8344f, 441.019073f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                me->SummonCreature(CREATURE_TWILIGHT_FLAMES, -995.78f, -731.838f, 439.27356f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                me->SummonCreature(CREATURE_TWILIGHT_FLAMES, -998.61f, -699.241f, 441.598297f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
 
-                PHASE=1;
+                PHASE = 1;
             }
-            else Animation_timer-=Diff;
+            else
+                Animation_timer -= Diff;
 
-/*###################################### PHASE 1 ################################################*/
-            if (PHASE == 1 )
+            /*###################################### PHASE 1 ################################################*/
+            if (PHASE == 1)
             {
-                if ( Whelps_timer <= Diff)
+                if (Whelps_timer <= Diff)
                 {
-                    float angle,dist,height;
+                    float angle, dist, height;
 
-                    for ( uint8 i = 0; i < 5; i++ ) // Summon 5 drakes
+                    for (uint8 i = 0; i < 5; i++) // Summon 5 drakes
                     {
                         //Generate random angle,distance,height and spawn whelp on that position
-                        angle = (float)urand(0,6) + 0.28f ; 
-                        dist = (float) urand(40,60);
-                        height = (float)urand(15,35);
+                        angle = (float)urand(0, 6) + 0.28f;
+                        dist = (float)urand(40, 60);
+                        height = (float)urand(15, 35);
 
-                        me->SummonCreature(CREATURE_TWILIGHT_WHELP, MIDDLE_X + cos(angle) * dist, MIDDLE_Y + sin(angle) * dist, MIDDLE_Z + height ,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        me->SummonCreature(CREATURE_TWILIGHT_WHELP, MIDDLE_X + cos(angle) * dist, MIDDLE_Y + sin(angle) * dist, MIDDLE_Z + height, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
+
+                    Whelps_timer = 50000;
+                }
+                else
+                    Whelps_timer -= Diff;
+
+                if (Flame_breath_timer <= Diff)
+                {
+                    me->CastSpell(me, 92944, false); // Aoe flame breath
+                    Flame_breath_timer = urand(20000, 25000);
+                }
+                else
+                    Flame_breath_timer -= Diff;
+
+                // WRACK
+                if (Wrack_timer <= Diff)
+                {
+                    CastWrack();
+                    Wrack_timer = 65000;
+                }
+                else Wrack_timer -= Diff;
+
+                // CheckTimer - If tank is not in melee range, cast Twilight blast on random player
+                if (CheckTimer <= Diff)
+                {
+                    bool inMeleeRange = (me->IsWithinMeleeRange(me->GetVictim())) ? true : false;
+
+                    if (!inMeleeRange && (PHASE == 1 || PHASE == 3) && !me->IsNonMeleeSpellCasted(false))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                            me->CastSpell(target, SPELL_TWILIGHT_BLAST, false);
+
+                    CheckTimer = 4000;
+                }
+                else
+                    CheckTimer -= Diff;
+
+
+                if (Shadow_orb_timer <= Diff)
+                {
+                    SpawnShadowOrbs();
+                    Shadow_orb_timer = 30000;
+                }
+                else
+                    Shadow_orb_timer -= Diff;
+            }
+
+            ///////  PRECHOD DO DRUHEJ FAZE  //////
+            if (HealthBelowPct(30) && PHASE == 1)
+            {
+                was_used = was_blasted = false;
+                PHASE = 2;
+                Beam_timer = 15000;
+                Delay_timer = 10000;
+                Drake_timer = 60000;
+                Spawn_calen_timer = 16000;
+                Spitecaller_timer = Spawn_calen_timer + 55000;
+                Voice_losing_time = 90000 - 21000;
+                Repeat_timer = MAX_TIMER;
+
+                me->InterruptNonMeleeSpells(false);
+                me->MonsterYell("I tire of this. Do you see this clutch amidst which you stand? I have nurtured the spark within them, but that life-force is and always will be mine. Behold, power beyond your comprehension!", LANG_UNIVERSAL, 0);
+                me->SendPlaySound(20204, false);
+                DoCast(me, SPELL_MANA_BARRIER);
+            }
+
+            // ############################# PHASE 2 ######################################### 
+
+            if (PHASE == 2)
+            {
+                if (Delay_timer <= Diff) // After 6 seconds from entering PHASE2 can can Twilight Extinction
+                {
+                    may_cast_extinction = true;
+                }
+                else
+                    Delay_timer -= Diff;
+
+                if (may_cast_extinction == true)// Set hp to full during whole phase 2
+                    me->SetHealth(me->CountPctFromMaxHealth(100));
+
+                if (was_used == false && may_cast_extinction)
+                {
+                    if (!me->IsNonMeleeSpellCasted(false))
+                    {
+                        DoCast(me, SPELL_TWILIGHT_EXTINCTION); // Only 15 s visual cast
+                        Beam_timer = 15000 + 5000;
+                        was_used = true;
+                    }
+
+                }
+
+                if (was_used && !me->IsNonMeleeSpellCasted(false) && !was_blasted) // After 15 seconds
+                {
+                    me->CastSpell(me, TWILIGHT_EXTINCTION_DMG, true); // Cast damage spell
+                    was_blasted = true;
+                }
+
+                if (Spawn_calen_timer <= Diff) // Spawn Stalker and Calen after 10 seconds
+                {
+                    me->SummonCreature(CREATURE_BARRIER_COMSMETIC_STALKER, -988.927f, -783.37f, 439.0f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    me->SummonCreature(CREATURE_CALEN, -1015.624207f, -815.707947f, 438.593506f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 5000);
+                    Spawn_calen_timer = MAX_TIMER;
+                }
+                else Spawn_calen_timer -= Diff;
+
+
+                if (Beam_timer <= Diff) // Visual cast of beamu on stalkera
+                {
+                    if (Creature *pStalker = me->FindNearestCreature(CREATURE_BARRIER_COMSMETIC_STALKER, 500.0f, true))
+                        me->CastSpell(pStalker, SPELL_TWILIGHT_POWER, false);
+
+                    Beam_timer = MAX_TIMER;
+                }
+                else Beam_timer -= Diff;
+
+
+                if (Voice_losing_time <= Diff)
+                {
+                    me->MonsterYell("You mistake this for weakness? Fool!", LANG_UNIVERSAL, 0);
+                    me->SendPlaySound(20203, false);
+
+                    Creature* pStalker = me->FindNearestCreature(CREATURE_BARRIER_COMSMETIC_STALKER, 200, true);
+                    if (pStalker)
+                        pStalker->GetMotionMaster()->MovePoint(0, -995.16f, -793.48f, 438.6f);
+
+                    Voice_losing_time = MAX_TIMER;
+                }
+                else Voice_losing_time -= Diff;
+
+                if (Drake_timer <= Diff) // Spawn Twilight drake
+                {
+                    me->SummonCreature(CREATURE_TWILIGHT_DRAKE, -1038.66f, -710.26f, 461.78f, 5.14f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    Drake_timer = 45000;
+                }
+                else Drake_timer -= Diff;
+
+
+                if (Spitecaller_timer <= Diff) // Spawn Twilight Spitecaller
+                {
+                    me->SummonCreature(CREATURE_TWILIGHT_SPITECALLER, -1042.167f, -850.95f, 445.74762f, 1.03f);
+                    Spitecaller_timer = 55000;
+                }
+                else Spitecaller_timer -= Diff;
+
+                if (Repeat_timer <= Diff)
+                {
+                    me->CastSpell(me, SPELL_MANA_BARRIER, true);
+                    me->ModifyPower(POWER_MANA, me->GetMaxPower(POWER_MANA)); // Fill mana to full again
+                    Repeat_timer = MAX_TIMER;
+                }
+                else Repeat_timer -= Diff;
+
+            }
+
+            /**************** SWITCHING TO PHASE 3 ********************/
+
+            if (eggs_dead == 2 && PHASE == 2) // Both eggs are dead
+            {
+                if (Creature * pCalen = me->FindNearestCreature(CREATURE_CALEN, 200.0f, true))
+                    pCalen->AI()->DoAction(DO_WIN);
+
+                PHASE = 3;
+                me->ModifyPower(POWER_MANA, me->GetMaxPower(POWER_MANA)); // Fill mana to full
+                me->RemoveAurasDueToSpell(SPELL_DRAINED); // Remove damage reduction  debuff
+
+                if (Creature* pStalker = me->FindNearestCreature(CREATURE_BARRIER_COMSMETIC_STALKER, 500.0f, true))
+                    pStalker->ForcedDespawn();
+
+                me->InterruptNonMeleeSpells(false);
+                me->MonsterYell("Enough! Drawing upon this source will set us back months. You should feel honored to be worthy of its expenditure. Now... die!", LANG_UNIVERSAL, 0);
+                me->SendPlaySound(20206, false);
+
+                Flame_breath_timer = 25000;
+                Wrack_timer = 15000;
+                CheckTimer = 30000;
+                Shadow_orb_timer = 30000;
+                Respawn_flames_timer = 15000;
+                Whelps_timer = 20000;
+                flamed = false; // Spawn Twilight Flames again
+            }
+
+            //############################ PHASE 3 ##############################/
+
+            if (PHASE == 3)
+            {
+                if (Respawn_flames_timer <= Diff && !flamed) // Respawn twilight flames
+                {
+                    me->CastSpell(me, 95855, false); // Visual cast call flames
+
+                    me->SummonCreature(CREATURE_TWILIGHT_FLAMES, -904.473755f, -769.9f, 441.850739f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    me->SummonCreature(CREATURE_TWILIGHT_FLAMES, -928.732f, -774.8344f, 441.019073f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    me->SummonCreature(CREATURE_TWILIGHT_FLAMES, -995.78f, -731.838f, 439.27356f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    me->SummonCreature(CREATURE_TWILIGHT_FLAMES, -998.61f, -699.241f, 441.598297f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    flamed = true;
+                }
+                else Respawn_flames_timer -= Diff;
+
+                // DIFFERENT PHRASES IN PHASE 3
+
+                if (me->HealthBelowPct(78) && !phrase1)
+                {
+                    me->MonsterYell("The energy infuse within my clutch is mine to reclaim!", LANG_UNIVERSAL, 0);
+                    me->SendPlaySound(20208, false);
+                    phrase1 = true;
+                }
+
+                if (me->HealthBelowPct(32) && !phrase2)
+                {
+                    me->MonsterYell("SUFFER!", LANG_UNIVERSAL, 0);
+                    me->SendPlaySound(20209, false);
+                    phrase2 = true;
+                }
+
+                if (me->HealthBelowPct(8) && !phrase3)
+                {
+                    me->MonsterYell("FEEL MY HATRED!", LANG_UNIVERSAL, 0);
+                    me->SendPlaySound(20210, false);
+                    phrase3 = true;
+                }
+
+
+                /********** SAME AS PHASE 1 **********/
+
+                if (Whelps_timer <= Diff)
+                {
+                    float angle, dist, height;
+
+                    for (uint8 i = 0; i < 5; i++) // Summon 5 drakes
+                    {
+                        //Generate random angle,distance,height and spawn whelp on that position
+                        angle = (float)urand(0, 6) + 0.28f;
+                        dist = (float)urand(40, 60);
+                        height = (float)urand(15, 35);
+
+                        me->SummonCreature(CREATURE_TWILIGHT_WHELP, MIDDLE_X + cos(angle) * dist, MIDDLE_Y + sin(angle) * dist, MIDDLE_Z + height, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
                     }
 
                     Whelps_timer = 50000;
                 }
                 else Whelps_timer -= Diff;
 
+                // Flame breath
                 if (Flame_breath_timer <= Diff)
                 {
-                    me->CastSpell(me,92944,false); // Aoe flame breath
-                    Flame_breath_timer = urand(20000,25000);
+                    me->CastSpell(me, 92944, false);
+                    Flame_breath_timer = urand(20000, 25000);
                 }
                 else Flame_breath_timer -= Diff;
 
-            // WRACK
-            if (Wrack_timer <= Diff)
-            {
-                CastWrack();
-                Wrack_timer= 65000;
-            }
-            else Wrack_timer -= Diff;
-
-            // CheckTimer - If tank is not in melee range, cast Twilight blast on random player
-            if (CheckTimer <= Diff)
-            {
-                bool inMeleeRange = ( me->IsWithinMeleeRange(me->GetVictim()) ) ? true : false;
-
-                if (inMeleeRange == false)
-                    if ( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true) )
-                        if (PHASE == 1 || PHASE == 3)
-                            if (!me->IsNonMeleeSpellCasted(false))
-                                me->CastSpell(target,SPELL_TWILIGHT_BLAST,false);
-
-                    CheckTimer = 4000;
-             }
-             else CheckTimer -= Diff;
-
-
-            if (Shadow_orb_timer <= Diff)
-            {
-                SpawnShadowOrbs();
-                Shadow_orb_timer = 30000;
-            }
-            else Shadow_orb_timer-=Diff;
-
-    }
-
-    ///////  PRECHOD DO DRUHEJ FAZE  //////
-    if(HealthBelowPct(30) && PHASE==1)
-    {
-        was_used = was_blasted = false;
-        PHASE = 2;
-        Beam_timer = 15000;
-        Delay_timer= 10000;
-        Drake_timer= 60000;
-        Spawn_calen_timer = 16000;
-        Spitecaller_timer = Spawn_calen_timer + 55000;
-        Voice_losing_time = 90000 - 21000;
-        Repeat_timer = MAX_TIMER;
-
-        me->InterruptNonMeleeSpells(false);
-        me->MonsterYell("I tire of this. Do you see this clutch amidst which you stand? I have nurtured the spark within them, but that life-force is and always will be mine. Behold, power beyond your comprehension!", LANG_UNIVERSAL, 0);
-        me->SendPlaySound(20204, false);
-        DoCast(me,SPELL_MANA_BARRIER); 
-    }
-
-// ############################# PHASE 2 ######################################### 
-
-    if (PHASE == 2)
-    {
-        if (Delay_timer <= Diff) // After 6 seconds from entering PHASE2 can can Twilight Extinction
-        {
-            may_cast_extinction = true;
-        }
-        else Delay_timer-=Diff;
-
-
-        if (may_cast_extinction == true)// Set hp to full during whole phase 2
-            me->SetHealth(me->CountPctFromMaxHealth(100));
-
-        if (was_used==false && may_cast_extinction)
-        {
-            if (!me->IsNonMeleeSpellCasted(false))
-            {
-                DoCast(me,SPELL_TWILIGHT_EXTINCTION); // Only 15 s visual cast
-                Beam_timer = 15000 + 5000;
-                was_used=true;
-            }
-
-        }
-
-        if (was_used && !me->IsNonMeleeSpellCasted(false) && !was_blasted) // After 15 seconds
-        {
-            me->CastSpell(me,TWILIGHT_EXTINCTION_DMG,true); // Cast damage spell
-            was_blasted=true;
-        }
-
-        if (Spawn_calen_timer <= Diff) // Spawn Stalker and Calen after 10 seconds
-        {
-            me->SummonCreature(CREATURE_BARRIER_COMSMETIC_STALKER,-988.927f,-783.37f,439.0f, 0.0f,TEMPSUMMON_CORPSE_DESPAWN,0);
-            me->SummonCreature(CREATURE_CALEN,-1015.624207f,-815.707947f,438.593506f, 0.0f,TEMPSUMMON_CORPSE_DESPAWN,5000);
-            Spawn_calen_timer = MAX_TIMER;
-        }
-        else Spawn_calen_timer -= Diff;
-
-
-        if (Beam_timer <= Diff) // Visual cast of beamu on stalkera
-        {
-            if (Creature *pStalker = me->FindNearestCreature(CREATURE_BARRIER_COMSMETIC_STALKER, 500.0f, true))
-                me->CastSpell(pStalker,SPELL_TWILIGHT_POWER,false);
-
-            Beam_timer = MAX_TIMER;
-        }
-        else Beam_timer -= Diff;
-
-
-        if (Voice_losing_time <= Diff)
-        {
-            me->MonsterYell("You mistake this for weakness? Fool!", LANG_UNIVERSAL, 0);
-            me->SendPlaySound(20203, false);
-
-            Creature* pStalker = me->FindNearestCreature(CREATURE_BARRIER_COMSMETIC_STALKER, 200, true);
-            if (pStalker)
-                pStalker->GetMotionMaster()->MovePoint(0,-995.16f,-793.48f,438.6f);
-
-            Voice_losing_time = MAX_TIMER;
-        }
-        else Voice_losing_time -= Diff;
-
-        if (Drake_timer <= Diff) // Spawn Twilight drake
-        {
-            me->SummonCreature(CREATURE_TWILIGHT_DRAKE,-1038.66f,-710.26f,461.78f, 5.14f,TEMPSUMMON_CORPSE_DESPAWN,0);
-            Drake_timer = 45000;
-        }
-        else Drake_timer -= Diff;
-
-
-        if (Spitecaller_timer <= Diff) // Spawn Twilight Spitecaller
-        {
-            me->SummonCreature(CREATURE_TWILIGHT_SPITECALLER,-1042.167f,-850.95f,445.74762f,1.03f);
-            Spitecaller_timer = 55000;
-        }
-        else Spitecaller_timer -= Diff;
-
-        if(Repeat_timer <= Diff )
-        {
-            me->CastSpell(me,SPELL_MANA_BARRIER,true);
-            me->ModifyPower(POWER_MANA, me->GetMaxPower(POWER_MANA)); // Fill mana to full again
-            Repeat_timer = MAX_TIMER;
-        }
-        else Repeat_timer -= Diff;
-
-    }
-
-
-/**************** SWITCHING TO PHASE 3 ********************/
-
-        if(eggs_dead == 2 && PHASE==2) // Both eggs are dead
-        {
-            if(Creature * pCalen = me->FindNearestCreature(CREATURE_CALEN,200.0f,true) )
-                pCalen->AI()->DoAction(DO_WIN);
-
-            PHASE = 3;
-            me->ModifyPower(POWER_MANA, me->GetMaxPower(POWER_MANA)); // Fill mana to full
-            me->RemoveAurasDueToSpell(SPELL_DRAINED); // Remove damage reduction  debuff
-
-            if(Creature* pStalker = me->FindNearestCreature(CREATURE_BARRIER_COMSMETIC_STALKER, 500.0f, true))
-                pStalker->ForcedDespawn();
-
-            me->InterruptNonMeleeSpells(false);
-            me->MonsterYell("Enough! Drawing upon this source will set us back months. You should feel honored to be worthy of its expenditure. Now... die!", LANG_UNIVERSAL, 0);
-            me->SendPlaySound(20206, false);
-
-            Flame_breath_timer = 25000;
-            Wrack_timer = 15000;
-            CheckTimer = 30000;
-            Shadow_orb_timer = 30000;
-            Respawn_flames_timer = 15000;
-            Whelps_timer = 20000;
-            flamed = false; // Spawn Twilight Flames again
-        }
-
-//############################ PHASE 3 ##############################/
-
-        if (PHASE == 3)
-        {
-            if (Respawn_flames_timer <= Diff && !flamed) // Respawn twilight flames
-            {
-                me->CastSpell(me,95855 ,false); // Visual cast call flames
-
-                me->SummonCreature(CREATURE_TWILIGHT_FLAMES,-904.473755f,-769.9f, 441.850739f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                me->SummonCreature(CREATURE_TWILIGHT_FLAMES,-928.732f, -774.8344f, 441.019073f, 0.0f , TEMPSUMMON_CORPSE_DESPAWN, 0);
-                me->SummonCreature(CREATURE_TWILIGHT_FLAMES,-995.78f,-731.838f,439.27356f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                me->SummonCreature(CREATURE_TWILIGHT_FLAMES,-998.61f,-699.241f,441.598297f, 0.0f , TEMPSUMMON_CORPSE_DESPAWN, 0);
-                flamed = true;
-            }
-            else Respawn_flames_timer -= Diff;
-
-            // DIFFERENT PHRASES IN PHASE 3
-
-            if (me->HealthBelowPct(78) && !phrase1)
-            {
-                me->MonsterYell("The energy infuse within my clutch is mine to reclaim!", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(20208, false);
-                phrase1=true;
-            }
-
-            if (me->HealthBelowPct(32) && !phrase2)
-            {
-                me->MonsterYell("SUFFER!", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(20209, false);
-                phrase2=true;
-            }
-
-            if (me->HealthBelowPct(8) && !phrase3)
-            {
-                me->MonsterYell("FEEL MY HATRED!", LANG_UNIVERSAL, 0);
-                me->SendPlaySound(20210, false);
-                phrase3=true;
-            }
-
-
-/********** SAME AS PHASE 1 **********/
-
-            if ( Whelps_timer <= Diff)
-            {
-                float angle,dist,height;
-
-                for ( uint8 i = 0; i < 5; i++ ) // Summon 5 drakes
+                // Wrack
+                if (Wrack_timer <= Diff)
                 {
-                    //Generate random angle,distance,height and spawn whelp on that position
-                    angle = (float)urand(0,6) + 0.28f ;
-                    dist = (float) urand(40,60);
-                    height = (float)urand(15,35);
-
-                    me->SummonCreature(CREATURE_TWILIGHT_WHELP, MIDDLE_X + cos(angle) * dist, MIDDLE_Y + sin(angle) * dist, MIDDLE_Z + height ,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    CastWrack();
+                    Wrack_timer = 65000;
                 }
+                else Wrack_timer -= Diff;
 
-                Whelps_timer = 50000;
-            }
-            else Whelps_timer -= Diff;
+                // CheckTimer - If tank is not in melee range, cast Twilight blast on random player
+                if (CheckTimer <= Diff)
+                {
+                    bool inMeleeRange = (me->IsWithinMeleeRange(me->GetVictim())) ? true : false;
 
-            // Flame breath
-            if (Flame_breath_timer <= Diff)
-            {
-                me->CastSpell(me,92944,false);
-                Flame_breath_timer = urand(20000,25000);
-            }
-            else Flame_breath_timer -= Diff;
-
-            // Wrack
-            if (Wrack_timer <= Diff)
-            {
-                CastWrack();
-                Wrack_timer= 65000;
-            }
-            else Wrack_timer -= Diff;
-
-            // CheckTimer - If tank is not in melee range, cast Twilight blast on random player
-            if (CheckTimer <= Diff)
-            {
-                bool inMeleeRange = ( me->IsWithinMeleeRange(me->GetVictim()) ) ? true : false;
-
-                if (inMeleeRange == false)
-                    if ( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 200.0f, true) )
-                        if (PHASE == 1 || PHASE == 3)
-                            if (!me->IsNonMeleeSpellCasted(false))
-                                me->CastSpell(target,SPELL_TWILIGHT_BLAST,false);
+                    if (inMeleeRange == false)
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 200.0f, true))
+                            if (PHASE == 1 || PHASE == 3)
+                                if (!me->IsNonMeleeSpellCasted(false))
+                                    me->CastSpell(target, SPELL_TWILIGHT_BLAST, false);
 
                     CheckTimer = 4000;
-             }
-             else CheckTimer -= Diff;
+                }
+                else CheckTimer -= Diff;
 
 
-            if (Shadow_orb_timer <= Diff)
-            {
-                SpawnShadowOrbs();
-                Shadow_orb_timer = 30000;
+                if (Shadow_orb_timer <= Diff)
+                {
+                    SpawnShadowOrbs();
+                    Shadow_orb_timer = 30000;
+                }
+                else Shadow_orb_timer -= Diff;
+
             }
-            else Shadow_orb_timer -= Diff;
 
-        }
-
-            if (PHASE == 1 || (PHASE == 3 && CheckTimer <= 4000) )
+            if (PHASE == 1 || (PHASE == 3 && CheckTimer <= 4000))
                 DoMeleeAttackIfReady();
-       }
+        }
     };
 };
 
@@ -868,12 +863,8 @@ public:
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
                     Player* pPlayer = itr->getSource();
-                    if (pPlayer && !pPlayer->IsGameMaster() && pPlayer->IsAlive())
-                        if (pPlayer->GetDistance(me) < 100.0f)
-                            if (!pPlayer->HasTankSpec() && !pPlayer->HasHealingSpec() && !pPlayer->HasAura(5487)) // Exclude healers and tanks
-                            {
-                                player_list.push_back(pPlayer);
-                            }
+                    if (pPlayer && !pPlayer->IsGameMaster() && pPlayer->IsAlive() && pPlayer->GetDistance(me) < 100.0f && !pPlayer->HasTankSpec() && !pPlayer->HasHealingSpec() && !pPlayer->HasAura(5487)) // Exclude healers and tanks
+                        player_list.push_back(pPlayer);
                 }
             }
 
@@ -892,7 +883,7 @@ public:
             return NULL;
         }
 
-        void UpdateAI (const uint32 diff)
+        void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
@@ -903,11 +894,11 @@ public:
             if (Fixate_timer <= diff)
             {
                 Player * fix_pl = GetFixateVictim();
-                if(fix_pl)
+                if (fix_pl)
                 {
                     fix_pl->Say("Shadow orb on me !!!", LANG_UNIVERSAL);
                     me->TauntApply(fix_pl);
-                    me->AddThreat(fix_pl,5000000.0f);
+                    me->AddThreat(fix_pl, 5000000.0f);
                 }
 
                 Fixate_timer = MAX_TIMER;
@@ -916,40 +907,40 @@ public:
 
             if (Beam_timer <= diff)
             {
-                if ( ! me->GetAura(35371,me->GetVictim()->GetGUID()) )
-                    me->GetVictim()->CastSpell(me,35371,true); // White beam
+                if (!me->GetAura(35371, me->GetVictim()->GetGUID()))
+                    me->GetVictim()->CastSpell(me, 35371, true); // White beam
                 Beam_timer = 100;
             }
             else Beam_timer -= diff;
 
-            if(Slicer_timer <= diff)
+            if (Slicer_timer <= diff)
             {
-                me->CastSpell(me,92852,true); // twilight slicer
+                me->CastSpell(me, 92852, true); // twilight slicer
                 Slicer_timer = 300;
             }
             else Slicer_timer -= diff;
 
-            if(Pulse_timer <= diff) // Po 3.5 sekundach sa orb uvolni a zacne nahanat hraca
+            if (Pulse_timer <= diff) // Po 3.5 sekundach sa orb uvolni a zacne nahanat hraca
             {
-                if(Creature* orb2 = me->FindNearestCreature(CREATURE_SHADOW_ORB2,200.0f,true))
-                    me->CastSpell(orb2,92851,true);
+                if (Creature* orb2 = me->FindNearestCreature(CREATURE_SHADOW_ORB2, 200.0f, true))
+                    me->CastSpell(orb2, 92851, true);
 
                 me->ClearUnitState(UNIT_STATE_CASTING);
-                me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
-                me->CastSpell(me,SPELL_SHADOW_PULSE,true);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                me->CastSpell(me, SPELL_SHADOW_PULSE, true);
 
                 Pulse_timer = MAX_TIMER;
             }
             else Pulse_timer -= diff;
 
-            if(!me->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE)) 
+            if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
             {
                 Unit * victim = me->GetVictim();
-                if(victim)
-                    me->GetMotionMaster()->MovePoint(0,victim->GetPositionX(),victim->GetPositionY(),victim->GetPositionZ());
+                if (victim)
+                    me->GetMotionMaster()->MovePoint(0, victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ());
             }
 
-            if(Despawn_timer <= diff)
+            if (Despawn_timer <= diff)
             {
                 me->Kill(me);
                 Despawn_timer = MAX_TIMER;
@@ -987,7 +978,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-                damage = 0;
+            damage = 0;
         }
 
         void Reset()
@@ -1004,7 +995,7 @@ public:
         bool IsOrb1Victim(Player * p)
         {
             if (Creature * orb1 = me->FindNearestCreature(CREATURE_SHADOW_ORB1,200.0f,true) )
-                if( orb1->GetVictim() && orb1->GetVictim() == p)
+                if (orb1->GetVictim() && orb1->GetVictim() == p)
                     return true;
             return false;
         }
@@ -1021,7 +1012,7 @@ public:
                     Player* pPlayer = itr->getSource();
                     if (pPlayer && !pPlayer->IsGameMaster() && pPlayer->IsAlive())
                         if (pPlayer->GetDistance(me) < 100.0f)
-                            if (!pPlayer->HasTankSpec() && IsOrb1Victim(pPlayer) == false &&  !pPlayer->HasAura(5487)) // Exclude tanks and orb1 victim
+                            if (!pPlayer->HasTankSpec() && IsOrb1Victim(pPlayer) == false && !pPlayer->HasAura(5487)) // Exclude tanks and orb1 victim
                             {
                                 player_list.push_back(pPlayer);
                             }
@@ -1031,19 +1022,19 @@ public:
             if (!player_list.empty())
             {
                 std::list<Player*>::const_iterator j = player_list.begin();
-                advance(j, rand()%player_list.size());
+                advance(j, rand() % player_list.size());
                 return (*j);
             }
             else
             {
-                if ( Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true) )
+                if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
                     return player->ToPlayer();
             }
 
             return NULL;
         }
 
-        void UpdateAI (const uint32 diff)
+        void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
@@ -1054,11 +1045,10 @@ public:
             if (Fixate_timer <= diff)
             {
                 Player * fix_pl = GetFixateVictim();
-                if(fix_pl)
+                if (fix_pl)
                 {
-                    fix_pl->Say("Shadow orb on me !!!", LANG_UNIVERSAL);
                     me->TauntApply(fix_pl);
-                    me->AddThreat(fix_pl,5000000.0f);
+                    me->AddThreat(fix_pl, 5000000.0f);
                 }
 
                 Fixate_timer = MAX_TIMER;
@@ -1067,34 +1057,34 @@ public:
 
             if (Pulse_timer <= diff) // Po 3.5 sekundach sa orb uvolni a zacne nahanat hraca
             {
-                me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
-                me->CastSpell(me,SPELL_SHADOW_PULSE,true);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                me->CastSpell(me, SPELL_SHADOW_PULSE, true);
                 Pulse_timer = MAX_TIMER;
             }
             else Pulse_timer -= diff;
 
             if (Beam_timer <= diff)
             {
-                if ( ! me->GetVictim()->GetAura(35371,me->GetGUID()) )
-                    me->CastSpell(me->GetVictim(),35371,true); // White beam
+                if (!me->GetVictim()->GetAura(35371, me->GetGUID()))
+                    me->CastSpell(me->GetVictim(), 35371, true); // White beam
 
                 Beam_timer = 100;
             }
             else Beam_timer -= diff;
 
-            if(!me->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE)) 
+            if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
             {
                 Unit * victim = me->GetVictim();
-                if(victim)
-                    me->GetMotionMaster()->MovePoint(0,victim->GetPositionX(),victim->GetPositionY(),victim->GetPositionZ());
+                if (victim)
+                    me->GetMotionMaster()->MovePoint(0, victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ());
             }
 
-            if(Despawn_timer <= diff)
+            if (Despawn_timer <= diff)
             {
                 me->Kill(me);
                 Despawn_timer = MAX_TIMER;
             }
-            else Despawn_timer -=diff;
+            else Despawn_timer -= diff;
 
         }
 
@@ -1158,7 +1148,7 @@ public:
 
         void DamageDealt(Unit* victim, uint32& damage, DamageEffectType typeOfDamage) // Only 10 HC functionality
         {
-            if (typeOfDamage == DIRECT_DAMAGE )
+            if (typeOfDamage == DIRECT_DAMAGE)
             {
                 uint32 absorbAmount = 0;
                 Unit::AuraEffectList const& auraAbsorbList = victim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
@@ -1172,29 +1162,29 @@ public:
                     return;
 
                 uint32 stack_number = victim->GetAuraCount(SPELL_TWILIGHTT_SPIT); // save stacks of spit on target
-                me->CastSpell(victim,SPELL_TWILIGHTT_SPIT,true); // Cast spell, cause we want damage efffect of that spell
+                me->CastSpell(victim, SPELL_TWILIGHTT_SPIT, true); // Cast spell, cause we want damage efffect of that spell
                 victim->RemoveAura(SPELL_TWILIGHTT_SPIT); // do not use removeaurasduetospell !!!! can cycle server due to wrack mechanic
-                if(stack_number < 99 )
-                    me->SetAuraStack(SPELL_TWILIGHTT_SPIT,victim,stack_number + 1 );
+                if (stack_number < 99)
+                    me->SetAuraStack(SPELL_TWILIGHTT_SPIT, victim, stack_number + 1);
             }
         }
 
-        void JustDied (Unit * killed)  // Spawn whelp puddle after dead
+        void JustDied(Unit * killed)  // Spawn whelp puddle after dead
         {
             if (summonerEntry == SINESTRA_ENTRY)
             {
-                if(Unit * pSinestra = Unit::GetUnit(*me,summonerGUID))
-                    pSinestra->SummonCreature(CREATURE_WHELP_AOE_PUDDLE,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(), 0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                if (Unit * pSinestra = Unit::GetUnit(*me, summonerGUID))
+                    pSinestra->SummonCreature(CREATURE_WHELP_AOE_PUDDLE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
             }
             me->RemoveCorpse();
         }
 
-        void UpdateAI (const uint32 diff)
+        void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
 
-            if(me->GetVictim())
+            if (me->GetVictim())
                 me->GetVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
 
             DoMeleeAttackIfReady();
@@ -1230,9 +1220,9 @@ public:
 
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
-            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
-            me->GetMotionMaster()->MovePoint(0,-1010.7f,-762.098f,439.644012f);
+            me->GetMotionMaster()->MovePoint(0, -1010.7f, -762.098f, 439.644012f);
             flight_timer = 8000;
             Breath_timer = flight_timer + 10000;
             landed = false;
@@ -1245,7 +1235,8 @@ public:
                 me->CastSpell(me->GetVictim(),SPELL_TWILIGHT_BREATH,false);
                 Breath_timer = 10000;
             }
-            else Breath_timer -= diff;
+            else
+                Breath_timer -= diff;
 
             if (flight_timer <= diff && !landed)
             {
@@ -1255,7 +1246,8 @@ public:
 
                 landed = true;
             }
-            else flight_timer -= diff;
+            else
+                flight_timer -= diff;
 
             DoMeleeAttackIfReady();
         }
@@ -1302,40 +1294,39 @@ public:
 
         void MoveInLineOfSight(Unit * who) 
         {
-            if( who && who->ToCreature()  && who->ToCreature()->GetEntry() == CREATURE_TWILIGHT_DRAKE)
-                if(me->IsWithinMeleeRange(who))
-                {
-                    who->CastSpell(who,SPELL_ABSORB_ESSENCE,true);
-                    me->ForcedDespawn();
-                }
+            if (who && who->ToCreature() && who->ToCreature()->GetEntry() == CREATURE_TWILIGHT_DRAKE && me->IsWithinMeleeRange(who))
+            {
+                who->CastSpell(who,SPELL_ABSORB_ESSENCE,true);
+                me->ForcedDespawn();
+            }
         }
 
-        void UpdateAI (const uint32 diff)
+        void UpdateAI(const uint32 diff)
         {
-            if (growing_timer <= diff )
+            if (growing_timer <= diff)
             {
-                me->CastSpell(me,INCREASE_PUDDLE,true); // Increase size by 15 %
+                me->CastSpell(me, INCREASE_PUDDLE, true); // Increase size by 15 %
                 boundig_radius += 0.225f;
-                me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,boundig_radius);
+                me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, boundig_radius);
                 stacks++;
                 growing_timer = 10000;
             }
             else growing_timer -= diff;
 
-            if ( aoe_damage_timer <= diff) // Manual aoe dmg, due to increasing spell radius
+            if (aoe_damage_timer <= diff) // Manual aoe dmg, due to increasing spell radius
             {
-                me->CastCustomSpell(TWILIGHT_ESSENCE_AOE, SPELLVALUE_RADIUS_MOD,(10000 + stacks * 1500)); // 100% + 15 % stacks
+                me->CastCustomSpell(TWILIGHT_ESSENCE_AOE, SPELLVALUE_RADIUS_MOD, (10000 + stacks * 1500)); // 100% + 15 % stacks
                 aoe_damage_timer = 2000;
             }
             else aoe_damage_timer -= diff;
 
-            if (delay_spawn_timer <=diff && !summoned_whelps) // After few seconds spawn whelp on puddle position
+            if (delay_spawn_timer <= diff && !summoned_whelps) // After few seconds spawn whelp on puddle position
             {
-                if ( urand(0,100) > 20 ) // Little workaround for s while
-                    me->SummonCreature(CREATURE_TWILIGHT_WHELP,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,1000);
+                if (urand(0, 100) > 20) // Little workaround for s while
+                    me->SummonCreature(CREATURE_TWILIGHT_WHELP, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000);
                 summoned_whelps = true;
             }
-            else delay_spawn_timer-=diff;
+            else delay_spawn_timer -= diff;
         }
     };
 };
@@ -1382,17 +1373,17 @@ public:
             Ticking_timer = MAX_TIMER;
             Voice_timer = MAX_TIMER; // 74000
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); // Stop HP regeneration
-            if(instance)
+            if (instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             check_health = false;
         }
 
         void JustDied(Unit* killer)
         {
-            if(instance)
+            if (instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
-            if(killer == me)
+            if (killer == me)
             {
                 me->MonsterYell("All is lost.... Forgive me, my Queen....", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(21598, false);
@@ -1407,7 +1398,7 @@ public:
 
         void DoAction(const int32 action) // This will be called if dummy aoe spell hits a player ( in melee range ) - spellscript
         {
-            if(action == DO_WIN)
+            if (action == DO_WIN)
             {
                 Voice_timer = 8000;
                 Desummon_Timer = 16000;
@@ -1428,7 +1419,8 @@ public:
                 me->SendPlaySound(21588, false);
                 Talk_timer = MAX_TIMER;
             }
-            else Talk_timer -= diff;
+            else
+                Talk_timer -= diff;
 
             if (Winning_timer <= diff)
             {
@@ -1441,7 +1433,8 @@ public:
 
                 Winning_timer = MAX_TIMER;
             }
-            else Winning_timer -= diff;
+            else
+                Winning_timer -= diff;
 
             if (Remove_barrier <= diff)
             {
@@ -1452,8 +1445,8 @@ public:
                 me->RemoveAurasDueToSpell(87229); // shadow reduction buff
                 Remove_barrier = MAX_TIMER;
             }
-            else Remove_barrier -= diff;
-
+            else
+                Remove_barrier -= diff;
 
             if (Beam_timer <= diff)
             {
@@ -1464,7 +1457,8 @@ public:
                    DoCast(pStalker,SPELL_FIERY_RESOLVE);
                 Beam_timer = MAX_TIMER;
             }
-            else Beam_timer -= diff;
+            else
+                Beam_timer -= diff;
 
             if (Ticking_timer <= diff)
             {
@@ -1488,7 +1482,8 @@ public:
                     check_health=true;
                 }
             }
-            else Ticking_timer -= diff;
+            else
+                Ticking_timer -= diff;
 
             if (Voice_timer <= diff)
             {
@@ -1496,7 +1491,8 @@ public:
                 me->SendPlaySound(21591, false);
                 Voice_timer = MAX_TIMER;
             }
-            else Voice_timer -= diff;
+            else
+                Voice_timer -= diff;
 
             if (Desummon_Timer <= diff)
             {
@@ -1509,8 +1505,8 @@ public:
                 if (Creature* pSinestra = me->FindNearestCreature(SINESTRA_ENTRY, 200.0f, true))
                     pSinestra->Kill(me);
             }
-
-            else Desummon_Timer -= diff;
+            else
+                Desummon_Timer -= diff;
         }
     };
 };
@@ -1558,39 +1554,38 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
 
-            me->CastSpell(me,SPELL_TWILIGHT_CARAPACE,true); // Absorb
+            me->CastSpell(me, SPELL_TWILIGHT_CARAPACE, true); // Absorb
         }
 
-        void JustDied (Unit * killed)
+        void JustDied(Unit * killed)
         {
-            if (summonerGUID == 0 )
+            if (summonerGUID == 0)
                 return;
 
-            if (Unit* summoner = Unit::GetUnit(*me,summonerGUID))
+            if (Unit* summoner = Unit::GetUnit(*me, summonerGUID))
                 summoner->ToCreature()->AI()->DoAction(DO_CHANGE_PHASE);
         }
 
         void DoAction(const int32 param)
         {
-            if(param == DO_REMOVE)
+            if (param == DO_REMOVE)
             {
                 Reapply_timer = 30000;
                 can_remove = true;
 
                 me->RemoveAurasDueToSpell(SPELL_TWILIGHT_CARAPACE);
 
-                if(summonerGUID)
-                    if (Unit* summoner = Unit::GetUnit(*me,summonerGUID))
-                        me->CastSpell(summoner,TWILIGHT_INFUSION,false); // Purple beam
+                if (summonerGUID)
+                    if (Unit* summoner = Unit::GetUnit(*me, summonerGUID))
+                        me->CastSpell(summoner, TWILIGHT_INFUSION, false); // Purple beam
             }
         }
 
-
-        void UpdateAI (const uint32 diff)
+        void UpdateAI(const uint32 diff)
         {
-            if(Reapply_timer <= diff && can_remove )
+            if (Reapply_timer <= diff && can_remove)
             {
-                me->CastSpell(me,SPELL_TWILIGHT_CARAPACE,true); // Reapply absorb
+                me->CastSpell(me, SPELL_TWILIGHT_CARAPACE, true); // Reapply absorb
                 me->SetFullHealth();
                 Reapply_timer = MAX_TIMER;
                 can_remove = false;
@@ -1637,16 +1632,20 @@ public:
             despawned = false;
         }
 
-         void UpdateAI (const uint32 diff)
+        void UpdateAI (const uint32 diff)
         {
-            if(despawned == false && summonerGUID)
-                if (Unit* summoner = Unit::GetUnit(*me,summonerGUID))
-                    if(summoner->HealthBelowPct(30) && summoner->HasAura(SPELL_DRAINED))
+            if (!despawned && summonerGUID)
+            {
+                if (Unit* summoner = Unit::GetUnit(*me, summonerGUID))
+                {
+                    if (summoner->HealthBelowPct(30) && summoner->HasAura(SPELL_DRAINED))
                     {
                         me->ForcedDespawn(20000);
                         despawned = true;
                         return;
                     }
+                }
+            }
 
             if (Burn_timer <= diff)
             {
@@ -1654,7 +1653,8 @@ public:
                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
                 Burn_timer = MAX_TIMER;
             }
-            else Burn_timer -= diff;
+            else
+                Burn_timer -= diff;
         }
     };
 };
@@ -1682,10 +1682,10 @@ public:
 
         void SpellHit(Unit* caster, const SpellEntry* spell) // HORRIBLE CONDITIONS ( Blizzard facepalm )
         {
-            if(caster == me ) // Anti recursion check, due to indomitable spell :P
+            if (caster == me) // Anti recursion check, due to indomitable spell :P
                 return;
 
-            for (uint32 i = 0 ; i < MAX_SPELL_EFFECTS; i ++) // Interrupt spell without MECHANIC_INTERRUPT are fine
+            for (uint32 i = 0; i < MAX_SPELL_EFFECTS; i++) // Interrupt spell without MECHANIC_INTERRUPT are fine
             {
                 if (spell->Effect[i] == SPELL_EFFECT_INTERRUPT_CAST && spell->EffectMechanic[i] != MECHANIC_INTERRUPT)
                 {
@@ -1694,23 +1694,23 @@ public:
                 }
             }
 
-            if ( spell->AppliesAuraType(SPELL_AURA_MOD_FEAR) ) // Fear like spells like fine
+            if (spell->AppliesAuraType(SPELL_AURA_MOD_FEAR)) // Fear like spells like fine
             {
                 me->InterruptNonMeleeSpells(false);
                 me->RemoveAurasDueToSpell(spell->Id);
                 return;
             }
 
-            if ( spell->Id == 1776 || spell->Id == 20066 || spell->Id == 19503 || spell->SpellIconID == 3440) // Gouge,Repentance,Scatter shot, Blind
+            if (spell->Id == 1776 || spell->Id == 20066 || spell->Id == 19503 || spell->SpellIconID == 3440) // Gouge,Repentance,Scatter shot, Blind
             {
                 me->InterruptNonMeleeSpells(false);
                 me->RemoveAurasDueToSpell(spell->Id);
                 return;
             }
 
-            if ( (spell->AttributesEx & SPELL_ATTR0_BREAKABLE_BY_DAMAGE) || (spell->AttributesEx & SPELL_ATTR0_STOP_ATTACK_TARGET) ) // E.g Hex,Hibernate ( is fine )
+            if ((spell->AttributesEx & SPELL_ATTR0_BREAKABLE_BY_DAMAGE) || (spell->AttributesEx & SPELL_ATTR0_STOP_ATTACK_TARGET)) // E.g Hex,Hibernate ( is fine )
             {
-                if ( !spell->AppliesAuraType(SPELL_AURA_MOD_CONFUSE) && !spell->AppliesAuraType(SPELL_AURA_MOD_STUN) ) // Not poly e.g, not allowed
+                if (!spell->AppliesAuraType(SPELL_AURA_MOD_CONFUSE) && !spell->AppliesAuraType(SPELL_AURA_MOD_STUN)) // Not poly e.g, not allowed
                 {
                     me->InterruptNonMeleeSpells(false);
                     me->RemoveAurasDueToSpell(spell->Id);
@@ -1719,34 +1719,34 @@ public:
             }
 
 
-            if (spell->AppliesAuraType(SPELL_AURA_MOD_STUN) || spell->AppliesAuraType(SPELL_AURA_MOD_SILENCE) ) // Stun - Silence like spells trigger indomtibale
+            if (spell->AppliesAuraType(SPELL_AURA_MOD_STUN) || spell->AppliesAuraType(SPELL_AURA_MOD_SILENCE)) // Stun - Silence like spells trigger indomtibale
             {
                 me->RemoveAurasDueToSpell(spell->Id);
                 me->InterruptNonMeleeSpells(false);
-                me->CastSpell(me,SPELL_INDOMITABLE_AOE,true); // That will hurt :)
-                me->CastSpell(me,SPELL_INDOMITABLE_DUMMY,true); // Dummy ?
+                me->CastSpell(me, SPELL_INDOMITABLE_AOE, true); // That will hurt :)
+                me->CastSpell(me, SPELL_INDOMITABLE_DUMMY, true); // Dummy ?
             }
         }
 
         void Reset()
         {
             me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark simulacrum
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
 
             me->SetSpeed(MOVE_WALK, 1.1f, true);
-            me->GetMotionMaster()->MovePoint(0,-1014.179f,-808.09f,439.0f);
+            me->GetMotionMaster()->MovePoint(0, -1014.179f, -808.09f, 439.0f);
 
             Walk_timer = 10000; // 10 seconds till he walks to place
-            Dot_timer = Walk_timer + urand(8000,9000);
+            Dot_timer = Walk_timer + urand(8000, 9000);
         }
 
-        void UpdateAI (const uint32 diff)
+        void UpdateAI(const uint32 diff)
         {
-            if (Walk_timer <= diff ) // Aggro after 15 seconds
+            if (Walk_timer <= diff) // Aggro after 15 seconds
             {
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
-                me->SetSpeed(MOVE_RUN,1.0f,true);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                me->SetSpeed(MOVE_RUN, 1.0f, true);
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->SetInCombatWithZone();
 
@@ -1760,7 +1760,7 @@ public:
             if (Dot_timer <= diff) // Unleash essence every 9 seconds cca
             {
                 DoCast(SPELL_UNLEASH_ESSENCE);
-                Dot_timer = urand(8000,10000);
+                Dot_timer = urand(8000, 10000);
             }
             else Dot_timer -= diff;
 
@@ -1792,10 +1792,10 @@ public:
         void OnDispel(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
 
-            if(GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_STACK) // Anti  "Recursion" after recasting spell in AI
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_STACK) // Anti  "Recursion" after recasting spell in AI
                 return;
 
-            if(GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+            if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
             {
                 Unit* caster = aurEff->GetCaster();
                 if (!caster)
@@ -1827,7 +1827,7 @@ class IsNotTwilightFlame
         bool operator()(WorldObject* object) const
         {
             if (object->ToCreature() && object->ToCreature()->GetEntry() == CREATURE_TWILIGHT_FLAMES)
-                    return false;
+                return false;
             return true;
         }
 };
@@ -1877,9 +1877,9 @@ class spell_twilight_slicer : public SpellScriptLoader
                 if (!orb)
                     return;
 
-                for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
+                for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
                 {
-                    if ((*itr)->IsInBetween(GetCaster(),orb,orb->GetObjectSize()) == false)
+                    if ((*itr)->IsInBetween(GetCaster(), orb, orb->GetObjectSize()) == false)
                         itr = unitList.erase(itr);
                     else
                         ++itr;
@@ -1889,7 +1889,6 @@ class spell_twilight_slicer : public SpellScriptLoader
             void Register()
             {
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_twilight_slicerSpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC);
-
             }
         };
 

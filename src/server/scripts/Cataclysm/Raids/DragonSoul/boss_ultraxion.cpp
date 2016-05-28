@@ -538,7 +538,7 @@ public:
                         {
                             if (pAura->GetStackAmount() > 1)
                                 achievement = false;
-                                return;
+                            return;
                         }
                     }
                 }

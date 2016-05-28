@@ -84,12 +84,12 @@ enum ThaddiusSpells
     SPELL_CHAIN_LIGHTNING       = 28167,
     H_SPELL_CHAIN_LIGHTNING     = 54531,
     SPELL_BERSERK               = 27680,
-	//61902 Heal 20%, +25%dmg inf.stack, /pod50% s polarity shift
-	//43654 Visual random lightning
-	//56327 Random periodic lightning
-	SPELL_HEAL_DMG                = 61902,
-	SPELL_VISUAL_LIGHTNING        = 43654,
-	SPELL_LIGHTNING_PERIODIC      = 56327,
+    //61902 Heal 20%, +25%dmg inf.stack, /pod50% s polarity shift
+    //43654 Visual random lightning
+    //56327 Random periodic lightning
+    SPELL_HEAL_DMG                = 61902,
+    SPELL_VISUAL_LIGHTNING        = 43654,
+    SPELL_LIGHTNING_PERIODIC      = 56327,
 };
 
 enum Events
@@ -142,7 +142,7 @@ public:
         bool checkStalaggAlive;
         bool checkFeugenAlive;
         uint32 uiAddsTimer;
-		uint32 LightningTimer;
+        uint32 LightningTimer;
 
         void KilledUnit(Unit* /*victim*/)
         {
@@ -187,11 +187,11 @@ public:
             }
         }
 
-		void Reset()
-		{
+        void Reset()
+        {
             _Reset();
-			me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
-		}
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+        }
 
         void EnterCombat(Unit * /*who*/)
         {
@@ -200,7 +200,7 @@ public:
             events.ScheduleEvent(EVENT_SHIFT, 30000);
             events.ScheduleEvent(EVENT_CHAIN, urand(10000,20000));
             events.ScheduleEvent(EVENT_BERSERK, 360000);
-			LightningTimer = 0;
+            LightningTimer = 0;
         }
 
         void DamageTaken(Unit * /*pDoneBy*/, uint32 & /*uiDamage*/)
@@ -236,29 +236,29 @@ public:
             if (!UpdateVictim())
                 return;
 
-			//iCelike!
-			//Visuals
-			if(me->GetHealth() < me->GetMaxHealth()*0.5 && !me->HasAura(SPELL_LIGHTNING_PERIODIC))
-			{
-				me->CastSpell(me, SPELL_LIGHTNING_PERIODIC, true);
-				LightningTimer = 2000;
-			}
-			if(me->GetHealth() > me->GetMaxHealth()*0.5 && me->HasAura(SPELL_LIGHTNING_PERIODIC))
-			{
-				me->RemoveAurasDueToSpell(SPELL_LIGHTNING_PERIODIC);
-				LightningTimer = 0;
-			}
+            //iCelike!
+            //Visuals
+            if (me->GetHealth() < me->GetMaxHealth()*0.5 && !me->HasAura(SPELL_LIGHTNING_PERIODIC))
+            {
+                me->CastSpell(me, SPELL_LIGHTNING_PERIODIC, true);
+                LightningTimer = 2000;
+            }
+            if (me->GetHealth() > me->GetMaxHealth()*0.5 && me->HasAura(SPELL_LIGHTNING_PERIODIC))
+            {
+                me->RemoveAurasDueToSpell(SPELL_LIGHTNING_PERIODIC);
+                LightningTimer = 0;
+            }
 
-			//iCelike!
-			//Visual no.2
-			if(LightningTimer)
-			{
-				if(LightningTimer <= diff)
-				{
-					DoCast(me, SPELL_VISUAL_LIGHTNING, true);
-					LightningTimer = 2000;
-				} else LightningTimer -= diff;
-			}
+            //iCelike!
+            //Visual no.2
+            if(LightningTimer)
+            {
+                if(LightningTimer <= diff)
+                {
+                    DoCast(me, SPELL_VISUAL_LIGHTNING, true);
+                    LightningTimer = 2000;
+                } else LightningTimer -= diff;
+            }
 
             events.Update(diff);
 
@@ -271,16 +271,16 @@ public:
                 {
                     case EVENT_SHIFT:
                         DoCastAOE(SPELL_POLARITY_SHIFT);
-						//iCelike!
-						if(me->GetHealth() < me->GetMaxHealth()*0.5)
-						{
-							//asi 40% na 10man, 30% na 25man
-							if(urand(0,RAID_MODE(120,150)) < 50)
-								DoCast(me, SPELL_HEAL_DMG, true);
-							events.ScheduleEvent(EVENT_SHIFT, 35000);
-						}
-						else
-							events.ScheduleEvent(EVENT_SHIFT, 30000);
+                        //iCelike!
+                        if (me->GetHealth() < me->GetMaxHealth()*0.5)
+                        {
+                            //asi 40% na 10man, 30% na 25man
+                            if (urand(0, RAID_MODE(120, 150)) < 50)
+                                DoCast(me, SPELL_HEAL_DMG, true);
+                            events.ScheduleEvent(EVENT_SHIFT, 35000);
+                        }
+                        else
+                            events.ScheduleEvent(EVENT_SHIFT, 30000);
                         return;
                     case EVENT_CHAIN:
                         DoCast(me->GetVictim(), RAID_MODE(SPELL_CHAIN_LIGHTNING, H_SPELL_CHAIN_LIGHTNING));
@@ -317,19 +317,19 @@ public:
         mob_stalaggAI(Creature *c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
-			JustSpawnedVisual = false;
-			if(GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181478,100.0f))
-				NearTeslaCoil->ResetDoorOrButton();
+            JustSpawnedVisual = false;
+            if (GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181478,100.0f))
+                NearTeslaCoil->ResetDoorOrButton();
         }
 
         InstanceScript* pInstance;
 
         uint32 powerSurgeTimer;
         uint32 magneticPullTimer;
-		bool JustSpawnedVisual;
-		bool isFeugenClose;
-		bool JustEnraged;
-		uint32 EnrageCastTimer;
+        bool JustSpawnedVisual;
+        bool isFeugenClose;
+        bool JustEnraged;
+        uint32 EnrageCastTimer;
 
         void Reset()
         {
@@ -339,16 +339,16 @@ public:
                         pThaddius->AI()->DoAction(ACTION_STALAGG_RESET);
             powerSurgeTimer = urand(20000,25000);
             magneticPullTimer = 20000;
-			if(GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181478,100.0f))
-				NearTeslaCoil->ResetDoorOrButton();
+            if (GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181478,100.0f))
+                NearTeslaCoil->ResetDoorOrButton();
         }
 
         void EnterCombat(Unit * /*pWho*/)
         {
             DoCast(SPELL_STALAGG_TESLA);
-			isFeugenClose = false;
-			JustEnraged = false;
-			EnrageCastTimer = 0;
+            isFeugenClose = false;
+            JustEnraged = false;
+            EnrageCastTimer = 0;
         }
 
         void JustDied(Unit * /*killer*/)
@@ -358,56 +358,56 @@ public:
                     if (pThaddius->AI())
                         pThaddius->AI()->DoAction(ACTION_STALAGG_DIED);
 
-			if(GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181478,100.0f))
-				NearTeslaCoil->UseDoorOrButton();
+            if (GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181478,100.0f))
+                NearTeslaCoil->UseDoorOrButton();
         }
 
         void UpdateAI(const uint32 uiDiff)
         {
-			if(!JustSpawnedVisual)
-			{
-				if(GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181478,100.0f))
-				{
-					float gx,gy,gz;
-					NearTeslaCoil->GetPosition(gx,gy,gz);
-					if(Creature* TeslaVisual = me->SummonCreature(C_TESLA_COIL,gx,gy,gz,0.0f,TEMPSUMMON_DEAD_DESPAWN,0))
-					{
-						TeslaVisual->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_UNK_9 + UNIT_FLAG_NOT_SELECTABLE + UNIT_FLAG_NON_ATTACKABLE);
-						TeslaVisual->GetMotionMaster()->MovePoint(0,gx,gy,gz);
-						TeslaVisual->CastSpell(me,45537,true);
-						JustSpawnedVisual = true;
-					}
-				}
-			}
+            if(!JustSpawnedVisual)
+            {
+                if (GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181478,100.0f))
+                {
+                    float gx,gy,gz;
+                    NearTeslaCoil->GetPosition(gx,gy,gz);
+                    if(Creature* TeslaVisual = me->SummonCreature(C_TESLA_COIL,gx,gy,gz,0.0f,TEMPSUMMON_DEAD_DESPAWN,0))
+                    {
+                        TeslaVisual->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_UNK_9 + UNIT_FLAG_NOT_SELECTABLE + UNIT_FLAG_NON_ATTACKABLE);
+                        TeslaVisual->GetMotionMaster()->MovePoint(0,gx,gy,gz);
+                        TeslaVisual->CastSpell(me, 45537, true);
+                        JustSpawnedVisual = true;
+                    }
+                }
+            }
 
             if (!UpdateVictim())
                 return;
 
-			if (Creature *Feugen = me->GetCreature(*me, pInstance->GetData64(DATA_FEUGEN)))
-			{
-				if(Feugen->IsWithinDist(me,20.0f))
-					isFeugenClose = true;
-				else
-					isFeugenClose = false;
-			}
+            if (Creature *Feugen = me->GetCreature(*me, pInstance->GetData64(DATA_FEUGEN)))
+            {
+                if(Feugen->IsWithinDist(me,20.0f))
+                    isFeugenClose = true;
+                else
+                    isFeugenClose = false;
+            }
 
-			if( (me->GetPositionZ() < 309.58f) || isFeugenClose)
-			{
-				if(!JustEnraged)
-				{
-					JustEnraged = true;
-				}
-				else
-				{
-					if(EnrageCastTimer <= uiDiff)
-					{
-						me->CastSpell(me->GetVictim(),17364,true);
-						EnrageCastTimer = 500;
-					} else EnrageCastTimer -= uiDiff;
-				}
-			}
-			else
-				JustEnraged = false;
+            if( (me->GetPositionZ() < 309.58f) || isFeugenClose)
+            {
+                if(!JustEnraged)
+                {
+                    JustEnraged = true;
+                }
+                else
+                {
+                    if(EnrageCastTimer <= uiDiff)
+                    {
+                        me->CastSpell(me->GetVictim(),17364,true);
+                        EnrageCastTimer = 500;
+                    } else EnrageCastTimer -= uiDiff;
+                }
+            }
+            else
+                JustEnraged = false;
 
             if (magneticPullTimer <= uiDiff)
             {
@@ -461,18 +461,18 @@ public:
         mob_feugenAI(Creature *c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
-			JustSpawnedVisual = false;
-			if(GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181477,100.0f))
-				NearTeslaCoil->ResetDoorOrButton();
+            JustSpawnedVisual = false;
+            if(GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181477,100.0f))
+                NearTeslaCoil->ResetDoorOrButton();
         }
 
         InstanceScript* pInstance;
 
         uint32 staticFieldTimer;
-		bool JustSpawnedVisual;
-		bool isStalaggClose;
-		bool JustEnraged;
-		uint32 EnrageCastTimer;
+        bool JustSpawnedVisual;
+        bool isStalaggClose;
+        bool JustEnraged;
+        uint32 EnrageCastTimer;
 
         void Reset()
         {
@@ -481,16 +481,16 @@ public:
                     if (pThaddius->AI())
                         pThaddius->AI()->DoAction(ACTION_FEUGEN_RESET);
             staticFieldTimer = 5000;
-			if(GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181477,100.0f))
-				NearTeslaCoil->ResetDoorOrButton();
+            if (GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181477,100.0f))
+                NearTeslaCoil->ResetDoorOrButton();
         }
 
         void EnterCombat(Unit * /*pWho*/)
         {
             DoCast(SPELL_FEUGEN_TESLA);
-			isStalaggClose = false;
-			JustEnraged = false;
-			EnrageCastTimer = 0;
+            isStalaggClose = false;
+            JustEnraged = false;
+            EnrageCastTimer = 0;
         }
 
         void JustDied(Unit * /*killer*/)
@@ -500,56 +500,56 @@ public:
                     if (pThaddius->AI())
                         pThaddius->AI()->DoAction(ACTION_FEUGEN_DIED);
 
-			if(GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181477,100.0f))
-				NearTeslaCoil->UseDoorOrButton();
+            if(GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181477,100.0f))
+                NearTeslaCoil->UseDoorOrButton();
         }
 
         void UpdateAI(const uint32 uiDiff)
         {
-			if(!JustSpawnedVisual)
-			{
-				if(GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181477,100.0f))
-				{
-					float gx,gy,gz;
-					NearTeslaCoil->GetPosition(gx,gy,gz);
-					if(Creature* TeslaVisual = me->SummonCreature(C_TESLA_COIL,gx,gy,gz,0.0f,TEMPSUMMON_DEAD_DESPAWN,0))
-					{
-						TeslaVisual->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_UNK_9 + UNIT_FLAG_NOT_SELECTABLE + UNIT_FLAG_NON_ATTACKABLE);
-						TeslaVisual->GetMotionMaster()->MovePoint(0,gx,gy,gz);
-						TeslaVisual->CastSpell(me,45537,true);
-						JustSpawnedVisual = true;
-					}
-				}
-			}
+            if(!JustSpawnedVisual)
+            {
+                if(GameObject* NearTeslaCoil = GetClosestGameObjectWithEntry(me,181477,100.0f))
+                {
+                    float gx,gy,gz;
+                    NearTeslaCoil->GetPosition(gx,gy,gz);
+                    if(Creature* TeslaVisual = me->SummonCreature(C_TESLA_COIL,gx,gy,gz,0.0f,TEMPSUMMON_DEAD_DESPAWN,0))
+                    {
+                        TeslaVisual->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_UNK_9 + UNIT_FLAG_NOT_SELECTABLE + UNIT_FLAG_NON_ATTACKABLE);
+                        TeslaVisual->GetMotionMaster()->MovePoint(0,gx,gy,gz);
+                        TeslaVisual->CastSpell(me,45537,true);
+                        JustSpawnedVisual = true;
+                    }
+                }
+            }
 
             if (!UpdateVictim())
                 return;
 
-			if (Creature *Stalagg = me->GetCreature(*me, pInstance->GetData64(DATA_STALAGG)))
-			{
-				if(Stalagg->IsWithinDist(me,20.0f))
-					isStalaggClose = true;
-				else
-					isStalaggClose = false;
-			}
+            if (Creature *Stalagg = me->GetCreature(*me, pInstance->GetData64(DATA_STALAGG)))
+            {
+                if(Stalagg->IsWithinDist(me,20.0f))
+                    isStalaggClose = true;
+                else
+                    isStalaggClose = false;
+            }
 
-			if( (me->GetPositionZ() < 309.58f) || isStalaggClose)
-			{
-				if(!JustEnraged)
-				{
-					JustEnraged = true;
-				}
-				else
-				{
-					if(EnrageCastTimer <= uiDiff)
-					{
-						me->CastSpell(me->GetVictim(),17364,true);
-						EnrageCastTimer = 500;
-					} else EnrageCastTimer -= uiDiff;
-				}
-			}
-			else
-				JustEnraged = false;
+            if( (me->GetPositionZ() < 309.58f) || isStalaggClose)
+            {
+                if(!JustEnraged)
+                {
+                    JustEnraged = true;
+                }
+                else
+                {
+                    if(EnrageCastTimer <= uiDiff)
+                    {
+                        me->CastSpell(me->GetVictim(),17364,true);
+                        EnrageCastTimer = 500;
+                    } else EnrageCastTimer -= uiDiff;
+                }
+            }
+            else
+                JustEnraged = false;
 
             if (staticFieldTimer <= uiDiff)
             {

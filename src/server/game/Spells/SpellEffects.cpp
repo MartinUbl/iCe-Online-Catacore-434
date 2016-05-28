@@ -2129,8 +2129,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     if (!unitTarget && unitTarget->GetEntry() != 26452 && unitTarget->HealthAbovePct(95))
                         return;
 
-                        m_caster->DealDamage(unitTarget, unitTarget->CountPctFromMaxHealth(93));
-                        return;
+                    m_caster->DealDamage(unitTarget, unitTarget->CountPctFromMaxHealth(93));
+                    return;
                 }
                 case 49357:                                 // Brewfest Mount Transformation
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)

@@ -3726,10 +3726,12 @@ public:
                 cell.Visit(pair, visitor, *(owner->GetMap()));
 
                 if (!templist.empty())
+                {
                     for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
                         if ((*itr)->GetOwner() == me->GetOwner() && *itr != me)
                             (*itr)->DisappearAndDie();
-                            templist.clear();
+                }
+                templist.clear();
             }
         }
 

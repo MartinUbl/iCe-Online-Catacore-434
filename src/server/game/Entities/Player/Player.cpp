@@ -21684,7 +21684,7 @@ void Player::RemovePet(Pet* pet, PetRemoveMode mode)
 
     if (pet)
     {
-        sLog->outDebug("RemovePet %u, %u", pet->GetEntry(), mode);
+        sLog->outDebug("RemovePet %u, %u", pet->GetEntry(), (uint32)mode);
 
         if (pet->m_removed)
             return;
@@ -26087,10 +26087,12 @@ void Player::DespawnAllSummonsByEntry(uint32 entry)
     Player::GUIDTimestampMap* pSummmons = GetSummonMapFor(entry);
     if (pSummmons && !pSummmons->empty())
     {
-        for (Player::GUIDTimestampMap::iterator itr = pSummmons->begin(); itr != pSummmons->end();++itr)
+        for (Player::GUIDTimestampMap::iterator itr = pSummmons->begin(); itr != pSummmons->end(); ++itr)
+        {
             if (Creature * cr = Creature::GetCreature(*this, (*itr).first))
                 cr->ForcedDespawn();
-            pSummmons->clear();
+        }
+        pSummmons->clear();
     }
 }
 
@@ -26099,12 +26101,14 @@ void Player::DeleteSummonFromMapByGUID(uint32 entry, uint64 guid)
     Player::GUIDTimestampMap* pSummmons = GetSummonMapFor(entry);
     if (pSummmons && !pSummmons->empty())
     {
-        for (Player::GUIDTimestampMap::iterator itr = pSummmons->begin(); itr != pSummmons->end();++itr)
+        for (Player::GUIDTimestampMap::iterator itr = pSummmons->begin(); itr != pSummmons->end(); ++itr)
+        {
             if ((*itr).first == guid)
             {
                 pSummmons->erase(itr);
                 break;
             }
+        }
     }
 }
 

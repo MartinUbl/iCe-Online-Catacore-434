@@ -104,26 +104,36 @@ public:
         {
             switch(go->GetEntry())
             {
-                case 193564:     Prince_TaldaramPlatform = go->GetGUID();
-                    if (m_auiEncounter[1] == DONE) HandleGameObject(0,true,go); break;
-                case 193093:     Prince_TaldaramSpheres[0] = go->GetGUID();
+                case 193564:
+                    Prince_TaldaramPlatform = go->GetGUID();
+                    if (m_auiEncounter[1] == DONE)
+                        HandleGameObject(0, true, go);
+                    break;
+                case 193093:
+                    Prince_TaldaramSpheres[0] = go->GetGUID();
                     if (spheres[0] == IN_PROGRESS)
                     {
                         go->SetGoState(GO_STATE_ACTIVE);
                         go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     }
-                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    else
+                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
-                case 193094:     Prince_TaldaramSpheres[1] = go->GetGUID();
+                case 193094:
+                    Prince_TaldaramSpheres[1] = go->GetGUID();
                     if (spheres[1] == IN_PROGRESS)
                     {
                         go->SetGoState(GO_STATE_ACTIVE);
                         go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     }
-                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    else
+                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
-                case 192236:    Prince_TaldaramGate = go->GetGUID(); // Web gate past Prince Taldaram
-                    if (m_auiEncounter[1] == DONE)HandleGameObject(0,true,go);break;
+                case 192236:
+                    Prince_TaldaramGate = go->GetGUID(); // Web gate past Prince Taldaram
+                    if (m_auiEncounter[1] == DONE)
+                        HandleGameObject(0, true, go);
+                    break;
             }
         }
 

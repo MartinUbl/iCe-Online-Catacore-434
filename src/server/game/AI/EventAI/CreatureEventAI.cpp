@@ -851,6 +851,8 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
 
             break;
         }
+        default:
+            break;
     }
 }
 
@@ -896,11 +898,13 @@ void CreatureEventAI::Reset()
                     (*i).Enabled = true;
                 break;
             }
-            //default:
-            //TODO: enable below code line / verify this is correct to enable events previously disabled (ex. aggro yell), instead of enable this in void EnterCombat()
-            //(*i).Enabled = true;
-            //(*i).Time = 0;
-            //break;
+            default:
+            {
+                //TODO: enable below code line / verify this is correct to enable events previously disabled (ex. aggro yell), instead of enable this in void EnterCombat()
+                //(*i).Enabled = true;
+                //(*i).Time = 0;
+                break;
+            }
         }
     }
 }
@@ -1120,6 +1124,8 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                             if (me->IsInMap(me->GetVictim()))
                                 if (me->IsInRange(me->GetVictim(),(float)(*i).Event.range.minDist,(float)(*i).Event.range.maxDist))
                                     ProcessEvent(*i);
+                        break;
+                    default:
                         break;
                 }
             }

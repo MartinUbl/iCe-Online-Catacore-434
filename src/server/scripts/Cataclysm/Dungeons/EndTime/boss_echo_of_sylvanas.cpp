@@ -225,7 +225,7 @@ public:
             for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
                 if (Player * pPlayer = i->getSource())
                     pPlayer->SummonGameObject(209438, 3821.3f, 935.617f, 55.8123f, 5.50447f, 0.0f, 0.0f, 0.379594f, -0.925153f, 86400);
-                    return;
+            return;
         }
 
         void KillGhouls()

@@ -1735,13 +1735,11 @@ bool ChatHandler::HandleModifyASpeedCommand(const char* args)
     if (needReportToTarget(chr))
         ChatHandler(chr).PSendSysMessage(LANG_YOURS_ASPEED_CHANGED, GetNameLink().c_str(), ASpeed);
 
-	{
-        //chr->SetSpeed(MOVE_WALK,    ASpeed,true); This is not needed anymore.
-        chr->SetSpeed(MOVE_RUN,     ASpeed,true);
-        chr->SetSpeed(MOVE_SWIM,    ASpeed,true);
-        //chr->SetSpeed(MOVE_TURN,    ASpeed,true);
-        chr->SetSpeed(MOVE_FLIGHT,     ASpeed,true);
-    }
+    //chr->SetSpeed(MOVE_WALK,    ASpeed,true); This is not needed anymore.
+    chr->SetSpeed(MOVE_RUN,     ASpeed,true);
+    chr->SetSpeed(MOVE_SWIM,    ASpeed,true);
+    //chr->SetSpeed(MOVE_TURN,    ASpeed,true);
+    chr->SetSpeed(MOVE_FLIGHT,     ASpeed,true);
     return true;
 }
 

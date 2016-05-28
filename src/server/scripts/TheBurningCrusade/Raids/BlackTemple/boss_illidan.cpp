@@ -1300,40 +1300,45 @@ public:
 
             Event = EVENT_MAIEV_NULL;
             for (uint8 i = 1; i <= MaxTimer; i++)
+            {
                 if (Timer[i])
                 {
                     if (Timer[i] <= diff)
                         Event = (EventMaiev)i;
                     else Timer[i] -= diff;
                 }
+            }
 
-                switch(Event)
-                {
+            switch (Event)
+            {
                 case EVENT_MAIEV_STEALTH:
-                    {
-                        me->SetFullHealth();
-                        me->SetVisibility(VISIBILITY_ON);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        Timer[EVENT_MAIEV_STEALTH] = 0;
-                        BlinkToPlayer();
-                        EnterPhase(Phase);
-                    }
+                {
+                    me->SetFullHealth();
+                    me->SetVisibility(VISIBILITY_ON);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    Timer[EVENT_MAIEV_STEALTH] = 0;
+                    BlinkToPlayer();
+                    EnterPhase(Phase);
                     break;
+                }
                 case EVENT_MAIEV_TAUNT:
-                    {
-                        uint32 random = rand()%4;
-                        uint32 sound = MaievTaunts[random].sound;
-                        if (MaievTaunts[random].text.size())
-                            me->MonsterYell(MaievTaunts[random].text.c_str(), LANG_UNIVERSAL, 0);
-                        DoPlaySoundToSet(me, sound);
-                        Timer[EVENT_MAIEV_TAUNT] = 22000 + rand()%21 * 1000;
-                    }
+                {
+                    uint32 random = rand()%4;
+                    uint32 sound = MaievTaunts[random].sound;
+                    if (MaievTaunts[random].text.size())
+                        me->MonsterYell(MaievTaunts[random].text.c_str(), LANG_UNIVERSAL, 0);
+                    DoPlaySoundToSet(me, sound);
+                    Timer[EVENT_MAIEV_TAUNT] = 22000 + rand()%21 * 1000;
                     break;
+                }
                 case EVENT_MAIEV_SHADOW_STRIKE:
+                {
                     DoCast(me->GetVictim(), SPELL_SHADOW_STRIKE);
                     Timer[EVENT_MAIEV_SHADOW_STRIKE] = 60000;
                     break;
+                }
                 case EVENT_MAIEV_TRAP:
+                {
                     if (Phase == PHASE_NORMAL_MAIEV)
                     {
                         BlinkToPlayer();
@@ -1348,23 +1353,24 @@ public:
                         Timer[EVENT_MAIEV_THROW_DAGGER] = 2000;
                     }
                     break;
+                }
                 default:
                     break;
-                }
+            }
 
-                if (HealthBelowPct(50))
-                {
-                    me->SetVisibility(VISIBILITY_OFF);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    if (GETCRE(Illidan, IllidanGUID))
-                        CAST_AI(boss_illidan_stormrage::boss_illidan_stormrageAI, Illidan->AI())->DeleteFromThreatList(me->GetGUID());
-                    me->AttackStop();
-                    Timer[EVENT_MAIEV_STEALTH] = 60000; //reappear after 1 minute
-                    MaxTimer = 1;
-                }
+            if (HealthBelowPct(50))
+            {
+                me->SetVisibility(VISIBILITY_OFF);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                if (GETCRE(Illidan, IllidanGUID))
+                    CAST_AI(boss_illidan_stormrage::boss_illidan_stormrageAI, Illidan->AI())->DeleteFromThreatList(me->GetGUID());
+                me->AttackStop();
+                Timer[EVENT_MAIEV_STEALTH] = 60000; //reappear after 1 minute
+                MaxTimer = 1;
+            }
 
-                if (Phase == PHASE_NORMAL_MAIEV)
-                    DoMeleeAttackIfReady();
+            if (Phase == PHASE_NORMAL_MAIEV)
+                DoMeleeAttackIfReady();
         }
     };
 

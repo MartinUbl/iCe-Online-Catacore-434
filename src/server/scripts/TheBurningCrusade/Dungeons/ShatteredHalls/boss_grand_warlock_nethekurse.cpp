@@ -185,22 +185,22 @@ class boss_grand_warlock_nethekurse : public CreatureScript
             void MoveInLineOfSight(Unit *who)
             {
                 if (!IntroOnce && me->IsWithinDistInMap(who, 50.0f))
-                    {
+                {
                     if (who->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                        DoScriptText(SAY_INTRO, me);
-                        IntroOnce = true;
-                        IsIntroEvent = true;
+                    DoScriptText(SAY_INTRO, me);
+                    IntroOnce = true;
+                    IsIntroEvent = true;
 
-                        if (pInstance)
-                            pInstance->SetData(TYPE_NETHEKURSE,IN_PROGRESS);
-                    }
+                    if (pInstance)
+                        pInstance->SetData(TYPE_NETHEKURSE,IN_PROGRESS);
+                }
 
-                    if (IsIntroEvent || !IsMainEvent)
-                        return;
+                if (IsIntroEvent || !IsMainEvent)
+                    return;
 
-                    ScriptedAI::MoveInLineOfSight(who);
+                ScriptedAI::MoveInLineOfSight(who);
             }
 
             void EnterCombat(Unit * /*who*/)

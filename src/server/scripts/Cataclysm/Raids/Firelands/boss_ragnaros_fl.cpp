@@ -3518,42 +3518,39 @@ class spell_gen_world_in_flames : public SpellScriptLoader
                 if (flameCounter > 2) // Maximum 3 times
                     return;
 
-                    uint32 randNum = urand(1,3); // Spawn on 3 random locations
+                uint32 randNum = urand(1, 3); // Spawn on 3 random locations
 
-                    if (randNum == lastNumber) // Dont spawn flames at same position
+                if (randNum == lastNumber) // Dont spawn flames at same position
+                {
+                    if (randNum == 1)
+                        randNum = urand(2, 3);
+                    else if (randNum == 2)
+                        randNum = (urand(0, 1)) ? 1 : 3;
+                    else // 3
+                        randNum = urand(1, 2);
+                }
+
+                if (boss_ragnaros_firelands::boss_ragnaros_firelandsAI* pAI = (boss_ragnaros_firelands::boss_ragnaros_firelandsAI*)(caster->ToCreature()->GetAI()))
+                {
+                    if (!caster->IsNonMeleeSpellCasted(false) && pAI->CanCast())
+                        caster->CastSpell(caster, ENGULFING_FLAMES_HC, false); // Only for visual casting
+
+                    switch (randNum)
                     {
-                        if (randNum == 1)
-                            randNum = urand(2,3);
-                        else
-                        if (randNum == 2)
-                            randNum = (urand(0,1)) ? 1 : 3;
-                        else // 3
-                            randNum = urand(1,2);
+                        case 1:
+                            pAI->SpawnEngulfingFlames(engulfing_lengths[randNum - 1], 1.6f, 5.2f);
+                            break;
+                        case 2:
+                            pAI->SpawnEngulfingFlames(engulfing_lengths[randNum - 1], 1.6f, 4.6f);
+                            break;
+                        case 3:
+                            pAI->SpawnEngulfingFlames(engulfing_lengths[2], 2.12f, 4.33f);
+                            pAI->SpawnEngulfingFlames(engulfing_lengths[3], 2.12f, 4.33f);
+                            break;
                     }
-
-                    if (boss_ragnaros_firelands::boss_ragnaros_firelandsAI* pAI = (boss_ragnaros_firelands::boss_ragnaros_firelandsAI*)(caster->ToCreature()->GetAI()))
-                    {
-                        if (!caster->IsNonMeleeSpellCasted(false) && pAI->CanCast())
-                            caster->CastSpell(caster, ENGULFING_FLAMES_HC, false); // Only for visual casting
-
-                        switch(randNum)
-                        {
-                            case 1 :
-                                pAI->SpawnEngulfingFlames(engulfing_lengths[randNum - 1],1.6f,5.2f);
-                            break;
-
-                            case 2 :
-                                pAI->SpawnEngulfingFlames(engulfing_lengths[randNum - 1],1.6f,4.6f);
-                            break;
-
-                            case 3:
-                                pAI->SpawnEngulfingFlames(engulfing_lengths[2],2.12f,4.33f);
-                                pAI->SpawnEngulfingFlames(engulfing_lengths[3],2.12f,4.33f);
-                            break;
-                        }
-                    }
-                    lastNumber = randNum;
-                    flameCounter++;
+                }
+                lastNumber = randNum;
+                flameCounter++;
             }
 
             void Register()
