@@ -5834,6 +5834,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
     Unit* target = pVictim;
     int32 basepoints0 = 0;
     uint64 originalCaster = 0;
+    uint32 duration = 0;
 
     switch(dummySpell->SpellFamilyName)
     {
@@ -6549,8 +6550,26 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     if (GetTypeId() == TYPEID_PLAYER)
                         ToPlayer()->ApplySpellMod(12654, SPELLMOD_DOT, basepoints0);
 
-                    basepoints0 = basepoints0 / 2;
-                    basepoints0 += pVictim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id,SPELL_AURA_PERIODIC_DAMAGE,EFFECT_0);
+                    // Following this new system, ignite's behavior is as follows: 
+                    // - Ignite's initial application will be 4s in duration: 2 ticks, one at 2s, one at 0s. Ignite's total damage pool is divided between these two ticks.
+                    // - Any refreshes at any time will refresh ignite to 6s in(max) duration(current duration is ignite's current duration mod 2 plus 4s): 3 ticks, one at 4s, one at 2s, one at 0s. Ignite's damage pool is divided evenly between these three ticks.
+                    // - Ignite must be below 4s in current duration to accept any new refresh events.
+
+                    if (AuraEffect* aurEff = pVictim->GetAuraEffect(12654, 0, GetGUID()))
+                    {
+                        if (aurEff->GetBase()->GetDuration() < 4 * IN_MILLISECONDS)
+                            duration = (aurEff->GetBase()->GetDuration() / 2) + 4 * IN_MILLISECONDS;
+                        else
+                            duration = aurEff->GetBase()->GetDuration();
+
+                        basepoints0 = basepoints0 / 3;
+                        basepoints0 += pVictim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE, EFFECT_0);
+                    }
+                    else
+                    {
+                        duration = 4 * IN_MILLISECONDS;
+                        basepoints0 = basepoints0 / 2;
+                    }
                     break;
                 }
                 // Blessing of Ancient Kings (Val'anyr, Hammer of Ancient Kings)
@@ -8790,6 +8809,13 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->AddSpellCooldown(cooldown_spell_id,0,cooldown*1000);
+
+    // Update Ignite's duration
+    if (dummySpell->Id == 11119 || dummySpell->Id == 11120 || dummySpell->Id == 12846)
+    {
+        if (AuraEffect* aurEff = pVictim->GetAuraEffect(12654, 0, GetGUID()))
+            aurEff->GetBase()->SetDuration(duration);
+    }
 
     return true;
 }

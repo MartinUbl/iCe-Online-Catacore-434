@@ -1472,9 +1472,7 @@ void AuraEffect::HandleEffectAll(AuraApplication const *aurApp, uint8 mode, bool
 {
     if(apply)
     {
-        // This should want some general solution, maybe implement SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER ???
-        if (GetId() == 12654) // Ignite
-            ResetPeriodic(true);
+        //
     }
     else
     {
