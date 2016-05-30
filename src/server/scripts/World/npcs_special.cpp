@@ -5205,7 +5205,8 @@ public:
                     target->CastSpell(target, SPELL_INFILTRATING_RAVENHOLDT, true);
                 }
                 me->CombatStop(true);
-                target->CombatStop(true);
+                if (target)
+                    target->CombatStop(true);
             });
         }
 
@@ -5279,7 +5280,8 @@ public:
                     target->CastSpell(target, SPELL_INFILTRATING_GILNEAS_CITY, true);
                 }
                 me->CombatStop(true);
-                target->CombatStop(true);
+                if (target)
+                    target->CombatStop(true);
             });
         }
 
