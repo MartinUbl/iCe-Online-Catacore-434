@@ -9143,6 +9143,16 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
             }
             break;
         }
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Do not allow Bloodsurge to be dropped by another spell than Slam (handled elsewhere)
+            if (triggeredByAura && triggeredByAura->GetId() == 46916)
+            {
+                *handled = true;
+                break;
+            }
+            break;
+        }
     }
     return false;
 }
