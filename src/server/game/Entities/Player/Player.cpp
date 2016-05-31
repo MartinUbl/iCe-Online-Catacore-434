@@ -7904,7 +7904,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                 case 3518: // Nagrand
                 case 3523: // Netherstorm
                 case 3520: // Shadowmoon Valley
-                case 3703: // Shattrath City
                 case 3519: // Terokkar Forest
                 case 3521: // Zangarmarsh
                     TeleportTo(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f); // Teleport to homebind
