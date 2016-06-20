@@ -79,7 +79,7 @@ static size_t getCommandTableSize(const ChatCommand* commands)
     if (!commands)
         return 0;
     size_t count = 0;
-    while (commands[count].Name != NULL)
+    while (commands[count].Name != nullptr)
         count++;
     return count;
 }
@@ -88,8 +88,17 @@ static size_t getCommandTableSize(const ChatCommand* commands)
 static size_t appendCommandTable(ChatCommand* target, const ChatCommand* source)
 {
     const size_t count = getCommandTableSize(source);
-    if (count)
-        memcpy(target, source, count * sizeof(ChatCommand));
+    for (size_t i = 0; i < count; i++)
+    {
+        // since this is just cache "mirror" of const data, pointer assignment is fine
+        target[i].Name = source[i].Name;
+
+        target[i].SecurityLevel = source[i].SecurityLevel;
+        target[i].AllowConsole = source[i].AllowConsole;
+        target[i].Handler = source[i].Handler;
+        target[i].Name = source[i].Name;
+        target[i].ChildCommands = source[i].ChildCommands;
+    }
     return count;
 }
 
@@ -910,8 +919,10 @@ ChatCommand * ChatHandler::getCommandTable()
             total += 1; // ending zero
 
             // cache top-level commands
-            commandTableCache = (ChatCommand*)malloc(sizeof(ChatCommand) * total);
-            memset(commandTableCache, 0, sizeof(ChatCommand) * total);
+            commandTableCache = new ChatCommand[total];
+            for (size_t i = 0; i < total; i++)
+                commandTableCache[i].Name = nullptr;
+
             ACE_ASSERT(commandTableCache);
             size_t added = appendCommandTable(commandTableCache, commandTable);
             for (std::vector<ChatCommand*>::const_iterator it = dynamic.begin(); it != dynamic.end(); ++it)
@@ -925,8 +936,10 @@ ChatCommand * ChatHandler::getCommandTable()
             {
                 Field *fields = result->Fetch();
                 std::string name = fields[0].GetString();
+                uint16 security = fields[1].GetUInt16();
+                std::string help = fields[2].GetString();
 
-                SetDataForCommandInTable(commandTableCache, name.c_str(), fields[1].GetUInt16(), fields[2].GetString(), name);
+                SetDataForCommandInTable(commandTableCache, name.c_str(), security, help, name);
 
             } while (result->NextRow());
         }
@@ -1199,14 +1212,14 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand *table, const char* text,
 
     while (*text == ' ') ++text;
 
-    for (uint32 i = 0; table[i].Name != NULL; i++)
+    for (uint32 i = 0; table[i].Name != nullptr; i++)
     {
         // for data fill use full explicit command names
         if (table[i].Name != cmd)
             continue;
 
         // select subcommand from child commands list (including "")
-        if (table[i].ChildCommands != NULL)
+        if (table[i].ChildCommands != nullptr)
         {
             if (SetDataForCommandInTable(table[i].ChildCommands, text, security, help, fullcommand))
                 return true;
@@ -1226,7 +1239,7 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand *table, const char* text,
             sLog->outDetail("Table `command` overwrite for command '%s' default security (%u) by %u",fullcommand.c_str(),table[i].SecurityLevel,security);
 
         table[i].SecurityLevel = security;
-        table[i].Help          = help;
+        table[i].Help = help.c_str();
         return true;
     }
 
