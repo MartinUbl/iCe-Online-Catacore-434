@@ -1015,7 +1015,7 @@ bool Guild::RankInfo::LoadFromDB(Field* fields)
     m_rankId            = fields[1].GetUInt8();
     m_name              = fields[2].GetString();
     m_rights            = fields[3].GetUInt32();
-    m_bankMoneyPerDay   = fields[4].GetUInt64();
+    m_bankMoneyPerDay   = fields[4].GetUInt32();
     if (m_rankId == GR_GUILDMASTER)                     // Prevent loss of leader rights
         m_rights |= GR_RIGHT_ALL;
     return true;
@@ -1474,7 +1474,7 @@ bool Guild::Member::LoadFromDB(Field* fields)
     m_publicNote    = fields[3].GetString();
     m_officerNote   = fields[4].GetString();
     m_bankRemaining[GUILD_BANK_MAX_TABS].resetTime  = fields[5].GetUInt32();
-    m_bankRemaining[GUILD_BANK_MAX_TABS].value      = fields[6].GetUInt64();
+    m_bankRemaining[GUILD_BANK_MAX_TABS].value      = fields[6].GetUInt32();
     for (uint8 i = 0; i < GUILD_BANK_MAX_TABS; ++i)
     {
         m_bankRemaining[i].resetTime                = fields[7 + i * 2].GetUInt32();
@@ -3803,7 +3803,7 @@ bool Guild::LoadBankEventLogFromDB(Field* fields)
                 dbTabId,                                // tab id
                 eventType,                              // event type
                 fields[4].GetUInt32(),                  // player guid
-                fields[5].GetUInt64(),                  // item or money
+                fields[5].GetUInt32(),                  // item or money
                 fields[6].GetUInt16(),                  // itam stack count
                 fields[7].GetUInt8()));                 // dest tab id
         }

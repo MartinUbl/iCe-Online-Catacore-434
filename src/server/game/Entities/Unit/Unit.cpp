@@ -213,6 +213,7 @@ m_vehicleKit(NULL), m_unitTypeMask(UNIT_MASK_NONE), m_HostileRefManager(this)
     m_aiAnimKitId = 0;
     m_movementAnimKitId = 0;
     m_meleeAnimKitId = 0;
+    m_sheathForced = SHEATH_STATE_UNARMED;
 
     // remove aurastates allowing special moves
     for (uint8 i = 0; i < MAX_REACTIVE; ++i)
