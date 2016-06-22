@@ -1188,12 +1188,14 @@ BattlegroundTypeId BattlegroundMgr::SelectRandomBattleground(uint32 minBracketLe
         // Strand of the Ancients is available only to 85's too (but that's custom change)
         bgs.push_back(BATTLEGROUND_SA);
 
-        time_t secs = time(NULL);
-        tm* date = localtime(&secs);
+        // Alterac Valley is now excluded from random BG selections due to lower population
+
+        //time_t secs = time(NULL);
+        //tm* date = localtime(&secs);
 
         // Allow Alterac Valley only from 16:00 to 22:00 every day
-        if (date && date->tm_hour >= 16 && date->tm_hour <= 22)
-            bgs.push_back(BATTLEGROUND_AV);
+        //if (date && date->tm_hour >= 16 && date->tm_hour <= 22)
+        //    bgs.push_back(BATTLEGROUND_AV);
     }
 
     return SelectRandomBattleground(bgs);
