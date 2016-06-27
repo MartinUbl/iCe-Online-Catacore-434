@@ -1,5 +1,6 @@
 #include "gamePCH.h"
 #include "GSCommands.h"
+#include "GSMgr.h"
 #include <exception>
 #include <stack>
 #include <map>
@@ -142,7 +143,7 @@ int gscr_last_timer_id = -1;
 // last id assigned to variable
 int gscr_last_variable_id = -1;
 
-#define CLEANUP_AND_THROW(s) { delete ret; throw SyntaxErrorException(s); }
+#define CLEANUP_AND_THROW(s) { delete ret; throw SyntaxErrorException(src->lineNum,s); }
 
 // exception class we will catch in parsing loop
 class SyntaxErrorException : public std::exception
@@ -151,14 +152,14 @@ class SyntaxErrorException : public std::exception
         std::string msgstr;
 
     public:
-        SyntaxErrorException(const char* message)
+        SyntaxErrorException(int lineNum, const char* message)
         {
-            msgstr = std::string("SyntaxErrorException: ") + std::string(message);
+            msgstr = std::string("line ") + std::to_string(lineNum) + std::string(": ") + std::string(message);
         }
 
-        SyntaxErrorException(std::string message)
+        SyntaxErrorException(int lineNum, std::string message)
         {
-            msgstr = std::string("SyntaxErrorException: ") + message;
+            msgstr = std::string("line ") + std::to_string(lineNum) + std::string(": ") + message;
         }
 
         virtual const char* what() const throw()
@@ -1366,7 +1367,7 @@ CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
         for (auto itr = gscr_gotos_list.begin(); itr != gscr_gotos_list.end(); ++itr)
         {
             if (gscr_label_offset_map.find((*itr).second) == gscr_label_offset_map.end())
-                throw SyntaxErrorException(std::string("no matching label '") + (*itr).second + std::string("' for goto"));
+                throw SyntaxErrorException(0, std::string("no matching label '") + (*itr).second + std::string("' for goto"));
 
             (*itr).first->params.c_goto_label.instruction_offset = gscr_label_offset_map[(*itr).second];
         }
@@ -1374,6 +1375,7 @@ CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
     catch (std::exception& e)
     {
         sLog->outError("GSAI ID %u Exception: %s", scriptId, e.what());
+        sGSMgr->AddError(scriptId, e.what());
         delete cv;
         cv = nullptr;
     }

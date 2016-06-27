@@ -19,6 +19,8 @@ void GSMgr::LoadScripts()
     QueryResult res = ScriptDatabase.PQuery("SELECT id, script FROM gscript_template");
     uint32 cnt = 0;
 
+    m_errorList.clear();
+
     for (auto itr = m_registeredAIs.begin(); itr != m_registeredAIs.end(); ++itr)
     {
         // unhook scripts, so we won't cause conflict or memory corruption
@@ -95,4 +97,14 @@ CommandVector* GSMgr::GetScript(int id)
         return nullptr;
 
     return m_loadedScripts[id];
+}
+
+void GSMgr::AddError(int scriptId, std::string err)
+{
+    m_errorList.push_back(std::string("Script ") + std::to_string(scriptId) + ", " + err);
+}
+
+std::list<std::string>* GSMgr::GetErrorList()
+{
+    return &m_errorList;
 }

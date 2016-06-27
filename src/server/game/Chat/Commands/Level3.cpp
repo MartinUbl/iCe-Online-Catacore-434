@@ -925,6 +925,16 @@ bool ChatHandler::HandleReloadGScriptsCommand(const char* arg)
 
     SendGlobalGMSysMessage("G-Scripts reloaded.");
 
+    std::list<std::string>* errList = sGSMgr->GetErrorList();
+    if (!errList || errList->size() == 0)
+    {
+        SendSysMessage("No errors.");
+        return true;
+    }
+
+    for (std::list<std::string>::iterator itr = errList->begin(); itr != errList->end(); ++itr)
+        SendSysMessage((*itr).c_str());
+
     return true;
 }
 

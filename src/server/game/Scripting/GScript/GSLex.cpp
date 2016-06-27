@@ -29,6 +29,7 @@ CommandProtoVector* gscr_parseInput(std::vector<std::string>& lines)
         line = (char*)lines[linepos].c_str();
 
         tmp = new gs_command_proto;
+        tmp->lineNum = linepos + 1;
         lastpos = 0;
         instr = false;
         endbybreak = false;

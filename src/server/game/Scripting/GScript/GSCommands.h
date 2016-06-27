@@ -6,6 +6,7 @@ struct gs_command_proto
 {
     std::string instruction;
     std::vector<std::string> parameters;
+    int lineNum;
 
     void addParameter(std::string par);
 };

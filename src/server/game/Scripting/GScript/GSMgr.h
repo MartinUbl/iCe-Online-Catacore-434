@@ -48,9 +48,13 @@ class GSMgr
         void UnregisterAI(ScriptedAI* src);
         CommandVector* GetScript(int id);
 
+        void AddError(int scriptId, std::string err);
+        std::list<std::string>* GetErrorList();
+
     private:
         std::map<int, CommandVector*> m_loadedScripts;
         std::set<ScriptedAI*> m_registeredAIs;
+        std::list<std::string> m_errorList;
 };
 
 #define sGSMgr ACE_Singleton<GSMgr, ACE_Null_Mutex>::instance()
