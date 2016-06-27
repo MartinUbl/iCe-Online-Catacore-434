@@ -608,6 +608,23 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 ret->params.c_say_yell.sound_id = gs_specifier::make_default_value(0);
 
             break;
+        // say and yell instructions are basically the same
+        // Syntax: whisper "Hello world!" invoker
+        case GSCR_WHISPER:
+            if (src->parameters.size() < 1)
+                CLEANUP_AND_THROW("too few parameters for instruction WHISPER");
+            if (src->parameters.size() > 2)
+                CLEANUP_AND_THROW("too many parameters for instruction WHISPER");
+
+            // store string to be whispered
+            ret->params.c_whisper.tosay = src->parameters[0].c_str();
+            // store whisper target if specified
+            if (src->parameters.size() == 2)
+                ret->params.c_whisper.target = gs_specifier::parse(src->parameters[1].c_str());
+            else
+                ret->params.c_whisper.target = gs_specifier::make_default_value(0);
+
+            break;
         // if instruction - standard control sequence; needs to be closed by endif
         // Syntax: if <specifier> [<operator> <specifier>]
         case GSCR_IF:

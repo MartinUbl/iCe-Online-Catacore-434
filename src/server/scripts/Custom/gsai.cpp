@@ -1216,6 +1216,18 @@ class GS_CreatureScript : public CreatureScript
                                 source->PlayDirectSound(sound);
                             break;
                         }
+                        case GSCR_WHISPER:
+                        {
+                            Unit* invoker = m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                            Unit* target;
+                            if (curr->params.c_whisper.target.subject_type == GSST_NONE)
+                                target = invoker;
+                            else
+                                target = GS_SelectTarget(curr->params.c_whisper.target);
+
+                            source->MonsterWhisper(curr->params.c_whisper.tosay, target ? target->GetGUID() : 0);
+                            break;
+                        }
                         case GSCR_IF:
                             // if script does not meet condition passed in, move to endif offset
                             if (!GS_Meets(curr->params.c_if.condition))

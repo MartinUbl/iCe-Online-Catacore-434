@@ -75,6 +75,7 @@ enum gs_command_type
     GSCR_TEXTEMOTE = 46,
     GSCR_BOSSEMOTE = 47,
     GSCR_UNVEHICLE = 48,
+    GSCR_WHISPER = 49,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -128,6 +129,7 @@ static std::string gscr_identifiers[] = {
     "textemote",
     "bossemote",
     "unvehicle",
+    "whisper"
 };
 
 enum gs_quest_operation
@@ -494,6 +496,12 @@ struct gs_command
         {
             gs_specifier entry;
         } c_unvehicle;
+
+        struct
+        {
+            const char* tosay;
+            gs_specifier target;
+        } c_whisper;
 
     } params;
 
