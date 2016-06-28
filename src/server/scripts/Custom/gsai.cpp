@@ -1019,7 +1019,7 @@ class GS_CreatureScript : public CreatureScript
 
             void MoveInLineOfSight(Unit* who) override
             {
-                if (m_playerInRangeScriptId > -1 && me->GetDistance(who) <= m_playerInRangeScriptDistance)
+                if (m_playerInRangeScriptId > -1 && me->GetDistance(who) <= m_playerInRangeScriptDistance && me->IsWithinLOSInMap(who, false))
                 {
                     if (GS_SelectScript(GS_TYPE_PLAYER_IN_RANGE, (int32)m_playerInRangeScriptDistance, who))
                         ResetState();
