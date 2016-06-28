@@ -1325,6 +1325,14 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             else
                 ret->params.c_unvehicle.entry = gs_specifier::make_default_value(0);
             break;
+        // set visibility (on/off)
+        // Syntax: visible
+        //         invisible
+        case GSCR_VISIBLE:
+        case GSCR_INVISIBLE:
+            if (src->parameters.size() > 0)
+                CLEANUP_AND_THROW("too many parameters for instruction VISIBLE/INVISIBLE");
+            break;
     }
 
     return ret;

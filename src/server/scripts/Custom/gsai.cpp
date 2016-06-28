@@ -1558,9 +1558,9 @@ class GS_CreatureScript : public CreatureScript
                         case GSCR_FOLLOW:
                         {
                             if (Unit* target = GS_SelectTarget(curr->params.c_follow.subject))
-                                me->GetMotionMaster()->MoveFollow(target, GS_GetValueFromSpecifier(curr->params.c_follow.distance).toFloat(), GS_GetValueFromSpecifier(curr->params.c_follow.angle).toFloat());
+                                source->GetMotionMaster()->MoveFollow(target, GS_GetValueFromSpecifier(curr->params.c_follow.distance).toFloat(), GS_GetValueFromSpecifier(curr->params.c_follow.angle).toFloat());
                             else
-                                me->GetMotionMaster()->MovementExpired();
+                                source->GetMotionMaster()->MovementExpired();
                             break;
                         }
                         case GSCR_UNVEHICLE:
@@ -1571,6 +1571,12 @@ class GS_CreatureScript : public CreatureScript
                                     source->ExitVehicle();
                             break;
                         }
+                        case GSCR_VISIBLE:
+                            source->SetVisibility(VISIBILITY_ON);
+                            break;
+                        case GSCR_INVISIBLE:
+                            source->SetVisibility(VISIBILITY_OFF);
+                            break;
                         default:
                         case GSCR_NONE:
                             break;
