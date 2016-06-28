@@ -28959,6 +28959,8 @@ void Player::RefundItem(Item *item)
     // Delete any references to the refund data
     item->SetNotRefundable(this);
 
+    uint64 refundMoney = item->GetPaidMoney();
+
     // Destroy item
     DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
 
@@ -28988,8 +28990,8 @@ void Player::RefundItem(Item *item)
     }
 
     // Grant back money
-    if (uint64 moneyRefund = item->GetPaidMoney())
-        ModifyMoney(moneyRefund);
+    if (refundMoney)
+        ModifyMoney(refundMoney);
 
 }
 
