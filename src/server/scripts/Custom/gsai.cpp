@@ -1399,13 +1399,11 @@ class GS_CreatureScript : public CreatureScript
                                 source->ApplySpellImmune(0, IMMUNITY_MECHANIC, curr->params.c_immunity.mask, false);
                             break;
                         case GSCR_EMOTE:
-                            if (Unit* source = GS_SelectTarget(curr->params.c_emote.subject))
-                                source->HandleEmoteCommand(GS_GetValueFromSpecifier(curr->params.c_emote.emote_id).toInteger());
+                            source->HandleEmoteCommand(GS_GetValueFromSpecifier(curr->params.c_emote.emote_id).toInteger());
                             break;
                         case GSCR_MOVIE:
-                            if (Unit* source = GS_SelectTarget(curr->params.c_emote.subject))
-                                if (Player* pl = source->ToPlayer())
-                                    pl->SendMovieStart(GS_GetValueFromSpecifier(curr->params.c_movie.movie_id).toInteger());
+                            if (Player* pl = source->ToPlayer())
+                                pl->SendMovieStart(GS_GetValueFromSpecifier(curr->params.c_movie.movie_id).toInteger());
                             break;
                         case GSCR_AURA:
                             if (Unit* source = GS_SelectTarget(curr->params.c_aura.subject))

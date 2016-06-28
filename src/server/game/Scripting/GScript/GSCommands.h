@@ -392,13 +392,11 @@ struct gs_command
         struct
         {
             gs_specifier emote_id;
-            gs_specifier subject;
         } c_emote;
 
         struct
         {
             gs_specifier movie_id;
-            gs_specifier subject;
         } c_movie;
 
         struct

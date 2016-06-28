@@ -905,7 +905,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         {
             if (src->parameters.size() < 1)
                 CLEANUP_AND_THROW("too few parameters for instruction EMOTE");
-            if (src->parameters.size() > 2)
+            if (src->parameters.size() > 1)
                 CLEANUP_AND_THROW("too many parameters for instruction EMOTE");
 
             int32 emote;
@@ -914,23 +914,17 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             else
                 ret->params.c_emote.emote_id = gs_specifier::make_default_value(emote);
 
-            if (src->parameters.size() == 2)
-                ret->params.c_emote.subject = gs_specifier::parse(src->parameters[1].c_str());
-            else
-                ret->params.c_emote.subject.subject_type = GSST_ME;
-
             break;
         }
         // movie instruction - plays movie to subject
         // Syntax: movie <movie id> <subject>
         case GSCR_MOVIE:
-            if (src->parameters.size() < 2)
+            if (src->parameters.size() < 1)
                 CLEANUP_AND_THROW("too few parameters for instruction MOVIE");
-            if (src->parameters.size() > 2)
+            if (src->parameters.size() > 1)
                 CLEANUP_AND_THROW("too many parameters for instruction MOVIE");
 
             ret->params.c_movie.movie_id = gs_specifier::parse(src->parameters[0].c_str());
-            ret->params.c_movie.subject = gs_specifier::parse(src->parameters[1].c_str());
 
             break;
         // aura instruction - adds/removes aura to subject
