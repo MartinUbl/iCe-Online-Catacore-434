@@ -79,6 +79,7 @@ enum gs_command_type
     GSCR_WHISPER = 49,
     GSCR_VISIBLE = 50,
     GSCR_INVISIBLE = 51,
+    GSCR_RESET = 52,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -134,7 +135,8 @@ static std::string gscr_identifiers[] = {
     "unvehicle",
     "whisper",
     "visible",
-    "invisible"
+    "invisible",
+    "reset"
 };
 
 enum gs_quest_operation

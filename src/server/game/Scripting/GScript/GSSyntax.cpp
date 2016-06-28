@@ -1333,6 +1333,12 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             if (src->parameters.size() > 0)
                 CLEANUP_AND_THROW("too many parameters for instruction VISIBLE/INVISIBLE");
             break;
+        // reset NPC
+        // Syntax: reset
+        case GSCR_RESET:
+            if (src->parameters.size() > 0)
+                CLEANUP_AND_THROW("too many parameters for instruction RESET");
+            break;
     }
 
     return ret;

@@ -1577,6 +1577,33 @@ class GS_CreatureScript : public CreatureScript
                         case GSCR_INVISIBLE:
                             source->SetVisibility(VISIBILITY_OFF);
                             break;
+                        case GSCR_RESET:
+                            if (source == me)
+                            {
+                                // is this enough?
+                                EnterEvadeMode();
+                            }
+                            else
+                            {
+                                if (source->GetTypeId() == TYPEID_PLAYER)
+                                {
+                                    // this should not be valid, or..?
+                                }
+                                else
+                                {
+                                    Creature* cr = source->ToCreature();
+                                    if (cr)
+                                    {
+                                        if (cr->GetAI())
+                                            cr->GetAI()->Reset();
+                                        cr->LoadCreaturesAddon(true);
+
+                                        cr->GetMotionMaster()->MovementExpired(true);
+                                        cr->GetMotionMaster()->MoveTargetedHome();
+                                    }
+                                }
+                            }
+                            break;
                         default:
                         case GSCR_NONE:
                             break;
