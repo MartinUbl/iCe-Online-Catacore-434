@@ -368,8 +368,8 @@ class GS_CreatureScript : public CreatureScript
             // set of all passed WHEN's offsets in script
             std::set<int> when_set;
 
-            Unit* m_scriptInvoker = nullptr;
-            Unit* m_inheritedScriptInvoker = nullptr;
+            uint64 m_scriptInvokerGUID = 0;
+            uint64 m_inheritedScriptInvokerGUID = 0;
 
             Unit* m_parentUnit = nullptr;
             Unit* m_lastSummonedUnit = nullptr;
@@ -423,18 +423,18 @@ class GS_CreatureScript : public CreatureScript
                 {
                     Unit* creator = sObjectAccessor->GetUnit(*me, me->GetCreatorGUID());
                     if (creator)
-                        m_scriptInvoker = creator;
+                        m_scriptInvokerGUID = creator->GetGUID();
                 }
                 else if (action == GSAI_SIGNAL_INVOKER_FROM_OWNER)
                 {
                     Unit* creator = sObjectAccessor->GetUnit(*me, me->GetOwnerGUID());
                     if (creator)
-                        m_scriptInvoker = creator;
+                        m_scriptInvokerGUID = creator->GetGUID();
                 }
                 else if (action == GSAI_SIGNAL_INVOKER_FROM_SUMMONER)
                 {
                     if (me->ToTempSummon())
-                        m_scriptInvoker = me->ToTempSummon()->GetSummoner();
+                        m_scriptInvokerGUID = me->ToTempSummon()->GetSummoner() ? me->ToTempSummon()->GetSummoner()->GetGUID() : 0;
                 }
                 else
                     ScriptedAI::DoAction(action);
@@ -500,7 +500,7 @@ class GS_CreatureScript : public CreatureScript
 
             void SetInheritedInvoker(Unit* pl)
             {
-                m_inheritedScriptInvoker = pl;
+                m_inheritedScriptInvokerGUID = pl->GetGUID();
             }
 
             void SetParentUnit(Unit* parent)
@@ -778,7 +778,7 @@ class GS_CreatureScript : public CreatureScript
 
                     my_commands = sGSMgr->GetScript(scriptId);
                     m_currentScriptType = type;
-                    m_scriptInvoker = invoker;
+                    m_scriptInvokerGUID = invoker ? invoker->GetGUID() : 0;
                     m_currentScriptParam = param;
 
                     if (m_scriptSettings.find(scriptId) != m_scriptSettings.end())
@@ -794,7 +794,7 @@ class GS_CreatureScript : public CreatureScript
                     my_commands = nullptr;
                     m_currentScriptType = GS_TYPE_NONE;
                     m_currScriptSettings = nullptr;
-                    m_scriptInvoker = nullptr;
+                    m_scriptInvokerGUID = 0;
                     m_currentScriptParam = 0;
                 }
 
@@ -873,7 +873,10 @@ class GS_CreatureScript : public CreatureScript
                     }
                     // script invoker (active during gossip select, quest accept, etc.)
                     case GSST_INVOKER:
-                        return m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                    {
+                        uint64 invGUID = m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID;
+                        return Unit::GetUnit(*me, invGUID);
+                    }
                     // parent (summoner)
                     case GSST_PARENT:
                         return m_parentUnit ? m_parentUnit : me;
@@ -1040,8 +1043,8 @@ class GS_CreatureScript : public CreatureScript
                 {
                     GS_ScriptedAI* targetAI = ((GS_ScriptedAI*)summoned->AI());
                     // set summoned creature invoker same like ours invoker
-                    if (m_scriptInvoker)
-                        targetAI->SetInheritedInvoker(m_scriptInvoker);
+                    if (m_scriptInvokerGUID)
+                        targetAI->SetInheritedInvoker(Unit::GetUnit(*me, m_scriptInvokerGUID));
 
                     // set me as parent of summoned unit
                     targetAI->SetParentUnit(me);
@@ -1182,7 +1185,7 @@ class GS_CreatureScript : public CreatureScript
                         }
                         case GSCR_SAY:
                         {
-                            Unit* invoker = m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
                             source->MonsterSay(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, invoker ? invoker->GetGUID() : 0);
                             int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
                             if (sound > 0)
@@ -1191,7 +1194,7 @@ class GS_CreatureScript : public CreatureScript
                         }
                         case GSCR_YELL:
                         {
-                            Unit* invoker = m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
                             source->MonsterYell(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, invoker ? invoker->GetGUID() : 0);
                             int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
                             if (sound > 0)
@@ -1200,7 +1203,7 @@ class GS_CreatureScript : public CreatureScript
                         }
                         case GSCR_TEXTEMOTE:
                         {
-                            Unit* invoker = m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
                             source->MonsterTextEmote(curr->params.c_say_yell.tosay, invoker ? invoker->GetGUID() : 0, false);
                             int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
                             if (sound > 0)
@@ -1209,7 +1212,7 @@ class GS_CreatureScript : public CreatureScript
                         }
                         case GSCR_BOSSEMOTE:
                         {
-                            Unit* invoker = m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
                             source->MonsterTextEmote(curr->params.c_say_yell.tosay, invoker ? invoker->GetGUID() : 0, true);
                             int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
                             if (sound > 0)
@@ -1218,7 +1221,7 @@ class GS_CreatureScript : public CreatureScript
                         }
                         case GSCR_WHISPER:
                         {
-                            Unit* invoker = m_scriptInvoker ? m_scriptInvoker : m_inheritedScriptInvoker;
+                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
                             Unit* target;
                             if (curr->params.c_whisper.target.subject_type == GSST_NONE)
                                 target = invoker;
@@ -1452,16 +1455,19 @@ class GS_CreatureScript : public CreatureScript
                             source->Unmount();
                             break;
                         case GSCR_QUEST:
-                            if (m_scriptInvoker && m_scriptInvoker->IsInWorld() && m_scriptInvoker->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
+                            if (invoker && invoker->IsInWorld() && invoker->GetTypeId() == TYPEID_PLAYER)
                             {
                                 if (curr->params.c_quest.op == GSQO_COMPLETE)
-                                    m_scriptInvoker->ToPlayer()->CompleteQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
+                                    invoker->ToPlayer()->CompleteQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
                                 else if (curr->params.c_quest.op == GSQO_FAIL)
-                                    m_scriptInvoker->ToPlayer()->FailQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
+                                    invoker->ToPlayer()->FailQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
                                 else if (curr->params.c_quest.op == GSQO_PROGRESS)
-                                    m_scriptInvoker->ToPlayer()->AddQuestObjectiveProgress(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.objective_index).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.value).toInteger());
+                                    invoker->ToPlayer()->AddQuestObjectiveProgress(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.objective_index).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.value).toInteger());
                             }
                             break;
+                        }
                         case GSCR_DESPAWN:
                             if (Unit* subj = GS_SelectTarget(curr->params.c_despawn.subject))
                                 if (subj->GetTypeId() == TYPEID_UNIT)
