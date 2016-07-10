@@ -7688,7 +7688,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             {
                 if(procSpell->Id == 35395) // Crusader Strike
                 {
-                    CastCustomSpell(99092, SPELLVALUE_BASE_POINT0,damage * 0.075, pVictim, true); // Flames of the Faithful
+                    CastCustomSpell(99092, SPELLVALUE_BASE_POINT0, damage * 0.075, pVictim, true); // Flames of the Faithful
                     break;
                 }
                 else return (false);
@@ -7697,7 +7697,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             {
                 if(procSpell->Id == 53600) // Shield of the Righteous
                 {
-                    CastCustomSpell(99075, SPELLVALUE_BASE_POINT0,damage * 0.1, pVictim, true); // Righteous Flames
+                    CastCustomSpell(99075, SPELLVALUE_BASE_POINT0, damage * 0.2, pVictim, true); // Righteous Flames
                     break;
                 }
                 else return (false);
@@ -7706,7 +7706,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             {
                 if(procSpell->Id == 82326 || procSpell->Id == 19750 || procSpell->Id == 635 ) // Divine Light, Flash of Light, and Holy Light 
                 {
-                    CastCustomSpell(54968, SPELLVALUE_BASE_POINT0,damage * 0.10, this, true); // Divine Flame
+                    CastCustomSpell(54968, SPELLVALUE_BASE_POINT0, damage * 0.10, this, true); // Divine Flame
                     break;
                 }
                 else return (false);
