@@ -802,7 +802,7 @@ public:
         void EnterCombat(Unit *) {}
         void EnterEvadeMode() override {}
         /*
-            Overriding OnCharmed is crucial ! When player enters vehicle, he charms vehicle, which will cause deleting the whole AI and not repsoding to anything
+            Overriding OnCharmed is crucial ! When player enters vehicle, he charms vehicle, which will cause deleting the whole AI and not respoding to anything
             But we want move with vehicle to boss position (handled in spellscript)
             Instead of this, we will inherit from PassiveAI + override some methods which could lead to reacting of npc to some actions.
         */

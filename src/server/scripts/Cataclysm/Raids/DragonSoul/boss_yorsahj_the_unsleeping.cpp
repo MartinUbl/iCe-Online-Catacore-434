@@ -15,6 +15,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+ /*
+ Encounter: Yorsahj the Unsleeeing
+ Difficulty: Normal / Heroic
+ Mode: 10/25
+ Autor: Artisan
+ Note: Heroic and 25 difficulty not tested, but should be implemented
+ */
+
 #include "ScriptPCH.h"
 #include "dragonsoul.h"
 #include "MapManager.h"
@@ -68,7 +76,7 @@ enum whisperSpells : uint32
     SPELL_WHISPER_CORRUPTION        = 109899
 };
 
-enum bloodAuraSpells
+enum bloodAuraSpells : uint32
 {
     SPELL_BLACK_BLOOD_OF_SHUMA      = 104894,
     SPELL_SHADOWED_BLOOD_OF_SHUMA   = 104896,
@@ -78,7 +86,7 @@ enum bloodAuraSpells
     SPELL_GLOWING_BLOOD_OF_SHUMA    = 104901
 };
 
-enum spells
+enum spells : uint32
 {
     SPELL_VOID_BOLT                 = 104849,
     SPELL_VOID_BOLT_AOE             = 105416,
@@ -154,7 +162,7 @@ enum colorBeamsAuras : uint32
     AURA_TALL_BLACK                 = 105478
 };
 
-enum globuleBloodAuras
+enum globuleBloodAuras : uint32
 {
     SPELL_BLACK_BLOOD_OF_SHUMA_UNLIMITED    = 110746,
     SPELL_SHADOWED_BLOOD_OF_SHUMA_UNLIMITED = 110748,
