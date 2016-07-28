@@ -1784,6 +1784,15 @@ void Unit::HandleEmoteCommand(uint32 anim_id)
     data << uint32(anim_id);
     data << uint64(GetGUID());
     SendMessageToSet(&data, true);
+
+    EmotesEntry const* em = sEmotesStore.LookupEntry(anim_id);
+    if (em)
+    {
+        if (em->EmoteType == EMOTE_TYPE_STATE_1)
+            SetStandState(em->UnitStandState);
+        if (em->EmoteType == EMOTE_TYPE_STATE_1 || em->EmoteType == EMOTE_TYPE_STATE_2)
+            SetUInt32Value(UNIT_NPC_EMOTESTATE, anim_id);
+    }
 }
 
 bool Unit::IsDamageReducedByArmor(SpellSchoolMask schoolMask, SpellEntry const *spellInfo, uint8 effIndex)

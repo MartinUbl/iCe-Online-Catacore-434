@@ -1961,6 +1961,14 @@ enum Emote
     EMOTE_STATE_READ_CHRISTMAS         = 518
 };
 
+enum EmoteType
+{
+    EMOTE_TYPE_ONESHOT = 0,     // all oneshot emotes
+    EMOTE_TYPE_STATE_1 = 1,     // 10 emotes marked as "state", probably something with animations?
+    EMOTE_TYPE_STATE_2 = 2,     // almost all "state" emotes
+    MAX_EMOTE_TYPE
+};
+
 enum Anim
 {
     ANIM_STAND                     = 0x0,

@@ -581,6 +581,18 @@ void MotionMaster::Mutate(MovementGenerator *m, MovementSlot slot)
     else
         setPathfindingState(PATHFIND_STATE_OK | PATHFIND_STATE_INITIAL);
 
+    // when not going to idle motion type, reset NPC emote state to "none"
+    if (m->GetMovementGeneratorType() != IDLE_MOTION_TYPE)
+    {
+        if (i_owner)
+        {
+            if (i_owner->GetUInt32Value(UNIT_NPC_EMOTESTATE) != EMOTE_ONESHOT_NONE)
+                i_owner->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+            if (i_owner->getStandState() != UNIT_STAND_STATE_STAND)
+                i_owner->SetStandState(UNIT_STAND_STATE_STAND);
+        }
+    }
+
     if (MovementGenerator *curr = Impl[slot])
     {
         bool wasAtTop = (i_top == slot);
