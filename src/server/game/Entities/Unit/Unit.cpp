@@ -526,16 +526,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
     if (damagetype != NODAMAGE)
     {
-        // Improved Polymorph - needs to be handled before Polymorph removal
-        if (GetTypeId() == TYPEID_PLAYER && (HasAura(11210) || HasAura(12592)) && pVictim->HasAura(118) && !HasAura(87515))
-        {
-            CastSpell(this, 87515, true); // Cooldown marker
-            if (HasAura(11210))
-                pVictim->CastSpell(pVictim, 83046, true); // stun #1
-            else if (HasAura(12592))
-                pVictim->CastSpell(pVictim, 83047, true); // stun #2
-        }
-
         if (Aura* roar = pVictim->GetAura(53480)) // Roar of Sacrifice
         {
             Unit * pet = roar->GetCaster(); // Caster should be hunter's pet

@@ -1245,6 +1245,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
                 switch(GetId())
                 {
+                    case 118: // Polymorph
+                        if (caster && (caster->HasAura(11210) || caster->HasAura(12592)) && target && !target->HasAura(87515))
+                        {
+                            int32 bp0 = caster->HasAura(83046) ? 1500 : 3000;
+                            target->CastCustomSpell(target, 87515, &bp0, nullptr, nullptr, nullptr, nullptr, nullptr, true);
+                            if (Aura* aur = target->GetAura(87515))
+                                aur->SetDuration(GetDuration());
+                        }
+                        break;
                     case 12536: // Clearcasting
                     case 12043: // Presence of Mind
                         // Arcane Potency
@@ -2065,6 +2074,32 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         target->CastSpell(target, 32612, true, NULL, GetEffect(1));
                         target->CombatStop(); // Drop all threat
                         break;
+                    case 118: // Polymorph
+                    {
+                        // Improved Polymorph - needs to be handled before Polymorph removal
+                        if (target->HasAura(87515))
+                        {
+                            Aura* aur = target->GetAura(87515);
+                            if (aur)
+                            {
+                                AuraEffect* aureff = aur->GetEffect(0);
+                                if (aureff)
+                                {
+                                    int32 time = aureff->GetAmount();
+                                    if (time > 0)
+                                    {
+                                        aureff->SetAmount(0);
+                                        aur->SetDuration(10000);
+                                        if (time == 1500)
+                                            target->CastSpell(target, 83046, true); // stun #1
+                                        else if (time == 3000)
+                                            target->CastSpell(target, 83047, true); // stun #2
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
                     case 32612: // Invisibility (real invisible mod aura)
                         // Force Water Elemental to also remove his Invisibility
                         if (target->GetPetGUID())
