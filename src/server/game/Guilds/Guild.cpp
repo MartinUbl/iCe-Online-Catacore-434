@@ -2188,7 +2188,10 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
         data.WriteBit(guid[7]);
 
         memberData << uint8(member->GetClass());
-        memberData << uint32(0);      // total guild reputation of member
+        if (Player* plr = sObjectAccessor->FindPlayer(member->GetGUID()))
+            memberData << uint32(plr->GetReputation(FACTION_GUILD));
+        else
+            memberData << uint32(0);      // total guild reputation of member
         memberData.WriteByteSeq(guid[0]);
         memberData << uint64(member->m_activityWeek); // week activity
         memberData << uint32(member->GetRankId());
