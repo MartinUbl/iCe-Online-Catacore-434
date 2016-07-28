@@ -1129,7 +1129,54 @@ void Player::ApplyReforge(Item *item, bool apply)
     for (int j = 0; j < MAX_ITEM_PROTO_STATS; j++)
     {
         if (proto->ItemStat[j].ItemStatType == pReforge->source_stat)
-            srcstatamount = proto->ItemStat[j].ItemStatValue;
+            srcstatamount += proto->ItemStat[j].ItemStatValue;
+    }
+
+    // for items with random enchantments (either randomproperties and randomsuffix) count also their amounts
+    for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_0 + MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++i)
+    {
+        uint32 enchDisplayType = 0;
+        uint32 enchAmount = 0;
+        uint32 enchSpellId = 0;
+        uint32 enchId = item->GetEnchantmentId(EnchantmentSlot(i));
+        if (enchId)
+        {
+            SpellItemEnchantmentEntry const *ench = sSpellItemEnchantmentStore.LookupEntry(enchId);
+            if (!ench)
+                continue;
+
+            for (int s = 0; s < MAX_ITEM_ENCHANTMENT_EFFECTS; ++s)
+            {
+                enchDisplayType = ench->type[s];
+                enchAmount = ench->amount[s];
+                enchSpellId = ench->spellid[s];
+
+                // we fancy only STAT modifiers
+                if (enchDisplayType != ITEM_ENCHANTMENT_TYPE_STAT)
+                    continue;
+
+                // if no implicit stat amount, retrieve it from suffix stuff
+                if (!enchAmount)
+                {
+                    ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                    if (item_rand_suffix)
+                    {
+                        for (int k = 0; k < MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++k)
+                        {
+                            if (item_rand_suffix->enchant_id[k] == enchId)
+                            {
+                                enchAmount = uint32((item_rand_suffix->prefix[k] * item->GetItemSuffixFactor()) / 10000);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // add amount to total
+                if (enchSpellId == pReforge->source_stat)
+                    srcstatamount += enchAmount;
+            }
+        }
     }
 
     // Get stat/rating bonus

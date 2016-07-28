@@ -1636,13 +1636,6 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
         return;
     }
 
-    // Check for random enchantments (disabled because of not working correctly)
-    if (dstItem->GetItemRandomPropertyId() != 0)
-    {
-        sLog->outDebug("Player is trying to reforge random enchantment (temporarily disabled)");
-        return;
-    }
-
     // And take money equal to sell price
     if (reforgeID != 0)
         GetPlayer()->ModifyMoney(-int64(pProto->SellPrice));
