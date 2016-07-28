@@ -4141,6 +4141,9 @@ void SpellMgr::LoadSpellCustomAttr()
             // and that's wrong
             spellInfo->EffectMechanic[1] = MECHANIC_INFECTED;
             break;
+        case 97389:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
+            break;
         /**************************** ALYSRAZOR  **********************************/
 
         case 100555: // Smouldering Roots

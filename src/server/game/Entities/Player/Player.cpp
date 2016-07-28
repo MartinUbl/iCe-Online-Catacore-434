@@ -1695,6 +1695,23 @@ void Player::Update(uint32 p_time)
         }
     }
 
+    if (Spell* currspell = GetCurrentSpell(CURRENT_GENERIC_SPELL))
+    {
+        // when in battleground, and casting "Capturing" spell, periodically trigger visual capturing spell
+        if (InBattleground() && currspell->GetSpellInfo()->Id == 98322)
+        {
+            // we bestially abuse glyphIndex as "counter" for spell
+            // there is no such generic mechanism, that could do this for us, so we have to handle it this way
+            if (currspell->GetRemainingCastTime() < 7000 - currspell->m_glyphIndex * 2000)
+            {
+                GameObject* goTarget = currspell->m_targets.getGOTarget();
+                if (goTarget)
+                    CastSpell(goTarget->GetPositionX(), goTarget->GetPositionY(), goTarget->GetPositionZ(), 97389, true);
+                currspell->m_glyphIndex++;
+            }
+        }
+    }
+
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && !pet->IsPossessed())
     //if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && (GetCharmGUID() && (pet->GetGUID() != GetCharmGUID())))
