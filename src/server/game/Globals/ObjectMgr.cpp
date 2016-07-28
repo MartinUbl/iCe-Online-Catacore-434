@@ -3228,6 +3228,16 @@ void ObjectMgr::LoadPlayerInfo()
     // Load playercreate spells
     sLog->outString("Loading Player Create Spell Data...");
     {
+        QueryResult genresult = WorldDatabase.Query("SELECT spell_id FROM spell_knownbyall");
+        if (genresult)
+        {
+            do
+            {
+                Field* fields = genresult->Fetch();
+                if (fields)
+                    SetSpellKnownByAll(fields[0].GetUInt32());
+            } while (genresult->NextRow());
+        }
 
         QueryResult result = QueryResult(NULL);
         if (sWorld->getBoolConfig(CONFIG_START_ALL_SPELLS))

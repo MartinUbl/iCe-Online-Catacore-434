@@ -417,8 +417,12 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     if (mover->GetTypeId() == TYPEID_PLAYER)
     {
-        if(mover->ToPlayer()->GetEmoteState())
+        if (mover->ToPlayer()->GetEmoteState())
             mover->ToPlayer()->SetEmoteState(0);
+
+        // if the spell is in general knowledge of all players, ignore individual knowledge
+        if (sObjectMgr->IsSpellKnownByAll(spellId))
+            IgnoreDontKnowSpell = true;
 
         // allow cast even if the player don't know the spell
         if (spellInfo->AttributesEx8 & SPELL_ATTR8_RAID_MARKER)

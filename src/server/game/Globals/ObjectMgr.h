@@ -852,6 +852,16 @@ class ObjectMgr
             return mGameObjectForQuestSet.find(entry) != mGameObjectForQuestSet.end();
         }
 
+        void SetSpellKnownByAll(uint32 id)
+        {
+            m_spellsKnownByAll.insert(id);
+        }
+
+        bool IsSpellKnownByAll(uint32 id)
+        {
+            return m_spellsKnownByAll.find(id) != m_spellsKnownByAll.end();
+        }
+
         GossipText const* GetGossipText(uint32 Text_ID) const;
 
         WorldSafeLocsEntry const *GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team);
@@ -1545,6 +1555,8 @@ class ObjectMgr
         typedef std::map<uint32,PetLevelInfo*> PetLevelInfoMap;
         // PetLevelInfoMap[creature_id][level]
         PetLevelInfoMap petInfo;                            // [creature_id][level]
+
+        std::set<uint32> m_spellsKnownByAll;
 
         PlayerClassInfo playerClassInfo[MAX_CLASSES];
 
