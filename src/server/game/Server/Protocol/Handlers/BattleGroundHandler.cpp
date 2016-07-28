@@ -117,8 +117,8 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
 
     BattlegroundTypeId bgTypeId = BattlegroundTypeId(bgTypeId_);
 
-    /* force random bg */
-    if (_player->getLevel() >= 80) {
+    /* force random bg (when not in BG debug mode) */
+    if (_player->getLevel() >= 80 && !sBattlegroundMgr->isTesting()) {
         switch (bgTypeId) {
             case BATTLEGROUND_WS:
             case BATTLEGROUND_AB:
