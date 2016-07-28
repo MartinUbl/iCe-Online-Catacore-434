@@ -1248,6 +1248,10 @@ public:
                     pPlayer->SEND_GOSSIP_MENU(10241, pCreature->GetGUID());
                 else canBuy = true;
                 break;
+            case 55285: // Worgen vendor, too lazy to find the name
+                if (pPlayer->GetReputationRank(1134) != REP_EXALTED && race != RACE_WORGEN)
+                    pPlayer->SEND_GOSSIP_MENU(10242, pCreature->GetGUID());
+                else canBuy = true;
         }
 
         if (canBuy)
