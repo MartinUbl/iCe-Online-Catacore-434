@@ -14085,7 +14085,8 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, uint32 effectMask)
                 return true;
     }
 
-    if (spellInfo->Id != 42292 && spellInfo->Id !=59752)
+    // exclude PvP Trinket spells from immunity calculations
+    if (spellInfo->Id != 42292 && spellInfo->Id != 59752)
     {
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
@@ -14093,6 +14094,10 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, uint32 effectMask)
             const SpellImmune &immune = *itr;
             const SpellEntry *immuneAura = sSpellStore.LookupEntry(immune.spellId);
             if (!immuneAura)
+                continue;
+
+            // Banish should not cause immunity to itself (next cast should cancel the effect)
+            if (immuneAura->Id == 710 && spellInfo->Id == 710)
                 continue;
 
             if ((immune.type & GetSpellSchoolMask(spellInfo))
