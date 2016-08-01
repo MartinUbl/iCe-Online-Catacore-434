@@ -1190,6 +1190,10 @@ class GS_CreatureScript : public CreatureScript
                             int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
                             if (sound > 0)
                                 source->PlayDirectSound(sound);
+
+                            int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
+                            if (emote > 0)
+                                source->HandleEmoteCommand(emote);
                             break;
                         }
                         case GSCR_YELL:
@@ -1199,6 +1203,10 @@ class GS_CreatureScript : public CreatureScript
                             int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
                             if (sound > 0)
                                 source->PlayDirectSound(sound);
+
+                            int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
+                            if (emote > 0)
+                                source->HandleEmoteCommand(emote);
                             break;
                         }
                         case GSCR_TEXTEMOTE:
@@ -1208,6 +1216,10 @@ class GS_CreatureScript : public CreatureScript
                             int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
                             if (sound > 0)
                                 source->PlayDirectSound(sound);
+
+                            int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
+                            if (emote > 0)
+                                source->HandleEmoteCommand(emote);
                             break;
                         }
                         case GSCR_BOSSEMOTE:
@@ -1217,6 +1229,10 @@ class GS_CreatureScript : public CreatureScript
                             int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
                             if (sound > 0)
                                 source->PlayDirectSound(sound);
+
+                            int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
+                            if (emote > 0)
+                                source->HandleEmoteCommand(emote);
                             break;
                         }
                         case GSCR_WHISPER:

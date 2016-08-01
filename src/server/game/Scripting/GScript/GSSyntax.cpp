@@ -587,26 +587,36 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
 
             break;
         // say and yell instructions are basically the same
-        // Syntax: say "Hello world!"
-        //         yell "Hello universe!"
-        //         textemote "Hello Milky Way!"
-        //         bossemote "Hello everything!"
+        // Syntax: say "Hello world!" [sound] [emote]
+        //         yell "Hello universe!" [sound] [emote]
+        //         textemote "Hello Milky Way!" [sound] [emote]
+        //         bossemote "Hello everything!" [sound] [emote]
         case GSCR_SAY:
         case GSCR_YELL:
         case GSCR_TEXTEMOTE:
         case GSCR_BOSSEMOTE:
             if (src->parameters.size() < 1)
                 CLEANUP_AND_THROW("too few parameters for instruction SAY/YELL/TEXTEMOTE/BOSSEMOTE");
-            if (src->parameters.size() > 2)
+            if (src->parameters.size() > 3)
                 CLEANUP_AND_THROW("too many parameters for instruction SAY/YELL/TEXTEMOTE/BOSSEMOTE");
 
             // store string to be said / yelled
             ret->params.c_say_yell.tosay = src->parameters[0].c_str();
             // store sound ID if supplied
-            if (src->parameters.size() == 2)
+            if (src->parameters.size() >= 2)
                 ret->params.c_say_yell.sound_id = gs_specifier::parse(src->parameters[1].c_str());
             else
                 ret->params.c_say_yell.sound_id = gs_specifier::make_default_value(0);
+
+            // store emote ID if supplied
+            if (src->parameters.size() == 3)
+            {
+                int32 emote;
+                if (!tryRecognizeFlag(emote, UNIT_NPC_EMOTESTATE, src->parameters[2]))
+                    ret->params.c_say_yell.emote_id = gs_specifier::parse(src->parameters[2].c_str());
+                else
+                    ret->params.c_say_yell.emote_id = gs_specifier::make_default_value(emote);
+            }
 
             break;
         // say and yell instructions are basically the same

@@ -319,6 +319,7 @@ struct gs_command
         {
             const char* tosay;
             gs_specifier sound_id;
+            gs_specifier emote_id;
         } c_say_yell;
 
         struct
