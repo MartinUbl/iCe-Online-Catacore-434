@@ -5171,9 +5171,9 @@ public:
 
         void MoveInLineOfSight(Unit *who) override
         {
-            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0)
+            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0 && who->IsWithinLOSInMap(me, false))
             {
-                if (!me->HasAura(6770))
+                if (!me->HasAura(6770) && who->HasAura(70793))
                 {
                     if (me->GetExactDist2d(who) < 7.0f)
                     {
@@ -5211,6 +5211,7 @@ public:
                 me->CombatStop(true);
                 if (target)
                     target->CombatStop(true);
+                me->GetMotionMaster()->MoveTargetedHome();
             });
         }
 
