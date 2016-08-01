@@ -1343,6 +1343,59 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             if (src->parameters.size() > 0)
                 CLEANUP_AND_THROW("too many parameters for instruction RESET");
             break;
+        // resolves position or something else
+        // Syntax: resolve <resolver> <specific params...>
+        //         resolve vector <var x> <var y> <var z> <source> <angle> <distance>
+        //         resolve vector <var x> <var y> <var z> <source> <x> <y> <z>
+        case GSCR_RESOLVE:
+            if (src->parameters.size() < 1)
+                CLEANUP_AND_THROW("too few parameters for instruction RESOLVE");
+
+            if (src->parameters[0] == "vector")
+            {
+                if (src->parameters.size() < 7)
+                    CLEANUP_AND_THROW("too few parameters for instruction RESOLVE, resolver VECTOR");
+                if (src->parameters.size() > 8)
+                    CLEANUP_AND_THROW("too many parameters for instruction RESOLVE, resolver VECTOR");
+
+                ret->params.c_resolve.resolver_type = GSRT_VECTOR;
+
+                for (int i = 0; i < 3; i++)
+                {
+                    if (gscr_variable_map.find(src->parameters[1 + i].c_str()) == gscr_variable_map.end())
+                        gscr_variable_map[src->parameters[1 + i].c_str()] = ++gscr_last_variable_id;
+
+                    ret->params.c_resolve.variable[i] = gscr_variable_map[src->parameters[1 + i].c_str()];
+                }
+
+                if (src->parameters[4] == "absolute")
+                    ret->params.c_resolve.position_type = GSPTS_ABSOLUTE;
+                else if (src->parameters[4] == "from_current")
+                    ret->params.c_resolve.position_type = GSPTS_RELATIVE_CURRENT;
+                else if (src->parameters[4] == "from_spawn")
+                    ret->params.c_resolve.position_type = GSPTS_RELATIVE_SPAWN;
+                else
+                    CLEANUP_AND_THROW("unknown source position type parameter for RESOLVE instruction");
+
+                if (src->parameters.size() == 7)
+                {
+                    ret->params.c_resolve.vector_resolve_type = GSVRT_ANGLE_DISTANCE;
+
+                    ret->params.c_resolve.angle = gs_specifier::parse(src->parameters[5].c_str());
+                    ret->params.c_resolve.distance = gs_specifier::parse(src->parameters[6].c_str());
+                }
+                else
+                {
+                    ret->params.c_resolve.vector_resolve_type = GSVRT_RELATIVE_POSITION;
+
+                    ret->params.c_resolve.rel_x = gs_specifier::parse(src->parameters[5].c_str());
+                    ret->params.c_resolve.rel_y = gs_specifier::parse(src->parameters[6].c_str());
+                    ret->params.c_resolve.rel_z = gs_specifier::parse(src->parameters[7].c_str());
+                }
+            }
+            else
+                CLEANUP_AND_THROW("unknown resolver type for instruction RESOLVE");
+            break;
     }
 
     return ret;

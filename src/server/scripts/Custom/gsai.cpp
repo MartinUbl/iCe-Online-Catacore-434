@@ -27,6 +27,21 @@ class GS_CreatureScript : public CreatureScript
             GSVTYPE_UNIT = 2
         };
 
+        static void GetPoint2D(float &x, float &y, float &z, float srcX, float srcY, float srcZ, float objSize, float absAngle, float distance, Map const* srcMap)
+        {
+            x = srcX + (objSize + distance) * cos(absAngle);
+            y = srcY + (objSize + distance) * sin(absAngle);
+
+            Trinity::NormalizeMapCoord(x);
+            Trinity::NormalizeMapCoord(y);
+
+            z = srcZ;
+            float max_z = srcMap->GetWaterOrGroundLevel(x, y, z, &srcZ, false);
+
+            if (max_z > INVALID_HEIGHT)
+                z = max_z;
+        }
+
         struct GS_Variable
         {
             union
@@ -1618,6 +1633,105 @@ class GS_CreatureScript : public CreatureScript
                                 }
                             }
                             break;
+                        case GSCR_RESOLVE:
+                        {
+                            if (curr->params.c_resolve.resolver_type == GSRT_VECTOR)
+                            {
+                                // initialize destination variables (so we can be sure they're there)
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    auto itr = variable_map.find(curr->params.c_resolve.variable[i]);
+                                    if (itr == variable_map.end())
+                                        variable_map[curr->params.c_resolve.variable[i]] = GS_Variable();
+                                }
+
+                                float tmpx, tmpy, tmpz;
+
+                                // angle + distance vector resolver
+                                if (curr->params.c_resolve.vector_resolve_type == GSVRT_ANGLE_DISTANCE)
+                                {
+                                    float angle = GS_GetValueFromSpecifier(curr->params.c_resolve.angle).toFloat() * M_PI / 180.0f;
+                                    float distance = GS_GetValueFromSpecifier(curr->params.c_resolve.distance).toFloat();
+                                    // base = current position
+                                    if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_CURRENT)
+                                    {
+                                        GS_CreatureScript::GetPoint2D(tmpx, tmpy, tmpz, source->GetPositionX(), source->GetPositionY(), source->GetPositionZ(),
+                                            source->GetObjectSize(), source->GetOrientation() + angle, distance, source->GetBaseMap());
+                                    }
+                                    // base = spawn position
+                                    else if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_SPAWN)
+                                    {
+                                        // only creatures have spawn position
+                                        if (Creature* crsource = source->ToCreature())
+                                        {
+                                            GS_CreatureScript::GetPoint2D(tmpx, tmpy, tmpz, crsource->GetHomePosition().GetPositionX(), crsource->GetHomePosition().GetPositionY(), crsource->GetHomePosition().GetPositionZ(),
+                                                source->GetObjectSize(), crsource->GetHomePosition().GetOrientation() + angle, distance, source->GetBaseMap());
+                                        }
+                                        else
+                                        {
+                                            // we cannot resolve "spawn" position of not spawned object (i.e. player)
+                                            GS_CreatureScript::GetPoint2D(tmpx, tmpy, tmpz, source->GetPositionX(), source->GetPositionY(), source->GetPositionZ(),
+                                                source->GetObjectSize(), source->GetOrientation() + angle, distance, source->GetBaseMap());
+                                        }
+                                    }
+                                    // base = 0;0;0 (may come in handy in more complex scenarios)
+                                    else if (curr->params.c_resolve.position_type == GSPTS_ABSOLUTE)
+                                    {
+                                        GS_CreatureScript::GetPoint2D(tmpx, tmpy, tmpz, 0.0f, 0.0f, 0.0f,
+                                            source->GetObjectSize(), angle, distance, source->GetBaseMap());
+                                    }
+                                }
+                                // relative position vector resolver
+                                else if (curr->params.c_resolve.vector_resolve_type == GSVRT_RELATIVE_POSITION)
+                                {
+                                    float rel_x = GS_GetValueFromSpecifier(curr->params.c_resolve.rel_x).toFloat();
+                                    float rel_y = GS_GetValueFromSpecifier(curr->params.c_resolve.rel_y).toFloat();
+                                    float rel_z = GS_GetValueFromSpecifier(curr->params.c_resolve.rel_z).toFloat();
+
+                                    // base = current position
+                                    if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_CURRENT)
+                                    {
+                                        tmpx = source->GetPositionX() + rel_x;
+                                        tmpy = source->GetPositionY() + rel_y;
+                                        tmpz = source->GetPositionZ() + rel_z;
+                                    }
+                                    // base = spawn position
+                                    else if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_SPAWN)
+                                    {
+                                        // only creatures have spawn position
+                                        if (Creature* crsource = source->ToCreature())
+                                        {
+                                            tmpx = crsource->GetHomePosition().GetPositionX() + rel_x;
+                                            tmpy = crsource->GetHomePosition().GetPositionY() + rel_y;
+                                            tmpz = crsource->GetHomePosition().GetPositionZ() + rel_z;
+                                        }
+                                        else
+                                        {
+                                            tmpx = source->GetPositionX() + rel_x;
+                                            tmpy = source->GetPositionY() + rel_y;
+                                            tmpz = source->GetPositionZ() + rel_z;
+                                        }
+                                    }
+                                    // base = 0;0;0
+                                    else if (curr->params.c_resolve.position_type == GSPTS_ABSOLUTE)
+                                    {
+                                        // i have no idea why would somebody want that, but this language should be complete in that way
+                                        tmpx = rel_x;
+                                        tmpy = rel_y;
+                                        tmpz = rel_z;
+                                    }
+                                }
+
+                                // set variables to resolved values
+                                variable_map[curr->params.c_resolve.variable[0]].value.asFloat = tmpx;
+                                variable_map[curr->params.c_resolve.variable[0]].type = GSVTYPE_FLOAT;
+                                variable_map[curr->params.c_resolve.variable[1]].value.asFloat = tmpy;
+                                variable_map[curr->params.c_resolve.variable[1]].type = GSVTYPE_FLOAT;
+                                variable_map[curr->params.c_resolve.variable[2]].value.asFloat = tmpz;
+                                variable_map[curr->params.c_resolve.variable[2]].type = GSVTYPE_FLOAT;
+                            }
+                            break;
+                        }
                         default:
                         case GSCR_NONE:
                             break;

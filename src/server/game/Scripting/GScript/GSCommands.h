@@ -80,6 +80,7 @@ enum gs_command_type
     GSCR_VISIBLE = 50,
     GSCR_INVISIBLE = 51,
     GSCR_RESET = 52,
+    GSCR_RESOLVE = 53,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -136,7 +137,8 @@ static std::string gscr_identifiers[] = {
     "whisper",
     "visible",
     "invisible",
-    "reset"
+    "reset",
+    "resolve"
 };
 
 enum gs_quest_operation
@@ -254,6 +256,25 @@ enum gs_specifier_operator
     GSOP_GREATER_OR_EQUAL = 6,  // >=
     GSOP_OF = 7,                // of   i.e. "if chance of 50"
     GSOP_IS = 8,                // is   (comparing states, not values)
+};
+
+enum gs_resolver_type
+{
+    GSRT_NONE = 0,              // no resolver type (or unresolved)
+    GSRT_VECTOR = 1,            // vector resolver (using angle and distance, or relative position)
+};
+
+enum gs_vector_resolve_type
+{
+    GSVRT_ANGLE_DISTANCE = 1,   // resolve using angle and distance
+    GSVRT_RELATIVE_POSITION = 2,// resolve using relative position
+};
+
+enum gs_position_type_specifier
+{
+    GSPTS_ABSOLUTE = 0,         // position is absolute, no need to add/subtract/multiply
+    GSPTS_RELATIVE_CURRENT = 1, // position is relative to current position
+    GSPTS_RELATIVE_SPAWN = 2,   // position is relative to spawn (summon) position
 };
 
 // specifier structure - specifies target, target + target parameter or one-value
@@ -508,6 +529,17 @@ struct gs_command
             const char* tosay;
             gs_specifier target;
         } c_whisper;
+
+        struct
+        {
+            gs_resolver_type resolver_type;
+            int variable[3]; // for now, 3 should be sufficient
+            gs_position_type_specifier position_type;
+            gs_vector_resolve_type vector_resolve_type;
+            gs_specifier angle;
+            gs_specifier distance;
+            gs_specifier rel_x, rel_y, rel_z;
+        } c_resolve;
 
     } params;
 
