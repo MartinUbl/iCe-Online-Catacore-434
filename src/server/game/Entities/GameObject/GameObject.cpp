@@ -2316,8 +2316,11 @@ void GameObject::UpdateModel()
     if (!IsInWorld())
         return;
 
+    bool isEnabled = true;
+
     if (m_model)
     {
+        isEnabled = m_model->isEnabled();
         if (GetMap()->Contains(*m_model))
             GetMap()->Remove(*m_model);
         delete m_model;
@@ -2326,6 +2329,9 @@ void GameObject::UpdateModel()
     m_model = GameObjectModel::Create(*this);
 
     if (m_model)
+    {
         GetMap()->Insert(*m_model);
+        EnableCollision(isEnabled);
+    }
 }
 
