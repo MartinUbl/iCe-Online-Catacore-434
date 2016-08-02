@@ -617,6 +617,8 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 else
                     ret->params.c_say_yell.emote_id = gs_specifier::make_default_value(emote);
             }
+            else
+                ret->params.c_say_yell.emote_id = gs_specifier::make_default_value(0);
 
             break;
         // say and yell instructions are basically the same
