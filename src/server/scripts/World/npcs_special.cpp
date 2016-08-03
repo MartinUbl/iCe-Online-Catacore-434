@@ -5454,7 +5454,16 @@ public:
                         scheduler.Schedule(Milliseconds(1100), [this](TaskContext /*context*/)
                         {
                             if (Creature * pShadowBreath = me->FindNearestCreature(NPC_SHADOW_BREATH, 200.0f, true))
+                            {
+                                pShadowBreath->SetOrientation(me->GetOrientation());
+                                me->AddThreat(pShadowBreath, 10000000.0f);
                                 me->CastSpell(pShadowBreath, SPELL_SHADOW_BREATH, false);
+                            }
+                        });
+                        scheduler.Schedule(Milliseconds(4100), [this](TaskContext /*context*/)
+                        {
+                            if (Creature * pShadowBreath = me->FindNearestCreature(NPC_SHADOW_BREATH, 200.0f, true))
+                                me->Kill(pShadowBreath);
                         });
                         shadowBreathTimer = 10000;
                     }
