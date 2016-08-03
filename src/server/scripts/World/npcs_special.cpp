@@ -48,6 +48,8 @@ EndContentData */
 #include "ScriptMgr.h"
 #include "World.h"
 #include "TaskScheduler.h"
+#include "MovementGenerator.h"
+#include "WaypointMovementGenerator.h"
 
 /*########
 # npc_air_force_bots
@@ -5160,9 +5162,14 @@ public:
 
     struct npc_ravenholdt_guardsAI : public ScriptedAI
     {
-        npc_ravenholdt_guardsAI(Creature *c) : ScriptedAI(c) {}
+        npc_ravenholdt_guardsAI(Creature *c) : ScriptedAI(c)
+        {
+            m_startMovementTimer = 0;
+        }
 
         TaskScheduler scheduler;
+
+        uint32_t m_startMovementTimer;
 
         void Reset()
         {
@@ -5211,6 +5218,8 @@ public:
                 me->CombatStop(true);
                 if (target)
                     target->CombatStop(true);
+                me->getThreatManager().clearReferences();
+
                 me->GetMotionMaster()->MoveTargetedHome();
             });
         }
@@ -5218,6 +5227,20 @@ public:
         void UpdateAI(const uint32 diff)
         {
             scheduler.Update(diff);
+
+            if (!me->isMoving())
+            {
+                if (!me->IsInCombat() && me->CanFreeMove() && m_startMovementTimer == 0)
+                    m_startMovementTimer = 5000;
+                else if (m_startMovementTimer <= diff)
+                {
+                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                        ((WaypointMovementGenerator<Creature>*)me->GetMotionMaster()->top())->StartMoveNow(me);
+                    m_startMovementTimer = 0;
+                }
+                else
+                    m_startMovementTimer -= diff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -5236,9 +5259,14 @@ public:
 
     struct npc_gilneas_guardsAI : public ScriptedAI
     {
-        npc_gilneas_guardsAI(Creature *c) : ScriptedAI(c) {}
+        npc_gilneas_guardsAI(Creature *c) : ScriptedAI(c)
+        {
+            m_startMovementTimer = 0;
+        }
 
         TaskScheduler scheduler;
+
+        uint32_t m_startMovementTimer;
 
         void Reset()
         {
@@ -5247,9 +5275,9 @@ public:
 
         void MoveInLineOfSight(Unit *who) override
         {
-            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0)
+            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0 && who->IsWithinLOSInMap(me, false))
             {
-                if (!me->HasAura(6770))
+                if (!me->HasAura(6770) && who->HasAura(70793))
                 {
                     if (me->GetExactDist2d(who) < 7.0f)
                     {
@@ -5287,12 +5315,28 @@ public:
                 me->CombatStop(true);
                 if (target)
                     target->CombatStop(true);
+                me->getThreatManager().clearReferences();
+                me->GetMotionMaster()->MoveTargetedHome();
             });
         }
 
         void UpdateAI(const uint32 diff)
         {
             scheduler.Update(diff);
+
+            if (!me->isMoving())
+            {
+                if (!me->IsInCombat() && me->CanFreeMove() && m_startMovementTimer == 0)
+                    m_startMovementTimer = 5000;
+                else if (m_startMovementTimer <= diff)
+                {
+                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                        ((WaypointMovementGenerator<Creature>*)me->GetMotionMaster()->top())->StartMoveNow(me);
+                    m_startMovementTimer = 0;
+                }
+                else
+                    m_startMovementTimer -= diff;
+            }
 
             DoMeleeAttackIfReady();
         }

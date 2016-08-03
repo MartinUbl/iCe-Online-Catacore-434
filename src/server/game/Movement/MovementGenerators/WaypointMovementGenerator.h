@@ -83,6 +83,12 @@ class WaypointMovementGenerator<Creature> : public MovementGeneratorMedium< Crea
 
         bool GetResetPos(Creature*, float& x, float& y, float& z);
 
+        void StartMoveNow(Creature* creature)
+        {
+            i_nextMoveTime.Reset(0);
+            StartMove(creature);
+        }
+
     private:
 
         void Stop(int32 time) { i_nextMoveTime.Reset(time);}
@@ -97,12 +103,6 @@ class WaypointMovementGenerator<Creature> : public MovementGeneratorMedium< Crea
 
         void OnArrived(Creature*);
         bool StartMove(Creature*);
-
-        void StartMoveNow(Creature* creature)
-        {
-            i_nextMoveTime.Reset(0);
-            StartMove(creature);
-        }
 
         TimeTrackerSmall i_nextMoveTime;
         bool m_isArrivalDone;
