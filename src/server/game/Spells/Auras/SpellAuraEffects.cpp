@@ -396,7 +396,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleModActionButton,                           //333 SPELL_AURA_MOD_TRAP_LAUNCHER
     &AuraEffect::HandleNULL,                                      //334
     &AuraEffect::HandleAuraModIncreaseSpeedSpecial,               //335 SPELL_AURA_MOD_INCREASE_SPEED_SPECIAL
-    &AuraEffect::HandleNULL,                                      //336
+    &AuraEffect::HandleAuraFlyingRestrictions,                    //336 SPELL_AURA_MOD_MOUNT_TYPE
     &AuraEffect::HandleNULL,                                      //337
     &AuraEffect::HandleNULL,                                      //338
     &AuraEffect::HandleNULL,                                      //339
@@ -8890,6 +8890,25 @@ void AuraEffect::HandleAuraModFaction(AuraApplication const *aurApp, uint8 mode,
     }
 }
 
+void AuraEffect::HandleAuraFlyingRestrictions(AuraApplication const *aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK))
+        return;
+
+    Unit *target = aurApp->GetTarget();
+
+    if (target->IsMounted() && (target->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || target->HasAuraType(SPELL_AURA_FLY)))
+    {
+        target->Unmount();
+        target->RemoveAurasByType(SPELL_AURA_MOUNTED);
+        target->RemoveAurasByType(SPELL_AURA_FLY);
+        target->RemoveAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
+        target->RemoveAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED);
+
+        if (m_spellProto->EffectTriggerSpell[GetEffIndex()] != 0)
+            target->CastSpell(target, m_spellProto->EffectTriggerSpell[GetEffIndex()], true);
+    }
+}
 
 void AuraEffect::HandleComprehendLanguage(AuraApplication const *aurApp, uint8 mode, bool apply) const
 {

@@ -313,6 +313,7 @@ class AuraEffect
         void HandleAuraOpenStable(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         void HandleAuraOverrideSpells(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         void HandleAuraSetVehicle(AuraApplication const * aurApp, uint8 mode, bool apply) const;
+        void HandleAuraFlyingRestrictions(AuraApplication const * aurApp, uint8 mode, bool apply) const;
 };
 
 namespace Trinity
