@@ -8241,6 +8241,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     caster->ToPlayer()->ModifySpellCooldown(1680, -6000, true);
             }
 
+            // Teleport Back Timing Aura - teleport from Lord Hiram Creed after his death
+            if (m_spellProto->Id == 109383 && caster && caster->GetTypeId() == TYPEID_PLAYER)
+                caster->ToPlayer()->TeleportTo(0, -1389.801f, 1233.41955f, 35.5607f, 0.78f);
+
             // Shadow Orbs - remove marker
             if (m_spellProto->Id == 77487 && caster)
             {

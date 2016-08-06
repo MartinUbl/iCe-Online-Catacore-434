@@ -50,6 +50,8 @@ EndContentData */
 #include "TaskScheduler.h"
 #include "MovementGenerator.h"
 #include "WaypointMovementGenerator.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 
 /*########
 # npc_air_force_bots
@@ -5395,6 +5397,17 @@ public:
 
         void JustDied(Unit * /*who*/) override
         {
+            // get players within 50y
+            float radius = 50.0f;
+            std::list<Player*> players;
+            Trinity::AnyPlayerInObjectRangeCheck checker(me, radius);
+            Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
+            me->VisitNearbyWorldObject(radius, searcher);
+
+            // cast Teleport Back Timing Aura
+            for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                (*itr)->CastSpell(*itr, 109383, true);
+
             me->MonsterSay("Who... ordered... this?", LANG_UNIVERSAL, 0);
         }
 
