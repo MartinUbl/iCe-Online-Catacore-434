@@ -3406,9 +3406,9 @@ void Guild::SendBankList(WorldSession *session, uint8 tabId, bool withContent, b
 
                     data.WriteBits(enchants, 23);
 
+                    tabData << uint32(0);                                   // SpellItemEnchantment.dbc ID 1
                     tabData << uint32(0);
-                    tabData << uint32(0);
-                    tabData << uint32(0);
+                    tabData << uint32(0);                                   // SpellItemEnchantment.dbc ID 2
                     tabData << uint32(tabItem->GetCount());                 // ITEM_FIELD_STACK_COUNT
                     tabData << uint32(slotId);
                     tabData << uint32(0);

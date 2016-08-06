@@ -458,8 +458,8 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
     data << uint8(ActivateAccept ? 1 : 0);                  // auto finish
     data << uint32(pQuest->GetFlags());                     // 3.3.3 questFlags
     data << uint32(pQuest->GetSuggestedPlayers());
-    data << uint8(0);                                       // 4.0.1, unknow
     data << uint8(0);                                       // IsFinished? value is sent back to server in quest accept packet
+    data << uint8(pQuest->HasFlag(QUEST_FLAGS_AUTO_ACCEPT) ? 1 : 0); // 4.0.1, starts at areatrigger
     data << uint32(pQuest->GetRequiredSpell());             // 4.0.1, objective: learn spell
 
     ItemPrototype const* IProto;
@@ -506,7 +506,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
     data << uint32(pQuest->GetBonusTalents());
 
     data << uint32(0); // unknown 4.0.1
-    data << uint32(0); // unknown 4.0.1
+    data << uint32(0); // 4.0.1 - reward reputation mask
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
         data << uint32(pQuest->RewRepFaction[i]);
@@ -605,7 +605,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const *pQuest)
     data << float(0);                                       // new reward honor (multipled by ~62 at client side)
     data << uint32(pQuest->GetSrcItemId());                 // source item id
     data << uint32(pQuest->GetFlags() & 0xFFFF);            // quest flags
-    data << uint32(0);                                      // new 4.0.1
+    data << uint32(0);                                      // 4.0.1 - minimap target mark
     data << uint32(pQuest->GetCharTitleId());               // CharTitleId, new 2.4.0, player gets this title (id from CharTitles)
     data << uint32(pQuest->GetPlayersSlain());              // players slain
     data << uint32(pQuest->GetBonusTalents());              // bonus talents
@@ -714,7 +714,6 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, uint64 npcGUID, 
 {
     std::string Title = pQuest->GetTitle();
     std::string OfferRewardText = pQuest->GetOfferRewardText();
-    std::string unk_401 = "";
 
     int loc_idx = pSession->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
@@ -733,13 +732,13 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, uint64 npcGUID, 
     data << Title;
     data << OfferRewardText;
 
-    data << unk_401;                                        // unk string, 4.0.1
-    data << unk_401;                                        // unk string, 4.0.1
-    data << unk_401;                                        // unk string, 4.0.1
-    data << unk_401;                                        // unk string, 4.0.1
+    data << uint8(0);                                       // 4.0.1 - questgiver portrait text
+    data << uint8(0);                                       // 4.0.1 - questgiver portrait title
+    data << uint8(0);                                       // 4.0.1 - creature portrait text
+    data << uint8(0);                                       // 4.0.1 - creature portrait title
 
-    data << uint32(0);                                      // unk uint32, 4.0.1
-    data << uint32(0);                                      // unk uint32, 4.0.1
+    data << uint32(0);                                      // 4.0.1 - questgiver portrait
+    data << uint32(0);                                      // 4.0.1 - creature portrait
 
     data << uint8(EnableNext ? 1 : 0);                      // Auto Finish
     data << uint32(pQuest->GetFlags());                     // 3.3.3 questFlags
@@ -811,7 +810,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, uint64 npcGUID, 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
         data << int32(pQuest->RewRepValue[i]);
 
-    data << uint32(0); // unknow 4.0.1
+    data << uint32(pQuest->GetRewSpellCast()); // "The following spell will be cast on you"
     data << uint32(0); // unknow 4.0.1
 
     for(int i = 0; i < 4; i++)
@@ -856,7 +855,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const *pQuest, uint64 npcGUID,
     data << Title;
     data << RequestItemsText;
 
-    data << uint32(0x00);                                   // unknown
+    data << uint32(0);                                   // unknown
 
     if (Completable)
         data << pQuest->GetCompleteEmote();
@@ -893,13 +892,13 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const *pQuest, uint64 npcGUID,
             data << uint32(0);
     }
 
-    // Added in 4.0.1
+    // Added in 4.0.1 - required currency
     uint32 counter = 0;
-    data << counter;
+    data << counter;                            // required currencies count
     for(uint32 i = 0; i < counter; i++)
     {
-        data << uint32(0);
-        data << uint32(0);
+        data << uint32(0);                      // required currency ID
+        data << uint32(0);                      // required currency amount
     }
 
     if (!Completable)
@@ -907,7 +906,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const *pQuest, uint64 npcGUID,
     else
         data << uint32(0x02);
 
-    data << uint32(0x04);
+    data << uint32(0x04);                       // unknown 4.0.1; when zero, the quest could not be completed
     data << uint32(0x08);
     data << uint32(0x10);
     data << uint32(0x40); // added in 4.0.1

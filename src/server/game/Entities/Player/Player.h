@@ -531,7 +531,7 @@ enum PlayerFlags
     PLAYER_FLAGS_HIDE_CLOAK     = 0x00000800,
     PLAYER_FLAGS_UNK13          = 0x00001000,               // played long time
     PLAYER_FLAGS_UNK14          = 0x00002000,               // played too long time
-    PLAYER_FLAGS_UNK15          = 0x00004000,
+    PLAYER_FLAGS_UNK15          = 0x00004000,               // after logout, teleport using console and login, player will be frozen in place, no models displaying, on OLD location before teleport
     PLAYER_FLAGS_DEVELOPER      = 0x00008000,               // <Dev> prefix for something?
     PLAYER_FLAGS_UNK17          = 0x00010000,               // pre-3.0.3 PLAYER_FLAGS_SANCTUARY flag for player entered sanctuary
     PLAYER_FLAGS_UNK18          = 0x00020000,               // taxi benchmark mode (on/off) (2.0.1)
