@@ -14101,6 +14101,14 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, uint32 effectMask)
         }
     }
 
+    // Cloak of Shadows (rogue)
+    if (HasAura(31224))
+    {
+        // strange inclusion of spell Blackhowls Will
+        if (spellInfo->Id == 109664)
+            return true;
+    }
+
     return false;
 }
 
