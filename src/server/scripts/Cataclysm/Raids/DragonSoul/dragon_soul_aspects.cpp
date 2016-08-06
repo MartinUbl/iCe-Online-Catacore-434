@@ -252,7 +252,7 @@ public:
                     if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
                         pDragonSoul->CastSpell(pDragonSoul, SPELL_DRAGON_SOUL_CHARGED_COSMETIC, true);
                 });
-                scheduler.Schedule(Seconds(46), [this](TaskContext moveSteps)
+                scheduler.Schedule(Seconds(121), [this](TaskContext moveSteps)
                 {
                     uint32 repeatCount = moveSteps.GetRepeatCounter();
                     uint32 repeatSeconds = 0;
@@ -381,7 +381,7 @@ public:
                     me->RemoveAllAuras();
                     me->GetMotionMaster()->MoveFall();
                 });
-                scheduler.Schedule(Seconds(40), [this](TaskContext moveSteps)
+                scheduler.Schedule(Seconds(115), [this](TaskContext moveSteps)
                 {
                     uint32 repeatCount = moveSteps.GetRepeatCounter();
                     uint32 repeatSeconds = 0;
@@ -503,7 +503,7 @@ public:
                     me->RemoveAllAuras();
                     me->GetMotionMaster()->MoveFall();
                 });
-                scheduler.Schedule(Seconds(40), [this](TaskContext moveSteps)
+                scheduler.Schedule(Seconds(115), [this](TaskContext moveSteps)
                 {
                     uint32 repeatCount = moveSteps.GetRepeatCounter();
                     uint32 repeatSeconds = 0;
@@ -688,7 +688,7 @@ public:
                     me->RemoveAllAuras();
                     me->GetMotionMaster()->MoveFall();
                 });
-                scheduler.Schedule(Seconds(46), [this](TaskContext moveSteps)
+                scheduler.Schedule(Seconds(121), [this](TaskContext moveSteps)
                 {
                     uint32 repeatCount = moveSteps.GetRepeatCounter();
                     uint32 repeatSeconds = 0;
@@ -916,7 +916,7 @@ public:
                         if (Creature* pDragonSoul = me->FindNearestCreature(NPC_THE_DRAGON_SOUL, SEARCH_RANGE))
                             pDragonSoul->GetMotionMaster()->MoveJump(pDragonSoul->GetPositionX(), pDragonSoul->GetPositionY(), pDragonSoul->GetPositionZ() - 8, 1.0f, 1.0f);
                     });
-                    scheduler.Schedule(Seconds(25), [this](TaskContext /*Walk towards Dragon Soul*/)
+                    scheduler.Schedule(Seconds(100), [this](TaskContext /*Walk towards Dragon Soul*/)
                     {
                         me->SetSpeed(MOVE_WALK, 0.4f);
                         me->SetWalk(true);
@@ -924,7 +924,7 @@ public:
                         me->MonsterSay("Taretha... Cairne... Aggra... I will not fail you. I will not fail this world!", LANG_UNIVERSAL, 0, SEARCH_RANGE);
                         me->SendPlaySound(25908, true);
                     });
-                    scheduler.Schedule(Seconds(37), [this](TaskContext /*Show Movie and ship*/)
+                    scheduler.Schedule(Seconds(112), [this](TaskContext /*Show Movie and ship*/)
                     {
                         me->SetSpeed(MOVE_WALK, 1.2f);
                         PlayMovieToPlayers(73);
@@ -940,7 +940,7 @@ public:
                                 pKaanuReevs->SetVisible(true);
                         }
                     });
-                    scheduler.Schedule(Seconds(42), [this](TaskContext moveSteps)
+                    scheduler.Schedule(Seconds(117), [this](TaskContext moveSteps)
                     {
                         uint32 repeatCount = moveSteps.GetRepeatCounter();
                         uint32 repeatSeconds = 0;
