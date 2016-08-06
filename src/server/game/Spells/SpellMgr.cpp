@@ -4513,11 +4513,13 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
 /*************************        DRAGON SOUL END        *****************************/
 
-        case 107818: // Gurthalag - Summon Tentacle of the Old Ones
+        case 107818: // Gurthalak - Summon Tentacle of the Old Ones
         case 109840:
             spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_CASTER_RADIUS;
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_8_YARDS;
             spellInfo->DurationIndex = 29;
+            spellInfo->AttributesEx &= ~SPELL_ATTR4_NOT_USABLE_IN_ARENA;
+            count++;
             break;
         case 88691: //Marked for Death Tracking
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_STALKED;
