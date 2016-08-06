@@ -5232,14 +5232,17 @@ public:
             {
                 if (!me->IsInCombat() && me->CanFreeMove() && m_startMovementTimer == 0)
                     m_startMovementTimer = 5000;
-                else if (m_startMovementTimer <= diff)
+                else if (m_startMovementTimer != 0)
                 {
-                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-                        ((WaypointMovementGenerator<Creature>*)me->GetMotionMaster()->top())->StartMoveNow(me);
-                    m_startMovementTimer = 0;
+                    if (m_startMovementTimer <= diff)
+                    {
+                        if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                            ((WaypointMovementGenerator<Creature>*)me->GetMotionMaster()->top())->StartMoveNow(me);
+                        m_startMovementTimer = 0;
+                    }
+                    else
+                        m_startMovementTimer -= diff;
                 }
-                else
-                    m_startMovementTimer -= diff;
             }
 
             DoMeleeAttackIfReady();
@@ -5328,14 +5331,17 @@ public:
             {
                 if (!me->IsInCombat() && me->CanFreeMove() && m_startMovementTimer == 0)
                     m_startMovementTimer = 5000;
-                else if (m_startMovementTimer <= diff)
+                else if (m_startMovementTimer != 0)
                 {
-                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-                        ((WaypointMovementGenerator<Creature>*)me->GetMotionMaster()->top())->StartMoveNow(me);
-                    m_startMovementTimer = 0;
+                    if (m_startMovementTimer <= diff)
+                    {
+                        if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                            ((WaypointMovementGenerator<Creature>*)me->GetMotionMaster()->top())->StartMoveNow(me);
+                        m_startMovementTimer = 0;
+                    }
+                    else
+                        m_startMovementTimer -= diff;
                 }
-                else
-                    m_startMovementTimer -= diff;
             }
 
             DoMeleeAttackIfReady();
