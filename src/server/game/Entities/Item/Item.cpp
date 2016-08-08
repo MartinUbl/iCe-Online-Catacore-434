@@ -1124,11 +1124,6 @@ void Player::ApplyReforge(Item *item, bool apply)
     if (proto->ItemLevel < 200)
         return;
 
-    // Only items with durability higher than 0 can be reforged
-    int32 pDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
-    if (pDurability <= 0)
-        return;
-
     // Get source stat/rating amount from item
     uint32 srcstatamount = 0;
     for (int j = 0; j < MAX_ITEM_PROTO_STATS; j++)

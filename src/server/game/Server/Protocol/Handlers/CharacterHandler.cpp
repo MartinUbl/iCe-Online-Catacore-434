@@ -1636,6 +1636,13 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
         return;
     }
 
+    // Only not-broken items could be reforged
+    if (dstItem->IsBroken())
+    {
+        sLog->outChar("Exploit attempt: Player %s (%u) tried to reforge item %u with 0 durability", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), pProto->ItemId);
+        return;
+    }
+
     // And take money equal to sell price
     if (reforgeID != 0)
         GetPlayer()->ModifyMoney(-int64(pProto->SellPrice));
