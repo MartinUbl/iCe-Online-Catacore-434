@@ -5197,6 +5197,27 @@ public:
             }
         }
 
+        void DropCombatEngagement(uint64 targetGUID)
+        {
+            std::list<Unit*> nearUnits;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 30.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, nearUnits, u_check);
+            me->VisitNearbyObject(30.0f, searcher);
+
+            for (Unit* un : nearUnits)
+            {
+                if (un->GetTypeId() != TYPEID_UNIT)
+                    continue;
+
+                if (un->GetVictim() && un->GetVictim()->GetGUID() == targetGUID)
+                {
+                    un->CombatStop(true);
+                    un->getThreatManager().clearReferences();
+                    un->GetMotionMaster()->MoveTargetedHome();
+                }
+            }
+        }
+
         void EnterCombat(Unit * /*who*/) override
         {
             Unit * target = me->GetVictim();
@@ -5217,6 +5238,9 @@ public:
                     target->CastSpell(target, SPELL_MOSTRASZ_VISION, true);
                     target->CastSpell(target, SPELL_INFILTRATING_RAVENHOLDT, true);
                 }
+
+                DropCombatEngagement(targetGUID);
+
                 me->CombatStop(true);
                 if (target)
                     target->CombatStop(true);
@@ -5297,6 +5321,27 @@ public:
             }
         }
 
+        void DropCombatEngagement(uint64 targetGUID)
+        {
+            std::list<Unit*> nearUnits;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 30.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, nearUnits, u_check);
+            me->VisitNearbyObject(30.0f, searcher);
+
+            for (Unit* un : nearUnits)
+            {
+                if (un->GetTypeId() != TYPEID_UNIT)
+                    continue;
+
+                if (un->GetVictim() && un->GetVictim()->GetGUID() == targetGUID)
+                {
+                    un->CombatStop(true);
+                    un->getThreatManager().clearReferences();
+                    un->GetMotionMaster()->MoveTargetedHome();
+                }
+            }
+        }
+
         void EnterCombat(Unit * /*who*/) override
         {
             Unit * target = me->GetVictim();
@@ -5317,6 +5362,9 @@ public:
                     target->CastSpell(target, SPELL_EYE_OF_ZAZZO, true);
                     target->CastSpell(target, SPELL_INFILTRATING_GILNEAS_CITY, true);
                 }
+
+                DropCombatEngagement(targetGUID);
+
                 me->CombatStop(true);
                 if (target)
                     target->CombatStop(true);
