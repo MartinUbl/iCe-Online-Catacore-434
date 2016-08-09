@@ -7760,7 +7760,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     unitTarget->GetPosition(x, y, z);
                     uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
                     AreaTableEntry const *pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (!pArea || (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
+                    if (!pArea || unitTarget->HasAuraType(SPELL_AURA_MOD_MOUNT_TYPE) || (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
                         canFly = false;
 
                     switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
@@ -7811,7 +7811,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     unitTarget->GetPosition(x, y, z);
                     uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
                     AreaTableEntry const *pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (!pArea || (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
+                    if (!pArea || unitTarget->HasAuraType(SPELL_AURA_MOD_MOUNT_TYPE) || (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
                         canFly = false;
 
                     switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
@@ -8182,7 +8182,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         unitTarget->GetPosition(x, y, z);
                         uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
                         AreaTableEntry const *pArea = sAreaStore.LookupEntry(areaFlag);
-                        if (!pArea || (canFly && (pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
+                        if (!pArea || unitTarget->HasAuraType(SPELL_AURA_MOD_MOUNT_TYPE) || (canFly && (pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
                             canFly = false;
 
                         switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
@@ -8228,7 +8228,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     unitTarget->GetPosition(x, y, z);
                     uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
                     AreaTableEntry const *pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (canFly && pArea->flags & AREA_FLAG_NO_FLY_ZONE)
+                    if (canFly && (unitTarget->HasAuraType(SPELL_AURA_MOD_MOUNT_TYPE) || pArea->flags & AREA_FLAG_NO_FLY_ZONE))
                         canFly = false;
 
                     switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
@@ -8295,7 +8295,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     unitTarget->GetPosition(x, y, z);
                     uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
                     AreaTableEntry const *pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (!pArea || (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
+                    if (!pArea || (canFly && (unitTarget->HasAuraType(SPELL_AURA_MOD_MOUNT_TYPE) || (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE))))
                         canFly = false;
 
                     switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
