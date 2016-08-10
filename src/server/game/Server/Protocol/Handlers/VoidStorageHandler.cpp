@@ -75,6 +75,12 @@ void WorldSession::HandleVoidStorageUnlock(WorldPacket& recvData)
 
     player->ModifyMoney(-int32(VOID_STORAGE_UNLOCK));
     player->UnlockVoidStorage();
+
+    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s)",
+        player->GetSession()->GetRemoteAddress().c_str(),
+        player->GetSession()->GetAccountId(),
+        player->GetName(),
+        "unlock void storage");
 }
 
 void WorldSession::HandleVoidStorageQuery(WorldPacket& recvData)
@@ -336,6 +342,14 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
             continue;
         }
 
+        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) item:(%u) name:(%s)",
+            player->GetSession()->GetRemoteAddress().c_str(),
+            player->GetSession()->GetAccountId(),
+            player->GetName(),
+            "void storage deposit",
+            item->GetProto()->ItemId,
+            item->GetProto()->Name1);
+
         VoidStorageItem itemVS(sObjectMgr->GenerateVoidStorageItemId(), item->GetEntry(), item->GetUInt64Value(ITEM_FIELD_CREATOR), item->GetItemRandomPropertyId(), item->GetItemSuffixFactor());
 
         uint8 slot = player->AddVoidStorageItem(itemVS);
@@ -376,6 +390,14 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
         player->SendNewItem(item, 1, false, false, false);
 
         withdrawItems[withdrawCount++] = *itemVS;
+
+        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) item:(%u) name:(%s)",
+            player->GetSession()->GetRemoteAddress().c_str(),
+            player->GetSession()->GetAccountId(),
+            player->GetName(),
+            "void storage withdraw",
+            item->GetProto()->ItemId,
+            item->GetProto()->Name1);
 
         player->DeleteVoidStorageItem(slot);
     }
