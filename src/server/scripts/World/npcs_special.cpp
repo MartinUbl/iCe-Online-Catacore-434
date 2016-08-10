@@ -5282,6 +5282,19 @@ public:
     };
 };
 
+#define GILNEAS_SHOUT_COUNT 8
+
+static const char* guardShouts[GILNEAS_SHOUT_COUNT] = {
+    "What have we here ?",
+    "I see you...",
+    "Protect Lord Creed!",
+    "Die, assassin!",
+    "Over here - an assassin!",
+    "Take him out!",
+    "Intruder!",
+    "Show yourself!"
+};
+
 class npc_gilneas_guards : public CreatureScript
 {
 public:
@@ -5353,6 +5366,10 @@ public:
             Unit * target = me->GetVictim();
             if (!target)
                 return;
+            
+            // if we are not a dog, shout some random aggro stuff
+            if (me->GetEntry() != 57861)
+                me->MonsterSay(guardShouts[urand(0, GILNEAS_SHOUT_COUNT - 1)], LANG_UNIVERSAL, 0);
 
             target->Unmount();
             target->RemoveAurasByType(SPELL_AURA_MOUNTED);
