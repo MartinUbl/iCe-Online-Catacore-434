@@ -5224,6 +5224,12 @@ public:
             if (!target)
                 return;
 
+            target->Unmount();
+            target->RemoveAurasByType(SPELL_AURA_MOUNTED);
+            target->RemoveAurasByType(SPELL_AURA_FLY);
+            target->RemoveAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
+            target->RemoveAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED);
+
             uint64 targetGUID = target->GetGUID();
 
             scheduler.Schedule(Seconds(6), [this, targetGUID](TaskContext /*context*/)
@@ -5347,6 +5353,12 @@ public:
             Unit * target = me->GetVictim();
             if (!target)
                 return;
+
+            target->Unmount();
+            target->RemoveAurasByType(SPELL_AURA_MOUNTED);
+            target->RemoveAurasByType(SPELL_AURA_FLY);
+            target->RemoveAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
+            target->RemoveAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED);
 
             uint64 targetGUID = target->GetGUID();
 
