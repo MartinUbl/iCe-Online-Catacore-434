@@ -2044,8 +2044,6 @@ void World::Update(uint32 diff)
 
         // For now, we reset currency week cap at the same time
         ResetCurrencyWeekCount();
-
-        sObjectMgr->ResetGuildChallenges();
     }
 
     if (m_gameTime > m_NextRandomBGReset)

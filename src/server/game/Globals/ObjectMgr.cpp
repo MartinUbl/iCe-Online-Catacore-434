@@ -453,6 +453,8 @@ void ObjectMgr::ResetGuildDailyXPCap()
 
 void ObjectMgr::ResetGuildChallenges()
 {
+    // inactive now; moved to query scheduler, this method never gets invoked!
+
     for (ObjectMgr::GuildMap::iterator itr = mGuildMap.begin(); itr != mGuildMap.end(); ++itr)
     {
         if ((*itr))
