@@ -71,6 +71,7 @@
 #include "Transport.h"
 #include "TransportMgr.h"
 #include "GSMgr.h"
+#include "QueryScheduler.h"
 
 #include "ScriptMgr.h"
 #include "AddonMgr.h"
@@ -1313,6 +1314,11 @@ void World::SetInitialWorldSettings()
     ///- Initialize Allowed Security Level
     LoadDBAllowedSecurityLevel();
 
+    ///- Initialize query scheduler before everything else
+    sQueryScheduler->LoadFromDB();
+    // immediatelly check for need to run queries after startup
+    sQueryScheduler->CheckStartupSchedules();
+
     ///- Init highest guids before any table loading to prevent using not initialized guids in some code.
     sObjectMgr->SetHighestGuids();
 
@@ -2163,6 +2169,9 @@ void World::Update(uint32 diff)
 
     // update the instance reset times
     sInstanceSaveMgr->Update();
+
+    // update query scheduler
+    sQueryScheduler->Update();
 
     // And last, but not least handle the issued cli commands
     ProcessCliCommands();
