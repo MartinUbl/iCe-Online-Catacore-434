@@ -5236,6 +5236,14 @@ public:
             {
                 Unit* target = sObjectAccessor->FindUnit(targetGUID);
 
+                DropCombatEngagement(targetGUID);
+
+                me->CombatStop(true);
+                if (target)
+                    target->CombatStop(true);
+                me->getThreatManager().clearReferences();
+                me->GetMotionMaster()->MoveTargetedHome();
+
                 if (target && me->GetDistance2d(target) < 10.0f)
                 {
                     target->NearTeleportTo(MostraszPos.GetPositionX(), MostraszPos.GetPositionY(), MostraszPos.GetPositionZ(), MostraszPos.GetOrientation());
@@ -5244,15 +5252,6 @@ public:
                     target->CastSpell(target, SPELL_MOSTRASZ_VISION, true);
                     target->CastSpell(target, SPELL_INFILTRATING_RAVENHOLDT, true);
                 }
-
-                DropCombatEngagement(targetGUID);
-
-                me->CombatStop(true);
-                if (target)
-                    target->CombatStop(true);
-                me->getThreatManager().clearReferences();
-
-                me->GetMotionMaster()->MoveTargetedHome();
             });
         }
 
@@ -5383,6 +5382,14 @@ public:
             {
                 Unit* target = sObjectAccessor->FindUnit(targetGUID);
 
+                DropCombatEngagement(targetGUID);
+
+                me->CombatStop(true);
+                if (target)
+                    target->CombatStop(true);
+                me->getThreatManager().clearReferences();
+                me->GetMotionMaster()->MoveTargetedHome();
+
                 if (target && me->GetDistance2d(target) < 10.0f)
                 {
                     target->NearTeleportTo(ZazzoPos.GetPositionX(), ZazzoPos.GetPositionY(), ZazzoPos.GetPositionZ(), ZazzoPos.GetOrientation());
@@ -5391,14 +5398,6 @@ public:
                     target->CastSpell(target, SPELL_EYE_OF_ZAZZO, true);
                     target->CastSpell(target, SPELL_INFILTRATING_GILNEAS_CITY, true);
                 }
-
-                DropCombatEngagement(targetGUID);
-
-                me->CombatStop(true);
-                if (target)
-                    target->CombatStop(true);
-                me->getThreatManager().clearReferences();
-                me->GetMotionMaster()->MoveTargetedHome();
             });
         }
 
