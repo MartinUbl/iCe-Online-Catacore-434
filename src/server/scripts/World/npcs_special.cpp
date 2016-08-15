@@ -5276,6 +5276,17 @@ public:
                 }
             }
 
+            if (!me->GetVictim())
+                return;
+
+            if (me->GetVictim()->GetDistance(me) > 30.0f)
+            {
+                me->CombatStop(true);
+                me->getThreatManager().clearReferences();
+                me->GetMotionMaster()->MoveTargetedHome();
+                return;
+            }
+
             DoMeleeAttackIfReady();
         }
     };
@@ -5420,6 +5431,17 @@ public:
                     else
                         m_startMovementTimer -= diff;
                 }
+            }
+
+            if (!me->GetVictim())
+                return;
+
+            if (me->GetVictim()->GetDistance(me) > 30.0f)
+            {
+                me->CombatStop(true);
+                me->getThreatManager().clearReferences();
+                me->GetMotionMaster()->MoveTargetedHome();
+                return;
             }
 
             DoMeleeAttackIfReady();
