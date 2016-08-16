@@ -1641,15 +1641,20 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 // Inquisition
                 else if(GetId() == 84963)
                 {
-                    if(caster)
+                    if (caster)
                     {
-                        if (caster->HasAura(90174))
-                        {
+                        // Divine Purpose causes the Inquisition spell to act as if the caster have 3 holy power
+                        int32 calcHolyPower = caster->HasAura(90174) ? 3 : caster->GetPower(POWER_HOLY_POWER) + 1;
+                        // T11 4p set bonus
+                        if (caster->HasAura(90299))
+                            calcHolyPower += 1;
+
+                        SetDuration(GetMaxDuration() * calcHolyPower);
+                        // Divine Purpose also causes the caster to not lose holy power
+                        if (!caster->HasAura(90174))
+                            caster->SetPower(POWER_HOLY_POWER, 0);
+                        else
                             caster->RemoveAurasDueToSpell(90174);
-                        }
-                        // + T11 4p bonus bonus
-                        SetDuration(GetMaxDuration() * (caster->GetPower(POWER_HOLY_POWER) + 1 + (caster->HasAura(90299) ? 1 : 0) ));
-                        caster->SetPower(POWER_HOLY_POWER, 0);
                     }
                 }
                 // Avenging Wrath
