@@ -6188,6 +6188,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_LINE_OF_SIGHT;
     }
 
+    // the teleporting spell used for lowlevels in Cata-locations should work only on 
+    if (m_spellInfo->Id == 84513 && (m_caster->GetMapId() != 0 && m_caster->GetMapId() != 1 && m_caster->GetMapId() != 646))
+        return SPELL_FAILED_NOT_HERE;
+
     Unit* Target = m_targets.getUnitTarget();
     if (m_spellInfo->Id == 30449 && Target) // Spellsteal Check
     {
