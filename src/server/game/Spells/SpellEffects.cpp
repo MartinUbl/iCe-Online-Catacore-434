@@ -245,7 +245,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //163 unused
     &Spell::EffectRemoveAura,                               //164 SPELL_EFFECT_REMOVE_AURA
     &Spell::EffectDamageFromMaxHealthPCT,                   //165 SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT
-    &Spell::EffectNULL,                                     //166
+    &Spell::EffectGainCurrency,                             //166 SPELL_EFFECT_GAIN_CURRENCY
     &Spell::EffectNULL,                                     //167
     &Spell::EffectNULL,                                     //168
     &Spell::EffectNULL,                                     //169
@@ -11114,6 +11114,28 @@ void Spell::EffectDamageFromMaxHealthPCT(SpellEffIndex effIndex)
         return;
 
     m_damage += unitTarget->CountPctFromMaxHealth(damage);
+}
+
+void Spell::EffectGainCurrency(SpellEffIndex effIndex)
+{
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    uint32 currencyId = (uint32)m_spellInfo->EffectMiscValue[effIndex];
+    Player* plr = unitTarget->ToPlayer();
+
+    // by default use "other" source
+    CurrencySource src = CURRENCY_SOURCE_OTHER;
+    // for PvP currencies, disambiguate by current environment - arena and BG sources should be separated
+    if (currencyId == CURRENCY_TYPE_CONQUEST_POINTS || currencyId == CURRENCY_TYPE_HONOR_POINTS)
+    {
+        if (plr->InArena())
+            src = CURRENCY_SOURCE_ARENA;
+        else if (plr->InBattleground())
+            src = CURRENCY_SOURCE_BG;
+    }
+
+    plr->ModifyCurrency(currencyId, damage / GetCurrencyPrecision(currencyId), src);
 }
 
 void Spell::EffectRemoveAura(SpellEffIndex effIndex)
