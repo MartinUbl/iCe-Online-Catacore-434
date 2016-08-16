@@ -16324,6 +16324,10 @@ int32 Unit::CalcSpellDuration(SpellEntry const* spellProto)
     if ((spellProto->Id == 774 || spellProto->Id == 8936) && HasAura(105770) && urand(0, 100) <= 10)
         duration *= 2;
 
+    // Slice and Dice special case - the glyph duration flat modifier should be applied BEFORE pct modifiers
+    if (spellProto->Id == 5171 && HasAura(56810))
+        duration += 6000;
+
     return duration;
 }
 

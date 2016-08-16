@@ -22154,6 +22154,9 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
                 return false;
             break;
         }
+        case 56810: // Glyph of Slice and Dice
+            // the glyph bonus is added before any spell mod manually, so the spell mod should not be applied here again
+            return false;
     }
 
     return sSpellMgr->IsAffectedByMod(spellInfo, mod);

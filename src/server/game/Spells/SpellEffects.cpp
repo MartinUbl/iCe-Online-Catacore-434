@@ -1392,15 +1392,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         {
                             uint32 duration = 21000;
 
+                            // Glyph of Slice and Dice
+                            if (m_caster->HasAura(56810))
+                                duration += 6000;
+
                             // Improved Slice and Dice
                             if (m_caster->HasAura(14166))
                                 duration *= 1.5f;
                             else if (m_caster->HasAura(14165))
                                 duration *= 1.25f;
-
-                            // Glyph of Slice and Dice
-                            if (m_caster->HasAura(56810))
-                                duration += 6000;
 
                             pAura->SetMaxDuration(duration);
                             pAura->SetDuration(duration);
@@ -1450,15 +1450,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         {
                             uint32 duration = 21000;
 
+                            // Glyph of Slice and Dice
+                            if (m_caster->HasAura(56810))
+                                duration += 6000;
+
                             // Improved Slice and Dice
                             if (m_caster->HasAura(14166))
                                 duration *= 1.5f;
                             else if (m_caster->HasAura(14165))
                                 duration *= 1.25f;
-
-                            // Glyph of Slice and Dice
-                            if (m_caster->HasAura(56810))
-                                duration += 6000;
 
                             pAura->SetMaxDuration(duration);
                             pAura->SetDuration(duration);
