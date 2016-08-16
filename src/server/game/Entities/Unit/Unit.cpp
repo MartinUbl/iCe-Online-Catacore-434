@@ -4463,11 +4463,20 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
             // stealing stacks should not apply new aura, just add stack to existing aura
             else if (newAura && stealStacks)
             {
+                // store duration and restore it later
+                int32 duration = newAura->GetDuration();
+                if (aura->GetDuration() > duration)
+                    duration = aura->GetDuration();
+
+                // this method causes duration refresh
                 newAura->ModStackAmount(+1);
+
+                newAura->SetDuration(duration);
             }
             else
             {
                 int32 dur = (2*MINUTE*IN_MILLISECONDS < aura->GetDuration() || aura->GetDuration() < 0) ? 2*MINUTE*IN_MILLISECONDS : aura->GetDuration();
+                int32 maxdur = (2*MINUTE*IN_MILLISECONDS < aura->GetMaxDuration() || aura->GetMaxDuration() < 0) ? 2*MINUTE*IN_MILLISECONDS : aura->GetMaxDuration();
 
                 newAura = Aura::TryCreate(aura->GetSpellProto(), effMask, stealer, NULL, &baseDamage[0], &scriptedDamage[0], NULL, aura->GetCasterGUID());
                 if (!newAura)
@@ -4475,7 +4484,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
                 // strange but intended behaviour: Stolen single target auras won't be treated as single targeted
                 if (newAura->IsSingleTarget())
                     newAura->UnregisterSingleTarget();
-                newAura->SetLoadedState(dur, dur, stealCharge ? 1 : aura->GetCharges(), stealStacks ? 1 : aura->GetStackAmount(), recalculateMask, &damage[0]);
+                newAura->SetLoadedState(maxdur, dur, stealCharge ? 1 : aura->GetCharges(), stealStacks ? 1 : aura->GetStackAmount(), recalculateMask, &damage[0]);
                 newAura->ApplyForTargets();
             }
             return;
