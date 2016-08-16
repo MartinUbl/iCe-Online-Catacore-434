@@ -22239,6 +22239,8 @@ void Player::RestoreSpellMods(Spell *spell, uint32 ownerAuraId)
     if (!spell || spell->m_appliedMods.empty())
         return;
 
+    Spell::UsedSpellMods droppedMods;
+
     for (uint8 i=0; i<MAX_SPELLMOD; ++i)
     {
         for (SpellModList::iterator itr = m_spellMods[i].begin(); itr != m_spellMods[i].end(); ++itr)
@@ -22256,10 +22258,19 @@ void Player::RestoreSpellMods(Spell *spell, uint32 ownerAuraId)
             // check if mod affected this spell
             Spell::UsedSpellMods::iterator iterMod = spell->m_appliedMods.find(mod->ownerAura);
             if (iterMod == spell->m_appliedMods.end())
-                continue;
+            {
+                // if the aura wasn't already moved from appliedMods set, then it didn't affected this spell at all
+                if (droppedMods.find(mod->ownerAura) == droppedMods.end())
+                    continue;
+            }
+            else
+            {
+                // added to "dropped" list, so if one aura applied two mods, both of them are restored
+                droppedMods.insert(mod->ownerAura);
 
-            // remove from list
-            spell->m_appliedMods.erase(iterMod);
+                // remove from list
+                spell->m_appliedMods.erase(iterMod);
+            }
 
             // add mod charges back to mod
             if (mod->charges == -1)
