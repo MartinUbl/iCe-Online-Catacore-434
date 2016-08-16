@@ -10562,7 +10562,7 @@ void Spell::EffectStealBeneficialBuff(SpellEffIndex effIndex)
             // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) -> 50% chance to dispell
             // Polymorph instead of 1 / (5 + 1) -> 16%.
             bool dispel_charges = aura->GetSpellProto()->AttributesEx7 & SPELL_ATTR7_DISPEL_CHARGES;
-            uint8 charges = dispel_charges ? aura->GetCharges() : aura->GetStackAmount();
+            uint8 charges = dispel_charges ? (aura->GetCharges() ? aura->GetCharges() : aura->GetStackAmount()) : (aura->GetStackAmount() ? aura->GetStackAmount() : aura->GetCharges());
             if (charges > 0)
                 steal_list.push_back(std::make_pair(aurApp, charges));
         }

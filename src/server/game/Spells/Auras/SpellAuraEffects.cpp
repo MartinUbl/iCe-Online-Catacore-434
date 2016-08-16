@@ -442,7 +442,6 @@ m_canBeRecalculated(true), m_spellmod(NULL), m_isPeriodic(false), m_periodicTime
     CalculatePeriodic(caster, true);
 
     m_amount = CalculateAmount(caster);
-    m_scriptedAmount = 0;
 
     CalculateSpellMod();
 

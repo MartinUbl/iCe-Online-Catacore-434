@@ -3801,6 +3801,26 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
                 break;
         }
 
+        // kinda hacklike implementation - if the aura was created by spellsteal, and is stackable,
+        // do not consider this application as singletarget aura (such aura has -1 as all spelleffect scripted values)
+        if (isSingleTarget && aura->GetSpellProto()->StackAmount > 1)
+        {
+            uint32 cnt = 0;
+            uint32 am = 0;
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+            {
+                if (aura->GetEffect(i))
+                {
+                    cnt++;
+                    if (aura->GetEffect(i)->GetScriptedAmount() == -1)
+                        am++;
+                }
+            }
+
+            if (cnt == am)
+                isSingleTarget = false;
+        }
+
         aura->SetIsSingleTarget(isSingleTarget);
 
         if (isSingleTarget)
@@ -4394,8 +4414,13 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
         Aura * aura = iter->second;
         if (aura->GetCasterGUID() == casterGUID)
         {
+            bool stealCharge = aura->GetSpellProto()->AttributesEx7 & SPELL_ATTR7_DISPEL_CHARGES;
+            // we do stacks stealing when the spell is not stolen by single charges and the spell actually has some stacks
+            bool stealStacks = !stealCharge && aura->GetSpellProto()->StackAmount > 1;
+
             int32 damage[MAX_SPELL_EFFECTS];
             int32 baseDamage[MAX_SPELL_EFFECTS];
+            int32 scriptedDamage[MAX_SPELL_EFFECTS];
             uint8 effMask = 0;
             uint8 recalculateMask = 0;
             for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -4413,17 +4438,19 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
                     baseDamage[i] = 0;
                     damage[i] = 0;
                 }
-            }
 
-            bool stealCharge = aura->GetSpellProto()->AttributesEx7 & SPELL_ATTR7_DISPEL_CHARGES;
+                // -1 as scripted damage is signaling the aura applier routine to not count this aura as singletarget
+                scriptedDamage[i] = stealStacks ? -1 : 0;
+            }
 
             if (stealCharge)
                 aura->DropCharge();
             else
                 RemoveAuraFromStack(iter, AURA_REMOVE_BY_ENEMY_SPELL);
 
+            Aura* newAura = stealer->GetAura(aura->GetId(), aura->GetCasterGUID());
 
-            if (Aura * newAura = stealCharge ? stealer->GetAura(aura->GetId(), aura->GetCasterGUID()) : NULL)
+            if (newAura && stealCharge)
             {
                 uint8 newCharges = newAura->GetCharges() + 1;
                 uint8 maxCharges = newAura->GetSpellProto()->procCharges;
@@ -4433,17 +4460,22 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
                         modOwner->ApplySpellMod(aura->GetId(), SPELLMOD_CHARGES, maxCharges);
                 newAura->SetCharges(maxCharges < newCharges ? maxCharges : newCharges);
             }
+            // stealing stacks should not apply new aura, just add stack to existing aura
+            else if (newAura && stealStacks)
+            {
+                newAura->ModStackAmount(+1);
+            }
             else
             {
                 int32 dur = (2*MINUTE*IN_MILLISECONDS < aura->GetDuration() || aura->GetDuration() < 0) ? 2*MINUTE*IN_MILLISECONDS : aura->GetDuration();
 
-                newAura = Aura::TryCreate(aura->GetSpellProto(), effMask, stealer, NULL, &baseDamage[0], NULL, NULL, aura->GetCasterGUID());
+                newAura = Aura::TryCreate(aura->GetSpellProto(), effMask, stealer, NULL, &baseDamage[0], &scriptedDamage[0], NULL, aura->GetCasterGUID());
                 if (!newAura)
                     return;
                 // strange but intended behaviour: Stolen single target auras won't be treated as single targeted
                 if (newAura->IsSingleTarget())
                     newAura->UnregisterSingleTarget();
-                newAura->SetLoadedState(dur, dur, stealCharge ? 1 : aura->GetCharges(), aura->GetStackAmount(), recalculateMask, &damage[0]);
+                newAura->SetLoadedState(dur, dur, stealCharge ? 1 : aura->GetCharges(), stealStacks ? 1 : aura->GetStackAmount(), recalculateMask, &damage[0]);
                 newAura->ApplyForTargets();
             }
             return;
