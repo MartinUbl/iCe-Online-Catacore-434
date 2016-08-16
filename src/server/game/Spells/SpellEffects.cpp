@@ -4288,7 +4288,15 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             {
                 Aura* pAura = unitTarget->GetAura(33763);
                 if (pAura)
-                    pAura->RefreshDuration();
+                {
+                    // just reset timers, do not recalculate amounts
+                    pAura->SetDuration(pAura->GetMaxDuration());
+                    for (uint32 eff = 0; eff < MAX_SPELL_EFFECTS; eff++)
+                    {
+                        if (AuraEffect* auraeff = pAura->GetEffect(eff))
+                            auraeff->ResetPeriodic();
+                    }
+                }
             }
         }
 
