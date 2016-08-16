@@ -383,7 +383,13 @@ m_isRemoved(false), m_isSingleTarget(false)
         m_maxDuration = -1;
 
     if (!IsPermanent() && modOwner)
+    {
         modOwner->ApplySpellMod(GetId(), SPELLMOD_DURATION, m_maxDuration);
+
+        // mathematically round duration up if needed
+        if (m_maxDuration > 0 && m_maxDuration % 1000 >= 500)
+            m_maxDuration += 1000 - (m_maxDuration % 1000);
+    }
 
     m_duration = m_maxDuration;
 
