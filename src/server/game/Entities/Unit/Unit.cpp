@@ -13013,7 +13013,18 @@ float Unit::GetUnitSpellCriticalChance(Unit *pVictim, SpellEntry const *spellPro
         case SPELL_DAMAGE_CLASS_MAGIC:
         {
             if (schoolMask & SPELL_SCHOOL_MASK_NORMAL)
-                crit_chance = 0.0f;
+            {
+                // several spells have mask "normal" so they cannot be resisted by magical resist spells, but
+                // should have critical chance calculated normally using general crit chance
+                if (spellProto)
+                {
+                    // Healthstone (warlock), use shadow spell school
+                    if (spellProto->Id == 6262)
+                        crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + SPELL_SCHOOL_SHADOW);
+                }
+                else
+                    crit_chance = 0.0f;
+            }
             // For other schools
             else if (GetTypeId() == TYPEID_PLAYER)
                 crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
