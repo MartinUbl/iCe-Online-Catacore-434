@@ -4507,11 +4507,11 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
 
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
 
-            //Riptide
+            // Riptide
             AuraEffect * aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0, 0x10, m_originalCasterGUID);
 
-            // Chain Heal
-            if (aurEff && m_spellInfo->Id == 1064)
+            // Chain Heal; drops Riptide only from primary target, not chain targets
+            if (aurEff && m_spellInfo->Id == 1064 && unitTarget && unitTarget->GetGUID() == m_targets.getUnitTargetGUID())
             {
                 // Your next Chain Heal cast on that primary target will consume the healing over time effect and increase the amount of the Chain Heal by 25%
                 addhealth = int32(addhealth * 1.25f);
