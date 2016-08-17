@@ -6433,13 +6433,18 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
                            item_owner->GetSession()->GetAccountId());
         }
 
-        // remove old enchanting before applying new if equipped
-        item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,false);
+        EnchantmentSlot slot = PERM_ENCHANTMENT_SLOT;
+        // Engineering tinkers - they should be active at one time with other permanent enchants
+        if (pEnchant->type[0] == 7)
+            slot = TINKER_ENCHANTMENT_SLOT;
 
-        itemTarget->SetEnchantment(PERM_ENCHANTMENT_SLOT, enchant_id, 0, 0);
+        // remove old enchanting before applying new if equipped
+        item_owner->ApplyEnchantment(itemTarget, slot, false);
+
+        itemTarget->SetEnchantment(slot, enchant_id, 0, 0);
 
         // add new enchanting if equipped
-        item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,true);
+        item_owner->ApplyEnchantment(itemTarget, slot, true);
 
         itemTarget->SetSoulboundTradeable(NULL, item_owner, false);
     }
