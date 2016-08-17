@@ -4148,6 +4148,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 57531: // Arcane Potency (triggered spell, rank 2)
             spellInfo->EffectSpellClassMask[0][0] |= 0x00200000; // add Arcane Missiles triggered spell
             break;
+        case 77487: // Shadow Orb
+            // allow shadow orb to be stolen by Spellsteal
+            spellInfo->AttributesEx4 &= ~SPELL_ATTR4_NOT_STEALABLE;
+            break;
         /**************************** ALYSRAZOR  **********************************/
 
         case 100555: // Smouldering Roots
