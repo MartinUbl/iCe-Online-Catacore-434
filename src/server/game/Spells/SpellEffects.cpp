@@ -4296,6 +4296,10 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                         if (AuraEffect* auraeff = pAura->GetEffect(eff))
                             auraeff->ResetPeriodic();
                     }
+
+                    // Revitalize talent - cast Replenishment when refreshing Lifebloom
+                    if (m_caster->HasAura(48539) || m_caster->HasAura(48544))
+                        m_caster->CastSpell(m_caster, 57669, true);
                 }
             }
         }
