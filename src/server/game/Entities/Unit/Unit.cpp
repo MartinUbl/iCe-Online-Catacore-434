@@ -1910,8 +1910,16 @@ uint32 Unit::CalcSpellResistance(Unit* victim, SpellSchoolMask schoolMask, Spell
         return 0;
 
     // Ignore spells that can't be resisted
-    if (spellInfo && spellInfo->AttributesEx4 & SPELL_ATTR4_IGNORE_RESISTANCES)
-        return 0;
+    if (spellInfo)
+    {
+        // can't be resisted by definition
+        if (spellInfo->AttributesEx4 & SPELL_ATTR4_IGNORE_RESISTANCES)
+            return 0;
+
+        // Mind Sear can't be resisted when cast on friendly target
+        if (spellInfo->Id == 48045 && victim->IsFriendlyTo(this))
+            return 0;
+    }
 
     uint8 const bossLevel = 85;
     uint32 const bossResistanceConstant = 510;
