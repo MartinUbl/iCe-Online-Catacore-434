@@ -14127,6 +14127,10 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, uint32 effectMask)
                 return true;
     }
 
+    // Light's Beacon should not be dropped by immunity effects
+    if (spellInfo->Id == 53651)
+        return false;
+
     // exclude PvP Trinket spells from immunity calculations
     if (spellInfo->Id != 42292 && spellInfo->Id != 59752)
     {
