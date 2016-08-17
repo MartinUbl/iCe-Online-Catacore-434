@@ -2934,6 +2934,10 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     if ((spell->HasSpellEffect(SPELL_EFFECT_INTERRUPT_CAST) || (spell->AttributesEx7 & SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER)) && !spell->HasSpellEffect(SPELL_EFFECT_SCHOOL_DAMAGE))
         return SPELL_MISS_NONE;
 
+    // Spells casted on friendly targets also cannot miss or be resisted
+    if (IsFriendlyTo(pVictim))
+        return SPELL_MISS_NONE;
+
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
     // PvP - PvE spell misschances per leveldif > 2
     int32 lchance = pVictim->GetTypeId() == TYPEID_PLAYER ? 7 : 11;
