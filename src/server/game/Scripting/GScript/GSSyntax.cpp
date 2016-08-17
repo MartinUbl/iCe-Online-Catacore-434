@@ -56,7 +56,7 @@ static gs_recognized_string gs_recognized_mechanic_immunity[] = {
     { "fear", MECHANIC_FEAR },
     { "grip", MECHANIC_GRIP },
     { "root", MECHANIC_ROOT },
-    { "pacify", MECHANIC_PACIFY },
+    { "slowattack", MECHANIC_SLOW_ATTACK },
     { "silence", MECHANIC_SILENCE },
     { "sleep", MECHANIC_SLEEP },
     { "snare", MECHANIC_SNARE },

@@ -1204,7 +1204,7 @@ enum Mechanics
     MECHANIC_FEAR             = 5,
     MECHANIC_GRIP             = 6,
     MECHANIC_ROOT             = 7,
-    MECHANIC_PACIFY           = 8,                          //0 spells use this mechanic
+    MECHANIC_SLOW_ATTACK      = 8,                          // 0 spells use this mechanic directly, but effects do (i.e. Infected Wounds, Frost Fever, ..)
     MECHANIC_SILENCE          = 9,
     MECHANIC_SLEEP            = 10,
     MECHANIC_SNARE            = 11,
@@ -1233,7 +1233,7 @@ enum Mechanics
 // Used for spell 42292 Immune Movement Impairment and Loss of Control (0x49967da6)
 #define IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (\
     (1<<MECHANIC_CHARM)|(1<<MECHANIC_DISORIENTED)|(1<<MECHANIC_FEAR)| \
-    (1<<MECHANIC_ROOT)|(1<<MECHANIC_PACIFY)|(1<<MECHANIC_SLEEP)| \
+    (1<<MECHANIC_ROOT)|(1<<MECHANIC_SLEEP)| \
     (1<<MECHANIC_SNARE)|(1<<MECHANIC_STUN)|(1<<MECHANIC_FREEZE)| \
     (1<<MECHANIC_KNOCKOUT)|(1<<MECHANIC_POLYMORPH)|(1<<MECHANIC_BANISH)| \
     (1<<MECHANIC_SHACKLE)|(1<<MECHANIC_TURN)|(1<<MECHANIC_HORROR)| \
@@ -1241,7 +1241,7 @@ enum Mechanics
 
 // Daze and all croud control spells except polymorph are not removed
 #define MECHANIC_NOT_REMOVED_BY_SHAPESHIFT (\
-    (1<<MECHANIC_CHARM)|(1<<MECHANIC_DISORIENTED)|(1<<MECHANIC_FEAR)|(1<<MECHANIC_PACIFY)| \
+    (1<<MECHANIC_CHARM)|(1<<MECHANIC_DISORIENTED)|(1<<MECHANIC_FEAR)| \
     (1<<MECHANIC_STUN)|(1<<MECHANIC_FREEZE)|(1<<MECHANIC_BANISH)|(1<<MECHANIC_SHACKLE)| \
     (1<<MECHANIC_HORROR)|(1<<MECHANIC_TURN)|(1<<MECHANIC_DAZE)|(1<<MECHANIC_SAPPED))
 
