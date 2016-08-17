@@ -1002,7 +1002,7 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
         return;
 
     // Check for effect immune skip if immuned
-    bool immuned = pVictim->IsImmunedToSpellEffect(m_spellInfo, effIndex);
+    bool immuned = pVictim->IsImmunedToSpellEffect(m_spellInfo, effIndex, false);
 
     uint64 targetGUID = pVictim->GetGUID();
 

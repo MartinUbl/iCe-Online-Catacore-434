@@ -471,7 +471,7 @@ class Creature : public Unit, public GridObject<Creature>
         bool CanCreatureAttack(Unit const *pVictim, bool force = true) const;
         bool IsImmunedToSpell(SpellEntry const* spellInfo, uint32 effectMask = MAX_EFFECT_MASK);
                                                             // redefine Unit::IsImmunedToSpell
-        bool IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) const;
+        bool IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index, bool precheck) const;
                                                             // redefine Unit::IsImmunedToSpellEffect
         bool isElite() const
         {

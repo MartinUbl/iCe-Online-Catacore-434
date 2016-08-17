@@ -14115,7 +14115,7 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, uint32 effectMask)
         // State/effect immunities applied by aura expect full spell immunity
         // Ignore effects with mechanic, they are supposed to be checked separately
         if (!spellInfo->EffectMechanic[i])
-            if (IsImmunedToSpellEffect(spellInfo, i))
+            if (IsImmunedToSpellEffect(spellInfo, i, true))
                 return true;
     }
 
@@ -14160,7 +14160,7 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, uint32 effectMask)
     return false;
 }
 
-bool Unit::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) const
+bool Unit::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index, bool precheck) const
 {
     if (!spellInfo || spellInfo->Effect[index] == SPELL_EFFECT_NONE)
         return false;
@@ -14175,28 +14175,38 @@ bool Unit::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) con
         if (itr->type == effect)
             return true;
 
-    if (uint32 mechanic = spellInfo->EffectMechanic[index])
+    // precheck == true means, that we are checking for spell effect immunity to be immune to whole spell
+    // mechanic and aura type checks should not cause whole spell to be immuned
+    if (!precheck)
     {
-        SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
-        for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
-            if (itr->type == mechanic)
-                return true;
-    }
-
-    if (uint32 aura = spellInfo->EffectApplyAuraName[index])
-    {
-        SpellImmuneList const& list = m_spellImmune[IMMUNITY_STATE];
-        for (SpellImmuneList::const_iterator itr = list.begin(); itr != list.end(); ++itr)
-            if (itr->type == aura)
-                if (!(spellInfo->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT))
+        if (uint32 mechanic = spellInfo->EffectMechanic[index])
+        {
+            SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
+            for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+                if (itr->type == mechanic)
                     return true;
-        // Check for immune to application of harmful magical effects
-        AuraEffectList const& immuneAuraApply = GetAuraEffectsByType(SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL);
-        for (AuraEffectList::const_iterator iter = immuneAuraApply.begin(); iter != immuneAuraApply.end(); ++iter)
-        if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC &&   // Magic debuff
-                ((*iter)->GetMiscValue() & GetSpellSchoolMask(spellInfo)) &&  // Check school
-                !IsPositiveEffect(spellInfo->Id, index))                                  // Harmful
-                return true;
+        }
+
+        if (uint32 aura = spellInfo->EffectApplyAuraName[index])
+        {
+            SpellImmuneList const& list = m_spellImmune[IMMUNITY_STATE];
+            for (SpellImmuneList::const_iterator itr = list.begin(); itr != list.end(); ++itr)
+                if (itr->type == aura)
+                    if (!(spellInfo->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT))
+                        return true;
+
+            // Check for immune to application of harmful magical effects
+            AuraEffectList const& immuneAuraApply = GetAuraEffectsByType(SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL);
+            for (AuraEffectList::const_iterator iter = immuneAuraApply.begin(); iter != immuneAuraApply.end(); ++iter)
+            {
+                if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC &&   // Magic debuff
+                    ((*iter)->GetMiscValue() & GetSpellSchoolMask(spellInfo)) &&  // Check school
+                    !IsPositiveEffect(spellInfo->Id, index))                                  // Harmful
+                {
+                    return true;
+                }
+            }
+        }
     }
 
     return false;
@@ -20233,7 +20243,7 @@ Aura * Unit::AddAura(SpellEntry const *spellInfo, uint8 effMask, Unit *target)
     {
         if (!(effMask & (1<<i)))
             continue;
-        if (target->IsImmunedToSpellEffect(spellInfo, i))
+        if (target->IsImmunedToSpellEffect(spellInfo, i, false))
             effMask &= ~(1<<i);
     }
 

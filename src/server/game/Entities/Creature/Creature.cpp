@@ -1759,7 +1759,7 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo, uint32 effectMask)
     return Unit::IsImmunedToSpell(spellInfo, effectMask);
 }
 
-bool Creature::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) const
+bool Creature::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index, bool precheck) const
 {
     if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->EffectMechanic[index] - 1)))
         return true;
@@ -1767,7 +1767,7 @@ bool Creature::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index)
     if (GetCreatureInfo()->type == CREATURE_TYPE_MECHANICAL && spellInfo->Effect[index] == SPELL_EFFECT_HEAL)
         return true;
 
-    return Unit::IsImmunedToSpellEffect(spellInfo, index);
+    return Unit::IsImmunedToSpellEffect(spellInfo, index, precheck);
 }
 
 SpellEntry const *Creature::reachWithSpellAttack(Unit *pVictim)

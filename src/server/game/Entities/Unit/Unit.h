@@ -2017,7 +2017,7 @@ class Unit : public WorldObject
                                                             // redefined in Creature
         bool IsImmunedToDamage(SpellSchoolMask meleeSchoolMask);
         bool IsImmunedToDamage(SpellEntry const* spellInfo);
-        virtual bool IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) const;
+        virtual bool IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index, bool precheck) const;
         bool IsDiminishingReturnImmuneToSpell(uint32 spellId, bool triggered = false);
         bool IsDiminishingReturnImmuneToSpell(SpellEntry const* spellInfo, bool triggered = false);
         bool IsDiminishingReturnImmune(DiminishingGroup group);

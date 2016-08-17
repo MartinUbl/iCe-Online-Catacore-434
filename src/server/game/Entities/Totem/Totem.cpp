@@ -181,16 +181,14 @@ void Totem::UnSummon()
     AddObjectToRemoveList();
 }
 
-bool Totem::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) const
+bool Totem::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index, bool precheck) const
 {
     // TODO: possibly all negative auras immune?
     if (GetEntry() == 5925)
         return false;
+
     switch(spellInfo->EffectApplyAuraName[index])
     {
-        case SPELL_AURA_PERIODIC_DAMAGE:
-            // Temp hack fix, allow spells with initial direct ( Moonfire, Holy Fire, ... )
-            return spellInfo->HasSpellEffect(SPELL_EFFECT_SCHOOL_DAMAGE) ? false : true;
         case SPELL_AURA_PERIODIC_LEECH:
         case SPELL_AURA_MOD_FEAR:
         case SPELL_AURA_TRANSFORM:
@@ -198,5 +196,5 @@ bool Totem::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) co
         default:
             break;
     }
-    return Creature::IsImmunedToSpellEffect(spellInfo, index);
+    return Creature::IsImmunedToSpellEffect(spellInfo, index, precheck);
 }
