@@ -8783,34 +8783,26 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
     {
         if (pVictim && pVictim->GetTypeId() != TYPEID_PLAYER && !pVictim->IsPet())       // pVictim is attacker actually
         {
+            // in Vengeance spell, effects has these amounts:
+            // 1) amount: real damage increase, scriptedamount: damage from last 2 seconds total
+            // 2) amount: real damage increase, scriptedamount: maximum amount of vengeance ever
+            // 3) amount: unk, scriptedamount: unk
+
             if (Aura* pVengeance = GetAura(76691))
             {
                 AuraEffect* pFrst = pVengeance->GetEffect(EFFECT_0);
-                AuraEffect* pScnd = pVengeance->GetEffect(EFFECT_1);
-                AuraEffect* pThrd = pVengeance->GetEffect(EFFECT_2);
-                if (!pFrst || !pScnd || !pThrd)
+                if (!pFrst)
                     return true;
 
-                int32 bp = damage*0.05f;
-
-                if (pFrst->GetAmount()+bp >= GetMaxHealth()*0.1f)
-                    bp = GetMaxHealth()*0.1f - pFrst->GetAmount();
-
-                pFrst->ChangeAmount(pFrst->GetAmount()+bp);
-                pScnd->ChangeAmount(pScnd->GetAmount()+bp);
-
-                if (pFrst->GetAmount() > pThrd->GetAmount())
-                    pThrd->SetAmount(pFrst->GetAmount());
-
-                pVengeance->SetNeedClientUpdateForTargets();
+                // add damage taken to cummulative field (first effect scripted amount)
+                pFrst->SetScriptedAmount(pFrst->GetScriptedAmount() + damage);
             }
             else
             {
-                int32 bp = damage*0.05f;
-                CastCustomSpell(this, 76691, &bp, &bp, &bp, true);
+                int32 bp = damage*0.33f;
+                int32 sp = damage;
+                CastCustomSpell(this, 76691, &bp, &bp, nullptr, &sp, &bp, nullptr, true);
             }
-
-            ToPlayer()->AddSpellCooldown(76691,0,cooldown*1000);
         }
 
         // we handled everything, leave
@@ -10074,34 +10066,22 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 // trigger Vengeance if present
                 if (target && target->HasSpell(93098))
                 {
+                    int32 countDamage = damage * 0.2f;
                     if (Aura* pVengeance = target->GetAura(76691))
                     {
                         AuraEffect* pFrst = pVengeance->GetEffect(EFFECT_0);
-                        AuraEffect* pScnd = pVengeance->GetEffect(EFFECT_1);
-                        AuraEffect* pThrd = pVengeance->GetEffect(EFFECT_2);
-                        if (!pFrst || !pScnd || !pThrd)
+                        if (!pFrst)
                             return true;
 
-                        int32 bp = (damage*0.2f)*0.05f;
-
-                        if (pFrst->GetAmount()+bp >= GetMaxHealth()*0.1f)
-                            bp = GetMaxHealth()*0.1f - pFrst->GetAmount();
-
-                        pFrst->ChangeAmount(pFrst->GetAmount()+bp);
-                        pScnd->ChangeAmount(pScnd->GetAmount()+bp);
-
-                        if (pFrst->GetAmount() > pThrd->GetAmount())
-                            pThrd->SetAmount(pFrst->GetAmount());
-
-                        pVengeance->SetNeedClientUpdateForTargets();
+                        // add damage taken to cummulative field (first effect scripted amount)
+                        pFrst->SetScriptedAmount(pFrst->GetScriptedAmount() + countDamage);
                     }
                     else
                     {
-                        int32 bp = (damage*0.2f)*0.05f;
-                        target->CastCustomSpell(this, 76691, &bp, &bp, &bp, true);
+                        int32 bp = countDamage*0.33f;
+                        int32 sp = countDamage;
+                        target->CastCustomSpell(this, 76691, &bp, &bp, nullptr, &sp, &bp, nullptr, true);
                     }
-
-                    target->ToPlayer()->AddSpellCooldown(76691,0,cooldown*1000);
                 }
             }
             break;

@@ -3014,6 +3014,11 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
             }
             case 76691: // Vengeance (multi-class talent bonus)
             {
+                // in Vengeance spell, effects has these amounts:
+                // 1) amount: real damage increase, scriptedamount: damage from last 2 seconds total
+                // 2) amount: real damage increase, scriptedamount: maximum amount of vengeance ever
+                // 3) amount: unk, scriptedamount: unk
+
                 AuraEffect* pFrst = GetBase()->GetEffect(EFFECT_0);
                 AuraEffect* pScnd = GetBase()->GetEffect(EFFECT_1);
 
@@ -3023,18 +3028,44 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     break;
                 }
 
-                // drops 0.1f/15 of maxhealth every 2 seconds (so it will remove whole 10% of max health after 30secs)
-                int32 dropamount = GetAmount()/15.0f;
-
-                if (pFrst->GetAmount() > dropamount && pScnd->GetAmount() > dropamount)
+                int32 damageTaken = pFrst->GetScriptedAmount();
+                if (damageTaken > 0)
                 {
-                    pFrst->ChangeAmount(pFrst->GetAmount()-dropamount);
-                    pScnd->ChangeAmount(pScnd->GetAmount()-dropamount);
+                    float damageTakenF = (float)damageTaken;
+
+                    float newAmount = (float)pFrst->GetAmount()*0.95f + damageTakenF * 0.05f;
+                    // minimum of 33% of lastDamage should be applied as bonus
+                    if (newAmount < damageTakenF * 0.33f)
+                        newAmount = damageTakenF * 0.33f;
+                    // but maximum of caster's 10% max HP
+                    if (newAmount > caster->GetMaxHealth()*0.1f)
+                        newAmount = caster->GetMaxHealth()*0.1f;
+
+                    pFrst->ChangeAmount((int32)newAmount);
+                    pScnd->ChangeAmount((int32)newAmount);
+
+                    // reset damage counter
+                    pFrst->SetScriptedAmount(0);
+
+                    // store maximum amount to second effect scripted amount
+                    if (pScnd->GetScriptedAmount() < pScnd->GetAmount())
+                        pScnd->SetScriptedAmount(pScnd->GetAmount());
 
                     GetBase()->SetNeedClientUpdateForTargets();
                 }
-                else
-                    caster->RemoveAurasDueToSpell(76691);
+                else // decay 5% of maximum Vengeance amount
+                {
+                    float newAmount = (float)pFrst->GetAmount()*0.95f - (float)pScnd->GetScriptedAmount()*0.05f;
+                    if (newAmount > 0.0f)
+                    {
+                        pFrst->ChangeAmount((int32)newAmount);
+                        pScnd->ChangeAmount((int32)newAmount);
+
+                        GetBase()->SetNeedClientUpdateForTargets();
+                    }
+                    else
+                        caster->RemoveAurasDueToSpell(76691);
+                }
 
                 break;
             }
