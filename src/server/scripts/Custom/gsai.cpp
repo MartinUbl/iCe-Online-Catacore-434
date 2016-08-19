@@ -1437,12 +1437,12 @@ class GS_CreatureScript : public CreatureScript
                                 pl->SendMovieStart(GS_GetValueFromSpecifier(curr->params.c_movie.movie_id).toInteger());
                             break;
                         case GSCR_AURA:
-                            if (Unit* source = GS_SelectTarget(curr->params.c_aura.subject))
+                            if (Unit* target = GS_SelectTarget(curr->params.c_aura.subject))
                             {
                                 if (curr->params.c_aura.op == GSFO_ADD)
-                                    source->AddAura(GS_GetValueFromSpecifier(curr->params.c_aura.aura_id).toInteger(), source);
+                                    target->AddAura(GS_GetValueFromSpecifier(curr->params.c_aura.aura_id).toInteger(), source);
                                 else if (curr->params.c_aura.op == GSFO_REMOVE)
-                                    source->RemoveAurasDueToSpell(GS_GetValueFromSpecifier(curr->params.c_aura.aura_id).toInteger());
+                                    target->RemoveAurasDueToSpell(GS_GetValueFromSpecifier(curr->params.c_aura.aura_id).toInteger());
                             }
                             break;
                         case GSCR_SPEED:
