@@ -4510,6 +4510,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 106527: // Cataclysm - Black Screen Effect
             spellInfo->DurationIndex = 18; // 20s
             break;
+        case 110211: // Weighted Blades (rogue legendary blades spell)
+            // change family to rogue, so the SpellMod created gets applied properly
+            spellInfo->SpellFamilyName = SPELLFAMILY_ROGUE;
+            break;
 /*************************        DRAGON SOUL END        *****************************/
 
         case 107818: // Gurthalak - Summon Tentacle of the Old Ones

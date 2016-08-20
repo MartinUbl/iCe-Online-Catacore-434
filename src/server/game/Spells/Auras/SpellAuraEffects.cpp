@@ -1305,6 +1305,24 @@ void AuraEffect::CalculateSpellMod()
         {
             switch (GetSpellProto()->SpellFamilyName)
             {
+                case SPELLFAMILY_ROGUE:
+                {
+                    // Weighted Blades (rogue legendary weapon bonus)
+                    if (m_spellProto->Id == 110211)
+                    {
+                        if (!m_spellmod)
+                        {
+                            m_spellmod = new SpellModifier(GetBase());
+                            m_spellmod->op = SPELLMOD_DAMAGE;
+                            m_spellmod->type = SPELLMOD_PCT;
+                            m_spellmod->spellId = GetId();
+                            m_spellmod->mask[0] = 0x00800002;
+                            m_spellmod->mask[1] = 0x10000000;
+                        }
+                        m_spellmod->value = GetAmount();
+                    }
+                    break;
+                }
                 case SPELLFAMILY_PRIEST:
                 {
                     // Pain and Suffering
