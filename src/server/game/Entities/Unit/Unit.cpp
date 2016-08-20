@@ -9897,22 +9897,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 ToPlayer()->SetCombatReadinessTimer(10 * IN_MILLISECONDS);
             break;
         }
-        case 12298: // Shield Specialization 
-        case 12724:
-        case 12725:
-        {
-            if (procEx & PROC_EX_REFLECT)
-            {
-                uint32 auraId = auraSpellInfo->Id;
-
-                if (auraId == 12298)
-                    ModifyPower(POWER_RAGE,20);
-                else
-                    ModifyPower(POWER_RAGE,(auraId == 12724) ? 40 : 60);
-
-                return false;
-            }
-        }
         break;
         // Lock and Load
         case 56342:
@@ -21621,6 +21605,11 @@ bool Unit::IsHackTriggeredAura(Unit *pVictim, Aura * aura, SpellEntry const* pro
         case 79683:
         case 89523:
             return true; // Continue handling
+        // Shield Specialization (all ranks), triggered when reflecting spell
+        case 12298:
+        case 12724:
+        case 12725:
+            return (procExtra & PROC_EX_REFLECT);
     }
 
     return false; // Will not be processed as triggered aura
@@ -21641,6 +21630,36 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
 
     switch (dummySpell->SpellFamilyName)
     {
+        case SPELLFAMILY_GENERIC:
+        {
+            // Shield Specialization
+            // triggered only when procEx & PROC_EX_REFLECT (see IsHackTriggeredAura)
+            if (dummySpell->SpellIconID == 1463)
+            {
+                uint32_t selectedSpell = 0;
+                int32_t rageAmount = 0;
+                if (dummySpell->Id == 12298)
+                {
+                    selectedSpell = 23602;
+                    rageAmount = 200;
+                }
+                else if (dummySpell->Id == 12724)
+                {
+                    selectedSpell = 84994;
+                    rageAmount = 400;
+                }
+                else if (dummySpell->Id == 12725)
+                {
+                    selectedSpell = 84993;
+                    rageAmount = 600;
+                }
+
+                if (Unit* caster = aura->GetUnitOwner())
+                    if (rageAmount)
+                        caster->CastCustomSpell(caster, selectedSpell, &rageAmount, nullptr, nullptr, true);
+            }
+            break;
+        }
         case SPELLFAMILY_PRIEST:
         {
             switch (dummySpell->Id)
@@ -21805,6 +21824,7 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
                             caster->Kill(caster);
                 }
             }
+            break;
         default:
             break;
     }
