@@ -1555,6 +1555,7 @@ class Unit : public WorldObject
         virtual bool SetPosition(float x, float y, float z, float ang, bool teleport = false);
         // returns true if unit's position really changed
         bool SetPosition(const Position &pos, bool teleport = false) { return SetPosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teleport); }
+        void SendTeleportPacket(Position &pos);
 
         float GetPositionZMinusOffset() const
         {
