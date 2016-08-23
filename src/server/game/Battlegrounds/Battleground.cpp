@@ -502,23 +502,6 @@ inline void Battleground::_ProcessJoin(uint32 diff)
                 plr->ResetAllPowers();
     }
 
-    // Send packet every 10 seconds until the 2nd field reach 0
-    if (m_CountdownTimer >= 10000)
-    {
-        uint32 countdownMaxForBGType = isArena() ? ARENA_COUNTDOWN_MAX : BATTLEGROUND_COUNTDOWN_MAX;
-
-        WorldPacket data(SMSG_START_TIMER, 4+4+4);
-        data << uint32(0); // unk
-        data << uint32(GetStartDelayTime() / 1000);
-        data << uint32(countdownMaxForBGType);
-
-        for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-            if (Player* player = ObjectAccessor::FindPlayer(itr->first))
-                player->GetSession()->SendPacket(&data);
-
-        m_CountdownTimer = 0;
-    }
-
     if (!(m_Events & BG_STARTING_EVENT_1))
     {
         m_Events |= BG_STARTING_EVENT_1;
@@ -631,6 +614,23 @@ inline void Battleground::_ProcessJoin(uint32 diff)
             //if (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
             //    sWorld->SendWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), GetMinLevel(), GetMaxLevel());
         }
+    }
+
+    // Send packet every 2 seconds until the 2nd field reach 0
+    if (m_CountdownTimer >= 2000)
+    {
+        uint32 countdownMaxForBGType = isArena() ? ARENA_COUNTDOWN_MAX : BATTLEGROUND_COUNTDOWN_MAX;
+
+        WorldPacket data(SMSG_START_TIMER, 4 + 4 + 4);
+        data << uint32(0); // unk
+        data << uint32(GetStartDelayTime() / 1000);
+        data << uint32(countdownMaxForBGType);
+
+        for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+            if (Player* player = ObjectAccessor::FindPlayer(itr->first))
+                player->GetSession()->SendPacket(&data);
+
+        m_CountdownTimer = 0;
     }
 }
 
@@ -1418,16 +1418,6 @@ void Battleground::AddPlayer(Player* plr)
             plr->RemoveAurasByType(SPELL_AURA_MOD_SCALE);
             plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
         }
-    }
-
-    if (GetStatus() == STATUS_WAIT_JOIN)
-    {
-        int32 countdownMaxForBGType = isArena() ? ARENA_COUNTDOWN_MAX : BATTLEGROUND_COUNTDOWN_MAX;
-        WorldPacket data(SMSG_START_TIMER, 4+4+4);
-        data << uint32(0); // unk
-        data << uint32(GetStartDelayTime() / 1000);
-        data << uint32(countdownMaxForBGType);
-        plr->GetSession()->SendPacket(&data);
     }
 
     plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
