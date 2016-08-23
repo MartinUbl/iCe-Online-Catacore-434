@@ -4147,6 +4147,10 @@ void SpellMgr::LoadSpellCustomAttr()
             // allow shadow orb to be stolen by Spellsteal
             spellInfo->AttributesEx4 &= ~SPELL_ATTR4_NOT_STEALABLE;
             break;
+        case 109968: // Blazing Shadows
+            // set damage class to magic, so Cloak of Shadows protects the caster from it
+            spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
+            break;
         /**************************** ALYSRAZOR  **********************************/
 
         case 100555: // Smouldering Roots
