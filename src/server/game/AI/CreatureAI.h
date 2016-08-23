@@ -118,6 +118,9 @@ class CreatureAI : public UnitAI
         // Called when currently casted spell is interrupted
         virtual void SpellCastInterrupted(const SpellEntry*) {}
 
+        // Called when currently casted spell is cancelled for any reason
+        virtual void SpellCastFailed(const SpellEntry*) {}
+
         // Called when spell hits a target
         virtual void SpellHitTarget(Unit* /*target*/, const SpellEntry*) {}
 

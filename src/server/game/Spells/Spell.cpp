@@ -4174,6 +4174,10 @@ void Spell::cancel()
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         m_caster->ToPlayer()->RemoveGlobalCooldown(m_spellInfo);
 
+    // signal the AI of caster, if any
+    if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->IsAIEnabled)
+        m_caster->ToCreature()->AI()->SpellCastFailed(m_spellInfo);
+
     m_caster->RemoveDynObject(m_spellInfo->Id);
     m_caster->RemoveGameObject(m_spellInfo->Id,true);
 
