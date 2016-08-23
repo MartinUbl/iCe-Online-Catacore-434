@@ -1006,10 +1006,26 @@ class GS_CreatureScript : public CreatureScript
                         return false;
                 }
 
-                // from now, we support just 3 parameter condition (lefthand, operator, righthand)
-                // so get those two values, and then apply operator
-                GS_Variable lefthand = GS_GetValueFromSpecifier(cond.source);
                 GS_Variable righthand = GS_GetValueFromSpecifier(cond.dest);
+
+                // set operations (has, hasnt)
+                if (cond.op == GSOP_HAS || cond.op == GSOP_HASNT)
+                {
+                    if (cond.source.subject_parameter == GSSP_AURAS)
+                    {
+                        Unit* source = GS_SelectTarget(cond.source);
+                        if (!source)
+                            return false;
+
+                        if (source->HasAura(righthand.toInteger()))
+                            return (cond.op == GSOP_HAS);
+                        else
+                            return (cond.op == GSOP_HASNT);
+                    }
+                }
+
+                // from now, we support just 3 parameter condition (lefthand, operator, righthand)
+                GS_Variable lefthand = GS_GetValueFromSpecifier(cond.source);
 
                 switch (cond.op)
                 {
@@ -1017,6 +1033,7 @@ class GS_CreatureScript : public CreatureScript
                     case GSOP_IS:
                         return lefthand == righthand;
                     case GSOP_NOT_EQUAL:
+                    case GSOP_ISNT:
                         return lefthand != righthand;
                     case GSOP_LESS_THAN:
                         return lefthand < righthand;

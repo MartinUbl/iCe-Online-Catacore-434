@@ -228,6 +228,7 @@ enum gs_subject_parameter
     GSSP_ALIVE = 15,            // subject alive state
     GSSP_GUIDLOW = 16,          // subject low GUID (mostly DB table GUID)
     GSSP_ENTRY = 17,            // subject entry (entry, ID from DB table)
+    GSSP_AURAS = 18,            // subject aura set
 };
 
 enum gs_numeric_operatror
@@ -256,6 +257,9 @@ enum gs_specifier_operator
     GSOP_GREATER_OR_EQUAL = 6,  // >=
     GSOP_OF = 7,                // of   i.e. "if chance of 50"
     GSOP_IS = 8,                // is   (comparing states, not values)
+    GSOP_HAS = 9,               // has  (is element contained in set?)
+    GSOP_ISNT = 10,             // isnt (comparing states, not values) (negation of GSOP_IS)
+    GSOP_HASNT = 11,            // hasnt (is element NOT contained in set?) (negation of GSOP_HAS)
 };
 
 enum gs_resolver_type

@@ -298,6 +298,12 @@ static gs_specifier_operator gs_parse_operator(std::string& src)
         return GSOP_OF;
     else if (src == "is")
         return GSOP_IS;
+    else if (src == "has")
+        return GSOP_HAS;
+    else if (src == "isnt")
+        return GSOP_ISNT;
+    else if (src == "hasnt")
+        return GSOP_HASNT;
     return GSOP_NONE;
 }
 
@@ -464,6 +470,8 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_parameter = GSSP_GUIDLOW;
             else if (parid == "entry")
                 rr.subject_parameter = GSSP_ENTRY;
+            else if (parid == "auras")
+                rr.subject_parameter = GSSP_AURAS;
         }
     }
 
