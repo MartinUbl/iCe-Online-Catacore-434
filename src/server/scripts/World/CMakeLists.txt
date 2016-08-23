@@ -18,6 +18,7 @@ set(scripts_STAT_SRCS__World
   World/npc_taxi.cpp
   World/npcs_special.cpp
   World/npc_spell_click_spells.cpp
+  World/questline_fangs_of_the_father.cpp
 )
 
 source_group(World FILES ${scripts_STAT_SRCS__World})

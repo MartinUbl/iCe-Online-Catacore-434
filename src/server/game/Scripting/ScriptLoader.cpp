@@ -66,6 +66,7 @@ void AddSC_npc_professions();
 void AddSC_npc_innkeeper();
 void AddSC_npc_spell_click_spells();
 void AddSC_npcs_special();
+void AddSC_questline_fangs_of_the_father();
 void AddSC_npc_taxi();
 void AddSC_achievement_scripts();
 void AddSC_bf_commandscript();
@@ -1166,6 +1167,7 @@ void AddWorldScripts()
     AddSC_npc_professions();
     AddSC_npc_innkeeper();
     AddSC_npc_spell_click_spells();
+    AddSC_questline_fangs_of_the_father();
     AddSC_npcs_special();
     AddSC_npc_taxi();
     AddSC_achievement_scripts();
