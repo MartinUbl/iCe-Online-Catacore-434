@@ -219,6 +219,9 @@ struct ScriptedAI : public CreatureAI
     //Checks if you can cast the specified spell
     bool CanCast(Unit* pTarget, SpellEntry const* pSpell, bool bTriggered = false);
 
+    // Checks if you can cast specified spell according to current state (stun, casting another spell, etc.)
+    bool CanCastRegular(Unit* pTarget, uint32 spellId, bool triggered = false);
+
     void SetEquipmentSlots(bool bLoadDefault, int32 uiMainHand = EQUIP_NO_CHANGE, int32 uiOffHand = EQUIP_NO_CHANGE, int32 uiRanged = EQUIP_NO_CHANGE);
 
     //Generally used to control if MoveChase() is to be used or not in AttackStart(). Some creatures does not chase victims

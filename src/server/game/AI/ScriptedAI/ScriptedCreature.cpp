@@ -349,8 +349,46 @@ bool ScriptedAI::CanCast(Unit* pTarget, SpellEntry const* pSpell, bool bTriggere
         return false;
 
     //Unit is out of range of this spell
-    if (me->IsInRange(pTarget, (float)me->GetSpellMinRangeForTarget(pTarget, pTempRange), (float)me->GetSpellMaxRangeForTarget(pTarget, pTempRange)))
+    if (!me->IsInRange(pTarget, (float)me->GetSpellMinRangeForTarget(pTarget, pTempRange), (float)me->GetSpellMaxRangeForTarget(pTarget, pTempRange)))
         return false;
+
+    return true;
+}
+
+bool ScriptedAI::CanCastRegular(Unit* pTarget, uint32 spellId, bool triggered)
+{
+    SpellEntry const* spell = sSpellStore.LookupEntry(spellId);
+    if (!spell || !pTarget)
+        return false;
+
+    // cannot cast non-triggered spell over casted spell
+    if (me->IsNonMeleeSpellCasted(false) && !triggered)
+        return false;
+
+    // check state - stunned, confused, feared, silenced, pacified
+    uint32 unitflag = me->GetUInt32Value(UNIT_FIELD_FLAGS);
+    if ((unitflag & UNIT_FLAG_STUNNED && !(spell->AttributesEx5 & SPELL_ATTR5_USABLE_WHILE_STUNNED)) ||
+        (unitflag & UNIT_FLAG_CONFUSED && !(spell->AttributesEx5 & SPELL_ATTR5_USABLE_WHILE_CONFUSED)) ||
+        (unitflag & UNIT_FLAG_FLEEING && !(spell->AttributesEx5 & SPELL_ATTR5_USABLE_WHILE_FEARED)) ||
+        (unitflag & UNIT_FLAG_SILENCED && spell->PreventionType == SPELL_PREVENTION_TYPE_SILENCE) ||
+        (unitflag & UNIT_FLAG_PACIFIED && spell->PreventionType == SPELL_PREVENTION_TYPE_PACIFY))
+    {
+        return false;
+    }
+
+    // if spell is not triggered, check for power needs
+    if (!triggered && me->GetPower((Powers)spell->powerType) < (int32)spell->manaCost)
+        return false;
+
+    // if not targetting self, check range
+    if (pTarget != me)
+    {
+        SpellRangeEntry const* pTempRange = GetSpellRangeStore()->LookupEntry(spell->rangeIndex);
+        if (!pTempRange)
+            return false;
+        if (!me->IsInRange(pTarget, (float)me->GetSpellMinRangeForTarget(pTarget, pTempRange), (float)me->GetSpellMaxRangeForTarget(pTarget, pTempRange)))
+            return false;
+    }
 
     return true;
 }
