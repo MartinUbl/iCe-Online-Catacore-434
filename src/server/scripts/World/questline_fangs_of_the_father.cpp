@@ -44,6 +44,9 @@ public:
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, THAUMATURGE_GOSSIP_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             pPlayer->SEND_GOSSIP_MENU(THAUMATURGE_TEXT_ID_1, pCreature->GetGUID());
         }
+        else
+            pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
+
         return true;
     }
 
@@ -94,11 +97,9 @@ public:
         if (pPlayer->GetQuestStatus(QUEST_A_HIDDEN_MESSAGE) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_A_HIDDEN_MESSAGE) == QUEST_STATUS_COMPLETE)
         {
             if (pPlayer->GetItemCount(ITEM_SINGED_CIPHER, true) == 0)
-            {
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Lord Afrasastrasz sent me. He said you have a message to decode?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-                pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
-            }
         }
+        pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
         return true;
     }
 
