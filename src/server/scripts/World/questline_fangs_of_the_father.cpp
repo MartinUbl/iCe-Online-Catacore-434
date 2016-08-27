@@ -1003,7 +1003,6 @@ class npc_nalice : public CreatureScript
                 float startX, startY, vectorX_a, vectorY_a;
                 float vectorX_b, vectorY_b;
                 const float zpos = 23.1f;
-                const float dist = 5.0f;
 
                 // left
                 if (left)
