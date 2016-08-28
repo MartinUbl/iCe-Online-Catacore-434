@@ -2990,7 +2990,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
                 return SPELL_FAILED_REQUIRES_AREA;
 
             Battleground* bg = player->GetBattleground();
-            return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            return (bg && (bg->GetStatus() == STATUS_WAIT_JOIN || bg->GetTypeID(true) == BATTLEGROUND_SA)) ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
         case 32724:                                         // Gold Team (Alliance)
         case 32725:                                         // Green Team (Alliance)

@@ -356,6 +356,9 @@ void BattlegroundSA::Update(uint32 diff)
             {
                 if (Player *plr = sObjectMgr->GetPlayer(itr->first))
                 {
+                    // remove preparation aura
+                    plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
+
                     // if there are some players still in sea, teleport them on the ground
                     if (plr->GetPositionX() > 1668.0f)
                         plr->TeleportTo(607, 1502.2851f, 14.278719f, 4.857650f, 5.943011f, TELE_TO_NOT_LEAVE_COMBAT);
@@ -564,7 +567,9 @@ void BattlegroundSA::TeleportPlayers()
 
             // remove any auras before teleporting - i.e. stun would cause inability to
             // land on ship for unknown reason
-            plr->RemoveArenaAuras(false, true);
+            plr->RemoveAllNegativeAuras();
+            plr->RemoveAurasWithMechanic(MECHANIC_STUN);
+            plr->CastSpell(plr, SPELL_PREPARATION, true);
 
             plr->ResetAllPowers();
             plr->CombatStopWithPets(true);
