@@ -579,9 +579,9 @@ void BattlegroundSA::TeleportPlayers()
                 plr->CastSpell(plr,12438,true);     //Without this player falls before boat loads...
 
                 if (urand(0,1))
-                    plr->TeleportTo(607, 2682.936f, -830.368f, 50.0f, 2.895f, 0);
+                    plr->TeleportTo(607, 2683.206543f, -828.761414f, 19.304276f, 2.895f, 0);
                 else
-                    plr->TeleportTo(607, 2577.003f, 980.261f, 50.0f, 0.807f, 0);
+                    plr->TeleportTo(607, 2578.892090f, 986.893982f, 21.910999f, 0.807f, 0);
             }
             else
                 plr->TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f, 0);
