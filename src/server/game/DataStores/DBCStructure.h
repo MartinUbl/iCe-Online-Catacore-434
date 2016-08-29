@@ -1459,7 +1459,7 @@ struct MapEntry
     uint32  addon;                                          // 16 expansion
     uint32 unk_time;                                       // 17 some kind of time?
     //uint32 maxPlayers;                                    // 18 max players
-    //uint32 unk400;                                        // 19 new 4.0.0, mapid, related to phasing
+    //uint32 parentPhaseMap;                                // 19 mapId of "non phased" parent map (i.e. phased Hyjal has 1 there, since it's on Kalimdor)
 
     // Helpers
     uint32 Expansion() const { return addon; }

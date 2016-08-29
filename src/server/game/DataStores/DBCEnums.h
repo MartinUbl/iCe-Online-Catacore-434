@@ -103,17 +103,18 @@ enum AchievementCriteriaCondition
     ACHIEVEMENT_CRITERIA_CONDITION_UNK1         = 2,    // only used in "Complete a daily quest every day for five consecutive days"
     ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP       = 3,    // requires you to be on specific map, reset at change
     ACHIEVEMENT_CRITERIA_CONDITION_NO_LOSE      = 4,    // only used in "Win 10 arenas without losing"
-    ACHIEVEMENT_CRITERIA_CONDITION_UNK2         = 9,    // unk
+    ACHIEVEMENT_CRITERIA_CONDITION_MINIGAME_SPELL = 8,  // used in "peacebloom vs. ghouls" event - criteria for exclusive spell use
+    ACHIEVEMENT_CRITERIA_CONDITION_NOT_BE_HIT_BY_SPELL = 9, // used when the achievement requires the players not to be hit by specific spell during encounter
     ACHIEVEMENT_CRITERIA_CONDITION_NOT_IN_GROUP = 10,   // requires the player not to be in group
-    ACHIEVEMENT_CRITERIA_CONDITION_UNK3         = 13,   // unk
+    ACHIEVEMENT_CRITERIA_CONDITION_UNK2         = 13,   // unk, used only in boss encounter achievements for some kind of exclusion
 };
 
 enum AchievementCriteriaCompletionFlags
 {
     ACHIEVEMENT_CRITERIA_FLAG_SHOW_PROGRESS_BAR = 0x00000001,         // Show progress as bar
     ACHIEVEMENT_CRITERIA_FLAG_HIDE_CRITERIA     = 0x00000002,         // Not show criteria in client
-    ACHIEVEMENT_CRITERIA_FLAG_UNK3              = 0x00000004,         // BG related??
-    ACHIEVEMENT_CRITERIA_FLAG_UNK4              = 0x00000008,         //
+    ACHIEVEMENT_CRITERIA_FLAG_SINGLE_INSTANCE   = 0x00000004,         // Must be completed within single battleground / single instance
+    ACHIEVEMENT_CRITERIA_FLAG_SINGLE_RUN        = 0x00000008,         // Must be completed within single run (boss pull, SotA round, ..)
     ACHIEVEMENT_CRITERIA_FLAG_UNK5              = 0x00000010,         // not used
     ACHIEVEMENT_CRITERIA_FLAG_MONEY_COUNTER     = 0x00000020,         // Displays counter as money
 };
