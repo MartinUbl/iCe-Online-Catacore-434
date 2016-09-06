@@ -5099,6 +5099,11 @@ void Spell::EffectCreateItem2(SpellEffIndex effIndex)
         // Cast "Deck of Trades" to create random fortune card
         player->CastSpell(player, 84193, true);
     }
+    // Reveal the Shadows - Elementium Gem Cluster spell, creating random (3-9) amount of items with ID 77951
+    else if (m_spellInfo->Id == 109954)
+    {
+        player->AddItem(77951, urand(3,9));
+    }
 
     // special case: fake item replaced by generate using spell_loot_template
     if (IsLootCraftingSpell(m_spellInfo))
