@@ -399,11 +399,18 @@ void Battlefield::InitStalker(uint32 entry, float x, float y, float z, float o)
 
 void Battlefield::KickAfk()
 {
+    GuidSet kickGUIDs;
+
     for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
         for (GuidSet::const_iterator itr = m_PlayersInWar[team].begin(); itr != m_PlayersInWar[team].end(); ++itr)
             if (Player* player = sObjectAccessor->FindPlayer(*itr))
                 if (player->isAFK())
-                    KickPlayerFromBf(*itr);
+                    kickGUIDs.insert(*itr);
+
+    // the deletion is delayed due to the possibility of removing player from m_PlayersInWar set, and therefore
+    // make any iterator incrementation operation invalid (may lead to segfault)
+    for (GuidSet::const_iterator itr = kickGUIDs.begin(); itr != kickGUIDs.end(); ++itr)
+        KickPlayerFromBf(*itr);
 }
 
 void Battlefield::KickPlayerFromBf(uint64 guid)
