@@ -4492,6 +4492,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 106600:
         case 106613:
         case 106624:
+        case 109102: // Congealing Blood
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
             break;
         case 106242: // Elementium Meteor target

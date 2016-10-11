@@ -6093,6 +6093,10 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     if (unitTarget->HasAura(109325))
         unitTarget->RemoveAurasDueToSpell(109325);
 
+    // Corrupting Parasite
+    if (unitTarget->HasAura(108649))
+        unitTarget->RemoveAurasDueToSpell(108649);
+
     Unit::AuraMap const& auras = unitTarget->GetOwnedAuras();
     for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {

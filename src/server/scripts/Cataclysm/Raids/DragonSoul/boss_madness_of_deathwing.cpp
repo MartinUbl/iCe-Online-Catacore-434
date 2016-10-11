@@ -54,6 +54,7 @@ enum NPC
     NPC_CRUSH_TARGET                    = 56581,
     NPC_HEMORRHAGE_TARGET               = 56359, // 105853
     NPC_CLAWK_MARK                      = 56545,
+    NPC_CORRUPTING_PARASITE_TENTACLE    = 57480,
     NPC_CORRUPTING_PARASITE             = 57479,
 
     // Phase 2 adds
@@ -98,12 +99,6 @@ enum Spells
     SPELL_CORRUPTED_BLOOD_10HC          = 109593,
     SPELL_CORRUPTED_BLOOD_25HC          = 109594,
     SPELL_CORRUPTED_BLOOD_STACKER       = 106843,
-
-    SPELL_CORRUPTING_PARASITE_AOE       = 108597,
-    SPELL_CORRUPTING_PARASITE_DMG       = 108601,
-    SPELL_CORRUPTING_PARASITE_AURA      = 108649,
-    SPELL_PARASITIC_BACKSLASH           = 108787,
-    SPELL_UNSTABLE_CORRUPTION           = 108813,
 
     SPELL_DEATH                         = 110101,
     SPELL_BERSERK                       = 64238,
@@ -172,6 +167,13 @@ enum Spells
     SPELL_SHRAPNEL_TARGET               = 106794,
     SPELL_SHRAPNEL_DMG                  = 106791,
 
+    // Corrupting Parasite
+    SPELL_CORRUPTING_PARASITE_AOE       = 108597,
+    SPELL_CORRUPTING_PARASITE_DMG       = 108601,
+    SPELL_CORRUPTING_PARASITE_AURA      = 108649,
+    SPELL_PARASITIC_BACKSLASH           = 108787,
+    SPELL_UNSTABLE_CORRUPTION           = 108813,
+
     // Aspects
     SPELL_CONCENTRATION_ALEXSTRASZA     = 106641,
     SPELL_CONCENTRATION_NOZDORMU        = 106642,
@@ -237,6 +239,7 @@ enum MadnessActions
     ACTION_ASPECTS_SECOND_PHASE         = 10,
     ACTION_ASPECTS_OUTRO                = 11,
     ACTION_ASPECTS_HIDE                 = 12,
+    ACTION_CORRUPTING_PARASITE          = 13,
 };
 
 enum SeatPosition
@@ -323,8 +326,16 @@ const Position terrorPos[MAX_TERROR_POSITIONS] =
 
 const uint8 MAX_CONGEALING_BLOODS           = 9;
 
-const Position congealingPosSpawn = { -12119.4f, 12162.6f, -2.7f, 0.0f };
-const Position congealingPosHeal  = { -12079.5f, 12169.6f, -2.7f, 0.0f };
+#define MAX_CONGEALING_POSITIONS            3
+
+const Position congealingPosSpawn[MAX_CONGEALING_POSITIONS] = 
+{
+    { -12074.78f, 12135.56f, -2.73f, 0.0f },
+    { -12099.60f, 12144.50f, -2.73f, 0.0f },
+    { -12126.18f, 12173.20f, -2.73f, 0.0f }
+};
+
+const Position congealingPosHeal  = { -12076.49f, 12173.56f, -2.83f, 0.0f };
 
 #define MAX_ELEMENTIUM_BOLT_QUOTES             3 
 
@@ -434,8 +445,8 @@ public:
         uint32 cataclysmTimer;
         uint32 elementiumFragmentsTimer;
         uint32 elementiumTerrorsTimer;
-        uint32 congealingBloodSpawnPct;
-        uint32 congealingBloodSpawnTimer;
+        uint32 congealingTimer;
+        uint32 healthPct;
         uint32 berserkTimer;
 
         uint8 platformKilled;
@@ -445,8 +456,7 @@ public:
         bool newAssault;
         bool canCataclysm;
         bool platformDestroyed[MAX_PLATFORMS];
-        bool canSpawnCongealings;
-        bool newTimerCongelingsSet;
+        bool canSpawnCongealing;
 
         void Reset() override
         {
@@ -468,15 +478,14 @@ public:
             assaultAspectsTimer = 5000;
             newAssault = true;
             canCataclysm = false;
+            canSpawnCongealing = false;
             platformKilled = 0;
             activePlatform = 0;
             elementiumFragmentsTimer = 0;
             elementiumTerrorsTimer = 0;
-            congealingBloodSpawnPct = 15;
-            congealingBloodSpawnTimer = 0;
+            congealingTimer = 0;
+            healthPct = 15;
             berserkTimer = 15 * MINUTE * IN_MILLISECONDS;
-            canSpawnCongealings = true;
-            newTimerCongelingsSet = false;
             phase = PHASE_LIMBS;
 
             for (uint8 i = PLATFORM_ALEXSTRASZA; i < MAX_PLATFORMS; i++)
@@ -807,12 +816,15 @@ public:
                     }
                     else if (action == ACTION_SPAWN_CONGEALING_BLOODS)
                     {
-                        scheduler.Schedule(Seconds(0), [this, pHemorrhageTarget, pDeathwingHead](TaskContext congealingBlood)
+                        if (Creature * pCongealingTarget = me->SummonCreature(NPC_HEMORRHAGE_TARGET, congealingPosSpawn[urand(0, MAX_CONGEALING_POSITIONS-1)], TEMPSUMMON_TIMED_DESPAWN, 10000))
                         {
-                            pDeathwingHead->CastSpell(pHemorrhageTarget, SPELL_CONGEALING_BLOOD_MISSILE, true);
-                            if (congealingBlood.GetRepeatCounter() < 9)
-                                congealingBlood.Repeat(Seconds(1));
-                        });
+                            scheduler.Schedule(Seconds(0), [this, pCongealingTarget, pDeathwingHead](TaskContext congealingBlood)
+                            {
+                                pDeathwingHead->CastSpell(pCongealingTarget, SPELL_CONGEALING_BLOOD_MISSILE, true);
+                                if (congealingBlood.GetRepeatCounter() < 9)
+                                    congealingBlood.Repeat(Milliseconds(500));
+                            });
+                        }
                     }
                 }
             }
@@ -858,6 +870,26 @@ public:
                             pDeathwingHead->CastSpell(me, SPELL_SHARE_HEALTH, false);
                         }
                         break;
+                    case ACTION_CORRUPTING_PARASITE:
+                    {
+                        if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 500.0f, true))
+                        {
+                            me->CastSpell(pTarget, SPELL_CORRUPTING_PARASITE_AURA, true);
+
+                            if (Vehicle * veh = pTarget->GetVehicleKit())
+                            {
+                                if (Creature * pTentacle = me->SummonCreature(NPC_CORRUPTING_PARASITE_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0.0f, TEMPSUMMON_DEAD_DESPAWN))
+                                {
+                                    pTentacle->SendMovementFlagUpdate();
+                                    pTentacle->AI()->SetGUID(pTarget->GetGUID());
+                                    pTentacle->EnterVehicle(veh, 0);
+                                    pTentacle->CastSpell(pTarget, SPELL_CORRUPTING_PARASITE_DMG, true);
+                                    pTentacle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                                }
+                            }
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -962,6 +994,17 @@ public:
                         if (pNozdormu->HasAura(SPELL_NOZDORMU_PRESENCE))
                             pNozdormu->CastSpell(pPlatform, SPELL_TIME_ZONE_MISSILE, true);
                     }
+                }
+
+                // Corrupting Parasite
+                if (IsHeroic())
+                {
+                    scheduler.Schedule(Seconds(5), 1, [this](TaskContext corruptingParasite)
+                    {
+                        me->AI()->DoAction(ACTION_CORRUPTING_PARASITE);
+                        if (corruptingParasite.GetRepeatCounter() == 0)
+                            corruptingParasite.Repeat(Seconds(60));
+                    });
                 }
 
                 // Elementium Bolt
@@ -1072,10 +1115,10 @@ public:
                 me->CastSpell(me, SPELL_SLUMP, false);
                 RunPlayableQuote(slumbQuote);
 
+                canSpawnCongealing = true;
                 elementiumFragmentsTimer = 10000;
                 elementiumTerrorsTimer = 40000;
-                congealingBloodSpawnTimer = 60000;
-                canSpawnCongealings = true;
+                congealingTimer = 60000;
                 phase = PHASE_HEAD_DOWN;
 
                 if (Creature * pThrall = me->FindNearestCreature(NPC_THRALL_MADNESS_START, 500.0f, true))
@@ -1097,28 +1140,23 @@ public:
                 }
                 else elementiumTerrorsTimer -= diff;
 
+                // Congealing Bloods should spawn at 15, 10 and 5 HealthPct or 60s into the phase if HealthPct hasn't been reached yet
                 if (IsHeroic())
                 {
-                    if (me->GetHealthPct() == congealingBloodSpawnPct || congealingBloodSpawnTimer <= diff)
+                    if (canSpawnCongealing == true)
                     {
-                        if (canSpawnCongealings == true)
+                        if (me->GetHealthPct() < healthPct || congealingTimer <= diff)
                         {
                             SpawnAdds(ACTION_SPAWN_CONGEALING_BLOODS);
-                            congealingBloodSpawnPct -= 5;
-                            canSpawnCongealings = false;
-                            newTimerCongelingsSet = false;
+                            if (healthPct > 5)
+                            {
+                                healthPct -= 5;
+                                congealingTimer = 60000;
+                            }
+                            else
+                                canSpawnCongealing = false;
                         }
-                    }
-                    else congealingBloodSpawnTimer -= diff;
-
-                    if (!newTimerCongelingsSet)
-                    {
-                        if (me->GetHealthPct() == 15 || me->GetHealthPct() == 10 || me->GetHealthPct() == 5)
-                        {
-                            congealingBloodSpawnTimer = 60000;
-                            canSpawnCongealings = true;
-                            newTimerCongelingsSet = true;
-                        }
+                        else congealingTimer -= diff;
                     }
                 }
             }
@@ -1562,6 +1600,49 @@ public:
     };
 };
 
+class npc_ds_madness_corrupting_parasite : public CreatureScript
+{
+public:
+    npc_ds_madness_corrupting_parasite() : CreatureScript("npc_ds_madness_corrupting_parasite") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ds_madness_corrupting_parasiteAI(pCreature);
+    }
+
+    struct npc_ds_madness_corrupting_parasiteAI : public ScriptedAI
+    {
+        npc_ds_madness_corrupting_parasiteAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        TaskScheduler scheduler;
+        uint32 despawnTimer;
+
+        void Reset() override
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->SetReactState(REACT_PASSIVE);
+
+            scheduler.Schedule(Seconds(1), [this](TaskContext /* unstable corruption */)
+            {
+                if (me->FindNearestCreature(NPC_TIME_ZONE, 11.0f, true))
+                {
+                    me->AddAura(SPELL_TIME_ZONE_AURA_DUMMY - 1, me);
+                    despawnTimer = 15500;
+                }
+                else despawnTimer = 10500;
+
+                me->CastSpell(me, SPELL_UNSTABLE_CORRUPTION, false);
+                me->DespawnOrUnsummon(despawnTimer);
+            });
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            scheduler.Update(diff);
+        }
+    };
+};
+
 class npc_ds_madness_platform : public CreatureScript
 {
 public:
@@ -1684,12 +1765,29 @@ public:
     {
         npc_ds_madness_congealing_bloodAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
+        bool canHeal;
+
         void Reset() override
         {
+            canHeal = false;
+            me->SetReactState(REACT_PASSIVE);
+            me->GetMotionMaster()->MovePoint(0, congealingPosHeal.GetPositionX(), congealingPosHeal.GetPositionY(), congealingPosHeal.GetPositionZ());
         }
 
         void UpdateAI(const uint32 diff) override
         {
+            if (!canHeal)
+            {
+                if (me->GetDistance2d(congealingPosHeal.GetPositionX(), congealingPosHeal.GetPositionY()) <= 2.0f)
+                {
+                    canHeal = true;
+
+                    // Heal Deathwing
+                    if (Creature* pHead = me->FindNearestCreature(NPC_DEATHWING_HEAD, 300.0f))
+                        me->CastSpell(pHead, SPELL_CONGEALING_BLOOD_HEAL, false);
+                    me->DespawnOrUnsummon(1000);
+                }
+            }
         }
     };
 };
@@ -1820,9 +1918,18 @@ public:
                 return;
 
             float damage = 0.0f;
+            float dmg_multiplier = 0.0f;
+
+            switch (GetCaster()->GetMap()->GetDifficulty())
+            {
+                case RAID_DIFFICULTY_10MAN_HEROIC:
+                case RAID_DIFFICULTY_25MAN_HEROIC:
+                    dmg_multiplier = 1.6f; break; // Possible nerf here in future
+                default:/*RAID_DIFFICULTY_10MAN N*/dmg_multiplier = 1.3f; break;
+            }
 
             if (caster->GetHealthPct() < 21)
-                damage = GetHitDamage() * ((21 - caster->GetHealthPct()) * 0.5) * 1.3;
+                damage = GetHitDamage() * ((21 - caster->GetHealthPct()) * 0.5) * dmg_multiplier;
 
             SetHitDamage((int32)damage);
         }
@@ -1911,7 +2018,7 @@ class IsNotMadnessNpc
 public:
     bool operator()(WorldObject* object) const
     {
-        if (object->ToCreature() && /*object->ToCreature()->GetEntry() == NPC_ELEMENTIUM_TERROR || */ object->ToCreature()->GetEntry() == NPC_REGENERATIVE_BLOOD)
+        if (object->ToCreature() && /*object->ToCreature()->GetEntry() == NPC_ELEMENTIUM_TERROR || */ (object->ToCreature()->GetEntry() == NPC_REGENERATIVE_BLOOD || object->ToCreature()->GetEntry() == NPC_CORRUPTING_PARASITE))
             return false;
         return true;
     }
@@ -1945,6 +2052,79 @@ public:
     }
 };
 
+class spell_ds_madness_corrupting_parasite : public SpellScriptLoader
+{
+public:
+    spell_ds_madness_corrupting_parasite() : SpellScriptLoader("spell_ds_madness_corrupting_parasite") { }
+
+    class spell_ds_madness_corrupting_parasite_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ds_madness_corrupting_parasite_AuraScript);
+
+        void RemoveBuff(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            Unit * pTarget = GetTarget();
+            if (!pTarget)
+                return;
+
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEFAULT || GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+            {
+                pTarget->SummonCreature(NPC_CORRUPTING_PARASITE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN);
+                pTarget->CastSpell(pTarget, SPELL_PARASITIC_BACKSLASH, true);
+                pTarget->RemoveAura(SPELL_CORRUPTING_PARASITE_DMG);
+
+                if (Vehicle * veh = pTarget->GetVehicleKit())
+                {
+                    if (Unit * vehiclePassenger = veh->GetPassenger(0))
+                        vehiclePassenger->ToCreature()->DespawnOrUnsummon();
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_ds_madness_corrupting_parasite_AuraScript::RemoveBuff, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_ds_madness_corrupting_parasite_AuraScript();
+    }
+};
+
+class spell_ds_unstable_corruption : public SpellScriptLoader
+{
+public:
+    spell_ds_unstable_corruption() : SpellScriptLoader("spell_ds_unstable_corruption") {}
+
+    class spell_ds_unstable_corruption_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_unstable_corruption_SpellScript);
+
+        void HandleDamage(SpellEffIndex /*effIndex*/)
+        {
+            Unit * caster = GetCaster();
+            if (!caster)
+                return;
+
+            float damage = caster->GetHealth() / 10;
+
+            SetHitDamage((int32)damage);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_ds_unstable_corruption_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_unstable_corruption_SpellScript();
+    }
+};
+
 void AddSC_boss_madness_of_deathwing()
 {
     new boss_madness_of_deathwing();                // 56173
@@ -1959,6 +2139,7 @@ void AddSC_boss_madness_of_deathwing()
     new npc_ds_madness_elementium_fragment();       // 56724
     new npc_ds_madness_elementium_terror();         // 56710
     new npc_ds_madness_congealing_blood();          // 57798
+    new npc_ds_madness_corrupting_parasite();       // 57479
 
     new spell_ds_elementium_blast();                // 105723, 109600, 109601, 109602
     new spell_ds_burning_blood();                   // 105401
@@ -1966,6 +2147,8 @@ void AddSC_boss_madness_of_deathwing()
     new spell_ds_corrupted_blood_dmg();             // 106835, 109591, 109595, 109596
     new spell_ds_madness_cauterize();               // 105569, 109576, 109577, 109578
     new spell_ds_time_zone();                       // 105830
+    new spell_ds_madness_corrupting_parasite();     // 108649
+    new spell_ds_unstable_corruption();             // 108813
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
