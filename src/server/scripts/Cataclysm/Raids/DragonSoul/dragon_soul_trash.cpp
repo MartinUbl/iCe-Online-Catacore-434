@@ -1354,6 +1354,8 @@ enum BlackhornTrashNPC
     NPC_TWILIGHT_ELITE_SLAYER           = 56848,
     NPC_TWILIGHT_SAPPER                 = 56923,
     NPC_TWILIGHT_FLAMES                 = 57268,
+    NPC_FIRE_STALKER                    = 57852,
+    NPC_BROADSIDE_TARGET                = 119559,
 };
 
 enum BlackhornTrashSpells
@@ -1373,6 +1375,8 @@ enum BlackhornTrashSpells
     SPELL_MASSIVE_EXPLOSION         = 108132,
 
     SPELL_TWILIGHT_FLAMES_AURA      = 108053,
+    SPELL_SHIP_FIRE_VISUAL          = 109245,
+    SPELL_DECK_FIRE_DMG             = 110095,
 };
 
 enum actionsSkyfire
@@ -1553,6 +1557,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->GetMotionMaster()->MoveFall();
+            explosion = false;
 
             scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
             {
@@ -1608,12 +1613,31 @@ public:
     {
         npc_ds_warmaster_triggersAI(Creature *creature) : ScriptedAI(creature) { }
 
+        TaskScheduler scheduler;
+
         void Reset() override
         {
+            me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            if (me->GetEntry() != NPC_BROADSIDE_TARGET)
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             if (me->GetEntry() == NPC_TWILIGHT_FLAMES)
                 me->CastSpell(me, SPELL_TWILIGHT_FLAMES_AURA, false);
+            if (me->GetEntry() == NPC_FIRE_STALKER)
+            {
+                me->CastSpell(me, SPELL_SHIP_FIRE_VISUAL, false);
+
+                scheduler.Schedule(Seconds(1), [this](TaskContext fireDamage)
+                {
+                    me->CastSpell(me, SPELL_DECK_FIRE_DMG, true);
+                    fireDamage.Repeat(Seconds(1));
+                });
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            scheduler.Update(diff);
         }
     };
 };

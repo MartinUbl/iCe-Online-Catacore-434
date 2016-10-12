@@ -95,7 +95,7 @@ enum Spells
     SPELL_DECK_FIRE_PERSISTENT_AURA     = 109445,
     SPELL_DECK_FIRE_DMG                 = 110095,
     SPELL_DECK_FIRE_PERIODIC            = 110092, // Periodically trigger damage 
-    SPELL_DECK_FIRE_SPAWN               = 109470,
+    SPELL_DECK_FIRE_SPAWN               = 109470, // Explosion and fire spread
     SPELL_SHIP_FIRE_VISUAL              = 109245,
     SPELL_HEAVY_SLUG                    = 108010,
     SPELL_ARTILLERY_BARRAGE             = 108040,
@@ -246,12 +246,17 @@ public:
             siphonVitality = false;
 
             if (Creature* pGoriona = me->FindNearestCreature(NPC_GORIONA, SEARCH_RANGE))
+            {
+                if (!pGoriona->IsAlive())
+                    pGoriona->Respawn(true);
                 pGoriona->AI()->Reset();
+            }
 
             if (Creature* pCaptainSwayze = me->FindNearestCreature(NPC_SKY_CAPTAIN_SWAYZE, SEARCH_RANGE))
                 pCaptainSwayze->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
             ScriptedAI::Reset();
+            DespawnFireStalkers();
         }
 
         void EnterCombat(Unit * /*who*/) override
@@ -298,6 +303,17 @@ public:
             RunPlayableQuote(warmasterDeath);
         }
 
+        void DespawnFireStalkers()
+        {
+            scheduler.Schedule(Seconds(10), [this](TaskContext firestalkerDespawn)
+            {
+                if (Creature * pFireStalker = me->FindNearestCreature(NPC_FIRE_STALKER, SEARCH_RANGE, true))
+                    pFireStalker->DespawnOrUnsummon();
+                if (firestalkerDespawn.GetRepeatCounter() < 20)
+                    firestalkerDespawn.Repeat(Seconds(2));
+            });
+        }
+
         void DoAction(const int32 action) override
         {
             if (action == ACTION_WARMASTER_JUMPS_ON_BOARD)
@@ -313,6 +329,7 @@ public:
                 RunPlayableQuote(warmasterOnBoardPhase);
                 berserkTimer = 240 * IN_MILLISECONDS;
                 berserk = true;
+                DespawnFireStalkers();
             }
             else if (action == ACTION_ACHIEVEMENT_FAILED)
             {
@@ -511,6 +528,38 @@ const OnslaughtSpot onslaughtSpot[MAX_ONSLAUGHT_POSITIONS]
     { 5, 5, 6, 4, 5 },
 };
 
+const uint32 MAX_FIRE_POSITIONS = 20;
+
+struct FireSpot
+{
+    uint8 spotX;
+    uint8 spotY;
+};
+
+const FireSpot fireSpot[MAX_FIRE_POSITIONS]
+{
+    { 2, 3 },
+    { 2, 2 },
+    { 1, 2 },
+    { 1, 3 },
+    { 1, 4 },
+    { 0, 2 },
+    { 0, 3 },
+    { 1, 1 },
+    { 0, 1 },
+    { 0, 4 },
+    { 1, 0 },
+    { 1, 5 },
+    { 0, 5 },
+    { 0, 0 },
+    { 2, 1 },
+    { 2, 0 },
+    { 3, 0 },
+    { 2, 4 },
+    { 2, 5 },
+    { 3, 5 },
+};
+
 enum Status
 {
     CHECK              = 0,
@@ -563,6 +612,7 @@ public:
         bool nextWave;
         bool flyAway;
         bool heroicLand;
+        bool spreadFire;
         TARGET_SPOTS boardSpots[MAX_VERTICAL_LINES][MAX_HORIZONTAL_LINES];
 
         void Reset() override
@@ -587,6 +637,7 @@ public:
             nextWave = false;
             flyAway = false;
             heroicLand = false;
+            spreadFire = true;
 
             if (Creature* pShip = me->FindNearestCreature(NPC_SKYFIRE, SEARCH_RANGE))
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pShip);
@@ -608,6 +659,7 @@ public:
             DespawnNPC(NPC_TWILIGHT_ELITE_SLAYER);
             DespawnNPC(NPC_TWILIGHT_SAPPER);
 
+            scheduler.CancelGroup(1);
             ScriptedAI::Reset();
         }
 
@@ -654,6 +706,11 @@ public:
         void UnlockBoardSpot(uint32 spotX, uint32 spotY)
         {
             boardSpots[spotX][spotY].free = true;
+        }
+
+        void SetBoardSpotFull(uint32 spotX, uint32 spotY)
+        {
+            boardSpots[spotX][spotY].free = false;
         }
 
         bool OnslaughtBoardSpotStatus(uint32 onslaughtPosition, uint32 status)
@@ -912,9 +969,10 @@ public:
                 if (twilightOnsloughtTimer <= diff)
                 {
                     RunPlayableQuote(warmasterGorionaOnslaught, BOSS_WARMASTER_BLACKHORN);
+                    twilightOnsloughtTimer = 30000;
 
                     std::vector<int> locations;
-                    for (uint32 i = 0; i < MAX_WARMASTER_DAMAGE_POSITIONS; i++)
+                    for (uint32 i = !IsHeroic() ? 0 : 2; i < MAX_WARMASTER_DAMAGE_POSITIONS; i++)
                     {
                         if (OnslaughtBoardSpotStatus(i, CHECK) == EMPTY_SPOT)
                             locations.push_back(i);
@@ -939,8 +997,7 @@ public:
                             }
                         }
                     }
-
-                    twilightOnsloughtTimer = 30000;
+                    else twilightOnsloughtTimer = 5000;
                 }
                 else twilightOnsloughtTimer -= diff;
 
@@ -965,6 +1022,20 @@ public:
                             me->DealDamage(pShip, damage);
                         }
                         broadsideTimer = 100000;
+
+                        if (spreadFire == true)
+                        {
+                            scheduler.Schedule(Seconds(5), 1,[this](TaskContext spreadFire)
+                            {
+                                Creature * pFireStalker = me->SummonCreature(NPC_FIRE_STALKER, boardSpots[fireSpot[spreadFire.GetRepeatCounter()].spotX][fireSpot[spreadFire.GetRepeatCounter()].spotY].x, boardSpots[fireSpot[spreadFire.GetRepeatCounter()].spotX][fireSpot[spreadFire.GetRepeatCounter()].spotY].y, START_Z, 0, TEMPSUMMON_TIMED_DESPAWN, 300000);
+                                if (pFireStalker && spreadFire.GetRepeatCounter() == 0)
+                                    pFireStalker->CastSpell(pFireStalker, SPELL_DECK_FIRE_SPAWN, false);
+                                SetBoardSpotFull(fireSpot[spreadFire.GetRepeatCounter()].spotX, fireSpot[spreadFire.GetRepeatCounter()].spotY);
+                                if (spreadFire.GetRepeatCounter() < 19)
+                                    spreadFire.Repeat(Seconds(6));
+                            });
+                        }
+                        spreadFire = false;
                     }
                     else broadsideTimer -= diff;
                 }

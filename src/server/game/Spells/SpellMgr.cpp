@@ -4464,6 +4464,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             break;
+        case 110095: // Deck Fire
+            spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS;
+            count++;
+            break;
         // Spine of Deathwing
         case 109379: // Searing Plasma
             spellInfo->MaxAffectedTargets = 1;
