@@ -1361,9 +1361,9 @@ public:
         return new npc_ds_madness_blistering_tentacleAI(pCreature);
     }
 
-    struct npc_ds_madness_blistering_tentacleAI : public ScriptedAI
+    struct npc_ds_madness_blistering_tentacleAI : public Scripted_NoMovementAI
     {
-        npc_ds_madness_blistering_tentacleAI(Creature* pCreature) : ScriptedAI(pCreature) 
+        npc_ds_madness_blistering_tentacleAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
             me->AddAura(SPELL_BLISTERING_HEAT, me);
         }
@@ -1373,6 +1373,9 @@ public:
             me->SetInCombatWithZone();
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->CastSpell(me, SPELL_BLISTERING_HEAT, false);
+            // Avoidance for AoE dmg spells
+            int32 bp0 = -100;
+            me->CastCustomSpell(me, 65220, &bp0, 0, 0, true);
         }
 
         void UpdateAI(const uint32 diff) override {}
