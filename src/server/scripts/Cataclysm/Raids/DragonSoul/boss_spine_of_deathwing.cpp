@@ -1150,10 +1150,22 @@ public:
         }
 
         TaskScheduler scheduler;
+        uint32 dispelCount;
         bool isExplode;
+        bool mutated;
         int absorbedBloodCount = 0;
 
-        void Reset() override {}
+        void Reset() override 
+        {
+            dispelCount = 0;
+            mutated = false;
+
+            scheduler.Schedule(Seconds(30), [this](TaskContext /* Task context */)
+            {
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, SEARCH_RANGE, true))
+                    me->CastSpell(pTarget, SPELL_BLOOD_CORRUPTION_DEATH, false);
+            });
+        }
 
         void DoAction(const int32 action)
         {
@@ -1174,6 +1186,30 @@ public:
             {
                 me->GetMotionMaster()->MoveJump(rollPos[DEST_RIGHT].GetPositionX(), rollPos[DEST_RIGHT].GetPositionY(), rollPos[DEST_RIGHT].GetPositionZ(), 20.0f, 10.0f);
                 me->DespawnOrUnsummon(3000);
+            }
+            // Spread Blood Corruption: Death
+            else if (action)
+            {
+                dispelCount++;
+
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, SEARCH_RANGE, true, -SPELL_BLOOD_CORRUPTION_DEATH))
+                {
+                    // 50% chance after 3rd dispel or 100% on 4th dispel to mutate into corruption earth
+                    if ((roll_chance_i(50) && dispelCount == 3) || (dispelCount == 4 && mutated == false))
+                    {
+                        mutated = true;
+                        me->CastSpell(pTarget, SPELL_BLOOD_CORRUPTION_EARTH, false);
+                        if (Aura * pAura = pTarget->GetAura(SPELL_BLOOD_CORRUPTION_EARTH))
+                            pAura->SetDuration(action);
+                    }
+                    // otherwise just jump corrupted blood death
+                    if (mutated == false)
+                    {
+                        me->CastSpell(pTarget, SPELL_BLOOD_CORRUPTION_DEATH, false);
+                        if (Aura * pAura = pTarget->GetAura(SPELL_BLOOD_CORRUPTION_DEATH))
+                            pAura->SetDuration(action);
+                    }
+                }
             }
         }
 
@@ -1204,6 +1240,8 @@ public:
                     }
                 }
             }
+
+            scheduler.CancelAll();
         }
 
         void DamageTaken(Unit* who, uint32& damage)
@@ -1323,6 +1361,101 @@ public:
     }
 };
 
+class spell_ds_spine_blood_corruption_death : public SpellScriptLoader
+{
+public:
+    spell_ds_spine_blood_corruption_death() : SpellScriptLoader("spell_ds_spine_blood_corruption_death") { }
+
+    class spell_ds_spine_blood_corruption_death_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ds_spine_blood_corruption_death_AuraScript);
+
+        void OnDispel(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_STACK)
+                return;
+
+            if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+            {
+                Unit* caster = aurEff->GetCaster();
+                if (!caster)
+                    return;
+
+                if (Creature * pAmalgamation = caster->ToCreature())
+                {
+                    pAmalgamation->AI()->DoAction(aurEff->GetBase()->GetDuration());
+                }
+            }
+            else
+            {
+                if (Unit* target = GetTarget())
+                    target->CastSpell(target, SPELL_BLOOD_OF_DEATHWING, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_ds_spine_blood_corruption_death_AuraScript::OnDispel, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_ds_spine_blood_corruption_death_AuraScript();
+    }
+};
+
+class spell_ds_spine_blood_corruption_earth : public SpellScriptLoader
+{
+public:
+    spell_ds_spine_blood_corruption_earth() : SpellScriptLoader("spell_ds_spine_blood_corruption_earth") { }
+
+    class spell_ds_spine_blood_corruption_earth_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ds_spine_blood_corruption_earth_AuraScript);
+
+        void OnDispel(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_STACK)
+                return;
+
+            if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+            {
+                Unit* caster = aurEff->GetCaster();
+                if (!caster)
+                    return;
+
+                if (Creature * pAmalgamation = caster->ToCreature())
+                {
+                    pAmalgamation->AI()->DoAction(aurEff->GetBase()->GetDuration());
+                }
+            }
+            else
+            {
+                if (Unit* target = GetTarget())
+                {
+                    target->CastSpell(target, SPELL_BLOOD_OF_NELTHARION, true);
+                    if (roll_chance_i(50)) // 50% chance to apply second stack
+                        target->CastSpell(target, SPELL_BLOOD_OF_NELTHARION, true);
+                }
+            }
+
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_ds_spine_blood_corruption_earth_AuraScript::OnDispel, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_ds_spine_blood_corruption_earth_AuraScript();
+    }
+};
+
 void AddSC_boss_spine_of_deathwing()
 {
     new boss_spine_of_deathwing();
@@ -1331,6 +1464,8 @@ void AddSC_boss_spine_of_deathwing()
     new npc_ds_spine_hideous_amalgamation();
     new npc_ds_spine_burning_tendons();
     new npc_ds_spine_spawner();
+    new spell_ds_spine_blood_corruption_death();
+    new spell_ds_spine_blood_corruption_earth();
 
     new spell_ds_spine_plate_activate_loader();
     new spell_ds_spine_searing_plasma();
