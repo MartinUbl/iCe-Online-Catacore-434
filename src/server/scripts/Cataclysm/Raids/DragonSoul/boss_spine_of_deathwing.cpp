@@ -25,10 +25,9 @@ Autor: Lazik
 
 /*
 TO DO:
-1) Heroic abilities
-2) 25 man mode
-3) Fiery Grip sometime targets two different players and Effect 0 is used on player 1 and Effect 1 is used on player 2
-4) Searing Plasma - still sometimes targets player who already has Searing Plasma debuff
+1) 25 man mode
+2) Fiery Grip sometime targets two different players and Effect 0 is used on player 1 and Effect 1 is used on player 2
+3) Searing Plasma - still sometimes targets player who already has Searing Plasma debuff
 */
 
 #include "ScriptPCH.h"
@@ -1160,11 +1159,14 @@ public:
             dispelCount = 0;
             mutated = false;
 
-            scheduler.Schedule(Seconds(30), [this](TaskContext /* Task context */)
+            if (IsHeroic())
             {
-                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, SEARCH_RANGE, true))
-                    me->CastSpell(pTarget, SPELL_BLOOD_CORRUPTION_DEATH, false);
-            });
+                scheduler.Schedule(Seconds(30), [this](TaskContext /* Task context */)
+                {
+                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, SEARCH_RANGE, true))
+                        me->CastSpell(pTarget, SPELL_BLOOD_CORRUPTION_DEATH, false);
+                });
+            }
         }
 
         void DoAction(const int32 action)

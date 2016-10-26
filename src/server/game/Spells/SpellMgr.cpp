@@ -4461,6 +4461,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 109013:
         case 109014:
         case 109015:
+        case 106199: // Blood Corruption: Death
+        case 106200: // Blood Corruption: Earth
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             break;
