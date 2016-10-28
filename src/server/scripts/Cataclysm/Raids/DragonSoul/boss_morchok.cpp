@@ -1211,7 +1211,7 @@ public:
             Unit * caster = GetCaster();
 
             #define ANGLE_JUMP_OFFSET   (M_PI / 4)
-            #define JUMP_DISTANCE       (15.0f)
+            #define JUMP_DISTANCE       (45.0f)
 
             float o = caster->GetOrientation();
 
