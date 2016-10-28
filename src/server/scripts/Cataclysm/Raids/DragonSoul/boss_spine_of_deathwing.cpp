@@ -459,16 +459,16 @@ public:
                 {
                     // For every plate away, we need to add two more spawn positions
                     uint32 maxPos = ZERO_PLATE_OFF_MAX_SPAWN_COUNT;
-                    nextSpawnTimer = 11000;
+                    nextSpawnTimer = IsHeroic() ? 9500 : 11000;
                     if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 1)
                     {
                         maxPos = FIRST_PLATE_OFF_MAX_SPAWN_COUNT;
-                        nextSpawnTimer = 9000;
+                        nextSpawnTimer = IsHeroic() ? 7500 : 9000;
                     }
                     else if (instance->GetData(DATA_SPINE_OF_DEATHWING_PLATES) == 2)
                     {
                         maxPos = SECOND_PLATE_OFF_MAX_SPAWN_COUNT;
-                        nextSpawnTimer = 7000;
+                        nextSpawnTimer = IsHeroic() ? 5500 : 7000;
                     }
 
                     uint32 randPos = urand(0, maxPos-1);
