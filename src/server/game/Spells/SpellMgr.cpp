@@ -4348,10 +4348,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 109548: // Share health
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
             break;
-        case 103528: // Target Selection
-        case 104573:
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_35_YARDS;
-            break;
         case 98399: // I think these spells should be used by Ragnaros for clustering check, but I did it manually, so borrow them :)
         case 100943:
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_SRC_CASTER;
