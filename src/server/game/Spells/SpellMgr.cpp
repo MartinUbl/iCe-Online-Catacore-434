@@ -4497,9 +4497,21 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
             break;
         case 106588: // Expoose Weakness (Aspects)
+        case 109582:
+        case 109583:
+        case 109584:
         case 106600:
+        case 109619:
+        case 109620:
+        case 109621:
         case 106613:
+        case 109637:
+        case 109638:
+        case 109639:
         case 106624:
+        case 109728:
+        case 109729:
+        case 109730:
         case 109102: // Congealing Blood
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
             break;
@@ -4518,6 +4530,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_TARGET_ANY;
             break;
         case 105569: // Cauterize
+        case 109576:
+        case 109577:
+        case 109578:
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_ENEMY_DST;
             break;
         case 106527: // Cataclysm - Black Screen Effect
