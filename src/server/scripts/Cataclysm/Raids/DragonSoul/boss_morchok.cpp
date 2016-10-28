@@ -707,7 +707,7 @@ public:
                 {
                     stompTimer = pAI->stompTimer + KOHCROM_TIMERS_OFFSET_MILIS;
                     crystalTimer = pAI->crystalTimer + KOHCROM_TIMERS_OFFSET_MILIS;
-                    vortexTimer = pAI->vortexTimer + KOHCROM_TIMERS_OFFSET_MILIS;
+                    vortexTimer = pAI->vortexTimer + KOHCROM_TIMERS_OFFSET_MILIS + 18000;
                 }
             }
         }
