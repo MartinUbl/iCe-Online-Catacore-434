@@ -663,6 +663,11 @@ public:
             {
                 kohcromSummoned = true;
 
+                // Delay all timers when Morchok splits to Kohcrom
+                stompTimer = stompTimer + 15000;
+                crystalTimer = crystalTimer + 15000;
+                vortexTimer = vortexTimer + 15000;
+
                 // Handled in spellscript
                 me->CastSpell(me, SPELL_SUMMON_KOHCROM, true);
                 RunPlayableQuote(summonMorchokQuote);
