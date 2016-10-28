@@ -970,27 +970,10 @@ public:
                 SetHitDamage(damage);
         }
 
-        void FilterNonTankPlayers(std::list<Unit*>& unitList)
-        {
-            Unit * caster = GetCaster();
-
-            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
-            {
-                // Remove all targets except main tank
-                if (caster->GetVictim() != *itr)
-                {
-                    itr = unitList.erase(itr);
-                }
-                else
-                    itr++;
-            }
-        }
-
         void Register() override
         {
             OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_morchok_stomp_SpellScript::FindClosestTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_DST);
             OnEffect += SpellEffectFn(spell_ds_morchok_stomp_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_morchok_stomp_SpellScript::FilterNonTankPlayers, EFFECT_2, TARGET_UNIT_AREA_ENEMY_DST);
         }
     };
 
