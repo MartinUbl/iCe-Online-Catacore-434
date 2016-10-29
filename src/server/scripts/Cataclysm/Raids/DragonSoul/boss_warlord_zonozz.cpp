@@ -1006,7 +1006,7 @@ public:
             if (abilityTimer <= diff)
             {
                 // When not tanked the Claw of Go'rath spits ooze at a random player
-                if (!me->IsWithinMeleeRange(me->GetVictim()))
+                if (!me->IsWithinMeleeRange(me->GetVictim(), 7.0f))
                 {
                     if (Unit * player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
                         me->CastSpell(player, SPELL_OOZE_SPIT, false);

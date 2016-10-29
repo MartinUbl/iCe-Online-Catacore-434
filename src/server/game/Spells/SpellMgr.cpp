@@ -4359,8 +4359,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_1;
             break;
         // Warlord Zonozz
-        case 104377:
+        case 104377: // Black Blood of Go'rath
         case 110306:
+        case 104347: // Shadow Gaze
+        case 104602:
+        case 104603:
+        case 104604:
             spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
             break;
         // Hagara the Stormbringer
