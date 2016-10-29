@@ -33,9 +33,9 @@ enum spells : uint32
 {
     /* BOSS SPELLS */
     SPELL_FOCUSED_ANGER                 = 104543, // OK
-    SPELL_FOCUSED_ANGER_25N             = 104543,
-    SPELL_FOCUSED_ANGER_10HC            = 104543,
-    SPELL_FOCUSED_ANGER_25HC            = 104543,
+    SPELL_FOCUSED_ANGER_25N             = 109409,
+    SPELL_FOCUSED_ANGER_10HC            = 109410,
+    SPELL_FOCUSED_ANGER_25HC            = 109411,
     SPELL_PSYCHIC_DRAIN                 = 104323, // OK
     SPELL_DISRUPTING_SHADOWS            = 103434, // OK (maybe cast with max affected targets)
     SPELL_DISRUPTING_SHADOWS_KNOCKBACK  = 103948, // this should be triggered after dispeling spell above
