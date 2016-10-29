@@ -4096,6 +4096,10 @@ bool Spell::CanCancel()
         // Morchok spells
         case 103851:
         case 103821:
+        case 103785:
+        case 108570:
+        case 110288:
+        case 110287:
         // Warlord spell
         case 103946:
         // Peroth'arn

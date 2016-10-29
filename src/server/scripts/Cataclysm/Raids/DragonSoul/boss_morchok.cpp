@@ -476,7 +476,7 @@ struct ElementalAI : public ScriptedAI
             return;
         }
 
-        // Crush armor available only in heroic
+        // Crush armor available only in normal
         if (!IsHeroic() && crushArmorTimer <= diff)
         {
             if (IsCastingAllowed())
@@ -492,7 +492,7 @@ struct ElementalAI : public ScriptedAI
             if (IsCastingAllowed())
             {
                 me->CastSpell(me, SPELL_STOMP, false);
-                stompTimer = 12000;
+                stompTimer = urand(12000, 15000);
             }
         }
         else stompTimer -= diff;
@@ -664,9 +664,9 @@ public:
                 kohcromSummoned = true;
 
                 // Delay all timers when Morchok splits to Kohcrom
-                stompTimer = stompTimer + 15000;
-                crystalTimer = crystalTimer + 15000;
-                vortexTimer = vortexTimer + 15000;
+                stompTimer = stompTimer + 7000;
+                crystalTimer = crystalTimer + 7000;
+                vortexTimer = vortexTimer + 7000;
 
                 // Handled in spellscript
                 me->CastSpell(me, SPELL_SUMMON_KOHCROM, true);
@@ -1199,7 +1199,7 @@ public:
             Unit * caster = GetCaster();
 
             #define ANGLE_JUMP_OFFSET   (M_PI / 4)
-            #define JUMP_DISTANCE       (45.0f)
+            #define JUMP_DISTANCE       (30.0f)
 
             float o = caster->GetOrientation();
 
@@ -1218,11 +1218,11 @@ public:
                 caster->GetNearPosition(kohcromPos, JUMP_DISTANCE, MapManager::NormalizeOrientation(kohcromAngle));
 
                 pKohcrom->AttackStop();
-                pKohcrom->GetMotionMaster()->MoveJump(kohcromPos.GetPositionX(), kohcromPos.GetPositionY(), kohcromPos.GetPositionZ(), 15.0f, 10.0f);
+                pKohcrom->GetMotionMaster()->MoveJump(kohcromPos.GetPositionX(), kohcromPos.GetPositionY(), kohcromPos.GetPositionZ(), 35.0f, 10.0f);
             }
 
             caster->AttackStop();
-            caster->GetMotionMaster()->MoveJump(morchokPos.GetPositionX(), morchokPos.GetPositionY(), morchokPos.GetPositionZ(), 15.0f, 10.0f);
+            caster->GetMotionMaster()->MoveJump(morchokPos.GetPositionX(), morchokPos.GetPositionY(), morchokPos.GetPositionZ(), 35.0f, 10.0f);
         }
 
         void Register()
