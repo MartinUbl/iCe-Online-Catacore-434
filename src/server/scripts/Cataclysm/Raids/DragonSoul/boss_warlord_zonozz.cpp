@@ -63,7 +63,7 @@ enum spells : uint32
     SPELL_OOZE_SPIT                     = 109396, // Casted by Claw of Go'rath when no one in melee range
     SPELL_SHADOW_GAZE                   = 104347, // Casted by Eye of Go'rath to random player
     SPELL_WILD_FLAIL                    = 109199, // Casted be Flail of Go'rath (melee AoE)
-    SPELL_SLUDGE_SPEW                   = 110102, // Casted be Flail of Go'rath to random player
+    SPELL_SLUDGE_SPEW                   = 110302, // Casted be Flail of Go'rath to random player
 
     ACHIEVEMENT_HEROIC_ZONOZZ           = 6110,
     ACHIEVEMENT_PING_PONG_CHAMPION      = 6128,
