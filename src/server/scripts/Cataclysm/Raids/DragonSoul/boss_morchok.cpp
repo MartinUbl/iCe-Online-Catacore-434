@@ -961,7 +961,7 @@ public:
             if (!hitUnit || unitsAffected == 0)
                 return;
 
-            int32 damage = GetHitDamage() / unitsAffected; // Shared damage
+            int32 damage = GetHitDamage() / (unitsAffected + 2); // Shared damage
 
             // Two closest targets take a double share of the damage
             if (hitUnit->GetGUID() == guids[FIRST_CLOSEST_TARGET_INDEX] || hitUnit->GetGUID() == guids[SECOND_CLOSEST_TARGET_INDEX])
