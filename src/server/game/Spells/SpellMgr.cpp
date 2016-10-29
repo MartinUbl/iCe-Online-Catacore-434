@@ -4358,6 +4358,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
             spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_1;
             break;
+        // Warlord Zonozz
+        case 104377:
+        case 110306:
+            spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
+            break;
         // Hagara the Stormbringer
         case 105466: // Lightning Storm Cosmetic
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
