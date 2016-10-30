@@ -415,7 +415,7 @@ public:
                 // We need to setup timers here, beacause these timer are updating only in NORMAL_PHASE
                 if (IsHeroic())
                 {
-                    focusedAngerTimer = 24000;
+                    focusedAngerTimer = 44000;
                     disruptingShadowsTimer = 24000;
                     voidSphereTimer = 40000;
                     psychicDrainTimer = 50000;
