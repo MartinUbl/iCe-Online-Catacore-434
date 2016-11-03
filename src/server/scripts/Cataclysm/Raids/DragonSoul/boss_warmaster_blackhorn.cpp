@@ -23,11 +23,6 @@ Mode: 10-man normal/ 10-man heroic
 Autor: Lazik
 */
 
-/*
-TO DO:
-1) Heroic Deck Fire, also rework Twilight Onslaught and Twilight Barrage targeting so it won`t hit burning spot
-*/
-
 #include "ScriptPCH.h"
 #include "dragonsoul.h"
 #include "MapManager.h"
