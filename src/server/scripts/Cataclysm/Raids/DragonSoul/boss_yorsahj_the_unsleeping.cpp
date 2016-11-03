@@ -987,8 +987,11 @@ public:
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE);
                 me->SetInCombatWithZone();
 
-                if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_FIXATE))
+                {
+                    me->AddThreat(target, 99999999.0f);
                     me->GetMotionMaster()->MoveChase(target);
+                }
 
                 me->CastSpell(me, SPELL_FIXATE, true);
             });
