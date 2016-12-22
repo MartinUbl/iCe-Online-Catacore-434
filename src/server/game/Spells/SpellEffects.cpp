@@ -5551,7 +5551,13 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
     }
 
     if (gameObjTarget)
+    {
         SendLoot(guid, LOOT_SKINNING);
+
+        // if the object is not in instance, start loot abandon timer to avoid "locking" objects
+        if (!gameObjTarget->GetInstanceId())
+            gameObjTarget->SetLootAbandonTime(time(nullptr) + 120);
+    }
     else
         itemTarget->SetFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_UNLOCKED);
 
