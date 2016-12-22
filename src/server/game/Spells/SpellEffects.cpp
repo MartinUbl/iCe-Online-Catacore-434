@@ -5500,10 +5500,10 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
             //CanUseBattlegroundObject() already called in CheckCast()
             // in battleground check
             if (Battleground *bg = player->GetBattleground())
-          {
-        bg->EventPlayerClickedOnFlag(player, gameObjTarget);
-        return;
-          }
+            {
+                bg->EventPlayerClickedOnFlag(player, gameObjTarget);
+                return;
+            }
         }
         else if (goInfo->type == GAMEOBJECT_TYPE_FLAGSTAND)
         {
@@ -5515,7 +5515,8 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
                     bg->EventPlayerClickedOnFlag(player, gameObjTarget);
                 return;
             }
-        }else if (m_spellInfo->Id == 1842 && gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && gameObjTarget->GetOwner())
+        }
+        else if (m_spellInfo->Id == 1842 && gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && gameObjTarget->GetOwner())
         {
             gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
             return;
