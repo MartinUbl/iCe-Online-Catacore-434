@@ -265,7 +265,7 @@ void BattlegroundTP::EventPlayerCapturedFlag(Player *Source)
         if (GetTeamScore(ALLIANCE) < BG_TP_MAX_TEAM_SCORE)
             AddPoint(ALLIANCE, 1);
         PlaySoundToAll(BG_TP_SOUND_FLAG_CAPTURED_ALLIANCE);
-        RewardReputationToTeam(890, m_ReputationCapture, ALLIANCE);
+        RewardReputationToTeamMixed(890, 889, m_ReputationCapture, ALLIANCE);
     }
     else
     {
@@ -279,7 +279,7 @@ void BattlegroundTP::EventPlayerCapturedFlag(Player *Source)
         if (GetTeamScore(HORDE) < BG_TP_MAX_TEAM_SCORE)
             AddPoint(HORDE, 1);
         PlaySoundToAll(BG_TP_SOUND_FLAG_CAPTURED_HORDE);
-        RewardReputationToTeam(889, m_ReputationCapture, HORDE);
+        RewardReputationToTeamMixed(890, 889, m_ReputationCapture, HORDE);
     }
     RewardHonorToTeam(BG_TP_Honor[BG_TP_FLAG_CAP], Source->GetBGTeam());
 

@@ -794,6 +794,23 @@ void Battleground::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, 
                 player->GetReputationMgr().ModifyReputation(factionEntry, Reputation);
 }
 
+void Battleground::RewardReputationToTeamMixed(uint32 faction_id_foralliance, uint32 faction_id_forhorde, uint32 Reputation, uint32 TeamID)
+{
+    // Wargames does not reward
+    if (isWargame())
+        return;
+
+    FactionEntry const* factionEntry_a = sFactionStore.LookupEntry(faction_id_foralliance);
+    FactionEntry const* factionEntry_h = sFactionStore.LookupEntry(faction_id_forhorde);
+
+    if (!factionEntry_a || !factionEntry_h)
+        return;
+
+    for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+        if (Player* player = _GetPlayerForTeam(TeamID, itr, "RewardReputationToTeam"))
+            player->GetReputationMgr().ModifyReputation(player->GetTeam() == ALLIANCE ? factionEntry_a : factionEntry_h, Reputation);
+}
+
 void Battleground::UpdateWorldState(uint32 Field, uint32 Value)
 {
     WorldPacket data;

@@ -339,7 +339,7 @@ void BattlegroundWS::EventPlayerCapturedFlag(Player *Source)
         if (GetTeamScore(ALLIANCE) < BG_WS_MAX_TEAM_SCORE)
             AddPoint(ALLIANCE, 1);
         PlaySoundToAll(BG_WS_SOUND_FLAG_CAPTURED_ALLIANCE);
-        RewardReputationToTeam(890, m_ReputationCapture, ALLIANCE);
+        RewardReputationToTeamMixed(890, 889, m_ReputationCapture, ALLIANCE);
     }
     else
     {
@@ -356,7 +356,7 @@ void BattlegroundWS::EventPlayerCapturedFlag(Player *Source)
         if (GetTeamScore(HORDE) < BG_WS_MAX_TEAM_SCORE)
             AddPoint(HORDE, 1);
         PlaySoundToAll(BG_WS_SOUND_FLAG_CAPTURED_HORDE);
-        RewardReputationToTeam(889, m_ReputationCapture, HORDE);
+        RewardReputationToTeamMixed(890, 889, m_ReputationCapture, HORDE);
     }
     //for flag capture was reward 2 honorable kills
     //now special reward (40 honor points).. TODO: implement holiday
