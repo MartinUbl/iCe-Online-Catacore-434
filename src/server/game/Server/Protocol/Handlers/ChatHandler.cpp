@@ -428,6 +428,12 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                         if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP))
                             lang = LANG_UNIVERSAL;
                         break;
+                    case CHAT_MSG_BATTLEGROUND:
+                    case CHAT_MSG_BATTLEGROUND_LEADER:
+                        // battlegrounds are now also mixed
+                        if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                            lang = LANG_UNIVERSAL;
+                        break;
                     case CHAT_MSG_GUILD:
                     case CHAT_MSG_OFFICER:
                         // allow two side chat at guild channel if two side guild allowed
