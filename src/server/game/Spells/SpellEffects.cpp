@@ -1697,11 +1697,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Seal of Righteousness
                 else if (m_spellInfo->Id == 25742 || m_spellInfo->Id == 101423)
                 {
-                    // damage formula is little wierd - divide weapon damage by 1.8 to be more accurent to tooltip
                     apply_direct_bonus = false;
-                    damage = (m_caster->ToPlayer()->GetAttackTime(BASE_ATTACK)/1000.0f/1.8f)*0.011f*m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)*0.022f*m_caster->GetStat(STAT_INTELLECT);
-                    if (Player* modOwner = m_caster->GetSpellModOwner())
-                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, damage);
+                    damage = (m_caster->GetFloatValue(UNIT_FIELD_BASEATTACKTIME + BASE_ATTACK) / 1000.0f)*(0.011f*m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + 0.022f * m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY));
+
+                    // Seals of the Pure
+                    if (m_caster->HasAura(20225))
+                        damage *= 1.1f;
+                    else if (m_caster->HasAura(20224))
+                        damage *= 1.05f;
                 }
                 // Seal of Justice
                 else if (m_spellInfo->Id == 20170)
