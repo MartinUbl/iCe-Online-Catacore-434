@@ -1442,8 +1442,8 @@ void Battleground::AddPlayer(Player* plr)
     if (isBattleground() && isRated())
         UpdatePlayerScore(plr, SCORE_BATTLEGROUND_RATING, plr->GetRatedBattlegroundRating());
 
-    // faction override in rated battlegrounds + wargames
-    if (isBattleground() && (isRated() || isWargame()))
+    // faction override for "wrong" faction in teams; this applies to rated BGs, BG wargames and mixed BGs
+    if (isBattleground())
     {
         // override only when necessary
         if (plr->GetBGTeam() == ALLIANCE && plr->GetTeam() != ALLIANCE)
