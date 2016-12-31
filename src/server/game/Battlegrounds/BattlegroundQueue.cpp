@@ -740,6 +740,7 @@ void BattlegroundQueue::FillPlayersToBG(Battleground* bg, BattlegroundBracketId 
 
             (*Ali_itr)->Team = ALLIANCE;
             ++Ali_itr;
+            aliIndex++;
             --aliFreeCopy;
 
             if (aliIndex >= aliCount || !m_SelectionPools[BG_TEAM_HORDE].AddGroup((*Ali_itr), hordeFree))
@@ -747,6 +748,7 @@ void BattlegroundQueue::FillPlayersToBG(Battleground* bg, BattlegroundBracketId 
 
             (*Ali_itr)->Team = HORDE;
             ++Ali_itr;
+            aliIndex++;
             --hordeFreeCopy;
         }
     }
@@ -759,6 +761,7 @@ void BattlegroundQueue::FillPlayersToBG(Battleground* bg, BattlegroundBracketId 
 
             (*Horde_itr)->Team = HORDE;
             ++Horde_itr;
+            hordeIndex++;
             --hordeFreeCopy;
 
             if (hordeIndex >= hordeCount || !m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup((*Horde_itr), aliFree))
@@ -766,6 +769,7 @@ void BattlegroundQueue::FillPlayersToBG(Battleground* bg, BattlegroundBracketId 
 
             (*Horde_itr)->Team = ALLIANCE;
             ++Horde_itr;
+            hordeIndex++;
             --aliFreeCopy;
         }
     }
