@@ -1703,19 +1703,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (Player* modOwner = m_caster->GetSpellModOwner())
                         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, damage);
                 }
-                // Seal of Justice
-                else if (m_spellInfo->Id == 20170)
-                {
-                    //apply_direct_bonus = false;
-                    damage = ((float)m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)*0.005f + (float)m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY)*0.01f) *
-                         m_caster->GetFloatValue(UNIT_FIELD_BASEATTACKTIME + BASE_ATTACK) / 1000.0f;
-
-                    // Seals of the Pure
-                    if (m_caster->HasAura(20225))
-                        damage *= 1.1f;
-                    else if (m_caster->HasAura(20224))
-                        damage *= 1.05f;
-                }
                 // Consecration triggered spell
                 else if (m_spellInfo->Id == 81297)
                 {
