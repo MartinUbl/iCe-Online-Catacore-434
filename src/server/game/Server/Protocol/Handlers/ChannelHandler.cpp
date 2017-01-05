@@ -118,6 +118,8 @@ void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
         {
             if (stricmp(channelName.c_str(), "krcma") == 0)
                 SendNotification("Setting password for channel krcma is not allowed.");
+            else if (stricmp(channelName.c_str(), "babylon") == 0)
+                SendNotification("Setting password for babylon channel is not allowed.");
             else
                 chn->Password(_player->GetGUID(), password.c_str());
         }

@@ -926,7 +926,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 {
                     sScriptMgr->OnPlayerChat(_player, type, lang, msg, chn);
 
-                    chn->Say(_player->GetGUID(), msg.c_str(), lang);
+                    // channel "babylon" uses common language
+                    if (channel != "babylon")
+                        chn->Say(_player->GetGUID(), msg.c_str(), lang);
+                    else
+                        chn->Say(_player->GetGUID(), msg.c_str(), LANG_UNIVERSAL);
                 }
             }
         } break;

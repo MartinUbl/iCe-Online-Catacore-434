@@ -52,6 +52,10 @@ Channel *ChannelMgr::GetJoinChannel(std::string name, uint32 channel_id)
     Utf8toWStr(name,wname);
     wstrToLower(wname);
 
+    // channel "babylon" uses common language, and is stored in alliance ChannelMgr
+    if (team != ALLIANCE && wname == L"babylon")
+        return channelMgr(ALLIANCE)->GetJoinChannel(name, channel_id);
+
     if (channels.find(wname) == channels.end())
     {
         Channel *nchan = new Channel(name,channel_id, team);
@@ -67,6 +71,10 @@ Channel *ChannelMgr::GetChannel(std::string name, Player *p, bool pkt)
     std::wstring wname;
     Utf8toWStr(name,wname);
     wstrToLower(wname);
+
+    // channel "babylon" uses common language, and is stored in alliance ChannelMgr
+    if (team != ALLIANCE && wname == L"babylon")
+        return channelMgr(ALLIANCE)->GetChannel(name, p, pkt);
 
     ChannelMap::const_iterator i = channels.find(wname);
 

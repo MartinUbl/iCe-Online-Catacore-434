@@ -37,7 +37,7 @@ class ChannelMgr
     public:
         uint32 team;
         typedef std::map<std::wstring,Channel*> ChannelMap;
-        ChannelMgr() {team = 0;}
+        ChannelMgr(uint32 _team = 0) : team(_team) { };
         ~ChannelMgr();
 
         Channel *GetJoinChannel(std::string name, uint32 channel_id);
@@ -48,8 +48,17 @@ class ChannelMgr
         void MakeNotOnPacket(WorldPacket *data, std::string name);
 };
 
-class AllianceChannelMgr : public ChannelMgr {};
-class HordeChannelMgr    : public ChannelMgr {};
+class AllianceChannelMgr : public ChannelMgr
+{
+    public:
+        AllianceChannelMgr() : ChannelMgr(ALLIANCE) { };
+};
+
+class HordeChannelMgr : public ChannelMgr
+{
+    public:
+        HordeChannelMgr() : ChannelMgr(HORDE) { };
+};
 
 ChannelMgr* channelMgr(uint32 team);
 
