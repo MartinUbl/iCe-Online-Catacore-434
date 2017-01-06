@@ -634,8 +634,6 @@ void BattlegroundQueue::FillPlayersToBG(Battleground* bg, BattlegroundBracketId 
 {
     int32 hordeFree = bg->GetFreeSlotsForTeam(HORDE);
     int32 aliFree   = bg->GetFreeSlotsForTeam(ALLIANCE);
-    int32 hordeFreeCopy = hordeFree;
-    int32 aliFreeCopy = aliFree;
 
     GroupsQueueType::const_iterator Ali_itr = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE].begin();
     GroupsQueueType::const_iterator Horde_itr = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].begin();
@@ -644,135 +642,11 @@ void BattlegroundQueue::FillPlayersToBG(Battleground* bg, BattlegroundBracketId 
     int32 aliIndex = 0;
     int32 hordeIndex = 0;
 
-    // NOTE: we need to set groupinfo team again when adding player/group to a specific queue; we cannot
-    // be sure the team matches queue
-
-    // at first, balance teams using their own queues
-    if (hordeFreeCopy > aliFreeCopy)
-    {
-        int32 pldiff = std::min(hordeCount, (hordeFreeCopy - aliFreeCopy));
-
-        for (; hordeIndex < pldiff && m_SelectionPools[BG_TEAM_HORDE].AddGroup((*Horde_itr), hordeFree); hordeIndex++)
-        {
-            (*Horde_itr)->Team = HORDE;
-            ++Horde_itr;
-            --hordeFreeCopy;
-        }
-    }
-    else if (hordeFreeCopy < aliFreeCopy)
-    {
-        int32 pldiff = std::min(aliCount, aliFreeCopy - hordeFreeCopy);
-
-        for (; aliIndex < pldiff && m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup((*Ali_itr), aliFree); aliIndex++)
-        {
-            (*Ali_itr)->Team = ALLIANCE;
-            ++Ali_itr;
-            --aliFreeCopy;
-        }
-    }
-
-    // then balance using opponent queue
-    if (hordeFreeCopy > aliFreeCopy)
-    {
-        int32 pldiff = std::min(aliCount, aliIndex + (hordeFreeCopy - aliFreeCopy));
-
-        for (; aliIndex < pldiff && m_SelectionPools[BG_TEAM_HORDE].AddGroup((*Ali_itr), hordeFree); aliIndex++)
-        {
-            (*Ali_itr)->Team = HORDE;
-            ++Ali_itr;
-            --hordeFreeCopy;
-        }
-    }
-    else if (hordeFreeCopy < aliFreeCopy)
-    {
-        int32 pldiff = std::min(hordeCount, hordeIndex + (aliFreeCopy - hordeFreeCopy));
-
-        for (; hordeIndex < pldiff && m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup((*Horde_itr), aliFree); hordeIndex++)
-        {
-            (*Horde_itr)->Team = ALLIANCE;
-            ++Horde_itr;
-            --aliFreeCopy;
-        }
-    }
-
-    // Now there are these possible scenarios:
-    // 1) both queues are empty, player count is either balanced or not balanced -> exit
-    // 2) both BG sides are full, player count is balanced -> exit
-    // 3) both queues are not empty, player count is balanced -> fill teams with players from their queues, but remain balanced, then 4)
-    // 4) one queue is empty, player count is balanced -> round robin between teams
-
-    // 1) and 2)
-    if ((aliIndex == aliCount && hordeIndex == hordeCount) || (hordeFreeCopy == 0 && aliFreeCopy == 0))
-        return;
-
-    // 3)
-    int32 enqBase = std::min(aliCount - aliIndex + 1, hordeCount - hordeIndex + 1); // remaining player count to be joined to keep teams balanced (minimum of remaining count)
-    int32 pldiff = std::min(aliCount, aliIndex + enqBase);
-
-    for (; aliIndex < pldiff && m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup((*Ali_itr), aliFree); aliIndex++)
-    {
-        (*Ali_itr)->Team = ALLIANCE;
-        ++Ali_itr;
-        --aliFreeCopy;
-    }
-    pldiff = std::min(hordeCount, hordeIndex + enqBase);
-    for (; hordeIndex < pldiff && m_SelectionPools[BG_TEAM_HORDE].AddGroup((*Horde_itr), hordeFree); hordeIndex++)
-    {
-        (*Horde_itr)->Team = HORDE;
+    for (; hordeIndex < hordeCount && m_SelectionPools[BG_TEAM_HORDE].AddGroup((*Horde_itr), hordeFree); hordeIndex++)
         ++Horde_itr;
-        --hordeFreeCopy;
-    }
 
-    // check 1) and 2) again
-    if ((aliIndex == aliCount && hordeIndex == hordeCount) || (hordeFreeCopy == 0 && aliFreeCopy == 0))
-        return;
-
-    // 4)
-    // now one queue is empty, and the other one has players - now we need to round-robin the players between both pools
-
-    // somebody left in alliance queue
-    if (aliIndex != aliCount)
-    {
-        for (; aliIndex < aliCount; aliIndex++)
-        {
-            if (!m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup((*Ali_itr), aliFree))
-                break;
-
-            (*Ali_itr)->Team = ALLIANCE;
-            ++Ali_itr;
-            aliIndex++;
-            --aliFreeCopy;
-
-            if (aliIndex >= aliCount || !m_SelectionPools[BG_TEAM_HORDE].AddGroup((*Ali_itr), hordeFree))
-                break;
-
-            (*Ali_itr)->Team = HORDE;
-            ++Ali_itr;
-            aliIndex++;
-            --hordeFreeCopy;
-        }
-    }
-    else // somebody left in horde queue
-    {
-        for (; hordeIndex < hordeCount; hordeIndex++)
-        {
-            if (!m_SelectionPools[BG_TEAM_HORDE].AddGroup((*Horde_itr), hordeFree))
-                break;
-
-            (*Horde_itr)->Team = HORDE;
-            ++Horde_itr;
-            hordeIndex++;
-            --hordeFreeCopy;
-
-            if (hordeIndex >= hordeCount || !m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup((*Horde_itr), aliFree))
-                break;
-
-            (*Horde_itr)->Team = ALLIANCE;
-            ++Horde_itr;
-            hordeIndex++;
-            --aliFreeCopy;
-        }
-    }
+    for (; aliIndex < aliCount && m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup((*Ali_itr), aliFree); aliIndex++)
+        ++Ali_itr;
 }
 
 // this method checks if premade versus premade battleground is possible

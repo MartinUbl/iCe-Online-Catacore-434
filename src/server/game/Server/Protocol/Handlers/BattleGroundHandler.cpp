@@ -617,7 +617,30 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
             _player->SetBattlegroundId(bg->GetInstanceID(), bgTypeId);
             // set the destination team
             if (!bg->isWargame())
+            {
+                if (bg->isBattleground() && !bg->isRated())
+                {
+                    uint32 aliFree = bg->GetMaxPlayersPerTeam() - bg->GetPlayersCountByTeam(ALLIANCE);
+                    uint32 hordeFree = bg->GetMaxPlayersPerTeam() - bg->GetPlayersCountByTeam(HORDE);
+                    // alliance needs help; prefer alliance
+                    if (aliFree != 0 && aliFree > hordeFree)
+                        ginfo->Team = ALLIANCE;
+                    // horde needs help; prefer horde
+                    else if (hordeFree != 0 && hordeFree > aliFree)
+                        ginfo->Team = HORDE;
+                    // nobody needs help; prefer player faction
+                    else
+                    {
+                        if (_player->GetTeam() == ALLIANCE && aliFree > 0)
+                            ginfo->Team = ALLIANCE;
+                        if (_player->GetTeam() == HORDE && hordeFree > 0)
+                            ginfo->Team = HORDE;
+                    }
+
+                }
+
                 _player->SetBGTeam(ginfo->Team);
+            }
             else
             {
                 WargameQueueInfoPtr wgqueue = std::static_pointer_cast<WargameQueueInfo>(ginfo);
