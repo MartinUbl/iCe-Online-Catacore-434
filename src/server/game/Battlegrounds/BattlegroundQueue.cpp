@@ -627,20 +627,21 @@ bool BattlegroundQueue::InviteGroupToBG(const GroupQueueInfoPtr &ginfo, Battlegr
 
 /*
 This function is inviting players to already running battlegrounds
-Invitation type is based on config file
-large groups are disadvantageous, because they will be kicked first if invitation type = 1
+
+Teams are now joined, so no fraction-level balancing is present - all people are invited, and
+their fraction is decided on teleport (see WorldSession::HandleBattleFieldPortOpcode)
 */
 void BattlegroundQueue::FillPlayersToBG(Battleground* bg, BattlegroundBracketId bracket_id)
 {
-    int32 hordeFree = bg->GetFreeSlotsForTeam(HORDE);
-    int32 aliFree   = bg->GetFreeSlotsForTeam(ALLIANCE);
+    uint32 aliFree = bg->GetMaxPlayersPerTeam() - bg->GetPlayersCountByTeam(ALLIANCE);
+    uint32 hordeFree = bg->GetMaxPlayersPerTeam() - bg->GetPlayersCountByTeam(HORDE);
 
     GroupsQueueType::const_iterator Ali_itr = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE].begin();
     GroupsQueueType::const_iterator Horde_itr = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].begin();
-    int32 aliCount = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE].size();
-    int32 hordeCount = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].size();
-    int32 aliIndex = 0;
-    int32 hordeIndex = 0;
+    uint32 aliCount = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE].size();
+    uint32 hordeCount = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].size();
+    uint32 aliIndex = 0;
+    uint32 hordeIndex = 0;
 
     for (; hordeIndex < hordeCount && m_SelectionPools[BG_TEAM_HORDE].AddGroup((*Horde_itr), hordeFree); hordeIndex++)
         ++Horde_itr;
