@@ -612,6 +612,15 @@ bool BattlegroundAB::SetupBattleground()
             sLog->outErrorDb("BatteGroundAB: Failed to spawn buff object!");
     }
 
+    const uint32 toLockObjects[] = { BG_AB_OBJECT_GATE_A, BG_AB_OBJECT_GATE_H };
+    GameObject* go;
+    for (uint32 i = 0; i < sizeof(toLockObjects) / sizeof(uint32); i++)
+    {
+        go = GetBGObject(toLockObjects[i]);
+        if (go)
+            go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+    }
+
     return true;
 }
 

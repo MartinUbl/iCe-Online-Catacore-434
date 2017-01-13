@@ -589,6 +589,15 @@ bool BattlegroundBG::SetupBattleground()
         return false;
     }
 
+    const uint32 toLockObjects[] = { BG_BG_OBJECT_GATE_A, BG_BG_OBJECT_GATE_H };
+    GameObject* go;
+    for (uint32 i = 0; i < sizeof(toLockObjects) / sizeof(uint32); i++)
+    {
+        go = GetBGObject(toLockObjects[i]);
+        if (go)
+            go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+    }
+
     // Spawn buffs
     for (int i = 0; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
     {

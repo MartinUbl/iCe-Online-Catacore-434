@@ -738,6 +738,15 @@ bool BattlegroundWS::SetupBattleground()
         return false;
     }
 
+    const uint32 toLockObjects[] = { BG_WS_OBJECT_DOOR_A_1, BG_WS_OBJECT_DOOR_A_2, BG_WS_OBJECT_DOOR_A_3, BG_WS_OBJECT_DOOR_H_1, BG_WS_OBJECT_DOOR_H_2 };
+    GameObject* go;
+    for (uint32 i = 0; i < sizeof(toLockObjects) / sizeof(uint32); i++)
+    {
+        go = GetBGObject(toLockObjects[i]);
+        if (go)
+            go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+    }
+
     WorldSafeLocsEntry const *sg = sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_MAIN_ALLIANCE);
     if (!sg || !AddSpiritGuide(WS_SPIRIT_MAIN_ALLIANCE, sg->x, sg->y, sg->z, 3.124139f, ALLIANCE))
     {

@@ -488,6 +488,15 @@ bool BattlegroundEY::SetupBattleground()
         return false;
     }
 
+    const uint32 toLockObjects[] = { BG_EY_OBJECT_DOOR_A, BG_EY_OBJECT_DOOR_H };
+    GameObject* go;
+    for (uint32 i = 0; i < sizeof(toLockObjects) / sizeof(uint32); i++)
+    {
+        go = GetBGObject(toLockObjects[i]);
+        if (go)
+            go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+    }
+
     //buffs
     for (int i = 0; i < EY_POINTS_MAX; ++i)
     {
