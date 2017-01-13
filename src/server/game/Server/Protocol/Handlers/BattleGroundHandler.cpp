@@ -435,7 +435,7 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket &recv_dat
     SendPacket(&data);
 }
 
-void WorldSession::HandlePVPLogDataOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandlePVPLogDataOpcode(WorldPacket &recv_data)
 {
     sLog->outDebug("WORLD: Recvd MSG_PVP_LOG_DATA Message");
 
