@@ -245,18 +245,20 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
         if (grp->GetLeaderGUID() != _player->GetGUID())
             return;
         err = grp->CanJoinBattlegroundQueue(bg, bgQueueTypeId, 0, bg->GetMaxPlayersPerTeam(), false, 0);
-        isPremade = (grp->GetMembersCount() >= bg->GetMinPlayersPerTeam());
+        // this is disabled for now, since we have mixed battlegrounds
+        isPremade = false;//(grp->GetMembersCount() >= bg->GetMinPlayersPerTeam());
 
         BattlegroundQueue& bgQueue = sBattlegroundMgr->m_BattlegroundQueues[bgQueueTypeId][twink];
         GroupQueueInfoPtr ginfo = nullptr;
         uint32 avgTime = 0;
 
-        if (err == ERR_BATTLEGROUND_NONE)
+        // also disabled for now - groups are "shattered" to single member groupinfos for our mixed-BG purposes
+        /*if (err == ERR_BATTLEGROUND_NONE)
         {
             sLog->outDebug("Battleground: the following players are joining as group:");
             ginfo = bgQueue.AddGroup(_player, grp, bgTypeId, bracketEntry, 0, false, isPremade, 0, 0);
             avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry->GetBracketId());
-        }
+        }*/
 
         for (GroupReference *itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
         {
@@ -271,6 +273,10 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
                 member->GetSession()->SendPacket(&data);
                 continue;
             }
+
+            // add players one-by-one here; this is also modification made for mixed-BG purposes
+            ginfo = bgQueue.AddGroup(member, nullptr, bgTypeId, bracketEntry, 0, false, isPremade, 0, 0);
+            avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry->GetBracketId());
 
             // add to queue
             uint32 queueSlot = member->AddBattlegroundQueueId(bgQueueTypeId);
@@ -631,9 +637,9 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
                     // nobody needs help; prefer player faction
                     else
                     {
-                        if (_player->GetTeam() == ALLIANCE && aliFree > 0)
+                        if (_player->GetTeam() == ALLIANCE && aliFree >= ginfo->Players.size())
                             ginfo->Team = ALLIANCE;
-                        if (_player->GetTeam() == HORDE && hordeFree > 0)
+                        if (_player->GetTeam() == HORDE && hordeFree >= ginfo->Players.size())
                             ginfo->Team = HORDE;
                     }
 
