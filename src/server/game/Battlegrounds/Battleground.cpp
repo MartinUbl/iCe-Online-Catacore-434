@@ -1173,6 +1173,27 @@ void Battleground::BlockMovement(Player* plr)
     plr->SetClientControl(plr, 0);                          // movement disabled NOTE: the effect will be automatically removed by client when the player is teleported from the battleground, so no need to send with uint8(1) in RemovePlayerAtLeave()
 }
 
+void Battleground::MigrateGroupInfoFaction(GroupQueueInfoPtr& ginfo, uint32 destTeam)
+{
+    // no change needs to be done
+    if (ginfo->Team == destTeam)
+        return;
+
+    // if ginfo has other team in it, we need to decrease original and increase new team invited count
+    if (ginfo->Team == ALLIANCE)
+    {
+        DecreaseInvitedCount(ALLIANCE);
+        IncreaseInvitedCount(HORDE);
+    }
+    else
+    {
+        DecreaseInvitedCount(HORDE);
+        IncreaseInvitedCount(ALLIANCE);
+    }
+
+    ginfo->Team = destTeam;
+}
+
 void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool SendPacket)
 {
     uint32 team = GetPlayerTeam(guid);
@@ -1218,7 +1239,8 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
         {
             plr->ClearAfkReports();
 
-            if (!team) team = plr->GetTeam();
+            if (!team)
+                team = plr->GetBGTeam();
 
             plr->RemoveAurasByType(SPELL_AURA_MOD_SCALE);
             plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);

@@ -36,6 +36,8 @@ class BattlegroundMap;
 
 struct PvPDifficultyEntry;
 struct WorldSafeLocsEntry;
+struct GroupQueueInfo;
+typedef std::shared_ptr<GroupQueueInfo> GroupQueueInfoPtr;
 
 enum BattlegroundSounds
 {
@@ -603,6 +605,8 @@ class Battleground
 
         virtual void RemovePlayerAtLeave(const uint64& guid, bool Transport, bool SendPacket);
                                                             // can be extended in in BG subclass
+
+        void MigrateGroupInfoFaction(GroupQueueInfoPtr& ginfo, uint32 destTeam);
 
         void HandleTriggerBuff(const uint64& go_guid);
         void SetHoliday(bool is_holiday);

@@ -145,6 +145,8 @@ class BattlegroundQueue
 
         void setTwink(uint8 twink) {m_twink = twink;}
 
+        ACE_Thread_Mutex& GetQueueMutex() { return m_queueMtx; };
+
     private:
 
         bool InviteGroupToBG(const GroupQueueInfoPtr &ginfo, Battleground * bg, uint32 side, bool isWargame = false);
@@ -153,6 +155,8 @@ class BattlegroundQueue
         uint32 m_SumOfWaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
 
         uint8 m_twink;
+
+        ACE_Thread_Mutex m_queueMtx;
 };
 
 /*

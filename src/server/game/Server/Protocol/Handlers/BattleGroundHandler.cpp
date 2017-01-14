@@ -588,6 +588,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
     switch (action)
     {
         case 1:                                         // port to battleground
+        {
             if (!_player->IsInvitedForBattlegroundQueueType(bgQueueTypeId))
                 return;                                 // cheating?
 
@@ -612,6 +613,9 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
 
             sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, _player, queueSlot, STATUS_IN_PROGRESS, _player->GetBattlegroundQueueJoinTime(bgTypeId), bg->GetElapsedTime(), bg->GetArenaType());
             _player->GetSession()->SendPacket(&data);
+
+            TRINITY_GUARD(ACE_Thread_Mutex, bgQueue.GetQueueMutex());
+
             // remove battleground queue status from BGmgr
             bgQueue.RemovePlayer(_player->GetGUID(), false);
             // this is still needed here if battleground "jumping" shouldn't add deserter debuff
@@ -626,21 +630,21 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
             {
                 if (bg->isBattleground() && !bg->isRated())
                 {
-                    uint32 aliFree = bg->GetMaxPlayersPerTeam() - bg->GetPlayersCountByTeam(ALLIANCE);
-                    uint32 hordeFree = bg->GetMaxPlayersPerTeam() - bg->GetPlayersCountByTeam(HORDE);
+                    uint32 aliFree = (bg->GetMaxPlayersPerTeam() > bg->GetPlayersCountByTeam(ALLIANCE)) ? bg->GetMaxPlayersPerTeam() - bg->GetPlayersCountByTeam(ALLIANCE) : 0;
+                    uint32 hordeFree = (bg->GetMaxPlayersPerTeam() > bg->GetPlayersCountByTeam(HORDE)) ? bg->GetMaxPlayersPerTeam() - bg->GetPlayersCountByTeam(HORDE) : 0;
                     // alliance needs help; prefer alliance
                     if (aliFree != 0 && aliFree > hordeFree)
-                        ginfo->Team = ALLIANCE;
+                        bg->MigrateGroupInfoFaction(ginfo, ALLIANCE);
                     // horde needs help; prefer horde
                     else if (hordeFree != 0 && hordeFree > aliFree)
-                        ginfo->Team = HORDE;
+                        bg->MigrateGroupInfoFaction(ginfo, HORDE);
                     // nobody needs help; prefer player faction
                     else
                     {
                         if (_player->GetTeam() == ALLIANCE && aliFree >= ginfo->Players.size())
-                            ginfo->Team = ALLIANCE;
+                            bg->MigrateGroupInfoFaction(ginfo, ALLIANCE);
                         if (_player->GetTeam() == HORDE && hordeFree >= ginfo->Players.size())
-                            ginfo->Team = HORDE;
+                            bg->MigrateGroupInfoFaction(ginfo, HORDE);
                     }
 
                 }
@@ -659,7 +663,9 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
             // bg->AddPlayer(_player, team);
             sLog->outDebug("Battleground: player %s (%u) joined battle for bg %u, bgtype %u, queue type %u.", _player->GetName(), _player->GetGUIDLow(), bg->GetInstanceID(), bg->GetTypeID(), bgQueueTypeId);
             break;
+        }
         case 0:                                         // leave queue
+        {
             if (bg->isArena() && bg->GetStatus() > STATUS_WAIT_QUEUE)
                 return;
 
@@ -674,6 +680,9 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
                     at->SaveToDB();
                 }
             }
+
+            TRINITY_GUARD(ACE_Thread_Mutex, bgQueue.GetQueueMutex());
+
             _player->RemoveBattlegroundQueueId(bgQueueTypeId);  // must be called this way, because if you move this call to queue->removeplayer, it causes bugs
             sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, _player, queueSlot, STATUS_NONE, _player->GetBattlegroundQueueJoinTime(bgTypeId), 0, ginfo->ArenaType);
             bgQueue.RemovePlayer(_player->GetGUID(), true);
@@ -683,6 +692,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
             SendPacket(&data);
             sLog->outDebug("Battleground: player %s (%u) left queue for bgtype %u, queue type %u.", _player->GetName(), _player->GetGUIDLow(), bg->GetTypeID(), bgQueueTypeId);
             break;
+        }
         default:
             sLog->outError("Battleground port: unknown action %u", action);
             break;
