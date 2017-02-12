@@ -919,6 +919,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                         msg.erase(first, last-first+1);
             }
 
+            // explicitly cast "babylon" channel name to lowercase to pass future checks
+            if (stricmp(channel.c_str(), "babylon") == 0)
+                channel = "babylon";
+
             if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
             {
 
@@ -927,7 +931,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                     sScriptMgr->OnPlayerChat(_player, type, lang, msg, chn);
 
                     // channel "babylon" uses common language
-                    if (channel != "babylon")
+                    if (stricmp(channel.c_str(), "babylon") != 0)
                         chn->Say(_player->GetGUID(), msg.c_str(), lang);
                     else
                         chn->Say(_player->GetGUID(), msg.c_str(), LANG_UNIVERSAL);

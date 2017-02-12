@@ -52,6 +52,10 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
     if (channelName.empty())
         return;
 
+    // explicitly cast "babylon" channel name to lowercase to pass future checks
+    if (stricmp(channelName.c_str(), "babylon") == 0)
+        channelName = "babylon";
+
     if (ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
     {
         cMgr->team = GetPlayer()->GetTeam();
