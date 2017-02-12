@@ -11672,8 +11672,10 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
         if (HasFlag(UNIT_FIELD_AURASTATE,1<<(flag-1)))
         {
             // Don`t remove Enrage state when player has Enrage and Berserker Rage effect at the same moment
-            if (!HasAura(18499) && !(HasAura(12880) || HasAura(14201) || HasAura(14202)))
-                RemoveFlag(UNIT_FIELD_AURASTATE, 1<<(flag-1));
+            if (flag == AURA_STATE_ENRAGE && HasAura(18499) && (HasAura(12880) || HasAura(14201) || HasAura(14202)))
+                return;
+
+            RemoveFlag(UNIT_FIELD_AURASTATE, 1<<(flag-1));
 
             if (flag != AURA_STATE_ENRAGE)                  // enrage aura state triggering continues auras
             {
