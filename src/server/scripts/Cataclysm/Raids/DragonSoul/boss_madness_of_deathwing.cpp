@@ -1847,7 +1847,18 @@ public:
             if (!GetCaster())
                 return;
 
-            if (Aura* pCorruptedBlood = GetCaster()->GetAura(SPELL_BURNING_BLOOD))
+            uint32 auraId = 0;
+
+            if (GetCaster()->HasAura(SPELL_BURNING_BLOOD))
+                auraId = SPELL_BURNING_BLOOD;
+            else if (GetCaster()->HasAura(SPELL_BURNING_BLOOD_25))
+                auraId = SPELL_BURNING_BLOOD_25;
+            else if (GetCaster()->HasAura(SPELL_BURNING_BLOOD_10H))
+                auraId = SPELL_BURNING_BLOOD_10H;
+            else if (GetCaster()->HasAura(SPELL_BURNING_BLOOD_25H))
+                auraId = SPELL_BURNING_BLOOD_25H;
+
+            if (Aura* pCorruptedBlood = GetCaster()->GetAura(auraId))
             {
                 uint32 currHealthPct = GetCaster()->GetHealthPct();
                 uint32 stackAmount = 100 - currHealthPct;
@@ -2146,7 +2157,7 @@ void AddSC_boss_madness_of_deathwing()
     new npc_ds_madness_corrupting_parasite();       // 57479
 
     new spell_ds_elementium_blast();                // 105723, 109600, 109601, 109602
-    new spell_ds_burning_blood();                   // 105401
+    new spell_ds_burning_blood();                   // 105401, 109616, 109617, 109618
     new spell_ds_burning_blood_dmg();               // 105408, 105412, 105413, 105414
     new spell_ds_corrupted_blood_dmg();             // 106835, 109591, 109595, 109596
     new spell_ds_madness_cauterize();               // 105569, 109576, 109577, 109578
