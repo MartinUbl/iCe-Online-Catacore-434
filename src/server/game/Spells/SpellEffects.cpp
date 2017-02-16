@@ -4040,6 +4040,15 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                     return;
                 }
             }
+            if (m_spellInfo->Id == 109634 || m_spellInfo->Id == 109635 || m_spellInfo->Id == 109636)
+            {
+                if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
+                {
+                    unitTarget->ToPlayer()->AddSpellCooldown(109634, 0, 30000);
+                    unitTarget->ToPlayer()->AddSpellCooldown(109635, 0, 30000);
+                    unitTarget->ToPlayer()->AddSpellCooldown(109636, 0, 30000);
+                }
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:

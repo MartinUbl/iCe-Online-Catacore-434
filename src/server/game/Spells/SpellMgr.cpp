@@ -892,6 +892,10 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
                 case 108861: // 25N
                 case 109207: // 10HC
                 case 109208: // 25 HC
+                case 106794: // Shrapnel 10N
+                case 110141: // 25
+                case 110140: // 10HC
+                case 110139: // 25HC
                     return false;
                 case 30877: // Tag Murloc
                     return true;
@@ -4497,6 +4501,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
             break;
+        case 106213: // Blood of Neltharion
+            spellInfo->AttributesEx3 &= ~SPELL_ATTR3_DEATH_PERSISTENT;
+            break;
         // Madness of Deathwing
         case 106728: // Tetanus
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
@@ -4536,6 +4543,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 109961:
             spellInfo->DurationIndex = 28; // 5s
             break;
+        case 108787: // Parasitic Backlash
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_EXCLUDE_SELF;
         case 106776: // Impaling Tentacle
         case 106766: // Elementium Terror
             spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_TARGET_ANY;

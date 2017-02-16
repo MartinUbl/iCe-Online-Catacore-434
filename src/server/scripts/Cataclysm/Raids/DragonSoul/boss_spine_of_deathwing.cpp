@@ -260,6 +260,7 @@ public:
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_25N);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_10HC);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_25HC);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BLOOD_OF_NELTHARION);
             }
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -370,6 +371,7 @@ public:
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_25N);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_10HC);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SEARING_PLASMA_25HC);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BLOOD_OF_NELTHARION);
 
                 if (achievement)
                     instance->DoCompleteAchievement(ACHIEVEMENT_DIZZY);

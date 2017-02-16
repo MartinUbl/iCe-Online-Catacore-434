@@ -620,6 +620,7 @@ public:
             if (instance)
             {
                 instance->SetData(TYPE_BOSS_MADNESS_OF_DEATHWING, IN_PROGRESS);
+                instance->DoRemoveAurasDueToSpellOnPlayers(106213); // Blood of Neltharion
             }
 
             me->SendPlaySpellVisualKit(SPELL_EMERGE, 0);

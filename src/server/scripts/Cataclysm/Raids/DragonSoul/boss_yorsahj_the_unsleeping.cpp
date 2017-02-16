@@ -86,7 +86,7 @@ enum bloodAuraSpells : uint32
     SPELL_GLOWING_BLOOD_OF_SHUMA    = 104901
 };
 
-enum spells : uint32
+enum spells : int32
 {
     SPELL_VOID_BOLT                 = 104849,
     SPELL_VOID_BOLT_AOE             = 105416,
