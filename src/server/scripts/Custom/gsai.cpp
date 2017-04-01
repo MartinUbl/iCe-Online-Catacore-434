@@ -903,6 +903,8 @@ class GS_CreatureScript : public CreatureScript
                         return m_lastSummonedUnit;
                     case GSST_CLOSEST_CREATURE_GUID:
                         return GetClosestCreatureWithDBGuid(me, spec.value, 300.0f, true);
+                    case GSST_CLOSEST_DEAD_CREATURE:
+                        return GetClosestCreatureWithEntry(me, spec.value, 300.0f, false);
                     // may be also variable value, if the variable points to unit
                     case GSST_VARIABLE_VALUE:
                         if (variable_map.find(spec.value) != variable_map.end())

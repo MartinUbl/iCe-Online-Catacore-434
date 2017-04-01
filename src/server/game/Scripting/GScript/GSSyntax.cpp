@@ -393,6 +393,8 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_type = GSST_LAST_SUMMON;
             else if (subid == "creature_guid")
                 rr.subject_type = GSST_CLOSEST_CREATURE_GUID;
+            else if (subid == "closest_dead_creature")
+                rr.subject_type = GSST_CLOSEST_DEAD_CREATURE;
             else if (subid == "ready")
             {
                 rr.subject_type = GSST_STATE;
@@ -420,7 +422,7 @@ gs_specifier gs_specifier::parse(const char* str)
                     i++;
                 std::string subpar = std::string(str).substr(lastpos + 1, i - lastpos - 1);
 
-                if (rr.subject_type == GSST_CLOSEST_CREATURE || rr.subject_type == GSST_CLOSEST_CREATURE_GUID)
+                if (rr.subject_type == GSST_CLOSEST_CREATURE || rr.subject_type == GSST_CLOSEST_DEAD_CREATURE || rr.subject_type == GSST_CLOSEST_CREATURE_GUID)
                     tryStrToInt(rr.value, subpar.c_str());
             }
 
