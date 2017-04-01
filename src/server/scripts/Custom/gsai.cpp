@@ -1751,6 +1751,15 @@ class GS_CreatureScript : public CreatureScript
                             }
                             break;
                         }
+                        case GSCR_PHASE:
+                        {
+                            int32 mask = GS_GetValueFromSpecifier(curr->params.c_phase.phase_mask).toInteger();
+                            if (mask > 0)
+                                source->SetPhaseMask(mask, true);
+                            else
+                                source->SetPhaseMask(PHASEMASK_NORMAL, true);
+                            break;
+                        }
                         default:
                         case GSCR_NONE:
                             break;

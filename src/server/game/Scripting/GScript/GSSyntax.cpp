@@ -1408,6 +1408,17 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             else
                 CLEANUP_AND_THROW("unknown resolver type for instruction RESOLVE");
             break;
+        // phase instruction - modifies invoker's phase mask temporarily
+        // Syntax: phase <phase mask>
+        case GSCR_PHASE:
+            if (src->parameters.size() < 1)
+                CLEANUP_AND_THROW("too few parameters for instruction PHASE");
+            if (src->parameters.size() > 1)
+                CLEANUP_AND_THROW("too many parameters for instruction PHASE");
+
+            ret->params.c_phase.phase_mask = gs_specifier::parse(src->parameters[0].c_str());
+
+            break;
     }
 
     return ret;

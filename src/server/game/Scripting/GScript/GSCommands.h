@@ -81,6 +81,7 @@ enum gs_command_type
     GSCR_INVISIBLE = 51,
     GSCR_RESET = 52,
     GSCR_RESOLVE = 53,
+    GSCR_PHASE = 54,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -138,7 +139,8 @@ static std::string gscr_identifiers[] = {
     "visible",
     "invisible",
     "reset",
-    "resolve"
+    "resolve",
+    "phase"
 };
 
 enum gs_quest_operation
@@ -545,6 +547,11 @@ struct gs_command
             gs_specifier distance;
             gs_specifier rel_x, rel_y, rel_z;
         } c_resolve;
+
+        struct
+        {
+            gs_specifier phase_mask;
+        } c_phase;
 
     } params;
 
