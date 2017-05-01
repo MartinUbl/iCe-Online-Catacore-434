@@ -1578,7 +1578,7 @@ class GS_CreatureScript : public CreatureScript
                         case GSCR_SOUND:
                         {
                             Unit* target = GS_SelectTarget(curr->params.c_sound.target);
-                            source->PlayDirectSound(GS_GetValueFromSpecifier(curr->params.c_sound.sound_id).toInteger(), target->ToPlayer());
+                            source->PlayDirectSound(GS_GetValueFromSpecifier(curr->params.c_sound.sound_id).toInteger(), target ? target->ToPlayer() : nullptr);
                             break;
                         }
                         case GSCR_TALK:
