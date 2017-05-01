@@ -1362,6 +1362,7 @@ class GS_CreatureScript : public CreatureScript
                                 source->DeMorph();
                                 stored_modelid = 0;
                             }
+                            break;
                         case GSCR_SUMMON:
                         {
                             float x = GS_GetValueFromSpecifier(curr->params.c_summon.x).toFloat();
