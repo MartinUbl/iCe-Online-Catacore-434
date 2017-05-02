@@ -5938,6 +5938,25 @@ void SpellMgr::LoadSpellCustomAttr()
         case 93784: // Pistol Barrage (Heroic)
             spellInfo->Effect[1] = 0; // Disable second effect
             break;
+        // High Prophet Barim
+        case 88814: // Hallowed Ground (Normal)
+        case 90010: // Hallowed Ground (Heroic)
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_13_YARDS;
+            break;
+        case 82263: // Merged Souls
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
+            spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[2] = TARGET_NONE;
+        case 82224: // Soul Fragment
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            count++;
+            break;
+        case 91196: // Blaze of the Heavens
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_3_YARDS;
+            break;
         default:
             break;
         }

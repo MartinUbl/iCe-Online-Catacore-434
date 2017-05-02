@@ -19,14 +19,6 @@
 #include "ScriptPCH.h"
 #include "lost_city_of_the_tolvir.h"
 
-enum data
-{
-    DATA_GENERAL_HUSAM = 0,
-    DATA_LOCKMAW,
-    DATA_HIGH_PROPHET_BARIM,
-    DATA_SIAMAT
-};
-
 #define MAX_ENCOUNTER 4
 
 class instance_lost_city_of_the_tolvir : public InstanceMapScript

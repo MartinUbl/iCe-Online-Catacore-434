@@ -14,3 +14,11 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+enum data
+{
+    DATA_GENERAL_HUSAM = 0,
+    DATA_LOCKMAW,
+    DATA_HIGH_PROPHET_BARIM,
+    DATA_SIAMAT
+};
