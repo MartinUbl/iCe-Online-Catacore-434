@@ -1543,9 +1543,15 @@ public:
             {
                 if (IsCastingAllowed())
                 {
-                    me->CastSpell(me->GetVictim(), SPELL_IMPALE, false);
-                    impaleTimer = 35000;
-                    crushTimer += 8000;
+                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 300.0f, true))
+                    {
+                        if (pTarget && pTarget->IsAlive() && pTarget->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            me->CastSpell(pTarget, SPELL_IMPALE, false);
+                        }
+                        impaleTimer = 35000;
+                        crushTimer += 8000;
+                    }
                 }
             }
             else impaleTimer -= diff;
@@ -1896,8 +1902,18 @@ public:
 
             float damage = 0.0f;
             uint32 stackAmount = 0;
+            uint32 auraId = 0;
 
-            if (Aura * pBurningBlood = caster->GetAura(SPELL_BURNING_BLOOD))
+            if (GetCaster()->HasAura(SPELL_BURNING_BLOOD))
+                auraId = SPELL_BURNING_BLOOD;
+            else if (GetCaster()->HasAura(SPELL_BURNING_BLOOD_25))
+                auraId = SPELL_BURNING_BLOOD_25;
+            else if (GetCaster()->HasAura(SPELL_BURNING_BLOOD_10H))
+                auraId = SPELL_BURNING_BLOOD_10H;
+            else if (GetCaster()->HasAura(SPELL_BURNING_BLOOD_25H))
+                auraId = SPELL_BURNING_BLOOD_25H;
+
+            if (Aura * pBurningBlood = caster->GetAura(auraId))
                 stackAmount = pBurningBlood->GetStackAmount();
 
             damage = GetHitDamage() * stackAmount;
