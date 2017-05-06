@@ -176,7 +176,7 @@ public:
         {
             if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0 && who->IsWithinLOSInMap(me, false))
             {
-                if (!me->HasAura(SPELL_SAP))
+                if (!me->HasAura(SPELL_SAP) && who->HasAura(SPELL_MOSTRASZ_VISION))
                 {
                     if (me->GetExactDist2d(who) < 7.0f)
                     {
@@ -329,7 +329,7 @@ public:
         {
             if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0 && who->IsWithinLOSInMap(me, false))
             {
-                if (!me->HasAura(SPELL_SAP))
+                if (!me->HasAura(SPELL_SAP) && who->HasAura(SPELL_EYE_OF_ZAZZO))
                 {
                     if (me->GetExactDist2d(who) < 7.0f)
                     {
@@ -1324,7 +1324,7 @@ public:
         {
             if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0 && who->IsWithinLOSInMap(me, false))
             {
-                if (!me->HasAura(SPELL_SAP))
+                if (!me->HasAura(SPELL_SAP) && who->HasAura(SPELL_EYE_OF_ZAZZO_KARAZHAN))
                 {
                     if (me->GetExactDist2d(who) < 7.0f)
                     {
@@ -1366,7 +1366,7 @@ public:
             if (!target)
                 return;
 
-            me->MonsterSay(guardShouts[urand(0, KARAZHAN_SHOUT_COUNT - 1)], LANG_UNIVERSAL, 0);
+            me->MonsterSay(guardKarazhanShouts[urand(0, KARAZHAN_SHOUT_COUNT - 1)], LANG_UNIVERSAL, 0);
 
             target->Unmount();
             target->RemoveAurasByType(SPELL_AURA_MOUNTED);

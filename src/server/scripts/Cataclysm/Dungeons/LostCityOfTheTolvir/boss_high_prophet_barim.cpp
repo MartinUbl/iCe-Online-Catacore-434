@@ -619,7 +619,7 @@ public:
                     }
                 }
 
-                if (Creature * fire = me->FindNearestCreature(NPC_BLAZE_OF_THE_HEAVENS_FIRE, 1.5f, true))
+                if (me->FindNearestCreature(NPC_BLAZE_OF_THE_HEAVENS_FIRE, 1.5f, true))
                     me->AddAura(SPELL_BURNING_SOUL, me);
 
                 updateTimer = 1000;
