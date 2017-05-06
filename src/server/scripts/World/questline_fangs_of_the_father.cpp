@@ -121,9 +121,12 @@ enum RavenholdtSpells
 {
     SPELL_INFILTRATING_RAVENHOLDT     = 106067,
     SPELL_INFILTRATING_GILNEAS_CITY   = 109157,
+    SPELL_INFILTRATING_KARAZHAN       = 109376,
     SPELL_MOSTRASZ_VISION             = 106015,
     SPELL_EYE_OF_ZAZZO                = 109156,
+    SPELL_EYE_OF_ZAZZO_KARAZHAN       = 109374,
     SPELL_HIGH_ALERT                  = 106198,
+    SPELL_EYE_OF_THE_ARCANE           = 109366,
     SPELL_SAP                         = 6770,
     SPELL_STEALTH                     = 1784,
 
@@ -141,6 +144,7 @@ enum RavenholdtSpells
 
 static const Position MostraszPos = { 14.9f, -1447.1f, 175.3f, 0.04f };
 static const Position ZazzoPos = { -1392.0f , 1232.1f, 35.5f,  0.83f };
+static const Position ZazzoPosKarazhan = { -11155.2f, -2143.2f, 62.0f, 1.28f };
 
 class npc_ravenholdt_guards : public CreatureScript
 {
@@ -172,7 +176,7 @@ public:
         {
             if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0 && who->IsWithinLOSInMap(me, false))
             {
-                if (!me->HasAura(6770) && who->HasAura(70793))
+                if (!me->HasAura(SPELL_SAP))
                 {
                     if (me->GetExactDist2d(who) < 7.0f)
                     {
@@ -325,7 +329,7 @@ public:
         {
             if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0 && who->IsWithinLOSInMap(me, false))
             {
-                if (!me->HasAura(6770) && who->HasAura(70793))
+                if (!me->HasAura(SPELL_SAP))
                 {
                     if (me->GetExactDist2d(who) < 7.0f)
                     {
@@ -1230,6 +1234,211 @@ class npc_nalice_quest_checker : public CreatureScript
         };
 };
 
+class npc_wrathion_quest_checker : public CreatureScript
+{
+public:
+    npc_wrathion_quest_checker() : CreatureScript("npc_wrathion_quest_checker") {}
+
+    CreatureAI * GetAI(Creature * pCreature) const
+    {
+        return new npc_wrathion_quest_checkerAI(pCreature);
+    }
+
+    struct npc_wrathion_quest_checkerAI : public Scripted_NoMovementAI
+    {
+        npc_wrathion_quest_checkerAI(Creature * creature) : Scripted_NoMovementAI(creature) 
+        {
+            checkTimer = 1000;
+        }
+
+        uint32 checkTimer;
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (checkTimer <= diff)
+            {
+                // get players within 300y
+                float radius = 300.0f;
+                std::list<Player*> players;
+                Trinity::AnyPlayerInObjectRangeCheck checker(me, radius);
+                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
+                me->VisitNearbyWorldObject(radius, searcher);
+
+                for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                {
+                    // If player has quest Patricide! add aura for correct phase 
+                    if (((*itr)->GetQuestStatus(30118) == QUEST_STATUS_COMPLETE) && ((*itr)->GetItemCount(77949, true) == 0))
+                    {
+                        if (!(*itr)->HasAura(69078))
+                        {
+                            // Switch phase
+                            (*itr)->RemoveAura(59074);
+                            (*itr)->AddAura(69078, *itr);
+                        }
+                    }
+                }
+                checkTimer = 3000;
+            }
+            else checkTimer -= diff;
+        }
+    };
+};
+
+const uint8 KARAZHAN_SHOUT_COUNT = 6;
+
+static const char* guardKarazhanShouts[KARAZHAN_SHOUT_COUNT] = {
+    "Dirty sneak, you will be destroyed!",
+    "I see you...",
+    "I can smell you, thief!",
+    "Over here - an assassin!",
+    "Fool!",
+    "Terminate him!",
+};
+
+class npc_karazhan_guards : public CreatureScript
+{
+public:
+    npc_karazhan_guards() : CreatureScript("npc_karazhan_guards") { }
+
+    CreatureAI* GetAI(Creature *_Creature) const
+    {
+        return new npc_karazhan_guardsAI(_Creature);
+    }
+
+    struct npc_karazhan_guardsAI : public ScriptedAI
+    {
+        npc_karazhan_guardsAI(Creature *c) : ScriptedAI(c)
+        {
+            m_startMovementTimer = 0;
+        }
+
+        TaskScheduler scheduler;
+        uint32_t m_startMovementTimer;
+
+        void Reset()
+        {
+            me->CastSpell(me, SPELL_EYE_OF_THE_ARCANE, true);
+        }
+
+        void MoveInLineOfSight(Unit *who) override
+        {
+            if (who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->IsGameMaster() && (who->GetPhaseMask() & me->GetPhaseMask()) != 0 && who->IsWithinLOSInMap(me, false))
+            {
+                if (!me->HasAura(SPELL_SAP))
+                {
+                    if (me->GetExactDist2d(who) < 7.0f)
+                    {
+                        who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                        who->RemoveAura(SPELL_INFILTRATING_KARAZHAN);
+                        who->RemoveAura(SPELL_EYE_OF_ZAZZO_KARAZHAN);
+                        me->canAttack(who, true);
+                        me->GetMotionMaster()->MoveChase(who);
+                        me->Attack(who, true);
+                    }
+                }
+            }
+        }
+
+        void DropCombatEngagement(uint64 targetGUID)
+        {
+            std::list<Unit*> nearUnits;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 30.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, nearUnits, u_check);
+            me->VisitNearbyObject(30.0f, searcher);
+
+            for (Unit* un : nearUnits)
+            {
+                if (un->GetTypeId() != TYPEID_UNIT)
+                    continue;
+
+                if (un->GetVictim() && un->GetVictim()->GetGUID() == targetGUID)
+                {
+                    un->CombatStop(true);
+                    un->getThreatManager().clearReferences();
+                    un->GetMotionMaster()->MoveTargetedHome();
+                }
+            }
+        }
+
+        void EnterCombat(Unit * /*who*/) override
+        {
+            Unit * target = me->GetVictim();
+            if (!target)
+                return;
+
+            me->MonsterSay(guardShouts[urand(0, KARAZHAN_SHOUT_COUNT - 1)], LANG_UNIVERSAL, 0);
+
+            target->Unmount();
+            target->RemoveAurasByType(SPELL_AURA_MOUNTED);
+            target->RemoveAurasByType(SPELL_AURA_FLY);
+            target->RemoveAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
+            target->RemoveAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED);
+
+            uint64 targetGUID = target->GetGUID();
+
+            scheduler.Schedule(Seconds(6), [this, targetGUID](TaskContext /*context*/)
+            {
+                Unit* target = sObjectAccessor->FindUnit(targetGUID);
+
+                DropCombatEngagement(targetGUID);
+
+                me->CombatStop(true);
+                if (target)
+                    target->CombatStop(true);
+                me->getThreatManager().clearReferences();
+                me->GetMotionMaster()->MoveTargetedHome();
+
+                if (target && me->GetDistance2d(target) < 10.0f)
+                {
+                    target->NearTeleportTo(ZazzoPosKarazhan.GetPositionX(), ZazzoPosKarazhan.GetPositionY(), ZazzoPosKarazhan.GetPositionZ(), ZazzoPosKarazhan.GetOrientation());
+                    target->ToPlayer()->RemoveSpellCooldown(SPELL_STEALTH);
+                    target->CastSpell(target, SPELL_STEALTH, true);
+                    target->CastSpell(target, SPELL_EYE_OF_ZAZZO, true);
+                    target->CastSpell(target, SPELL_INFILTRATING_GILNEAS_CITY, true);
+
+                    if (Creature * pZazzo = me->FindNearestCreature(57770, 50.0f, true))
+                        pZazzo->MonsterSay("You call that sneaking?", LANG_UNIVERSAL, 0);
+                }
+            });
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            scheduler.Update(diff);
+
+            if (!me->isMoving())
+            {
+                if (!me->IsInCombat() && me->CanFreeMove() && m_startMovementTimer == 0)
+                    m_startMovementTimer = 5000;
+                else if (m_startMovementTimer != 0)
+                {
+                    if (m_startMovementTimer <= diff)
+                    {
+                        if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                            ((WaypointMovementGenerator<Creature>*)me->GetMotionMaster()->top())->StartMoveNow(me);
+                        m_startMovementTimer = 0;
+                    }
+                    else
+                        m_startMovementTimer -= diff;
+                }
+            }
+
+            if (!me->GetVictim())
+                return;
+
+            if (me->GetVictim()->GetDistance(me) > 30.0f)
+            {
+                me->CombatStop(true);
+                me->getThreatManager().clearReferences();
+                me->GetMotionMaster()->MoveTargetedHome();
+                return;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_questline_fangs_of_the_father()
 {
     new npc_thaumaturge_altha_and_rafir;
@@ -1243,4 +1452,6 @@ void AddSC_questline_fangs_of_the_father()
     new npc_nalice_ground_explosion();
     new npc_nalice_blazing_shadows();
     new npc_nalice_quest_checker();
+    new npc_wrathion_quest_checker();
+    new npc_karazhan_guards();
 }
