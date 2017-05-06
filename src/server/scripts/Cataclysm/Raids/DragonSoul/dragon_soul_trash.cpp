@@ -1547,9 +1547,14 @@ public:
 
     struct npc_ds_twilight_sapperAI : public ScriptedAI
     {
-        npc_ds_twilight_sapperAI(Creature *creature) : ScriptedAI(creature) { }
+        npc_ds_twilight_sapperAI(Creature *creature) : ScriptedAI(creature) 
+        {
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+        }
 
         TaskScheduler scheduler;
+        uint32 moveTimer;
         bool explosion;
 
         void Reset() override
@@ -1557,6 +1562,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->GetMotionMaster()->MoveFall();
+            moveTimer = 3000;
             explosion = false;
 
             scheduler.Schedule(Seconds(2), [this](TaskContext /*task context*/)
@@ -1581,6 +1587,14 @@ public:
         {
             scheduler.Update(diff);
 
+            if (moveTimer <= diff)
+            {
+                if (!me->HasAuraType(SPELL_AURA_MOD_STUN))
+                    me->GetMotionMaster()->MovePoint(0, sapperEndPos, true, true);
+                moveTimer = 1000;
+            }
+            else moveTimer -= diff;
+
             if (!explosion)
             {
                 if (me->GetDistance2d(sapperEndPos.GetPositionX(), sapperEndPos.GetPositionY()) <= 2.0f)
@@ -1590,7 +1604,8 @@ public:
 
                     // Deal dmg to the ship (20% Ship health) 
                     if (Creature* pShip = me->FindNearestCreature(NPC_SKYFIRE, 300.0f))
-                        pShip->SetHealth(pShip->GetHealth() - pShip->GetMaxHealth()*0.2);
+                        pShip->DealDamage(pShip, pShip->GetMaxHealth()*0.2);
+
                     me->CastSpell(me, SPELL_DETONATE, false);
                     me->DespawnOrUnsummon(1000);
                 }
