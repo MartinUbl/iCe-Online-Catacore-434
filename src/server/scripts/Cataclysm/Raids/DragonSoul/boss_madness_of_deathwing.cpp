@@ -165,6 +165,9 @@ enum Spells
     SPELL_SHRAPNEL_AURA                 = 106818,
     SPELL_SHRAPNEL_AOE                  = 106789,
     SPELL_SHRAPNEL_TARGET               = 106794,
+    SPELL_SHRAPNEL_TARGET_10HC          = 110140,
+    SPELL_SHRAPNEL_TARGET_25N           = 110141,
+    SPELL_SHRAPNEL_TARGET_25HC          = 110139,
     SPELL_SHRAPNEL_DMG                  = 106791,
 
     // Corrupting Parasite
@@ -197,6 +200,10 @@ enum Spells
     SPELL_ENTER_THE_DREAM               = 106464,
     SPELL_SPELLWEAVER                   = 106039,
     SPELL_SPELLWEAVING                  = 106040,
+    SPELL_SPELLWEAVING_DMG_10N          = 106043,
+    SPELL_SPELLWEAVING_DMG_25N          = 109609,
+    SPELL_SPELLWEAVING_DMG_10HC         = 109610,
+    SPELL_SPELLWEAVING_DMG_25HC         = 109611,
     SPELL_FIRE_DRAGON_SOUL              = 109971,
 
     ACHIEVEMENT_DESTROYERS_END          = 6177,
@@ -446,7 +453,8 @@ public:
         uint32 elementiumFragmentsTimer;
         uint32 elementiumTerrorsTimer;
         uint32 congealingTimer;
-        uint32 healthPct;
+        uint32 congealingCounter;
+        uint32 healthPctForNextSpawn;
         uint32 berserkTimer;
 
         uint8 platformKilled;
@@ -474,6 +482,7 @@ public:
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetVisible(false);
             me->RemoveAura(SPELL_SLUMP);
+            me->RemoveAura(SPELL_BERSERK);
 
             assaultAspectsTimer = 5000;
             newAssault = true;
@@ -484,7 +493,8 @@ public:
             elementiumFragmentsTimer = 0;
             elementiumTerrorsTimer = 0;
             congealingTimer = 0;
-            healthPct = 15;
+            healthPctForNextSpawn = 15;
+            congealingCounter = 0;
             berserkTimer = 15 * MINUTE * IN_MILLISECONDS;
             phase = PHASE_LIMBS;
 
@@ -1078,6 +1088,14 @@ public:
             if (!UpdateVictim())
                 return;
 
+            if (berserkTimer <= diff)
+            {
+                me->CastSpell(me, SPELL_BERSERK, true);
+                if (Creature * pDeathwingHead = me->FindNearestCreature(NPC_DEATHWING_HEAD, 300.0f, true))
+                    pDeathwingHead->CastSpell(pDeathwingHead, SPELL_BERSERK, true);
+            }
+            else berserkTimer -= diff;
+
             if (phase == PHASE_LIMBS)
             {
                 // Assault Aspects
@@ -1116,10 +1134,12 @@ public:
                 me->CastSpell(me, SPELL_SLUMP, false);
                 RunPlayableQuote(slumbQuote);
 
-                canSpawnCongealing = true;
                 elementiumFragmentsTimer = 10000;
                 elementiumTerrorsTimer = 40000;
-                congealingTimer = 60000;
+                canSpawnCongealing = true;
+                congealingTimer = 0;
+                congealingCounter = 0;
+                healthPctForNextSpawn = 15;
                 phase = PHASE_HEAD_DOWN;
 
                 if (Creature * pThrall = me->FindNearestCreature(NPC_THRALL_MADNESS_START, 500.0f, true))
@@ -1144,20 +1164,37 @@ public:
                 // Congealing Bloods should spawn at 15, 10 and 5 HealthPct or 60s into the phase if HealthPct hasn't been reached yet
                 if (IsHeroic())
                 {
+                    congealingTimer += diff;
+
+                    if (canSpawnCongealing == false)
+                    {
+                        if (congealingCounter == 1)
+                        {
+                            if (me->GetHealthPct() <= 15)
+                            {
+                                congealingTimer = 0;
+                                canSpawnCongealing = true;
+                            }
+                        }
+                        else if (congealingCounter == 2)
+                        {
+                            if (me->GetHealthPct() <= 10)
+                            {
+                                congealingTimer = 0;
+                                canSpawnCongealing = true;
+                            }
+                        }
+                    }
+
                     if (canSpawnCongealing == true)
                     {
-                        if (me->GetHealthPct() < healthPct || congealingTimer <= diff)
+                        if ((me->GetHealthPct() > healthPctForNextSpawn && congealingTimer >= 60000) || me->GetHealthPct() <= healthPctForNextSpawn)
                         {
                             SpawnAdds(ACTION_SPAWN_CONGEALING_BLOODS);
-                            if (healthPct > 5)
-                            {
-                                healthPct -= 5;
-                                congealingTimer = 60000;
-                            }
-                            else
-                                canSpawnCongealing = false;
+                            healthPctForNextSpawn -= 5;
+                            canSpawnCongealing = false;
+                            congealingCounter++;
                         }
-                        else congealingTimer -= diff;
                     }
                 }
             }
@@ -1749,9 +1786,17 @@ public:
         {
             if (shrapnelTimer < diff)
             {
-                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 300.0f, true, -SPELL_SHRAPNEL_TARGET))
+                int32 shrapnelAura = 0;
+                switch (me->GetMap()->GetDifficulty())
                 {
-                    me->CastSpell(pTarget, SPELL_SHRAPNEL_TARGET, true);
+                case RAID_DIFFICULTY_10MAN_HEROIC: shrapnelAura = SPELL_SHRAPNEL_TARGET_10HC; break;
+                case RAID_DIFFICULTY_25MAN_NORMAL: shrapnelAura = SPELL_SHRAPNEL_TARGET_25N; break;
+                case RAID_DIFFICULTY_25MAN_HEROIC: shrapnelAura = SPELL_SHRAPNEL_TARGET_25HC; break;
+                default:/*RAID_DIFFICULTY_10MAN N*/shrapnelAura = SPELL_SHRAPNEL_TARGET; break;
+                }
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 300.0f, true, -shrapnelAura))
+                {
+                    pTarget->CastSpell(pTarget, SPELL_SHRAPNEL_TARGET, true);
                     me->CastSpell(pTarget, SPELL_SHRAPNEL_DMG, false);
                 }
                 shrapnelTimer = 8000;
@@ -1779,6 +1824,8 @@ public:
 
         void Reset() override
         {
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             canHeal = false;
             me->SetReactState(REACT_PASSIVE);
             me->GetMotionMaster()->MovePoint(0, congealingPosHeal.GetPositionX(), congealingPosHeal.GetPositionY(), congealingPosHeal.GetPositionZ());
@@ -1792,9 +1839,11 @@ public:
                 {
                     canHeal = true;
 
-                    // Heal Deathwing
+                    // Heal Deathwing's head and Deathwing as well due to shared health
                     if (Creature* pHead = me->FindNearestCreature(NPC_DEATHWING_HEAD, 300.0f))
                         me->CastSpell(pHead, SPELL_CONGEALING_BLOOD_HEAL, false);
+                    if (Creature* pDeathwing = me->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 500.0f))
+                        me->CastSpell(pDeathwing, SPELL_CONGEALING_BLOOD_HEAL, false);
                     me->DespawnOrUnsummon(1000);
                 }
             }
@@ -1948,7 +1997,7 @@ public:
             if (!caster)
                 return;
 
-            float damage = 0.0f;
+            float damage = GetHitDamage();
             float dmg_multiplier = 0.0f;
 
             switch (GetCaster()->GetMap()->GetDifficulty())
@@ -2041,6 +2090,43 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_ds_madness_cauterize_SpellScript();
+    }
+};
+
+class IsNotSpellweaverTarget
+{
+public:
+    bool operator()(WorldObject* object) const
+    {
+        if (object->ToCreature() && object->ToCreature()->GetEntry() == NPC_BLISTERING_TENTACLE)
+            return true;
+        return false;
+    }
+};
+
+class spell_ds_madness_spellweave : public SpellScriptLoader
+{
+public:
+    spell_ds_madness_spellweave() : SpellScriptLoader("spell_ds_madness_spellweave") { }
+
+    class spell_ds_madness_spellweave_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_madness_spellweave_SpellScript);
+
+        void RemoveInvalidTargets(std::list<Unit*>& unitList)
+        {
+            unitList.remove_if(IsNotSpellweaverTarget());
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ds_madness_spellweave_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_AREA_ENEMY_DST);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_madness_spellweave_SpellScript();
     }
 };
 
@@ -2180,6 +2266,7 @@ void AddSC_boss_madness_of_deathwing()
     new spell_ds_time_zone();                       // 105830
     new spell_ds_madness_corrupting_parasite();     // 108649
     new spell_ds_unstable_corruption();             // 108813
+    new spell_ds_madness_spellweave();              // 106043, 109609, 109610, 109611
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
