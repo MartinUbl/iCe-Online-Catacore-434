@@ -166,51 +166,76 @@ void BattlegroundWS::Update(uint32 diff)
                       plr->CastSpell(plr,WS_SPELL_FOCUSED_ASSAULT,true);
 
                     m_FlagDebuffState++;
-                    m_FlagSpellForceTimer = 60000; // Every minute afterwards
+                    m_FlagSpellForceTimer = 0; // Reset timer for next stack
                 }
                 break;
             }
             case 1:
             case 2:
             case 3:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
             {
                 if (m_FlagSpellForceTimer >= 60000)
                 {
                     if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
-                      plr->CastSpell(plr,WS_SPELL_FOCUSED_ASSAULT,true);
+                      plr->CastSpell(plr,m_FlagDebuffState < 4 ? WS_SPELL_FOCUSED_ASSAULT : WS_SPELL_BRUTAL_ASSAULT,true);
                     if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
-                      plr->CastSpell(plr,WS_SPELL_FOCUSED_ASSAULT,true);
+                        plr->CastSpell(plr, m_FlagDebuffState < 4 ? WS_SPELL_FOCUSED_ASSAULT : WS_SPELL_BRUTAL_ASSAULT, true);
 
                     m_FlagDebuffState++;
-                    m_FlagSpellForceTimer = 60000;
+                    m_FlagSpellForceTimer = 0;
                 }
                 break;
             }
-            case 4: // After 7 minutes, Brutal Assault will be applied in place of Focused Assault
+            case 4: // After 7 minutes, Brutal Assault will mutate into Focused Assault
             {
-                if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+                if (m_FlagSpellForceTimer >= 60000)
                 {
-                      plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
-                      plr->CastSpell(plr,WS_SPELL_BRUTAL_ASSAULT,true);
-                }
-                if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
-                {
-                      plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
-                      plr->CastSpell(plr,WS_SPELL_BRUTAL_ASSAULT,true);
-                }
+                    // Set debuff state first for correct amount of stacks
+                    m_FlagDebuffState++;
+                    m_FlagSpellForceTimer = 0;
 
-                m_FlagDebuffState++;
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+                    {
+                        plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
+                        for (size_t i = 0; i < m_FlagDebuffState; i++)
+                        {
+                            plr->CastSpell(plr, WS_SPELL_BRUTAL_ASSAULT, true);
+                        }
+                    }
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+                    {
+                        plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
+                        for (size_t i = 0; i < m_FlagDebuffState; i++)
+                        {
+                            plr->CastSpell(plr, WS_SPELL_BRUTAL_ASSAULT, true);
+                        }
+                    }
+                }
                 break;
             }
-
             default:
                 break;
           }
         }
         else
         {
-          m_FlagSpellForceTimer = 0; //reset timer.
-          m_FlagDebuffState = 0;
+            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+            {
+                plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
+                plr->RemoveAurasDueToSpell(WS_SPELL_BRUTAL_ASSAULT);
+            }
+            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+            {
+                plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
+                plr->RemoveAurasDueToSpell(WS_SPELL_BRUTAL_ASSAULT);
+            }
+            m_FlagSpellForceTimer = 0; // Reset timer
+            m_FlagDebuffState = 0;
         }
     }
 }
@@ -442,7 +467,6 @@ void BattlegroundWS::EventPlayerDroppedFlag(Player *Source)
             Source->RemoveAurasDueToSpell(BG_WS_SPELL_WARSONG_FLAG);
             Source->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
             Source->RemoveAurasDueToSpell(WS_SPELL_BRUTAL_ASSAULT);
-
             m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_ON_GROUND;
             Source->CastSpell(Source, BG_WS_SPELL_WARSONG_FLAG_DROPPED, true);
             set = true;
@@ -554,13 +578,11 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             Source->CastSpell(Source, BG_WS_SPELL_SILVERWING_FLAG, true);
             m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_ON_PLAYER;
             UpdateFlagState(HORDE, BG_WS_FLAG_STATE_ON_PLAYER);
-            if (m_FlagDebuffState > 1 && m_FlagDebuffState < 4 )
+            if (m_FlagDebuffState >= 1)
             {
                 for (uint8 i = 0; i < m_FlagDebuffState; i++)
-                    Source->CastSpell(Source,WS_SPELL_FOCUSED_ASSAULT,true);
+                    Source->CastSpell(Source, m_FlagDebuffState <= 4 ? WS_SPELL_FOCUSED_ASSAULT : WS_SPELL_BRUTAL_ASSAULT, true);
             }
-            if (m_FlagDebuffState >= 4)
-              Source->CastSpell(Source,WS_SPELL_BRUTAL_ASSAULT,true);
 
             UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, 1);
         }
@@ -592,13 +614,12 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             Source->CastSpell(Source, BG_WS_SPELL_WARSONG_FLAG, true);
             m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_ON_PLAYER;
             UpdateFlagState(ALLIANCE, BG_WS_FLAG_STATE_ON_PLAYER);
-            if (m_FlagDebuffState > 1 && m_FlagDebuffState < 4 )
+            if (m_FlagDebuffState >= 1)
             {
                 for (uint8 i = 0; i < m_FlagDebuffState; i++)
-                    Source->CastSpell(Source,WS_SPELL_FOCUSED_ASSAULT,true);
+                    Source->CastSpell(Source, m_FlagDebuffState <= 4 ? WS_SPELL_FOCUSED_ASSAULT : WS_SPELL_BRUTAL_ASSAULT,true);
             }
-            if (m_FlagDebuffState >= 4)
-              Source->CastSpell(Source,WS_SPELL_BRUTAL_ASSAULT,true);
+
             UpdateWorldState(BG_WS_FLAG_UNK_HORDE, 1);
         }
         //called in HandleGameObjectUseOpcode:
