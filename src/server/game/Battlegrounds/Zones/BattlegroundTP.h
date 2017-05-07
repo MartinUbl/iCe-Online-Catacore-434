@@ -123,6 +123,12 @@ enum BG_TP_CreatureTypes
     BG_CREATURES_MAX_TP       = 4
 };
 
+enum BG_TP_CarrierDebuffs
+{
+    TP_SPELL_FOCUSED_ASSAULT    = 46392,
+    TP_SPELL_BRUTAL_ASSAULT     = 46393
+};
+
 enum BG_TP_Objectives
 {
     TP_OBJECTIVE_FLAG_CAPTURE   = 290,
@@ -208,6 +214,8 @@ class BattlegroundTP : public Battleground
         uint32 m_HonorWinKills;
         uint32 m_HonorEndKills;
         bool m_BothFlagsKept;
+        int32 m_FlagSpellForceTimer;
+        uint8 m_FlagDebuffState;                            // 0,1,2,3 - focused assault 4 - brutal assault
         uint8 m_minutesElapsed;
 };
 #endif

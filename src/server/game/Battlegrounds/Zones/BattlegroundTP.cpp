@@ -148,6 +148,94 @@ void BattlegroundTP::Update(uint32 diff)
                 m_BothFlagsKept = false;
             }
         }
+
+        if (m_BothFlagsKept)
+        {
+            m_FlagSpellForceTimer += diff;
+
+            switch (m_FlagDebuffState)
+            {
+            case 0:
+            {
+                if (m_FlagSpellForceTimer >= 180000) // After 3 minutes of both teams having the flag
+                {
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+                        plr->CastSpell(plr, TP_SPELL_FOCUSED_ASSAULT, true);
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+                        plr->CastSpell(plr, TP_SPELL_FOCUSED_ASSAULT, true);
+
+                    m_FlagDebuffState++;
+                    m_FlagSpellForceTimer = 0; // Reset timer for next stack
+                }
+                break;
+            }
+            case 1:
+            case 2:
+            case 3:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            {
+                if (m_FlagSpellForceTimer >= 60000)
+                {
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+                        plr->CastSpell(plr, m_FlagDebuffState < 4 ? TP_SPELL_FOCUSED_ASSAULT : TP_SPELL_BRUTAL_ASSAULT, true);
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+                        plr->CastSpell(plr, m_FlagDebuffState < 4 ? TP_SPELL_FOCUSED_ASSAULT : TP_SPELL_BRUTAL_ASSAULT, true);
+
+                    m_FlagDebuffState++;
+                    m_FlagSpellForceTimer = 0;
+                }
+                break;
+            }
+            case 4: // After 7 minutes, Brutal Assault will mutate into Focused Assault
+            {
+                if (m_FlagSpellForceTimer >= 60000)
+                {
+                    // Set debuff state first for correct amount of stacks
+                    m_FlagDebuffState++;
+                    m_FlagSpellForceTimer = 0;
+
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+                    {
+                        plr->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+                        for (size_t i = 0; i < m_FlagDebuffState; i++)
+                        {
+                            plr->CastSpell(plr, TP_SPELL_BRUTAL_ASSAULT, true);
+                        }
+                    }
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+                    {
+                        plr->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+                        for (size_t i = 0; i < m_FlagDebuffState; i++)
+                        {
+                            plr->CastSpell(plr, TP_SPELL_BRUTAL_ASSAULT, true);
+                        }
+                    }
+                }
+                break;
+            }
+            default:
+                break;
+            }
+        }
+        else
+        {
+            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+            {
+                plr->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+                plr->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
+            }
+            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+            {
+                plr->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+                plr->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
+            }
+            m_FlagSpellForceTimer = 0; // Reset timer
+            m_FlagDebuffState = 0;
+        }
     }
 }
 
@@ -262,6 +350,9 @@ void BattlegroundTP::EventPlayerCapturedFlag(Player *Source)
         m_FlagState[BG_TEAM_HORDE] = BG_TP_FLAG_STATE_WAIT_RESPAWN;
                                                             // Drop Horde Flag from Player
         Source->RemoveAurasDueToSpell(BG_TP_SPELL_HORDE_FLAG);
+        Source->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+        Source->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
+
         if (GetTeamScore(ALLIANCE) < BG_TP_MAX_TEAM_SCORE)
             AddPoint(ALLIANCE, 1);
         PlaySoundToAll(BG_TP_SOUND_FLAG_CAPTURED_ALLIANCE);
@@ -276,6 +367,9 @@ void BattlegroundTP::EventPlayerCapturedFlag(Player *Source)
         m_FlagState[BG_TEAM_ALLIANCE] = BG_TP_FLAG_STATE_WAIT_RESPAWN;
                                                             // Drop Alliance Flag from Player
         Source->RemoveAurasDueToSpell(BG_TP_SPELL_ALLIANCE_FLAG);
+        Source->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+        Source->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
+
         if (GetTeamScore(HORDE) < BG_TP_MAX_TEAM_SCORE)
             AddPoint(HORDE, 1);
         PlaySoundToAll(BG_TP_SOUND_FLAG_CAPTURED_HORDE);
@@ -361,6 +455,8 @@ void BattlegroundTP::EventPlayerDroppedFlag(Player *Source)
         {
             SetHordeFlagPicker(0);
             Source->RemoveAurasDueToSpell(BG_TP_SPELL_HORDE_FLAG);
+            Source->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+            Source->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
             m_FlagState[BG_TEAM_HORDE] = BG_TP_FLAG_STATE_ON_GROUND;
             Source->CastSpell(Source, BG_TP_SPELL_HORDE_FLAG_DROPPED, true);
             set = true;
@@ -374,6 +470,8 @@ void BattlegroundTP::EventPlayerDroppedFlag(Player *Source)
         {
             SetAllianceFlagPicker(0);
             Source->RemoveAurasDueToSpell(BG_TP_SPELL_ALLIANCE_FLAG);
+            Source->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+            Source->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
             m_FlagState[BG_TEAM_ALLIANCE] = BG_TP_FLAG_STATE_ON_GROUND;
             Source->CastSpell(Source, BG_TP_SPELL_ALLIANCE_FLAG_DROPPED, true);
             set = true;
@@ -469,6 +567,12 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             m_FlagState[BG_TEAM_ALLIANCE] = BG_TP_FLAG_STATE_ON_PLAYER;
             UpdateFlagState(HORDE, BG_TP_FLAG_STATE_ON_PLAYER);
             UpdateWorldState(TP_FLAG_ALLIANCE_UP, 1);
+
+            if (m_FlagDebuffState >= 1)
+            {
+                for (uint8 i = 0; i < m_FlagDebuffState; i++)
+                    Source->CastSpell(Source, m_FlagDebuffState <= 4 ? TP_SPELL_FOCUSED_ASSAULT : TP_SPELL_BRUTAL_ASSAULT, true);
+            }
         }
         //called in HandleGameObjectUseOpcode:
         //target_obj->Delete();
@@ -499,6 +603,12 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             m_FlagState[BG_TEAM_HORDE] = BG_TP_FLAG_STATE_ON_PLAYER;
             UpdateFlagState(ALLIANCE, BG_TP_FLAG_STATE_ON_PLAYER);
             UpdateWorldState(TP_FLAG_HORDE_UP, 1);
+
+            if (m_FlagDebuffState >= 1)
+            {
+                for (uint8 i = 0; i < m_FlagDebuffState; i++)
+                    Source->CastSpell(Source, m_FlagDebuffState <= 4 ? TP_SPELL_FOCUSED_ASSAULT : TP_SPELL_BRUTAL_ASSAULT, true);
+            }
         }
         //called in HandleGameObjectUseOpcode:
         //target_obj->Delete();
