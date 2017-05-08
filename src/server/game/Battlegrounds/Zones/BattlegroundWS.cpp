@@ -806,6 +806,9 @@ void BattlegroundWS::Reset()
     // For WorldState
     m_minutesElapsed                    = 0;
     m_LastFlagCaptureTeam               = 0;
+    m_BothFlagsKept                     = 0;
+    m_FlagSpellForceTimer               = 0;
+    m_FlagDebuffState                   = 0;
 
     /* Spirit nodes is static at this BG and then not required deleting at BG reset.
     if (m_BgCreatures[WS_SPIRIT_MAIN_ALLIANCE])

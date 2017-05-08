@@ -786,6 +786,9 @@ void BattlegroundTP::Reset()
     // For WorldState
     m_minutesElapsed                    = 0;
     m_LastFlagCaptureTeam               = 0;
+    m_BothFlagsKept                     = 0;
+    m_FlagSpellForceTimer               = 0;
+    m_FlagDebuffState                   = 0;
 }
 
 void BattlegroundTP::EndBattleground(uint32 winner)
