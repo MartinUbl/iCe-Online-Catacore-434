@@ -91,7 +91,7 @@ void GSMgr::UnregisterAI(ScriptedAI* src)
         m_registeredAIs.erase(src);
 }
 
-CommandVector* GSMgr::GetScript(int id)
+CommandContainer* GSMgr::GetScript(int id)
 {
     if (m_loadedScripts.find(id) == m_loadedScripts.end())
         return nullptr;

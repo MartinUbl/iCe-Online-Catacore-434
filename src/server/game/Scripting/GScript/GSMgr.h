@@ -46,13 +46,13 @@ class GSMgr
         void LoadScripts();
         void RegisterAI(ScriptedAI* src);
         void UnregisterAI(ScriptedAI* src);
-        CommandVector* GetScript(int id);
+        CommandContainer* GetScript(int id);
 
         void AddError(int scriptId, std::string err);
         std::list<std::string>* GetErrorList();
 
     private:
-        std::map<int, CommandVector*> m_loadedScripts;
+        std::map<int, CommandContainer*> m_loadedScripts;
         std::set<ScriptedAI*> m_registeredAIs;
         std::list<std::string> m_errorList;
 };

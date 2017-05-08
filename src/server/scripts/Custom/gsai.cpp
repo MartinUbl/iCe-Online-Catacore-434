@@ -14,6 +14,22 @@ class GS_CreatureScript : public CreatureScript
             //
         }
 
+        struct GS_EventQueueItem
+        {
+            EventHookType ev_hook_type;
+            int start_offset;
+            int end_offset;
+            int current_offset;
+
+            GS_EventQueueItem(EventHookType evHookType, int startOffset, int endOffset)
+            {
+                ev_hook_type = evHookType;
+                start_offset = startOffset;
+                current_offset = startOffset;
+                end_offset = endOffset;
+            }
+        };
+
         struct GS_QuestScriptRecord
         {
             int acceptScriptId;
@@ -312,12 +328,17 @@ class GS_CreatureScript : public CreatureScript
 
         struct GS_ScriptedAI : public ScriptedAI
         {
+            std::queue<GS_EventQueueItem> eventQueue;
             // vector of commands to be executed
-            CommandVector* my_commands;
+            CommandContainer* com_container;
             // command counter (similar to program counter register); points to specific element in my_commands
             uint32 com_counter;
             // flag for waiting (not moving to next instruction)
             bool is_waiting;
+            // flag for while command
+            bool lock_move_counter = false;
+            // snapshoted com_counter in case of event hook calls
+            uint32 snapshot_com_counter;
             // if waiting, this timer will then stop waiting loop
             uint32 wait_timer;
             // waiting flags
@@ -391,7 +412,7 @@ class GS_CreatureScript : public CreatureScript
 
             GS_ScriptedAI(Creature* cr) : ScriptedAI(cr)
             {
-                my_commands = nullptr;
+                com_container = nullptr;
                 for (int i = 0; i < 10; i++)
                     m_gossipSelectScripts[i] = -1;
 
@@ -401,6 +422,8 @@ class GS_CreatureScript : public CreatureScript
 
                 // ordinary reset
                 com_counter = 0;
+                snapshot_com_counter = 0;
+                lock_move_counter = false;
                 is_waiting = false;
                 disable_melee = false;
                 is_moving = false;
@@ -414,6 +437,12 @@ class GS_CreatureScript : public CreatureScript
                 sGSMgr->UnregisterAI(this);
             }
 
+            inline void ClearEventQueue() 
+            {
+                while (!eventQueue.empty())
+                    eventQueue.pop(); 
+            }
+
             void DoAction(const int32 action) override
             {
                 if (action == GSAI_SIGNAL_UNHOOK)
@@ -421,8 +450,11 @@ class GS_CreatureScript : public CreatureScript
                     // while any other thread is inside UpdateAI, wait to leave
                     while (is_updating_lock)
                         ;
-                    my_commands = nullptr;
+                    com_container = nullptr;
                     com_counter = 0;
+
+                    snapshot_com_counter = 0;
+                    ClearEventQueue();
                 }
                 else if (action == GSAI_SIGNAL_REHOOK)
                 {
@@ -430,9 +462,9 @@ class GS_CreatureScript : public CreatureScript
                     ResetState();
 
                     if (m_currentScriptType == GS_TYPE_COMBAT && m_combatScriptId >= 0)
-                        my_commands = sGSMgr->GetScript(m_combatScriptId);
+                        com_container = sGSMgr->GetScript(m_combatScriptId);
                     else if (m_currentScriptType == GS_TYPE_OUT_OF_COMBAT && m_outOfCombatScriptId >= 0)
-                        my_commands = sGSMgr->GetScript(m_outOfCombatScriptId);
+                        com_container = sGSMgr->GetScript(m_outOfCombatScriptId);
                 }
                 else if (action == GSAI_SIGNAL_INVOKER_FROM_CREATOR)
                 {
@@ -503,6 +535,9 @@ class GS_CreatureScript : public CreatureScript
 
             void SpellHit(Unit* who, const SpellEntry* spell) override
             {
+                if (who != me)
+                    AddEventToQueue(EVENT_HOOK_SPELL_HIT);
+
                 if (m_spellReceivedScripts.find(spell->Id) != m_spellReceivedScripts.end())
                 {
                     if (m_currentScriptType != GS_TYPE_COMBAT)
@@ -589,6 +624,10 @@ class GS_CreatureScript : public CreatureScript
             {
                 // reset command counter, waiting and melee disable flags
                 com_counter = 0;
+                snapshot_com_counter = 0;
+                ClearEventQueue();
+
+                lock_move_counter = false;
                 is_waiting = false;
                 disable_melee = false;
                 is_moving = false;
@@ -645,26 +684,83 @@ class GS_CreatureScript : public CreatureScript
 
             void EnterEvadeMode() override
             {
+                ExecuteCommandDirectly(EVENT_HOOK_EVADE);
+
                 if (!is_script_locked)
                 {
                     ResetState();
-
                     GS_SelectScript(GS_TYPE_OUT_OF_COMBAT);
                 }
 
                 ScriptedAI::EnterEvadeMode();
             }
 
+            void JustDied(Unit * killer) override
+            {
+                ExecuteCommandDirectly(EVENT_HOOK_DIED);
+                ScriptedAI::JustDied(killer);
+            }
+
+            // Used only by JustDied and EnterEvadeMode hooks
+            void ExecuteCommandDirectly(EventHookType hookType)
+            {
+                AddEventToQueue(hookType);
+                GS_EventQueueItem &eventItem = eventQueue.front();
+
+                while (com_counter != eventItem.end_offset)
+                {
+                    if (eventItem.current_offset == eventItem.start_offset)
+                    {
+                        com_counter = eventItem.start_offset + 1;
+                    }
+
+                    ExecuteCommand(0, lock_move_counter, true);
+                    eventItem.current_offset = com_counter;
+
+                    if (eventItem.current_offset == eventItem.end_offset)
+                        break;
+                }
+
+                ClearEventQueue();
+            }
+
+            void KilledUnit(Unit * victim) override
+            {
+                AddEventToQueue(EVENT_HOOK_KILLED);
+                ScriptedAI::KilledUnit(victim);
+            }
+
             void EnterCombat(Unit* who) override
             {
                 com_counter = 0;
+                snapshot_com_counter = 0;
+                lock_move_counter = false;
                 is_waiting = false;
                 disable_melee = false;
                 is_moving = false;
+
                 if (!is_script_locked)
                     GS_SelectScript(GS_TYPE_COMBAT);
 
+                AddEventToQueue(EVENT_HOOK_COMBAT);
+
                 ScriptedAI::EnterCombat(who);
+            }
+
+            void AddEventToQueue(EventHookType hookType)
+            {
+                // command container is nullptr if gscript was unsuccessfully reloaded (error in script)
+                if (!com_container)
+                    return;
+
+                // if event hook is registered, schedule its execution
+                if (com_container->event_offset_map.find(hookType) != com_container->event_offset_map.end())
+                {
+                    int startOffset = com_container->event_offset_map[hookType].start_offset;
+                    int endOffset = com_container->event_offset_map[hookType].end_offset;
+                    auto eventItem = GS_EventQueueItem(hookType, startOffset, endOffset);
+                    eventQueue.push(eventItem);
+                }
             }
 
             uint64 GS_MakeTypeParamPair(GScriptType type, int32 param)
@@ -791,7 +887,7 @@ class GS_CreatureScript : public CreatureScript
                     if (GS_HasScriptCooldownFor(type, param, invoker))
                         return false;
 
-                    my_commands = sGSMgr->GetScript(scriptId);
+                    com_container = sGSMgr->GetScript(scriptId);
                     m_currentScriptType = type;
                     m_scriptInvokerGUID = invoker ? invoker->GetGUID() : 0;
                     m_currentScriptParam = param;
@@ -806,7 +902,7 @@ class GS_CreatureScript : public CreatureScript
                 else
                 {
                     // reset state
-                    my_commands = nullptr;
+                    com_container = nullptr;
                     m_currentScriptType = GS_TYPE_NONE;
                     m_currScriptSettings = nullptr;
                     m_scriptInvokerGUID = 0;
@@ -1084,7 +1180,14 @@ class GS_CreatureScript : public CreatureScript
                     targetAI->SetParentUnit(me);
                 }
 
+                AddEventToQueue(EVENT_HOOK_JUST_SUMMONED);
+
                 m_lastSummonedUnit = summoned;
+            }
+
+            void AttackStart(Unit *who) override
+            {
+                ScriptedAI::AttackStart(who);
             }
 
             void SummonedCreatureDespawn(Creature* summoned) override
@@ -1103,7 +1206,7 @@ class GS_CreatureScript : public CreatureScript
 
             void UpdateAI(const uint32 diff) override
             {
-                bool lock_move_counter = false;
+                lock_move_counter = false;
 
                 is_updating_lock = true;
 
@@ -1123,7 +1226,7 @@ class GS_CreatureScript : public CreatureScript
                 }
 
                 // do not proceed script, if not in combat, and the script has not yet started/has already finished
-                if (m_currentScriptType == GS_TYPE_COMBAT && !me->IsInCombat() && (com_counter == 0 || com_counter == my_commands->size()))
+                if (m_currentScriptType == GS_TYPE_COMBAT && !me->IsInCombat() && (com_counter == 0 || com_counter == com_container->command_vector.size()))
                 {
                     // if the script has been locked, and we reached end, there's no point in holding lock anymore
                     is_script_locked = false;
@@ -1132,7 +1235,7 @@ class GS_CreatureScript : public CreatureScript
                     return;
                 }
 
-                if (!my_commands || com_counter == my_commands->size())
+                if (!com_container || com_counter == com_container->command_vector.size())
                 {
                     // when no commands specified, or we just ended script block, there's no point in holding lock anymore
                     is_script_locked = false;
@@ -1178,605 +1281,651 @@ class GS_CreatureScript : public CreatureScript
 
                 GS_UpdateTimers(diff);
 
-                gs_command* curr = (*my_commands)[com_counter];
+                // handle event commands
+                if (!eventQueue.empty())
+                {
+                    GS_EventQueueItem &eventItem = eventQueue.front();
+
+                    if (eventItem.current_offset == eventItem.start_offset)
+                    {
+                        snapshot_com_counter = com_counter;
+                        com_counter = eventItem.start_offset + 1;
+                    }
+
+                    ExecuteCommand(diff, lock_move_counter, true);
+                    eventItem.current_offset = com_counter;
+
+                    if (eventItem.current_offset == eventItem.end_offset)
+                    {
+                        eventQueue.pop();
+                    }
+
+                    if (eventQueue.empty())
+                    {
+                        com_counter = snapshot_com_counter;
+                    }
+
+                    is_updating_lock = false;
+                    return;
+                }
+
+                // main flow of commands
+                ExecuteCommand(diff, lock_move_counter, false);
+                is_updating_lock = false;
+            }
+
+            void ExecuteCommand(const uint32 diff, bool &lock_move_counter, bool is_in_event_handler)
+            {
+                gs_command* curr = com_container->command_vector[com_counter];
 
                 Unit* source = GS_SelectTarget(curr->command_delegate);
                 if (source)
                 {
                     switch (curr->type)
                     {
-                        case GSCR_LABEL:    // these instructions just marks current offset
-                        case GSCR_ENDIF:
-                        case GSCR_REPEAT:
-                        case GSCR_ENDWHEN:
-                            break;
-                        case GSCR_GOTO:
-                            com_counter = curr->params.c_goto_label.instruction_offset;
-                            break;
-                        case GSCR_WAIT:
-                            // if we are already waiting, loop in timer until the end is reached
-                            if (is_waiting)
-                            {
-                                // if waiting ended, cancel wait flag
-                                if (wait_timer < diff)
-                                    is_waiting = false;
-                                else
-                                    wait_timer -= diff;
-                            }
-                            else // just stumbled upon wait instruction
-                            {
-                                // set waiting flag and store waiting parameters
-                                is_waiting = true;
-                                wait_timer = GS_GetValueFromSpecifier(curr->params.c_wait.delay).toInteger();
-                                wait_flags = curr->params.c_wait.flags;
-                            }
-                            break;
-                        case GSCR_CAST:
+                    case GSCR_LABEL:    // these instructions just marks current offset
+                    case GSCR_ENDIF:
+                    case GSCR_REPEAT:
+                    case GSCR_ENDWHEN:
+                    case GSCR_END_EVENT:
+                        break;
+                    case GSCR_EVENT:
+                        com_counter = curr->params.c_event.end_offset;
+                        break;
+                    case GSCR_GOTO:
+                        com_counter = curr->params.c_goto_label.instruction_offset;
+                        break;
+                    case GSCR_WAIT:
+                        // if we are already waiting, loop in timer until the end is reached
+                        if (is_waiting)
                         {
-                            Unit* target = GS_SelectTarget(curr->params.c_cast.target_type);
-                            source->CastSpell(target, GS_GetValueFromSpecifier(curr->params.c_cast.spell).toInteger(), curr->params.c_cast.triggered);
-                            break;
-                        }
-                        case GSCR_SAY:
-                        {
-                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
-                            source->MonsterSay(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, invoker ? invoker->GetGUID() : 0);
-                            int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
-                            if (sound > 0)
-                                source->PlayDirectSound(sound);
-
-                            int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
-                            if (emote > 0)
-                                source->HandleEmoteCommand(emote);
-                            break;
-                        }
-                        case GSCR_YELL:
-                        {
-                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
-                            source->MonsterYell(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, invoker ? invoker->GetGUID() : 0);
-                            int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
-                            if (sound > 0)
-                                source->PlayDirectSound(sound);
-
-                            int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
-                            if (emote > 0)
-                                source->HandleEmoteCommand(emote);
-                            break;
-                        }
-                        case GSCR_TEXTEMOTE:
-                        {
-                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
-                            source->MonsterTextEmote(curr->params.c_say_yell.tosay, invoker ? invoker->GetGUID() : 0, false);
-                            int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
-                            if (sound > 0)
-                                source->PlayDirectSound(sound);
-
-                            int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
-                            if (emote > 0)
-                                source->HandleEmoteCommand(emote);
-                            break;
-                        }
-                        case GSCR_BOSSEMOTE:
-                        {
-                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
-                            source->MonsterTextEmote(curr->params.c_say_yell.tosay, invoker ? invoker->GetGUID() : 0, true);
-                            int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
-                            if (sound > 0)
-                                source->PlayDirectSound(sound);
-
-                            int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
-                            if (emote > 0)
-                                source->HandleEmoteCommand(emote);
-                            break;
-                        }
-                        case GSCR_WHISPER:
-                        {
-                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
-                            Unit* target;
-                            if (curr->params.c_whisper.target.subject_type == GSST_NONE)
-                                target = invoker;
+                            // if waiting ended, cancel wait flag
+                            if (wait_timer < diff)
+                                is_waiting = false;
                             else
-                                target = GS_SelectTarget(curr->params.c_whisper.target);
-
-                            source->MonsterWhisper(curr->params.c_whisper.tosay, target ? target->GetGUID() : 0);
-                            break;
+                                wait_timer -= diff;
                         }
-                        case GSCR_IF:
-                            // if script does not meet condition passed in, move to endif offset
-                            if (!GS_Meets(curr->params.c_if.condition))
-                                com_counter = curr->params.c_if.endif_offset;
-                            break;
-                        case GSCR_WHEN:
-                            // if we already passed this when (condition was at least once true), or if the condition is not true,
-                            // move to endwhen; otherwise pass to condition body and insert WHEN offset to set, to avoid passing again
-                            if (when_set.find(com_counter) != when_set.end() || !GS_Meets(curr->params.c_when.condition))
-                                com_counter = curr->params.c_when.endwhen_offset;
-                            else
-                                when_set.insert(com_counter);
-                            break;
-                        case GSCR_WHILE:
-                            // if script does not meet condition passed in, move to endwhile offset
-                            if (!GS_Meets(curr->params.c_while.condition))
-                                com_counter = curr->params.c_while.endwhile_offset;
-                            break;
-                        case GSCR_ENDWHILE:
-                            com_counter = curr->params.c_endwhile.while_offset;
-                            // this avoids moving to next instruction after switch command (just this method call pass)
-                            lock_move_counter = true;
-                            break;
-                        case GSCR_UNTIL:
-                            // if script does not meet condition passed in, move to repeat offset
-                            if (!GS_Meets(curr->params.c_until.condition))
-                                com_counter = curr->params.c_until.repeat_offset;
-                            break;
-                        case GSCR_COMBATSTOP:
-                            disable_melee = true;
-                            source->AttackStop();
-                            source->getThreatManager().clearReferences();
-                            break;
-                        case GSCR_FACTION:
-                            // if the faction is larger than 0, that means set faction to specified value
-                            if (curr->params.c_faction.faction.value > 0)
-                            {
-                                // store original faction, if not stored yet
-                                if (stored_faction == 0)
-                                    stored_faction = source->getFaction();
-                                source->setFaction(GS_GetValueFromSpecifier(curr->params.c_faction.faction).toInteger());
-                            }
-                            // or if we are about to restore original faction and we already stored that value
-                            else if (stored_faction != 0)
-                            {
-                                // restore faction
-                                source->setFaction(stored_faction);
-                                stored_faction = 0;
-                            }
-                            break;
-                        case GSCR_REACT:
-                            if (source->GetTypeId() == TYPEID_UNIT)
-                            {
-                                if (stored_react >= 99)
-                                    stored_react = (uint8)source->ToCreature()->GetReactState();
-                                source->ToCreature()->SetReactState(curr->params.c_react.reactstate);
-                            }
-                            break;
-                        case GSCR_KILL:
-                            if (Unit* victim = GS_SelectTarget(curr->params.c_kill.target))
-                                source->Kill(victim);
-                            break;
-                        case GSCR_COMBATSTART:
-                            disable_melee = false;
-                            source->Attack(source->GetVictim(), true);
-                            break;
-                        case GSCR_TIMER:
-                            GS_SetTimer(curr->params.c_timer.timer_id, GS_GetValueFromSpecifier(curr->params.c_timer.value).toInteger());
-                            break;
-                        case GSCR_MORPH:
-                            if (curr->params.c_morph.morph_id.value > 0)
-                            {
-                                if (stored_modelid == 0)
-                                    stored_modelid = source->GetDisplayId();
-                                source->SetDisplayId(GS_GetValueFromSpecifier(curr->params.c_morph.morph_id).toInteger());
-                            }
-                            else if (stored_modelid > 0)
-                            {
-                                source->DeMorph();
-                                stored_modelid = 0;
-                            }
-                            break;
-                        case GSCR_SUMMON:
+                        else // just stumbled upon wait instruction
                         {
-                            float x = GS_GetValueFromSpecifier(curr->params.c_summon.x).toFloat();
-                            float y = GS_GetValueFromSpecifier(curr->params.c_summon.y).toFloat();
-                            float z = GS_GetValueFromSpecifier(curr->params.c_summon.z).toFloat();
-                            float o = source->GetOrientation();
-                            if (x == 0 && y == 0 && z == 0)
-                                source->GetPosition(x, y, z, o);
-
-                            TempSummonType sumtype = TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT;
-                            if (curr->params.c_summon.nodespawn)
-                                sumtype = TEMPSUMMON_MANUAL_DESPAWN;
-
-                            source->SummonCreature(GS_GetValueFromSpecifier(curr->params.c_summon.creature_entry).toInteger(), x, y, z, o, sumtype, 15000);
-                            break;
-                        }
-                        case GSCR_WALK:
-                            source->SetWalk(true);
-                            is_moving = true;
-                            source->GetMotionMaster()->MovePoint(100,
-                                GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.x).toFloat(),
-                                GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.y).toFloat(),
-                                GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.z).toFloat(),
-                                true);
-                            break;
-                        case GSCR_RUN:
-                            source->SetWalk(false);
-                            is_moving = true;
-                            source->GetMotionMaster()->MovePoint(100,
-                                GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.x).toFloat(),
-                                GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.y).toFloat(),
-                                GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.z).toFloat(),
-                                true);
-                            break;
-                        case GSCR_TELEPORT:
-                            source->NearTeleportTo(GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.x).toFloat(),
-                                GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.y).toFloat(),
-                                GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.z).toFloat(),
-                                source->GetOrientation());
-                            break;
-                        case GSCR_WAITFOR:
+                            // set waiting flag and store waiting parameters
                             is_waiting = true;
-                            wait_flags = 0;
-                            if (curr->params.c_waitfor.eventtype == GSET_MOVEMENT && !is_moving)
-                                is_waiting = false;
-                            else if (curr->params.c_waitfor.eventtype == GSET_CAST && !source->IsNonMeleeSpellCasted(false))
-                                is_waiting = false;
-                            else if (curr->params.c_waitfor.eventtype == GSET_NONE)
-                                is_waiting = false;
-                            break;
-                        case GSCR_LOCK:
-                            is_script_locked = true;
-                            break;
-                        case GSCR_UNLOCK:
-                            is_script_locked = false;
-                            break;
-                        case GSCR_SCALE:
-                            if (!curr->params.c_scale.restore)
-                            {
-                                if (stored_scale < 0.0f)
-                                    stored_scale = source->GetFloatValue(OBJECT_FIELD_SCALE_X);
+                            wait_timer = GS_GetValueFromSpecifier(curr->params.c_wait.delay).toInteger();
+                            wait_flags = curr->params.c_wait.flags;
+                        }
+                        break;
+                    case GSCR_CAST:
+                    {
+                        Unit* target = GS_SelectTarget(curr->params.c_cast.target_type);
+                        source->CastSpell(target, GS_GetValueFromSpecifier(curr->params.c_cast.spell).toInteger(), curr->params.c_cast.triggered);
+                        break;
+                    }
+                    case GSCR_SAY:
+                    {
+                        Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
+                        source->MonsterSay(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, invoker ? invoker->GetGUID() : 0);
+                        int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
+                        if (sound > 0)
+                            source->PlayDirectSound(sound);
 
-                                source->SetFloatValue(OBJECT_FIELD_SCALE_X, GS_GetValueFromSpecifier(curr->params.c_scale.scale).toFloat());
+                        int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
+                        if (emote > 0)
+                            source->HandleEmoteCommand(emote);
+                        break;
+                    }
+                    case GSCR_YELL:
+                    {
+                        Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
+                        source->MonsterYell(curr->params.c_say_yell.tosay, LANG_UNIVERSAL, invoker ? invoker->GetGUID() : 0);
+                        int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
+                        if (sound > 0)
+                            source->PlayDirectSound(sound);
+
+                        int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
+                        if (emote > 0)
+                            source->HandleEmoteCommand(emote);
+                        break;
+                    }
+                    case GSCR_TEXTEMOTE:
+                    {
+                        Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
+                        source->MonsterTextEmote(curr->params.c_say_yell.tosay, invoker ? invoker->GetGUID() : 0, false);
+                        int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
+                        if (sound > 0)
+                            source->PlayDirectSound(sound);
+
+                        int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
+                        if (emote > 0)
+                            source->HandleEmoteCommand(emote);
+                        break;
+                    }
+                    case GSCR_BOSSEMOTE:
+                    {
+                        Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
+                        source->MonsterTextEmote(curr->params.c_say_yell.tosay, invoker ? invoker->GetGUID() : 0, true);
+                        int sound = GS_GetValueFromSpecifier(curr->params.c_say_yell.sound_id).toInteger();
+                        if (sound > 0)
+                            source->PlayDirectSound(sound);
+
+                        int emote = GS_GetValueFromSpecifier(curr->params.c_say_yell.emote_id).toInteger();
+                        if (emote > 0)
+                            source->HandleEmoteCommand(emote);
+                        break;
+                    }
+                    case GSCR_WHISPER:
+                    {
+                        Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
+                        Unit* target;
+                        if (curr->params.c_whisper.target.subject_type == GSST_NONE)
+                            target = invoker;
+                        else
+                            target = GS_SelectTarget(curr->params.c_whisper.target);
+
+                        source->MonsterWhisper(curr->params.c_whisper.tosay, target ? target->GetGUID() : 0);
+                        break;
+                    }
+                    case GSCR_IF:
+                        // if script does not meet condition passed in, move to endif offset
+                        if (!GS_Meets(curr->params.c_if.condition))
+                            com_counter = curr->params.c_if.endif_offset;
+                        break;
+                    case GSCR_WHEN:
+                        // if we already passed this when (condition was at least once true), or if the condition is not true,
+                        // move to endwhen; otherwise pass to condition body and insert WHEN offset to set, to avoid passing again
+                        if (when_set.find(com_counter) != when_set.end() || !GS_Meets(curr->params.c_when.condition))
+                            com_counter = curr->params.c_when.endwhen_offset;
+                        else
+                            when_set.insert(com_counter);
+                        break;
+                    case GSCR_WHILE:
+                        // if script does not meet condition passed in, move to endwhile offset
+                        if (!GS_Meets(curr->params.c_while.condition))
+                            com_counter = curr->params.c_while.endwhile_offset;
+                        break;
+                    case GSCR_ENDWHILE:
+                        com_counter = curr->params.c_endwhile.while_offset;
+                        // this avoids moving to next instruction after switch command (just this method call pass)
+                        lock_move_counter = true;
+                        break;
+                    case GSCR_UNTIL:
+                        // if script does not meet condition passed in, move to repeat offset
+                        if (!GS_Meets(curr->params.c_until.condition))
+                            com_counter = curr->params.c_until.repeat_offset;
+                        break;
+                    case GSCR_COMBATSTOP:
+                        disable_melee = true;
+                        source->AttackStop();
+                        source->getThreatManager().clearReferences();
+                        break;
+                    case GSCR_FACTION:
+                        // if the faction is larger than 0, that means set faction to specified value
+                        if (curr->params.c_faction.faction.value > 0)
+                        {
+                            // store original faction, if not stored yet
+                            if (stored_faction == 0)
+                                stored_faction = source->getFaction();
+                            source->setFaction(GS_GetValueFromSpecifier(curr->params.c_faction.faction).toInteger());
+                        }
+                        // or if we are about to restore original faction and we already stored that value
+                        else if (stored_faction != 0)
+                        {
+                            // restore faction
+                            source->setFaction(stored_faction);
+                            stored_faction = 0;
+                        }
+                        break;
+                    case GSCR_REACT:
+                        if (source->GetTypeId() == TYPEID_UNIT)
+                        {
+                            if (stored_react >= 99)
+                                stored_react = (uint8)source->ToCreature()->GetReactState();
+                            source->ToCreature()->SetReactState(curr->params.c_react.reactstate);
+                        }
+                        break;
+                    case GSCR_KILL:
+                        if (Unit* victim = GS_SelectTarget(curr->params.c_kill.target))
+                            source->Kill(victim);
+                        break;
+                    case GSCR_COMBATSTART:
+                        disable_melee = false;
+                        source->Attack(source->GetVictim(), true);
+                        break;
+                    case GSCR_TIMER:
+                        GS_SetTimer(curr->params.c_timer.timer_id, GS_GetValueFromSpecifier(curr->params.c_timer.value).toInteger());
+                        break;
+                    case GSCR_MORPH:
+                        if (curr->params.c_morph.morph_id.value > 0)
+                        {
+                            if (stored_modelid == 0)
+                                stored_modelid = source->GetDisplayId();
+                            source->SetDisplayId(GS_GetValueFromSpecifier(curr->params.c_morph.morph_id).toInteger());
+                        }
+                        else if (stored_modelid > 0)
+                        {
+                            source->DeMorph();
+                            stored_modelid = 0;
+                        }
+                        break;
+                    case GSCR_SUMMON:
+                    {
+                        float x = GS_GetValueFromSpecifier(curr->params.c_summon.x).toFloat();
+                        float y = GS_GetValueFromSpecifier(curr->params.c_summon.y).toFloat();
+                        float z = GS_GetValueFromSpecifier(curr->params.c_summon.z).toFloat();
+                        float o = source->GetOrientation();
+                        if (x == 0 && y == 0 && z == 0)
+                            source->GetPosition(x, y, z, o);
+
+                        TempSummonType sumtype = TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT;
+                        if (curr->params.c_summon.nodespawn)
+                            sumtype = TEMPSUMMON_MANUAL_DESPAWN;
+
+                        source->SummonCreature(GS_GetValueFromSpecifier(curr->params.c_summon.creature_entry).toInteger(), x, y, z, o, sumtype, 15000);
+                        break;
+                    }
+                    case GSCR_WALK:
+                        source->SetWalk(true);
+                        is_moving = true;
+                        source->GetMotionMaster()->MovePoint(100,
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.x).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.y).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.z).toFloat(),
+                            true);
+                        break;
+                    case GSCR_RUN:
+                        source->SetWalk(false);
+                        is_moving = true;
+                        source->GetMotionMaster()->MovePoint(100,
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.x).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.y).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.z).toFloat(),
+                            true);
+                        break;
+                    case GSCR_TELEPORT:
+                        source->NearTeleportTo(GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.x).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.y).toFloat(),
+                            GS_GetValueFromSpecifier(curr->params.c_walk_run_teleport.z).toFloat(),
+                            source->GetOrientation());
+                        break;
+                    case GSCR_WAITFOR:
+                        is_waiting = true;
+                        wait_flags = 0;
+                        if (curr->params.c_waitfor.eventtype == GSET_MOVEMENT && !is_moving)
+                            is_waiting = false;
+                        else if (curr->params.c_waitfor.eventtype == GSET_CAST && !source->IsNonMeleeSpellCasted(false))
+                            is_waiting = false;
+                        else if (curr->params.c_waitfor.eventtype == GSET_NONE)
+                            is_waiting = false;
+                        break;
+                    case GSCR_LOCK:
+                        is_script_locked = true;
+                        break;
+                    case GSCR_UNLOCK:
+                        is_script_locked = false;
+                        break;
+                    case GSCR_SCALE:
+                        if (!curr->params.c_scale.restore)
+                        {
+                            if (stored_scale < 0.0f)
+                                stored_scale = source->GetFloatValue(OBJECT_FIELD_SCALE_X);
+
+                            source->SetFloatValue(OBJECT_FIELD_SCALE_X, GS_GetValueFromSpecifier(curr->params.c_scale.scale).toFloat());
+                        }
+                        else
+                        {
+                            if (stored_scale > 0.0f)
+                            {
+                                source->SetFloatValue(OBJECT_FIELD_SCALE_X, stored_scale);
+                                stored_scale = -1.0f;
+                            }
+                        }
+                    case GSCR_FLAGS:
+                        if (curr->params.c_flags.op == GSFO_ADD)
+                            source->SetFlag(curr->params.c_flags.field, curr->params.c_flags.value);
+                        else if (curr->params.c_flags.op == GSFO_REMOVE)
+                            source->RemoveFlag(curr->params.c_flags.field, curr->params.c_flags.value);
+                        else if (curr->params.c_flags.op == GSFO_SET)
+                            source->SetUInt32Value(curr->params.c_flags.field, curr->params.c_flags.value);
+                        break;
+                    case GSCR_IMMUNITY:
+                        if (curr->params.c_immunity.op == GSFO_ADD)
+                            source->ApplySpellImmune(0, IMMUNITY_MECHANIC, curr->params.c_immunity.mask, true);
+                        else if (curr->params.c_immunity.op == GSFO_REMOVE)
+                            source->ApplySpellImmune(0, IMMUNITY_MECHANIC, curr->params.c_immunity.mask, false);
+                        break;
+                    case GSCR_EMOTE:
+                        source->HandleEmoteCommand(GS_GetValueFromSpecifier(curr->params.c_emote.emote_id).toInteger());
+                        break;
+                    case GSCR_MOVIE:
+                        if (Player* pl = source->ToPlayer())
+                            pl->SendMovieStart(GS_GetValueFromSpecifier(curr->params.c_movie.movie_id).toInteger());
+                        break;
+                    case GSCR_AURA:
+                        if (Unit* target = GS_SelectTarget(curr->params.c_aura.subject))
+                        {
+                            if (curr->params.c_aura.op == GSFO_ADD)
+                                target->AddAura(GS_GetValueFromSpecifier(curr->params.c_aura.aura_id).toInteger(), source);
+                            else if (curr->params.c_aura.op == GSFO_REMOVE)
+                                target->RemoveAurasDueToSpell(GS_GetValueFromSpecifier(curr->params.c_aura.aura_id).toInteger());
+                        }
+                        break;
+                    case GSCR_SPEED:
+                        if (curr->params.c_speed.movetype >= 0 && curr->params.c_speed.movetype <= MAX_MOVE_TYPE)
+                            source->SetSpeed((UnitMoveType)curr->params.c_speed.movetype, GS_GetValueFromSpecifier(curr->params.c_speed.speed).toFloat(), true);
+                        break;
+                    case GSCR_MOVE:
+                        if (curr->params.c_move.movetype < 0)
+                        {
+                            source->GetMotionMaster()->MovementExpired();
+                            source->GetMotionMaster()->MoveIdle();
+                            source->StopMoving();
+
+                            source->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                            source->SetOrientation(source->GetOrientation());
+                            source->SendMovementFlagUpdate();
+                        }
+                        else
+                        {
+                            // if we are idling right now, start moving (if possible)
+                            if (source->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
+                            {
+                                source->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                                source->GetMotionMaster()->MovementExpired(true);
+                                if (source->GetVictim())
+                                    source->GetMotionMaster()->MoveChase(source->GetVictim());
+                            }
+
+                            if (curr->params.c_move.movetype == MOVE_RUN)
+                                source->SetWalk(false);
+                            if (curr->params.c_move.movetype == MOVE_WALK)
+                                source->SetWalk(true);
+                        }
+                        break;
+                    case GSCR_MOUNT:
+                        source->Mount(GS_GetValueFromSpecifier(curr->params.c_mount.mount_model_id).toInteger());
+                        break;
+                    case GSCR_UNMOUNT:
+                        source->Unmount();
+                        break;
+                    case GSCR_QUEST:
+                    {
+                        Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
+                        if (invoker && invoker->IsInWorld() && invoker->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            if (curr->params.c_quest.op == GSQO_COMPLETE)
+                                invoker->ToPlayer()->CompleteQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
+                            else if (curr->params.c_quest.op == GSQO_FAIL)
+                                invoker->ToPlayer()->FailQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
+                            else if (curr->params.c_quest.op == GSQO_PROGRESS)
+                                invoker->ToPlayer()->AddQuestObjectiveProgress(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.objective_index).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.value).toInteger());
+                        }
+                        break;
+                    }
+                    case GSCR_DESPAWN:
+                        if (Unit* subj = GS_SelectTarget(curr->params.c_despawn.subject))
+                            if (subj->GetTypeId() == TYPEID_UNIT)
+                                subj->ToCreature()->DespawnOrUnsummon();
+                        break;
+                    case GSCR_VAR:
+                    {
+                        auto itr = variable_map.find(curr->params.c_var.variable);
+                        if (itr == variable_map.end())
+                        {
+                            variable_map[curr->params.c_var.variable] = GS_Variable();
+                            itr = variable_map.find(curr->params.c_var.variable);
+                        }
+
+                        GS_Variable working = GS_GetValueFromSpecifier(curr->params.c_var.spec);
+
+                        if (curr->params.c_var.op == GSNOP_ASSIGN)
+                            itr->second = working;
+                        else if (curr->params.c_var.op == GSNOP_ADD)
+                            itr->second += working;
+                        else if (curr->params.c_var.op == GSNOP_SUBTRACT)
+                            itr->second -= working;
+                        else if (curr->params.c_var.op == GSNOP_MULTIPLY)
+                            itr->second *= working;
+                        else if (curr->params.c_var.op == GSNOP_DIVIDE)
+                        {
+                            // change type of our variable to floating point number instead of integer
+                            if (itr->second.type == GSVTYPE_INTEGER)
+                            {
+                                itr->second.value.asFloat = (float)itr->second.value.asInteger;
+                                itr->second.type = GSVTYPE_FLOAT;
+                            }
+                            itr->second /= working;
+                        }
+                        else if (curr->params.c_var.op == GSNOP_DIVIDE_INT)
+                        {
+                            // change both types to integer, to be sure we do integer division
+                            if (itr->second.type == GSVTYPE_FLOAT)
+                            {
+                                itr->second.value.asInteger = (int32)itr->second.value.asFloat;
+                                itr->second.type = GSVTYPE_INTEGER;
+                            }
+                            if (working.type == GSVTYPE_FLOAT)
+                            {
+                                working.value.asInteger = (int32)working.value.asFloat;
+                                working.type = GSVTYPE_INTEGER;
+                            }
+                            itr->second /= working;
+                        }
+                        else if (curr->params.c_var.op == GSNOP_MODULO)
+                            itr->second %= working;
+                        else if (curr->params.c_var.op == GSNOP_INCREMENT)
+                            itr->second += GS_Variable((int32)1);
+                        else if (curr->params.c_var.op == GSNOP_DECREMENT)
+                            itr->second -= GS_Variable((int32)1);
+
+                        break;
+                    }
+                    case GSCR_SOUND:
+                    {
+                        Unit* target = GS_SelectTarget(curr->params.c_sound.target);
+                        source->PlayDirectSound(GS_GetValueFromSpecifier(curr->params.c_sound.sound_id).toInteger(), target ? target->ToPlayer() : nullptr);
+                        break;
+                    }
+                    case GSCR_TALK:
+                    {
+                        if (source->GetTypeId() == TYPEID_UNIT)
+                        {
+                            Unit* target = GS_SelectTarget(curr->params.c_talk.talk_target);
+                            sCreatureTextMgr->SendChat(source->ToCreature(), GS_GetValueFromSpecifier(curr->params.c_talk.talk_group_id).toInteger(), target ? target->GetGUID() : 0);
+                        }
+                        break;
+                    }
+                    case GSCR_TURN:
+                    {
+                        GS_Variable turnpar = GS_GetValueFromSpecifier(curr->params.c_turn.amount);
+                        if (curr->params.c_turn.relative && (turnpar.type == GSVTYPE_INTEGER || turnpar.type == GSVTYPE_FLOAT))
+                            source->SetFacingTo(source->GetOrientation() + turnpar.toFloat());
+                        else
+                        {
+                            if (turnpar.type == GSVTYPE_UNIT)
+                                source->SetFacingToObject(turnpar.value.asUnitPointer);
+                            else
+                                source->SetFacingTo(turnpar.toFloat());
+                        }
+                        break;
+                    }
+                    case GSCR_FOLLOW:
+                    {
+                        if (Unit* target = GS_SelectTarget(curr->params.c_follow.subject))
+                            source->GetMotionMaster()->MoveFollow(target, GS_GetValueFromSpecifier(curr->params.c_follow.distance).toFloat(), GS_GetValueFromSpecifier(curr->params.c_follow.angle).toFloat());
+                        else
+                            source->GetMotionMaster()->MovementExpired();
+                        break;
+                    }
+                    case GSCR_UNVEHICLE:
+                    {
+                        GS_Variable vehEntry = GS_GetValueFromSpecifier(curr->params.c_unvehicle.entry);
+                        if (Unit* veh = source->GetVehicleBase())
+                            if (vehEntry.value.asInteger == 0 || vehEntry.value.asInteger == (int32)veh->GetEntry())
+                                source->ExitVehicle();
+                        break;
+                    }
+                    case GSCR_VISIBLE:
+                        source->SetVisibility(VISIBILITY_ON);
+                        break;
+                    case GSCR_INVISIBLE:
+                        source->SetVisibility(VISIBILITY_OFF);
+                        break;
+                    case GSCR_RESET:
+                        if (source == me)
+                        {
+                            // is this enough?
+                            EnterEvadeMode();
+                        }
+                        else
+                        {
+                            if (source->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                // this should not be valid, or..?
                             }
                             else
                             {
-                                if (stored_scale > 0.0f)
+                                Creature* cr = source->ToCreature();
+                                if (cr)
                                 {
-                                    source->SetFloatValue(OBJECT_FIELD_SCALE_X, stored_scale);
-                                    stored_scale = -1.0f;
+                                    if (cr->GetAI())
+                                        cr->GetAI()->Reset();
+                                    cr->LoadCreaturesAddon(true);
+
+                                    cr->GetMotionMaster()->MovementExpired(true);
+                                    cr->GetMotionMaster()->MoveTargetedHome();
                                 }
                             }
-                        case GSCR_FLAGS:
-                            if (curr->params.c_flags.op == GSFO_ADD)
-                                source->SetFlag(curr->params.c_flags.field, curr->params.c_flags.value);
-                            else if (curr->params.c_flags.op == GSFO_REMOVE)
-                                source->RemoveFlag(curr->params.c_flags.field, curr->params.c_flags.value);
-                            else if (curr->params.c_flags.op == GSFO_SET)
-                                source->SetUInt32Value(curr->params.c_flags.field, curr->params.c_flags.value);
-                            break;
-                        case GSCR_IMMUNITY:
-                            if (curr->params.c_immunity.op == GSFO_ADD)
-                                source->ApplySpellImmune(0, IMMUNITY_MECHANIC, curr->params.c_immunity.mask, true);
-                            else if (curr->params.c_immunity.op == GSFO_REMOVE)
-                                source->ApplySpellImmune(0, IMMUNITY_MECHANIC, curr->params.c_immunity.mask, false);
-                            break;
-                        case GSCR_EMOTE:
-                            source->HandleEmoteCommand(GS_GetValueFromSpecifier(curr->params.c_emote.emote_id).toInteger());
-                            break;
-                        case GSCR_MOVIE:
-                            if (Player* pl = source->ToPlayer())
-                                pl->SendMovieStart(GS_GetValueFromSpecifier(curr->params.c_movie.movie_id).toInteger());
-                            break;
-                        case GSCR_AURA:
-                            if (Unit* target = GS_SelectTarget(curr->params.c_aura.subject))
-                            {
-                                if (curr->params.c_aura.op == GSFO_ADD)
-                                    target->AddAura(GS_GetValueFromSpecifier(curr->params.c_aura.aura_id).toInteger(), source);
-                                else if (curr->params.c_aura.op == GSFO_REMOVE)
-                                    target->RemoveAurasDueToSpell(GS_GetValueFromSpecifier(curr->params.c_aura.aura_id).toInteger());
-                            }
-                            break;
-                        case GSCR_SPEED:
-                            if (curr->params.c_speed.movetype >= 0 && curr->params.c_speed.movetype <= MAX_MOVE_TYPE)
-                                source->SetSpeed((UnitMoveType)curr->params.c_speed.movetype, GS_GetValueFromSpecifier(curr->params.c_speed.speed).toFloat(), true);
-                            break;
-                        case GSCR_MOVE:
-                            if (curr->params.c_move.movetype < 0)
-                            {
-                                source->GetMotionMaster()->MovementExpired();
-                                source->GetMotionMaster()->MoveIdle();
-                                source->StopMoving();
-
-                                source->AddUnitState(UNIT_STATE_CANNOT_TURN);
-                                source->SetOrientation(source->GetOrientation());
-                                source->SendMovementFlagUpdate();
-                            }
-                            else
-                            {
-                                // if we are idling right now, start moving (if possible)
-                                if (source->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
-                                {
-                                    source->ClearUnitState(UNIT_STATE_CANNOT_TURN);
-                                    source->GetMotionMaster()->MovementExpired(true);
-                                    if (source->GetVictim())
-                                        source->GetMotionMaster()->MoveChase(source->GetVictim());
-                                }
-
-                                if (curr->params.c_move.movetype == MOVE_RUN)
-                                    source->SetWalk(false);
-                                if (curr->params.c_move.movetype == MOVE_WALK)
-                                    source->SetWalk(true);
-                            }
-                            break;
-                        case GSCR_MOUNT:
-                            source->Mount(GS_GetValueFromSpecifier(curr->params.c_mount.mount_model_id).toInteger());
-                            break;
-                        case GSCR_UNMOUNT:
-                            source->Unmount();
-                            break;
-                        case GSCR_QUEST:
-                        {
-                            Unit* invoker = Unit::GetUnit(*me, m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID);
-                            if (invoker && invoker->IsInWorld() && invoker->GetTypeId() == TYPEID_PLAYER)
-                            {
-                                if (curr->params.c_quest.op == GSQO_COMPLETE)
-                                    invoker->ToPlayer()->CompleteQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
-                                else if (curr->params.c_quest.op == GSQO_FAIL)
-                                    invoker->ToPlayer()->FailQuest(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger());
-                                else if (curr->params.c_quest.op == GSQO_PROGRESS)
-                                    invoker->ToPlayer()->AddQuestObjectiveProgress(GS_GetValueFromSpecifier(curr->params.c_quest.quest_id).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.objective_index).toInteger(), GS_GetValueFromSpecifier(curr->params.c_quest.value).toInteger());
-                            }
-                            break;
                         }
-                        case GSCR_DESPAWN:
-                            if (Unit* subj = GS_SelectTarget(curr->params.c_despawn.subject))
-                                if (subj->GetTypeId() == TYPEID_UNIT)
-                                    subj->ToCreature()->DespawnOrUnsummon();
-                            break;
-                        case GSCR_VAR:
+                        break;
+                    case GSCR_RESOLVE:
+                    {
+                        if (curr->params.c_resolve.resolver_type == GSRT_VECTOR)
                         {
-                            auto itr = variable_map.find(curr->params.c_var.variable);
-                            if (itr == variable_map.end())
+                            // initialize destination variables (so we can be sure they're there)
+                            for (int i = 0; i < 3; i++)
                             {
-                                variable_map[curr->params.c_var.variable] = GS_Variable();
-                                itr = variable_map.find(curr->params.c_var.variable);
+                                auto itr = variable_map.find(curr->params.c_resolve.variable[i]);
+                                if (itr == variable_map.end())
+                                    variable_map[curr->params.c_resolve.variable[i]] = GS_Variable();
                             }
 
-                            GS_Variable working = GS_GetValueFromSpecifier(curr->params.c_var.spec);
+                            float tmpx, tmpy, tmpz;
 
-                            if (curr->params.c_var.op == GSNOP_ASSIGN)
-                                itr->second = working;
-                            else if (curr->params.c_var.op == GSNOP_ADD)
-                                itr->second += working;
-                            else if (curr->params.c_var.op == GSNOP_SUBTRACT)
-                                itr->second -= working;
-                            else if (curr->params.c_var.op == GSNOP_MULTIPLY)
-                                itr->second *= working;
-                            else if (curr->params.c_var.op == GSNOP_DIVIDE)
+                            // angle + distance vector resolver
+                            if (curr->params.c_resolve.vector_resolve_type == GSVRT_ANGLE_DISTANCE)
                             {
-                                // change type of our variable to floating point number instead of integer
-                                if (itr->second.type == GSVTYPE_INTEGER)
+                                float angle = GS_GetValueFromSpecifier(curr->params.c_resolve.angle).toFloat() * M_PI / 180.0f;
+                                float distance = GS_GetValueFromSpecifier(curr->params.c_resolve.distance).toFloat();
+                                // base = current position
+                                if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_CURRENT)
                                 {
-                                    itr->second.value.asFloat = (float)itr->second.value.asInteger;
-                                    itr->second.type = GSVTYPE_FLOAT;
+                                    GS_CreatureScript::GetPoint2D(tmpx, tmpy, tmpz, source->GetPositionX(), source->GetPositionY(), source->GetPositionZ(),
+                                        source->GetObjectSize(), source->GetOrientation() + angle, distance, source->GetBaseMap());
                                 }
-                                itr->second /= working;
-                            }
-                            else if (curr->params.c_var.op == GSNOP_DIVIDE_INT)
-                            {
-                                // change both types to integer, to be sure we do integer division
-                                if (itr->second.type == GSVTYPE_FLOAT)
+                                // base = spawn position
+                                else if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_SPAWN)
                                 {
-                                    itr->second.value.asInteger = (int32)itr->second.value.asFloat;
-                                    itr->second.type = GSVTYPE_INTEGER;
-                                }
-                                if (working.type == GSVTYPE_FLOAT)
-                                {
-                                    working.value.asInteger = (int32)working.value.asFloat;
-                                    working.type = GSVTYPE_INTEGER;
-                                }
-                                itr->second /= working;
-                            }
-                            else if (curr->params.c_var.op == GSNOP_MODULO)
-                                itr->second %= working;
-                            else if (curr->params.c_var.op == GSNOP_INCREMENT)
-                                itr->second += GS_Variable((int32)1);
-                            else if (curr->params.c_var.op == GSNOP_DECREMENT)
-                                itr->second -= GS_Variable((int32)1);
-
-                            break;
-                        }
-                        case GSCR_SOUND:
-                        {
-                            Unit* target = GS_SelectTarget(curr->params.c_sound.target);
-                            source->PlayDirectSound(GS_GetValueFromSpecifier(curr->params.c_sound.sound_id).toInteger(), target ? target->ToPlayer() : nullptr);
-                            break;
-                        }
-                        case GSCR_TALK:
-                        {
-                            if (source->GetTypeId() == TYPEID_UNIT)
-                            {
-                                Unit* target = GS_SelectTarget(curr->params.c_talk.talk_target);
-                                sCreatureTextMgr->SendChat(source->ToCreature(), GS_GetValueFromSpecifier(curr->params.c_talk.talk_group_id).toInteger(), target ? target->GetGUID() : 0);
-                            }
-                            break;
-                        }
-                        case GSCR_TURN:
-                        {
-                            GS_Variable turnpar = GS_GetValueFromSpecifier(curr->params.c_turn.amount);
-                            if (curr->params.c_turn.relative && (turnpar.type == GSVTYPE_INTEGER || turnpar.type == GSVTYPE_FLOAT))
-                                source->SetFacingTo(source->GetOrientation() + turnpar.toFloat());
-                            else
-                            {
-                                if (turnpar.type == GSVTYPE_UNIT)
-                                    source->SetFacingToObject(turnpar.value.asUnitPointer);
-                                else
-                                    source->SetFacingTo(turnpar.toFloat());
-                            }
-                            break;
-                        }
-                        case GSCR_FOLLOW:
-                        {
-                            if (Unit* target = GS_SelectTarget(curr->params.c_follow.subject))
-                                source->GetMotionMaster()->MoveFollow(target, GS_GetValueFromSpecifier(curr->params.c_follow.distance).toFloat(), GS_GetValueFromSpecifier(curr->params.c_follow.angle).toFloat());
-                            else
-                                source->GetMotionMaster()->MovementExpired();
-                            break;
-                        }
-                        case GSCR_UNVEHICLE:
-                        {
-                            GS_Variable vehEntry = GS_GetValueFromSpecifier(curr->params.c_unvehicle.entry);
-                            if (Unit* veh = source->GetVehicleBase())
-                                if (vehEntry.value.asInteger == 0 || vehEntry.value.asInteger == (int32)veh->GetEntry())
-                                    source->ExitVehicle();
-                            break;
-                        }
-                        case GSCR_VISIBLE:
-                            source->SetVisibility(VISIBILITY_ON);
-                            break;
-                        case GSCR_INVISIBLE:
-                            source->SetVisibility(VISIBILITY_OFF);
-                            break;
-                        case GSCR_RESET:
-                            if (source == me)
-                            {
-                                // is this enough?
-                                EnterEvadeMode();
-                            }
-                            else
-                            {
-                                if (source->GetTypeId() == TYPEID_PLAYER)
-                                {
-                                    // this should not be valid, or..?
-                                }
-                                else
-                                {
-                                    Creature* cr = source->ToCreature();
-                                    if (cr)
+                                    // only creatures have spawn position
+                                    if (Creature* crsource = source->ToCreature())
                                     {
-                                        if (cr->GetAI())
-                                            cr->GetAI()->Reset();
-                                        cr->LoadCreaturesAddon(true);
-
-                                        cr->GetMotionMaster()->MovementExpired(true);
-                                        cr->GetMotionMaster()->MoveTargetedHome();
+                                        GS_CreatureScript::GetPoint2D(tmpx, tmpy, tmpz, crsource->GetHomePosition().GetPositionX(), crsource->GetHomePosition().GetPositionY(), crsource->GetHomePosition().GetPositionZ(),
+                                            source->GetObjectSize(), crsource->GetHomePosition().GetOrientation() + angle, distance, source->GetBaseMap());
                                     }
-                                }
-                            }
-                            break;
-                        case GSCR_RESOLVE:
-                        {
-                            if (curr->params.c_resolve.resolver_type == GSRT_VECTOR)
-                            {
-                                // initialize destination variables (so we can be sure they're there)
-                                for (int i = 0; i < 3; i++)
-                                {
-                                    auto itr = variable_map.find(curr->params.c_resolve.variable[i]);
-                                    if (itr == variable_map.end())
-                                        variable_map[curr->params.c_resolve.variable[i]] = GS_Variable();
-                                }
-
-                                float tmpx, tmpy, tmpz;
-
-                                // angle + distance vector resolver
-                                if (curr->params.c_resolve.vector_resolve_type == GSVRT_ANGLE_DISTANCE)
-                                {
-                                    float angle = GS_GetValueFromSpecifier(curr->params.c_resolve.angle).toFloat() * M_PI / 180.0f;
-                                    float distance = GS_GetValueFromSpecifier(curr->params.c_resolve.distance).toFloat();
-                                    // base = current position
-                                    if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_CURRENT)
+                                    else
                                     {
+                                        // we cannot resolve "spawn" position of not spawned object (i.e. player)
                                         GS_CreatureScript::GetPoint2D(tmpx, tmpy, tmpz, source->GetPositionX(), source->GetPositionY(), source->GetPositionZ(),
                                             source->GetObjectSize(), source->GetOrientation() + angle, distance, source->GetBaseMap());
                                     }
-                                    // base = spawn position
-                                    else if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_SPAWN)
-                                    {
-                                        // only creatures have spawn position
-                                        if (Creature* crsource = source->ToCreature())
-                                        {
-                                            GS_CreatureScript::GetPoint2D(tmpx, tmpy, tmpz, crsource->GetHomePosition().GetPositionX(), crsource->GetHomePosition().GetPositionY(), crsource->GetHomePosition().GetPositionZ(),
-                                                source->GetObjectSize(), crsource->GetHomePosition().GetOrientation() + angle, distance, source->GetBaseMap());
-                                        }
-                                        else
-                                        {
-                                            // we cannot resolve "spawn" position of not spawned object (i.e. player)
-                                            GS_CreatureScript::GetPoint2D(tmpx, tmpy, tmpz, source->GetPositionX(), source->GetPositionY(), source->GetPositionZ(),
-                                                source->GetObjectSize(), source->GetOrientation() + angle, distance, source->GetBaseMap());
-                                        }
-                                    }
-                                    // base = 0;0;0 (may come in handy in more complex scenarios)
-                                    else if (curr->params.c_resolve.position_type == GSPTS_ABSOLUTE)
-                                    {
-                                        GS_CreatureScript::GetPoint2D(tmpx, tmpy, tmpz, 0.0f, 0.0f, 0.0f,
-                                            source->GetObjectSize(), angle, distance, source->GetBaseMap());
-                                    }
                                 }
-                                // relative position vector resolver
-                                else if (curr->params.c_resolve.vector_resolve_type == GSVRT_RELATIVE_POSITION)
+                                // base = 0;0;0 (may come in handy in more complex scenarios)
+                                else if (curr->params.c_resolve.position_type == GSPTS_ABSOLUTE)
                                 {
-                                    float rel_x = GS_GetValueFromSpecifier(curr->params.c_resolve.rel_x).toFloat();
-                                    float rel_y = GS_GetValueFromSpecifier(curr->params.c_resolve.rel_y).toFloat();
-                                    float rel_z = GS_GetValueFromSpecifier(curr->params.c_resolve.rel_z).toFloat();
+                                    GS_CreatureScript::GetPoint2D(tmpx, tmpy, tmpz, 0.0f, 0.0f, 0.0f,
+                                        source->GetObjectSize(), angle, distance, source->GetBaseMap());
+                                }
+                            }
+                            // relative position vector resolver
+                            else if (curr->params.c_resolve.vector_resolve_type == GSVRT_RELATIVE_POSITION)
+                            {
+                                float rel_x = GS_GetValueFromSpecifier(curr->params.c_resolve.rel_x).toFloat();
+                                float rel_y = GS_GetValueFromSpecifier(curr->params.c_resolve.rel_y).toFloat();
+                                float rel_z = GS_GetValueFromSpecifier(curr->params.c_resolve.rel_z).toFloat();
 
-                                    // base = current position
-                                    if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_CURRENT)
+                                // base = current position
+                                if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_CURRENT)
+                                {
+                                    tmpx = source->GetPositionX() + rel_x;
+                                    tmpy = source->GetPositionY() + rel_y;
+                                    tmpz = source->GetPositionZ() + rel_z;
+                                }
+                                // base = spawn position
+                                else if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_SPAWN)
+                                {
+                                    // only creatures have spawn position
+                                    if (Creature* crsource = source->ToCreature())
+                                    {
+                                        tmpx = crsource->GetHomePosition().GetPositionX() + rel_x;
+                                        tmpy = crsource->GetHomePosition().GetPositionY() + rel_y;
+                                        tmpz = crsource->GetHomePosition().GetPositionZ() + rel_z;
+                                    }
+                                    else
                                     {
                                         tmpx = source->GetPositionX() + rel_x;
                                         tmpy = source->GetPositionY() + rel_y;
                                         tmpz = source->GetPositionZ() + rel_z;
                                     }
-                                    // base = spawn position
-                                    else if (curr->params.c_resolve.position_type == GSPTS_RELATIVE_SPAWN)
-                                    {
-                                        // only creatures have spawn position
-                                        if (Creature* crsource = source->ToCreature())
-                                        {
-                                            tmpx = crsource->GetHomePosition().GetPositionX() + rel_x;
-                                            tmpy = crsource->GetHomePosition().GetPositionY() + rel_y;
-                                            tmpz = crsource->GetHomePosition().GetPositionZ() + rel_z;
-                                        }
-                                        else
-                                        {
-                                            tmpx = source->GetPositionX() + rel_x;
-                                            tmpy = source->GetPositionY() + rel_y;
-                                            tmpz = source->GetPositionZ() + rel_z;
-                                        }
-                                    }
-                                    // base = 0;0;0
-                                    else if (curr->params.c_resolve.position_type == GSPTS_ABSOLUTE)
-                                    {
-                                        // i have no idea why would somebody want that, but this language should be complete in that way
-                                        tmpx = rel_x;
-                                        tmpy = rel_y;
-                                        tmpz = rel_z;
-                                    }
                                 }
-
-                                // set variables to resolved values
-                                variable_map[curr->params.c_resolve.variable[0]].value.asFloat = tmpx;
-                                variable_map[curr->params.c_resolve.variable[0]].type = GSVTYPE_FLOAT;
-                                variable_map[curr->params.c_resolve.variable[1]].value.asFloat = tmpy;
-                                variable_map[curr->params.c_resolve.variable[1]].type = GSVTYPE_FLOAT;
-                                variable_map[curr->params.c_resolve.variable[2]].value.asFloat = tmpz;
-                                variable_map[curr->params.c_resolve.variable[2]].type = GSVTYPE_FLOAT;
+                                // base = 0;0;0
+                                else if (curr->params.c_resolve.position_type == GSPTS_ABSOLUTE)
+                                {
+                                    // i have no idea why would somebody want that, but this language should be complete in that way
+                                    tmpx = rel_x;
+                                    tmpy = rel_y;
+                                    tmpz = rel_z;
+                                }
                             }
-                            break;
+
+                            // set variables to resolved values
+                            variable_map[curr->params.c_resolve.variable[0]].value.asFloat = tmpx;
+                            variable_map[curr->params.c_resolve.variable[0]].type = GSVTYPE_FLOAT;
+                            variable_map[curr->params.c_resolve.variable[1]].value.asFloat = tmpy;
+                            variable_map[curr->params.c_resolve.variable[1]].type = GSVTYPE_FLOAT;
+                            variable_map[curr->params.c_resolve.variable[2]].value.asFloat = tmpz;
+                            variable_map[curr->params.c_resolve.variable[2]].type = GSVTYPE_FLOAT;
                         }
-                        case GSCR_PHASE:
-                        {
-                            int32 mask = GS_GetValueFromSpecifier(curr->params.c_phase.phase_mask).toInteger();
-                            if (mask > 0)
-                                source->SetPhaseMask(mask, true);
-                            else
-                                source->SetPhaseMask(PHASEMASK_NORMAL, true);
-                            break;
-                        }
-                        default:
-                        case GSCR_NONE:
-                            break;
+                        break;
+                    }
+                    case GSCR_PHASE:
+                    {
+                        int32 mask = GS_GetValueFromSpecifier(curr->params.c_phase.phase_mask).toInteger();
+                        if (mask > 0)
+                            source->SetPhaseMask(mask, true);
+                        else
+                            source->SetPhaseMask(PHASEMASK_NORMAL, true);
+                        break;
+                    }
+                    default:
+                    case GSCR_NONE:
+                        break;
                     }
                 }
 
+                bool command_incremented = false;
+
                 // if not explicitly waiting, move counter to next instruction
                 if (!is_waiting && !lock_move_counter)
+                {
+                    command_incremented = true;
+                    com_counter++;
+                }
+
+                // If we are in event hook -> ignore wait condition
+                if (!command_incremented && is_in_event_handler && !lock_move_counter)
                     com_counter++;
 
                 // if not explicitly disabled melee attack, and is not waiting or has appropriate flag to attack during waiting,
                 // proceed melee attack
                 if (!disable_melee && (!is_waiting || (wait_flags & GSWF_MELEE_ATTACK)))
                     DoMeleeAttackIfReady();
-
-                is_updating_lock = false;
             }
         };
 

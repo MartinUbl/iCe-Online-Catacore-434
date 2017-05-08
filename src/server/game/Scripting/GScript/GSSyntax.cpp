@@ -143,6 +143,11 @@ int gscr_last_timer_id = -1;
 // last id assigned to variable
 int gscr_last_variable_id = -1;
 
+// map of AI event hooks
+std::stack<std::pair<std::string, gs_command*>> events_stack;
+std::set<EventHookType> events_registered;
+std::map<std::string, gs_event_offsets> event_offset_map;
+
 #define CLEANUP_AND_THROW(s) { delete ret; throw SyntaxErrorException(src->lineNum,s); }
 
 // exception class we will catch in parsing loop
@@ -1417,17 +1422,69 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 CLEANUP_AND_THROW("too many parameters for instruction PHASE");
 
             ret->params.c_phase.phase_mask = gs_specifier::parse(src->parameters[0].c_str());
-
             break;
+        case GSCR_EVENT:
+        {
+            if (src->parameters.size() != 1)
+                CLEANUP_AND_THROW("EVENT instruction must have only parameter")
+
+            if (events_stack.size() > 0)
+                CLEANUP_AND_THROW("EVENT is not correctly ended")
+
+            std::string event_name = src->parameters[0];
+
+            if (gs_event_hook_names_map.count(event_name) == 0)
+                CLEANUP_AND_THROW("EVENT " + event_name + " is not supported")
+
+            // allow only one hook for same name in whole script
+            if (events_registered.count(gs_event_hook_names_map.at(event_name)) == 0)
+                events_registered.insert(gs_event_hook_names_map.at(event_name));
+            else
+                CLEANUP_AND_THROW("EVENT " + event_name + " cannot be registered more than once.")
+
+            gs_event_offsets off_sets;
+            off_sets.start_offset = (uint32)offset;
+            off_sets.end_offset = 0; // will be set in end_event command
+
+            event_offset_map.insert({ event_name , off_sets });
+            events_stack.push({ event_name, ret });
+            break;
+        }
+        case GSCR_END_EVENT:
+        {
+            if (events_stack.size() != 1)
+                CLEANUP_AND_THROW("Cannot find matching EVENT for EVENT_END command")
+
+            auto event_pair = events_stack.top();
+            events_stack.pop();
+
+            // remember ending offset of instructions
+            event_offset_map[event_pair.first].end_offset = (uint32)offset;
+            event_pair.second->params.c_event.end_offset = offset;
+            break;
+        }
+    }
+
+    // Redirect commands inside event handlers into separate map
+    if (events_stack.size() > 0)
+    {
+        if (ret->type == GSCR_GOTO)
+            CLEANUP_AND_THROW("GO_TO command is not allowed in event handlers.")
+        else if (ret->type == GSCR_WHEN)
+            CLEANUP_AND_THROW("WHEN command is not allowed in event handlers.")
+        else if (ret->type == GSCR_LABEL)
+            CLEANUP_AND_THROW("LABEL command is not allowed in event handlers.")
+        else if (ret->type == GSCR_WAIT)
+            CLEANUP_AND_THROW("WAIT command is not allowed in event handlers.")
     }
 
     return ret;
 }
 
 // analyzes sequence of command prototypes and parses lines of input to output CommandVector
-CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
+CommandContainer* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
 {
-    CommandVector* cv = new CommandVector;
+    CommandContainer* command_container = new CommandContainer();
     gs_command* tmp;
     size_t i;
 
@@ -1435,6 +1492,7 @@ CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
     gscr_gotos_list.clear();
     gscr_timer_map.clear();
     gscr_variable_map.clear();
+
     gscr_last_timer_id = -1;
     gscr_last_variable_id = -1;
 
@@ -1447,6 +1505,12 @@ CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
     while (!gscr_while_stack.empty())
         gscr_while_stack.pop();
 
+    while (!events_stack.empty())
+        events_stack.pop();
+
+    event_offset_map.clear();
+    events_registered.clear();
+
     try
     {
         // parse every input line
@@ -1454,7 +1518,7 @@ CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
         {
             tmp = gs_command::parse((*input)[i], i);
             if (tmp)
-                cv->push_back(tmp);
+                command_container->command_vector.push_back(tmp);
         }
 
         // pair gotos with labels
@@ -1465,14 +1529,21 @@ CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
 
             (*itr).first->params.c_goto_label.instruction_offset = gscr_label_offset_map[(*itr).second];
         }
+
+        // add event commands
+        for (auto const &event_command_pair : event_offset_map)
+        {
+            EventHookType ev_hook_type = gs_event_hook_names_map.at(event_command_pair.first);
+            command_container->event_offset_map.insert({ ev_hook_type, event_command_pair.second });
+        }
     }
     catch (std::exception& e)
     {
         sLog->outError("GSAI ID %u Exception: %s", scriptId, e.what());
         sGSMgr->AddError(scriptId, e.what());
-        delete cv;
-        cv = nullptr;
+        delete command_container;
+        command_container = nullptr;
     }
 
-    return cv;
+    return command_container;
 }

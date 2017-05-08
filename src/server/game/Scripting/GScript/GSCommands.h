@@ -15,14 +15,15 @@ struct gs_command_proto
 typedef std::vector<gs_command_proto*> CommandProtoVector;
 
 struct gs_command;
+struct gs_commands_container;
 
-// vector of commands
-typedef std::vector<gs_command*> CommandVector;
+// wrapper struct for command vector and event command vector
+typedef gs_commands_container CommandContainer;
 
 // parse input lines into command prototype vector
 CommandProtoVector* gscr_parseInput(std::vector<std::string> &lines);
 // parse command prototypes into command vector to be executed
-CommandVector* gscr_analyseSequence(CommandProtoVector* input, int scriptId);
+CommandContainer* gscr_analyseSequence(CommandProtoVector* input, int scriptId);
 
 // types of available commands
 enum gs_command_type
@@ -82,6 +83,8 @@ enum gs_command_type
     GSCR_RESET = 52,
     GSCR_RESOLVE = 53,
     GSCR_PHASE = 54,
+    GSCR_EVENT = 55,
+    GSCR_END_EVENT = 56
 };
 
 // string identifiers - index is matching the value of enum above
@@ -140,7 +143,29 @@ static std::string gscr_identifiers[] = {
     "invisible",
     "reset",
     "resolve",
-    "phase"
+    "phase",
+    "event",
+    "endevent"
+};
+
+enum EventHookType : uint8
+{
+    EVENT_HOOK_COMBAT,
+    EVENT_HOOK_EVADE,
+    EVENT_HOOK_DIED,
+    EVENT_HOOK_KILLED,
+    EVENT_HOOK_JUST_SUMMONED,
+    EVENT_HOOK_SPELL_HIT
+};
+
+static const std::map<std::string, EventHookType> gs_event_hook_names_map =
+{
+    { "combat_start",       EVENT_HOOK_COMBAT },            // Unit* enemy
+    { "enter_evade_mode",   EVENT_HOOK_EVADE },             // none
+    { "just_died",          EVENT_HOOK_DIED },              // Unit* killer
+    { "killed_unit",        EVENT_HOOK_KILLED },            // Unit* victim
+    { "just_summoned",      EVENT_HOOK_JUST_SUMMONED },     // Unit* summon
+    { "spell_hit",          EVENT_HOOK_SPELL_HIT },         // Unit* caster
 };
 
 enum gs_quest_operation
@@ -313,6 +338,18 @@ struct gs_condition
     gs_specifier source;
     gs_specifier_operator op;
     gs_specifier dest;
+};
+
+struct gs_event_offsets
+{
+    uint32 start_offset;
+    uint32 end_offset;
+};
+
+struct gs_commands_container
+{
+    std::vector<gs_command*> command_vector;
+    std::map<EventHookType, gs_event_offsets> event_offset_map;
 };
 
 // command structure
@@ -552,6 +589,11 @@ struct gs_command
         {
             gs_specifier phase_mask;
         } c_phase;
+
+        struct
+        {
+            int end_offset;
+        } c_event;
 
     } params;
 
