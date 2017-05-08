@@ -589,9 +589,8 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
         //called in HandleGameObjectUseOpcode:
         //target_obj->Delete();
     }
-
     //Horde flag on ground(not in base) (returned or picked up again)
-    if (GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_GROUND && Source->IsWithinDistInMap(target_obj, 10))
+    else if (GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_GROUND && Source->IsWithinDistInMap(target_obj, 10))
     {
         if (Source->GetBGTeam() == HORDE) // Flag was returned to base by enemy team
         {
