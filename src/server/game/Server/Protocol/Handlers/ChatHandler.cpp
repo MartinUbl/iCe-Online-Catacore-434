@@ -888,7 +888,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 break;
 
             /* process krcma-specific checks */
-            if (stricmp(channel.c_str(), "krcma")==0) {
+            if (stricmp(channel.c_str(), "krcma") == 0 || stricmp(channel.c_str(), "babylon") == 0)
+            {
                 /* DB-based filter */
                 for (std::vector<std::string>::iterator itr = sObjectMgr->krcma_filter_keywords.begin(); itr != sObjectMgr->krcma_filter_keywords.end(); ++itr)
                     if (strstr(msg.c_str(), (*itr).c_str()))
