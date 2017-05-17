@@ -714,6 +714,10 @@ class GS_CreatureScript : public CreatureScript
                         com_counter = eventItem.start_offset + 1;
                     }
 
+                    // fail safe check (caused by swapping scripts? -> need proper solution)
+                    if (!com_container)
+                        break;
+
                     ExecuteCommand(0, lock_move_counter, true);
                     eventItem.current_offset = com_counter;
 
