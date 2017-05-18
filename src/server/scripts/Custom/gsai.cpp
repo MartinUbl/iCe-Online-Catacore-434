@@ -704,7 +704,9 @@ class GS_CreatureScript : public CreatureScript
             // Used only by JustDied and EnterEvadeMode hooks
             void ExecuteCommandDirectly(EventHookType hookType)
             {
-                AddEventToQueue(hookType);
+                if (!AddEventToQueue(hookType))
+                    return;
+
                 GS_EventQueueItem &eventItem = eventQueue.front();
 
                 while (com_counter != eventItem.end_offset)
@@ -751,11 +753,11 @@ class GS_CreatureScript : public CreatureScript
                 ScriptedAI::EnterCombat(who);
             }
 
-            void AddEventToQueue(EventHookType hookType)
+            bool AddEventToQueue(EventHookType hookType)
             {
                 // command container is nullptr if gscript was unsuccessfully reloaded (error in script)
                 if (!com_container)
-                    return;
+                    return false;
 
                 // if event hook is registered, schedule its execution
                 if (com_container->event_offset_map.find(hookType) != com_container->event_offset_map.end())
@@ -764,7 +766,10 @@ class GS_CreatureScript : public CreatureScript
                     int endOffset = com_container->event_offset_map[hookType].end_offset;
                     auto eventItem = GS_EventQueueItem(hookType, startOffset, endOffset);
                     eventQueue.push(eventItem);
+                    return true;
                 }
+
+                return false;
             }
 
             uint64 GS_MakeTypeParamPair(GScriptType type, int32 param)
