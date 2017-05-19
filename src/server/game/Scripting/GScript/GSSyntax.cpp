@@ -366,8 +366,19 @@ gs_specifier gs_specifier::parse(const char* str)
             {
                 std::string varname = subid.substr(1, subid.size()-1);
                 auto itr = gscr_variable_map.find(varname.c_str());
+
+                // if not find in regular variables
                 if (itr == gscr_variable_map.end())
+                {
+                    // check special event variables
+                    if (gs_event_variable_id_mapping.count(varname) != 0)
+                    {
+                        rr.value = gs_event_variable_id_mapping.at(varname);
+                        rr.subject_type = GSST_VARIABLE_VALUE;
+                        return rr;
+                    }
                     return rr;
+                }
 
                 rr.value = (*itr).second;
                 rr.subject_type = GSST_VARIABLE_VALUE;
@@ -1477,6 +1488,10 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         else if (ret->type == GSCR_WAIT)
             CLEANUP_AND_THROW("WAIT command is not allowed in event handlers.")
     }
+
+    // check maximum number of variables declared
+    if (gscr_last_timer_id > GS_VARIABLE_MAX_LIMIT)
+        CLEANUP_AND_THROW("WAIT command is not allowed in event handlers.")
 
     return ret;
 }

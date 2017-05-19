@@ -20,13 +20,21 @@ class GS_CreatureScript : public CreatureScript
             int start_offset;
             int end_offset;
             int current_offset;
+            uint64 target_guid;
 
-            GS_EventQueueItem(EventHookType evHookType, int startOffset, int endOffset)
+            union
+            {
+                uint32 spell_id;
+                uint32 summon_entry;
+            }misc;
+
+            GS_EventQueueItem(EventHookType evHookType, int startOffset, int endOffset, uint64 targetGUID)
             {
                 ev_hook_type = evHookType;
                 start_offset = startOffset;
                 current_offset = startOffset;
                 end_offset = endOffset;
+                target_guid = targetGUID;
             }
         };
 
@@ -401,6 +409,8 @@ class GS_CreatureScript : public CreatureScript
             std::map<int, int32> timer_map;
             // map of all variables
             std::map<int, GS_Variable> variable_map;
+            // map of variables which exists in event hoook context
+            std::map<std::string, uint64> event_hook_variables;
             // set of all passed WHEN's offsets in script
             std::set<int> when_set;
 
@@ -536,7 +546,9 @@ class GS_CreatureScript : public CreatureScript
             void SpellHit(Unit* who, const SpellEntry* spell) override
             {
                 if (who != me)
-                    AddEventToQueue(EVENT_HOOK_SPELL_HIT);
+                {
+                    AddEventToQueue(EVENT_HOOK_SPELL_HIT, who, spell->Id);
+                }
 
                 if (m_spellReceivedScripts.find(spell->Id) != m_spellReceivedScripts.end())
                 {
@@ -684,7 +696,7 @@ class GS_CreatureScript : public CreatureScript
 
             void EnterEvadeMode() override
             {
-                ExecuteCommandDirectly(EVENT_HOOK_EVADE);
+                ExecuteCommandDirectly(EVENT_HOOK_EVADE, nullptr);
 
                 if (!is_script_locked)
                 {
@@ -697,19 +709,19 @@ class GS_CreatureScript : public CreatureScript
 
             void JustDied(Unit * killer) override
             {
-                ExecuteCommandDirectly(EVENT_HOOK_DIED);
+                ExecuteCommandDirectly(EVENT_HOOK_DIED, killer);
                 ScriptedAI::JustDied(killer);
             }
 
             // Used only by JustDied and EnterEvadeMode hooks
-            void ExecuteCommandDirectly(EventHookType hookType)
+            void ExecuteCommandDirectly(EventHookType hookType, Unit* unit)
             {
-                if (!AddEventToQueue(hookType))
+                if (!AddEventToQueue(hookType, unit))
                     return;
 
                 GS_EventQueueItem &eventItem = eventQueue.front();
 
-                while (com_counter != eventItem.end_offset)
+                while (com_counter != (uint32)eventItem.end_offset)
                 {
                     if (eventItem.current_offset == eventItem.start_offset)
                     {
@@ -732,7 +744,7 @@ class GS_CreatureScript : public CreatureScript
 
             void KilledUnit(Unit * victim) override
             {
-                AddEventToQueue(EVENT_HOOK_KILLED);
+                AddEventToQueue(EVENT_HOOK_KILLED, victim);
                 ScriptedAI::KilledUnit(victim);
             }
 
@@ -748,12 +760,12 @@ class GS_CreatureScript : public CreatureScript
                 if (!is_script_locked)
                     GS_SelectScript(GS_TYPE_COMBAT);
 
-                AddEventToQueue(EVENT_HOOK_COMBAT);
+                AddEventToQueue(EVENT_HOOK_COMBAT, who);
 
                 ScriptedAI::EnterCombat(who);
             }
 
-            bool AddEventToQueue(EventHookType hookType)
+            bool AddEventToQueue(EventHookType hookType, Unit* unit, uint32 miscValue = 0)
             {
                 // command container is nullptr if gscript was unsuccessfully reloaded (error in script)
                 if (!com_container)
@@ -764,7 +776,21 @@ class GS_CreatureScript : public CreatureScript
                 {
                     int startOffset = com_container->event_offset_map[hookType].start_offset;
                     int endOffset = com_container->event_offset_map[hookType].end_offset;
-                    auto eventItem = GS_EventQueueItem(hookType, startOffset, endOffset);
+                    auto eventItem = GS_EventQueueItem(hookType, startOffset, endOffset, unit ? unit->GetGUID() : 0);
+
+                    // Add addition misc variables
+                    switch (hookType)
+                    {
+                        case EVENT_HOOK_SPELL_HIT:
+                            eventItem.misc.spell_id = miscValue;
+                            break;
+                        case EVENT_HOOK_JUST_SUMMONED:
+                            eventItem.misc.summon_entry = miscValue;
+                            break;
+                        default:
+                            break;
+                    }
+
                     eventQueue.push(eventItem);
                     return true;
                 }
@@ -1012,13 +1038,35 @@ class GS_CreatureScript : public CreatureScript
                         return GetClosestCreatureWithEntry(me, spec.value, 300.0f, false);
                     // may be also variable value, if the variable points to unit
                     case GSST_VARIABLE_VALUE:
+                    {
+                        // check if variable is from event context
+                        if (!eventQueue.empty())
+                        {
+                            GS_EventQueueItem eventItem = eventQueue.front();
+
+                            switch (spec.value)
+                            {
+                                case EVENT_VARIABLE_ENEMY_ID:
+                                case EVENT_VARIABLE_KILLER_ID:
+                                case EVENT_VARIABLE_VICTIM_ID:
+                                case EVENT_VARIABLE_SUMMON_ID:
+                                case EVENT_VARIABLE_CASTER_ID:
+                                    return Unit::GetUnit(*me, eventItem.target_guid);
+                            }
+                        }
+
+                        // find regular variable
                         if (variable_map.find(spec.value) != variable_map.end())
                         {
                             GS_Variable var = variable_map[spec.value];
+
                             if (var.type == GSVTYPE_UNIT)
+                            {
                                 return var.value.asUnitPointer;
+                            }
                         }
                         return nullptr;
+                    }
                     // other non-handled cases - returns null as it's invalid in this context
                     default:
                     case GSST_STATE:
@@ -1036,6 +1084,25 @@ class GS_CreatureScript : public CreatureScript
                 // variable has priority before anything else, due to its genericity
                 if (spec.subject_type == GSST_VARIABLE_VALUE && spec.subject_parameter == GSSP_NONE)
                 {
+                    if (!eventQueue.empty())
+                    {
+                        GS_EventQueueItem eventItem = eventQueue.front();
+
+                        switch (spec.value)
+                        {
+                            case EVENT_VARIABLE_ENEMY_ID:
+                            case EVENT_VARIABLE_KILLER_ID:
+                            case EVENT_VARIABLE_VICTIM_ID:
+                            case EVENT_VARIABLE_SUMMON_ID:
+                            case EVENT_VARIABLE_CASTER_ID:
+                                return GS_Variable(Unit::GetUnit(*me, eventItem.target_guid));
+                            case EVENT_VARIABLE_SPELL_ID:
+                                return GS_Variable((int32)eventItem.misc.spell_id);
+                            case EVENT_VARIABLE_SUMMON_ENTRY_ID:
+                                return GS_Variable((int32)eventItem.misc.summon_entry);
+                        }
+                    }
+
                     if (variable_map.find(spec.value) == variable_map.end())
                         variable_map[spec.value] = GS_Variable((int32)0);
 
@@ -1189,7 +1256,7 @@ class GS_CreatureScript : public CreatureScript
                     targetAI->SetParentUnit(me);
                 }
 
-                AddEventToQueue(EVENT_HOOK_JUST_SUMMONED);
+                AddEventToQueue(EVENT_HOOK_JUST_SUMMONED, summoned, summoned->GetEntry());
 
                 m_lastSummonedUnit = summoned;
             }
@@ -1326,8 +1393,8 @@ class GS_CreatureScript : public CreatureScript
             void ExecuteCommand(const uint32 diff, bool &lock_move_counter, bool is_in_event_handler)
             {
                 gs_command* curr = com_container->command_vector[com_counter];
-
                 Unit* source = GS_SelectTarget(curr->command_delegate);
+
                 if (source)
                 {
                     switch (curr->type)
@@ -1921,14 +1988,14 @@ class GS_CreatureScript : public CreatureScript
                 bool command_incremented = false;
 
                 // if not explicitly waiting, move counter to next instruction
-                if (!is_waiting && !lock_move_counter)
+                if (!is_waiting && !lock_move_counter && curr->type != GSCR_END_EVENT)
                 {
                     command_incremented = true;
                     com_counter++;
                 }
 
                 // If we are in event hook -> ignore wait condition
-                if (!command_incremented && is_in_event_handler && !lock_move_counter)
+                if (!command_incremented && is_in_event_handler && !lock_move_counter && curr->type != GSCR_END_EVENT)
                     com_counter++;
 
                 // if not explicitly disabled melee attack, and is not waiting or has appropriate flag to attack during waiting,

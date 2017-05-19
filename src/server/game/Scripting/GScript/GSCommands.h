@@ -160,12 +160,36 @@ enum EventHookType : uint8
 
 static const std::map<std::string, EventHookType> gs_event_hook_names_map =
 {
-    { "combat_start",       EVENT_HOOK_COMBAT },            // Unit* enemy
+    { "combat_start",       EVENT_HOOK_COMBAT },            // Unit* ev_enemy
     { "enter_evade_mode",   EVENT_HOOK_EVADE },             // none
-    { "just_died",          EVENT_HOOK_DIED },              // Unit* killer
-    { "killed_unit",        EVENT_HOOK_KILLED },            // Unit* victim
-    { "just_summoned",      EVENT_HOOK_JUST_SUMMONED },     // Unit* summon
-    { "spell_hit",          EVENT_HOOK_SPELL_HIT },         // Unit* caster
+    { "just_died",          EVENT_HOOK_DIED },              // Unit* ev_killer
+    { "killed_unit",        EVENT_HOOK_KILLED },            // Unit* ev_victim
+    { "just_summoned",      EVENT_HOOK_JUST_SUMMONED },     // Unit* ev_summon
+    { "spell_hit",          EVENT_HOOK_SPELL_HIT },         // Unit* ev_caster
+};
+
+#define GS_VARIABLE_MAX_LIMIT 10000
+
+enum gs_event_variable_id : int32
+{
+    EVENT_VARIABLE_ENEMY_ID = GS_VARIABLE_MAX_LIMIT + 1,
+    EVENT_VARIABLE_KILLER_ID,
+    EVENT_VARIABLE_VICTIM_ID,
+    EVENT_VARIABLE_SUMMON_ID,
+    EVENT_VARIABLE_SUMMON_ENTRY_ID,
+    EVENT_VARIABLE_CASTER_ID,
+    EVENT_VARIABLE_SPELL_ID,
+};
+
+static const std::map<std::string, gs_event_variable_id> gs_event_variable_id_mapping =
+{
+    { "ev_enemy",           EVENT_VARIABLE_ENEMY_ID },
+    { "ev_killer",          EVENT_VARIABLE_KILLER_ID },
+    { "ev_victim",          EVENT_VARIABLE_VICTIM_ID },
+    { "ev_summon",          EVENT_VARIABLE_SUMMON_ID },
+    { "ev_summon_entry",    EVENT_VARIABLE_SUMMON_ENTRY_ID },
+    { "ev_caster",          EVENT_VARIABLE_CASTER_ID },
+    { "ev_spell_id",        EVENT_VARIABLE_SPELL_ID },
 };
 
 enum gs_quest_operation
