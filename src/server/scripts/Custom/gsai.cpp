@@ -412,8 +412,6 @@ class GS_CreatureScript : public CreatureScript
             std::map<int, int32> timer_map;
             // map of all variables
             std::map<int, GS_Variable> variable_map;
-            // map of variables which exists in event hoook context
-            std::map<std::string, uint64> event_hook_variables;
             // set of all passed WHEN's offsets in script
             std::set<int> when_set;
 
