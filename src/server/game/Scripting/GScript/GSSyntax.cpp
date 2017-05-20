@@ -1593,6 +1593,15 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             }
             break;
         }
+        // callforhelp instruction
+        // Syntax: callforhelp <radius>
+        case GSCR_CALL_FOR_HELP:
+        {
+            if (src->parameters.size() != 1)
+                CLEANUP_AND_THROW("CALL_FOR_HELP instruction must contain only 1 parameter (radius)");
+
+            ret->params.c_call_for_help.radius = gs_specifier::parse(src->parameters[0].c_str());
+        }
     }
 
     // Redirect commands inside event handlers into separate map

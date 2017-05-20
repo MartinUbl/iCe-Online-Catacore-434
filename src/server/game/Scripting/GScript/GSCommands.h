@@ -88,6 +88,7 @@ enum gs_command_type
     GSCR_EVENT,
     GSCR_END_EVENT,
     GSCR_GO,
+    GSCR_CALL_FOR_HELP,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -152,6 +153,7 @@ static std::string gscr_identifiers[] = {
     "event",
     "endevent",
     "go"
+    "callforhelp"
 };
 
 enum EventHookType : uint8
@@ -567,6 +569,11 @@ struct gs_command
             gs_specifier subject;
             int value;
         } c_go;
+
+        struct
+        {
+            gs_specifier radius;
+        } c_call_for_help;
 
         struct
         {

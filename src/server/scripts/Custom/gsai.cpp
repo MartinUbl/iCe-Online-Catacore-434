@@ -1678,6 +1678,13 @@ class GS_CreatureScript : public CreatureScript
                         }
                         break;
                     }
+                    case GSCR_CALL_FOR_HELP:
+                    {
+                        float call_radius = GS_GetValueFromSpecifier(curr->params.c_call_for_help.radius).toFloat();
+                        if (source->GetTypeId() == TYPEID_UNIT && call_radius < MAX_VISIBILITY_DISTANCE)
+                            source->ToCreature()->CallForHelp(call_radius);
+                        break;
+                    }
                     case GSCR_WALK:
                         source->SetWalk(true);
                         is_moving = true;
