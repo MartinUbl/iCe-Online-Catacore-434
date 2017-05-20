@@ -472,6 +472,9 @@ gs_specifier gs_specifier::parse(const char* str)
                     case GSST_CLOSEST_DEAD_CREATURE:
                     case GSST_CLOSEST_CREATURE_GUID:
                         tryStrToInt(rr.value, subpar.c_str());
+                        break;
+                    default:
+                        break;
                 }
             }
 
