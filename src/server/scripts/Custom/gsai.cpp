@@ -46,9 +46,10 @@ class GS_CreatureScript : public CreatureScript
 
         enum GS_VariableType
         {
-            GSVTYPE_INTEGER = 0,
-            GSVTYPE_FLOAT = 1,
-            GSVTYPE_UNIT = 2
+            GSVTYPE_INTEGER     = 0,
+            GSVTYPE_FLOAT       = 1,
+            GSVTYPE_UNIT        = 2,
+            GSVTYPE_GAMEOBJECT  = 3
         };
 
         static void GetPoint2D(float &x, float &y, float &z, float srcX, float srcY, float srcZ, float objSize, float absAngle, float distance, Map const* srcMap)
@@ -73,6 +74,7 @@ class GS_CreatureScript : public CreatureScript
                 int32 asInteger;
                 float asFloat;
                 Unit* asUnitPointer;
+                GameObject* asGoPointer;
             } value;
 
             // performs conversion to integer, if available (float, int)
@@ -103,6 +105,7 @@ class GS_CreatureScript : public CreatureScript
             GS_Variable(int32 nvalue) { value.asInteger = nvalue; type = GSVTYPE_INTEGER; };
             GS_Variable(float nvalue) { value.asFloat = nvalue; type = GSVTYPE_FLOAT; };
             GS_Variable(Unit* nvalue) { value.asUnitPointer = nvalue; type = GSVTYPE_UNIT; };
+            GS_Variable(GameObject* nvalue) { value.asGoPointer = nvalue; type = GSVTYPE_GAMEOBJECT; };
 
             bool operator==(GS_Variable &sec)
             {
@@ -979,8 +982,24 @@ class GS_CreatureScript : public CreatureScript
                 }
             }
 
+            Unit* GS_SelectUnitTarget(gs_specifier& spec)
+            {
+                WorldObject * obj = GS_SelectTarget(spec);
+                if (obj && obj->GetTypeId() == TYPEID_UNIT)
+                    return obj->ToUnit();
+                return nullptr;
+            }
+
+            GameObject* GS_SelectGameObjectTarget(gs_specifier& spec)
+            {
+                WorldObject * obj = GS_SelectTarget(spec);
+                if (obj && obj->GetTypeId() == TYPEID_GAMEOBJECT)
+                    return obj->ToGameObject();
+                return nullptr;
+            }
+
             // select target using specifier supplied; does not work for one-values, just unit specifiers
-            Unit* GS_SelectTarget(gs_specifier& spec)
+            WorldObject* GS_SelectTarget(gs_specifier& spec)
             {
                 switch (spec.subject_type)
                 {
@@ -1028,6 +1047,8 @@ class GS_CreatureScript : public CreatureScript
                         return m_parentUnit ? m_parentUnit : me;
                     case GSST_CLOSEST_CREATURE:
                         return GetClosestCreatureWithEntry(me, spec.value, 300.0f, true);
+                    case GSST_CLOSEST_GAMEOBJECT:
+                        return me->FindNearestGameObject(spec.value, 300.0f);
                     case GSST_CLOSEST_PLAYER:
                         return me->FindNearestPlayer(300.0f, true);
                     case GSST_LAST_SUMMON:
@@ -1063,6 +1084,10 @@ class GS_CreatureScript : public CreatureScript
                             if (var.type == GSVTYPE_UNIT)
                             {
                                 return var.value.asUnitPointer;
+                            }
+                            else if (var.type == GSVTYPE_GAMEOBJECT)
+                            {
+                                return var.value.asGoPointer;
                             }
                         }
                         return nullptr;
@@ -1119,10 +1144,13 @@ class GS_CreatureScript : public CreatureScript
                 if (spec.subject_type == GSST_STATE && spec.subject_parameter == GSSP_STATE_VALUE)
                     return GS_Variable((int32)spec.value);
 
+                if (spec.subject_type == GSST_CLOSEST_GAMEOBJECT)
+                    return GS_Variable(GS_SelectGameObjectTarget(spec));
+
                 // there are only two meaningful subject types: me and target,
                 // any other target is not so valuable here
 
-                Unit* subject = GS_SelectTarget(spec);
+                Unit* subject = GS_SelectUnitTarget(spec);
                 // fallback to "me" if the target has not been found
                 if (!subject)
                     subject = me;
@@ -1187,7 +1215,7 @@ class GS_CreatureScript : public CreatureScript
                 {
                     if (cond.source.subject_parameter == GSSP_AURAS)
                     {
-                        Unit* source = GS_SelectTarget(cond.source);
+                        Unit* source = GS_SelectUnitTarget(cond.source);
                         if (!source)
                             return false;
 
@@ -1393,7 +1421,7 @@ class GS_CreatureScript : public CreatureScript
             void ExecuteCommand(const uint32 diff, bool &lock_move_counter, bool is_in_event_handler)
             {
                 gs_command* curr = com_container->command_vector[com_counter];
-                Unit* source = GS_SelectTarget(curr->command_delegate);
+                Unit* source = GS_SelectUnitTarget(curr->command_delegate);
 
                 if (source)
                 {
@@ -1431,7 +1459,7 @@ class GS_CreatureScript : public CreatureScript
                         break;
                     case GSCR_CAST:
                     {
-                        Unit* target = GS_SelectTarget(curr->params.c_cast.target_type);
+                        Unit* target = GS_SelectUnitTarget(curr->params.c_cast.target_type);
                         source->CastSpell(target, GS_GetValueFromSpecifier(curr->params.c_cast.spell).toInteger(), curr->params.c_cast.triggered);
                         break;
                     }
@@ -1494,7 +1522,7 @@ class GS_CreatureScript : public CreatureScript
                         if (curr->params.c_whisper.target.subject_type == GSST_NONE)
                             target = invoker;
                         else
-                            target = GS_SelectTarget(curr->params.c_whisper.target);
+                            target = GS_SelectUnitTarget(curr->params.c_whisper.target);
 
                         source->MonsterWhisper(curr->params.c_whisper.tosay, target ? target->GetGUID() : 0);
                         break;
@@ -1558,7 +1586,7 @@ class GS_CreatureScript : public CreatureScript
                         }
                         break;
                     case GSCR_KILL:
-                        if (Unit* victim = GS_SelectTarget(curr->params.c_kill.target))
+                        if (Unit* victim = GS_SelectUnitTarget(curr->params.c_kill.target))
                             source->Kill(victim);
                         break;
                     case GSCR_COMBATSTART:
@@ -1595,6 +1623,22 @@ class GS_CreatureScript : public CreatureScript
                             sumtype = TEMPSUMMON_MANUAL_DESPAWN;
 
                         source->SummonCreature(GS_GetValueFromSpecifier(curr->params.c_summon.creature_entry).toInteger(), x, y, z, o, sumtype, 15000);
+                        break;
+                    }
+                    case GSCR_SUMMONGO:
+                    {
+                        float x = GS_GetValueFromSpecifier(curr->params.c_summon_go.x).toFloat();
+                        float y = GS_GetValueFromSpecifier(curr->params.c_summon_go.y).toFloat();
+                        float z = GS_GetValueFromSpecifier(curr->params.c_summon_go.z).toFloat();
+                        float o = source->GetOrientation();
+                        if (x == 0 && y == 0 && z == 0)
+                            source->GetPosition(x, y, z, o);
+
+                        uint32 respawnTimer = 0;
+                        if (curr->params.c_summon_go.respawn_timer.value > 0)
+                            respawnTimer = (uint32)curr->params.c_summon_go.respawn_timer.value;
+
+                        source->SummonGameObject(GS_GetValueFromSpecifier(curr->params.c_summon_go.go_entry).toInteger(), x, y, z, o, 0, 0, 0, 0, respawnTimer);
                         break;
                     }
                     case GSCR_WALK:
@@ -1675,7 +1719,7 @@ class GS_CreatureScript : public CreatureScript
                             pl->SendMovieStart(GS_GetValueFromSpecifier(curr->params.c_movie.movie_id).toInteger());
                         break;
                     case GSCR_AURA:
-                        if (Unit* target = GS_SelectTarget(curr->params.c_aura.subject))
+                        if (Unit* target = GS_SelectUnitTarget(curr->params.c_aura.subject))
                         {
                             if (curr->params.c_aura.op == GSFO_ADD)
                                 target->AddAura(GS_GetValueFromSpecifier(curr->params.c_aura.aura_id).toInteger(), source);
@@ -1736,9 +1780,13 @@ class GS_CreatureScript : public CreatureScript
                         break;
                     }
                     case GSCR_DESPAWN:
-                        if (Unit* subj = GS_SelectTarget(curr->params.c_despawn.subject))
+                        if (Unit* subj = GS_SelectUnitTarget(curr->params.c_despawn.subject))
                             if (subj->GetTypeId() == TYPEID_UNIT)
                                 subj->ToCreature()->DespawnOrUnsummon();
+                        break;
+                    case GSCR_DESPAWNGO:
+                        if (GameObject* go = GS_SelectGameObjectTarget(curr->params.c_despawn_go.subject))
+                            go->Delete();
                         break;
                     case GSCR_VAR:
                     {
@@ -1795,7 +1843,7 @@ class GS_CreatureScript : public CreatureScript
                     }
                     case GSCR_SOUND:
                     {
-                        Unit* target = GS_SelectTarget(curr->params.c_sound.target);
+                        Unit* target = GS_SelectUnitTarget(curr->params.c_sound.target);
                         source->PlayDirectSound(GS_GetValueFromSpecifier(curr->params.c_sound.sound_id).toInteger(), target ? target->ToPlayer() : nullptr);
                         break;
                     }
@@ -1803,7 +1851,7 @@ class GS_CreatureScript : public CreatureScript
                     {
                         if (source->GetTypeId() == TYPEID_UNIT)
                         {
-                            Unit* target = GS_SelectTarget(curr->params.c_talk.talk_target);
+                            Unit* target = GS_SelectUnitTarget(curr->params.c_talk.talk_target);
                             sCreatureTextMgr->SendChat(source->ToCreature(), GS_GetValueFromSpecifier(curr->params.c_talk.talk_group_id).toInteger(), target ? target->GetGUID() : 0);
                         }
                         break;
@@ -1824,7 +1872,7 @@ class GS_CreatureScript : public CreatureScript
                     }
                     case GSCR_FOLLOW:
                     {
-                        if (Unit* target = GS_SelectTarget(curr->params.c_follow.subject))
+                        if (Unit* target = GS_SelectUnitTarget(curr->params.c_follow.subject))
                             source->GetMotionMaster()->MoveFollow(target, GS_GetValueFromSpecifier(curr->params.c_follow.distance).toFloat(), GS_GetValueFromSpecifier(curr->params.c_follow.angle).toFloat());
                         else
                             source->GetMotionMaster()->MovementExpired();

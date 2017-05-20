@@ -364,7 +364,7 @@ gs_specifier gs_specifier::parse(const char* str)
             // variable name - recognized by first character
             if (str[0] == '$')
             {
-                std::string varname = subid.substr(1, subid.size()-1);
+                std::string varname = subid.substr(1, subid.size() - 1);
                 auto itr = gscr_variable_map.find(varname.c_str());
 
                 // if not find in regular variables
@@ -403,6 +403,8 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_type = GSST_PARENT;
             else if (subid == "closest_creature")
                 rr.subject_type = GSST_CLOSEST_CREATURE;
+            else if (subid == "closest_gameobject")
+                rr.subject_type = GSST_CLOSEST_GAMEOBJECT;
             else if (subid == "closest_player")
                 rr.subject_type = GSST_CLOSEST_PLAYER;
             else if (subid == "last_summon")
@@ -438,8 +440,14 @@ gs_specifier gs_specifier::parse(const char* str)
                     i++;
                 std::string subpar = std::string(str).substr(lastpos + 1, i - lastpos - 1);
 
-                if (rr.subject_type == GSST_CLOSEST_CREATURE || rr.subject_type == GSST_CLOSEST_DEAD_CREATURE || rr.subject_type == GSST_CLOSEST_CREATURE_GUID)
-                    tryStrToInt(rr.value, subpar.c_str());
+                switch (rr.subject_type)
+                {
+                    case GSST_CLOSEST_CREATURE:
+                    case GSST_CLOSEST_GAMEOBJECT:
+                    case GSST_CLOSEST_DEAD_CREATURE:
+                    case GSST_CLOSEST_CREATURE_GUID:
+                        tryStrToInt(rr.value, subpar.c_str());
+                }
             }
 
             subject = true;
@@ -824,6 +832,36 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 ret->params.c_summon.z = gs_specifier::make_default_float_value(0.0f);
             }
             break;
+        // summon instruction - summons GO at position
+        // Syntax: summongo <entry>
+        //         summongo <entry> <x> <y> <z>
+        case GSCR_SUMMONGO:
+            if (src->parameters.size() == 0)
+                CLEANUP_AND_THROW("too few parameters for instruction SUMMONGO");
+            if (src->parameters.size() != 1 && src->parameters.size() != 4 && src->parameters.size() != 5)
+                CLEANUP_AND_THROW("invalid parameter count for instruction SUMMONGO - use 1, 4 or 5 params");
+
+            ret->params.c_summon_go.go_entry = gs_specifier::parse(src->parameters[0].c_str());
+            ret->params.c_summon_go.respawn_timer = gs_specifier::make_default_value(0);
+
+            if (src->parameters.size() >= 4)
+            {
+                ret->params.c_summon_go.x = gs_specifier::parse(src->parameters[1].c_str());
+                ret->params.c_summon_go.y = gs_specifier::parse(src->parameters[2].c_str());
+                ret->params.c_summon_go.z = gs_specifier::parse(src->parameters[3].c_str());
+
+                if (src->parameters.size() == 5)
+                {
+                    ret->params.c_summon_go.respawn_timer = gs_specifier::parse(src->parameters[4].c_str());
+                }
+            }
+            else
+            {
+                ret->params.c_summon_go.x = gs_specifier::make_default_float_value(0.0f);
+                ret->params.c_summon_go.y = gs_specifier::make_default_float_value(0.0f);
+                ret->params.c_summon_go.z = gs_specifier::make_default_float_value(0.0f);
+            }
+            break;
         // walk, run and teleport instructions - move to destination position with specified type
         // Syntax: walk <x> <y> <z>
         //         run <x> <y> <z>
@@ -1083,8 +1121,8 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             }
 
             break;
-        // unmount instruction - dismounts script owner from mount
-        // Syntax: unmount
+        // despawn instruction - despawn self or subject supplied
+        // Syntax: despawn <subject>
         case GSCR_DESPAWN:
             if (src->parameters.size() > 1)
                 CLEANUP_AND_THROW("invalid parameter count for instruction DESPAWN - do not supply parameters, or supply one");
@@ -1094,6 +1132,14 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             else
                 ret->params.c_despawn.subject = gs_specifier::parse(src->parameters[0].c_str());
 
+            break;
+        // despawngo instruction - desapawn gameobject as subject supplied
+        // Syntax: despawngo subject
+        case GSCR_DESPAWNGO:
+            if (src->parameters.size() != 1)
+                CLEANUP_AND_THROW("DESPAWN instruction must have only 1 parameter");
+
+            ret->params.c_despawn_go.subject = gs_specifier::parse(src->parameters[0].c_str());
             break;
         // repeat instruction - standard control sequence; needs to be closed by until
         // Syntax: repeat

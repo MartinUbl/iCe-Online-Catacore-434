@@ -45,6 +45,7 @@ enum gs_command_type
     GSCR_TIMER,
     GSCR_MORPH,
     GSCR_SUMMON,
+    GSCR_SUMMONGO,
     GSCR_WALK,
     GSCR_RUN,
     GSCR_TELEPORT,
@@ -63,6 +64,7 @@ enum gs_command_type
     GSCR_UNMOUNT,
     GSCR_QUEST,
     GSCR_DESPAWN,
+    GSCR_DESPAWNGO,
     GSCR_REPEAT,
     GSCR_UNTIL,
     GSCR_WHILE,
@@ -106,6 +108,7 @@ static std::string gscr_identifiers[] = {
     "timer",
     "morph",
     "summon",
+    "summongo",
     "walk",
     "run",
     "teleport",
@@ -124,6 +127,7 @@ static std::string gscr_identifiers[] = {
     "unmount",
     "quest",
     "despawn",
+    "despawngo",
     "repeat",
     "until",
     "while",
@@ -240,23 +244,24 @@ enum gs_state_value
 // type of subject in specifier
 enum gs_subject_type
 {
-    GSST_NONE = 0,              // none specifier
-    GSST_ME = 1,                // the owner of script (NPC itself)
-    GSST_TARGET = 2,            // current target
-    GSST_RANDOM = 3,            // random target from threat list
-    GSST_IMPLICIT = 4,          // implicit targetting (i.e. implicit spell target, etc.)
-    GSST_CHANCE = 5,            // "chance" parameter i.e. for IF instruction
-    GSST_TIMER = 6,             // timer stored, i.e. for IF instruction
-    GSST_STATE = 7,             // constant state (i.e. for timer - ready)
-    GSST_RANDOM_NOTANK = 8,     // random target without current target
-    GSST_INVOKER = 9,           // script invoker (gossip script, quest accept, etc.)
-    GSST_PARENT = 10,           // parent unit (of summoned creature)
-    GSST_VARIABLE_VALUE = 11,   // value of variable declared
-    GSST_CLOSEST_CREATURE = 12, // closest creature - expects parameter in round parenthesis
-    GSST_CLOSEST_PLAYER = 13,   // closest player
-    GSST_LAST_SUMMON = 14,      // last summoned unit
+    GSST_NONE = 0,                  // none specifier
+    GSST_ME = 1,                    // the owner of script (NPC itself)
+    GSST_TARGET = 2,                // current target
+    GSST_RANDOM = 3,                // random target from threat list
+    GSST_IMPLICIT = 4,              // implicit targetting (i.e. implicit spell target, etc.)
+    GSST_CHANCE = 5,                // "chance" parameter i.e. for IF instruction
+    GSST_TIMER = 6,                 // timer stored, i.e. for IF instruction
+    GSST_STATE = 7,                 // constant state (i.e. for timer - ready)
+    GSST_RANDOM_NOTANK = 8,         // random target without current target
+    GSST_INVOKER = 9,               // script invoker (gossip script, quest accept, etc.)
+    GSST_PARENT = 10,               // parent unit (of summoned creature)
+    GSST_VARIABLE_VALUE = 11,       // value of variable declared
+    GSST_CLOSEST_CREATURE = 12,     // closest creature - expects parameter in round parenthesis
+    GSST_CLOSEST_PLAYER = 13,       // closest player
+    GSST_LAST_SUMMON = 14,          // last summoned unit
     GSST_CLOSEST_CREATURE_GUID = 15,// closest creature by GUID
     GSST_CLOSEST_DEAD_CREATURE = 16,// closest dead creature by entry
+    GSST_CLOSEST_GAMEOBJECT = 17,   // closest gameoject - expects parameter in round parenthesis
 };
 
 // type of subject parameter in specifier
@@ -452,6 +457,13 @@ struct gs_command
 
         struct
         {
+            gs_specifier go_entry;
+            gs_specifier x, y, z;
+            gs_specifier respawn_timer;
+        } c_summon_go;
+
+        struct
+        {
             gs_specifier x, y, z;
         } c_walk_run_teleport;
 
@@ -524,6 +536,11 @@ struct gs_command
         {
             gs_specifier subject;
         } c_despawn;
+
+        struct
+        {
+            gs_specifier subject;
+        } c_despawn_go;
 
         struct
         {
