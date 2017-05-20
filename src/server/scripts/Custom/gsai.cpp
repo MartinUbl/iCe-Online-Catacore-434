@@ -14,6 +14,21 @@ class GS_CreatureScript : public CreatureScript
             //
         }
 
+        struct event_data
+        {
+            union
+            {
+                uint32 spell_id;
+                uint32 summon_entry;
+
+                struct
+                {
+                    uint32 damage;
+                    DamageEffectType damage_type;
+                }damage_dealt;
+            }misc;
+        };
+
         struct GS_EventQueueItem
         {
             EventHookType ev_hook_type;
@@ -21,20 +36,16 @@ class GS_CreatureScript : public CreatureScript
             int end_offset;
             int current_offset;
             uint64 target_guid;
+            event_data ev_data;
 
-            union
-            {
-                uint32 spell_id;
-                uint32 summon_entry;
-            }misc;
-
-            GS_EventQueueItem(EventHookType evHookType, int startOffset, int endOffset, uint64 targetGUID)
+            GS_EventQueueItem(EventHookType evHookType, int startOffset, int endOffset, uint64 targetGUID, event_data ev_data)
             {
                 ev_hook_type = evHookType;
                 start_offset = startOffset;
                 current_offset = startOffset;
                 end_offset = endOffset;
                 target_guid = targetGUID;
+                this->ev_data = ev_data;
             }
         };
 
@@ -544,11 +555,21 @@ class GS_CreatureScript : public CreatureScript
                 }
             }
 
+            void DamageDealt(Unit* victim, uint32& damage, DamageEffectType typeOfDamage) override
+            {
+                event_data ev_data;
+                ev_data.misc.damage_dealt.damage = damage;
+                ev_data.misc.damage_dealt.damage_type = typeOfDamage;
+                AddEventToQueue(EVENT_HOOK_DAMAGE_DEALT, victim, ev_data);
+            }
+
             void SpellHit(Unit* who, const SpellEntry* spell) override
             {
                 if (who != me)
                 {
-                    AddEventToQueue(EVENT_HOOK_SPELL_HIT, who, spell->Id);
+                    event_data ev_data;
+                    ev_data.misc.spell_id = spell->Id;
+                    AddEventToQueue(EVENT_HOOK_SPELL_HIT, who, ev_data);
                 }
 
                 if (m_spellReceivedScripts.find(spell->Id) != m_spellReceivedScripts.end())
@@ -766,7 +787,7 @@ class GS_CreatureScript : public CreatureScript
                 ScriptedAI::EnterCombat(who);
             }
 
-            bool AddEventToQueue(EventHookType hookType, Unit* unit, uint32 miscValue = 0)
+            bool AddEventToQueue(EventHookType hookType, Unit* unit, event_data ev_data = event_data())
             {
                 // command container is nullptr if gscript was unsuccessfully reloaded (error in script)
                 if (!com_container)
@@ -777,21 +798,7 @@ class GS_CreatureScript : public CreatureScript
                 {
                     int startOffset = com_container->event_offset_map[hookType].start_offset;
                     int endOffset = com_container->event_offset_map[hookType].end_offset;
-                    auto eventItem = GS_EventQueueItem(hookType, startOffset, endOffset, unit ? unit->GetGUID() : 0);
-
-                    // Add addition misc variables
-                    switch (hookType)
-                    {
-                        case EVENT_HOOK_SPELL_HIT:
-                            eventItem.misc.spell_id = miscValue;
-                            break;
-                        case EVENT_HOOK_JUST_SUMMONED:
-                            eventItem.misc.summon_entry = miscValue;
-                            break;
-                        default:
-                            break;
-                    }
-
+                    auto eventItem = GS_EventQueueItem(hookType, startOffset, endOffset, unit ? unit->GetGUID() : 0, ev_data);
                     eventQueue.push(eventItem);
                     return true;
                 }
@@ -1118,11 +1125,16 @@ class GS_CreatureScript : public CreatureScript
                             case EVENT_VARIABLE_VICTIM_ID:
                             case EVENT_VARIABLE_SUMMON_ID:
                             case EVENT_VARIABLE_CASTER_ID:
+                            case EVENT_VARIABLE_TARGET_ID:
                                 return GS_Variable(Unit::GetUnit(*me, eventItem.target_guid));
                             case EVENT_VARIABLE_SPELL_ID:
-                                return GS_Variable((int32)eventItem.misc.spell_id);
+                                return GS_Variable((int32)eventItem.ev_data.misc.spell_id);
                             case EVENT_VARIABLE_SUMMON_ENTRY_ID:
-                                return GS_Variable((int32)eventItem.misc.summon_entry);
+                                return GS_Variable((int32)eventItem.ev_data.misc.summon_entry);
+                            case EVENT_VARIABLE_DAMAGE_ID:
+                                return GS_Variable((int32)eventItem.ev_data.misc.damage_dealt.damage);
+                            case EVENT_VARIABLE_DAMAGE_TYPE_ID:
+                                return GS_Variable((int32)eventItem.ev_data.misc.damage_dealt.damage_type);
                         }
                     }
 
@@ -1282,7 +1294,9 @@ class GS_CreatureScript : public CreatureScript
                     targetAI->SetParentUnit(me);
                 }
 
-                AddEventToQueue(EVENT_HOOK_JUST_SUMMONED, summoned, summoned->GetEntry());
+                event_data ev_data;
+                ev_data.misc.summon_entry = summoned->GetEntry();
+                AddEventToQueue(EVENT_HOOK_JUST_SUMMONED, summoned, ev_data);
 
                 m_lastSummonedUnit = summoned;
             }

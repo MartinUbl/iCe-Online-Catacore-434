@@ -161,17 +161,19 @@ enum EventHookType : uint8
     EVENT_HOOK_DIED,
     EVENT_HOOK_KILLED,
     EVENT_HOOK_JUST_SUMMONED,
-    EVENT_HOOK_SPELL_HIT
+    EVENT_HOOK_SPELL_HIT,
+    EVENT_HOOK_DAMAGE_DEALT
 };
 
 static const std::map<std::string, EventHookType> gs_event_hook_names_map =
 {
-    { "combat_start",       EVENT_HOOK_COMBAT },            // Unit* ev_enemy
-    { "enter_evade_mode",   EVENT_HOOK_EVADE },             // none
-    { "just_died",          EVENT_HOOK_DIED },              // Unit* ev_killer
-    { "killed_unit",        EVENT_HOOK_KILLED },            // Unit* ev_victim
-    { "just_summoned",      EVENT_HOOK_JUST_SUMMONED },     // Unit* ev_summon
-    { "spell_hit",          EVENT_HOOK_SPELL_HIT },         // Unit* ev_caster
+    { "combat_start",           EVENT_HOOK_COMBAT },            // Unit* ev_enemy
+    { "enter_evade_mode",       EVENT_HOOK_EVADE },             // none
+    { "just_died",              EVENT_HOOK_DIED },              // Unit* ev_killer
+    { "killed_unit",            EVENT_HOOK_KILLED },            // Unit* ev_victim
+    { "just_summoned",          EVENT_HOOK_JUST_SUMMONED },     // Unit* ev_summon
+    { "spell_hit",              EVENT_HOOK_SPELL_HIT },         // Unit* ev_caster
+    { "damage_dealt",           EVENT_HOOK_DAMAGE_DEALT },      // Unit* ev_target
 };
 
 #define GS_VARIABLE_MAX_LIMIT 10000
@@ -185,6 +187,9 @@ enum gs_event_variable_id : int32
     EVENT_VARIABLE_SUMMON_ENTRY_ID,
     EVENT_VARIABLE_CASTER_ID,
     EVENT_VARIABLE_SPELL_ID,
+    EVENT_VARIABLE_TARGET_ID,
+    EVENT_VARIABLE_DAMAGE_ID,
+    EVENT_VARIABLE_DAMAGE_TYPE_ID,
 };
 
 static const std::map<std::string, gs_event_variable_id> gs_event_variable_id_mapping =
@@ -196,6 +201,9 @@ static const std::map<std::string, gs_event_variable_id> gs_event_variable_id_ma
     { "ev_summon_entry",    EVENT_VARIABLE_SUMMON_ENTRY_ID },
     { "ev_caster",          EVENT_VARIABLE_CASTER_ID },
     { "ev_spell_id",        EVENT_VARIABLE_SPELL_ID },
+    { "ev_target",          EVENT_VARIABLE_TARGET_ID },
+    { "ev_damage",          EVENT_VARIABLE_DAMAGE_ID },
+    { "ev_damage_type",     EVENT_VARIABLE_DAMAGE_TYPE_ID },
 };
 
 enum gs_quest_operation
@@ -220,7 +228,7 @@ enum gs_go_operation
     GSGO_USE = 1,               // use gameobject
     GSGO_TOGGLE = 2,            // switch go state
     GSGO_RESET = 3,             // reset go state
-    GSGO_SET_STATE = 4       // manually set go state
+    GSGO_SET_STATE = 4          // manually set go state
 };
 
 // structure for recognized values
