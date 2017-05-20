@@ -89,6 +89,7 @@ enum gs_command_type
     GSCR_END_EVENT,
     GSCR_GO,
     GSCR_CALL_FOR_HELP,
+    GSCR_SET_SHEATHE_STATE
 };
 
 // string identifiers - index is matching the value of enum above
@@ -152,8 +153,9 @@ static std::string gscr_identifiers[] = {
     "phase",
     "event",
     "endevent",
-    "go"
-    "callforhelp"
+    "go",
+    "callforhelp",
+    "setsheath"
 };
 
 enum EventHookType : uint8
@@ -574,6 +576,11 @@ struct gs_command
         {
             gs_specifier radius;
         } c_call_for_help;
+
+        struct
+        {
+            int state;
+        } c_set_sheathe_state;
 
         struct
         {

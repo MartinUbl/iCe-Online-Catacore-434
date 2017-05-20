@@ -1685,6 +1685,12 @@ class GS_CreatureScript : public CreatureScript
                             source->ToCreature()->CallForHelp(call_radius);
                         break;
                     }
+                    case GSCR_SET_SHEATHE_STATE:
+                    {
+                        if (source->GetTypeId() == TYPEID_UNIT)
+                            source->SetSheath((SheathState)curr->params.c_set_sheathe_state.state);
+                        break;
+                    }
                     case GSCR_WALK:
                         source->SetWalk(true);
                         is_moving = true;

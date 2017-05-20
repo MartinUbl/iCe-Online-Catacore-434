@@ -1601,6 +1601,27 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 CLEANUP_AND_THROW("CALL_FOR_HELP instruction must contain only 1 parameter (radius)");
 
             ret->params.c_call_for_help.radius = gs_specifier::parse(src->parameters[0].c_str());
+            break;
+        }
+        // setsheath instruction
+        // Syntax: setsheath <state name>
+        // Supported state names (unarmed, melee, ranged)
+        case GSCR_SET_SHEATHE_STATE:
+        {
+            if (src->parameters.size() != 1)
+                CLEANUP_AND_THROW("SET_SHEATHE_STATE instruction must contain only 1 parameter");
+
+            std::string state = src->parameters[0];
+
+            if (state == "unarmed")
+                ret->params.c_set_sheathe_state.state = SHEATH_STATE_UNARMED;
+            else if (state == "melee")
+                ret->params.c_set_sheathe_state.state = SHEATH_STATE_MELEE;
+            else if (state == "ranged")
+                ret->params.c_set_sheathe_state.state = SHEATH_STATE_RANGED;
+            else
+                CLEANUP_AND_THROW("Unknown sheath state for instruction SET_SHEATHE_STATE. Supported sheath states (unarmed, melee or ranged)");
+            break;
         }
     }
 
