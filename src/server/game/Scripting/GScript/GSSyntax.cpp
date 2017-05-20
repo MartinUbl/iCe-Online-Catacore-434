@@ -112,6 +112,11 @@ static gs_recognized_string gs_recognized_emote[] = {
     { "shy", EMOTE_ONESHOT_SHY },
 };
 
+static gs_recognized_string gs_recognized_go_state[] = {
+    { "active", GO_STATE_ACTIVE },
+    { "ready", GO_STATE_READY },
+};
+
 // string comparator for map
 struct StrCompare : public std::binary_function<const char*, const char*, bool>
 {
@@ -229,7 +234,27 @@ static bool tryStrToFloat(float& dest, const char* src)
     return true;
 }
 
-static bool tryRecognizeFlag(int& target, uint32 field, std::string& str)
+static bool tryRecognizeGamebjectState(int& target, std::string& str)
+{
+    gs_recognized_string* arr = nullptr;
+    int count = 0;
+
+    arr = gs_recognized_go_state;
+    count = sizeof(gs_recognized_go_state) / sizeof(gs_recognized_string);
+
+    for (int i = 0; i < count; i++)
+    {
+        if (str == arr[i].str)
+        {
+            target = (int)(arr[i].value);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool tryRecognizeUnitFlag(int& target, uint32 field, std::string& str)
 {
     gs_recognized_string* arr = nullptr;
     int count = 0;
@@ -646,7 +671,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             if (src->parameters.size() == 3)
             {
                 int32 emote;
-                if (!tryRecognizeFlag(emote, UNIT_NPC_EMOTESTATE, src->parameters[2]))
+                if (!tryRecognizeUnitFlag(emote, UNIT_NPC_EMOTESTATE, src->parameters[2]))
                     ret->params.c_say_yell.emote_id = gs_specifier::parse(src->parameters[2].c_str());
                 else
                     ret->params.c_say_yell.emote_id = gs_specifier::make_default_value(emote);
@@ -946,7 +971,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
 
             if (!tryStrToInt(ret->params.c_flags.value, src->parameters[2].c_str()))
             {
-                if (!tryRecognizeFlag(ret->params.c_flags.value, ret->params.c_flags.field, src->parameters[2]))
+                if (!tryRecognizeUnitFlag(ret->params.c_flags.value, ret->params.c_flags.field, src->parameters[2]))
                     CLEANUP_AND_THROW("could not recognize flag name / identifier in FLAGS instruction");
             }
 
@@ -970,7 +995,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
 
             if (!tryStrToInt(ret->params.c_immunity.mask, src->parameters[1].c_str()))
             {
-                if (!tryRecognizeFlag(ret->params.c_immunity.mask, UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE /* dummy, just to not be in conflict */, src->parameters[1]))
+                if (!tryRecognizeUnitFlag(ret->params.c_immunity.mask, UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE /* dummy, just to not be in conflict */, src->parameters[1]))
                     CLEANUP_AND_THROW("could not recognize flag name / identifier in IMMUNITY instruction");
             }
 
@@ -985,7 +1010,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 CLEANUP_AND_THROW("too many parameters for instruction EMOTE");
 
             int32 emote;
-            if (!tryRecognizeFlag(emote, UNIT_NPC_EMOTESTATE, src->parameters[0]))
+            if (!tryRecognizeUnitFlag(emote, UNIT_NPC_EMOTESTATE, src->parameters[0]))
                 ret->params.c_emote.emote_id = gs_specifier::parse(src->parameters[0].c_str());
             else
                 ret->params.c_emote.emote_id = gs_specifier::make_default_value(emote);
@@ -1037,7 +1062,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
 
             if (!tryStrToInt(ret->params.c_speed.movetype, src->parameters[0].c_str()))
             {
-                if (!tryRecognizeFlag(ret->params.c_speed.movetype, UNIT_FIELD_HOVERHEIGHT /* dummy, to avoid conflict */, src->parameters[0]))
+                if (!tryRecognizeUnitFlag(ret->params.c_speed.movetype, UNIT_FIELD_HOVERHEIGHT /* dummy, to avoid conflict */, src->parameters[0]))
                     CLEANUP_AND_THROW("could not recognize move type name / identifier in SPEED instruction");
             }
 
@@ -1060,7 +1085,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             {
                 if (!tryStrToInt(ret->params.c_move.movetype, src->parameters[0].c_str()))
                 {
-                    if (!tryRecognizeFlag(ret->params.c_move.movetype, UNIT_FIELD_HOVERHEIGHT /* dummy, to avoid conflict */, src->parameters[0]))
+                    if (!tryRecognizeUnitFlag(ret->params.c_move.movetype, UNIT_FIELD_HOVERHEIGHT /* dummy, to avoid conflict */, src->parameters[0]))
                         CLEANUP_AND_THROW("could not recognize move type name / identifier in MOVE instruction");
                 }
             }
@@ -1480,6 +1505,9 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
 
             ret->params.c_phase.phase_mask = gs_specifier::parse(src->parameters[0].c_str());
             break;
+        // event instruction - defines event hook
+        // Syntax: event <event name>
+        // Supported event names (combat_start, enter_evade_mode, just_died, killed_unit, just_summoned, spell_hit)
         case GSCR_EVENT:
         {
             if (src->parameters.size() != 1)
@@ -1507,6 +1535,8 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             events_stack.push({ event_name, ret });
             break;
         }
+        // endevent instruction - defines end of event hook
+        // Syntax: endevent
         case GSCR_END_EVENT:
         {
             if (events_stack.size() != 1)
@@ -1518,6 +1548,49 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             // remember ending offset of instructions
             event_offset_map[event_pair.first].end_offset = (uint32)offset;
             event_pair.second->params.c_event.end_offset = offset;
+            break;
+        }
+        // go instruction
+        // Syntax v.1: go <subcommand name>
+        // Supported subcommand names (use, toggle, reset)
+        // Syntax v.2: go setstate <go state>
+        // Supported go state names (active, ready)
+        case GSCR_GO:
+        {
+            if (src->parameters.size() < 2)
+                CLEANUP_AND_THROW("GO instruction must contain at least 2 parameters");
+
+            if (src->parameters.size() > 3)
+                CLEANUP_AND_THROW("GO instruction contains more than 3 parameters");
+
+            // parse subcommand of go
+            std::string subcommand = src->parameters[0];
+
+            if (subcommand == "use")
+                ret->params.c_go.op = GSGO_USE;
+            else if (subcommand == "toggle")
+                ret->params.c_go.op = GSGO_TOGGLE;
+            else if (subcommand == "reset")
+                ret->params.c_go.op = GSGO_RESET;
+            else if (subcommand == "setstate")
+                ret->params.c_go.op = GSGO_SET_STATE;
+            else
+                CLEANUP_AND_THROW("Unknown subcommand of command GO");
+
+            // use, toggle, reset
+            if (src->parameters.size() == 2)
+            {
+                ret->params.c_go.subject = gs_specifier::parse(src->parameters[1].c_str());
+                ret->params.c_go.value = 0;
+            }
+            else // 3 parameters (setstate)
+            {
+                ret->params.c_go.subject = gs_specifier::parse(src->parameters[2].c_str());
+                ret->params.c_go.op = GSGO_NONE;
+
+                if (!tryRecognizeGamebjectState(ret->params.c_go.value, src->parameters[1]))
+                    CLEANUP_AND_THROW("could not recognize gamobject state in GO instruction");
+            }
             break;
         }
     }

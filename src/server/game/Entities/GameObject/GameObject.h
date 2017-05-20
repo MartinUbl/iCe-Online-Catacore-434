@@ -748,6 +748,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         static void SetGoArtKit(uint8 artkit, GameObject *go, uint32 lowguid = 0);
 
         void Use(Unit* user);
+        void SwitchDoorOrButton(bool activate, bool alternative = false);
 
         LootState getLootState() const { return m_lootState; }
         void SetLootState(LootState s);
@@ -879,7 +880,6 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         void AddModelToMap();
 
     private:
-        void SwitchDoorOrButton(bool activate, bool alternative = false);
         GameObjectAI* m_AI;
         void UpdateModel();                                 // updates model in case displayId were changed
 };

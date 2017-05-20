@@ -1639,6 +1639,31 @@ class GS_CreatureScript : public CreatureScript
                         source->SummonGameObject(GS_GetValueFromSpecifier(curr->params.c_summon_go.go_entry).toInteger(), x, y, z, o, 0, 0, 0, 0, respawnTimer);
                         break;
                     }
+                    case GSCR_GO:
+                    {
+                        GameObject* go = GS_SelectGameObjectTarget(curr->params.c_go.subject);
+                        if (!go)
+                            break;
+
+                        switch (curr->params.c_go.op)
+                        {
+                        case GSGO_USE:
+                            go->Use(source);
+                            break;
+                        case GSGO_RESET:
+                            go->ResetDoorOrButton();
+                            break;
+                        case GSGO_TOGGLE:
+                            go->SwitchDoorOrButton(!go->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE));
+                            break;
+                        case GSGO_SET_STATE:
+                            go->SetGoState((GOState)curr->params.c_go.value);
+                            break;
+                        default:
+                            break;
+                        }
+                        break;
+                    }
                     case GSCR_WALK:
                         source->SetWalk(true);
                         is_moving = true;

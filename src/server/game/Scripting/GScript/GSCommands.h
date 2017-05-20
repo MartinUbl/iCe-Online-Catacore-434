@@ -87,6 +87,7 @@ enum gs_command_type
     GSCR_PHASE,
     GSCR_EVENT,
     GSCR_END_EVENT,
+    GSCR_GO,
 };
 
 // string identifiers - index is matching the value of enum above
@@ -149,7 +150,8 @@ static std::string gscr_identifiers[] = {
     "resolve",
     "phase",
     "event",
-    "endevent"
+    "endevent",
+    "go"
 };
 
 enum EventHookType : uint8
@@ -210,6 +212,15 @@ enum gs_flag_operation
     GSFO_ADD = 1,               // add flag to current using OR instruction
     GSFO_REMOVE = 2,            // remove flag from current using AND on negated current and flag
     GSFO_SET = 3                // sets new value regardless of what was there previously
+};
+
+enum gs_go_operation
+{
+    GSGO_NONE = 0,
+    GSGO_USE = 1,               // use gameobject
+    GSGO_TOGGLE = 2,            // switch go state
+    GSGO_RESET = 3,             // reset go state
+    GSGO_SET_STATE = 4       // manually set go state
 };
 
 // structure for recognized values
@@ -541,6 +552,13 @@ struct gs_command
         {
             gs_specifier subject;
         } c_despawn_go;
+
+        struct
+        {
+            gs_go_operation op;
+            gs_specifier subject;
+            int value;
+        } c_go;
 
         struct
         {
