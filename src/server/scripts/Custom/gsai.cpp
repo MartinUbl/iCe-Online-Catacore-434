@@ -1596,7 +1596,7 @@ class GS_CreatureScript : public CreatureScript
                         if (Unit* victim = GS_SelectUnitTarget(curr->params.c_kill.target))
                             source->Kill(victim);
                         break;
-                    case GSCR_ATTACK:
+                    case GSCR_MELEE:
                         disable_melee = !curr->params.c_attack.is_attack_enabled;
                         break;
                     case GSCR_TIMER:

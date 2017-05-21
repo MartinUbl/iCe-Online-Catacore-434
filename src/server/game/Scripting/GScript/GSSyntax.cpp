@@ -739,9 +739,9 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             matching->params.c_if.endif_offset = offset;
             break;
         }
-        // attack instruction - allow or disallow melee attacking of creature
-        // Syntax: attack enable | disable
-        case GSCR_ATTACK:
+        // melee instruction - allow or disallow melee attacking of creature
+        // Syntax: melee enable | disable
+        case GSCR_MELEE:
         {
             if (src->parameters.size() != 1)
                 CLEANUP_AND_THROW("COMBATSTOP instruction can contain only 1 parameter");
