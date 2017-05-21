@@ -1458,6 +1458,12 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             if (src->parameters.size() > 0)
                 CLEANUP_AND_THROW("too many parameters for instruction RESET");
             break;
+        // make NPC leave combat and evade
+        // Syntax: evade
+        case GSCR_EVADE:
+            if (src->parameters.size() > 0)
+                CLEANUP_AND_THROW("too many parameters for instruction EVADE");
+            break;
         // resolves position or something else
         // Syntax: resolve <resolver> <specific params...>
         //         resolve vector <var x> <var y> <var z> <source> <angle> <distance>
