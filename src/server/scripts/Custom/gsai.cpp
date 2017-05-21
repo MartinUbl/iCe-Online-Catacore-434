@@ -1937,7 +1937,8 @@ class GS_CreatureScript : public CreatureScript
                             source->SetVisibility(VISIBILITY_OFF);
                         break;
                     case GSCR_EVADE:
-                        EnterEvadeMode();
+                        if (source->GetTypeId() == TYPEID_UNIT)
+                            source->ToCreature()->AI()->EnterEvadeMode();
                         break;
                     case GSCR_RESET:
                     {
