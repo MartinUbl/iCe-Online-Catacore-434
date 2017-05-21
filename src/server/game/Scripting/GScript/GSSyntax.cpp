@@ -1432,12 +1432,18 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 ret->params.c_unvehicle.entry = gs_specifier::make_default_value(0);
             break;
         // set visibility (on/off)
-        // Syntax: visible
-        //         invisible
-        case GSCR_VISIBLE:
-        case GSCR_INVISIBLE:
-            if (src->parameters.size() > 0)
-                CLEANUP_AND_THROW("too many parameters for instruction VISIBLE/INVISIBLE");
+        // Syntax: visibility on | off
+        case GSCR_VISIBILITY:
+            if (src->parameters.size() != 1)
+                CLEANUP_AND_THROW("VISIBILITY instruction can contain only one parameter");
+
+            std::string toggle = src->parameters[0];
+            if (toggle == "on")
+                ret->params.c_visibility.set_visible = true;
+            else if (toggle == "off")
+                ret->params.c_visibility.set_visible = false;
+            else
+                CLEANUP_AND_THROW("Unknown VISIBILITY parameter, expected (on/off)");
             break;
         // reset NPC
         // Syntax: reset

@@ -1936,11 +1936,11 @@ class GS_CreatureScript : public CreatureScript
                                 source->ExitVehicle();
                         break;
                     }
-                    case GSCR_VISIBLE:
-                        source->SetVisibility(VISIBILITY_ON);
-                        break;
-                    case GSCR_INVISIBLE:
-                        source->SetVisibility(VISIBILITY_OFF);
+                    case GSCR_VISIBILITY:
+                        if (curr->params.c_visibility.set_visible)
+                            source->SetVisibility(VISIBILITY_ON);
+                        else
+                            source->SetVisibility(VISIBILITY_OFF);
                         break;
                     case GSCR_RESET:
                         if (source == me)

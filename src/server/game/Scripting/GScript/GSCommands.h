@@ -80,8 +80,7 @@ enum gs_command_type
     GSCR_BOSSEMOTE,
     GSCR_UNVEHICLE,
     GSCR_WHISPER,
-    GSCR_VISIBLE,
-    GSCR_INVISIBLE,
+    GSCR_VISIBILITY,
     GSCR_RESET,
     GSCR_RESOLVE,
     GSCR_PHASE,
@@ -146,8 +145,7 @@ static std::string gscr_identifiers[] = {
     "bossemote",
     "unvehicle",
     "whisper",
-    "visible",
-    "invisible",
+    "visibility",
     "reset",
     "resolve",
     "phase",
@@ -648,6 +646,11 @@ struct gs_command
         {
             gs_specifier entry;
         } c_unvehicle;
+
+        struct
+        {
+            bool set_visible;
+        } c_visibility;
 
         struct
         {
