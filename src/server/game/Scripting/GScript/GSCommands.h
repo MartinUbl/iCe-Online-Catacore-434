@@ -37,11 +37,10 @@ enum gs_command_type
     GSCR_YELL,
     GSCR_IF,
     GSCR_ENDIF,
-    GSCR_COMBATSTOP,
+    GSCR_ATTACK,
     GSCR_FACTION,
     GSCR_REACT,
     GSCR_KILL,
-    GSCR_COMBATSTART,
     GSCR_TIMER,
     GSCR_MORPH,
     GSCR_SUMMON,
@@ -102,11 +101,10 @@ static std::string gscr_identifiers[] = {
     "yell",
     "if",
     "endif",
-    "combatstop",
+    "attack",
     "faction",
     "react",
     "kill",
-    "combatstart",
     "timer",
     "morph",
     "summon",
@@ -651,6 +649,11 @@ struct gs_command
         {
             bool set_visible;
         } c_visibility;
+
+        struct
+        {
+            bool is_attack_enabled;
+        } c_attack;
 
         struct
         {

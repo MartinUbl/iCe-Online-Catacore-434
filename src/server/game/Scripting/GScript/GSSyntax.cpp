@@ -739,12 +739,23 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             matching->params.c_if.endif_offset = offset;
             break;
         }
-        // combatstop instruction - stops combat (melee attack, threat, ..)
-        // Syntax: combatstop
-        case GSCR_COMBATSTOP:
-            if (src->parameters.size() != 0)
-                CLEANUP_AND_THROW("too many parameters for instruction COMBATSTOP");
+        // attack instruction - allow or disallow melee attacking of creature
+        // Syntax: attack enable | disable
+        case GSCR_ATTACK:
+        {
+            if (src->parameters.size() != 1)
+                CLEANUP_AND_THROW("COMBATSTOP instruction can contain only 1 parameter");
+
+            std::string subcommand = src->parameters[0];
+
+            if (subcommand == "enable")
+                ret->params.c_attack.is_attack_enabled = true;
+            else if (subcommand == "disable")
+                ret->params.c_attack.is_attack_enabled = false;
+            else
+                CLEANUP_AND_THROW("Unknown COMBATSTOP parameter, expected (enable/disable)");
             break;
+        }
         // faction instruction - changes faction of script owner
         // Syntax: faction <factionId>
         //         faction restore
@@ -782,12 +793,6 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 CLEANUP_AND_THROW("too many parameters for instruction KILL");
 
             ret->params.c_kill.target = gs_specifier::parse(src->parameters[0].c_str());
-            break;
-        // combatstart instruction - starts combat (melee attack, threat, ..)
-        // Syntax: combatstart
-        case GSCR_COMBATSTART:
-            if (src->parameters.size() != 0)
-                CLEANUP_AND_THROW("too many parameters for instruction COMBATSTART");
             break;
         // timer instruction - sets timer, etc.
         // Syntax: timer <timer name> set <timer value>
@@ -1434,6 +1439,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         // set visibility (on/off)
         // Syntax: visibility on | off
         case GSCR_VISIBILITY:
+        {
             if (src->parameters.size() != 1)
                 CLEANUP_AND_THROW("VISIBILITY instruction can contain only one parameter");
 
@@ -1445,6 +1451,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             else
                 CLEANUP_AND_THROW("Unknown VISIBILITY parameter, expected (on/off)");
             break;
+        }
         // reset NPC
         // Syntax: reset
         case GSCR_RESET:

@@ -1567,11 +1567,6 @@ class GS_CreatureScript : public CreatureScript
                         if (!GS_Meets(curr->params.c_until.condition))
                             com_counter = curr->params.c_until.repeat_offset;
                         break;
-                    case GSCR_COMBATSTOP:
-                        disable_melee = true;
-                        source->AttackStop();
-                        source->getThreatManager().clearReferences();
-                        break;
                     case GSCR_FACTION:
                         // if the faction is larger than 0, that means set faction to specified value
                         if (curr->params.c_faction.faction.value > 0)
@@ -1601,9 +1596,8 @@ class GS_CreatureScript : public CreatureScript
                         if (Unit* victim = GS_SelectUnitTarget(curr->params.c_kill.target))
                             source->Kill(victim);
                         break;
-                    case GSCR_COMBATSTART:
-                        disable_melee = false;
-                        source->Attack(source->GetVictim(), true);
+                    case GSCR_ATTACK:
+                        disable_melee = !curr->params.c_attack.is_attack_enabled;
                         break;
                     case GSCR_TIMER:
                         GS_SetTimer(curr->params.c_timer.timer_id, GS_GetValueFromSpecifier(curr->params.c_timer.value).toInteger());
