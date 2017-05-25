@@ -836,7 +836,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             break;
         // summon instruction - summons NPC at position
         // Syntax: summon <entry>
-        //         summon <entry> <x> <y> <z>
+        //         summon <entry> <x> <y> <z> [nodespawn]
         case GSCR_SUMMON:
             if (src->parameters.size() == 0)
                 CLEANUP_AND_THROW("too few parameters for instruction SUMMON");
@@ -867,7 +867,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             break;
         // summon instruction - summons GO at position
         // Syntax: summongo <entry>
-        //         summongo <entry> <x> <y> <z>
+        //         summongo <entry> <x> <y> <z> [respawn_timer]
         case GSCR_SUMMONGO:
             if (src->parameters.size() == 0)
                 CLEANUP_AND_THROW("too few parameters for instruction SUMMONGO");
@@ -998,8 +998,10 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 ret->params.c_immunity.op = GSFO_ADD;
             else if (src->parameters[0] == "remove")
                 ret->params.c_immunity.op = GSFO_REMOVE;
+            else if (src->parameters[0] == "add")
+                ret->params.c_immunity.op = GSFO_ADD;
             else
-                CLEANUP_AND_THROW("invalid operation for instruction IMMUNITY, use add or remove");
+                CLEANUP_AND_THROW("invalid operation for instruction IMMUNITY, use add or remove or set");
 
             if (!tryStrToInt(ret->params.c_immunity.mask, src->parameters[1].c_str()))
             {
@@ -1573,9 +1575,9 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             break;
         }
         // go instruction
-        // Syntax v.1: go <subcommand name>
+        // Syntax v.1: go <subcommand name> <go subject>
         // Supported subcommand names (use, toggle, reset)
-        // Syntax v.2: go setstate <go state>
+        // Syntax v.2: go setstate <go state> <go subject>
         // Supported go state names (active, ready)
         case GSCR_GO:
         {
@@ -1600,7 +1602,7 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 CLEANUP_AND_THROW("Unknown subcommand of command GO");
 
             // use, toggle, reset
-            if (src->parameters.size() == 2)
+            if (src->parameters.size() == 2 && ret->params.c_go.op != GSGO_SET_STATE)
             {
                 ret->params.c_go.subject = gs_specifier::parse(src->parameters[1].c_str());
                 ret->params.c_go.value = 0;
