@@ -1735,6 +1735,8 @@ CommandContainer* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
                     throw SyntaxErrorException(0, "Missing closing endwhen");
                 case STACK_TYPE_WHILE:
                     throw SyntaxErrorException(0, "Missing closing endwhile");
+                default:
+                    break;
                 }
             }
         }
