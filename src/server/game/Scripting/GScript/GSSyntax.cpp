@@ -127,18 +127,22 @@ public:
     }
 };
 
+enum StackType : uint8
+{
+    STACK_TYPE_IF = 0,      // stack of IF commands (to match appropriate ENDIF)
+    STACK_TYPE_WHEN,        // stack of WHEN commands (to match appropriate ENDWHEN)
+    STACK_TYPE_REPEAT,      // stack of REPEAT commands (to match appropriate UNTIL)
+    STACK_TYPE_WHILE,       // stack of WHILE commands (to match appropriate ENDWHILE)
+    STACK_TYPE_MAX
+};
+
+std::map<StackType, std::stack<gs_command*>> stacks_map;
+
 // stores label offsets (key = label name, value = label offset)
 std::map<const char*, int, StrCompare> gscr_label_offset_map;
 // list of all gotos (pairs of origin gs_command pointer, and label name it calls)
 std::list<std::pair<gs_command*, const char*> > gscr_gotos_list;
-// stack of IF commands (to match appropriate ENDIF)
-std::stack<gs_command*> gscr_if_stack;
-// stack of WHEN commands (to match appropriate ENDWHEN)
-std::stack<gs_command*> gscr_when_stack;
-// stack of REPEAT commands (to match appropriate UNTIL)
-std::stack<gs_command*> gscr_repeat_stack;
-// stack of WHILE commands (to match appropriate ENDWHILE)
-std::stack<gs_command*> gscr_while_stack;
+
 // map of identifiers for timers
 std::map<const char*, int, StrCompare> gscr_timer_map;
 // map of identifiers for variables
@@ -721,19 +725,19 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                     CLEANUP_AND_THROW("invalid IF statement, use subject, or subject + operator + subject");
             }
 
-            gscr_if_stack.push(ret);
+            stacks_map[STACK_TYPE_IF].push(ret);
 
             break;
         // endif instruction - just pops latest IF from stack and sets its offset there
         // Syntax: endif
         case GSCR_ENDIF:
         {
-            if (gscr_if_stack.empty())
+            if (stacks_map[STACK_TYPE_IF].empty())
                 CLEANUP_AND_THROW("invalid ENDIF - no matching IF");
 
             // pop matching IF from if-stack
-            gs_command* matching = gscr_if_stack.top();
-            gscr_if_stack.pop();
+            gs_command* matching = stacks_map[STACK_TYPE_IF].top();
+            stacks_map[STACK_TYPE_IF].pop();
 
             // sets offset of this instruction (for possible jumping) to the if statement command
             matching->params.c_if.endif_offset = offset;
@@ -1184,13 +1188,13 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
 
             ret->params.c_repeat.offset = offset;
 
-            gscr_repeat_stack.push(ret);
+            stacks_map[STACK_TYPE_REPEAT].push(ret);
             break;
         // until instruction - just pops latest REPEAT from stack and sets its offset there; also declares condition
         // Syntax: until <subject> <operator> <subject>
         case GSCR_UNTIL:
         {
-            if (gscr_repeat_stack.empty())
+            if (stacks_map[STACK_TYPE_REPEAT].empty())
                 CLEANUP_AND_THROW("invalid UNTIL - no matching REPEAT");
 
             if (src->parameters.size() == 0)
@@ -1212,8 +1216,8 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             }
 
             // pop matching REPEAT from if-stack
-            gs_command* matching = gscr_repeat_stack.top();
-            gscr_repeat_stack.pop();
+            gs_command* matching = stacks_map[STACK_TYPE_REPEAT].top();
+            stacks_map[STACK_TYPE_REPEAT].pop();
 
             // sets offset of this instruction (for possible jumping) to the repeat statement command
             ret->params.c_until.repeat_offset = matching->params.c_repeat.offset;
@@ -1242,19 +1246,19 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
 
             ret->params.c_while.my_offset = offset;
 
-            gscr_while_stack.push(ret);
+            stacks_map[STACK_TYPE_WHILE].push(ret);
 
             break;
         // endwhile instruction - just pops latest WHILE from stack and sets its offset there
         // Syntax: endwhile
         case GSCR_ENDWHILE:
         {
-            if (gscr_while_stack.empty())
+            if (stacks_map[STACK_TYPE_WHILE].empty())
                 CLEANUP_AND_THROW("invalid ENDWHILE - no matching WHILE");
 
             // pop matching IF from if-stack
-            gs_command* matching = gscr_while_stack.top();
-            gscr_while_stack.pop();
+            gs_command* matching = stacks_map[STACK_TYPE_WHILE].top();
+            stacks_map[STACK_TYPE_WHILE].pop();
 
             // sets offset of this instruction (for possible jumping) to the if statement command
             matching->params.c_while.endwhile_offset = offset;
@@ -1341,19 +1345,19 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                     CLEANUP_AND_THROW("invalid WHEN statement, use subject, or subject + operator + subject");
             }
 
-            gscr_when_stack.push(ret);
+            stacks_map[STACK_TYPE_WHEN].push(ret);
 
             break;
         // endwhen instruction - just pops latest WHEN from stack and sets its offset there
         // Syntax: endwhen
         case GSCR_ENDWHEN:
         {
-            if (gscr_when_stack.empty())
+            if (stacks_map[STACK_TYPE_WHEN].empty())
                 CLEANUP_AND_THROW("invalid ENDWHEN - no matching WHEN");
 
             // pop matching WHEN from if-stack
-            gs_command* matching = gscr_when_stack.top();
-            gscr_when_stack.pop();
+            gs_command* matching = stacks_map[STACK_TYPE_WHEN].top();
+            stacks_map[STACK_TYPE_WHEN].pop();
 
             // sets offset of this instruction (for possible jumping) to the when statement command
             matching->params.c_when.endwhen_offset = offset;
@@ -1684,14 +1688,11 @@ CommandContainer* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
     gscr_last_timer_id = -1;
     gscr_last_variable_id = -1;
 
-    while (!gscr_if_stack.empty())
-        gscr_if_stack.pop();
-    while (!gscr_when_stack.empty())
-        gscr_when_stack.pop();
-    while (!gscr_repeat_stack.empty())
-        gscr_repeat_stack.pop();
-    while (!gscr_while_stack.empty())
-        gscr_while_stack.pop();
+    stacks_map.clear();
+
+    for (uint8 i = 0; i < STACK_TYPE_MAX; i++) {
+        stacks_map.insert(std::pair<StackType, std::stack<gs_command*>>((StackType)i, std::stack<gs_command*>()));
+    }
 
     while (!events_stack.empty())
         events_stack.pop();
@@ -1716,6 +1717,31 @@ CommandContainer* gscr_analyseSequence(CommandProtoVector* input, int scriptId)
                 throw SyntaxErrorException(0, std::string("no matching label '") + (*itr).second + std::string("' for goto"));
 
             (*itr).first->params.c_goto_label.instruction_offset = gscr_label_offset_map[(*itr).second];
+        }
+
+        // check if stacks are empty
+        for (uint8 i = 0; i < STACK_TYPE_MAX; i++)
+        {
+            StackType stackType = (StackType)i;
+            if (!stacks_map[stackType].empty())
+            {
+                switch (stackType)
+                {
+                case STACK_TYPE_IF:
+                    throw SyntaxErrorException(0, "Missing closing endif");
+                case STACK_TYPE_REPEAT:
+                    throw SyntaxErrorException(0, "Missing closing until");
+                case STACK_TYPE_WHEN:
+                    throw SyntaxErrorException(0, "Missing closing endwhen");
+                case STACK_TYPE_WHILE:
+                    throw SyntaxErrorException(0, "Missing closing endwhile");
+                }
+            }
+        }
+
+        if (!events_stack.empty())
+        {
+            throw SyntaxErrorException(0, "Missing closing endevent");
         }
 
         // add event commands
