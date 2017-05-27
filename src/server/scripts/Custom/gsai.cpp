@@ -1695,6 +1695,30 @@ class GS_CreatureScript : public CreatureScript
                             source->SetSheath((SheathState)curr->params.c_set_sheathe_state.state);
                         break;
                     }
+                    case GSCR_THREAT:
+                    {
+                        Unit* target = GS_SelectUnitTarget(curr->params.c_threath.subject);
+                        int32 threathPct = GS_GetValueFromSpecifier(curr->params.c_threath.pct_value).toInteger();
+
+                        if (source->GetTypeId() == TYPEID_UNIT)
+                        {
+                            std::list<HostileReference*> const& threatList = source->getThreatManager().getThreatList();
+                            for (std::list<HostileReference*>::const_iterator i = threatList.begin(); i != threatList.end(); ++i)
+                            {
+                                if (Unit* unit = Unit::GetUnit(*source, (*i)->getUnitGuid()))
+                                {
+                                    if (!target || target == source)
+                                        source->getThreatManager().modifyThreatPercent(unit, threathPct);
+                                    else
+                                    {
+                                        if (target == unit)
+                                            source->getThreatManager().modifyThreatPercent(unit, threathPct);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
                     case GSCR_WALK:
                         source->SetWalk(true);
                         is_moving = true;

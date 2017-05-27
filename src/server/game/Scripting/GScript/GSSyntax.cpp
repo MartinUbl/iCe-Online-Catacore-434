@@ -1651,6 +1651,29 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
                 CLEANUP_AND_THROW("Unknown sheath state for instruction SET_SHEATHE_STATE. Supported sheath states (unarmed, melee or ranged)");
             break;
         }
+        // threat modify instruction
+        // Syntax: threat modify <pct value> [subject]
+        // Modify threat by pct value for subject, if no subject -> modify for all attackers
+        case GSCR_THREAT:
+        {
+            if (src->parameters.size() < 2)
+                CLEANUP_AND_THROW("THREAT instruction must contain at least 2 parameters");
+
+            if (src->parameters.size() > 3)
+                CLEANUP_AND_THROW("THREAT instruction can contain maximum 3 parameters");
+
+            if (src->parameters[0] != "modify")
+                CLEANUP_AND_THROW("unknown first parameter name for instrucion THREAT. Expected 'modify'.");
+
+            ret->params.c_threath.pct_value = gs_specifier::parse(src->parameters[1].c_str());
+            ret->params.c_threath.subject = gs_specifier::make_default_subject(GSST_ME);
+
+            if (src->parameters.size() == 3)
+            {
+                ret->params.c_threath.subject = gs_specifier::parse(src->parameters[2].c_str());
+            }
+            break;
+        }
     }
 
     // Redirect commands inside event handlers into separate map
