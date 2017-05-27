@@ -164,7 +164,8 @@ enum EventHookType : uint8
     EVENT_HOOK_KILLED,
     EVENT_HOOK_JUST_SUMMONED,
     EVENT_HOOK_SPELL_HIT,
-    EVENT_HOOK_DAMAGE_DEALT
+    EVENT_HOOK_DAMAGE_DEALT,
+    EVENT_HOOK_POINT_REACHED,
 };
 
 static const std::map<std::string, EventHookType> gs_event_hook_names_map =
@@ -176,6 +177,7 @@ static const std::map<std::string, EventHookType> gs_event_hook_names_map =
     { "just_summoned",          EVENT_HOOK_JUST_SUMMONED },     // Unit* ev_summon
     { "spell_hit",              EVENT_HOOK_SPELL_HIT },         // Unit* ev_caster
     { "damage_dealt",           EVENT_HOOK_DAMAGE_DEALT },      // Unit* ev_target
+    { "point_reached",          EVENT_HOOK_POINT_REACHED },     // none
 };
 
 #define GS_VARIABLE_MAX_LIMIT 10000
@@ -192,6 +194,7 @@ enum gs_event_variable_id : int32
     EVENT_VARIABLE_TARGET_ID,
     EVENT_VARIABLE_DAMAGE_ID,
     EVENT_VARIABLE_DAMAGE_TYPE_ID,
+    EVENT_VARIABLE_POINT_ID,
 };
 
 static const std::map<std::string, gs_event_variable_id> gs_event_variable_id_mapping =
@@ -206,6 +209,7 @@ static const std::map<std::string, gs_event_variable_id> gs_event_variable_id_ma
     { "ev_target",          EVENT_VARIABLE_TARGET_ID },
     { "ev_damage",          EVENT_VARIABLE_DAMAGE_ID },
     { "ev_damage_type",     EVENT_VARIABLE_DAMAGE_TYPE_ID },
+    { "ev_point_id",        EVENT_VARIABLE_POINT_ID },
 };
 
 enum gs_quest_operation

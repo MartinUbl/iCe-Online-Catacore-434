@@ -20,6 +20,7 @@ class GS_CreatureScript : public CreatureScript
             {
                 uint32 spell_id;
                 uint32 summon_entry;
+                uint32 point_id;
 
                 struct
                 {
@@ -1135,6 +1136,8 @@ class GS_CreatureScript : public CreatureScript
                                 return GS_Variable((int32)eventItem.ev_data.misc.damage_dealt.damage);
                             case EVENT_VARIABLE_DAMAGE_TYPE_ID:
                                 return GS_Variable((int32)eventItem.ev_data.misc.damage_dealt.damage_type);
+                            case EVENT_VARIABLE_POINT_ID:
+                                return GS_Variable((int32)eventItem.ev_data.misc.point_id);
                         }
                     }
 
@@ -1277,6 +1280,13 @@ class GS_CreatureScript : public CreatureScript
             {
                 if (id == 100)
                     is_moving = false;
+
+                if (type == POINT_MOTION_TYPE)
+                {
+                    event_data ev_data;
+                    ev_data.misc.point_id = id;
+                    AddEventToQueue(EVENT_HOOK_POINT_REACHED, nullptr, ev_data);
+                }
             }
 
             void JustSummoned(Creature* summoned) override
