@@ -368,8 +368,37 @@ public:
 
 };
 
+
+class spell_algalon_collapse : public SpellScriptLoader
+{
+public:
+    spell_algalon_collapse() : SpellScriptLoader("spell_algalon_collapse") { }
+
+    class spell_algalon_collapse_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_algalon_collapse_AuraScript);
+
+        void HandlePeriodic(AuraEffect const* /*aurEff*/)
+        {
+            PreventDefaultAction();
+            GetTarget()->DealDamage(GetTarget(), GetTarget()->CountPctFromMaxHealth(1), nullptr, NODAMAGE);
+        }
+
+        void Register() override
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_algalon_collapse_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_algalon_collapse_AuraScript();
+    }
+};
+
 void AddSC_boss_algalon_the_observer()
 {
     new boss_algalon();
     new mob_collapsing_star();
+    new spell_algalon_collapse();
 }
