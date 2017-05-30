@@ -436,6 +436,7 @@ class GS_CreatureScript : public CreatureScript
             GS_ScriptedAI(Creature* cr) : ScriptedAI(cr)
             {
                 com_container = nullptr;
+
                 for (int i = 0; i < 10; i++)
                     m_gossipSelectScripts[i] = -1;
 
@@ -460,6 +461,21 @@ class GS_CreatureScript : public CreatureScript
                 sGSMgr->UnregisterAI(this);
             }
 
+            void FreeCommandVector()
+            {
+                if (!com_container)
+                    return;
+
+                for (auto &command : com_container->command_vector)
+                {
+                    delete command;
+                    command = nullptr;
+                }
+
+                delete com_container;
+                com_container = nullptr;
+            }
+
             inline void ClearEventQueue() 
             {
                 while (!eventQueue.empty())
@@ -473,7 +489,7 @@ class GS_CreatureScript : public CreatureScript
                     // while any other thread is inside UpdateAI, wait to leave
                     while (is_updating_lock)
                         ;
-                    com_container = nullptr;
+                    FreeCommandVector();
                     com_counter = 0;
 
                     snapshot_com_counter = 0;
@@ -946,7 +962,7 @@ class GS_CreatureScript : public CreatureScript
                 else
                 {
                     // reset state
-                    com_container = nullptr;
+                    FreeCommandVector();
                     m_currentScriptType = GS_TYPE_NONE;
                     m_currScriptSettings = nullptr;
                     m_scriptInvokerGUID = 0;
