@@ -349,6 +349,8 @@ class GS_CreatureScript : public CreatureScript
             uint64 invokerGUID;
         };
 
+        #define GOSSIP_SELECT_SCRIPTS_MAX 10
+
         struct GS_ScriptedAI : public ScriptedAI
         {
             std::queue<GS_EventQueueItem> eventQueue;
@@ -372,7 +374,7 @@ class GS_CreatureScript : public CreatureScript
             // script ID when not in combat
             int m_outOfCombatScriptId = -1;
             // script IDs for gossip options
-            int m_gossipSelectScripts[10];
+            int m_gossipSelectScripts[GOSSIP_SELECT_SCRIPTS_MAX];
             // script ID when vehicle entered
             int m_vehicleEnterScriptId = -1;
             // script ID when player comes to range
@@ -437,7 +439,7 @@ class GS_CreatureScript : public CreatureScript
             {
                 com_container = nullptr;
 
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < GOSSIP_SELECT_SCRIPTS_MAX; i++)
                     m_gossipSelectScripts[i] = -1;
 
                 sGSMgr->RegisterAI(this);
@@ -638,7 +640,7 @@ class GS_CreatureScript : public CreatureScript
                                 m_outOfCombatScriptId = scriptId;
                                 break;
                             case GS_TYPE_GOSSIP_SELECT:
-                                if (scriptParam >= 0 && scriptParam <= 9)
+                                if (scriptParam >= 0 && scriptParam < GOSSIP_SELECT_SCRIPTS_MAX)
                                     m_gossipSelectScripts[scriptParam] = scriptId;
                                 break;
                             case GS_TYPE_QUEST_ACCEPT:
@@ -890,7 +892,7 @@ class GS_CreatureScript : public CreatureScript
                     case GS_TYPE_OUT_OF_COMBAT:
                         return m_outOfCombatScriptId;
                     case GS_TYPE_GOSSIP_SELECT:
-                        if (param >= 0 && param < 10)
+                        if (param >= 0 && param < GOSSIP_SELECT_SCRIPTS_MAX)
                             return m_gossipSelectScripts[param];
                         break;
                     case GS_TYPE_QUEST_ACCEPT:
