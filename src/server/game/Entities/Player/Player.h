@@ -1678,6 +1678,8 @@ class Player : public Unit, public GridObject<Player>
         void SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint16 count);
         void SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, uint64 guid, uint32 creatureOrGO_idx, uint16 old_count, uint16 add_count);
 
+        void SendLightChange(uint32 originalLightId, uint32 targetLightId, uint32 transitionTimeMs);
+
         uint64 GetDivider() { return m_divider; }
         void SetDivider(uint64 guid) { m_divider = guid; }
 

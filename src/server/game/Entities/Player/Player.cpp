@@ -29094,6 +29094,15 @@ uint64 Player::GetLastDirectAttackTargetGUID()
     return m_lastDirectAttackTarget;
 }
 
+void Player::SendLightChange(uint32 originalLightId, uint32 targetLightId, uint32 transitionTimeMs)
+{
+    WorldPacket data(SMSG_OVERRIDE_LIGHT);
+    data << originalLightId; // current light
+    data << targetLightId; // target light
+    data << transitionTimeMs; // transition time
+    GetSession()->SendPacket(&data);
+}
+
 float Player::GetAverageItemLevel()
 {
     float sum = 0;
