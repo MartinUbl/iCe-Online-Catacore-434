@@ -3870,6 +3870,14 @@ void SpellMgr::LoadCustomSpells()
         pSpell->rangeIndex = 1;
         INSERT_SPELLENTRY(pSpell);
     }
+
+    // Dalaran skybox spell, for some questline to change skybox on demand
+    INIT_NEW_SPELLENTRY(pSpell, 110471);
+    pSpell->SpellName = "Dalaran: Starry Skybox";
+    pSpell->CastingTimeIndex = 1;
+    pSpell->DurationIndex = 21;
+    pSpell->rangeIndex = 6;
+    INSERT_SPELLENTRY(pSpell);
 }
 
 // set data in core for now
@@ -4076,6 +4084,14 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AURA;
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
+            break;
+        case 110471: // Dalaran: Starry Skybox (custom spell)
+            spellInfo->EquippedItemClass = -1;
+            spellInfo->SpellFamilyName = SPELLFAMILY_GENERIC;
+            spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA_FRIEND;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
+            spellInfo->EffectRadiusIndex[0] = 12;
             break;
         case 95673: // Ozumat Heroic Kill Credit
             spellInfo->EquippedItemClass = -1;

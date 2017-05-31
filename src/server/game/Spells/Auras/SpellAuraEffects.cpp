@@ -8659,6 +8659,12 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                         }
                     }
                     break;
+                case 110471: // Dalaran: Starry Skybox (dummy custom spell)
+                {
+                    if (target && target->GetTypeId() == TYPEID_PLAYER)
+                        target->ToPlayer()->SendLightChange(1802, apply ? 1855 : 1802, 1000);
+                    break;
+                }
             }
 
             break;
