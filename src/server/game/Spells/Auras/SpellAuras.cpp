@@ -1157,6 +1157,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         if (GetStackAmount() >= 5 && !target->HasAura(50812))
                             target->CastSpell(target, 50812, true);
                         break;
+                    case 64412: // Phase punch, phase shift on 5 stacks
+                        if (GetStackAmount() >= 5 && !target->HasAura(64417))
+                        {
+                            target->CastSpell(target, 64417, true);
+                            target->RemoveAurasDueToSpell(64412);
+                        }
                     case 85474: // [DND] Hide text (unused)
                         if (target->GetTypeId() == TYPEID_UNIT)
                         {
