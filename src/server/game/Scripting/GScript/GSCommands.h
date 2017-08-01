@@ -313,6 +313,7 @@ enum gs_subject_parameter
     GSSP_GUIDLOW = 16,          // subject low GUID (mostly DB table GUID)
     GSSP_ENTRY = 17,            // subject entry (entry, ID from DB table)
     GSSP_AURAS = 18,            // subject aura set
+    GSSP_INSTANCE_DIFFICULTY = 19, // subject instance difficulty
 };
 
 enum gs_numeric_operatror

@@ -1203,6 +1203,8 @@ class GS_CreatureScript : public CreatureScript
                         return (subject->GetTypeId() == TYPEID_UNIT) ? GS_Variable((int32)subject->ToCreature()->GetDBTableGUIDLow()) : GS_Variable((int32)subject->GetGUIDLow());
                     case GSSP_ENTRY:
                         return (subject->GetTypeId() == TYPEID_UNIT && subject->ToCreature()->GetCreatureInfo()) ? GS_Variable((int32)subject->ToCreature()->GetCreatureInfo()->Entry) : GS_Variable((int32)subject->GetEntry());
+                    case GSSP_INSTANCE_DIFFICULTY:
+                        return (subject->GetMap()) ? subject->GetMap()->GetDifficulty() : REGULAR_DIFFICULTY;
                     case GSSP_NONE:
                         return GS_Variable(subject);
                     default:

@@ -530,6 +530,8 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_parameter = GSSP_ENTRY;
             else if (parid == "auras")
                 rr.subject_parameter = GSSP_AURAS;
+            else if (parid == "difficulty")
+                rr.subject_parameter = GSSP_INSTANCE_DIFFICULTY;
         }
     }
 
