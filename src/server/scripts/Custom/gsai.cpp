@@ -463,21 +463,6 @@ class GS_CreatureScript : public CreatureScript
                 sGSMgr->UnregisterAI(this);
             }
 
-            void FreeCommandVector()
-            {
-                if (!com_container)
-                    return;
-
-                for (auto &command : com_container->command_vector)
-                {
-                    delete command;
-                    command = nullptr;
-                }
-
-                delete com_container;
-                com_container = nullptr;
-            }
-
             inline void ClearEventQueue() 
             {
                 while (!eventQueue.empty())
@@ -491,7 +476,7 @@ class GS_CreatureScript : public CreatureScript
                     // while any other thread is inside UpdateAI, wait to leave
                     while (is_updating_lock)
                         ;
-                    FreeCommandVector();
+                    com_container = nullptr;
                     com_counter = 0;
 
                     snapshot_com_counter = 0;
@@ -964,7 +949,7 @@ class GS_CreatureScript : public CreatureScript
                 else
                 {
                     // reset state
-                    FreeCommandVector();
+                    com_container = nullptr;
                     m_currentScriptType = GS_TYPE_NONE;
                     m_currScriptSettings = nullptr;
                     m_scriptInvokerGUID = 0;
