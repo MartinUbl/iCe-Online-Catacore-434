@@ -25,13 +25,22 @@
 
 HmacHash::HmacHash(uint32 len, uint8 *seed)
 {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+    m_pCtx = HMAC_CTX_new();
+    HMAC_Init_ex(m_pCtx, seed, len, EVP_sha1(), NULL);
+#else
     HMAC_CTX_init(&m_ctx);
     HMAC_Init_ex(&m_ctx, seed, len, EVP_sha1(), NULL);
+#endif
 }
 
 HmacHash::~HmacHash()
 {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+    HMAC_CTX_free(m_pCtx);
+#else
     HMAC_CTX_cleanup(&m_ctx);
+#endif
 }
 
 void HmacHash::UpdateBigNumber(BigNumber *bn)
@@ -41,7 +50,11 @@ void HmacHash::UpdateBigNumber(BigNumber *bn)
 
 void HmacHash::UpdateData(const uint8 *data, int length)
 {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+    HMAC_Update(m_pCtx, data, length);
+#else
     HMAC_Update(&m_ctx, data, length);
+#endif
 }
 
 void HmacHash::UpdateData(const std::string &str)
@@ -52,13 +65,21 @@ void HmacHash::UpdateData(const std::string &str)
 void HmacHash::Finalize()
 {
     uint32 length = 0;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+    HMAC_Final(m_pCtx, (uint8*)m_digest, &length);
+#else
     HMAC_Final(&m_ctx, (uint8*)m_digest, &length);
+#endif
     ASSERT(length == SHA_DIGEST_LENGTH)
 }
 
 uint8 *HmacHash::ComputeHash(BigNumber *bn)
 {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+    HMAC_Update(m_pCtx, bn->AsByteArray(), bn->GetNumBytes());
+#else
     HMAC_Update(&m_ctx, bn->AsByteArray(), bn->GetNumBytes());
+#endif
     Finalize();
     return (uint8*)m_digest;
 }

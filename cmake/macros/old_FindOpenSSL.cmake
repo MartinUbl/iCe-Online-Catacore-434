@@ -1,3 +1,5 @@
+# Should no longer be needed; made deprecated by Gregory on 16.8.2017
+
 # - Try to find the OpenSSL encryption library
 # Once done this will define
 #

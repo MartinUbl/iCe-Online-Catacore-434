@@ -1,3 +1,5 @@
+# Should no longer be needed; made deprecated by Gregory on 16.8.2017
+
 # find Readline (terminal input library) includes and library
 #
 # READLINE_INCLUDE_DIR - where the directory containing the READLINE headers can be found

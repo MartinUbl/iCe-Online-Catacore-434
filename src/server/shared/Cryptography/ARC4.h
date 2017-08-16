@@ -35,7 +35,11 @@ class ARC4
         void Init(uint8 *seed);
         void UpdateData(int len, uint8 *data);
     private:
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+        EVP_CIPHER_CTX* m_pCtx;
+#else
         EVP_CIPHER_CTX m_ctx;
+#endif
 };
 
 #endif
