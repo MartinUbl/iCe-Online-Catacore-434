@@ -5,6 +5,8 @@
  *
  **/
 
+#include "ScriptPCH.h"
+
 enum DarkmoonQuests
 {
     QUEST_HUMANOID_CANNONBALL   = 29436,
