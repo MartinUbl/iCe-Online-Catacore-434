@@ -61,8 +61,11 @@ enum eAuthCmd
 
 enum eStatus
 {
-    STATUS_CONNECTED = 0,
-    STATUS_AUTHED
+    STATUS_CHALLENGE = 0,
+    STATUS_LOGON_PROOF,
+    STATUS_RECONNECT_PROOF,
+    STATUS_AUTHED,
+    STATUS_CLOSED
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some paltform
@@ -195,14 +198,14 @@ class Patcher
 
 const AuthHandler table[] =
 {
-    { AUTH_LOGON_CHALLENGE,     STATUS_CONNECTED, &AuthSocket::_HandleLogonChallenge    },
-    { AUTH_LOGON_PROOF,         STATUS_CONNECTED, &AuthSocket::_HandleLogonProof        },
-    { AUTH_RECONNECT_CHALLENGE, STATUS_CONNECTED, &AuthSocket::_HandleReconnectChallenge},
-    { AUTH_RECONNECT_PROOF,     STATUS_CONNECTED, &AuthSocket::_HandleReconnectProof    },
-    { REALM_LIST,               STATUS_AUTHED,    &AuthSocket::_HandleRealmList         },
-    { XFER_ACCEPT,              STATUS_CONNECTED, &AuthSocket::_HandleXferAccept        },
-    { XFER_RESUME,              STATUS_CONNECTED, &AuthSocket::_HandleXferResume        },
-    { XFER_CANCEL,              STATUS_CONNECTED, &AuthSocket::_HandleXferCancel        }
+    { AUTH_LOGON_CHALLENGE,     STATUS_CHALLENGE,       &AuthSocket::_HandleLogonChallenge    },
+    { AUTH_LOGON_PROOF,         STATUS_LOGON_PROOF,     &AuthSocket::_HandleLogonProof        },
+    { AUTH_RECONNECT_CHALLENGE, STATUS_CHALLENGE,       &AuthSocket::_HandleReconnectChallenge},
+    { AUTH_RECONNECT_PROOF,     STATUS_RECONNECT_PROOF, &AuthSocket::_HandleReconnectProof    },
+    { REALM_LIST,               STATUS_AUTHED,          &AuthSocket::_HandleRealmList         },
+    { XFER_ACCEPT,              STATUS_CHALLENGE,       &AuthSocket::_HandleXferAccept        },
+    { XFER_RESUME,              STATUS_CHALLENGE,       &AuthSocket::_HandleXferResume        },
+    { XFER_CANCEL,              STATUS_CHALLENGE,       &AuthSocket::_HandleXferCancel        }
 };
 
 #define AUTH_TOTAL_COMMANDS sizeof(table)/sizeof(AuthHandler)
@@ -215,7 +218,7 @@ AuthSocket::AuthSocket(RealmSocket& socket) : socket_(socket)
 {
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
-    _authed = false;
+    _status = STATUS_CHALLENGE;
     _accountSecurityLevel = SEC_PLAYER;
 
     _authPacketTime = 0;
@@ -283,9 +286,7 @@ void AuthSocket::OnRead()
         ///- Circle through known commands and call the correct command handler
         for (i = 0; i < AUTH_TOTAL_COMMANDS; ++i)
         {
-            if ((uint8)table[i].cmd == _cmd &&
-                (table[i].status == STATUS_CONNECTED ||
-                (_authed && table[i].status == STATUS_AUTHED)))
+            if ((uint8)table[i].cmd == _cmd && table[i].status == _status)
             {
                 sLog->outStaticDebug("[Auth] got data for cmd %u recv length %u", (uint32)_cmd, (uint32)socket().recv_len());
 
@@ -352,6 +353,8 @@ bool AuthSocket::_HandleLogonChallenge()
     sLog->outStaticDebug("Entering _HandleLogonChallenge");
     if (socket().recv_len() < sizeof(sAuthLogonChallenge_C))
         return false;
+
+    _status = STATUS_CLOSED;
 
     ///- Read the first 4 bytes (header) to get the length of the remaining of the packet
     std::vector<uint8> buf;
@@ -497,6 +500,8 @@ bool AuthSocket::_HandleLogonChallenge()
                     ///- Fill the response packet with the result
                     pkt << uint8(WOW_SUCCESS);
 
+                    _status = STATUS_LOGON_PROOF;
+
                     // B may be calculated < 32B so we force minimal length to 32B
                     pkt.append(B.AsByteArray(32), 32);      // 32 bytes
                     pkt << uint8(1);
@@ -552,6 +557,8 @@ bool AuthSocket::_HandleLogonProof()
     // Read the packet
     sAuthLogonProof_C lp;
 
+    _status = STATUS_CLOSED;
+
     if (!socket().recv((char *)&lp, sizeof(sAuthLogonProof_C)))
         return false;
 
@@ -571,7 +578,7 @@ bool AuthSocket::_HandleLogonProof()
     A.SetBinary(lp.A, 32);
 
     // SRP safeguard: abort if A == 0
-    if (A.isZero())
+    if ((A % N).isZero())
     {
         socket().shutdown();
         return true;
@@ -677,7 +684,7 @@ bool AuthSocket::_HandleLogonProof()
             socket().send((char *)&proof, sizeof(proof));
         }
 
-        _authed = true;
+        _status = STATUS_AUTHED;
     }
     else
     {
@@ -742,6 +749,8 @@ bool AuthSocket::_HandleReconnectChallenge()
     if (socket().recv_len() < sizeof(sAuthLogonChallenge_C))
         return false;
 
+    _status = STATUS_CLOSED;
+
     // Read the first 4 bytes (header) to get the length of the remaining of the packet
     std::vector<uint8> buf;
     buf.resize(4);
@@ -783,6 +792,8 @@ bool AuthSocket::_HandleReconnectChallenge()
 
     K.SetHexStr ((*result)[0].GetCString());
 
+    _status = STATUS_RECONNECT_PROOF;
+
     // Sending response
     ByteBuffer pkt;
     pkt << (uint8)AUTH_RECONNECT_CHALLENGE;
@@ -798,6 +809,9 @@ bool AuthSocket::_HandleReconnectChallenge()
 bool AuthSocket::_HandleReconnectProof()
 {
     sLog->outStaticDebug("Entering _HandleReconnectProof");
+
+    _status = STATUS_CLOSED;
+
     // Read the packet
     sAuthReconnectProof_C lp;
     if (!socket().recv((char *)&lp, sizeof(sAuthReconnectProof_C)))
@@ -824,7 +838,7 @@ bool AuthSocket::_HandleReconnectProof()
         pkt << (uint16) 0x00;                               // 2 bytes zeros
         socket().send((char const*)pkt.contents(), pkt.size());
 
-        _authed = true;
+        _status = STATUS_AUTHED;
 
         return true;
     }

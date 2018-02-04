@@ -83,7 +83,7 @@ class AuthSocket: public RealmSocket::Session
         BigNumber K;
         BigNumber _reconnectProof;
 
-        bool _authed;
+        int _status;
 
         time_t _authPacketTime;
         uint32 _authPacketCount;
