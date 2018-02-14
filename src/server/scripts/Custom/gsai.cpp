@@ -1040,8 +1040,7 @@ class GS_CreatureScript : public CreatureScript
                         std::list<HostileReference*>::iterator itr = me->getThreatManager().getThreatList().begin();
                         // and advance by random value + 1
                         int32 rr = urand(1, me->getThreatManager().getThreatList().size() - 1);
-                        while (rr > 0)
-                            itr++;
+                        std::advance(itr, rr);
                         return (*itr)->getTarget();
                     }
                     // script invoker (active during gossip select, quest accept, etc.)
