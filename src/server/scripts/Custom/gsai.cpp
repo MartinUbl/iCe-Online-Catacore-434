@@ -1027,8 +1027,7 @@ class GS_CreatureScript : public CreatureScript
                         std::list<HostileReference*>::iterator itr = me->getThreatManager().getThreatList().begin();
                         // and advance by random value
                         int32 rr = urand(0, me->getThreatManager().getThreatList().size() - 1);
-                        while (rr > 0)
-                            itr++;
+                        std::advance(itr, rr);
                         return (*itr)->getTarget();
                     }
                     // random target from threat list excluding tank
