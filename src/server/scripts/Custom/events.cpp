@@ -78,9 +78,20 @@ class npc_gh: public CreatureScript
                         {
                             if ((pPlayer->GetRank() <= rank) || (rank == -1)) // if is rank to access to enter ( -1 for all ranks)
                             {
-                                pPlayer->SetPhaseMask(phase, true);
-                                pPlayer->TeleportTo(map,x,y,z,0.0f); // Teleport To Dest where is GH
-                                pPlayer->SetPhaseMask(phase, true);
+                                if (!pPlayer->IsInCombat())
+                                {
+                                    WorldPacket data(SMSG_MESSAGECHAT, 200);
+                                    pCreature->BuildMonsterChat(&data, CHAT_MSG_RAID_BOSS_EMOTE, "You will be transferred to your guild house in 5 seconds.", LANG_UNIVERSAL, pCreature->GetName(), pPlayer->GetGUID());
+                                    pPlayer->GetSession()->SendPacket(&data);
+
+                                    npc_gh::gh_teleporterAI* myAI = CAST_AI(npc_gh::gh_teleporterAI, pCreature->GetAI());
+                                    if (myAI)
+                                        myAI->AddTransfer(pPlayer->GetGUID(), map, x, y, z, phase);
+                                    else
+                                        pPlayer->GetSession()->SendNotification(LANG_ERROR);
+                                }
+                                else
+                                    pPlayer->GetSession()->SendNotification(LANG_YOU_IN_COMBAT);
                             }
                             else // if not access.. bye
                                 pPlayer->GetSession()->SendNotification("Your rank is too low.");
@@ -141,6 +152,88 @@ class npc_gh: public CreatureScript
                 pPlayer->GetSession()->SendNotification("Your Guild don't have a Guild House.");
             }
             return true;
+        }
+
+        struct gh_teleporterAI : public ScriptedAI
+        {
+            gh_teleporterAI(Creature *c) : ScriptedAI(c) {}
+
+            const uint32 TRANSFER_TIME = 5000;
+
+            struct TransferRecord
+            {
+                uint64 guid;
+                uint32 mapId;
+                float x, y, z;
+                uint16 phase;
+
+                uint32 teleportTimer;
+            };
+
+            std::list<TransferRecord> m_transferList;
+
+            void Reset() override
+            {
+                m_transferList.clear();
+            }
+
+            void AddTransfer(uint64 guid, uint32 mapId, float x, float y, float z, uint16 phase)
+            {
+                m_transferList.push_back({
+                    guid,
+                    mapId,
+                    x, y, z,
+                    phase,
+                    TRANSFER_TIME
+                });
+
+                if (auto ts = me->ToTempSummon())
+                    ts->InitStats(TRANSFER_TIME * 2);
+            }
+
+            void UpdateAI(const uint32 diff) override
+            {
+                if (m_transferList.size() == 0)
+                    return;
+
+                for (auto itr = m_transferList.begin(); itr != m_transferList.end(); )
+                {
+                    auto& rec = *itr;
+
+                    if (rec.teleportTimer <= diff)
+                    {
+                        Player* pl = sObjectMgr->GetPlayer(rec.guid);
+                        if (pl)
+                        {
+                            if (!pl->IsInCombat())
+                            {
+                                if (pl->GetDistance2d(me) < 10.0f)
+                                {
+                                    pl->SetPhaseMask(rec.phase, true);
+                                    pl->TeleportTo(rec.mapId, rec.x, rec.y, rec.z, 0.0f);
+                                    pl->SetPhaseMask(rec.phase, true);
+                                }
+                                else
+                                    pl->GetSession()->SendNotification("You are too far away from portal");
+                            }
+                            else
+                                pl->GetSession()->SendNotification(LANG_YOU_IN_COMBAT);
+                        }
+
+                        itr = m_transferList.erase(itr);
+                    }
+                    else
+                    {
+                        rec.teleportTimer -= diff;
+                        ++itr;
+                    }
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* pCreature) const
+        {
+            return new gh_teleporterAI(pCreature);
         }
 };
 
