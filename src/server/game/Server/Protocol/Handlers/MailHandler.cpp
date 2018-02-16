@@ -119,7 +119,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
 
     // packet read complete, now do check
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX) && !GetPlayer()->GetNPCIfCanInteractWith(mailbox, UNIT_NPC_FLAG_MAILBOX))
         return;
 
     if (receiver.empty())
@@ -407,7 +407,7 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket & recv_data)
     recv_data >> mailbox;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX) && !GetPlayer()->GetNPCIfCanInteractWith(mailbox, UNIT_NPC_FLAG_MAILBOX))
         return;
 
     Player *pl = _player;
@@ -431,7 +431,7 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data)
     recv_data >> mailId;
     recv_data.read_skip<uint32>();                          // mailTemplateId
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX) && !GetPlayer()->GetNPCIfCanInteractWith(mailbox, UNIT_NPC_FLAG_MAILBOX))
         return;
 
     Mail *m = _player->GetMail(mailId);
@@ -459,7 +459,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket & recv_data)
     recv_data >> mailId;
     recv_data.read_skip<uint64>();                          // original sender GUID for return to, not used
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX) && !GetPlayer()->GetNPCIfCanInteractWith(mailbox, UNIT_NPC_FLAG_MAILBOX))
         return;
 
     Player *pl = _player;
@@ -516,7 +516,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data)
     recv_data >> mailId;
     recv_data >> itemId;                                    // item guid low
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX) && !GetPlayer()->GetNPCIfCanInteractWith(mailbox, UNIT_NPC_FLAG_MAILBOX))
         return;
 
     Player* pl = _player;
@@ -622,7 +622,7 @@ void WorldSession::HandleMailTakeMoney(WorldPacket & recv_data)
     recv_data >> mailId;
     recv_data.read_skip<uint64>();                          //4.0.6a
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX) && !GetPlayer()->GetNPCIfCanInteractWith(mailbox, UNIT_NPC_FLAG_MAILBOX))
         return;
 
     Player *pl = _player;
@@ -654,7 +654,7 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data)
     uint64 mailbox;
     recv_data >> mailbox;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX) && !GetPlayer()->GetNPCIfCanInteractWith(mailbox, UNIT_NPC_FLAG_MAILBOX))
         return;
 
     Player* pl = _player;
@@ -780,7 +780,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data)
     recv_data >> mailbox;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX) && !GetPlayer()->GetNPCIfCanInteractWith(mailbox, UNIT_NPC_FLAG_MAILBOX))
         return;
 
     Player *pl = _player;

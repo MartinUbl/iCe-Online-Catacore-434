@@ -102,6 +102,13 @@ void WorldSession::SendShowBank(uint64 guid)
     SendPacket(&data);
 }
 
+void WorldSession::SendShowMail(uint64 guid)
+{
+    WorldPacket data(SMSG_SHOW_MAILBOX, 8);
+    data << guid;
+    SendPacket(&data);
+}
+
 void WorldSession::HandleTrainerListOpcode(WorldPacket & recv_data)
 {
     uint64 guid;

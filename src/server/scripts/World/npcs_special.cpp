@@ -5020,6 +5020,350 @@ public:
     //INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES ('80004', 'Pet was succesfuly recovered.');
 };
 
+class spell_gen_mount_check : public SpellScriptLoader
+{
+    public:
+        spell_gen_mount_check() : SpellScriptLoader("spell_gen_mount_check") { }
+
+        class spell_gen_mount_check_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gen_mount_check_AuraScript)
+
+            public:
+                spell_gen_mount_check_AuraScript() { }
+
+                bool m_mountedState = false;
+
+                void HandleEffectPeriodic(AuraEffect const * aurEff)
+                {
+                    if (Unit* caster = GetCaster())
+                    {
+                        if (caster->GetOwner()->IsMounted())
+                        {
+                            if (!m_mountedState)
+                            {
+                                caster->Mount(29736);
+                                caster->SetSpeed(MOVE_RUN, 3.0f, true);
+                                m_mountedState = true;
+                            }
+                        }
+                        else if (caster->IsMounted())
+                        {
+                            if (m_mountedState)
+                            {
+                                caster->Unmount();
+                                caster->SetSpeed(MOVE_RUN, 1.0f, true);
+                                m_mountedState = false;
+                            }
+                        }
+                    }
+                }
+
+                void Register()
+                {
+                    OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_mount_check_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+                }
+        };
+
+        AuraScript * GetAuraScript() const
+        {
+            return new spell_gen_mount_check_AuraScript();
+        }
+};
+
+enum squire
+{
+    ACH_PONY_UP                     = 3736,
+
+    NPC_ARGENT_GRUNT                = 33239,
+    NPC_ARGENT_SQUIRE               = 33238,
+
+    SPELL_SQUIRE_MOUNT_CHECK        = 67039,
+    SPELL_STORMWIND_PENNANT         = 62727,
+    SPELL_SENJIN_PENNANT            = 63446,
+    SPELL_DARNASSUS_PENNANT         = 63443,
+    SPELL_EXODAR_PENNANT            = 63439,
+    SPELL_UNDERCITY_PENNANT         = 63441,
+    SPELL_GNOMEREAGAN_PENNANT       = 63442,
+    SPELL_IRONFORGE_PENNANT         = 63440,
+    SPELL_ORGRIMMAR_PENNANT         = 63444,
+    SPELL_SILVERMOON_PENNANT        = 63438,
+    SPELL_THUNDERBLUFF_PENNANT      = 63445,
+    SPELL_SQUIRE_TIRED              = 67401,
+    SPELL_SQUIRE_BANK               = 67368,
+    SPELL_SQUIRE_SHOP               = 67377,
+    SPELL_SQUIRE_POSTMAN            = 67376,
+    SPELL_PLAYER_TIRED              = 67334
+};
+
+class npc_argent_squire : public CreatureScript
+{
+public:
+    npc_argent_squire() : CreatureScript("npc_argent_squire") { }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_argent_squireAI(creature);
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        npc_argent_squireAI* ai = CAST_AI(npc_argent_squireAI, creature->GetAI());
+        if (!ai)
+            return false;
+
+        if (!ai->Mail && !ai->Shop)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Visit a bank", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 0);
+        if (!ai->Bank && !ai->Mail)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Visit a trade", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        if (!ai->Bank && !ai->Shop)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Visit a mailbox", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+
+        if (player->GetQuestStatus(13725) == QUEST_STATUS_COMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Darnassus Champion's Pennant", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+        if (player->GetQuestStatus(13724) == QUEST_STATUS_COMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Exodar Champion's Pennant", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+        if (player->GetQuestStatus(13723) == QUEST_STATUS_COMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Gnomeregan Champion's Pennant", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+        if (player->GetQuestStatus(13713) == QUEST_STATUS_COMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Ironforge Champion's Pennant", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+        if (player->GetQuestStatus(13699) == QUEST_STATUS_COMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stormwind Champion's Pennant", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
+
+        if (player->GetQuestStatus(13727) == QUEST_STATUS_COMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Darkspear Champion's Pennant", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+        if (player->GetQuestStatus(13729) == QUEST_STATUS_COMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Forsaken Champion's Pennant", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+        if (player->GetQuestStatus(13726) == QUEST_STATUS_COMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Orgrimmar Champion's Pennant", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+        if (player->GetQuestStatus(13731) == QUEST_STATUS_COMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Silvermoon Champion's Pennant", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+        if (player->GetQuestStatus(13728) == QUEST_STATUS_COMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Thunder Bluff Champion's Pennant", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
+
+        player->SEND_GOSSIP_MENU(1, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        npc_argent_squireAI* ai = CAST_AI(npc_argent_squireAI, creature->GetAI());
+        if (!ai)
+            return false;
+
+        ai->HandleGossip(player, sender, action);
+
+        return true;
+    }
+
+    struct npc_argent_squireAI : public ScriptedAI
+    {
+        npc_argent_squireAI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool Bank;
+        bool Shop;
+        bool Mail;
+        bool TimerStarted;
+
+        uint32 curPennant;
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_MAILBOX);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER);
+
+            curPennant = 0;
+            Bank = false;
+            Shop = false;
+            Mail = false;
+            TimerStarted = false;
+
+            if (Aura* tired = me->GetOwner()->GetAura(SPELL_PLAYER_TIRED))
+            {
+                int32 amt = 0;
+                if (auto eff = tired->GetEffect(0))
+                    amt = eff->GetAmount();
+
+                int32 duration = tired->GetDuration();
+                tired = me->AddAura(SPELL_SQUIRE_TIRED, me);
+                tired->SetDuration(duration);
+                SetTiredEffect(me, amt);
+
+                switch (amt)
+                {
+                    case SPELL_SQUIRE_BANK: Bank = true; SetSpec_Banker(); break;
+                    case SPELL_SQUIRE_SHOP: Shop = true; SetSpec_Vendor(); break;
+                    case SPELL_SQUIRE_POSTMAN: Mail = true; SetSpec_Mailman(); break;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            Player* player = me->GetOwner()->ToPlayer();
+
+            auto ach = sAchievementStore.LookupEntry(ACH_PONY_UP);
+
+            if (player && player->GetAchievementMgr().HasAchieved(ach))
+                if (!me->HasAura(SPELL_SQUIRE_MOUNT_CHECK))
+                    me->AddAura(SPELL_SQUIRE_MOUNT_CHECK,me);
+
+            if (TimerStarted && !me->HasAura(SPELL_SQUIRE_BANK) && !me->HasAura(SPELL_SQUIRE_SHOP) && !me->HasAura(SPELL_SQUIRE_POSTMAN))
+            {
+                if (Bank || Shop || Mail)
+                {
+                    me->DespawnOrUnsummon();
+                }
+            }
+        }
+
+        void SetTiredEffect(Unit* obj, int32 amount)
+        {
+            if (!obj)
+                return;
+
+            Aura* a = obj->GetAura(SPELL_PLAYER_TIRED);
+            if (!a)
+                return;
+
+            auto eff = a->GetEffect(0);
+            if (eff)
+                eff->SetAmount(amount);
+        }
+
+        void SetSpec_Banker()
+        {
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_MAILBOX);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR);
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER);
+        }
+
+        void SetSpec_Vendor()
+        {
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_MAILBOX);
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER);
+        }
+
+        void SetSpec_Mailman()
+        {
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_MAILBOX);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER);
+        }
+
+        void HandleGossip(Player* player, uint32 /*sender*/, uint32 action)
+        {
+            player->CLOSE_GOSSIP_MENU();
+
+            switch (action)
+            {
+                case GOSSIP_ACTION_INFO_DEF + 0:
+                {
+                    if (!Bank)
+                    {
+                        TimerStarted = true;
+                        Bank = true;
+                        me->AddAura(SPELL_SQUIRE_BANK, me);
+                        player->AddAura(SPELL_PLAYER_TIRED, player);
+
+                        SetSpec_Banker();
+                        SetTiredEffect(player, SPELL_SQUIRE_BANK);
+                    }
+                    if (!Shop && !Mail)
+                        player->GetSession()->SendShowBank(player->GetGUID());
+                    break;
+                }
+                case GOSSIP_ACTION_INFO_DEF + 1:
+                {
+                    if (!Shop)
+                    {
+                        TimerStarted = true;
+                        Shop = true;
+                        me->AddAura(SPELL_SQUIRE_SHOP, me);
+                        player->AddAura(SPELL_PLAYER_TIRED, player);
+
+                        SetSpec_Vendor();
+                        SetTiredEffect(player, SPELL_SQUIRE_SHOP);
+                    }
+                    if (!Bank && !Mail)
+                        player->GetSession()->SendListInventory(me->GetGUID());
+                    break;
+                }
+                case GOSSIP_ACTION_INFO_DEF + 2:
+                {
+                    if (!Mail)
+                    {
+                        TimerStarted = true;
+                        Mail = true;
+                        me->AddAura(SPELL_SQUIRE_POSTMAN, me);
+                        player->AddAura(SPELL_PLAYER_TIRED, player);
+
+                        SetSpec_Mailman();
+                        SetTiredEffect(player, SPELL_SQUIRE_POSTMAN);
+                    }
+                    if (!Bank && !Shop)
+                        player->GetSession()->SendShowMail(me->GetGUID());
+                    break;
+                }
+                case GOSSIP_ACTION_INFO_DEF + 3: //Darnassus/Darkspear Pennant
+                {
+                    me->RemoveAurasDueToSpell(curPennant);
+                    if (me->GetEntry() == NPC_ARGENT_SQUIRE)
+                        curPennant = SPELL_DARNASSUS_PENNANT;
+                    else
+                        curPennant = SPELL_SENJIN_PENNANT;
+                    me->AddAura(curPennant, me);
+                    break;
+                }
+                case GOSSIP_ACTION_INFO_DEF + 4: //Exodar/Forsaken Pennant
+                {
+                    me->RemoveAurasDueToSpell(curPennant);
+                    if (me->GetEntry() == NPC_ARGENT_SQUIRE)
+                        curPennant = SPELL_EXODAR_PENNANT;
+                    else
+                        curPennant = SPELL_UNDERCITY_PENNANT;
+                    me->AddAura(curPennant, me);
+                    break;
+                }
+                case GOSSIP_ACTION_INFO_DEF + 5: //Gnomereagan/Orgrimmar Pennant
+                {
+                    me->RemoveAurasDueToSpell(curPennant);
+                    if (me->GetEntry() == NPC_ARGENT_SQUIRE)
+                        curPennant = SPELL_GNOMEREAGAN_PENNANT;
+                    else
+                        curPennant = SPELL_ORGRIMMAR_PENNANT;
+                    me->AddAura(curPennant, me);
+                    break;
+                }
+                case GOSSIP_ACTION_INFO_DEF + 6: //Ironforge/Silvermoon Pennant
+                {
+                    me->RemoveAurasDueToSpell(curPennant);
+                    if (me->GetEntry() == NPC_ARGENT_SQUIRE)
+                        curPennant = SPELL_IRONFORGE_PENNANT;
+                    else
+                        curPennant = SPELL_SILVERMOON_PENNANT;
+                    me->AddAura(curPennant, me);
+                    break;
+                }
+                case GOSSIP_ACTION_INFO_DEF + 7: //Stormwind/Thunder Bluff Pennant
+                {
+                    me->RemoveAurasDueToSpell(curPennant);
+                    if (me->GetEntry() == NPC_ARGENT_SQUIRE)
+                        curPennant = SPELL_STORMWIND_PENNANT;
+                    else
+                        curPennant = SPELL_THUNDERBLUFF_PENNANT;
+                    me->AddAura(curPennant, me);
+                    break;
+                }
+            }
+        }
+
+    };
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -5078,4 +5422,6 @@ void AddSC_npcs_special()
     new npc_fiery_imp;
     new npc_raid_marker;
     new npc_pet_repairer;
+    new spell_gen_mount_check();
+    new npc_argent_squire();
 }

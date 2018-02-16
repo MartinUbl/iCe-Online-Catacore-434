@@ -488,6 +488,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_PLAYERBINDERROR,                         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BANKER_ACTIVATE,                         STATUS_LOGGEDIN, &WorldSession::HandleBankerActivateOpcode      );
     OPCODE( SMSG_SHOW_BANK,                               STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_SHOW_MAILBOX,                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BUY_BANK_SLOT,                           STATUS_LOGGEDIN, &WorldSession::HandleBuyBankSlotOpcode         );
     OPCODE( SMSG_BUY_BANK_SLOT_RESULT,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_PETITION_SHOWLIST,                       STATUS_LOGGEDIN, &WorldSession::HandlePetitionShowListOpcode    );

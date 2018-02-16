@@ -463,6 +463,7 @@ enum Opcodes
     SMSG_PLAYERBINDERROR                             = 0x06A24, // 4.3.4 15595
     CMSG_BANKER_ACTIVATE                             = 0x00005, // 4.3.4 15595
     SMSG_SHOW_BANK                                   = 0x02627, // 4.3.4 15595
+    SMSG_SHOW_MAILBOX                                = 0x02524, // 4.3.4 15595
     CMSG_BUY_BANK_SLOT                               = 0x00425, // 4.3.4 15595
     SMSG_BUY_BANK_SLOT_RESULT                        = 0x1006B, //
     CMSG_PETITION_SHOWLIST                           = 0x04617, // 4.3.4 15595 (remap)
@@ -672,7 +673,7 @@ enum Opcodes
     CMSG_MEETINGSTONE_CHEAT                          = 0x100A4, //
     SMSG_MEETINGSTONE_SETQUEUE                       = 0x100A5, //
     CMSG_MEETINGSTONE_INFO                           = 0x100A6, //
-    SMSG_MEETINGSTONE_COMPLETE                       = 0x02524, // 4.3.4 15595
+    SMSG_MEETINGSTONE_COMPLETE                       = 0x101FF, //
     SMSG_MEETINGSTONE_IN_PROGRESS                    = 0x02D35, // 4.3.4 15595
     SMSG_MEETINGSTONE_MEMBER_ADDED                   = 0x100A7, //
     CMSG_GMTICKETSYSTEM_TOGGLE                       = 0x100A8, //
