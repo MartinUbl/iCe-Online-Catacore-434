@@ -5112,12 +5112,15 @@ public:
         if (!ai)
             return false;
 
-        if (!ai->Mail && !ai->Shop)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Visit a bank", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 0);
-        if (!ai->Bank && !ai->Mail)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Visit a trade", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        if (!ai->Bank && !ai->Shop)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Visit a mailbox", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        if (!creature->HasAura(SPELL_SQUIRE_TIRED))
+        {
+            if (!ai->Mail && !ai->Shop)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Visit a bank", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 0);
+            if (!ai->Bank && !ai->Mail)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Visit a trade", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            if (!ai->Bank && !ai->Shop)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Visit a mailbox", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        }
 
         if (player->GetQuestStatus(13725) == QUEST_STATUS_COMPLETE)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Darnassus Champion's Pennant", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
@@ -5191,12 +5194,14 @@ public:
                 tired->SetDuration(duration);
                 SetTiredEffect(me, amt);
 
+                /*
                 switch (amt)
                 {
                     case SPELL_SQUIRE_BANK: Bank = true; SetSpec_Banker(); break;
                     case SPELL_SQUIRE_SHOP: Shop = true; SetSpec_Vendor(); break;
                     case SPELL_SQUIRE_POSTMAN: Mail = true; SetSpec_Mailman(); break;
                 }
+                */
             }
         }
 
