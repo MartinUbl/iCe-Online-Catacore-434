@@ -5864,6 +5864,10 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     if (m_originalCaster)
                         summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster);
                     break;
+                case SUMMON_TYPE_UNK13:
+                    summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster);
+                    summon->GetMotionMaster()->MoveFollow(m_caster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                    break;
                 case SUMMON_TYPE_TOTEM:
                 {
                     // we need to know the totem's GUID before it is actually created
