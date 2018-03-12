@@ -994,7 +994,7 @@ class GS_CreatureScript : public CreatureScript
             Unit* GS_SelectUnitTarget(gs_specifier& spec)
             {
                 WorldObject * obj = GS_SelectTarget(spec);
-                if (obj && obj->GetTypeId() == TYPEID_UNIT)
+                if (obj && (obj->GetTypeId() == TYPEID_UNIT || obj->GetTypeId() == TYPEID_PLAYER))
                     return obj->ToUnit();
                 return nullptr;
             }
@@ -1047,7 +1047,7 @@ class GS_CreatureScript : public CreatureScript
                     case GSST_INVOKER:
                     {
                         uint64 invGUID = m_scriptInvokerGUID ? m_scriptInvokerGUID : m_inheritedScriptInvokerGUID;
-                        return Unit::GetUnit(*me, invGUID);
+                        return invGUID ? Unit::GetUnit(*me, invGUID) : nullptr;
                     }
                     // parent (summoner)
                     case GSST_PARENT:
