@@ -106,6 +106,11 @@ auto TaskScheduler::TaskQueue::First() const -> TaskContainer const&
     return *container.begin();
 }
 
+auto TaskScheduler::TaskQueue::Last() const -> TaskContainer const&
+{
+    return *container.rbegin();
+}
+
 void TaskScheduler::TaskQueue::Clear()
 {
     container.clear();

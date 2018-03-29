@@ -140,6 +140,8 @@ class TaskScheduler
 
         TaskContainer const& First() const;
 
+        TaskContainer const& Last() const;
+
         void Clear();
 
         void RemoveIf(std::function<bool(TaskContainer const&)> const& filter);
@@ -227,6 +229,20 @@ public:
         task_handler_t const& task)
     {
         return Schedule(RandomDurationBetween(min, max), group, task);
+    }
+
+    /// Schedule an event after last planned event on fixed time
+    /// Never call this from within a task context! Use TaskContext::Schedule instead!
+    template<class _Rep, class _Period>
+    TaskScheduler& ScheduleNext(std::chrono::duration<_Rep, _Period> const& time,
+        task_handler_t const& task)
+    {
+        if (_task_holder.IsEmpty())
+            return ScheduleAt(_now, time, task);
+        else
+        {
+            return ScheduleAt(_task_holder.Last()->_end, time, task);
+        }
     }
 
     /// Cancels all tasks.
