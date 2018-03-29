@@ -4171,6 +4171,9 @@ void SpellMgr::LoadSpellCustomAttr()
             // set damage class to magic, so Cloak of Shadows protects the caster from it
             spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
             break;
+        case 109659: // Plump Dig Rat - Cooking
+            spellInfo->EffectTriggerSpell[0] = 6417; // learn spell "Dig Rat Stew" (cooking recipe)
+            break;
         /**************************** ALYSRAZOR  **********************************/
 
         case 100555: // Smouldering Roots
