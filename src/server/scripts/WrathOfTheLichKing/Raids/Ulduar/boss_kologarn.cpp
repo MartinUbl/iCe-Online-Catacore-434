@@ -110,6 +110,11 @@ enum KologarnChests
     CACHE_OF_LIVING_STONE_25                    = 195047
 };
 
+enum GameObjects
+{
+    GOB_TRAPDOOR_ENTRY = 194232
+};
+
 class boss_kologarn : public CreatureScript
 {
 public:
@@ -161,6 +166,10 @@ public:
         {                
             DoScriptText(SAY_DEATH, me);
             _JustDied();
+
+            // pridani rizeni pruchodu v podlaze
+            if (GameObject * goTrapDoor = me->FindNearestGameObject(GOB_TRAPDOOR_ENTRY, 50.0f))
+                goTrapDoor->SetGoState(GO_STATE_READY);
 
             if (instance)
             {
@@ -240,6 +249,10 @@ public:
         void Reset()
         {
             _Reset();
+
+            // pridani rizeni pruchodu v podlaze
+            if (GameObject * goTrapDoor = me->FindNearestGameObject(GOB_TRAPDOOR_ENTRY, 50.0f))
+                goTrapDoor->SetGoState(GO_STATE_ACTIVE);
             
             if (instance)
                 instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_DISARMED_START_EVENT);
@@ -248,6 +261,9 @@ public:
                 LeftArm->EnterVehicle(vehicle, 0);
             if (Unit* RightArm = me->SummonCreature(NPC_RIGHT_ARM, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation()))
                 RightArm->EnterVehicle(vehicle, 1);
+
+            // reset orientace
+            me->SetOrientation(3);
         }
 
         void UpdateAI(const uint32 diff)
@@ -331,6 +347,10 @@ public:
                     events.RescheduleEvent(EVENT_EYEBEAM, 20000);
                     break;
                 case EVENT_LEFT:
+                    // uklizeni predchozi ruky
+                    if (Creature* LeftArm = me->FindNearestCreature(NPC_LEFT_ARM, 50.0f, false))
+                        LeftArm->DespawnOrUnsummon();
+
                     if (Unit* LeftArm = me->SummonCreature(NPC_LEFT_ARM, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation()))
                     {
                         LeftArm->EnterVehicle(vehicle, 0);
@@ -342,6 +362,10 @@ public:
                     events.CancelEvent(EVENT_LEFT);
                     break;                
                 case EVENT_RIGHT:
+                    // uklizeni predchozi ruky
+                    if (Creature* RightArm = me->FindNearestCreature(NPC_RIGHT_ARM, 50.0f, false))
+                        RightArm->DespawnOrUnsummon();
+
                     if (Unit* RightArm = me->SummonCreature(NPC_RIGHT_ARM, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation()))
                     {
                         RightArm->EnterVehicle(vehicle, 1);
@@ -446,6 +470,11 @@ public:
         }
 
         InstanceScript* pInstance;
+
+        void Reset()
+        {
+            //
+        }
 
         void JustDied(Unit* /*victim*/)
         {
