@@ -158,8 +158,104 @@ public:
     }
 };
 
+#define GOSSIP_TEXT_TRAIN_CHARLES "Train me."
+#define GOSSIP_TEXT_TAILOR_DEATHCHILL_CLOAK_CHARLES "Tell me about the Deathchill Cloak Recipe."
+#define GOSSIP_TEXT_TAILOR_WISPCLOAK_CHARLES "Tell me about the Wispcloak Recipe."
+#define SKILL_ID_TAILORING 197
+#define GOSSIP_MENU_TEXT_ID_CHARLES_W_TAILOR 14076
+#define GOSSIP_MENU_TEXT_ID_CHARLES_DEATHCHILL_CLOAK 14074
+#define GOSSIP_MENU_TEXT_ID_CHARLES_WISPCLOAK 14072
+#define ACHIEV_ID_LOREMASTER_OF_NORTHREND 41 //Deathchill cloak
+#define ACHIEV_ID_NORTHREND_DUNGEON_MASTER 1288 //Wispcloak
+#define SPELL_ID_WISPCLOAK 56016
+#define SPELL_ID_DEATHCHILL_CLOAK 56017
+
+class npc_charles_worth : public CreatureScript
+{
+public:
+    npc_charles_worth() : CreatureScript("npc_charles_worth") { }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {
+        if (!pCreature->IsTrainer())
+            return false;
+
+        if (pCreature->IsQuestGiver())
+            pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+        uint32 gossipMenuTextId = pPlayer->GetGossipTextId(pCreature);
+
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_TEXT_TRAIN_CHARLES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
+
+        if (pPlayer->HasSkill(SKILL_ID_TAILORING))
+        {
+            gossipMenuTextId = GOSSIP_MENU_TEXT_ID_CHARLES_W_TAILOR;
+
+            if (pPlayer->GetSkillValue(SKILL_ID_TAILORING) >= 420)
+            {
+                if (!pPlayer->HasSpell(SPELL_ID_DEATHCHILL_CLOAK))
+                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT_TAILOR_DEATHCHILL_CLOAK_CHARLES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 0);
+
+                if (!pPlayer->HasSpell(SPELL_ID_WISPCLOAK))
+                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT_TAILOR_WISPCLOAK_CHARLES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
+        }
+
+        pPlayer->SEND_GOSSIP_MENU(gossipMenuTextId, pCreature->GetGUID());
+
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+
+        const AchievementEntry* achiev = NULL;
+
+        switch (uiAction)
+        {
+            case GOSSIP_ACTION_TRAIN:
+            {
+                pPlayer->SEND_TRAINERLIST(pCreature->GetGUID());
+                break;
+            }
+            case GOSSIP_ACTION_INFO_DEF + 0: // Deathchill cloak
+            {
+                if ((achiev = sAchievementStore.LookupEntry(ACHIEV_ID_LOREMASTER_OF_NORTHREND)))
+                {
+                    if (pPlayer->GetAchievementMgr().HasAchieved(achiev))
+                    {
+                        pPlayer->LearnSpell(SPELL_ID_DEATHCHILL_CLOAK, false);
+                        pPlayer->CLOSE_GOSSIP_MENU();
+                    }
+                    else
+                        pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_TEXT_ID_CHARLES_DEATHCHILL_CLOAK, pCreature->GetGUID());
+                }
+                break;
+            }
+            case GOSSIP_ACTION_INFO_DEF + 1: // Wispcloak
+            {
+                if ((achiev = sAchievementStore.LookupEntry(ACHIEV_ID_NORTHREND_DUNGEON_MASTER)))
+                {
+                    if (pPlayer->GetAchievementMgr().HasAchieved(achiev))
+                    {
+                        pPlayer->LearnSpell(SPELL_ID_WISPCLOAK, false);
+                        pPlayer->CLOSE_GOSSIP_MENU();
+                    }
+                    else
+                        pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_TEXT_ID_CHARLES_WISPCLOAK, pCreature->GetGUID());
+                }
+                break;
+            }
+        }
+
+        return true;
+    }
+};
+
 void AddSC_dalaran()
 {
     new npc_mageguard_dalaran;
     new npc_hira_snowdawn;
+    new npc_charles_worth;
 }
