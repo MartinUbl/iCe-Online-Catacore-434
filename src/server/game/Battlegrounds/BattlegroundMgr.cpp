@@ -1206,7 +1206,8 @@ BattlegroundTypeId BattlegroundMgr::SelectRandomBattleground(uint32 minBracketLe
         bgs.push_back(BATTLEGROUND_TP);
         bgs.push_back(BATTLEGROUND_BG);
         // Strand of the Ancients is available only to 85's too (but that's custom change)
-        bgs.push_back(BATTLEGROUND_SA);
+        // UPDATE: excluded from rotation due to not being fun to play at all
+        //bgs.push_back(BATTLEGROUND_SA);
 
         // Alterac Valley is now excluded from random BG selections due to lower population
 
