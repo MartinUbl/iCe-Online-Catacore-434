@@ -1111,7 +1111,7 @@ class GS_CreatureScript : public CreatureScript
             }
 
             // retrieves numeric value using specifier supplied
-            GS_Variable GS_GetValueFromSpecifier(gs_specifier& spec)
+            GS_Variable GS_GetValueFromSpecifier(gs_specifier& spec, bool enableFallback = true)
             {
                 // variable has priority before anything else, due to its genericity
                 if (spec.subject_type == GSST_VARIABLE_VALUE && spec.subject_parameter == GSSP_NONE)
@@ -1170,7 +1170,8 @@ class GS_CreatureScript : public CreatureScript
                 {
                     if (spec.subject_parameter == GSSP_EXISTS)
                         return GS_Variable((int32)0);
-                    subject = me;
+                    if (enableFallback)
+                        subject = me;
                 }
 
                 switch (spec.subject_parameter)
@@ -1884,7 +1885,7 @@ class GS_CreatureScript : public CreatureScript
                             itr = variable_map.find(curr->params.c_var.variable);
                         }
 
-                        GS_Variable working = GS_GetValueFromSpecifier(curr->params.c_var.spec);
+                        GS_Variable working = GS_GetValueFromSpecifier(curr->params.c_var.spec, false);
 
                         if (curr->params.c_var.op == GSNOP_ASSIGN)
                             itr->second = working;
