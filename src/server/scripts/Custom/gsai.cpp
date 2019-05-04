@@ -1167,7 +1167,11 @@ class GS_CreatureScript : public CreatureScript
                 Unit* subject = GS_SelectUnitTarget(spec);
                 // fallback to "me" if the target has not been found
                 if (!subject)
+                {
+                    if (spec.subject_parameter == GSSP_EXISTS)
+                        return GS_Variable((int32)0);
                     subject = me;
+                }
 
                 switch (spec.subject_parameter)
                 {
@@ -1203,6 +1207,8 @@ class GS_CreatureScript : public CreatureScript
                         return (subject->GetTypeId() == TYPEID_UNIT && subject->ToCreature()->GetCreatureInfo()) ? GS_Variable((int32)subject->ToCreature()->GetCreatureInfo()->Entry) : GS_Variable((int32)subject->GetEntry());
                     case GSSP_INSTANCE_DIFFICULTY:
                         return (subject->GetMap()) ? subject->GetMap()->GetDifficulty() : REGULAR_DIFFICULTY;
+                    case GSSP_EXISTS:
+                        return GS_Variable((int32)1); // if we reached this place, we exist for sure
                     case GSSP_NONE:
                         return GS_Variable(subject);
                     default:

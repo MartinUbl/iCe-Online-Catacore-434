@@ -532,6 +532,8 @@ gs_specifier gs_specifier::parse(const char* str)
                 rr.subject_parameter = GSSP_AURAS;
             else if (parid == "difficulty")
                 rr.subject_parameter = GSSP_INSTANCE_DIFFICULTY;
+            else if (parid == "exists")
+                rr.subject_parameter = GSSP_EXISTS;
         }
     }
 

@@ -275,10 +275,10 @@ enum gs_subject_type
     GSST_ME = 1,                    // the owner of script (NPC itself)
     GSST_TARGET = 2,                // current target
     GSST_RANDOM = 3,                // random target from threat list
-    GSST_IMPLICIT = 4,              // implicit targetting (i.e. implicit spell target, etc.)
-    GSST_CHANCE = 5,                // "chance" parameter i.e. for IF instruction
-    GSST_TIMER = 6,                 // timer stored, i.e. for IF instruction
-    GSST_STATE = 7,                 // constant state (i.e. for timer - ready)
+    GSST_IMPLICIT = 4,              // implicit targetting (e.g. implicit spell target, etc.)
+    GSST_CHANCE = 5,                // "chance" parameter e.g. for IF instruction
+    GSST_TIMER = 6,                 // timer stored, e.g. for IF instruction
+    GSST_STATE = 7,                 // constant state (e.g. for timer - ready)
     GSST_RANDOM_NOTANK = 8,         // random target without current target
     GSST_INVOKER = 9,               // script invoker (gossip script, quest accept, etc.)
     GSST_PARENT = 10,               // parent unit (of summoned creature)
@@ -299,8 +299,8 @@ enum gs_subject_parameter
     GSSP_HEALTH_PCT = 2,        // subject health percentage
     GSSP_FACTION = 3,           // subject faction (alliance / horde)
     GSSP_LEVEL = 4,             // subject level
-    GSSP_IDENTIFIER = 5,        // subject identifier, i.e. timer.name_of_timer
-    GSSP_STATE_VALUE = 6,       // subject state value, i.e. ready (for timer), etc.
+    GSSP_IDENTIFIER = 5,        // subject identifier, e.g. timer.name_of_timer
+    GSSP_STATE_VALUE = 6,       // subject state value, e.g. ready (for timer), etc.
     GSSP_COMBAT = 7,            // subject combat state (0 = ooc, 1 = combat)
     GSSP_MANA = 8,              // subject mana value
     GSSP_MANA_PCT = 9,          // subject mana percentage
@@ -314,6 +314,7 @@ enum gs_subject_parameter
     GSSP_ENTRY = 17,            // subject entry (entry, ID from DB table)
     GSSP_AURAS = 18,            // subject aura set
     GSSP_INSTANCE_DIFFICULTY = 19, // subject instance difficulty
+    GSSP_EXISTS = 20,           // subject validity state (e.g. when (not) found by searcher)
 };
 
 enum gs_numeric_operatror
