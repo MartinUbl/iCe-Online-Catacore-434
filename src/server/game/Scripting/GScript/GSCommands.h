@@ -89,7 +89,8 @@ enum gs_command_type
     GSCR_GO,
     GSCR_CALL_FOR_HELP,
     GSCR_SET_SHEATHE_STATE,
-    GSCR_THREAT
+    GSCR_THREAT,
+    GSCR_ATTACK
 };
 
 // string identifiers - index is matching the value of enum above
@@ -155,7 +156,8 @@ static std::string gscr_identifiers[] = {
     "go",
     "callforhelp",
     "setsheath",
-    "threat"
+    "threat",
+    "attack"
 };
 
 enum EventHookType : uint8
@@ -596,6 +598,11 @@ struct gs_command
 
         struct
         {
+            gs_specifier subject;
+        } c_attack;
+
+        struct
+        {
             gs_condition condition;
             int repeat_offset;
         } c_until;
@@ -669,7 +676,7 @@ struct gs_command
         struct
         {
             bool is_attack_enabled;
-        } c_attack;
+        } c_melee;
 
         struct
         {

@@ -1617,7 +1617,7 @@ class GS_CreatureScript : public CreatureScript
                             source->Kill(victim);
                         break;
                     case GSCR_MELEE:
-                        disable_melee = !curr->params.c_attack.is_attack_enabled;
+                        disable_melee = !curr->params.c_melee.is_attack_enabled;
                         break;
                     case GSCR_TIMER:
                         GS_SetTimer(curr->params.c_timer.timer_id, GS_GetValueFromSpecifier(curr->params.c_timer.value).toInteger());
@@ -2103,6 +2103,16 @@ class GS_CreatureScript : public CreatureScript
                             source->SetPhaseMask(mask, true);
                         else
                             source->SetPhaseMask(PHASEMASK_NORMAL, true);
+                        break;
+                    }
+                    case GSCR_ATTACK:
+                    {
+                        Unit* target = GS_SelectUnitTarget(curr->params.c_threath.subject);
+                        if (target)
+                        {
+                            source->AttackStop();
+                            source->Attack(target, true); // note this does not follow disable_melee - we want melee attack, it just may be temporarily suspended
+                        }
                         break;
                     }
                     default:

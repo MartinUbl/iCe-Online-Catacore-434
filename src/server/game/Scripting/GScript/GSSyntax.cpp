@@ -752,16 +752,16 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
         case GSCR_MELEE:
         {
             if (src->parameters.size() != 1)
-                CLEANUP_AND_THROW("COMBATSTOP instruction can contain only 1 parameter");
+                CLEANUP_AND_THROW("MELEE instruction can contain only 1 parameter");
 
             std::string subcommand = src->parameters[0];
 
             if (subcommand == "enable")
-                ret->params.c_attack.is_attack_enabled = true;
+                ret->params.c_melee.is_attack_enabled = true;
             else if (subcommand == "disable")
-                ret->params.c_attack.is_attack_enabled = false;
+                ret->params.c_melee.is_attack_enabled = false;
             else
-                CLEANUP_AND_THROW("Unknown COMBATSTOP parameter, expected (enable/disable)");
+                CLEANUP_AND_THROW("Unknown MELEE parameter, expected (enable/disable)");
             break;
         }
         // faction instruction - changes faction of script owner
@@ -1676,6 +1676,18 @@ gs_command* gs_command::parse(gs_command_proto* src, int offset)
             {
                 ret->params.c_threath.subject = gs_specifier::parse(src->parameters[2].c_str());
             }
+            break;
+        }
+        // attack instruction
+        // Syntax: attack <subject>
+        // Attacks given subject instead of current target (if any)
+        case GSCR_ATTACK:
+        {
+            if (src->parameters.size() != 1)
+                CLEANUP_AND_THROW("ATTACK instruction must contain exactly 1 parameter");
+
+            ret->params.c_attack.subject = gs_specifier::parse(src->parameters[0].c_str());
+
             break;
         }
     }
