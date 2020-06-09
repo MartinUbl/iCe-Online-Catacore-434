@@ -111,6 +111,14 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadInstanceScalingCommand(const char* arg)
+{
+	SendGlobalGMSysMessage("Reloading Instance scaling");
+	sScriptDatabase->LoadInstanceScalingData();
+	SendGlobalGMSysMessage("Instance scaling reloaded.");
+	return true;
+}
+
 bool ChatHandler::HandleReloadAllAchievementCommand(const char*)
 {
     HandleReloadAchievementCriteriaDataCommand("");

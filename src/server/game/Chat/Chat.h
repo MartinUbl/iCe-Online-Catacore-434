@@ -404,6 +404,7 @@ class ChatHandler
         bool HandleReloadAllSpellCommand(const char* args);
         bool HandleReloadAllLocalesCommand(const char* args);
 
+		bool HandleReloadInstanceScalingCommand(const char* args);
         bool HandleReloadConfigCommand(const char* args);
 
         bool HandleReloadAccessRequirementCommand(const char* args);

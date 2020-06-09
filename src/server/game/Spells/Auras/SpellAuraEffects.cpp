@@ -43,6 +43,7 @@
 #include "ScriptMgr.h"
 #include "WeatherMgr.h"
 #include "InstanceScript.h"
+#include "ScriptDatabase.h"
 
 class Aura;
 //
@@ -1749,6 +1750,60 @@ void AuraEffect::UpdatePeriodic(Unit *caster)
                         default:
                             break;
                     }
+
+					//instance scaling
+					if (GetId() == 110601) {
+						if (caster && caster->GetTypeId() == TYPEID_PLAYER) {
+							bool isAllMaxLvl = true;
+							Map* map = caster->GetMap();
+
+							if (!map->Instanceable()) {
+								return;
+							}
+
+							Map::PlayerList const &PlList = map->GetPlayers();
+							for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+							{
+								if (Player* player = i->getSource()) {
+									if (player->getLevel() != 85) {
+										isAllMaxLvl = false;
+									}
+								}
+							}
+
+							InstanceScaling isd = sScriptDatabase->GetInstanceScalingData(map->GetId());
+
+							if (isAllMaxLvl && isd.IdMap != -1) {
+
+								int cntMaxPlayers = map->ToInstanceMap()->GetMaxPlayers();
+								int delta = cntMaxPlayers - map->GetPlayersCountExceptGMs();
+								Difficulty diffc = map->ToInstanceMap()->GetDifficulty();
+								switch (diffc) {
+									//DUNGEON_DIFFICULTY_NORMAL; //RAID_DIFFICULTY_10MAN_NORMAL;
+									case DUNGEON_DIFFICULTY_HEROIC: //RAID_DIFFICULTY_25MAN_NORMAL
+										delta = delta * isd.Diff1Mul;
+										break;
+									case DUNGEON_DIFFICULTY_EPIC: //RAID_DIFFICULTY_10MAN_HEROIC
+										delta = delta * isd.Diff2Mul;
+										break;
+									case RAID_DIFFICULTY_25MAN_HEROIC:
+										delta = delta * isd.Diff3Mul;
+										break;
+								}
+
+
+								//sLog->outString("Apply instance scaling tick");
+								if (!caster->HasAura(110602)) {
+									int32 bp0 = delta * isd.ModDmgPct;
+									int32 bp1 = delta * isd.ModDmgPct;
+									int32 bp2 = delta * isd.ModHpPct;
+									caster->CastCustomSpell(caster, 110602, &bp0, &bp1, &bp2, true);
+									//sLog->outString("Dmg increase by %d, Hp increase by %d.", bp1, bp2);
+								}
+							}
+						}
+					}
+
                     break;
                 case SPELLFAMILY_MAGE:
                     if (GetId() == 55342)// Mirror Image

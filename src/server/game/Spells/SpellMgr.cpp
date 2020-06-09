@@ -3878,6 +3878,22 @@ void SpellMgr::LoadCustomSpells()
     pSpell->DurationIndex = 21;
     pSpell->rangeIndex = 6;
     INSERT_SPELLENTRY(pSpell);
+
+	// instance scaling - trigger spell
+	INIT_NEW_SPELLENTRY(pSpell, 110601);
+	pSpell->SpellName = "Instance: Apply scaling";
+	pSpell->CastingTimeIndex = 1;
+	pSpell->DurationIndex = 21;
+	pSpell->rangeIndex = 6;
+	INSERT_SPELLENTRY(pSpell);
+
+	// instance scaling - buff spell
+	INIT_NEW_SPELLENTRY(pSpell, 110602);
+	pSpell->SpellName = "Instance: Scaling";
+	pSpell->CastingTimeIndex = 1;
+	pSpell->DurationIndex = 21;
+	pSpell->rangeIndex = 6;
+	INSERT_SPELLENTRY(pSpell);
 }
 
 // set data in core for now
@@ -5976,6 +5992,30 @@ void SpellMgr::LoadSpellCustomAttr()
         case 91196: // Blaze of the Heavens
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_3_YARDS;
             break;
+		case 110601: // custom instance scaling spell I - trigger
+			spellInfo->EquippedItemClass = -1;
+			spellInfo->SpellFamilyName = SPELLFAMILY_GENERIC;
+			spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AURA;
+			spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+			spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
+			spellInfo->EffectRadiusIndex[0] = 12;
+			break;
+		case 110602: // custom instance scaling spell II - buff
+			spellInfo->EquippedItemClass = -1;
+			spellInfo->SpellFamilyName = SPELLFAMILY_GENERIC;
+			spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AURA;
+			spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+			spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_SPELL_POWER_PCT;
+			spellInfo->EffectRadiusIndex[0] = 12;
+			spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+			spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
+			spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+			spellInfo->EffectRadiusIndex[1] = 12;
+			spellInfo->Effect[2] = SPELL_EFFECT_APPLY_AURA;
+			spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_CASTER;
+			spellInfo->EffectApplyAuraName[2] = SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT;
+			spellInfo->EffectRadiusIndex[2] = 12;
+			break;
         default:
             break;
         }

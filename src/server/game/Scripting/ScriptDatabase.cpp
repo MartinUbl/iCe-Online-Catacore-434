@@ -99,9 +99,52 @@ void ScriptDatabaseMgr::LoadDatabase()
         sLog->outString("Loaded 0 personal creature definition(s), table is empty or doesn't exist!");
 
     sLog->outString();
+
+	/////////////// Instance scaling
+
+	LoadInstanceScalingData();
 }
 
- bool ScriptDatabaseMgr::IsPersonalCreature(uint32 entry)
- {
-     return (m_personalCreatures.find(entry) != m_personalCreatures.end());
- }
+void ScriptDatabaseMgr::LoadInstanceScalingData()
+{
+	m_instanceScaling.clear();
+
+	sLog->outString("Loading instance scaling data...");
+	QueryResult res = ScriptDatabase.PQuery("SELECT * FROM instance_scaling;");
+	if (res)
+	{
+		Field* pField = NULL;
+		uint32 count = 0;
+		for (uint64 i = 0; i < res->GetRowCount(); i++)
+		{
+			pField = res->Fetch();
+
+			InstanceScaling* pTemp = new InstanceScaling;
+			pTemp->IdMap = pField[0].GetUInt32();
+			pTemp->ModDmgPct = pField[1].GetUInt32();
+			pTemp->ModHpPct = pField[2].GetUInt32();
+			pTemp->Diff1Mul = pField[3].GetUInt32();
+			pTemp->Diff2Mul = pField[4].GetUInt32();
+			pTemp->Diff3Mul = pField[5].GetUInt32();
+
+			m_instanceScaling[pField[0].GetUInt32()] = pTemp;
+			++count;
+
+			res->NextRow();
+		}
+		sLog->outString("Loaded %u instance scaling definition(s)", count);
+	}
+	else
+		sLog->outString("Loaded 0 instance scaling definition(s), table is empty or doesn't exist!");
+}
+
+bool ScriptDatabaseMgr::IsPersonalCreature(uint32 entry)
+{
+    return (m_personalCreatures.find(entry) != m_personalCreatures.end());
+}
+
+InstanceScaling ScriptDatabaseMgr::GetInstanceScalingData(uint32 idMap) {
+	InstanceScaling blank;
+	blank.IdMap = -1;
+	return m_instanceScaling.find(idMap) != m_instanceScaling.end() ? *m_instanceScaling.find(idMap)->second : blank;
+}

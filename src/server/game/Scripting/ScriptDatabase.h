@@ -34,6 +34,16 @@ struct GameObjectTeleportCond
     uint32 map;
 };
 
+struct InstanceScaling
+{
+	uint32 IdMap;
+	uint32 ModDmgPct;
+	uint32 ModHpPct;
+	uint32 Diff1Mul;
+	uint32 Diff2Mul;
+	uint32 Diff3Mul;
+};
+
 struct CreaturePersonal
 {
     //uint32 Id;
@@ -63,14 +73,19 @@ public:
 
     bool IsPersonalCreature(uint32 entry);
 
+	InstanceScaling GetInstanceScalingData(uint32 idMap);
+	void LoadInstanceScalingData();
+
 private:
     //Typedefs HERE !
     typedef std::unordered_map<uint32, GameObjectTeleportCond*> GOTeleCondMap;
     typedef std::unordered_map<uint32, CreaturePersonal*> CreaturePersonalMap;
+	typedef std::unordered_map<uint32, InstanceScaling*> InstanceScalingMap;
 
     //Storages HERE !
     GOTeleCondMap m_GOTeleCond;
     CreaturePersonalMap m_personalCreatures;
+	InstanceScalingMap m_instanceScaling;
 };
 
 #define sScriptDatabase ACE_Singleton<ScriptDatabaseMgr, ACE_Null_Mutex>::instance()

@@ -537,6 +537,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "gossip_menu_option",          SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadGossipMenuOptionCommand>,        "", NULL },
         { "gossip_scripts",              SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadGossipScriptsCommand>,           "", NULL },
         { "gscripts",                    SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadGScriptsCommand>,                "", NULL },
+		{ "instance_scaling",            SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadInstanceScalingCommand>,		 "", NULL },
         { "item_enchantment_template",   SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadItemEnchantementsCommand>,       "", NULL },
         { "item_loot_template",          SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadLootTemplatesItemCommand>,       "", NULL },
         { "item_set_names",              SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadItemSetNamesCommand>,            "", NULL },

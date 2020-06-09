@@ -2474,6 +2474,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
         }
     }
 
+	// instance scaling clearing
+	if (GetId() == 110601) {
+		if (!apply) {
+			if (target->HasAura(110602)) {
+				target->RemoveAura(110602);
+			}
+		}
+	}
+
     // mods at aura apply or remove
     switch (GetSpellProto()->SpellFamilyName)
     {

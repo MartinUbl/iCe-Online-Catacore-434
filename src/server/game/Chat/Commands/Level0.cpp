@@ -46,14 +46,38 @@ bool ChatHandler::HandleTestCommand(const char* args)
     if (!player)
         return false;
 
+	if (player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK13))
+	{
+		player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK13);
+		player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK14);
+	}
+	else
+	{
+		player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK14);
+		player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK13);
+	}
+
     return true;
 }
 
 bool ChatHandler::HandleSoulwellCommand(const char* args)
 {
     Player* player = m_session->GetPlayer();
-    if (!player)
-        return false;
+	if (!player)
+		return false;
+
+	if (player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK13))
+	{
+		player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK13);
+		player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK14);
+	}
+	else
+	{
+		player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK14);
+		player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK13);
+	}
+
+	return true;
 
     if (player->getLevel() != 1 && player->getLevel() != 55)
         return false;
